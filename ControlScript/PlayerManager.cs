@@ -1,6 +1,6 @@
 using UnityEngine;
 using System;
-
+using System.Collections.Generic;
 
 
 public class PlayerManager : MonoBehaviour {
@@ -10,6 +10,8 @@ public class PlayerManager : MonoBehaviour {
 	public Pawn[] avaibleBots;
 
 	public GameObject[] ghostsBots;
+
+
     // s_Instance is used to cache the instance found in the scene so we don't have to look it up every time.
     private static PlayerManager s_Instance = null;
  
@@ -40,19 +42,20 @@ public class PlayerManager : MonoBehaviour {
     }
  
     // Add the rest of the code here...
-    public Pawn SpawmPlayer(Pawn newPalyerClass) {
+    public Pawn SpawmPlayer(Pawn newPalyerClass,int team) {
 		Pawn localPlayer;
-		if(Network.connections.Length==0){
-			localPlayer =Instantiate(newPalyerClass) as Pawn;
-		}else{
-			localPlayer =Network.Instantiate(newPalyerClass,Vector3.zero,Quaternion.identity,0) as Pawn;
-		}
+		Transform targetPos = GetSpamPosition (team);
+
+
+		localPlayer =(Pawn) PhotonNetwork.Instantiate (newPalyerClass.name, targetPos.position, targetPos.rotation, 0).GetComponent(typeof(Pawn));
+
 		return localPlayer;
     }
 	
 
     public Pawn SpawmPlayer(Pawn newPalyerClass, Vector3 position,Quaternion rotation ) {
 		Pawn localPlayer;
+	
 		if(Network.connections.Length==0){
 			localPlayer =Instantiate(newPalyerClass,position,rotation) as Pawn;
 		}else{
@@ -60,6 +63,19 @@ public class PlayerManager : MonoBehaviour {
 		}
 		return localPlayer;
     }
+
+	public Transform GetSpamPosition(int team){
+		List<SpamPoint> list  = new List<SpamPoint>();
+		SpamPoint[] spamPoints = FindObjectsOfType <SpamPoint>();
+		for(int i=0; i<spamPoints.Length;i++){
+			if(spamPoints[i].team==0||team==spamPoints[i].team)
+			{
+				list.Add(spamPoints[i]);
+			}
+		}
+		Debug.Log ( list.Count);
+		return list[(int)(UnityEngine.Random.value*list.Count)].transform;
+	}
  
  }
 	

@@ -17,14 +17,12 @@ public class Player : MonoBehaviour {
 	
 	private Pawn robotPawn;
 	
-	private bool inBot;
+	public bool inBot;
 	
 	private GameObject ghostBot;
 	
+	private int team =1;
 
-
-
-	
 	private Pawn prefabBot;
 	
 	private GameObject prefabGhostBot;
@@ -53,7 +51,7 @@ public class Player : MonoBehaviour {
 		camera = Camera.main;
 		((PlayerMainGui)camera.GetComponent (typeof(PlayerMainGui))).LocalPlayer = this;
 		//TODO: UNCOMMENT
-		//robotTimer = robotTime;
+		robotTimer = robotTime;
 	}
 
 	void Update(){
@@ -70,7 +68,7 @@ public class Player : MonoBehaviour {
 			respawnTimer-=Time.deltaTime;
 			if(respawnTimer<=0&&isStarted){
 				respawnTimer=respawnTime;
-				currentPawn =PlayerManager.instance.SpawmPlayer(prefabClass[selected]);
+				currentPawn =PlayerManager.instance.SpawmPlayer(prefabClass[selected],team);
 				prefabBot =PlayerManager.instance.avaibleBots[selected];
 				prefabGhostBot =PlayerManager.instance.ghostsBots[selected];
 			}
@@ -89,14 +87,14 @@ public class Player : MonoBehaviour {
 					}
 					if(Input.GetButtonDown("SpawnBot")){
 						
-						if(Physics.Raycast(centerofScreen, out hitinfo)){
+						if(Physics.Raycast(centerofScreen, out hitinfo,50.0f)){
 							ghostBot =Instantiate(prefabGhostBot,hitinfo.point,currentPawn.transform.rotation) as GameObject;
 							
 						}
 					}
 					if(Input.GetButton("SpawnBot")){
 						
-						if(Physics.Raycast(centerofScreen, out hitinfo)){
+						if(Physics.Raycast(centerofScreen, out hitinfo,50.0f)){
 							ghostBot.transform.position = hitinfo.point;
 							ghostBot.transform.rotation = currentPawn.transform.rotation;
 						}
@@ -104,8 +102,8 @@ public class Player : MonoBehaviour {
 					}
 				}
 			}
-			if(Physics.Raycast(centerofScreen, out hitinfo,100.0f)){
-				if(!inBot){
+			if(Physics.Raycast(centerofScreen, out hitinfo,3.0f)){
+				if(!inBot&&robotPawn!=null){
 					if(hitinfo.collider.gameObject==robotPawn.gameObject){
 						if(Input.GetButtonDown("Use")){
 							EnterBot();

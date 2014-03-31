@@ -12,14 +12,43 @@ public class Pawn : DamagebleObject {
 	public bool isDead=false;
 
 	public string publicName;
+
+	private PhotonView photonView;
 	// Use this for initialization
 	void Start () {
-
+		 photonView = GetComponent<PhotonView>();
+		if (!photonView.isMine) {
+			Destroy (GetComponent<ThirdPersonController>());
+			Destroy (GetComponent<ThirdPersonCamera>());
+			Destroy (GetComponent<MouseLook>());
+		}
 	}
 	
+	public override void Damage(float damage){
+		if (!PhotonNetwork.isMasterClient){
+			return;
+		}
+		Debug.Log ("DAMAGE");
+		base.Damage(damage);
+	}
+
+	public override void KillIt(){
+		Debug.Log ("KILLL IT" + this);
+		photonView.RPC("RPCKillIt",PhotonTargets.All);
+		
+	}
+
+	[RPC]
+	public void RPCKillIt(){
+		Debug.Log ("REMOTE KILLL IT" + this);
+		if (photonView.isMine) {
+			PhotonNetwork.Destroy (photonView);
+		}
+		
+	}
 	// Update is called once per frame
 	void Update () {
-	
+		//Debug.Log (photonView.isSceneView);
 	}
 
 	public void StartFire(){
@@ -43,6 +72,23 @@ public class Pawn : DamagebleObject {
 	}
 	void OnTriggerEnter	(Collider other) {
 		Debug.Log ("TRIGGER ENTER PAWN "+ this +  other);
+	}
+
+
+	public void OnPhotonSerializeView(PhotonStream stream, PhotonMessageInfo info)
+	{
+		if (stream.isWriting)
+		{
+			// We own this player: send the others our data
+			stream.SendNext(transform.position);
+			stream.SendNext(transform.rotation);
+		}
+		else
+		{
+			// Network player, receive data
+			this.transform.position = (Vector3) stream.ReceiveNext();
+			this.transform.rotation = (Quaternion) stream.ReceiveNext();
+		}
 	}
 
 }

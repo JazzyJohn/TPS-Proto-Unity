@@ -27,7 +27,7 @@ public class BaseWeapon : MonoBehaviour {
 
 	private float curAmmo;
 
-	private Pawn owner;
+	private GameObject owner;
 
 	private Transform curTransform;
 
@@ -41,7 +41,7 @@ public class BaseWeapon : MonoBehaviour {
 		curTransform = transform;
 	}
 
-	public void AttachWeapon(Transform weaponSlot,Vector3 Offset, Pawn inowner){
+	public void AttachWeapon(Transform weaponSlot,Vector3 Offset, GameObject inowner){
 		if (curTransform == null) {
 			curTransform = transform;		
 		}
@@ -101,40 +101,29 @@ public class BaseWeapon : MonoBehaviour {
 		Vector3 startPoint  = muzzlePoint.position+muzzleOffset;
 		Quaternion startRotation = getAimRotation();
 		GameObject proj;
-		proj=Instantiate(projectilePrefab,startPoint,startRotation) as GameObject;
+		if(Network.connections.Length>0){
+			proj=Network.Instantiate(projectilePrefab,startPoint,startRotation,0) as GameObject;
+		}
+		else{
+			proj=Instantiate(projectilePrefab,startPoint,startRotation) as GameObject;
+		}
+	
 		BaseProjectile projScript = (BaseProjectile)proj.GetComponent (typeof(BaseProjectile));
 		projScript.damage =damageAmount ;
-		projScript.owner = owner.gameObject;
+		projScript.owner = owner;
 	}
 	Quaternion getAimRotation(){
-		return owner.getAimRotation();
-		
-
-	}
-	
-	//TODO: MOVE THAT to PAwn and turn on replication of aiming
-	//TODO REPLICATION
-	
-	private Quaternion aimRotation;
-	
-	public Quaternion getAimRotation(){
-
-		if(photonView.isMine){
-		
-			Camera maincam = Camera.main;
-			Ray centerRay= maincam.ViewportPointToRay(new Vector3(.5f, 0.5f, 1f));
-			RaycastHit hitInfo;
-			Vector3 targetpoint = Vector3.zero;
-			if (Physics.Raycast (centerRay,out hitInfo, weaponRange)) {
-				targetpoint =hitInfo.point;
-				Debug.Log(hitInfo.collider);
-			}else{
-				targetpoint =maincam.transform.forward*weaponRange +maincam.ViewportToWorldPoint(new Vector3(.5f, 0.5f, 1f));
-			}
-			aimRotation=Quaternion.LookRotation(targetpoint-muzzlePoint.position);;
-			return aimRotation;
+		Camera maincam = Camera.main;
+		Ray centerRay= maincam.ViewportPointToRay(new Vector3(.5f, 0.5f, 1f));
+		RaycastHit hitInfo;
+		Vector3 targetpoint = Vector3.zero;
+		if (Physics.Raycast (centerRay,out hitInfo, weaponRange)) {
+			targetpoint =hitInfo.point;
+			//Debug.Log(hitInfo.collider);
 		}else{
-			return aimRotation;
+			targetpoint =maincam.transform.forward*weaponRange +maincam.ViewportToWorldPoint(new Vector3(.5f, 0.5f, 1f));
 		}
+		return Quaternion.LookRotation(targetpoint-muzzlePoint.position);
+
 	}
 }

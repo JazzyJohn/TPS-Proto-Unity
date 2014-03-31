@@ -105,7 +105,7 @@ private bool isControllable= true;
 void  Awake ()
 {
 	moveDirection = transform.TransformDirection(Vector3.forward);
-    Screen.showCursor = false;
+    
 	_animation = GetComponent<Animation>();
 	if(!_animation)
 		Debug.Log("The character you would like to control doesn't have animations. Moving her might look weird.");

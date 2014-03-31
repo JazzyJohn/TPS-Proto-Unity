@@ -24,6 +24,7 @@ public class PlayerMainGui : MonoBehaviour {
 		}
 		float screenX = Screen.width, screenY = Screen.height;
 		if (LocalPlayer.IsDead()) {
+			Screen.showCursor = true;
 			LocalPlayer.selected = 0;
 
 			Pawn[] prefabClass = PlayerManager.instance.avaiblePawn;
@@ -40,13 +41,20 @@ public class PlayerMainGui : MonoBehaviour {
 			}
 
 		} else{
-
+			Screen.showCursor = false;	
 			Rect crosrect = new Rect ((screenX  - crosshairWidth)/2,( screenY  - crosshairHeight)/2, crosshairWidth, crosshairHeight);
 			
 			GUI.Label(crosrect, crosshair);
-			crosrect = new Rect (0,0, crosshairWidth, crosshairHeight);
-			Debug.Log(GetFormatedTime(LocalPlayer.GetRobotTimer()));
-			GUI.Label(crosrect,GetFormatedTime(LocalPlayer.GetRobotTimer()));
+			if(!LocalPlayer.inBot){
+				float timer =LocalPlayer.GetRobotTimer();
+				crosrect = new Rect (0,0, crosshairWidth, crosshairHeight);
+				if(timer==0){
+					GUI.Label(crosrect,"PRES F TO SPAMN ROBOT");
+				}else{
+
+					GUI.Label(crosrect,GetFormatedTime(timer));
+				}
+			}
 		}
 	}
 	public static string GetFormatedTime(float input){

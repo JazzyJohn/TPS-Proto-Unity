@@ -16,12 +16,17 @@ public class DamagebleObject : MonoBehaviour {
 	
 	}
 
-	public void Damage(float damage){
+	public virtual void Damage(float damage){
 		if (destructableObject){
 			health-= damage;
 			if(health<0){
-				Destroy(gameObject);
+				KillIt();
+
 			}
 		}
+	}
+	public virtual void KillIt(){
+		Destroy(gameObject);
+
 	}
 }
