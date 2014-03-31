@@ -8,40 +8,53 @@ public class BaseWeapon : MonoBehaviour {
 	public enum AMUNITONTYPE{SIMPLEHIT, PROJECTILE, RAY};
 
 	public AMUNITONTYPE amunitionType;
+	
+	public enum SLOTTYPE{PERSONAL, MAIN, ANTITANK};
+
+	public SLOTTYPE slotType;
+	
+	public AMMOTYPE ammoType; 
 
 	public float fireInterval;
+	
+	public float reloadTime;
 
-	public float clipSize;
+	public int clipSize;
 
 	public float damageAmount;
 
 	public float aimRandCoef;
 
 	public GameObject projectilePrefab;
+	
+	public GameObject pickupPrefabPrefab;
 
 	public Transform muzzlePoint;
 
-	public Vector3 muzzleOffset;
+	public Vector3 	muzzleOffset;
 
 	public float weaponRange;
 
-	private float curAmmo;
+	public int curAmmo;
 
-	private GameObject owner;
+	private Pawn owner;
 
 	private Transform curTransform;
 
 	private bool isShooting = false;
 
-	private float timer =  0.0f;
+	private float fireTimer =  0.0f;
+	
+	private float reloadTimer =  0.0f;
 
 
 	// Use this for initialization
 	void Start () {
 		curTransform = transform;
+	
 	}
 
-	public void AttachWeapon(Transform weaponSlot,Vector3 Offset, GameObject inowner){
+	public void AttachWeapon(Transform weaponSlot,Vector3 Offset, Pawn inowner){
 		if (curTransform == null) {
 			curTransform = transform;		
 		}
@@ -51,14 +64,21 @@ public class BaseWeapon : MonoBehaviour {
 	}
 	// Update is called once per frame
 	void Update () {
+		if(isReload){
+			if(reloadTimer<0){
+				Reload();
+			}
+			reloadTimer-=Time.deltaTime;
+			return;
+		}
 		if (isShooting) {
-			if(timer<=0){
-				timer = fireInterval;
+			if(fireTimer<=0){
+				fireTimer = fireInterval;
 				Fire();
 			}
 		}
-		if (timer >= 0) {
-			timer-=Time.deltaTime;
+		if (fireTimer >= 0) {
+			fireTimer-=Time.deltaTime;
 		}
 	}
 	public void StartFire(){
@@ -69,7 +89,28 @@ public class BaseWeapon : MonoBehaviour {
 		isShooting = false;
 		
 	}
+	
+	public void ReloadStart(){
+		
+		if(owner.GetComponent<InventoryManager>.HasAmmo(ammoType)){
+			isReload= true;
+			reloadTimer=reloadTime;
+		}else{
+			isShooting = false;
+			return;
+		}
+		
+	}
+	public void Reload(){
+		curAmmo =owner.GetComponent<InventoryManager>.GiveAmmo(ammoType,clipSize);	
+	}
 	void Fire(){
+		if(curAmmo>0){
+			curAmmo--;
+		}else{
+			ReloadStart();
+			return;
+		}
 		switch (amunitionType) {
 		case AMUNITONTYPE.SIMPLEHIT:
 			DoSimpleDamage();
@@ -101,29 +142,40 @@ public class BaseWeapon : MonoBehaviour {
 		Vector3 startPoint  = muzzlePoint.position+muzzleOffset;
 		Quaternion startRotation = getAimRotation();
 		GameObject proj;
-		if(Network.connections.Length>0){
-			proj=Network.Instantiate(projectilePrefab,startPoint,startRotation,0) as GameObject;
-		}
-		else{
-			proj=Instantiate(projectilePrefab,startPoint,startRotation) as GameObject;
-		}
-	
+		proj=Instantiate(projectilePrefab,startPoint,startRotation) as GameObject;
 		BaseProjectile projScript = (BaseProjectile)proj.GetComponent (typeof(BaseProjectile));
 		projScript.damage =damageAmount ;
-		projScript.owner = owner;
+		projScript.owner = owner.gameObject;
 	}
 	Quaternion getAimRotation(){
-		Camera maincam = Camera.main;
-		Ray centerRay= maincam.ViewportPointToRay(new Vector3(.5f, 0.5f, 1f));
-		RaycastHit hitInfo;
-		Vector3 targetpoint = Vector3.zero;
-		if (Physics.Raycast (centerRay,out hitInfo, weaponRange)) {
-			targetpoint =hitInfo.point;
-			//Debug.Log(hitInfo.collider);
-		}else{
-			targetpoint =maincam.transform.forward*weaponRange +maincam.ViewportToWorldPoint(new Vector3(.5f, 0.5f, 1f));
-		}
-		return Quaternion.LookRotation(targetpoint-muzzlePoint.position);
+		return owner.getAimRotation();
+		
 
+	}
+	
+	//TODO: MOVE THAT to PAwn and turn on replication of aiming
+	//TODO REPLICATION
+	
+	private Quaternion aimRotation;
+	
+	public Quaternion getAimRotation(){
+
+		if(photonView.isMine){
+		
+			Camera maincam = Camera.main;
+			Ray centerRay= maincam.ViewportPointToRay(new Vector3(.5f, 0.5f, 1f));
+			RaycastHit hitInfo;
+			Vector3 targetpoint = Vector3.zero;
+			if (Physics.Raycast (centerRay,out hitInfo, weaponRange)) {
+				targetpoint =hitInfo.point;
+				Debug.Log(hitInfo.collider);
+			}else{
+				targetpoint =maincam.transform.forward*weaponRange +maincam.ViewportToWorldPoint(new Vector3(.5f, 0.5f, 1f));
+			}
+			aimRotation=Quaternion.LookRotation(targetpoint-muzzlePoint.position);
+			return aimRotation;
+		}else{
+			return aimRotation;
+		}
 	}
 }
