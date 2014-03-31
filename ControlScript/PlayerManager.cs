@@ -1,6 +1,6 @@
 using UnityEngine;
 using System;
-
+using System.Collections.Generic;
 
 
 public class PlayerManager : MonoBehaviour {
@@ -11,7 +11,7 @@ public class PlayerManager : MonoBehaviour {
 
 	public GameObject[] ghostsBots;
 	
-	public AmmoType[] AllTypeInGame;
+	public InventoryManager.AmmoBag[] AllTypeInGame;
     // s_Instance is used to cache the instance found in the scene so we don't have to look it up every time.
     private static PlayerManager s_Instance = null;
  

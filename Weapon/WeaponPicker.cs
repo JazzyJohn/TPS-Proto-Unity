@@ -2,13 +2,13 @@ using UnityEngine;
 using System;
 
 
-public class WeaponPicker : MonoBehaviour {
+public class WeaponPicker : UseObject {
 	
 	public BaseWeapon prefabWeapon;
 	
-	virtual public void ActualUse(Pawn target){
-		target.GetComponent<InventoryManager>.ChangePrefab(prefabWeapon);
-		base.ActualUse(target);
+	override public bool ActualUse(Pawn target){
+		target.GetComponent<InventoryManager>().ChangePrefab(prefabWeapon);
+		return base.ActualUse(target);
 	}
 	
 

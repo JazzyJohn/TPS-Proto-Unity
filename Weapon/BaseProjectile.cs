@@ -2,7 +2,7 @@
 using System.Collections;
 //We don't want to our projectile fly infinite time
 [RequireComponent (typeof (DelayDestroyedObject))]
-public class BaseProjectile : MonoBehaviour {
+public class BaseProjectile : UseObject {
 
 	public float damage;
 	
@@ -38,7 +38,7 @@ public class BaseProjectile : MonoBehaviour {
 		if (other.CompareTag ("decoration")) {
 			Destroy (gameObject);
 		}
-		DamagebleObject obj =other.GetComponent <DamagebleObject>;
+		DamagebleObject obj =other.GetComponent <DamagebleObject>();
 		if (obj != null) {
 			obj.Damage(damage);
 			Destroy (gameObject);
@@ -59,7 +59,7 @@ public class BaseProjectile : MonoBehaviour {
         Collider[] hitColliders = Physics.OverlapSphere(transform.position, splashRadius);
        
         for(int i=0;i < hitColliders.Length;i++) {
-			DamagebleObject obj = hitColliders[i].GetComponent <DamagebleObject>;
+			DamagebleObject obj = hitColliders[i].GetComponent <DamagebleObject>();
 			if (obj != null) {
 				obj.Damage(damage);
 			}

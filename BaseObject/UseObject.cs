@@ -13,6 +13,8 @@ public class UseObject : MonoBehaviour {
 	private float coolDownTimer;
 	
 	public Texture guiIcon;
+
+	private PhotonView photonView;
 	
 	//	Use function check if this object can be used turn on cooldown
 	virtual public void Use(Pawn target){
@@ -30,6 +32,10 @@ public class UseObject : MonoBehaviour {
 			coolDownTimer=coolDownTime;
 		}
 	
+	}
+	void Start () {
+		photonView = GetComponent<PhotonView> ();
+
 	}
 	[RPC]
 	public void KillMe(){
@@ -50,7 +56,7 @@ public class UseObject : MonoBehaviour {
 	}
 	void OnTriggerEnter	(Collider other) {
 		if(onTouch){
-			Pawn pawn =other.GetComponent<Pawn>;
+			Pawn pawn =(Pawn)other.GetComponent(typeof(Pawn));
 			if(pawn!=null){
 				Use(pawn);
 			}

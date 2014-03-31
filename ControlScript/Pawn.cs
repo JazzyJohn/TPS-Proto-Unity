@@ -14,6 +14,8 @@ public class Pawn : DamagebleObject {
 	public string publicName;
 
 	private PhotonView photonView;
+
+	private Vector3 aimRotation;
 	// Use this for initialization
 	void Start () {
 		 photonView = GetComponent<PhotonView>();
@@ -31,6 +33,7 @@ public class Pawn : DamagebleObject {
 		Debug.Log ("DAMAGE");
 		base.Damage(damage);
 	}
+
 
 	public override void KillIt(){
 		Debug.Log ("KILLL IT" + this);
@@ -64,7 +67,7 @@ public class Pawn : DamagebleObject {
 	public void setWeapon(BaseWeapon newWeapon){
 		CurWeapon = newWeapon;
 		Debug.Log (newWeapon);
-		CurWeapon.AttachWeapon(weaponSlot,weaponOffset,gameObject);
+		CurWeapon.AttachWeapon(weaponSlot,weaponOffset,this);
 	}
 
 	void OnCollisionEnter(Collision collision) {
@@ -74,6 +77,31 @@ public class Pawn : DamagebleObject {
 		Debug.Log ("TRIGGER ENTER PAWN "+ this +  other);
 	}
 
+	//TODO: MOVE THAT to PAwn and turn on replication of aiming
+	//TODO REPLICATION
+	
+
+	
+	public Vector3 getAimRotation(float weaponRange){
+		
+		if(photonView.isMine){
+			
+			Camera maincam = Camera.main;
+			Ray centerRay= maincam.ViewportPointToRay(new Vector3(.5f, 0.5f, 1f));
+			RaycastHit hitInfo;
+			Vector3 targetpoint = Vector3.zero;
+			if (Physics.Raycast (centerRay,out hitInfo, weaponRange)) {
+				targetpoint =hitInfo.point;
+				Debug.Log(hitInfo.collider);
+			}else{
+				targetpoint =maincam.transform.forward*weaponRange +maincam.ViewportToWorldPoint(new Vector3(.5f, 0.5f, 1f));
+			}
+			aimRotation=targetpoint; 
+			return aimRotation;
+		}else{
+			return aimRotation;
+		}
+	}
 
 	public void OnPhotonSerializeView(PhotonStream stream, PhotonMessageInfo info)
 	{
@@ -82,12 +110,14 @@ public class Pawn : DamagebleObject {
 			// We own this player: send the others our data
 			stream.SendNext(transform.position);
 			stream.SendNext(transform.rotation);
+			stream.SendNext(aimRotation);
 		}
 		else
 		{
 			// Network player, receive data
 			this.transform.position = (Vector3) stream.ReceiveNext();
 			this.transform.rotation = (Quaternion) stream.ReceiveNext();
+			this.aimRotation = (Vector3) stream.ReceiveNext();
 		}
 	}
 

@@ -2,15 +2,15 @@ using UnityEngine;
 using System;
 
 
-public class AmmoPicker : MonoBehaviour {
+public class AmmoPicker : UseObject {
 	
-	public AmmoType ammo;
+	public AMMOTYPE ammo;
 	
 	public int amount;
 	
-	virtual public void ActualUse(Pawn target){
-		target.GetComponent<InventoryManager>.AddAmmo(ammo,amount);
-		base.ActualUse(target);
+	override public bool ActualUse(Pawn target){
+		target.GetComponent<InventoryManager>().AddAmmo(ammo,amount);
+		return base.ActualUse(target);
 	}
 	
 

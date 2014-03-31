@@ -15,9 +15,9 @@ public class InventoryManager : MonoBehaviour {
 	private Pawn owner;
 	
 	[Serializable]
-	public class AmmoType {
+	public class AmmoBag {
 	
-			public  AmmoType type;
+			public  AMMOTYPE type;
 			
 			public int amount;
 			
@@ -29,11 +29,11 @@ public class InventoryManager : MonoBehaviour {
 	
 	public class WeaponBackUp {
 	
-			public  AmmoType type;
+			public  AMMOTYPE type;
 			
 			public int amount;
 			
-			public WeaponBackUp(int inAmount, AmmoType intType){
+			public WeaponBackUp(int inAmount, AMMOTYPE intType){
 				amount =inAmount;
 				type=intType;
 			}
@@ -49,23 +49,23 @@ public class InventoryManager : MonoBehaviour {
 	public WeaponBackUp[] weaponInfo;
 	
 	
-	private AmmoType[] allAmmo;
+	private AmmoBag[] allAmmo;
 	 	
 	
 	void Start(){
-		owner= GetComponent<Pawn>;
+		owner= (Pawn) GetComponent(typeof(Pawn));
 		GenerateBag();
 		GenerateInfo();
-		ChangeWeaoon(0);
+		ChangeWeapon(0);
 	}
 	
 	//AMMO BAG SECTION
 	
 	void GenerateBag(){
-		AmmoType[] allTypeInGame = PlayerManager.instance.AllTypeInGame;
-		allAmmo = new AmmoType[allTypeInGame.Length];
+		AmmoBag[] allTypeInGame = PlayerManager.instance.AllTypeInGame;
+		allAmmo = new AmmoBag[allTypeInGame.Length];
 		for(int i = 0;i<allTypeInGame.Length;i++){
-			allAmmo[i] = new  AmmoType();
+			allAmmo[i] = new  AmmoBag();
 			allAmmo[i].type = allTypeInGame[i].type;
 			allAmmo[i].amount = allTypeInGame[i].maxSize;
 			allAmmo[i].maxSize = allTypeInGame[i].maxSize;
@@ -75,7 +75,7 @@ public class InventoryManager : MonoBehaviour {
 	public bool HasAmmo(AMMOTYPE ammo){
 		for(int i=0;i<allAmmo.Length;i++){
 			if(allAmmo[i].type ==ammo){
-				return alllAmmo[i].amount>0;
+				return allAmmo[i].amount>0;
 			}
 		}
 		return false;
@@ -83,12 +83,12 @@ public class InventoryManager : MonoBehaviour {
 	public int GiveAmmo(AMMOTYPE ammo,int amount){
 		for(int i=0;i<allAmmo.Length;i++){
 			if(allAmmo[i].type ==ammo){
-				if(alllAmmo[i].amount>amount){
-					alllAmmo[i].amount-=amount;
+				if(allAmmo[i].amount>amount){
+					allAmmo[i].amount-=amount;
 					return amount;
 				}else{
-					alllAmmo[i].amount=0;
-					return alllAmmo[i].amount;
+					allAmmo[i].amount=0;
+					return allAmmo[i].amount;
 				}
 			}
 		}
@@ -98,9 +98,9 @@ public class InventoryManager : MonoBehaviour {
 	public void AddAmmo(AMMOTYPE ammo,int amount){
 		for(int i=0;i<allAmmo.Length;i++){
 			if(allAmmo[i].type ==ammo){
-				alllAmmo[i].amount+=amount;
-				if(alllAmmo[i].amount>alllAmmo[i].maxSize){
-					alllAmmo[i].amount=alllAmmo[i].maxSize;
+				allAmmo[i].amount+=amount;
+				if(allAmmo[i].amount>allAmmo[i].maxSize){
+					allAmmo[i].amount=allAmmo[i].maxSize;
 					return;
 				}
 			}
@@ -121,7 +121,7 @@ public class InventoryManager : MonoBehaviour {
 		
 		}
 	}
-	void AddOldClip(int index,BaseWeapon gun){
+	void SaveOldInfo(int index,BaseWeapon gun){
 		weaponInfo[index].amount  = gun.curAmmo;
 	
 	}
@@ -169,12 +169,12 @@ public class InventoryManager : MonoBehaviour {
 	}
 		//Change weapon in inventory 
 	public void ChangePrefab(BaseWeapon newWeapon){
-		ChangePrefab(newWeapon,new WeaponBackUp(newWeapon.clipSize,newWeapon.ammoType))
+		ChangePrefab (newWeapon, new WeaponBackUp (newWeapon.clipSize, newWeapon.ammoType));
 	}
 	//TODO: implementation of dropping weapon on ground after picking another one 
 	void DropWeapon(BaseWeapon oldWeapon,WeaponBackUp weaponinfo){
-		GameObject droppedWeapon =PhotonNetwork.Instantiate(oldWeapon.pickupPrefabPrefab,transform.position,transform.rotation,0) as GameObject;
-		OldWeaponPicker picker = droppedWeapon.GetComponent<OldWeaponPicker>;
+		GameObject droppedWeapon =PhotonNetwork.Instantiate(oldWeapon.pickupPrefabPrefab.name,transform.position,transform.rotation,0) as GameObject;
+		OldWeaponPicker picker = (OldWeaponPicker)droppedWeapon.GetComponent(typeof(OldWeaponPicker));
 		picker.info =weaponinfo;
 		picker.prefabWeapon =oldWeapon;
 		picker.isOneUse = true;
@@ -195,29 +195,29 @@ public class InventoryManager : MonoBehaviour {
 		ChangeWeapon(newIndex);
 	}
 	//Change weapon in hand
-	public void ChangeWeaoon(int newWeapon){
+	public void ChangeWeapon(int newWeapon){
 		if(prefabWeapon.Length<=newWeapon){
 			Debug.Log("Selected weapon doesn't exist in current inventory manager");
 			return;
 		}
-			BaseWeapon firstWeapon;
-			if(Network.connections.Length==0){
-				firstWeapon =Instantiate(prefabWeapon[newWeapon]) as BaseWeapon;
-			}else{
-				firstWeapon =Network.Instantiate(prefabWeapon[newWeapon],Vector3.zero,Quaternion.identity,0) as BaseWeapon;
-			}
-			indexWeapon=newWeapon;
-			owner.setWeapon(firstWeapon);
-			if(currentWeapon!=null){
-				SaveOldInfo(indexWeapon-1,currentWeapon);
-				Destroy(currentWeapon.gameObject);
-			}
-			currentWeapon=firstWeapon;
-			owner.setWeapon(firstWeapon);
-			LoadOldInfo();
-			
-			
+		BaseWeapon firstWeapon;
+		if(Network.connections.Length==0){
+			firstWeapon =Instantiate(prefabWeapon[newWeapon]) as BaseWeapon;
+		}else{
+			firstWeapon =Network.Instantiate(prefabWeapon[newWeapon],Vector3.zero,Quaternion.identity,0) as BaseWeapon;
 		}
+		indexWeapon=newWeapon;
+		owner.setWeapon(firstWeapon);
+		if(currentWeapon!=null){
+			SaveOldInfo(indexWeapon-1,currentWeapon);
+			Destroy(currentWeapon.gameObject);
+		}
+		currentWeapon=firstWeapon;
+		owner.setWeapon(firstWeapon);
+		LoadOldInfo();
+			
+			
+
 	}
 	//WEAPON SECTION END
 }

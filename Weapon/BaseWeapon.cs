@@ -41,6 +41,8 @@ public class BaseWeapon : MonoBehaviour {
 
 	private Transform curTransform;
 
+	private bool isReload = false;
+
 	private bool isShooting = false;
 
 	private float fireTimer =  0.0f;
@@ -92,7 +94,7 @@ public class BaseWeapon : MonoBehaviour {
 	
 	public void ReloadStart(){
 		
-		if(owner.GetComponent<InventoryManager>.HasAmmo(ammoType)){
+		if(owner.GetComponent<InventoryManager>().HasAmmo(ammoType)){
 			isReload= true;
 			reloadTimer=reloadTime;
 		}else{
@@ -102,7 +104,8 @@ public class BaseWeapon : MonoBehaviour {
 		
 	}
 	public void Reload(){
-		curAmmo =owner.GetComponent<InventoryManager>.GiveAmmo(ammoType,clipSize);	
+		isReload = false;
+		curAmmo =owner.GetComponent<InventoryManager>().GiveAmmo(ammoType,clipSize);	
 	}
 	void Fire(){
 		if(curAmmo>0){
@@ -148,34 +151,10 @@ public class BaseWeapon : MonoBehaviour {
 		projScript.owner = owner.gameObject;
 	}
 	Quaternion getAimRotation(){
-		return owner.getAimRotation();
+		return Quaternion.LookRotation(owner.getAimRotation(weaponRange)-muzzlePoint.position);
 		
 
 	}
 	
-	//TODO: MOVE THAT to PAwn and turn on replication of aiming
-	//TODO REPLICATION
-	
-	private Quaternion aimRotation;
-	
-	public Quaternion getAimRotation(){
 
-		if(photonView.isMine){
-		
-			Camera maincam = Camera.main;
-			Ray centerRay= maincam.ViewportPointToRay(new Vector3(.5f, 0.5f, 1f));
-			RaycastHit hitInfo;
-			Vector3 targetpoint = Vector3.zero;
-			if (Physics.Raycast (centerRay,out hitInfo, weaponRange)) {
-				targetpoint =hitInfo.point;
-				Debug.Log(hitInfo.collider);
-			}else{
-				targetpoint =maincam.transform.forward*weaponRange +maincam.ViewportToWorldPoint(new Vector3(.5f, 0.5f, 1f));
-			}
-			aimRotation=Quaternion.LookRotation(targetpoint-muzzlePoint.position);
-			return aimRotation;
-		}else{
-			return aimRotation;
-		}
-	}
 }
