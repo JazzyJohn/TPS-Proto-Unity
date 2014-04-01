@@ -73,7 +73,7 @@ public class PlayerManager : MonoBehaviour {
 				list.Add(spamPoints[i]);
 			}
 		}
-		Debug.Log ( list.Count);
+//		Debug.Log ( list.Count);
 		return list[(int)(UnityEngine.Random.value*list.Count)].transform;
 	}
  

@@ -4,6 +4,15 @@
 using UnityEngine;
 using System.Collections;
 
+
+enum CharacterState {
+	Idle = 0,
+	Walking = 1,
+	Trotting = 2,
+	Running = 3,
+	Jumping = 4,
+}
+
 public class ThirdPersonController : MonoBehaviour 
 {
 
@@ -27,13 +36,6 @@ private Animation _animation;
 
 
 
-enum CharacterState {
-	Idle = 0,
-	Walking = 1,
-	Trotting = 2,
-	Running = 3,
-	Jumping = 4,
-}
 
 private CharacterState _characterState;
 

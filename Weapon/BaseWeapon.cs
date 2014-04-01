@@ -49,21 +49,44 @@ public class BaseWeapon : MonoBehaviour {
 	
 	private float reloadTimer =  0.0f;
 
-
+	public PhotonView photonView;
 	// Use this for initialization
 	void Start () {
 		curTransform = transform;
-	
+		photonView = GetComponent<PhotonView>();
+		if (transform.parent == null) {
+
+		}
 	}
 
 	public void AttachWeapon(Transform weaponSlot,Vector3 Offset, Pawn inowner){
 		if (curTransform == null) {
 			curTransform = transform;		
 		}
+		if (photonView == null) {
+			photonView = GetComponent<PhotonView>();
+		}
 		owner = inowner;
 		curTransform.parent = weaponSlot;
 		curTransform.localPosition = Offset;
+		if (photonView.isMine) {
+			photonView.RPC("AttachWeaponRep",PhotonTargets.OthersBuffered,inowner.photonView.viewID);
+		}
 	}
+
+	[RPC]
+
+	public void AttachWeaponRep(int viewid){
+		if (curTransform == null) {
+			curTransform = transform;		
+		}
+		owner =PhotonView.Find (viewid).GetComponent<Pawn>();
+		Debug.Log ("PAWN RPC" + owner);
+		curTransform.parent = owner.weaponSlot;
+		curTransform.localPosition = owner.weaponOffset;
+
+	}
+
 	// Update is called once per frame
 	void Update () {
 		if(isReload){
@@ -146,7 +169,17 @@ public class BaseWeapon : MonoBehaviour {
 		Quaternion startRotation = getAimRotation();
 		GameObject proj;
 		proj=Instantiate(projectilePrefab,startPoint,startRotation) as GameObject;
-		BaseProjectile projScript = (BaseProjectile)proj.GetComponent (typeof(BaseProjectile));
+		if (photonView.isMine) {
+			photonView.RPC("GenerateProjectileRep",PhotonTargets.Others,startPoint,startRotation);
+		}
+		BaseProjectile projScript =proj.GetComponent<BaseProjectile>();
+		projScript.damage =damageAmount ;
+		projScript.owner = owner.gameObject;
+	}
+	[RPC]
+	void GenerateProjectileRep(Vector3 startPoint,Quaternion startRotation){
+		GameObject proj=Instantiate(projectilePrefab,startPoint,startRotation) as GameObject;
+		BaseProjectile projScript = proj.GetComponent<BaseProjectile>();
 		projScript.damage =damageAmount ;
 		projScript.owner = owner.gameObject;
 	}
@@ -154,6 +187,24 @@ public class BaseWeapon : MonoBehaviour {
 		return Quaternion.LookRotation(owner.getAimRotation(weaponRange)-muzzlePoint.position);
 		
 
+	}
+	
+	public void OnPhotonSerializeView(PhotonStream stream, PhotonMessageInfo info)
+	{
+		if (stream.isWriting)
+		{
+			// We own this player: send the others our data
+			stream.SendNext(transform.position);
+			stream.SendNext(transform.rotation);
+
+		}
+		else
+		{
+			// Network player, receive data
+			this.transform.position = (Vector3) stream.ReceiveNext();
+			this.transform.rotation = (Quaternion) stream.ReceiveNext();
+
+		}
 	}
 	
 

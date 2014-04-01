@@ -13,9 +13,14 @@ public class Pawn : DamagebleObject {
 
 	public string publicName;
 
-	private PhotonView photonView;
+	public PhotonView photonView;
 
 	private Vector3 aimRotation;
+
+
+	//rEplication Section
+
+	public bool onMove;
 	// Use this for initialization
 	void Start () {
 		 photonView = GetComponent<PhotonView>();
@@ -55,6 +60,7 @@ public class Pawn : DamagebleObject {
 	}
 
 	public void StartFire(){
+
 		if (CurWeapon != null) {
 			CurWeapon.StartFire ();
 		}
@@ -66,7 +72,7 @@ public class Pawn : DamagebleObject {
 	}
 	public void setWeapon(BaseWeapon newWeapon){
 		CurWeapon = newWeapon;
-		Debug.Log (newWeapon);
+		//Debug.Log (newWeapon);
 		CurWeapon.AttachWeapon(weaponSlot,weaponOffset,this);
 	}
 
@@ -115,7 +121,8 @@ public class Pawn : DamagebleObject {
 		else
 		{
 			// Network player, receive data
-			this.transform.position = (Vector3) stream.ReceiveNext();
+			Vector3 newPosition= (Vector3) stream.ReceiveNext();
+			this.transform.position = newPosition;
 			this.transform.rotation = (Quaternion) stream.ReceiveNext();
 			this.aimRotation = (Vector3) stream.ReceiveNext();
 		}

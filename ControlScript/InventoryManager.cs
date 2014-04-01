@@ -51,12 +51,15 @@ public class InventoryManager : MonoBehaviour {
 	
 	private AmmoBag[] allAmmo;
 	 	
-	
+
 	void Start(){
-		owner= (Pawn) GetComponent(typeof(Pawn));
-		GenerateBag();
-		GenerateInfo();
-		ChangeWeapon(0);
+		owner = GetComponent<Pawn>();
+		if (owner.photonView.isMine) {
+		
+			GenerateBag ();
+			GenerateInfo ();
+			ChangeWeapon (0);
+		}
 	}
 	
 	//AMMO BAG SECTION
@@ -201,11 +204,7 @@ public class InventoryManager : MonoBehaviour {
 			return;
 		}
 		BaseWeapon firstWeapon;
-		if(Network.connections.Length==0){
-			firstWeapon =Instantiate(prefabWeapon[newWeapon]) as BaseWeapon;
-		}else{
-			firstWeapon =Network.Instantiate(prefabWeapon[newWeapon],Vector3.zero,Quaternion.identity,0) as BaseWeapon;
-		}
+		firstWeapon =PhotonNetwork.Instantiate(prefabWeapon[newWeapon].name,transform.position,transform.rotation,0).GetComponent<BaseWeapon>();
 		indexWeapon=newWeapon;
 		owner.setWeapon(firstWeapon);
 		if(currentWeapon!=null){
