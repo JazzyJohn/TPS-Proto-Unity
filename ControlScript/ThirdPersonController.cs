@@ -5,7 +5,7 @@ using UnityEngine;
 using System.Collections;
 
 
-enum CharacterState {
+public enum CharacterState {
 	Idle = 0,
 	Walking = 1,
 	Trotting = 2,
@@ -30,14 +30,15 @@ public float runMaxAnimationSpeed = 1.0f;
 public float jumpAnimationSpeed = 1.15f;
 public float landAnimationSpeed = 1.0f;
 
-public Animator animator;
+
 
 private Animation _animation;
 
 
+private Pawn pawn;
 
 
-private CharacterState _characterState;
+
 
 // The speed when walking
 public float walkSpeed= 2.0f;
@@ -109,6 +110,7 @@ void  Awake ()
 	moveDirection = transform.TransformDirection(Vector3.forward);
     
 	_animation = GetComponent<Animation>();
+	pawn= GetComponent<Pawn>();
 	if(!_animation)
 		Debug.Log("The character you would like to control doesn't have animations. Moving her might look weird.");
 	
@@ -205,23 +207,27 @@ void  UpdateSmoothedMovementDirection ()
 		//* We want to support analog input but make sure you cant walk faster diagonally than just forward or sideways
 		float targetSpeed= Mathf.Min(targetDirection.magnitude, 1.0f);
 	
-		_characterState = CharacterState.Idle;
+		
 		
 		// Pick speed modifier
 		if (Input.GetKey (KeyCode.LeftShift) || Input.GetKey (KeyCode.RightShift))
 		{
 			targetSpeed *= runSpeed;
-			_characterState = CharacterState.Running;
+				pawn.characterState = CharacterState.Running;
 		}
 		else if (Time.time - trotAfterSeconds > walkTimeStart)
 		{
 			targetSpeed *= trotSpeed;
-			_characterState = CharacterState.Trotting;
+				pawn.characterState = CharacterState.Trotting;
 		}
 		else
 		{
 			targetSpeed *= walkSpeed;
-			_characterState = CharacterState.Walking;
+				if(isMoving){
+					pawn.characterState = CharacterState.Walking;
+				}else{
+					pawn.characterState = CharacterState.Idle;
+				}
 		}
 		
 		moveSpeed = Mathf.Lerp(moveSpeed, targetSpeed, curSmooth);
@@ -300,7 +306,7 @@ public void DidJump ()
 	lastJumpStartHeight = transform.position.y;
 	lastJumpButtonTime = -10;
 	
-	_characterState = CharacterState.Jumping;
+		pawn.characterState = CharacterState.Jumping;
 }
 
 void Update ()
@@ -345,7 +351,7 @@ void Update ()
 	
 	// ANIMATION sector
 	if(_animation) {
-		if(_characterState == CharacterState.Jumping) 
+			if(pawn.characterState == CharacterState.Jumping) 
 		{
 			if(!jumpingReachedApex) {
 				_animation[jumpPoseAnimation.name].speed = jumpAnimationSpeed;
@@ -364,15 +370,15 @@ void Update ()
 			}
 			else 
 			{
-				if(_characterState == CharacterState.Running) {
+					if(pawn.characterState == CharacterState.Running) {
 					_animation[runAnimation.name].speed = Mathf.Clamp(controller.velocity.magnitude, 0.0f, runMaxAnimationSpeed);
 					_animation.CrossFade(runAnimation.name);	
 				}
-				else if(_characterState == CharacterState.Trotting) {
+					else if(pawn.characterState == CharacterState.Trotting) {
 					_animation[walkAnimation.name].speed = Mathf.Clamp(controller.velocity.magnitude, 0.0f, trotMaxAnimationSpeed);
 					_animation.CrossFade(walkAnimation.name);	
 				}
-				else if(_characterState == CharacterState.Walking) {
+					else if(pawn.characterState == CharacterState.Walking) {
 					_animation[walkAnimation.name].speed = Mathf.Clamp(controller.velocity.magnitude, 0.0f, walkMaxAnimationSpeed);
 					_animation.CrossFade(walkAnimation.name);	
 				}
@@ -381,23 +387,7 @@ void Update ()
 		}
 	}
 
-	if (animator != null) {
-			if(controller.velocity.sqrMagnitude < 0.1f) {
-				animator.SetBool("Run",false);
-			}
-			else 
-			{
-				if(_characterState == CharacterState.Running) {
-					animator.SetBool("Run",true);
-				}
-				else if(_characterState == CharacterState.Trotting) {
-					animator.SetBool("Run",true);	
-				}
-				else if(_characterState == CharacterState.Walking) {
-					animator.SetBool("Run",true);	
-				}
-			}
-		}
+	
 		// ANIMATION sector
 	
 	

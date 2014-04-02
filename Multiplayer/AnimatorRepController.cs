@@ -19,19 +19,12 @@ public class AnimatorRepController : MonoBehaviour {
 	
 	// Update is called once per frame
 	void Update () {
-		if(photonView.isMine){
-		if (animator != null) {
-			if(owner.onMove) {
-				animator.SetBool("Run",true);	
-			
-			}
-			else 
-			{
-				animator.SetBool("Run",false);
-					
-			}
-		}
+				if (photonView.isMine) {
+						if (animator != null) {
+							
+						}
 
+				}
 	}
 
 }

@@ -44,7 +44,7 @@ public class ThirdPersonCamera : MonoBehaviour
 	private ThirdPersonController controller;
 	private float targetHeight= 100000.0f; 
 
-	private float yAngle =0.0f;
+	public float yAngle =0.0f;
 	
 	void  Awake (){
 		

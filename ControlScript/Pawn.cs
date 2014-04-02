@@ -7,6 +7,8 @@ public class Pawn : DamagebleObject {
 
 	public Transform weaponSlot;
 
+	public Transform myTransform;
+
 	public Vector3 weaponOffset;
 
 	public bool isDead=false;
@@ -17,18 +19,30 @@ public class Pawn : DamagebleObject {
 
 	private Vector3 aimRotation;
 
-
+	public Animator animator;
 	//rEplication Section
 
-	public bool onMove;
+	public CharacterState characterState;
+
+	public ThirdPersonCamera cameraController;
+
+	public float pitchAngle;
+
+	public bool isAi;
+
+	public Pawn enemy;
 	// Use this for initialization
 	void Start () {
 		 photonView = GetComponent<PhotonView>();
 		if (!photonView.isMine) {
-			Destroy (GetComponent<ThirdPersonController>());
-			Destroy (GetComponent<ThirdPersonCamera>());
-			Destroy (GetComponent<MouseLook>());
+						Destroy (GetComponent<ThirdPersonController> ());
+						Destroy (GetComponent<ThirdPersonCamera> ());
+						Destroy (GetComponent<MouseLook> ());
+		} else {
+			cameraController=GetComponent<ThirdPersonCamera> ();
+			isAi = cameraController==null;
 		}
+		myTransform = transform;
 	}
 	
 	public override void Damage(float damage){
@@ -57,6 +71,31 @@ public class Pawn : DamagebleObject {
 	// Update is called once per frame
 	void Update () {
 		//Debug.Log (photonView.isSceneView);
+		if (isAi) {
+				Quaternion aimRotation = Quaternion.LookRotation (enemy.myTransform.position - myTransform.position);
+				pitchAngle = aimRotation.eulerAngles.x;
+		} else {
+				pitchAngle = -cameraController.yAngle;
+		}
+		if (animator != null) {
+			if(characterState == CharacterState.Idle) {
+				animator.SetFloat("Speed",0.0f);
+			}
+			else 
+			{
+				if(characterState == CharacterState.Running) {
+					animator.SetFloat("Speed",2.0f);
+				}
+				else if(characterState == CharacterState.Trotting) {
+					animator.SetFloat("Speed",1.0f);	
+				}
+				else if(characterState == CharacterState.Walking) {
+					animator.SetFloat("Speed",1.0f);	
+				}
+			}
+			animator.SetFloat("Pitch",pitchAngle);
+		}
+
 	}
 
 	public void StartFire(){
@@ -91,18 +130,23 @@ public class Pawn : DamagebleObject {
 	public Vector3 getAimRotation(float weaponRange){
 		
 		if(photonView.isMine){
-			
-			Camera maincam = Camera.main;
-			Ray centerRay= maincam.ViewportPointToRay(new Vector3(.5f, 0.5f, 1f));
-			RaycastHit hitInfo;
-			Vector3 targetpoint = Vector3.zero;
-			if (Physics.Raycast (centerRay,out hitInfo, weaponRange)) {
-				targetpoint =hitInfo.point;
-				Debug.Log(hitInfo.collider);
+			if(isAi){
+				aimRotation = enemy.myTransform.position;
 			}else{
-				targetpoint =maincam.transform.forward*weaponRange +maincam.ViewportToWorldPoint(new Vector3(.5f, 0.5f, 1f));
+					Camera maincam = Camera.main;
+					Ray centerRay= maincam.ViewportPointToRay(new Vector3(.5f, 0.5f, 1f));
+					RaycastHit hitInfo;
+					Vector3 targetpoint = Vector3.zero;
+					if (Physics.Raycast (centerRay,out hitInfo, weaponRange)) {
+						targetpoint =hitInfo.point;
+						Debug.Log(hitInfo.collider);
+					}else{
+						targetpoint =maincam.transform.forward*weaponRange +maincam.ViewportToWorldPoint(new Vector3(.5f, 0.5f, 1f));
+					}
+					aimRotation=targetpoint; 
+				
 			}
-			aimRotation=targetpoint; 
+
 			return aimRotation;
 		}else{
 			return aimRotation;
