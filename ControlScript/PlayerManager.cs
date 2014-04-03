@@ -47,7 +47,7 @@ public class PlayerManager : MonoBehaviour {
 		Transform targetPos = GetSpamPosition (team);
 
 
-		localPlayer =(Pawn) PhotonNetwork.Instantiate (newPalyerClass.name, targetPos.position, targetPos.rotation, 0).GetComponent(typeof(Pawn));
+		localPlayer =(Pawn) PhotonNetwork.Instantiate (newPalyerClass.name, targetPos.position, targetPos.rotation, 0).GetComponent<Pawn>();
 
 		return localPlayer;
     }
@@ -56,11 +56,9 @@ public class PlayerManager : MonoBehaviour {
     public Pawn SpawmPlayer(Pawn newPalyerClass, Vector3 position,Quaternion rotation ) {
 		Pawn localPlayer;
 	
-		if(Network.connections.Length==0){
-			localPlayer =Instantiate(newPalyerClass,position,rotation) as Pawn;
-		}else{
-			localPlayer =Network.Instantiate(newPalyerClass,position,rotation,0) as Pawn;
-		}
+
+		localPlayer =(Pawn) PhotonNetwork.Instantiate (newPalyerClass.name,position,rotation,0).GetComponent<Pawn>();
+		
 		return localPlayer;
     }
 

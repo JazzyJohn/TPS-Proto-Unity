@@ -1,7 +1,7 @@
 ﻿using UnityEngine;
 using System.Collections;
 
-public class DamagebleObject : MonoBehaviour {
+public class DamagebleObject : DestroyableNetworkObject {
 
 	public float health;
 

@@ -2,7 +2,7 @@ using UnityEngine;
 using System;
 
 
-public class UseObject : MonoBehaviour {
+public class UseObject : DestroyableNetworkObject {
 
 	public bool onTouch;
 	
@@ -14,7 +14,7 @@ public class UseObject : MonoBehaviour {
 	
 	public Texture guiIcon;
 
-	private PhotonView photonView;
+
 	
 	//	Use function check if this object can be used turn on cooldown
 	virtual public void Use(Pawn target){
@@ -24,7 +24,7 @@ public class UseObject : MonoBehaviour {
 		if(ActualUse(target)){
 			if(isOneUse){
 				if(!photonView.isMine){
-					photonView.RPC("KillMe",PhotonTargets.All);
+					RequestKillMe();
 				}else{
 					PhotonNetwork.Destroy(photonView);
 				}
@@ -37,12 +37,7 @@ public class UseObject : MonoBehaviour {
 		photonView = GetComponent<PhotonView> ();
 
 	}
-	[RPC]
-	public void KillMe(){
-		if(photonView.isMine){
-			PhotonNetwork.Destroy(photonView);
-		}		
-	}
+
 	//Actual logic of object;
 	virtual public bool ActualUse(Pawn target){
 		return true;

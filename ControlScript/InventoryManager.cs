@@ -209,7 +209,7 @@ public class InventoryManager : MonoBehaviour {
 		owner.setWeapon(firstWeapon);
 		if(currentWeapon!=null){
 			SaveOldInfo(indexWeapon-1,currentWeapon);
-			Destroy(currentWeapon.gameObject);
+			currentWeapon.RequestKillMe();
 		}
 		currentWeapon=firstWeapon;
 		owner.setWeapon(firstWeapon);

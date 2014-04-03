@@ -120,7 +120,7 @@ public class Player : MonoBehaviour {
 		robotTimer=robotTime;
 		inBot= false;
 		currentPawn.transform.parent = null;
-		currentPawn.gameObject.SetActive(true);
+		currentPawn.DeActivate ();
 	}
 	public void PawnDead(){
 		Score.Death++;
@@ -138,7 +138,7 @@ public class Player : MonoBehaviour {
 	}
 	public void EnterBot(){
 		inBot=true;
-		currentPawn.gameObject.SetActive(false);
+		currentPawn.DeActivate();
 		currentPawn.transform.parent = robotPawn.transform;
 		Destroy(robotPawn.GetComponent(typeof(RobotDrop)));
 		((ThirdPersonController)robotPawn.GetComponent(typeof(ThirdPersonController))).enabled = true;

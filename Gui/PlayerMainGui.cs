@@ -47,7 +47,7 @@ public class PlayerMainGui : MonoBehaviour {
 			GUI.Label(crosrect, crosshair);
 			if(!LocalPlayer.inBot){
 				float timer =LocalPlayer.GetRobotTimer();
-				crosrect = new Rect (0,0, crosshairWidth, crosshairHeight);
+				crosrect = new Rect (screenX-crosshairWidth,0, crosshairWidth, crosshairHeight);
 				if(timer==0){
 					GUI.Label(crosrect,"PRES F TO SPAMN ROBOT");
 				}else{

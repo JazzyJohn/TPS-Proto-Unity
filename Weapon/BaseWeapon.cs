@@ -3,7 +3,7 @@ using System.Collections;
 
 
 
-public class BaseWeapon : MonoBehaviour {
+public class BaseWeapon : DestroyableNetworkObject {
 
 	public enum AMUNITONTYPE{SIMPLEHIT, PROJECTILE, RAY};
 
@@ -49,7 +49,7 @@ public class BaseWeapon : MonoBehaviour {
 	
 	private float reloadTimer =  0.0f;
 
-	public PhotonView photonView;
+
 	// Use this for initialization
 	void Start () {
 		curTransform = transform;
@@ -81,9 +81,7 @@ public class BaseWeapon : MonoBehaviour {
 			curTransform = transform;		
 		}
 		owner =PhotonView.Find (viewid).GetComponent<Pawn>();
-		Debug.Log ("PAWN RPC" + owner);
-		curTransform.parent = owner.weaponSlot;
-		curTransform.localPosition = owner.weaponOffset;
+		owner.setWeapon (this);
 
 	}
 

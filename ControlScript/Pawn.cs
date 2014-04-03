@@ -15,7 +15,7 @@ public class Pawn : DamagebleObject {
 
 	public string publicName;
 
-	public PhotonView photonView;
+
 
 	private Vector3 aimRotation;
 
@@ -56,28 +56,23 @@ public class Pawn : DamagebleObject {
 
 	public override void KillIt(){
 		Debug.Log ("KILLL IT" + this);
-		photonView.RPC("RPCKillIt",PhotonTargets.All);
+		RequestKillMe();
 		
 	}
 
-	[RPC]
-	public void RPCKillIt(){
-		Debug.Log ("REMOTE KILLL IT" + this);
-		if (photonView.isMine) {
-			PhotonNetwork.Destroy (photonView);
-		}
-		
-	}
+
 	// Update is called once per frame
 	void Update () {
 		//Debug.Log (photonView.isSceneView);
-		if (isAi) {
-				Quaternion aimRotation = Quaternion.LookRotation (enemy.myTransform.position - myTransform.position);
-				pitchAngle = aimRotation.eulerAngles.x;
-		} else {
-				pitchAngle = -cameraController.yAngle;
+		if (photonView.isMine) {
+					if (isAi) {
+							Quaternion aimRotation = Quaternion.LookRotation (enemy.myTransform.position - myTransform.position);
+							pitchAngle = aimRotation.eulerAngles.x;
+					} else {
+							pitchAngle = -cameraController.yAngle;
+					}
 		}
-		if (animator != null) {
+		if (animator != null&&animator.gameObject.activeSelf) {
 			if(characterState == CharacterState.Idle) {
 				animator.SetFloat("Speed",0.0f);
 			}
@@ -93,7 +88,10 @@ public class Pawn : DamagebleObject {
 					animator.SetFloat("Speed",1.0f);	
 				}
 			}
-			animator.SetFloat("Pitch",pitchAngle);
+
+			animator.SetLookAtPosition (getAimRotation(CurWeapon.weaponRange));
+			animator.SetLookAtWeight(1, 0.5f, 0.7f, 0.0f, 0.5f);
+			//animator.SetFloat("Pitch",pitchAngle);
 		}
 
 	}
@@ -139,7 +137,7 @@ public class Pawn : DamagebleObject {
 					Vector3 targetpoint = Vector3.zero;
 					if (Physics.Raycast (centerRay,out hitInfo, weaponRange)) {
 						targetpoint =hitInfo.point;
-						Debug.Log(hitInfo.collider);
+						//Debug.Log(hitInfo.collider);
 					}else{
 						targetpoint =maincam.transform.forward*weaponRange +maincam.ViewportToWorldPoint(new Vector3(.5f, 0.5f, 1f));
 					}
@@ -161,6 +159,8 @@ public class Pawn : DamagebleObject {
 			stream.SendNext(transform.position);
 			stream.SendNext(transform.rotation);
 			stream.SendNext(aimRotation);
+			stream.SendNext(characterState);
+			stream.SendNext(health);
 		}
 		else
 		{
@@ -169,7 +169,52 @@ public class Pawn : DamagebleObject {
 			this.transform.position = newPosition;
 			this.transform.rotation = (Quaternion) stream.ReceiveNext();
 			this.aimRotation = (Vector3) stream.ReceiveNext();
+			characterState = (CharacterState) stream.ReceiveNext();
+			health=(float) stream.ReceiveNext();
 		}
 	}
+	public void Activate(){
+		if(cameraController!=null){
+			cameraController.enabled = true;
+			GetComponent<ThirdPersonController> ().enabled= true;
+		}
+		for (int i =0; i<myTransform.childCount; i++) {
+			myTransform.GetChild(i).gameObject.SetActive(true);
+		}
+		photonView.RPC("RPCActivate",PhotonTargets.OthersBuffered);
+	}
+	[RPC]
+	public void RPCActivate(){
+		Debug.Log ("RPCActivate");
+		if(cameraController!=null){
+			cameraController.enabled = true;
+			GetComponent<ThirdPersonController> ().enabled= true;
+		}
+		for (int i =0; i<myTransform.childCount; i++) {
+			myTransform.GetChild(i).gameObject.SetActive(true);
+		}
+	}
+	public void DeActivate(){
+		if(cameraController!=null){
+			cameraController.enabled = false;
+			GetComponent<ThirdPersonController> ().enabled= false;
+		}
+		for (int i =0; i<myTransform.childCount; i++) {
+			myTransform.GetChild(i).gameObject.SetActive(false);
+		}
+		photonView.RPC("RPCDeActivate",PhotonTargets.OthersBuffered);
+		
+	}
+	[RPC]
+	public void RPCDeActivate(){
+		Debug.Log ("RPCDeActivate");
+		if(cameraController!=null){
+			cameraController.enabled = false;
+			GetComponent<ThirdPersonController> ().enabled= false;
+		}
+		for (int i =0; i<myTransform.childCount; i++) {
+			myTransform.GetChild(i).gameObject.SetActive(false);
+		}
 
+	}
 }
