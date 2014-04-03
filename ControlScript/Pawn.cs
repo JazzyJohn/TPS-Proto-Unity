@@ -15,8 +15,6 @@ public class Pawn : DamagebleObject {
 
 	public string publicName;
 
-
-
 	private Vector3 aimRotation;
 
 	public Animator animator;
