@@ -189,7 +189,7 @@ public class BaseWeapon : DestroyableNetworkObject {
 	
 	public void OnPhotonSerializeView(PhotonStream stream, PhotonMessageInfo info)
 	{
-		if (stream.isWriting)
+		/*if (stream.isWriting)
 		{
 			// We own this player: send the others our data
 			stream.SendNext(transform.position);
@@ -202,7 +202,7 @@ public class BaseWeapon : DestroyableNetworkObject {
 			this.transform.position = (Vector3) stream.ReceiveNext();
 			this.transform.rotation = (Quaternion) stream.ReceiveNext();
 
-		}
+		}*/
 	}
 	
 

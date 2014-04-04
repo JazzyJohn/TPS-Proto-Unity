@@ -9,6 +9,11 @@ public class Pawn : DamagebleObject {
 
 	public Transform myTransform;
 
+	private Vector3 correctPlayerPos = Vector3.zero; //We lerp towards this
+
+	private Quaternion correctPlayerRot = Quaternion.identity; //We lerp towards this
+
+
 	public Vector3 weaponOffset;
 
 	public bool isDead=false;
@@ -63,12 +68,16 @@ public class Pawn : DamagebleObject {
 	void Update () {
 		//Debug.Log (photonView.isSceneView);
 		if (photonView.isMine) {
-					if (isAi) {
-							Quaternion aimRotation = Quaternion.LookRotation (enemy.myTransform.position - myTransform.position);
-							pitchAngle = aimRotation.eulerAngles.x;
-					} else {
-							pitchAngle = -cameraController.yAngle;
-					}
+						if (isAi) {
+								Quaternion aimRotation = Quaternion.LookRotation (enemy.myTransform.position - myTransform.position);
+								pitchAngle = aimRotation.eulerAngles.x;
+						} else {
+								pitchAngle = -cameraController.yAngle;
+						}
+		} else {
+
+			myTransform.position = Vector3.Lerp(myTransform.position, correctPlayerPos, Time.deltaTime * 5);
+			myTransform.rotation = Quaternion.Lerp(myTransform.rotation, correctPlayerRot, Time.deltaTime * 5);
 		}
 		if (animator != null&&animator.gameObject.activeSelf) {
 			if(characterState == CharacterState.Idle) {
@@ -164,8 +173,8 @@ public class Pawn : DamagebleObject {
 		{
 			// Network player, receive data
 			Vector3 newPosition= (Vector3) stream.ReceiveNext();
-			this.transform.position = newPosition;
-			this.transform.rotation = (Quaternion) stream.ReceiveNext();
+			correctPlayerPos = newPosition;
+			correctPlayerRot = (Quaternion) stream.ReceiveNext();
 			this.aimRotation = (Vector3) stream.ReceiveNext();
 			characterState = (CharacterState) stream.ReceiveNext();
 			health=(float) stream.ReceiveNext();
