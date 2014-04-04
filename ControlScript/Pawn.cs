@@ -1,7 +1,19 @@
 ﻿using UnityEngine;
 using System.Collections;
 
+public enum CharacterState {
+	Idle = 0,
+	Walking = 1,
+	Trotting = 2,
+	Running = 3,
+	Jumping = 4,
+	WallRunning = 5
+}
+
 public class Pawn : DamagebleObject {
+
+	public LayerMask groundLayers = -1;
+	public LayerMask wallRunLayers = -1;
 
 	private BaseWeapon CurWeapon;
 
@@ -34,6 +46,17 @@ public class Pawn : DamagebleObject {
 	public bool isAi;
 
 	public Pawn enemy;
+
+	private Rigidbody _rb;
+
+	private float distToGround;
+
+	private CapsuleCollider capsule;
+
+	public bool canWallRun;
+	
+	private float v;
+
 	// Use this for initialization
 	void Start () {
 		 photonView = GetComponent<PhotonView>();
@@ -41,11 +64,15 @@ public class Pawn : DamagebleObject {
 						Destroy (GetComponent<ThirdPersonController> ());
 						Destroy (GetComponent<ThirdPersonCamera> ());
 						Destroy (GetComponent<MouseLook> ());
+						Destroy (GetComponent<Rigidbody> ());
 		} else {
 			cameraController=GetComponent<ThirdPersonCamera> ();
 			isAi = cameraController==null;
 		}
 		myTransform = transform;
+		_rb  = GetComponent<Rigidbody>();
+		capsule = GetComponent<CapsuleCollider> ();
+		distToGround = capsule.bounds.extents.y-capsule.center.y;
 	}
 	
 	public override void Damage(float damage){
@@ -102,7 +129,7 @@ public class Pawn : DamagebleObject {
 		}
 
 	}
-
+	//Weapon Section
 	public void StartFire(){
 
 		if (CurWeapon != null) {
@@ -119,7 +146,32 @@ public class Pawn : DamagebleObject {
 		//Debug.Log (newWeapon);
 		CurWeapon.AttachWeapon(weaponSlot,weaponOffset,this);
 	}
-
+	public Vector3 getAimRotation(float weaponRange){
+		
+		if(photonView.isMine){
+			if(isAi){
+				aimRotation = enemy.myTransform.position;
+			}else{
+				Camera maincam = Camera.main;
+				Ray centerRay= maincam.ViewportPointToRay(new Vector3(.5f, 0.5f, 1f));
+				RaycastHit hitInfo;
+				Vector3 targetpoint = Vector3.zero;
+				if (Physics.Raycast (centerRay,out hitInfo, weaponRange)) {
+					targetpoint =hitInfo.point;
+					//Debug.Log(hitInfo.collider);
+				}else{
+					targetpoint =maincam.transform.forward*weaponRange +maincam.ViewportToWorldPoint(new Vector3(.5f, 0.5f, 1f));
+				}
+				aimRotation=targetpoint; 
+				
+			}
+			
+			return aimRotation;
+		}else{
+			return aimRotation;
+		}
+	}
+	//END WEAPON SECTION
 	void OnCollisionEnter(Collision collision) {
 		Debug.Log ("COLLISION ENTER PAWN " + this + collision);
 	}
@@ -132,32 +184,108 @@ public class Pawn : DamagebleObject {
 	
 
 	
-	public Vector3 getAimRotation(float weaponRange){
-		
-		if(photonView.isMine){
-			if(isAi){
-				aimRotation = enemy.myTransform.position;
-			}else{
-					Camera maincam = Camera.main;
-					Ray centerRay= maincam.ViewportPointToRay(new Vector3(.5f, 0.5f, 1f));
-					RaycastHit hitInfo;
-					Vector3 targetpoint = Vector3.zero;
-					if (Physics.Raycast (centerRay,out hitInfo, weaponRange)) {
-						targetpoint =hitInfo.point;
-						//Debug.Log(hitInfo.collider);
-					}else{
-						targetpoint =maincam.transform.forward*weaponRange +maincam.ViewportToWorldPoint(new Vector3(.5f, 0.5f, 1f));
-					}
-					aimRotation=targetpoint; 
-				
-			}
 
-			return aimRotation;
-		}else{
-			return aimRotation;
+	//Movement section
+	public void Movement(Vector3 movement){
+
+		if (IsGrounded ()) {
+				_rb.velocity = movement;
+		} else {
+			v = _rb.velocity.magnitude;
+			WallRun ();
 		}
 	}
 
+	void WallRun ()
+	{
+		if(!canWallRun) return;
+		
+		if(v < 0.2f) return;
+		
+		bool leftW = Physics.Raycast (myTransform.position + myTransform.up,
+		                              myTransform.right * -1 + myTransform.forward/4, capsule.radius + 0.2f, wallRunLayers);
+		bool rightW = Physics.Raycast (myTransform.position + myTransform.up,
+		                               myTransform.right + myTransform.forward/4, capsule.radius + 0.2f, wallRunLayers);
+		bool frontW = Physics.Raycast (myTransform.position+ myTransform.up,
+		                               myTransform.forward, capsule.radius + 0.2f, wallRunLayers);
+		
+		if(!animator.IsInTransition(0) && !_rb.isKinematic)
+		{
+			if(leftW)
+			{
+				
+				_rb.velocity = myTransform.forward * Mathf.Abs(v) + myTransform.up*3;
+				if(!(characterState == CharacterState.WallRunning))
+				{
+					characterState = CharacterState.WallRunning;
+					//animator.SetBool("WallRunL", true);
+					StartCoroutine( WallRunCoolDown(3f)); // Exclude if not needed
+				}
+				
+				/*if(doJumpDown)
+				{
+					animator.SetBool("Jump", true);
+				}*/
+			}
+			
+			else if(rightW)
+			{
+				_rb.velocity = myTransform.forward * Mathf.Abs(v) + myTransform.up*3;
+				if(!(characterState == CharacterState.WallRunning))
+				{
+					characterState = CharacterState.WallRunning;
+					StartCoroutine( WallRunCoolDown(3f)); // Exclude if not needed
+				}
+				
+				/*if(doJumpDown)
+				{
+					animator.SetBool("Jump", true);
+				}*/
+			}
+			
+			else if(frontW)
+			{
+				_rb.velocity = myTransform.forward;
+				if(!(characterState == CharacterState.WallRunning))
+				{
+					characterState = CharacterState.WallRunning;
+					StartCoroutine( WallRunCoolDown(3f)); // Exclude if not needed
+				}
+				
+				/*if(doJumpDown)
+				{
+					animator.SetBool("Jump", true);
+				}*/
+			}
+			
+			
+			animator.SetBool("WallRunL", leftW);
+			
+			animator.SetBool("WallRunR", rightW);
+			
+			animator.SetBool("WallRunUp", frontW);
+		}
+	}
+	// Wall run cool-down
+	IEnumerator WallRunCoolDown (float sec)
+	{
+		canWallRun = true;
+		yield return new WaitForSeconds (sec/4);
+		canWallRun = false;
+		characterState = CharacterState.Jumping;
+		yield return new WaitForSeconds (sec);
+		canWallRun = true;
+	}
+
+
+	public bool IsGrounded ()
+	{
+		return Physics.Raycast(myTransform.position, -Vector3.up, distToGround);
+	}
+
+	//end Movement Section
+
+	//NetworkSection
 	public void OnPhotonSerializeView(PhotonStream stream, PhotonMessageInfo info)
 	{
 		if (stream.isWriting)
@@ -224,4 +352,5 @@ public class Pawn : DamagebleObject {
 		}
 
 	}
+	//EndNetworkSection
 }

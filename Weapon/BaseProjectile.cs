@@ -34,7 +34,7 @@ public class BaseProjectile : UseObject {
 		if (owner == other.gameObject) {
 			return;
 		}
-		Debug.Log ("Trigger ENTER PROJ "+ this +  other);
+		//Debug.Log ("Trigger ENTER PROJ "+ this +  other);
 		if (other.CompareTag ("decoration")) {
 			Destroy (gameObject);
 		}

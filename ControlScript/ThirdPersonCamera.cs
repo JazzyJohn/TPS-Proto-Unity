@@ -64,7 +64,7 @@ public class ThirdPersonCamera : MonoBehaviour
 		
 		if (controller)
 		{
-			CharacterController characterController = _target.GetComponent<CharacterController>();
+			CapsuleCollider characterController = _target.GetComponent<CapsuleCollider>();
 			centerOffset = characterController.bounds.center - _target.position;
 			headOffset = centerOffset;
 			headOffset.y = characterController.bounds.max.y - _target.position.y;
@@ -90,9 +90,9 @@ public class ThirdPersonCamera : MonoBehaviour
 	
 	void  Apply ( Transform dummyTarget ,   Vector3 dummyCenter  ){
 		// Early out if we don't have a target
-		if (!controller)
+		/*if (!controller)
 			return;
-		
+		*/
 		Vector3 targetCenter= _target.position + centerOffset;
 		Vector3 targetHead= _target.position + headOffset;
 	
