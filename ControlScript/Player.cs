@@ -80,6 +80,9 @@ public class Player : MonoBehaviour {
 				
 				if(robotTimer<=0){
 					if(Input.GetButtonUp("SpawnBot")){
+						if(ghostBot==null){
+							return;
+						}
 						Vector3 spamPoint =ghostBot.transform.position;
 						spamPoint.y+= 10;
 						robotPawn =PlayerManager.instance.SpawmPlayer(prefabBot,spamPoint,ghostBot.transform.rotation);
@@ -95,6 +98,9 @@ public class Player : MonoBehaviour {
 					if(Input.GetButton("SpawnBot")){
 						
 						if(Physics.Raycast(centerofScreen, out hitinfo,50.0f)){
+							if(ghostBot==null){
+								ghostBot =Instantiate(prefabGhostBot,hitinfo.point,currentPawn.transform.rotation) as GameObject;
+							}
 							ghostBot.transform.position = hitinfo.point;
 							ghostBot.transform.rotation = currentPawn.transform.rotation;
 						}
@@ -140,7 +146,7 @@ public class Player : MonoBehaviour {
 		inBot=true;
 		currentPawn.DeActivate();
 		currentPawn.transform.parent = robotPawn.transform;
-		Destroy(robotPawn.GetComponent(typeof(RobotDrop)));
+
 		((ThirdPersonController)robotPawn.GetComponent(typeof(ThirdPersonController))).enabled = true;
 		((ThirdPersonCamera)robotPawn.GetComponent(typeof(ThirdPersonCamera))).enabled = true;
 		((MouseLook)robotPawn.GetComponent(typeof(MouseLook))).enabled = true;

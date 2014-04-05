@@ -30,7 +30,7 @@ private Pawn pawn;
 
 private Transform myTransform;
 
-
+private CharacterState characterState;
 
 // The speed when walking
 public float walkSpeed= 2.0f;
@@ -69,6 +69,7 @@ private float moveSpeed= 0.0f;
 	
 // Are we jumping? (Initiated with jump button and not grounded yet)
 private bool jumping= false;
+private bool doubleJump= false;
 private bool jumpingReachedApex= false;
 
 // Are we moving backwards (This locks the camera to not do a 180 degree spin)
@@ -203,20 +204,20 @@ void  UpdateSmoothedMovementDirection ()
 		if (Input.GetKey (KeyCode.LeftShift) || Input.GetKey (KeyCode.RightShift))
 		{
 			targetSpeed *= runSpeed;
-				pawn.characterState = CharacterState.Running;
+			characterState = CharacterState.Running;
 		}
 		else if (Time.time - trotAfterSeconds > walkTimeStart)
 		{
 			targetSpeed *= trotSpeed;
-				pawn.characterState = CharacterState.Trotting;
+			characterState = CharacterState.Trotting;
 		}
 		else
 		{
 			targetSpeed *= walkSpeed;
 				if(isMoving){
-					pawn.characterState = CharacterState.Walking;
+					characterState = CharacterState.Walking;
 				}else{
-					pawn.characterState = CharacterState.Idle;
+					characterState = CharacterState.Idle;
 				}
 		}
 		
@@ -259,13 +260,18 @@ public float CalculateJumpVerticalSpeed ( float targetJumpHeight  )
 
 public void DidJump ()
 {
-	jumping = true;
+	
 	jumpingReachedApex = false;
 	lastJumpTime = Time.time;
 	lastJumpStartHeight = transform.position.y;
 	lastJumpButtonTime = -10;
-	
-		pawn.characterState = CharacterState.Jumping;
+	if (jumping == true && !doubleJump) {
+			doubleJump= true;
+			characterState = CharacterState.DoubleJump;
+	} else {
+			characterState = CharacterState.Jumping;	
+	}
+	jumping = true;
 }
 
 void Update ()
@@ -280,6 +286,8 @@ void Update ()
 	if (Input.GetButtonDown ("Jump"))
 	{
 		lastJumpButtonTime = Time.time;
+
+
 	}
 
 	if (Input.GetButtonDown ("Fire1")) {
@@ -289,6 +297,14 @@ void Update ()
 	if (Input.GetButtonUp ("Fire1")) {
 		
 			pawn.StopFire();
+	}
+	float wheel =Input.GetAxis ("Mouse ScrollWheel");
+
+	if (wheel < 0) {
+			pawn.GetComponent<InventoryManager>().PrevWeapon();
+	}
+	if(wheel>0){
+			pawn.GetComponent<InventoryManager>().NextWeapon();
 	}
 	UpdateSmoothedMovementDirection();
 	
@@ -300,7 +316,16 @@ void Update ()
 	Vector3 movement= moveDirection * moveSpeed + new Vector3 (0, verticalSpeed, 0) + inAirVelocity;
 	
 
-	pawn.Movement (movement);
+	if (pawn.Movement (movement, characterState)) {
+			lastGroundedTime = 0;
+			inAirVelocity = Vector3.zero;
+			if (jumping)
+			{
+				doubleJump=false;
+				jumping = false;
+				SendMessage("DidLand", SendMessageOptions.DontRequireReceiver);
+			}
+	}
 
 	
 	
@@ -310,13 +335,7 @@ void Update ()
 	
 	
 
-		lastGroundedTime = 0;
-		inAirVelocity = Vector3.zero;
-		if (jumping)
-		{
-			jumping = false;
-			SendMessage("DidLand", SendMessageOptions.DontRequireReceiver);
-		}
+
 	
 }
 

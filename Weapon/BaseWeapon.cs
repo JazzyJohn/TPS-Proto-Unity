@@ -69,6 +69,7 @@ public class BaseWeapon : DestroyableNetworkObject {
 		owner = inowner;
 		curTransform.parent = weaponSlot;
 		curTransform.localPosition = Offset;
+		curTransform.localRotation = Quaternion.identity;
 		if (photonView.isMine) {
 			photonView.RPC("AttachWeaponRep",PhotonTargets.OthersBuffered,inowner.photonView.viewID);
 		}

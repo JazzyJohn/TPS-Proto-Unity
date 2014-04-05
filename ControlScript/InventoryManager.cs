@@ -125,6 +125,7 @@ public class InventoryManager : MonoBehaviour {
 		}
 	}
 	void SaveOldInfo(int index,BaseWeapon gun){
+		Debug.Log (index);
 		weaponInfo[index].amount  = gun.curAmmo;
 	
 	}
@@ -185,16 +186,19 @@ public class InventoryManager : MonoBehaviour {
 	
 	public void NextWeapon(){
 		int newIndex = indexWeapon+1;
+
 		if(newIndex>=prefabWeapon.Length){
 			newIndex=0;
 		}
+		Debug.Log ("NextWeapon"+newIndex);
 		ChangeWeapon(newIndex);
 	}
 	public void PrevWeapon(){
 		int newIndex = indexWeapon-1;
 		if(newIndex<0){
-			newIndex=prefabWeapon.Length;
+			newIndex=prefabWeapon.Length-1;
 		}
+		Debug.Log ("PrevWeapon"+newIndex);
 		ChangeWeapon(newIndex);
 	}
 	//Change weapon in hand
@@ -204,13 +208,14 @@ public class InventoryManager : MonoBehaviour {
 			return;
 		}
 		BaseWeapon firstWeapon;
-		firstWeapon =PhotonNetwork.Instantiate(prefabWeapon[newWeapon].name,transform.position,transform.rotation,0).GetComponent<BaseWeapon>();
-		indexWeapon=newWeapon;
+		firstWeapon =PhotonNetwork.Instantiate(prefabWeapon[newWeapon].name,transform.position,Quaternion.identity,0).GetComponent<BaseWeapon>();
+	
 		owner.setWeapon(firstWeapon);
 		if(currentWeapon!=null){
-			SaveOldInfo(indexWeapon-1,currentWeapon);
+			SaveOldInfo(indexWeapon,currentWeapon);
 			currentWeapon.RequestKillMe();
 		}
+		indexWeapon=newWeapon;
 		currentWeapon=firstWeapon;
 		owner.setWeapon(firstWeapon);
 		LoadOldInfo();
