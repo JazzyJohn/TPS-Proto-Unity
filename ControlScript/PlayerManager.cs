@@ -63,8 +63,8 @@ public class PlayerManager : MonoBehaviour {
     }
 
 	public Transform GetSpamPosition(int team){
-		List<SpamPoint> list  = new List<SpamPoint>();
-		SpamPoint[] spamPoints = FindObjectsOfType <SpamPoint>();
+		List<SpawnPoint> list  = new List<SpawnPoint>();
+		SpawnPoint[] spamPoints = FindObjectsOfType <SpawnPoint>();
 		for(int i=0; i<spamPoints.Length;i++){
 			if(spamPoints[i].team==0||team==spamPoints[i].team)
 			{
