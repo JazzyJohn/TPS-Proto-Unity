@@ -25,6 +25,6 @@ public class ServerHolder : MonoBehaviour {
 		void OnJoinedRoom()
 		{
 			Camera.main.GetComponent<PlayerMainGui> ().enabled = true;
-
+			PhotonNetwork.Instantiate ("Player",Vector3.zero,Quaternion.identity,0);
 		}
 }

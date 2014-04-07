@@ -74,6 +74,10 @@ public class Pawn : DamagebleObject {
 	
 	private float v;
 
+	public Transform curLookTarget= null;
+
+	public Player player=null;
+
 	// Use this for initialization
 	void Start () {
 		 photonView = GetComponent<PhotonView>();
@@ -177,6 +181,7 @@ public class Pawn : DamagebleObject {
 				Vector3 targetpoint = Vector3.zero;
 				if (Physics.Raycast (centerRay,out hitInfo, weaponRange)) {
 					targetpoint =hitInfo.point;
+					curLookTarget= hitInfo.transform;
 					//Debug.Log(hitInfo.collider);
 				}else{
 					targetpoint =maincam.transform.forward*weaponRange +maincam.ViewportToWorldPoint(new Vector3(.5f, 0.5f, 1f));
@@ -331,8 +336,10 @@ public class Pawn : DamagebleObject {
 	}
 
 	public bool IsGrounded ()
-	{
-		return Physics.Raycast(myTransform.position, -Vector3.up, distToGround);
+	{	
+		Vector3 p1 = myTransform.position +myTransform.up;
+		RaycastHit hit;
+		return Physics.SphereCast(p1,1.0f, -Vector3.up,out hit, distToGround);
 	}
 
 	bool PullUpCheck(){

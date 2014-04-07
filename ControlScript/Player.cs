@@ -1,6 +1,7 @@
 using UnityEngine;
 using System;
 
+public enum PawnType{PAWN,BOT};
 
 
 public class Player : MonoBehaviour {
@@ -26,6 +27,8 @@ public class Player : MonoBehaviour {
 	private Pawn prefabBot;
 	
 	private GameObject prefabGhostBot;
+
+	public string PlayerName="VK NAME";
 	
 	 // Declare your serializable data.
 	[System.Serializable]
@@ -47,11 +50,21 @@ public class Player : MonoBehaviour {
 
 	private bool isDead;
 
+	private PhotonView photonView;
+
 	void Start(){
+		photonView = GetComponent<PhotonView> ();
+
+		if (photonView.isMine) {
 		camera = Camera.main;
-		((PlayerMainGui)camera.GetComponent (typeof(PlayerMainGui))).LocalPlayer = this;
-		//TODO: UNCOMMENT
-		robotTimer = robotTime;
+			((PlayerMainGui)camera.GetComponent (typeof(PlayerMainGui))).LocalPlayer = this;
+			//TODO: UNCOMMENT
+			robotTimer = robotTime;
+		
+			this.name = "Player";		
+			PlayerName = "Player" + PhotonNetwork.playerList.Length;
+			Application.ExternalCall( "SayMyName");
+		}
 	}
 
 	void Update(){
@@ -69,6 +82,7 @@ public class Player : MonoBehaviour {
 			if(respawnTimer<=0&&isStarted){
 				respawnTimer=respawnTime;
 				currentPawn =PlayerManager.instance.SpawmPlayer(prefabClass[selected],team);
+				AfterSpawnSetting(currentPawn,PawnType.PAWN);
 				prefabBot =PlayerManager.instance.avaibleBots[selected];
 				prefabGhostBot =PlayerManager.instance.ghostsBots[selected];
 			}
@@ -86,6 +100,8 @@ public class Player : MonoBehaviour {
 						Vector3 spamPoint =ghostBot.transform.position;
 						spamPoint.y+= 10;
 						robotPawn =PlayerManager.instance.SpawmPlayer(prefabBot,spamPoint,ghostBot.transform.rotation);
+						AfterSpawnSetting(robotPawn,PawnType.BOT);
+
 						Destroy(ghostBot);				
 					}
 					if(Input.GetButtonDown("SpawnBot")){
@@ -161,8 +177,57 @@ public class Player : MonoBehaviour {
 		}
 		return robotTimer;
 	}
+	//NetworkSection
+	public void OnPhotonSerializeView(PhotonStream stream, PhotonMessageInfo info)
+	{
+		if (stream.isWriting)
+		{
+			// We own this player: send the others our data
+			stream.SendNext(PlayerName);
+
+		}
+		else
+		{
+			// Network player, receive data
+			PlayerName= (String) stream.ReceiveNext();
+		
+		}
+	}
+	public void  SetName(String name)
+	{
+		PlayerName = name;
+	}
+	public String GetName(){
+		return PlayerName;
+	}	
+	public Pawn GetCurrentPawn(){
+		return currentPawn;
+	}
+
+	public void AfterSpawnSetting(Pawn pawn,PawnType type){
+		pawn.player = this;
+		if (photonView.isMine) {
+			photonView.RPC("RPCAfterSpawnSetting",PhotonTargets.OthersBuffered,pawn.GetComponent<PhotonView>().viewID,(int)type);
+		}
+	}
 
 
+	[RPC]
+	public void RPCAfterSpawnSetting(int viewid,int type){
+	
+		PawnType pType = (PawnType)type;
+		Pawn pawn =PhotonView.Find (viewid).GetComponent<Pawn>();
+
+		pawn.player = this;
+		switch (pType) {
+			case PawnType.PAWN:
+			currentPawn = pawn;
+			break;
+			case PawnType.BOT:
+			robotPawn = pawn;
+			break;
+		}
+	}
 	
 
 }

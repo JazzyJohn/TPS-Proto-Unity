@@ -54,8 +54,26 @@ public class PlayerMainGui : MonoBehaviour {
 
 					GUI.Label(crosrect,GetFormatedTime(timer));
 				}
+				Pawn myPawn = LocalPlayer.GetCurrentPawn();
+				if(myPawn!=null){
+					if(myPawn.curLookTarget!=null){
+						Pawn targetPawn = myPawn.curLookTarget.GetComponent<Pawn>(); 
+
+						if(targetPawn!=null){
+						
+							if(targetPawn.player!=null){
+								Rect labelrect = new Rect ((screenX  - crosshairWidth)/2,screenY/2-crosshairHeight*2, crosshairWidth, crosshairHeight);
+								GUI.Label(labelrect,targetPawn.player.GetName());
+							}
+						}
+					}
+				}
 			}
+
 		}
+		Rect rectforName = new Rect ((screenX-crosshairWidth)/2,0, crosshairWidth, crosshairHeight);
+		GUI.Label(rectforName,LocalPlayer.GetName());
+
 	}
 	public static string GetFormatedTime(float input){
 		int seconds;
