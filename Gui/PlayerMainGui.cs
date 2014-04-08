@@ -29,11 +29,12 @@ public class PlayerMainGui : MonoBehaviour {
 
 			Pawn[] prefabClass = PlayerManager.instance.avaiblePawn;
 			float slotsizeX =screenX/prefabClass.Length;
-			float slotsizeY = screenY/2;
+			float slotsizeY = screenY/10;
+			int timer =(int) LocalPlayer.GetRespawnTimer();
 			for (int i=0; i<prefabClass.Length;i++) {
-				Rect crosrect = new Rect (slotsizeX*i,( screenY  - slotsizeY)/2, slotsizeX, slotsizeY);
+				Rect crosrect = new Rect (slotsizeX*i,  slotsizeY, slotsizeX, slotsizeY);
 				
-				if(GUI.Button(crosrect, prefabClass[i].publicName)){
+				if(GUI.Button(crosrect, prefabClass[i].publicName+"("+timer+")")){
 					LocalPlayer.selected = i;
 					LocalPlayer.isStarted=true;
 				}

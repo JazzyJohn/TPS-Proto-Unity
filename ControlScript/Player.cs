@@ -29,6 +29,8 @@ public class Player : MonoBehaviour {
 	private GameObject prefabGhostBot;
 
 	public string PlayerName="VK NAME";
+
+	public int UID;
 	
 	 // Declare your serializable data.
 	[System.Serializable]
@@ -144,16 +146,50 @@ public class Player : MonoBehaviour {
 		currentPawn.transform.parent = null;
 		currentPawn.DeActivate ();
 	}
-	public void PawnDead(){
-		Score.Death++;
-	}
+	public void PawnDead(Player Killer){
 	
-	public void PawnKill(){
+		if (!photonView.isMine) {
+			int viewID = 0;
+			if(Killer!=null){
+				viewID = Killer.photonView.viewID;
+			}
+			photonView.RPC("RPCPawnDead",PhotonTargets.Others,viewID);
+			
+		}
+	}
+	[RPC]
+	public void RPCPawnDead(int viewId){
+		if (!photonView.isMine) {
+			return;
+		}
+		Score.Death++;
+		if (viewId != 0) {
+			Player killer = PhotonView.Find (viewId).GetComponent<Player> ();
+			StatisticHandler.SendPlayerKillbyPlayer(UID, PlayerName, killer.UID, killer.PlayerName);
+		} else {
+			StatisticHandler.SendPlayerKillbyNPC(UID, PlayerName);
+		}
+		
+		
+		
+	}
+	public void PawnKill(Player Victim){
+		photonView.RPC("RPCPawnKill",PhotonTargets.Others);
+
+	}
+	[RPC]
+	public void RPCPawnKill(){
+		if (!photonView.isMine) {
+			return;
+		}
 		if(inBot){
 			Score.Kill++;
 		}else{
 			Score.RobotKill++;
 		}
+
+
+
 	}
 	public void PawnAssist(){
 		Score.Assist++;
@@ -177,6 +213,12 @@ public class Player : MonoBehaviour {
 		}
 		return robotTimer;
 	}
+	public float GetRespawnTimer(){
+		if (respawnTimer < 0) {
+			return 0;
+		}
+		return respawnTimer;
+	}
 	//NetworkSection
 	public void OnPhotonSerializeView(PhotonStream stream, PhotonMessageInfo info)
 	{
@@ -193,9 +235,10 @@ public class Player : MonoBehaviour {
 		
 		}
 	}
-	public void  SetName(String name)
+	public void  SetName(String newname,int uid)
 	{
-		PlayerName = name;
+		PlayerName = newname;
+		UID = uid;
 	}
 	public String GetName(){
 		return PlayerName;

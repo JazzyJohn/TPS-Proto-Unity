@@ -159,7 +159,7 @@ public class BaseWeapon : DestroyableNetworkObject {
 		if (Physics.Raycast (centerRay, out hitInfo, weaponRange)) {
 			DamagebleObject target =(DamagebleObject) hitInfo.collider.GetComponent(typeof(DamagebleObject));
 			if(target!=null){
-				target.Damage(damageAmount);
+				target.Damage(damageAmount,owner.gameObject);
 			}
 		}
 	}

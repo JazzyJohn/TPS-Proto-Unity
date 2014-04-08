@@ -40,7 +40,7 @@ public class BaseProjectile : UseObject {
 		}
 		DamagebleObject obj =other.GetComponent <DamagebleObject>();
 		if (obj != null) {
-			obj.Damage(damage);
+			obj.Damage(damage,owner);
 			Destroy (gameObject);
 		}
 		             
@@ -61,7 +61,7 @@ public class BaseProjectile : UseObject {
         for(int i=0;i < hitColliders.Length;i++) {
 			DamagebleObject obj = hitColliders[i].GetComponent <DamagebleObject>();
 			if (obj != null) {
-				obj.Damage(damage);
+				obj.Damage(damage,owner);
 			}
         }
     }

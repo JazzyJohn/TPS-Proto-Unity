@@ -98,16 +98,31 @@ public class Pawn : DamagebleObject {
 		Debug.Log (distToGround);
 	}
 	
-	public override void Damage(float damage){
+	public override void Damage(float damage,GameObject killer){
 		if (!PhotonNetwork.isMasterClient){
 			return;
 		}
 		Debug.Log ("DAMAGE");
-		base.Damage(damage);
+		base.Damage(damage,killer);
 	}
 
 
-	public override void KillIt(){
+	public override void KillIt(GameObject killer){
+		Pawn killerPawn =killer.GetComponent<Pawn> ();
+		Player killerPlayer = null;
+		if (killerPawn != null) {
+			killerPlayer = killerPawn.player;
+			if(killerPlayer!=null){
+				killerPlayer.PawnKill(player);
+			}
+		}
+		if (player != null) {
+			player.PawnDead(killerPlayer);
+		}
+
+		if (CurWeapon != null) {
+			CurWeapon.	RequestKillMe();
+		}
 		Debug.Log ("KILLL IT" + this);
 		RequestKillMe();
 		

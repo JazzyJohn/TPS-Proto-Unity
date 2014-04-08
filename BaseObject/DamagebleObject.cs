@@ -16,16 +16,16 @@ public class DamagebleObject : DestroyableNetworkObject {
 	
 	}
 
-	public virtual void Damage(float damage){
+	public virtual void Damage(float damage,GameObject killer){
 		if (destructableObject){
 			health-= damage;
 			if(health<0){
-				KillIt();
+				KillIt(killer);
 
 			}
 		}
 	}
-	public virtual void KillIt(){
+	public virtual void KillIt(GameObject killer){
 		Destroy(gameObject);
 
 	}
