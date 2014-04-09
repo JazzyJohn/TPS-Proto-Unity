@@ -36,17 +36,17 @@ public class Player : MonoBehaviour {
 	[System.Serializable]
 	public class PlayerScore
 		{
-		public int Kill;
-		public int Death;
-		public int Assist;
-		public int RobotKill;
+		public int Kill =0;
+		public int Death=0;
+		public int Assist=0;
+		public int RobotKill=0;
 	}
  
 	private float robotTimer;
 	
 	private float respawnTimer;
 	
-	private PlayerScore Score;
+	public PlayerScore Score = new PlayerScore();
 	
 	private Camera camera;
 
@@ -102,6 +102,7 @@ public class Player : MonoBehaviour {
 						Vector3 spamPoint =ghostBot.transform.position;
 						spamPoint.y+= 10;
 						robotPawn =PlayerManager.instance.SpawmPlayer(prefabBot,spamPoint,ghostBot.transform.rotation);
+						Debug.Log("robot spawn"+robotPawn);
 						AfterSpawnSetting(robotPawn,PawnType.BOT);
 
 						Destroy(ghostBot);				
@@ -127,35 +128,42 @@ public class Player : MonoBehaviour {
 				}
 			}
 			if(Physics.Raycast(centerofScreen, out hitinfo,3.0f)){
-				if(!inBot&&robotPawn!=null){
-					if(hitinfo.collider.gameObject==robotPawn.gameObject){
-						if(Input.GetButtonDown("Use")){
-							EnterBot();
+				if(inBot){
+					if(Input.GetButtonDown("Use")){
+						ExitBot();
+					}
+					
+				}else 
+					if(!inBot&&robotPawn!=null){
+						if(hitinfo.collider.gameObject==robotPawn.gameObject){
+							if(Input.GetButtonDown("Use")){
+								EnterBot();
+							}
 						}
 					}
-				}
+
 			}
 			
 		}
 	
 	}
 	
-	public void RobotDead(){
+	public void RobotDead(Player Killer){
 		robotTimer=robotTime;
 		inBot= false;
 		currentPawn.transform.parent = null;
-		currentPawn.DeActivate ();
+		currentPawn.Activate ();
 	}
 	public void PawnDead(Player Killer){
 	
-		if (!photonView.isMine) {
-			int viewID = 0;
-			if(Killer!=null){
-				viewID = Killer.photonView.viewID;
-			}
-			photonView.RPC("RPCPawnDead",PhotonTargets.Others,viewID);
-			
+
+		int viewID = 0;
+		if(Killer!=null){
+			viewID = Killer.photonView.viewID;
 		}
+		photonView.RPC("RPCPawnDead",PhotonTargets.All,viewID);
+			
+
 	}
 	[RPC]
 	public void RPCPawnDead(int viewId){
@@ -174,15 +182,17 @@ public class Player : MonoBehaviour {
 		
 	}
 	public void PawnKill(Player Victim){
-		photonView.RPC("RPCPawnKill",PhotonTargets.Others);
+		photonView.RPC("RPCPawnKill",PhotonTargets.All);
 
 	}
 	[RPC]
 	public void RPCPawnKill(){
+
 		if (!photonView.isMine) {
 			return;
 		}
-		if(inBot){
+
+		if(!inBot){
 			Score.Kill++;
 		}else{
 			Score.RobotKill++;
@@ -199,9 +209,19 @@ public class Player : MonoBehaviour {
 		currentPawn.DeActivate();
 		currentPawn.transform.parent = robotPawn.transform;
 
-		((ThirdPersonController)robotPawn.GetComponent(typeof(ThirdPersonController))).enabled = true;
-		((ThirdPersonCamera)robotPawn.GetComponent(typeof(ThirdPersonCamera))).enabled = true;
-		((MouseLook)robotPawn.GetComponent(typeof(MouseLook))).enabled = true;
+		robotPawn.GetComponent<ThirdPersonController>().enabled = true;
+		robotPawn.GetComponent<ThirdPersonCamera>().enabled = true;
+		robotPawn.GetComponent<MouseLook>().enabled = true;
+	}
+	public void ExitBot(){
+		//robotTimer=robotTime;
+		inBot= false;
+		currentPawn.transform.parent = null;
+		currentPawn.Activate ();
+		robotPawn.GetComponent<ThirdPersonController>().enabled = false;
+		robotPawn.GetComponent<ThirdPersonCamera>().enabled = false;
+		robotPawn.GetComponent<MouseLook>().enabled = false;
+		robotPawn.StopMachine ();
 	}
 	public bool IsDead(){
 		return isDead;
@@ -235,18 +255,27 @@ public class Player : MonoBehaviour {
 		
 		}
 	}
-	public void  SetName(String newname,int uid)
+	public void  SetName(String newname)
 	{
 		PlayerName = newname;
+
+	}
+	public void  SetUid(int uid)
+	{
+
 		UID = uid;
 	}
+
+	
 	public String GetName(){
 		return PlayerName;
 	}	
 	public Pawn GetCurrentPawn(){
 		return currentPawn;
 	}
-
+	public Pawn GetRobot(){
+		return robotPawn;
+	}
 	public void AfterSpawnSetting(Pawn pawn,PawnType type){
 		pawn.player = this;
 		if (photonView.isMine) {

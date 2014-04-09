@@ -59,7 +59,7 @@ public class BaseWeapon : DestroyableNetworkObject {
 		}
 	}
 
-	public void AttachWeapon(Transform weaponSlot,Vector3 Offset, Pawn inowner){
+	public void AttachWeapon(Transform weaponSlot,Vector3 Offset, Quaternion weaponRotator,Pawn inowner){
 		if (curTransform == null) {
 			curTransform = transform;		
 		}
@@ -69,7 +69,7 @@ public class BaseWeapon : DestroyableNetworkObject {
 		owner = inowner;
 		curTransform.parent = weaponSlot;
 		curTransform.localPosition = Offset;
-		curTransform.localRotation = Quaternion.identity;
+		curTransform.localRotation = weaponRotator;
 		if (photonView.isMine) {
 			photonView.RPC("AttachWeaponRep",PhotonTargets.OthersBuffered,inowner.photonView.viewID);
 		}
@@ -128,6 +128,9 @@ public class BaseWeapon : DestroyableNetworkObject {
 	public void Reload(){
 		isReload = false;
 		curAmmo =owner.GetComponent<InventoryManager>().GiveAmmo(ammoType,clipSize);	
+	}
+	public bool IsReloading(){
+		return isReload;
 	}
 	void Fire(){
 		if(curAmmo>0){

@@ -35,14 +35,14 @@ public class BaseProjectile : UseObject {
 			return;
 		}
 		//Debug.Log ("Trigger ENTER PROJ "+ this +  other);
-		if (other.CompareTag ("decoration")) {
-			Destroy (gameObject);
-		}
+
+
 		DamagebleObject obj =other.GetComponent <DamagebleObject>();
 		if (obj != null) {
 			obj.Damage(damage,owner);
-			Destroy (gameObject);
+			//Destroy (gameObject);
 		}
+		Destroy (gameObject);
 		             
 	}
 	void OnDestroy() {

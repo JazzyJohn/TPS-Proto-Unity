@@ -28,8 +28,13 @@ public class Pawn : DamagebleObject {
 
 	private Quaternion correctPlayerRot = Quaternion.identity; //We lerp towards this
 
+	private Vector3 correctPlayerAim = Vector3.zero; //We lerp towards this
 
 	public Vector3 weaponOffset;
+
+	public Vector3 weaponRotatorOffset;
+
+	private Quaternion weaponRotator;
 
 	public bool isDead=false;
 
@@ -91,6 +96,8 @@ public class Pawn : DamagebleObject {
 			isAi = cameraController==null;
 		}
 		myTransform = transform;
+		correctPlayerPos = transform.position;
+		weaponRotator = Quaternion.Euler (weaponRotatorOffset);
 		_rb  = GetComponent<Rigidbody>();
 		capsule = GetComponent<CapsuleCollider> ();
 
@@ -102,12 +109,16 @@ public class Pawn : DamagebleObject {
 		if (!PhotonNetwork.isMasterClient){
 			return;
 		}
-		Debug.Log ("DAMAGE");
+		//Debug.Log ("DAMAGE");
 		base.Damage(damage,killer);
 	}
 
 
 	public override void KillIt(GameObject killer){
+		if (isDead) {
+			return;		
+		}
+		isDead = true;
 		Pawn killerPawn =killer.GetComponent<Pawn> ();
 		Player killerPlayer = null;
 		if (killerPawn != null) {
@@ -116,14 +127,19 @@ public class Pawn : DamagebleObject {
 				killerPlayer.PawnKill(player);
 			}
 		}
+		Debug.Log ("KILLL IT" + player);
 		if (player != null) {
-			player.PawnDead(killerPlayer);
+			if(player.inBot){
+				player.RobotDead(killerPlayer);
+			}else{
+				player.PawnDead(killerPlayer);
+			}
 		}
 
 		if (CurWeapon != null) {
 			CurWeapon.	RequestKillMe();
 		}
-		Debug.Log ("KILLL IT" + this);
+
 		RequestKillMe();
 		
 	}
@@ -160,9 +176,26 @@ public class Pawn : DamagebleObject {
 					animator.SetFloat("Speed",1.0f);	
 				}
 			}
+			if(CurWeapon!=null){
+				if(correctPlayerAim.sqrMagnitude==0){
+					correctPlayerAim= getAimRotation(CurWeapon.weaponRange);
+				}else{
+					correctPlayerAim = Vector3.Lerp(correctPlayerAim,getAimRotation(CurWeapon.weaponRange), Time.deltaTime*10);
+				}
+				/*Quaternion diff = Quaternion.identity;
+				Vector3 target = (correctPlayerAim-CurWeapon.transform.position).normalized;
+				if(!CurWeapon.IsReloading()){
+					diff= Quaternion.FromToRotation(CurWeapon.transform.forward,target);
+				}
 
-			animator.SetLookAtPosition (getAimRotation(CurWeapon.weaponRange));
-			animator.SetLookAtWeight(1, 0.5f, 0.7f, 0.0f, 0.5f);
+				Debug.DrawLine(CurWeapon.transform.position,correctPlayerAim);
+				Vector3 correctPlayerAimWeapon = diff*target*CurWeapon.weaponRange+CurWeapon.transform.position; 
+				Debug.DrawLine(CurWeapon.transform.position,correctPlayerAimWeapon);*/
+				animator.SetLookAtPosition (correctPlayerAim);
+				animator.SetLookAtWeight(1, 0.5f, 0.7f, 0.0f, 0.5f);
+			}
+			//TODO: TEMP SOLUTION BEFORE NORMAL BONE ORIENTATION
+
 			//animator.SetFloat("Pitch",pitchAngle);
 		}
 
@@ -182,7 +215,7 @@ public class Pawn : DamagebleObject {
 	public void setWeapon(BaseWeapon newWeapon){
 		CurWeapon = newWeapon;
 		//Debug.Log (newWeapon);
-		CurWeapon.AttachWeapon(weaponSlot,weaponOffset,this);
+		CurWeapon.AttachWeapon(weaponSlot,weaponOffset,weaponRotator,this);
 	}
 	public Vector3 getAimRotation(float weaponRange){
 		
@@ -229,6 +262,7 @@ public class Pawn : DamagebleObject {
 		//Debug.Log (characterState);
 		bool isGrounded = IsGrounded ();
 		if (isGrounded) {
+			if (_rb.isKinematic) _rb.isKinematic= false;
 			_rb.velocity = movement;
 			characterState = state;
 		} else {
@@ -400,7 +434,10 @@ public class Pawn : DamagebleObject {
 				}
 	}
 
+	public void StopMachine(){
+		characterState = CharacterState.Idle;
 
+	}
 	//end Movement Section
 
 	//NetworkSection
@@ -430,6 +467,7 @@ public class Pawn : DamagebleObject {
 		if(cameraController!=null){
 			cameraController.enabled = true;
 			GetComponent<ThirdPersonController> ().enabled= true;
+			GetComponent<MouseLook>().enabled = true;
 		}
 		for (int i =0; i<myTransform.childCount; i++) {
 			myTransform.GetChild(i).gameObject.SetActive(true);
@@ -442,6 +480,7 @@ public class Pawn : DamagebleObject {
 		if(cameraController!=null){
 			cameraController.enabled = true;
 			GetComponent<ThirdPersonController> ().enabled= true;
+			GetComponent<MouseLook>().enabled = true;
 		}
 		for (int i =0; i<myTransform.childCount; i++) {
 			myTransform.GetChild(i).gameObject.SetActive(true);
@@ -450,6 +489,7 @@ public class Pawn : DamagebleObject {
 	public void DeActivate(){
 		if(cameraController!=null){
 			cameraController.enabled = false;
+			GetComponent<MouseLook>().enabled =false;
 			GetComponent<ThirdPersonController> ().enabled= false;
 		}
 		for (int i =0; i<myTransform.childCount; i++) {
@@ -463,6 +503,7 @@ public class Pawn : DamagebleObject {
 		Debug.Log ("RPCDeActivate");
 		if(cameraController!=null){
 			cameraController.enabled = false;
+			GetComponent<MouseLook>().enabled =false;
 			GetComponent<ThirdPersonController> ().enabled= false;
 		}
 		for (int i =0; i<myTransform.childCount; i++) {

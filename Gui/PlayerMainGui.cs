@@ -24,7 +24,7 @@ public class PlayerMainGui : MonoBehaviour {
 		}
 		float screenX = Screen.width, screenY = Screen.height;
 		if (LocalPlayer.IsDead()) {
-			Screen.showCursor = true;
+			Screen.lockCursor = false;
 			LocalPlayer.selected = 0;
 
 			Pawn[] prefabClass = PlayerManager.instance.avaiblePawn;
@@ -42,38 +42,51 @@ public class PlayerMainGui : MonoBehaviour {
 			}
 
 		} else{
-			Screen.showCursor = false;	
+			Screen.lockCursor = true;
 			Rect crosrect = new Rect ((screenX  - crosshairWidth)/2,( screenY  - crosshairHeight)/2, crosshairWidth, crosshairHeight);
 			
 			GUI.Label(crosrect, crosshair);
+			crosrect = new Rect (screenX-crosshairWidth,0, crosshairWidth, crosshairHeight);
 			if(!LocalPlayer.inBot){
 				float timer =LocalPlayer.GetRobotTimer();
-				crosrect = new Rect (screenX-crosshairWidth,0, crosshairWidth, crosshairHeight);
+
 				if(timer==0){
 					GUI.Label(crosrect,"PRES F TO SPAMN ROBOT");
 				}else{
 
 					GUI.Label(crosrect,GetFormatedTime(timer));
 				}
+			}else{
+				GUI.Label(crosrect,"PRES E  TO EXIT");
+				
+			}
+
 				Pawn myPawn = LocalPlayer.GetCurrentPawn();
 				if(myPawn!=null){
 					if(myPawn.curLookTarget!=null){
 						Pawn targetPawn = myPawn.curLookTarget.GetComponent<Pawn>(); 
 
 						if(targetPawn!=null){
-						
-							if(targetPawn.player!=null){
-								Rect labelrect = new Rect ((screenX  - crosshairWidth)/2,screenY/2-crosshairHeight*2, crosshairWidth, crosshairHeight);
+							Rect labelrect = new Rect ((screenX  - crosshairWidth)/2,screenY/2-crosshairHeight*2, crosshairWidth*2, crosshairHeight*2);
+
+							if(targetPawn.player!=null&&targetPawn.player!=LocalPlayer){
+								//Rect labelrect = new Rect ((screenX  - crosshairWidth)/2,screenY/2-crosshairHeight*2, crosshairWidth*2, crosshairHeight*2);
 								GUI.Label(labelrect,targetPawn.player.GetName());
 							}
+							if(!LocalPlayer.inBot&&targetPawn==LocalPlayer.GetRobot()){
+							    GUI.Label(labelrect,"PRESS E TO ENTER");
+							}
+
 						}
+
 					}
 				}
-			}
-
+			
 		}
-		Rect rectforName = new Rect ((screenX-crosshairWidth)/2,0, crosshairWidth, crosshairHeight);
+		Rect rectforName = new Rect ((screenX-crosshairWidth)/2,0, crosshairWidth*2, crosshairHeight);
 		GUI.Label(rectforName,LocalPlayer.GetName());
+		rectforName = new Rect ((screenX-crosshairWidth)/2,crosshairHeight/2, crosshairWidth*2, crosshairHeight);
+		GUI.Label(rectforName,"K/D/A "  +LocalPlayer.Score.Kill+"/"+LocalPlayer.Score.Death+"/"+LocalPlayer.Score.Assist);
 
 	}
 	public static string GetFormatedTime(float input){
