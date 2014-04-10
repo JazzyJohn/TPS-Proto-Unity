@@ -77,6 +77,7 @@ public class PlayerManager : MonoBehaviour {
 		return list[(int)(UnityEngine.Random.value*list.Count)].transform;
 	}
  
+ 
  }
 	
 
