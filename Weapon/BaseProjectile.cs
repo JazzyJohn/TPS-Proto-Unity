@@ -5,7 +5,9 @@ using System.Collections;
 public class BaseProjectile : UseObject {
 
 	public float damage;
-	
+
+	public bool isDone;
+
 	public float speed = 100.0f;
 	
 	public GameObject owner;
@@ -34,6 +36,10 @@ public class BaseProjectile : UseObject {
 		if (owner == other.gameObject) {
 			return;
 		}
+		if (isDone) {
+			return;		
+		}
+		isDone = true;
 		//Debug.Log ("Trigger ENTER PROJ "+ this +  other);
 
 

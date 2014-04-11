@@ -66,9 +66,19 @@ public class Player : MonoBehaviour {
 			this.name = "Player";		
 			PlayerName = "Player" + PhotonNetwork.playerList.Length;
 			Application.ExternalCall( "SayMyName");
+			//photonView.RPC("ASKTeam",PhotonTargets.MasterClient);
+
 		}
 	}
+	[RPC]
+	public void ASKTeam(){
 
+		//	photonView.RPC("SetTeam",PhotonTargets.All,PlayerManager.instance);
+	}
+	[RPC]
+	public void SetTeam(int intTeam){
+		team = intTeam;
+	}
 	void Update(){
 		
 		isDead =currentPawn==null||currentPawn.isDead;

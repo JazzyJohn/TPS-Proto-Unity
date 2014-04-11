@@ -25,7 +25,7 @@ public class PlayerMainGui : MonoBehaviour {
 		float screenX = Screen.width, screenY = Screen.height;
 		if (LocalPlayer.IsDead()) {
 			Screen.lockCursor = false;
-			LocalPlayer.selected = 0;
+
 
 			Pawn[] prefabClass = PlayerManager.instance.avaiblePawn;
 			float slotsizeX =screenX/prefabClass.Length;

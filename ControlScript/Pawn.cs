@@ -34,8 +34,6 @@ public class Pawn : DamagebleObject {
 
 	public Vector3 weaponRotatorOffset;
 
-	private Quaternion weaponRotator;
-
 	public bool isDead=false;
 
 	public string publicName;
@@ -65,6 +63,14 @@ public class Pawn : DamagebleObject {
 
 	public float wallRunSpeed;
 
+	public float groundRunSpeed;
+
+	public float groundTrotSpeed;
+
+	public float groundWalkSpeed;
+
+	public float jumpHeight;
+	
 	public float climbSpeed;
 
 	public float climbCheckRadius = 0.1f;
@@ -97,7 +103,7 @@ public class Pawn : DamagebleObject {
 		}
 		myTransform = transform;
 		correctPlayerPos = transform.position;
-		weaponRotator = Quaternion.Euler (weaponRotatorOffset);
+
 		_rb  = GetComponent<Rigidbody>();
 		capsule = GetComponent<CapsuleCollider> ();
 
@@ -215,7 +221,7 @@ public class Pawn : DamagebleObject {
 	public void setWeapon(BaseWeapon newWeapon){
 		CurWeapon = newWeapon;
 		//Debug.Log (newWeapon);
-		CurWeapon.AttachWeapon(weaponSlot,weaponOffset,weaponRotator,this);
+		CurWeapon.AttachWeapon(weaponSlot,weaponOffset,Quaternion.Euler (weaponRotatorOffset),this);
 	}
 	public Vector3 getAimRotation(float weaponRange){
 		
@@ -255,7 +261,8 @@ public class Pawn : DamagebleObject {
 	//TODO REPLICATION
 	
 
-	
+
+		
 
 	//Movement section
 	public bool Movement(Vector3 movement,CharacterState state){
@@ -264,6 +271,7 @@ public class Pawn : DamagebleObject {
 		if (isGrounded) {
 			if (_rb.isKinematic) _rb.isKinematic= false;
 			_rb.velocity = movement;
+			
 			characterState = state;
 		} else {
 			v = movement.normalized.magnitude;
@@ -306,7 +314,7 @@ public class Pawn : DamagebleObject {
 			if(leftW)
 			{
 				
-				_rb.velocity = movement + myTransform.up*3;
+				_rb.velocity = movement.normalized*wallRunSpeed + myTransform.up*3;
 				if(!(characterState == CharacterState.WallRunning))
 				{
 					characterState = CharacterState.WallRunning;
@@ -323,7 +331,7 @@ public class Pawn : DamagebleObject {
 			
 			else if(rightW)
 			{
-				_rb.velocity = movement + myTransform.up*3;
+				_rb.velocity = movement.normalized*wallRunSpeed + myTransform.up*3;
 				if(!(characterState == CharacterState.WallRunning))
 				{
 					characterState = CharacterState.WallRunning;

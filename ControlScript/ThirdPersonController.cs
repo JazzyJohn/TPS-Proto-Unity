@@ -32,17 +32,12 @@ private Transform myTransform;
 
 private CharacterState characterState;
 
-// The speed when walking
-public float walkSpeed= 2.0f;
-// after trotAfterSeconds of walking we trot with trotSpeed
-public float trotSpeed= 4.0f;
+
 // when pressing "Fire3" button (cmd) we start running
-public float runSpeed= 6.0f;
+
 
 public float inAirControlAcceleration= 3.0f;
 
-// How high do we jump when pressing jump and letting go immediately
-public float jumpHeight= 2.0f;
 
 // The gravity for the character
 public float gravity= 20.0f;
@@ -178,7 +173,7 @@ void  UpdateSmoothedMovementDirection ()
 		if (targetDirection != Vector3.zero)
 		{
 			// If we are really slow, just snap to the target direction
-			if (moveSpeed < walkSpeed * 0.9f )
+			if (moveSpeed < pawn.groundWalkSpeed * 0.9f )
 			{
 				moveDirection = targetDirection.normalized;
 			}
@@ -203,17 +198,17 @@ void  UpdateSmoothedMovementDirection ()
 		// Pick speed modifier
 		if (Input.GetKey (KeyCode.LeftShift) || Input.GetKey (KeyCode.RightShift))
 		{
-			targetSpeed *= runSpeed;
+			targetSpeed *= pawn.groundRunSpeed;
 			characterState = CharacterState.Running;
 		}
 		else if (Time.time - trotAfterSeconds > walkTimeStart)
 		{
-			targetSpeed *= trotSpeed;
+			targetSpeed *= pawn.groundTrotSpeed;
 			characterState = CharacterState.Trotting;
 		}
 		else
 		{
-			targetSpeed *= walkSpeed;
+			targetSpeed *= pawn.groundWalkSpeed;
 				if(isMoving){
 					characterState = CharacterState.Walking;
 				}else{
@@ -224,7 +219,7 @@ void  UpdateSmoothedMovementDirection ()
 		moveSpeed = Mathf.Lerp(moveSpeed, targetSpeed, curSmooth);
 		
 		// Reset walk time start when we slow down
-		if (moveSpeed < walkSpeed * 0.3f)
+		if (moveSpeed < pawn.groundWalkSpeed * 0.3f)
 			walkTimeStart = Time.time;
 	
 	
@@ -242,7 +237,7 @@ void  ApplyJumping (){
 		// - Only when pressing the button down
 		// - With a timeout so you can press the button slightly before landing		
 		if (canJump && Time.time < lastJumpButtonTime + jumpTimeout) {
-			verticalSpeed = CalculateJumpVerticalSpeed (jumpHeight);
+			verticalSpeed = CalculateJumpVerticalSpeed (pawn.jumpHeight);
 			SendMessage("DidJump", SendMessageOptions.DontRequireReceiver);
 		}else{
 			verticalSpeed=0;

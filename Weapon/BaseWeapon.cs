@@ -21,6 +21,8 @@ public class BaseWeapon : DestroyableNetworkObject {
 
 	public int clipSize;
 
+	public bool vsArmor;
+
 	public float damageAmount;
 
 	public float aimRandCoef;
@@ -69,6 +71,7 @@ public class BaseWeapon : DestroyableNetworkObject {
 		owner = inowner;
 		curTransform.parent = weaponSlot;
 		curTransform.localPosition = Offset;
+		Debug.Log (name + weaponRotator);
 		curTransform.localRotation = weaponRotator;
 		if (photonView.isMine) {
 			photonView.RPC("AttachWeaponRep",PhotonTargets.OthersBuffered,inowner.photonView.viewID);
@@ -170,6 +173,7 @@ public class BaseWeapon : DestroyableNetworkObject {
 		Vector3 startPoint  = muzzlePoint.position+muzzleOffset;
 		Quaternion startRotation = getAimRotation();
 		GameObject proj;
+
 		proj=Instantiate(projectilePrefab,startPoint,startRotation) as GameObject;
 		if (photonView.isMine) {
 			photonView.RPC("GenerateProjectileRep",PhotonTargets.Others,startPoint,startRotation);
@@ -186,7 +190,10 @@ public class BaseWeapon : DestroyableNetworkObject {
 		projScript.owner = owner.gameObject;
 	}
 	Quaternion getAimRotation(){
-		return Quaternion.LookRotation(owner.getAimRotation(weaponRange)-muzzlePoint.position);
+		Vector3 randVec = Random.onUnitSphere;
+		Vector3 normalDirection  = owner.getAimRotation(weaponRange)-muzzlePoint.position;
+		normalDirection =normalDirection + randVec.normalized * normalDirection.magnitude * aimRandCoef / 100;
+		return Quaternion.LookRotation(normalDirection);
 		
 
 	}

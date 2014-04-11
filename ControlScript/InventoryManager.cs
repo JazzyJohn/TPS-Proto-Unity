@@ -1,7 +1,7 @@
 using UnityEngine;
 using System;
 
-public enum AMMOTYPE{ PISTOL,RIFLE};
+public enum AMMOTYPE{PISTOL,RIFLE,ROCKETS,MACHINEGUN};
 
 [RequireComponent (typeof (Pawn))]
 public class InventoryManager : MonoBehaviour {
