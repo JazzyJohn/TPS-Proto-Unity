@@ -22,7 +22,7 @@ public class Player : MonoBehaviour {
 	
 	private GameObject ghostBot;
 	
-	private int team =1;
+	public int team =0;
 
 	private Pawn prefabBot;
 	
@@ -66,14 +66,14 @@ public class Player : MonoBehaviour {
 			this.name = "Player";		
 			PlayerName = "Player" + PhotonNetwork.playerList.Length;
 			Application.ExternalCall( "SayMyName");
-			//photonView.RPC("ASKTeam",PhotonTargets.MasterClient);
+			photonView.RPC("ASKTeam",PhotonTargets.MasterClient);
 
 		}
 	}
 	[RPC]
 	public void ASKTeam(){
 
-		//	photonView.RPC("SetTeam",PhotonTargets.All,PlayerManager.instance);
+		photonView.RPC("SetTeam",PhotonTargets.All,PlayerManager.instance.NextTeam());
 	}
 	[RPC]
 	public void SetTeam(int intTeam){
@@ -287,9 +287,9 @@ public class Player : MonoBehaviour {
 		return robotPawn;
 	}
 	public void AfterSpawnSetting(Pawn pawn,PawnType type){
-		pawn.player = this;
+	
 		if (photonView.isMine) {
-			photonView.RPC("RPCAfterSpawnSetting",PhotonTargets.OthersBuffered,pawn.GetComponent<PhotonView>().viewID,(int)type);
+			photonView.RPC("RPCAfterSpawnSetting",PhotonTargets.AllBuffered,pawn.GetComponent<PhotonView>().viewID,(int)type);
 		}
 	}
 
@@ -301,6 +301,7 @@ public class Player : MonoBehaviour {
 		Pawn pawn =PhotonView.Find (viewid).GetComponent<Pawn>();
 
 		pawn.player = this;
+		pawn.team = this.team;
 		switch (pType) {
 			case PawnType.PAWN:
 			currentPawn = pawn;

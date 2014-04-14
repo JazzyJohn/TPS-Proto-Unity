@@ -33,6 +33,8 @@ public class BaseWeapon : DestroyableNetworkObject {
 
 	public Transform muzzlePoint;
 
+	public Transform leftHandHolder;
+
 	public Vector3 	muzzleOffset;
 
 	public float weaponRange;
@@ -41,7 +43,7 @@ public class BaseWeapon : DestroyableNetworkObject {
 
 	private Pawn owner;
 
-	private Transform curTransform;
+	public Transform curTransform;
 
 	private bool isReload = false;
 

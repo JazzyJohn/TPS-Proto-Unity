@@ -10,6 +10,12 @@ public class PlayerManager : MonoBehaviour {
 	public Pawn[] avaibleBots;
 
 	public GameObject[] ghostsBots;
+
+	private int curTeam =1;
+
+	public int MaxTeam = 2;
+
+	public bool frendlyFire =false;
 	
 	public InventoryManager.AmmoBag[] AllTypeInGame;
     // s_Instance is used to cache the instance found in the scene so we don't have to look it up every time.
@@ -73,6 +79,13 @@ public class PlayerManager : MonoBehaviour {
 		}
 //		Debug.Log ( list.Count);
 		return list[(int)(UnityEngine.Random.value*list.Count)].transform;
+	}
+	public int NextTeam(){
+		curTeam++;
+		if(curTeam>MaxTeam){
+			curTeam=1;
+		}
+		return curTeam;
 	}
  
  }

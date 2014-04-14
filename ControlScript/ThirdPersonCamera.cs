@@ -45,7 +45,7 @@ public class ThirdPersonCamera : MonoBehaviour
 	private float targetHeight= 100000.0f; 
 
 	public float yAngle =0.0f;
-	
+	public float xAngle = 0.0f;
 	void  Awake (){
 		
 		if(!cameraTransform && Camera.main)
@@ -137,7 +137,7 @@ public class ThirdPersonCamera : MonoBehaviour
 	*/
 		currentAngle = targetAngle;
 		// When jumping don't move camera upwards but only down!
-		if (controller.IsJumping ())
+		/*if (controller.IsJumping ())
 		{
 			// We'd be moving the camera upwards, do that only if it's really high
 			float newTargetHeight= targetCenter.y + height;
@@ -148,20 +148,20 @@ public class ThirdPersonCamera : MonoBehaviour
 		else
 		{
 			targetHeight = targetCenter.y + height;
-		}
-	
+		}*/
+		targetHeight = targetCenter.y + height;
 		// Damp the height
 
 	
 		// Convert the angle into a rotation, by which we then reposition the camera
-		Quaternion currentRotation= Quaternion.Euler (0, currentAngle, 0);
+		Quaternion currentRotation = Quaternion.identity;
 		
 		// Set the position of the camera on the x-z plane to:
 		// distance meters behind the target
 		float vert =Input.GetAxis("Mouse Y");
-		
+		float horizont =Input.GetAxis("Mouse X");
 		yAngle -= vert * angularMaxSpeed;
-		
+		xAngle += horizont * angularMaxSpeed;
 		if (yAngle > MaxYAngle) {
 			yAngle = MaxYAngle;
 		}
@@ -169,9 +169,9 @@ public class ThirdPersonCamera : MonoBehaviour
 			yAngle = MinYAngle;
 		}
 
-		Quaternion pitchRotation= Quaternion.Euler (yAngle, 0, 0);
-		Vector3 localCamOffset = currentRotation * pitchRotation* Vector3.back * distance;
-		Vector3 localTargetOffset = _target.rotation*targetOffset ;
+		Quaternion pitchRotation= Quaternion.Euler (yAngle, xAngle, 0);
+		Vector3 localCamOffset = pitchRotation* Vector3.back * distance;
+		Vector3 localTargetOffset = pitchRotation* targetOffset;
 		Vector3 resultcameraPos = targetCenter ;
 		
 		//Debug.Log(pitchRotation* Vector3.back );
@@ -184,7 +184,7 @@ public class ThirdPersonCamera : MonoBehaviour
 		// Always look at the target	
 		Vector3 relativePos=(targetCenter + localTargetOffset)-cameraTransform.position;
 
-		cameraTransform.rotation =Quaternion.LookRotation(relativePos);
+		cameraTransform.rotation = pitchRotation;
 		///SetUpRotation(targetCenter+ localTargetOffset, targetHead);
 	}
 	

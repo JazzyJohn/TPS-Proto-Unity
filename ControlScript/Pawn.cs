@@ -18,7 +18,7 @@ public class Pawn : DamagebleObject {
 	public LayerMask wallRunLayers = -1;
 	public LayerMask climbLayers = 1 << 9; // Layer 9
 
-	private BaseWeapon CurWeapon;
+	public BaseWeapon CurWeapon;
 
 	public Transform weaponSlot;
 
@@ -89,6 +89,8 @@ public class Pawn : DamagebleObject {
 
 	public Player player=null;
 
+	public int team;
+
 	// Use this for initialization
 	void Start () {
 		 photonView = GetComponent<PhotonView>();
@@ -113,6 +115,10 @@ public class Pawn : DamagebleObject {
 	
 	public override void Damage(float damage,GameObject killer){
 		if (!PhotonNetwork.isMasterClient){
+			return;
+		}
+		Pawn killerPawn =killer.GetComponent<Pawn> ();
+		if (killerPawn != null && killerPawn.team == team &&! PlayerManager.instance.frendlyFire) {
 			return;
 		}
 		//Debug.Log ("DAMAGE");
@@ -188,6 +194,11 @@ public class Pawn : DamagebleObject {
 				}else{
 					correctPlayerAim = Vector3.Lerp(correctPlayerAim,getAimRotation(CurWeapon.weaponRange), Time.deltaTime*10);
 				}
+				Vector3 eurler = Quaternion.LookRotation(correctPlayerAim-myTransform.position).eulerAngles;
+				eurler.z =0;
+				eurler.x =0;
+				myTransform.rotation=  Quaternion.Slerp(myTransform.rotation,Quaternion.Euler(eurler), Time.deltaTime*10);
+				CurWeapon.curTransform.rotation =  Quaternion.LookRotation(correctPlayerAim-CurWeapon.curTransform.position);
 				/*Quaternion diff = Quaternion.identity;
 				Vector3 target = (correctPlayerAim-CurWeapon.transform.position).normalized;
 				if(!CurWeapon.IsReloading()){
@@ -197,8 +208,8 @@ public class Pawn : DamagebleObject {
 				Debug.DrawLine(CurWeapon.transform.position,correctPlayerAim);
 				Vector3 correctPlayerAimWeapon = diff*target*CurWeapon.weaponRange+CurWeapon.transform.position; 
 				Debug.DrawLine(CurWeapon.transform.position,correctPlayerAimWeapon);*/
-				animator.SetLookAtPosition (correctPlayerAim);
-				animator.SetLookAtWeight(1, 0.5f, 0.7f, 0.0f, 0.5f);
+				//animator.SetLookAtPosition (correctPlayerAim);
+				//animator.SetLookAtWeight(1, 0.5f, 0.7f, 0.0f, 0.5f);
 			}
 			//TODO: TEMP SOLUTION BEFORE NORMAL BONE ORIENTATION
 
@@ -206,6 +217,7 @@ public class Pawn : DamagebleObject {
 		}
 
 	}
+	  
 	//Weapon Section
 	public void StartFire(){
 
@@ -233,10 +245,14 @@ public class Pawn : DamagebleObject {
 				Ray centerRay= maincam.ViewportPointToRay(new Vector3(.5f, 0.5f, 1f));
 				RaycastHit hitInfo;
 				Vector3 targetpoint = Vector3.zero;
-				if (Physics.Raycast (centerRay,out hitInfo, weaponRange)) {
+				if (Physics.Raycast (centerRay,out hitInfo, weaponRange)&&hitInfo.collider!=collider) {
 					targetpoint =hitInfo.point;
 					curLookTarget= hitInfo.transform;
-					//Debug.Log(hitInfo.collider);
+					//Debug.Log((aimRotation-myTransform.position).sqrMagnitude);
+					if((aimRotation-myTransform.position).sqrMagnitude<5){
+						targetpoint =maincam.transform.forward*weaponRange +maincam.ViewportToWorldPoint(new Vector3(.5f, 0.5f, 1f));
+
+					}
 				}else{
 					targetpoint =maincam.transform.forward*weaponRange +maincam.ViewportToWorldPoint(new Vector3(.5f, 0.5f, 1f));
 				}
@@ -473,10 +489,12 @@ public class Pawn : DamagebleObject {
 	}
 	public void Activate(){
 		if(cameraController!=null){
+			_rb.isKinematic = false;
 			cameraController.enabled = true;
 			GetComponent<ThirdPersonController> ().enabled= true;
 			GetComponent<MouseLook>().enabled = true;
 		}
+
 		for (int i =0; i<myTransform.childCount; i++) {
 			myTransform.GetChild(i).gameObject.SetActive(true);
 		}
@@ -496,6 +514,7 @@ public class Pawn : DamagebleObject {
 	}
 	public void DeActivate(){
 		if(cameraController!=null){
+			_rb.isKinematic = true;
 			cameraController.enabled = false;
 			GetComponent<MouseLook>().enabled =false;
 			GetComponent<ThirdPersonController> ().enabled= false;

@@ -83,8 +83,8 @@ public class PlayerMainGui : MonoBehaviour {
 				}
 			
 		}
-		Rect rectforName = new Rect ((screenX-crosshairWidth)/2,0, crosshairWidth*2, crosshairHeight);
-		GUI.Label(rectforName,LocalPlayer.GetName());
+		Rect rectforName = new Rect ((screenX-crosshairWidth)/2,0, crosshairWidth*4, crosshairHeight);
+		GUI.Label(rectforName,LocalPlayer.GetName()+ "Team:" +FormTeamName(LocalPlayer.team));
 		rectforName = new Rect ((screenX-crosshairWidth)/2,crosshairHeight/2, crosshairWidth*2, crosshairHeight);
 		GUI.Label(rectforName,"K/D/A "  +LocalPlayer.Score.Kill+"/"+LocalPlayer.Score.Death+"/"+LocalPlayer.Score.Assist);
 
@@ -96,5 +96,16 @@ public class PlayerMainGui : MonoBehaviour {
 		minutes = Mathf.FloorToInt(input / 60);
 		seconds = Mathf.FloorToInt(input - minutes * 60);
 		return string.Format("{0:0}:{1:00}", minutes, seconds);
+	}
+	public string FormTeamName(int team){
+		switch (team) {
+			case 1:
+			return "A TEAM"	;
+				break;
+		case 2:
+			return"POWER RANGERS";
+				break;
+		}
+		return "";
 	}
 }
