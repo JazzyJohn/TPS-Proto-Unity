@@ -1,6 +1,6 @@
 ﻿using UnityEngine;
 using System.Collections;
-
+using System.Collections.Generic;
 
 
 public class PlayerMainGui : MonoBehaviour {
@@ -12,9 +12,16 @@ public class PlayerMainGui : MonoBehaviour {
 
 	public Player LocalPlayer;
 
+	public Camera MainCamera;
+
+	public float MarkSize;
+
+	public Texture EnemyMark;
+	public Texture AliaMark;
+
 	// Use this for initialization
 	void Start () {
-		
+		MainCamera = Camera.main;
 	}
 	
 	// Update is called once per frame
@@ -81,8 +88,31 @@ public class PlayerMainGui : MonoBehaviour {
 
 					}
 				}
+			List<Pawn> seenablePawn = LocalPlayer.GetCurrentPawn().getAllSeenPawn ();
+			//Debug.Log (seenablePawn);
+			float maxsize =LocalPlayer.GetCurrentPawn().seenDistance;
+			Pawn robot = LocalPlayer.GetRobot ();
+			for (int i=0; i<seenablePawn.Count; i++) {
+				if(robot==seenablePawn[i]){
+					continue;
+				}
+				
+				Pawn  target =seenablePawn[i];
+				Vector3 Position = MainCamera.WorldToScreenPoint(target.myTransform.position+target.headOffset);
+				
+				float size =MarkSize*maxsize/Position.z;
+				
+				Rect mark = new Rect (Position.x-size/2,Screen.height-Position.y,size,size);
+				if(seenablePawn[i].team ==LocalPlayer.team){
+					
+					GUI.Label(mark,AliaMark);
+				}else{
+					GUI.Label(mark,EnemyMark);
+				}
+			}	
 			
 		}
+
 		Rect rectforName = new Rect ((screenX-crosshairWidth)/2,0, crosshairWidth*4, crosshairHeight);
 		GUI.Label(rectforName,LocalPlayer.GetName()+ "Team:" +FormTeamName(LocalPlayer.team));
 		rectforName = new Rect ((screenX-crosshairWidth)/2,crosshairHeight/2, crosshairWidth*2, crosshairHeight);

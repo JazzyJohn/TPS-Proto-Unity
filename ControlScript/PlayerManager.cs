@@ -87,7 +87,9 @@ public class PlayerManager : MonoBehaviour {
 		}
 		return curTeam;
 	}
- 
+	public Pawn[] FindAllPawn(){
+		return GameObject.FindObjectsOfType<Pawn>();
+	}
  
  }
 	

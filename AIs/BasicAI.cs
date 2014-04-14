@@ -1,7 +1,7 @@
 ﻿using UnityEngine;
 using System.Collections;
 
-public class BasicAI : Pawn 
+public class BasicAI : MonoBehaviour 
 {
     public float angleRange = 160;   // угол обзора
     public float rangeDistance = 10; // дальность обзора
@@ -19,7 +19,7 @@ public class BasicAI : Pawn
     {
         target = null;
 
-        foreach (Pawn pawn in PlayerManager.FindAllPawn())
+        foreach (Pawn pawn in PlayerManager.instance.FindAllPawn())
         {
             if (Vector3.Distance(pawn.transform.position, transform.position) < rangeDistance)
             {

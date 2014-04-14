@@ -1,5 +1,6 @@
 ﻿using UnityEngine;
 using System.Collections;
+using System.Collections.Generic;
 
 public enum CharacterState {
 	Idle = 0,
@@ -91,8 +92,19 @@ public class Pawn : DamagebleObject {
 
 	public int team;
 
+	private List<Pawn> seenPawns=new List<Pawn>();
+
+	public float seenDistance;
+
+	private Collider myCollider;
+
+	public Vector3 centerOffset;
+
+	public Vector3 headOffset;
+
 	// Use this for initialization
 	void Start () {
+
 		 photonView = GetComponent<PhotonView>();
 		if (!photonView.isMine) {
 						Destroy (GetComponent<ThirdPersonController> ());
@@ -103,11 +115,15 @@ public class Pawn : DamagebleObject {
 			cameraController=GetComponent<ThirdPersonCamera> ();
 			isAi = cameraController==null;
 		}
+
 		myTransform = transform;
 		correctPlayerPos = transform.position;
-
+		myCollider = collider;
 		_rb  = GetComponent<Rigidbody>();
 		capsule = GetComponent<CapsuleCollider> ();
+		centerOffset = capsule.bounds.center - myTransform.position;
+		headOffset = centerOffset;
+		headOffset.y = capsule.bounds.max.y - myTransform.position.y;
 
 		distToGround = capsule.height/2-capsule.center.y;
 		Debug.Log (distToGround);
@@ -160,13 +176,40 @@ public class Pawn : DamagebleObject {
 	// Update is called once per frame
 	void Update () {
 		//Debug.Log (photonView.isSceneView);
+
 		if (photonView.isMine) {
 						if (isAi) {
 								Quaternion aimRotation = Quaternion.LookRotation (enemy.myTransform.position - myTransform.position);
 								pitchAngle = aimRotation.eulerAngles.x;
 						} else {
 								pitchAngle = -cameraController.yAngle;
+
 						}
+			Pawn[] allPawn =PlayerManager.instance.FindAllPawn();
+			seenPawns.Clear();
+
+			for(int i=0;i<allPawn.Length;i++){
+				if(allPawn[i]==this){
+					continue;
+				}
+				Vector3 distance =(allPawn[i].myTransform.position-myTransform.position); 
+				if(distance.sqrMagnitude<seenDistance){
+					RaycastHit hitInfo;
+					Vector3 normalDist = distance.normalized;
+					Vector3 startpoint = myTransform.position +headOffset;
+
+					if (allPawn[i].team!=team&&Physics.Raycast(startpoint,normalDist,out hitInfo)) {
+
+				
+						if(allPawn[i].myCollider!=hitInfo.collider){
+							continue;
+						}
+					}
+					seenPawns.Add(allPawn[i]);
+				}
+
+			}
+
 		} else {
 
 			myTransform.position = Vector3.Lerp(myTransform.position, correctPlayerPos, Time.deltaTime * 5);
@@ -263,6 +306,12 @@ public class Pawn : DamagebleObject {
 			return aimRotation;
 		}else{
 			return aimRotation;
+		}
+	}
+
+	public void ToggleAim(){
+		if (cameraController != null) {
+			cameraController.ToggleAim();
 		}
 	}
 	//END WEAPON SECTION
@@ -492,7 +541,7 @@ public class Pawn : DamagebleObject {
 			_rb.isKinematic = false;
 			cameraController.enabled = true;
 			GetComponent<ThirdPersonController> ().enabled= true;
-			GetComponent<MouseLook>().enabled = true;
+
 		}
 
 		for (int i =0; i<myTransform.childCount; i++) {
@@ -506,7 +555,7 @@ public class Pawn : DamagebleObject {
 		if(cameraController!=null){
 			cameraController.enabled = true;
 			GetComponent<ThirdPersonController> ().enabled= true;
-			GetComponent<MouseLook>().enabled = true;
+
 		}
 		for (int i =0; i<myTransform.childCount; i++) {
 			myTransform.GetChild(i).gameObject.SetActive(true);
@@ -516,7 +565,7 @@ public class Pawn : DamagebleObject {
 		if(cameraController!=null){
 			_rb.isKinematic = true;
 			cameraController.enabled = false;
-			GetComponent<MouseLook>().enabled =false;
+
 			GetComponent<ThirdPersonController> ().enabled= false;
 		}
 		for (int i =0; i<myTransform.childCount; i++) {
@@ -530,7 +579,7 @@ public class Pawn : DamagebleObject {
 		Debug.Log ("RPCDeActivate");
 		if(cameraController!=null){
 			cameraController.enabled = false;
-			GetComponent<MouseLook>().enabled =false;
+
 			GetComponent<ThirdPersonController> ().enabled= false;
 		}
 		for (int i =0; i<myTransform.childCount; i++) {
@@ -539,4 +588,11 @@ public class Pawn : DamagebleObject {
 
 	}
 	//EndNetworkSection
+
+	//Base Seenn Hear work
+
+	public List<Pawn> getAllSeenPawn(){
+		return seenPawns;
+	}
+	//end seen hear work
 }

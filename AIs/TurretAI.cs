@@ -7,7 +7,7 @@ public class TurretAI : BasicAI
 
     void Start()
     {
-        isAi = true;
+        
     }
 
 	void Update () 
@@ -17,17 +17,15 @@ public class TurretAI : BasicAI
             IsInRange();
         }//*/
 
+
+	    FindTarget();
+	    print(target);
+	    if (target != null)
+	    {
+	        print(target);
+	        weaponModel.LookAt(target.transform);
+	    }
         
-        if (isAi)
-        {
-            FindTarget();
-            print(target);
-            if (target != null)
-            {
-                print(target);
-                weaponModel.LookAt(target.transform);
-            }
-        }
 	}
 
 

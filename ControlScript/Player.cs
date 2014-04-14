@@ -153,7 +153,18 @@ public class Player : MonoBehaviour {
 					}
 
 			}
-			
+			if(Input.GetButtonDown("Fire2")){
+				currentPawn.ToggleAim();
+				if(robotPawn!=null){
+					robotPawn.ToggleAim();
+				}
+			}
+			if(Input.GetButtonUp("Fire2")){
+				currentPawn.ToggleAim();
+				if(robotPawn!=null){
+					robotPawn.ToggleAim();
+				}
+			}
 		}
 	
 	}
@@ -221,7 +232,7 @@ public class Player : MonoBehaviour {
 
 		robotPawn.GetComponent<ThirdPersonController>().enabled = true;
 		robotPawn.GetComponent<ThirdPersonCamera>().enabled = true;
-		robotPawn.GetComponent<MouseLook>().enabled = true;
+
 	}
 	public void ExitBot(){
 		//robotTimer=robotTime;
@@ -230,7 +241,7 @@ public class Player : MonoBehaviour {
 		currentPawn.Activate ();
 		robotPawn.GetComponent<ThirdPersonController>().enabled = false;
 		robotPawn.GetComponent<ThirdPersonCamera>().enabled = false;
-		robotPawn.GetComponent<MouseLook>().enabled = false;
+
 		robotPawn.StopMachine ();
 	}
 	public bool IsDead(){

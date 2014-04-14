@@ -7,6 +7,9 @@ using System.Collections;
 public class ThirdPersonCamera : MonoBehaviour 
 {
 	public Transform cameraTransform;
+
+	private Transform minimapTransform;
+	private Camera minimapCamera;
 	private Transform _target;
 	
 	// The distance in the x-z plane to the target
@@ -30,7 +33,13 @@ public class ThirdPersonCamera : MonoBehaviour
 
 
 
-	public Vector3 targetOffset  = Vector3.zero;
+	private Vector3 targetOffset  = Vector3.zero;
+	public Vector3 normalOffset  = Vector3.zero;
+	public Vector3 aimingOffset  = Vector3.zero;
+
+	public Vector3 minimapOffset  = new Vector3(0.0f,40.0f,0.0f);
+
+	private bool aiming = false;
 
 	public float MaxYAngle=90f;
 	public float MinYAngle=-90f;
@@ -50,12 +59,14 @@ public class ThirdPersonCamera : MonoBehaviour
 		
 		if(!cameraTransform && Camera.main)
 			cameraTransform = Camera.main.transform;
+	
 		if(!cameraTransform) {
 			Debug.Log("Please assign a camera to the ThirdPersonCamera script.");
 			enabled = false;	
 		}
 				
-			
+		minimapTransform = GameObject.FindGameObjectWithTag ("MinimapCamera").GetComponent<Transform> ();
+		minimapCamera = minimapTransform.camera;
 		_target = transform;
 		if (_target)
 		{
@@ -75,7 +86,13 @@ public class ThirdPersonCamera : MonoBehaviour
 		
 		Cut(_target, centerOffset);
 	}
-	
+
+
+	public void ToggleAim(){
+		aiming = !aiming;
+
+	}
+
 	void  DebugDrawStuff (){
 		Debug.DrawLine(_target.position, _target.position + headOffset);
 	
@@ -95,6 +112,15 @@ public class ThirdPersonCamera : MonoBehaviour
 		*/
 		Vector3 targetCenter= _target.position + centerOffset;
 		Vector3 targetHead= _target.position + headOffset;
+
+
+		Vector3 centerPoint=Vector3.zero;
+		centerPoint.z = minimapOffset.y;
+		centerPoint.x = 0.5f;
+		centerPoint.y = 0.5f;
+	
+
+		minimapTransform.position = targetCenter + minimapTransform.position -minimapCamera.ViewportToWorldPoint (centerPoint);
 	
 	//	DebugDrawStuff();
 	
@@ -152,6 +178,12 @@ public class ThirdPersonCamera : MonoBehaviour
 		targetHeight = targetCenter.y + height;
 		// Damp the height
 
+		if (aiming) {
+				targetOffset = aimingOffset;
+		} else {
+			targetOffset = normalOffset;
+
+		}
 	
 		// Convert the angle into a rotation, by which we then reposition the camera
 		Quaternion currentRotation = Quaternion.identity;
