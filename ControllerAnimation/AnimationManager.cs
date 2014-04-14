@@ -19,6 +19,7 @@ public class AnimationManager : MonoBehaviour
     //debug
     private void Update()
     {
+        #region Read and delete this!!!
         directionAxisZ = Input.GetAxis("Vertical");
         directionAxisX = Input.GetAxis("Horizontal");
         float runButton = Input.GetAxis("Run") ;
@@ -39,7 +40,7 @@ public class AnimationManager : MonoBehaviour
         //reset animation
         if (Input.GetKeyDown(KeyCode.Tab))        
             ResetAnimation();
-        
+        #endregion
     }
     /// <summary>
     /// Задает или возвращает значение воспроизведения скорости анимации
