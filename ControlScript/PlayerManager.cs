@@ -88,6 +88,7 @@ public class PlayerManager : MonoBehaviour {
 		return curTeam;
 	}
  
+ 
  }
 	
 
