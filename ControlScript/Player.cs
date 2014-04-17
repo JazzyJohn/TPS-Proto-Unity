@@ -8,7 +8,7 @@ public class Player : MonoBehaviour {
 	
 	public float respawnTime = 10.0f;
 	
-	public float robotTime = 10.0f;
+	public float robotTime = 2.0f;
 
 	public bool isStarted = false;
 
@@ -67,7 +67,7 @@ public class Player : MonoBehaviour {
 			PlayerName = "Player" + PhotonNetwork.playerList.Length;
 			Application.ExternalCall( "SayMyName");
 			photonView.RPC("ASKTeam",PhotonTargets.MasterClient);
-
+			//StatisticHandler.StartStats(UID,PlayerName);
 		}
 	}
 	[RPC]
@@ -137,22 +137,23 @@ public class Player : MonoBehaviour {
 					}
 				}
 			}
-			if(Physics.Raycast(centerofScreen, out hitinfo,3.0f)){
+
 				if(inBot){
 					if(Input.GetButtonDown("Use")){
 						ExitBot();
 					}
 					
-				}else 
-					if(!inBot&&robotPawn!=null){
-						if(hitinfo.collider.gameObject==robotPawn.gameObject){
-							if(Input.GetButtonDown("Use")){
-								EnterBot();
+				}else {
+					
+						if(!inBot&&robotPawn!=null){
+							if(currentPawn.curLookTarget.gameObject==robotPawn.gameObject){
+								if(Input.GetButtonDown("Use")){
+									EnterBot();
+								}
 							}
 						}
-					}
 
-			}
+				}
 			if(Input.GetButtonDown("Fire2")){
 				currentPawn.ToggleAim();
 				if(robotPawn!=null){
@@ -232,6 +233,7 @@ public class Player : MonoBehaviour {
 
 		robotPawn.GetComponent<ThirdPersonController>().enabled = true;
 		robotPawn.GetComponent<ThirdPersonCamera>().enabled = true;
+		robotPawn.GetComponent<ThirdPersonCamera>().Reset ();
 
 	}
 	public void ExitBot(){
@@ -279,12 +281,17 @@ public class Player : MonoBehaviour {
 	public void  SetName(String newname)
 	{
 		PlayerName = newname;
-
+		if (UID != 0) {
+			StatisticHandler.StartStats(UID,PlayerName);
+		}
 	}
 	public void  SetUid(int uid)
 	{
 
 		UID = uid;
+		if (PlayerName != "") {
+			StatisticHandler.StartStats(UID,PlayerName);
+		}
 	}
 
 	

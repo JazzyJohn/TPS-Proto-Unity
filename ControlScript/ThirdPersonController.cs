@@ -196,10 +196,16 @@ void  UpdateSmoothedMovementDirection ()
 		
 		
 		// Pick speed modifier
-		if (Input.GetKey (KeyCode.LeftShift) || Input.GetKey (KeyCode.RightShift))
+		//Debug.Log (!Input.GetKey (KeyCode.LeftShift) &&! Input.GetKey (KeyCode.RightShift));
+		if (!Input.GetKey (KeyCode.LeftShift) &&! Input.GetKey (KeyCode.RightShift))
 		{
 			targetSpeed *= pawn.groundRunSpeed;
-			characterState = CharacterState.Running;
+		
+				if(isMoving){
+					characterState = CharacterState.Running;
+				}else{
+					characterState = CharacterState.Idle;
+				}
 		}
 		else if (Time.time - trotAfterSeconds > walkTimeStart)
 		{
@@ -268,8 +274,28 @@ public void DidJump ()
 	}
 	jumping = true;
 }
+	void Update ()
+	{
+		
+		if (Input.GetButtonDown ("Fire1")) {
+			
+			pawn.StartFire();
+		}
+		if (Input.GetButtonUp ("Fire1")) {
+			
+			pawn.StopFire();
+		}
+		float wheel =Input.GetAxis ("Mouse ScrollWheel");
+		
+		if (wheel < 0) {
+			pawn.GetComponent<InventoryManager>().PrevWeapon();
+		}
+		if(wheel>0){
+			pawn.GetComponent<InventoryManager>().NextWeapon();
+		}
 
-void Update ()
+}
+void FixedUpdate ()
 {
 	moveDirection = Vector3.zero;
 	if (!isControllable)
@@ -284,23 +310,7 @@ void Update ()
 
 
 	}
-
-	if (Input.GetButtonDown ("Fire1")) {
-
-			pawn.StartFire();
-	}
-	if (Input.GetButtonUp ("Fire1")) {
-		
-			pawn.StopFire();
-	}
-	float wheel =Input.GetAxis ("Mouse ScrollWheel");
-
-	if (wheel < 0) {
-			pawn.GetComponent<InventoryManager>().PrevWeapon();
-	}
-	if(wheel>0){
-			pawn.GetComponent<InventoryManager>().NextWeapon();
-	}
+	
 	UpdateSmoothedMovementDirection();
 	
 	
@@ -322,11 +332,7 @@ void Update ()
 			}
 	}
 
-	
-	
-
-	
-		// ANIMATION sector
+	// ANIMATION sector
 	
 	
 

@@ -211,12 +211,21 @@ public class ThirdPersonCamera : MonoBehaviour
 		localCamOffset += localTargetOffset;
 		//localCamOffset =  localCamOffset;
 		resultcameraPos +=localCamOffset;
-		cameraTransform.position = resultcameraPos;
+		Vector3 direction =  (cameraTransform.position - resultcameraPos);
+		Ray wallRay = new Ray (targetCenter, direction.normalized);
+		RaycastHit hit;
+		if (Physics.Raycast (wallRay, out hit, direction.magnitude)) {
+			Debug.Log(hit.collider);
+				cameraTransform.position = 	hit.point;
+		} else {
+
+				cameraTransform.position = resultcameraPos;
+		}
 		
 		// Always look at the target	
 		Vector3 relativePos=(targetCenter + localTargetOffset)-cameraTransform.position;
 
-		cameraTransform.rotation = pitchRotation;
+		cameraTransform.rotation = Quaternion.LookRotation(relativePos.normalized);
 		///SetUpRotation(targetCenter+ localTargetOffset, targetHead);
 	}
 	
@@ -240,7 +249,11 @@ public class ThirdPersonCamera : MonoBehaviour
 		snapMaxSpeed = oldSnapMaxSpeed;
 		snapSmoothLag = oldSnapSmooth;
 	}
-	
+	public void Reset (){
+		yAngle = 0;
+
+		xAngle = 0;
+	}
 	void  SetUpRotation ( Vector3 centerPos ,   Vector3 headPos  ){
 		// Now it's getting hairy. The devil is in the details here, the big issue is jumping of course.
 		// * When jumping up and down we don't want to center the guy in screen space.

@@ -7,8 +7,9 @@ public class AnimationManager : MonoBehaviour
         directionAxisZ,
         directionAxisX;
 
-    private Animator animator;
+    public Animator animator;
 
+	public Rigidbody rb;
     private void Start()
     {
         animator = GetComponent<Animator>();
@@ -20,7 +21,7 @@ public class AnimationManager : MonoBehaviour
     private void Update()
     {
         #region Read and delete this!!!
-        directionAxisZ = Input.GetAxis("Vertical");
+       /* directionAxisZ = Input.GetAxis("Vertical");
         directionAxisX = Input.GetAxis("Horizontal");
         float runButton = Input.GetAxis("Run") ;
 
@@ -39,7 +40,7 @@ public class AnimationManager : MonoBehaviour
 
         //reset animation
         if (Input.GetKeyDown(KeyCode.Tab))        
-            ResetAnimation();
+            ResetAnimation();*/
         #endregion
     }
     /// <summary>
@@ -62,14 +63,14 @@ public class AnimationManager : MonoBehaviour
     /// </summary>
     /// <param name="directionAxisX">Анимация влево/вправо</param>
     /// <param name="directionAxisZ">Анимация вперед/назад</param>
-    public void ApllyMotion(float directionAxisX, float directionAxisZ)
+    public void ApllyMotion(float Speed, float direction)
     {
         //so... this line makes advanced idle
         //axis return 0f when it not pressed
-        animator.SetBool("Idle", (directionAxisX == 0f && directionAxisZ == 0f) ? true : false);
-
-        animator.SetFloat("Direction_Z", directionAxisZ);
-        animator.SetFloat("Direction_X", directionAxisX);
+        //animator.SetBool("Idle", (directionAxisX == 0f && directionAxisZ == 0f) ? true : false);
+		//Debug.Log (directionAxisZ);
+		animator.SetFloat("Speed", Speed);
+		animator.SetFloat("Direction", direction);
     }
     /// <summary>
     /// Служит для определения выбора одно из вариантов позы смерти.
@@ -99,8 +100,21 @@ public class AnimationManager : MonoBehaviour
     /// </summary>
     /// <param name="jump"></param>
     public void ApllyJump(bool jump)
-    {
-        animator.SetBool("Jump", jump);
+    {	
+		if (animator.layerCount >= 2) {
+						AnimatorStateInfo state = animator.GetCurrentAnimatorStateInfo (3);
+						if (!jump) {
+								animator.SetBool ("Jump", false);
+								animator.SetBool ("Grounded", true);
+								animator.SetBool ("StandUp", true);
+						} 
+						if (jump) {
+								animator.SetBool ("StandUp", false);
+								animator.SetBool ("Jump", true);
+								animator.SetBool ("Grounded", false);
+						}
+				}
+				
     }
     /// <summary>
     /// Reset all animation to default
@@ -112,4 +126,17 @@ public class AnimationManager : MonoBehaviour
         animator.SetBool("Jump", false);
         animator.Play("Motion");
     }
+	/// <summary>
+	/// Wall run animation
+	/// </summary>
+	public void WallAnimation(bool leftW,bool rightW,bool frontW)
+	{
+		
+		animator.SetBool("WallRunL", leftW);
+		
+		animator.SetBool("WallRunR", rightW);
+		
+		animator.SetBool("WallRunUp", frontW);
+	}
+
 }
