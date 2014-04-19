@@ -21,8 +21,6 @@ public class BaseWeapon : DestroyableNetworkObject {
 
 	public int clipSize;
 
-	public bool vsArmor;
-
 	public float damageAmount;
 
 	public float aimRandCoef;
@@ -33,8 +31,6 @@ public class BaseWeapon : DestroyableNetworkObject {
 
 	public Transform muzzlePoint;
 
-	public Transform leftHandHolder;
-
 	public Vector3 	muzzleOffset;
 
 	public float weaponRange;
@@ -43,7 +39,7 @@ public class BaseWeapon : DestroyableNetworkObject {
 
 	private Pawn owner;
 
-	public Transform curTransform;
+	private Transform curTransform;
 
 	private bool isReload = false;
 
@@ -53,17 +49,19 @@ public class BaseWeapon : DestroyableNetworkObject {
 	
 	private float reloadTimer =  0.0f;
 
+	private RifleParticleController rifleParticleController;
 
 	// Use this for initialization
 	void Start () {
 		curTransform = transform;
 		photonView = GetComponent<PhotonView>();
+		rifleParticleController = GetComponentInChildren<RifleParticleController>();
 		if (transform.parent == null) {
 
 		}
 	}
 
-	public void AttachWeapon(Transform weaponSlot,Vector3 Offset, Quaternion weaponRotator,Pawn inowner){
+	public void AttachWeapon(Transform weaponSlot,Vector3 Offset, Pawn inowner){
 		if (curTransform == null) {
 			curTransform = transform;		
 		}
@@ -73,8 +71,7 @@ public class BaseWeapon : DestroyableNetworkObject {
 		owner = inowner;
 		curTransform.parent = weaponSlot;
 		curTransform.localPosition = Offset;
-		Debug.Log (name + weaponRotator);
-		curTransform.localRotation = weaponRotator;
+		curTransform.localRotation = Quaternion.identity;
 		if (photonView.isMine) {
 			photonView.RPC("AttachWeaponRep",PhotonTargets.OthersBuffered,inowner.photonView.viewID);
 		}
@@ -134,9 +131,6 @@ public class BaseWeapon : DestroyableNetworkObject {
 		isReload = false;
 		curAmmo =owner.GetComponent<InventoryManager>().GiveAmmo(ammoType,clipSize);	
 	}
-	public bool IsReloading(){
-		return isReload;
-	}
 	void Fire(){
 		if(curAmmo>0){
 			curAmmo--;
@@ -149,7 +143,7 @@ public class BaseWeapon : DestroyableNetworkObject {
 			DoSimpleDamage();
 			break;
 		case AMUNITONTYPE.PROJECTILE:
-			
+			rifleParticleController.CreateShootFlame();
 			GenerateProjectile();
 			break;
 		case AMUNITONTYPE.RAY:
@@ -174,8 +168,8 @@ public class BaseWeapon : DestroyableNetworkObject {
 	void GenerateProjectile(){
 		Vector3 startPoint  = muzzlePoint.position+muzzleOffset;
 		Quaternion startRotation = getAimRotation();
+		startRotation = Quaternion.Euler (startRotation.eulerAngles + new Vector3(Random.Range(-1 * aimRandCoef, 1 * aimRandCoef), Random.Range(-1 * aimRandCoef, 1 * aimRandCoef), Random.Range(-1 * aimRandCoef, 1 * aimRandCoef)));
 		GameObject proj;
-
 		proj=Instantiate(projectilePrefab,startPoint,startRotation) as GameObject;
 		if (photonView.isMine) {
 			photonView.RPC("GenerateProjectileRep",PhotonTargets.Others,startPoint,startRotation);
@@ -192,12 +186,7 @@ public class BaseWeapon : DestroyableNetworkObject {
 		projScript.owner = owner.gameObject;
 	}
 	Quaternion getAimRotation(){
-		Vector3 randVec = Random.onUnitSphere;
-		Vector3 normalDirection  = owner.getAimRotation(weaponRange)-muzzlePoint.position;
-		normalDirection =normalDirection + randVec.normalized * normalDirection.magnitude * aimRandCoef / 100;
-		return Quaternion.LookRotation(normalDirection);
-		
-
+		return Quaternion.LookRotation((owner.getAimRotation(weaponRange)-muzzlePoint.position));
 	}
 	
 	public void OnPhotonSerializeView(PhotonStream stream, PhotonMessageInfo info)
