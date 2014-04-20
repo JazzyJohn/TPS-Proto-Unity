@@ -138,6 +138,9 @@ public class BaseWeapon : DestroyableNetworkObject {
 			ReloadStart();
 			return;
 		}
+		if (rifleParticleController != null) {
+			rifleParticleController.CreateShootFlame ();
+		}
 		switch (amunitionType) {
 		case AMUNITONTYPE.SIMPLEHIT:
 			DoSimpleDamage();
@@ -150,6 +153,13 @@ public class BaseWeapon : DestroyableNetworkObject {
 			
 			break;
 			
+		}
+		photonView.RPC("FireEffect",PhotonTargets.Others);
+	}
+	[RPC]
+	void FireEffect(){
+		if (rifleParticleController != null) {
+			rifleParticleController.CreateShootFlame ();
 		}
 	}
 

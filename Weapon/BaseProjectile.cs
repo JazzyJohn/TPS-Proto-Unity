@@ -18,7 +18,11 @@ public class BaseProjectile : UseObject {
 		mTransform = transform;
 		mRigidBody = rigidbody;
 		mRigidBody.velocity = mTransform.TransformDirection(Vector3.forward * startImpulse);
+<<<<<<< HEAD
 
+=======
+		
+>>>>>>> 673c6e61ae2e4a8d4079aa31bfc23245ce8ee645
 		RaycastHit hit;
 		
 		if (Physics.Raycast (transform.position, mRigidBody.velocity.normalized, out hit)){
@@ -35,7 +39,11 @@ public class BaseProjectile : UseObject {
 		RaycastHit hit;
 		
 		if (Physics.Raycast (transform.position, mRigidBody.velocity.normalized, out hit)){
+<<<<<<< HEAD
 
+=======
+			
+>>>>>>> 673c6e61ae2e4a8d4079aa31bfc23245ce8ee645
 			if (hit.distance < mTransform.InverseTransformDirection (mRigidBody.velocity).z * 0.1f)
 			{
 				onBulletHit(hit);
