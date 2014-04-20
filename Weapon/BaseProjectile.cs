@@ -43,7 +43,7 @@ public class BaseProjectile : UseObject {
 		}
 	}
 	
-	void onBulletHit(RaycastHit hit)
+	public virtual  void onBulletHit(RaycastHit hit)
 	{
 		if (owner == hit.transform.gameObject) {
 			return;

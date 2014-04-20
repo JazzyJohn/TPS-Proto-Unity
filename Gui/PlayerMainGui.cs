@@ -19,6 +19,15 @@ public class PlayerMainGui : MonoBehaviour {
 	public Texture EnemyMark;
 	public Texture AliaMark;
 
+	public class PlayerStats{
+		public float robotTime;
+		public float health;
+		public float ammoInGun;
+		public float ammoInGunMax;
+		public float ammoInBag;
+			
+	}
+
 	// Use this for initialization
 	void Start () {
 		MainCamera = Camera.main;
@@ -54,8 +63,9 @@ public class PlayerMainGui : MonoBehaviour {
 			
 			GUI.Label(crosrect, crosshair);
 			crosrect = new Rect (screenX-crosshairWidth,0, crosshairWidth, crosshairHeight);
+			PlayerStats localstats  =LocalPlayer.GetPlayerStats();
 			if(!LocalPlayer.inBot){
-				float timer =LocalPlayer.GetRobotTimer();
+				float timer =localstats.robotTime; 
 
 				if(timer==0){
 					GUI.Label(crosrect,"PRES F TO SPAMN ROBOT");
@@ -110,7 +120,14 @@ public class PlayerMainGui : MonoBehaviour {
 					GUI.Label(mark,EnemyMark);
 				}
 			}	
-			
+
+			Rect statsRect = new Rect (screenX-crosshairWidth*4,Screen.height -crosshairHeight*3, crosshairWidth*4, crosshairHeight);
+			GUI.Label(statsRect,"Health: "+localstats.health);
+			statsRect = new Rect (screenX-crosshairWidth*4,Screen.height -crosshairHeight*2, crosshairWidth*4, crosshairHeight);
+			GUI.Label(statsRect,"Ammo: "+localstats.ammoInGun+"/"+localstats.ammoInGunMax);
+			statsRect = new Rect (screenX-crosshairWidth*4,Screen.height -crosshairHeight, crosshairWidth*4, crosshairHeight);
+			GUI.Label(statsRect,"Ammo in Bag: "+localstats.ammoInBag);
+
 		}
 
 		Rect rectforName = new Rect ((screenX-crosshairWidth)/2,0, crosshairWidth*4, crosshairHeight);

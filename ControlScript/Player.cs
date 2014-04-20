@@ -78,10 +78,13 @@ public class Player : MonoBehaviour {
 	}
 	[RPC]
 	public void SetTeam(int intTeam){
+		Debug.Log ("setTeam" + intTeam);
 		team = intTeam;
 	}
 	void Update(){
-		
+		if (!photonView.isMine) {
+			return;
+		}
 		isDead =currentPawn==null||currentPawn.isDead;
 		
 		if(isDead){
@@ -251,6 +254,26 @@ public class Player : MonoBehaviour {
 		return isDead;
 
 	}
+	public PlayerMainGui.PlayerStats GetPlayerStats(){
+		PlayerMainGui.PlayerStats stats = new PlayerMainGui.PlayerStats ();
+		stats.robotTime = GetRobotTimer();
+		Pawn curPawn = null;
+		if (inBot) {
+			curPawn = robotPawn;
+		} else {
+
+			curPawn= currentPawn;
+
+		}
+		stats.health = curPawn.health;
+		stats.ammoInGun = curPawn.CurWeapon.curAmmo;
+		stats.ammoInGunMax = curPawn.CurWeapon.clipSize;
+		stats.ammoInBag = curPawn.GetAmmoInBag ();
+		
+		return stats;
+
+	}
+
 	public float GetRobotTimer(){
 		if (robotTimer < 0) {
 			return 0;

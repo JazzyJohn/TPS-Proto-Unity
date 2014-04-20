@@ -110,9 +110,14 @@ public class Pawn : DamagebleObject {
 
 	public static float gravity = 10.0f;
 
+	public InventoryManager ivnMan;
+
+	public bool isAiming=false;
+
+	public float aimModCoef = -10.0f;
 	// Use this for initialization
 	void Start () {
-
+		maxHealth = health;
 		 photonView = GetComponent<PhotonView>();
 		if (!photonView.isMine) {
 						Destroy (GetComponent<ThirdPersonController> ());
@@ -123,7 +128,7 @@ public class Pawn : DamagebleObject {
 			cameraController=GetComponent<ThirdPersonCamera> ();
 			isAi = cameraController==null;
 		}
-
+		ivnMan =GetComponent<InventoryManager> ();
 		myTransform = transform;
 		correctPlayerPos = transform.position;
 		myCollider = collider;
@@ -149,6 +154,13 @@ public class Pawn : DamagebleObject {
 		base.Damage(damage,killer);
 	}
 
+	public void Heal(float damage,GameObject Healler){
+		health += damage;
+		if (maxHealth < health) {
+			health=maxHealth;		
+		}
+
+	}
 
 	public override void KillIt(GameObject killer){
 		if (isDead) {
@@ -325,7 +337,9 @@ public class Pawn : DamagebleObject {
 				//	Debug.Log((targetpoint-myTransform.position).sqrMagnitude.ToString()+(cameraController.normalOffset.magnitude+5));
 					if((targetpoint-myTransform.position).sqrMagnitude<cameraController.normalOffset.magnitude+5){
 						targetpoint =maincam.transform.forward*weaponRange +maincam.ViewportToWorldPoint(new Vector3(.5f, 0.5f, 1f));
-
+						animator.WeaponDown(true);
+					}else{
+						animator.WeaponDown(false);
 					}
 				}else{
 					targetpoint =maincam.transform.forward*weaponRange +maincam.ViewportToWorldPoint(new Vector3(.5f, 0.5f, 1f));
@@ -340,10 +354,23 @@ public class Pawn : DamagebleObject {
 		}
 	}
 
+	public float AimingCoef(){
+		if (isAiming) {
+			return aimModCoef;		
+		}
+		return 0.0f;
+	}
+
 	public void ToggleAim(){
+		isAiming = !isAiming;
 		if (cameraController != null) {
 			cameraController.ToggleAim();
 		}
+	}
+
+	public int 	GetAmmoInBag (){
+		return ivnMan.GetAmmo (CurWeapon.ammoType);
+
 	}
 	//END WEAPON SECTION
 	void OnCollisionEnter(Collision collision) {

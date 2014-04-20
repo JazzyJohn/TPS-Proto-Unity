@@ -83,6 +83,14 @@ public class InventoryManager : MonoBehaviour {
 		}
 		return false;
 	}
+	public int GetAmmo(AMMOTYPE ammo){
+		for(int i=0;i<allAmmo.Length;i++){
+			if(allAmmo[i].type ==ammo){
+				return allAmmo[i].amount;
+			}
+		}
+		return 0;
+	}
 	public int GiveAmmo(AMMOTYPE ammo,int amount){
 		for(int i=0;i<allAmmo.Length;i++){
 			if(allAmmo[i].type ==ammo){

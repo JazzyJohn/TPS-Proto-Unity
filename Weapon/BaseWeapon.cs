@@ -5,7 +5,7 @@ using System.Collections;
 
 public class BaseWeapon : DestroyableNetworkObject {
 
-	public enum AMUNITONTYPE{SIMPLEHIT, PROJECTILE, RAY};
+	public enum AMUNITONTYPE{SIMPLEHIT, PROJECTILE, RAY, HTHWEAPON};
 
 	public AMUNITONTYPE amunitionType;
 	
@@ -41,7 +41,7 @@ public class BaseWeapon : DestroyableNetworkObject {
 
 	public int curAmmo;
 
-	private Pawn owner;
+	protected Pawn owner;
 
 	public Transform curTransform;
 
@@ -54,6 +54,8 @@ public class BaseWeapon : DestroyableNetworkObject {
 	private float reloadTimer =  0.0f;
 
 	private RifleParticleController rifleParticleController;
+
+	public string attackAnim;
 
 	// Use this for initialization
 	void Start () {
@@ -118,7 +120,7 @@ public class BaseWeapon : DestroyableNetworkObject {
 	}
 	public void StopFire(){
 		isShooting = false;
-		
+		ReleaseFire ();
 	}
 	
 	public void ReloadStart(){
@@ -143,8 +145,10 @@ public class BaseWeapon : DestroyableNetworkObject {
 		if(curAmmo>0){
 			curAmmo--;
 		}else{
-			ReloadStart();
-			return;
+			if(clipSize>0){
+				ReloadStart();
+				return;
+			}
 		}
 		if (rifleParticleController != null) {
 			rifleParticleController.CreateShootFlame ();
@@ -160,9 +164,24 @@ public class BaseWeapon : DestroyableNetworkObject {
 		case AMUNITONTYPE.RAY:
 			
 			break;
+		case AMUNITONTYPE.HTHWEAPON:
+			owner.animator.StartAttackAnim(attackAnim);
+			ChangeWeaponStatus(true);
+			break;
 			
 		}
 		photonView.RPC("FireEffect",PhotonTargets.Others);
+	}
+
+	void ReleaseFire(){
+		switch (amunitionType) {
+
+		case AMUNITONTYPE.HTHWEAPON:
+			owner.animator.StopAttackAnim(attackAnim);
+			ChangeWeaponStatus(false);
+			break;
+			
+		}
 	}
 	[RPC]
 	void FireEffect(){
@@ -170,7 +189,10 @@ public class BaseWeapon : DestroyableNetworkObject {
 			rifleParticleController.CreateShootFlame ();
 		}
 	}
+	public virtual void ChangeWeaponStatus(bool status){
 
+
+	}
 	void DoSimpleDamage(){
 		Camera maincam = Camera.main;
 		Ray centerRay= maincam.ViewportPointToRay(new Vector3(.5f, 0.5f, 1f));
@@ -187,7 +209,10 @@ public class BaseWeapon : DestroyableNetworkObject {
 		Vector3 startPoint  = muzzlePoint.position+muzzleOffset;
 		Quaternion startRotation = getAimRotation();
 		GameObject proj;
-
+		float effAimRandCoef = aimRandCoef + owner.AimingCoef ();
+		if (effAimRandCoef > 0) {
+			startRotation = Quaternion.Euler (startRotation.eulerAngles + new Vector3 (Random.Range (-1 * effAimRandCoef, 1 * effAimRandCoef), Random.Range (-1 * effAimRandCoef, 1 * effAimRandCoef), Random.Range (-1 * effAimRandCoef, 1 * effAimRandCoef)));
+		}
 		proj=Instantiate(projectilePrefab,startPoint,startRotation) as GameObject;
 		if (photonView.isMine) {
 			photonView.RPC("GenerateProjectileRep",PhotonTargets.Others,startPoint,startRotation);
@@ -204,10 +229,11 @@ public class BaseWeapon : DestroyableNetworkObject {
 		projScript.owner = owner.gameObject;
 	}
 	Quaternion getAimRotation(){
-		Vector3 randVec = Random.onUnitSphere;
+		/*Vector3 randVec = Random.onUnitSphere;
 		Vector3 normalDirection  = owner.getAimRotation(weaponRange)-muzzlePoint.position;
-		normalDirection =normalDirection + randVec.normalized * normalDirection.magnitude * aimRandCoef / 100;
-		return Quaternion.LookRotation(normalDirection);
+		normalDirection =normalDirection + randVec.normalized * normalDirection.magnitude * aimRandCoef / 100;*/
+
+		return Quaternion.LookRotation(owner.getAimRotation(weaponRange) -muzzlePoint.position);
 		
 
 	}

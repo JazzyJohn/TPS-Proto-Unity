@@ -101,7 +101,7 @@ public class AnimationManager : MonoBehaviour
     /// <param name="jump"></param>
     public void ApllyJump(bool jump)
     {	
-		if (animator.layerCount >= 2) {
+		if (animator.layerCount >= 4) {
 						AnimatorStateInfo state = animator.GetCurrentAnimatorStateInfo (3);
 						if (!jump) {
 								animator.SetBool ("Jump", false);
@@ -140,6 +140,18 @@ public class AnimationManager : MonoBehaviour
 		animator.SetBool("WallRunR", rightW);
 		
 		animator.SetBool("WallRunUp", frontW);
+	}
+	public void WeaponDown(bool value){
+		animator.SetBool("wall_stop", value);	
+	}
+	public void StartAttackAnim(string name){
+		//Debug.Log (name);
+		animator.SetBool(name, true);	
+
+	}
+	public void StopAttackAnim(string name){
+		animator.SetBool(name, false);	
+		
 	}
 
 }
