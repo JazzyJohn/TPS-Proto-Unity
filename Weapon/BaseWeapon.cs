@@ -53,11 +53,13 @@ public class BaseWeapon : DestroyableNetworkObject {
 	
 	private float reloadTimer =  0.0f;
 
+	private RifleParticleController rifleParticleController;
 
 	// Use this for initialization
 	void Start () {
 		curTransform = transform;
 		photonView = GetComponent<PhotonView>();
+		rifleParticleController = GetComponentInChildren<RifleParticleController>();
 		if (transform.parent == null) {
 
 		}
@@ -144,6 +146,9 @@ public class BaseWeapon : DestroyableNetworkObject {
 			ReloadStart();
 			return;
 		}
+		if (rifleParticleController != null) {
+			rifleParticleController.CreateShootFlame ();
+		}
 		switch (amunitionType) {
 		case AMUNITONTYPE.SIMPLEHIT:
 			DoSimpleDamage();
@@ -156,6 +161,13 @@ public class BaseWeapon : DestroyableNetworkObject {
 			
 			break;
 			
+		}
+		photonView.RPC("FireEffect",PhotonTargets.Others);
+	}
+	[RPC]
+	void FireEffect(){
+		if (rifleParticleController != null) {
+			rifleParticleController.CreateShootFlame ();
 		}
 	}
 

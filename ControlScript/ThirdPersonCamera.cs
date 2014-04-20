@@ -214,13 +214,13 @@ public class ThirdPersonCamera : MonoBehaviour
 		Vector3 direction =  (cameraTransform.position - resultcameraPos);
 		Ray wallRay = new Ray (targetCenter, direction.normalized);
 		RaycastHit hit;
-		if (Physics.Raycast (wallRay, out hit, direction.magnitude)) {
+	/*	if (Physics.Raycast (wallRay, out hit, direction.magnitude)) {
 			Debug.Log(hit.collider);
 				cameraTransform.position = 	hit.point;
 		} else {
-
+*/
 				cameraTransform.position = resultcameraPos;
-		}
+		//}
 		
 		// Always look at the target	
 		Vector3 relativePos=(targetCenter + localTargetOffset)-cameraTransform.position;

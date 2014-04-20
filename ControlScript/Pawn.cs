@@ -29,8 +29,6 @@ public class Pawn : DamagebleObject {
 
 	private Quaternion correctPlayerRot = Quaternion.identity; //We lerp towards this
 
-	private Vector3 correctPlayerAim = Vector3.zero; //We lerp towards this
-
 	public Vector3 weaponOffset;
 
 	public Vector3 weaponRotatorOffset;
@@ -45,6 +43,10 @@ public class Pawn : DamagebleObject {
 	//rEplication Section
 
 	private CharacterState characterState;
+
+	private CharacterState nextState;
+
+	private Vector3 nextMovement;
 
 	public ThirdPersonCamera cameraController;
 
@@ -202,10 +204,10 @@ public class Pawn : DamagebleObject {
 				if(distance.sqrMagnitude<seenDistance){
 					RaycastHit hitInfo;
 					Vector3 normalDist = distance.normalized;
-					Vector3 startpoint = myTransform.position +headOffset;
-
+					Vector3 startpoint = myTransform.position +normalDist*capsule.radius;
+					//Debug.DrawLine(startpoint,normalDist*100+startpoint);
 					if (allPawn[i].team!=team&&Physics.Raycast(startpoint,normalDist,out hitInfo)) {
-
+						//Debug.Log(hitInfo.collider);
 				
 						if(allPawn[i].myCollider!=hitInfo.collider){
 							continue;
@@ -216,10 +218,50 @@ public class Pawn : DamagebleObject {
 
 			}
 
+			if(CurWeapon!=null){
+				//if(aimRotation.sqrMagnitude==0){
+				getAimRotation(CurWeapon.weaponRange);
+				/*}else{
+					aimRotation = Vector3.Lerp(aimRotation,getAimRotation(CurWeapon.weaponRange), Time.deltaTime*10);
+				}*/
+				Vector3 eurler = Quaternion.LookRotation(aimRotation-myTransform.position).eulerAngles;
+				eurler.z =0;
+				eurler.x =0;
+				myTransform.rotation= Quaternion.Euler(eurler);
+				//CurWeapon.curTransform.rotation =  Quaternion.LookRotation(aimRotation-CurWeapon.curTransform.position);
+				/*Quaternion diff = Quaternion.identity;
+				Vector3 target = (aimRotation-CurWeapon.transform.position).normalized;
+				if(!CurWeapon.IsReloading()){
+					diff= Quaternion.FromToRotation(CurWeapon.transform.forward,target);
+				}
+
+				Debug.DrawLine(CurWeapon.transform.position,aimRotation);
+				Vector3 aimRotationWeapon = diff*target*CurWeapon.weaponRange+CurWeapon.transform.position; 
+				Debug.DrawLine(CurWeapon.transform.position,aimRotationWeapon);*/
+
+			}else{
+				//if(aimRotation.sqrMagnitude==0){
+					getAimRotation(50);
+				/*}else{
+					aimRotation = Vector3.Lerp(aimRotation,getAimRotation(50), Time.deltaTime*10);
+				}*/
+				Vector3 eurler = Quaternion.LookRotation(aimRotation-myTransform.position).eulerAngles;
+				eurler.z =0;
+				eurler.x =0;
+				myTransform.rotation= Quaternion.Euler(eurler);
+				
+
+				
+			}
+			//TODO: TEMP SOLUTION BEFORE NORMAL BONE ORIENTATION
+			
+			//animator.SetFloat("Pitch",pitchAngle);
+
 		} else {
 
 			myTransform.position = Vector3.Lerp(myTransform.position, correctPlayerPos, Time.deltaTime * 5);
 			myTransform.rotation = Quaternion.Lerp(myTransform.rotation, correctPlayerRot, Time.deltaTime * 5);
+
 		}
 		if (animator != null&&animator.gameObject.activeSelf) {
 			if(characterState == CharacterState.Idle) {
@@ -238,46 +280,9 @@ public class Pawn : DamagebleObject {
 				}
 			}
 
-			if(CurWeapon!=null){
-				if(correctPlayerAim.sqrMagnitude==0){
-					correctPlayerAim= getAimRotation(CurWeapon.weaponRange);
-				}else{
-					correctPlayerAim = Vector3.Lerp(correctPlayerAim,getAimRotation(CurWeapon.weaponRange), Time.deltaTime*10);
-				}
-				Vector3 eurler = Quaternion.LookRotation(correctPlayerAim-myTransform.position).eulerAngles;
-				eurler.z =0;
-				eurler.x =0;
-				myTransform.rotation=  Quaternion.Lerp(myTransform.rotation,Quaternion.Euler(eurler), Time.deltaTime*10);
-				//CurWeapon.curTransform.rotation =  Quaternion.LookRotation(correctPlayerAim-CurWeapon.curTransform.position);
-				/*Quaternion diff = Quaternion.identity;
-				Vector3 target = (correctPlayerAim-CurWeapon.transform.position).normalized;
-				if(!CurWeapon.IsReloading()){
-					diff= Quaternion.FromToRotation(CurWeapon.transform.forward,target);
-				}
+			animator.animator.SetLookAtPosition (aimRotation);
+			animator.animator.SetLookAtWeight(1, 0.5f, 0.7f, 0.0f, 0.5f);
 
-				Debug.DrawLine(CurWeapon.transform.position,correctPlayerAim);
-				Vector3 correctPlayerAimWeapon = diff*target*CurWeapon.weaponRange+CurWeapon.transform.position; 
-				Debug.DrawLine(CurWeapon.transform.position,correctPlayerAimWeapon);*/
-				animator.animator.SetLookAtPosition (correctPlayerAim);
-				animator.animator.SetLookAtWeight(1, 0.5f, 0.7f, 0.0f, 0.5f);
-			}else{
-				if(correctPlayerAim.sqrMagnitude==0){
-					correctPlayerAim= getAimRotation(50);
-				}else{
-					correctPlayerAim = Vector3.Lerp(correctPlayerAim,getAimRotation(50), Time.deltaTime*10);
-				}
-				Vector3 eurler = Quaternion.LookRotation(correctPlayerAim-myTransform.position).eulerAngles;
-				eurler.z =0;
-				eurler.x =0;
-				myTransform.rotation=  Quaternion.Lerp(myTransform.rotation,Quaternion.Euler(eurler), Time.deltaTime*10);
-
-				animator.animator.SetLookAtPosition (correctPlayerAim);
-				animator.animator.SetLookAtWeight(1, 0.5f, 0.7f, 0.0f, 0.5f);
-
-			}
-			//TODO: TEMP SOLUTION BEFORE NORMAL BONE ORIENTATION
-
-			//animator.SetFloat("Pitch",pitchAngle);
 		}
 
 	}
@@ -305,6 +310,10 @@ public class Pawn : DamagebleObject {
 			if(isAi){
 				aimRotation = enemy.myTransform.position;
 			}else{
+				if(cameraController.enabled ==false){
+					aimRotation= myTransform.position +myTransform.forward*50;
+					return aimRotation;
+				}
 				Camera maincam = Camera.main;
 				Ray centerRay= maincam.ViewportPointToRay(new Vector3(.5f, 0.5f, 1f));
 				RaycastHit hitInfo;
@@ -312,8 +321,9 @@ public class Pawn : DamagebleObject {
 				if (Physics.Raycast (centerRay,out hitInfo, weaponRange)&&hitInfo.collider!=collider) {
 					targetpoint =hitInfo.point;
 					curLookTarget= hitInfo.transform;
-					//Debug.Log((aimRotation-myTransform.position).sqrMagnitude);
-					if((aimRotation-myTransform.position).sqrMagnitude<5){
+					//Debug.Log (curLookTarget);
+				//	Debug.Log((targetpoint-myTransform.position).sqrMagnitude.ToString()+(cameraController.normalOffset.magnitude+5));
+					if((targetpoint-myTransform.position).sqrMagnitude<cameraController.normalOffset.magnitude+5){
 						targetpoint =maincam.transform.forward*weaponRange +maincam.ViewportToWorldPoint(new Vector3(.5f, 0.5f, 1f));
 
 					}
@@ -353,50 +363,11 @@ public class Pawn : DamagebleObject {
 	//Movement section
 	public bool Movement(Vector3 movement,CharacterState state){
 		//Debug.Log (characterState);
+		nextState = state;
+		nextMovement  = movement;
 
-		bool lIsGrounded = IsGrounded ();
-//		Debug.Log (lIsGrounded);
-		if (lIsGrounded) {
-			if (_rb.isKinematic) _rb.isKinematic= false;
-			Vector3 velocity = rigidbody.velocity;
-			Vector3 velocityChange = (movement - velocity);
 
-			rigidbody.AddForce(velocityChange, ForceMode.VelocityChange);
-
-			characterState = state;
-			animator.ApllyJump(false);
-		} else {
-			animator.ApllyJump(true);
-			v = movement.normalized.magnitude;
-		
-			switch(state)
-			{
-				case CharacterState.DoubleJump:
-					if(characterState!=CharacterState.WallRunning
-				   	&&characterState!=CharacterState.PullingUp){
-						Vector3 velocity = rigidbody.velocity;
-						Vector3 velocityChange = (movement - velocity);
-						Debug.Log("DOUBLE JUMP");
-						rigidbody.AddForce(velocityChange, ForceMode.VelocityChange);
-						characterState = state;
-					}
-				break;
-				default:
-					lIsGrounded =WallRun (movement,state);
-					if(!lIsGrounded){
-						animator.WallAnimation(false,false,false);
-					}
-					if(PullUpCheck()){
-						isGrounded= false;
-						PullUp();
-					}
-				break;
-			}
-
-		}
-		//Debug.Log(_rb.isKinematic);
-
-		return lIsGrounded;
+		return isGrounded;
 	}
 
 	bool WallRun (Vector3 movement,CharacterState state)
@@ -476,7 +447,7 @@ public class Pawn : DamagebleObject {
 	IEnumerator WallRunCoolDown (float sec)
 	{
 		canWallRun = true;
-		yield return new WaitForSeconds (sec/4);
+		yield return new WaitForSeconds (sec);
 		canWallRun = false;
 		characterState = CharacterState.Jumping;
 		yield return new WaitForSeconds (sec);
@@ -485,6 +456,8 @@ public class Pawn : DamagebleObject {
 	// Wall run cool-down
 	IEnumerator WallJump (float sec)
 	{
+
+		Debug.Log ("WALLJUMP");
 		canWallRun = false;
 		characterState = CharacterState.Jumping;
 		yield return new WaitForSeconds (sec);
@@ -493,31 +466,76 @@ public class Pawn : DamagebleObject {
 
 	void OnCollisionStay(Collision collisionInfo) {
 	    contacts = collisionInfo.contacts;
-
-
-
-	}
-	public void FixedUpdate () {
-		isGrounded = false;
 		if (contacts != null) {
-				foreach (ContactPoint contact in contacts) {
-						Vector3 Direction = contact.point - myTransform.position;
-						//Debug.Log (this.ToString()+Vector3.Dot(Direction.normalized ,Vector3.down) );
-						if (Vector3.Dot (Direction.normalized, Vector3.down) > 0.75) {
-								isGrounded = true;
-						}
-						///Debug.DrawRay(contact.point, contact.normal, Color.white);
+			foreach (ContactPoint contact in contacts) {
+				/*if(contact.otherCollider.CompareTag("decoration")){
+					continue;
+				}*/
+				Vector3 Direction = contact.point - myTransform.position;
+				//Debug.Log (this.ToString()+Vector3.Dot(Direction.normalized ,Vector3.down) );
+				if (Vector3.Dot (Direction.normalized, Vector3.down) > 0.75) {
+					isGrounded = true;
 				}
+				///Debug.DrawRay(contact.point, contact.normal, Color.white);
+			}
 			contacts= null;	
 		}
 
 
+	}
+	public void FixedUpdate () {
+
+	
+
+
+		//		Debug.Log (lIsGrounded);
+		if (isGrounded) {
+			if (_rb.isKinematic) _rb.isKinematic= false;
+			Vector3 velocity = rigidbody.velocity;
+			Vector3 velocityChange = (nextMovement - velocity);
+			
+			rigidbody.AddForce(velocityChange, ForceMode.VelocityChange);
+			
+			characterState = nextState;
+			animator.ApllyJump(false);
+		} else {
+			
+			v = nextMovement.normalized.magnitude;
+			
+			switch(nextState)
+			{
+			case CharacterState.DoubleJump:
+				if(characterState!=CharacterState.WallRunning
+				   &&characterState!=CharacterState.PullingUp){
+					Vector3 velocity = rigidbody.velocity;
+					Vector3 velocityChange = (nextMovement - velocity);
+					Debug.Log("DOUBLE JUMP");
+					
+					rigidbody.AddForce(velocityChange, ForceMode.VelocityChange);
+					characterState = nextState;
+				}
+				break;
+			default:
+				isGrounded =WallRun (nextMovement,nextState);
+				if(!isGrounded){
+					animator.ApllyJump(true);						
+					animator.WallAnimation(false,false,false);
+				}
+				if(PullUpCheck()){
+					isGrounded= false;
+					PullUp();
+				}
+				break;
+			}
+			
+		}
+		//Debug.Log(_rb.isKinematic);
 
 		if (!_rb.isKinematic) {
 			
 			_rb.AddForce(new Vector3(0,-gravity * rigidbody.mass,0));
 		}	
-
+		isGrounded = false;
 	}
 	public bool IsGrounded ()
 	{	
@@ -586,6 +604,8 @@ public class Pawn : DamagebleObject {
 			stream.SendNext(aimRotation);
 			stream.SendNext(characterState);
 			stream.SendNext(health);
+
+
 		}
 		else
 		{
@@ -596,14 +616,15 @@ public class Pawn : DamagebleObject {
 			this.aimRotation = (Vector3) stream.ReceiveNext();
 			characterState = (CharacterState) stream.ReceiveNext();
 			health=(float) stream.ReceiveNext();
+
 		}
 	}
 	public void Activate(){
 		if(cameraController!=null){
 			_rb.isKinematic = false;
 			cameraController.enabled = true;
-			GetComponent<ThirdPersonController> ().Reset ();
-
+			cameraController.Reset();
+			GetComponent<ThirdPersonController> ().enabled= true;
 		}
 
 		for (int i =0; i<myTransform.childCount; i++) {
@@ -656,5 +677,7 @@ public class Pawn : DamagebleObject {
 	public List<Pawn> getAllSeenPawn(){
 		return seenPawns;
 	}
+
+
 	//end seen hear work
 }

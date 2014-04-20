@@ -65,15 +65,16 @@ public class Player : MonoBehaviour {
 		
 			this.name = "Player";		
 			PlayerName = "Player" + PhotonNetwork.playerList.Length;
-			Application.ExternalCall( "SayMyName");
 			photonView.RPC("ASKTeam",PhotonTargets.MasterClient);
+			Application.ExternalCall( "SayMyName");
+		
 			//StatisticHandler.StartStats(UID,PlayerName);
 		}
 	}
 	[RPC]
 	public void ASKTeam(){
 
-		photonView.RPC("SetTeam",PhotonTargets.All,PlayerManager.instance.NextTeam());
+		photonView.RPC("SetTeam",PhotonTargets.AllBuffered,PlayerManager.instance.NextTeam());
 	}
 	[RPC]
 	public void SetTeam(int intTeam){
@@ -269,13 +270,14 @@ public class Player : MonoBehaviour {
 		{
 			// We own this player: send the others our data
 			stream.SendNext(PlayerName);
+			stream.SendNext(UID);
 
 		}
 		else
 		{
 			// Network player, receive data
 			PlayerName= (String) stream.ReceiveNext();
-		
+			UID= (int) stream.ReceiveNext();
 		}
 	}
 	public void  SetName(String newname)
@@ -316,8 +318,9 @@ public class Player : MonoBehaviour {
 	public void RPCAfterSpawnSetting(int viewid,int type){
 	
 		PawnType pType = (PawnType)type;
+		Debug.Log (viewid);
 		Pawn pawn =PhotonView.Find (viewid).GetComponent<Pawn>();
-
+	
 		pawn.player = this;
 		pawn.team = this.team;
 		switch (pType) {

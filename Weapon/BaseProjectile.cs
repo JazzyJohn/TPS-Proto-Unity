@@ -1,74 +1,82 @@
 ﻿using UnityEngine;
 using System.Collections;
+
 //We don't want to our projectile fly infinite time
 [RequireComponent (typeof (DelayDestroyedObject))]
 public class BaseProjectile : UseObject {
-
+	
 	public float damage;
-
-	public bool isDone;
-
-	public float speed = 100.0f;
-	
+	public float startImpulse;
 	public GameObject owner;
-	
-	public GameObject Explode;
-	
+	public GameObject hitParticle;
 	public int splashRadius;
-
+	
 	private Transform mTransform;
-	// Use this for initialization
+	private Rigidbody mRigidBody;
+	
 	void Start () {
 		mTransform = transform;
+		mRigidBody = rigidbody;
+		mRigidBody.velocity = mTransform.TransformDirection(Vector3.forward * startImpulse);
 		
+		RaycastHit hit;
+		
+		if (Physics.Raycast (transform.position, mRigidBody.velocity.normalized, out hit)){
+			
+			if (hit.distance < mTransform.InverseTransformDirection (mRigidBody.velocity).z * 0.1f)
+			{
+				onBulletHit(hit);
+			}
+		}
 	}
 	
-	// Update is called once per frame
-
-	void FixedUpdate() {
-		Vector3 distance = mTransform.forward * Time.fixedDeltaTime * speed;
-		rigidbody.MovePosition(rigidbody.position + distance);
+	void Update() {
+		
+		RaycastHit hit;
+		
+		if (Physics.Raycast (transform.position, mRigidBody.velocity.normalized, out hit)){
+			
+			if (hit.distance < mTransform.InverseTransformDirection (mRigidBody.velocity).z * 0.1f)
+			{
+				onBulletHit(hit);
+			}
+		}
 	}
-	void OnCollisionEnter(Collision collision) {
-		//Debug.Log ("COLLISION ENTER PROJ "+ this + collision);
-	}
-	void OnTriggerEnter	(Collider other) {
-		if (owner == other.gameObject) {
+	
+	void onBulletHit(RaycastHit hit)
+	{
+		if (owner == hit.transform.gameObject) {
 			return;
 		}
-		if (isDone) {
-			return;		
+		if (hit.transform.gameObject.CompareTag ("decoration")) {
+			Debug.Log ("HADISH INTO " + hit.transform.gameObject.name);
+			if(hitParticle!=null){
+				Instantiate(hitParticle, hit.point, Quaternion.LookRotation(hit.normal));
+			}
+			Destroy (gameObject, 0.1f);
 		}
-		isDone = true;
-		//Debug.Log ("Trigger ENTER PROJ "+ this +  other);
-
-
-		DamagebleObject obj =other.GetComponent <DamagebleObject>();
+		DamagebleObject obj = hit.transform.gameObject.GetComponent <DamagebleObject>();
 		if (obj != null) {
 			obj.Damage(damage,owner);
-			//Destroy (gameObject);
+			Debug.Log ("HADISH INTO SOME PLAYER! " + hit.transform.gameObject.name);
+			Destroy (gameObject, 0.1f);
 		}
-		Destroy (gameObject);
-		             
 	}
+	
 	void OnDestroy() {
 		if(splashRadius>0){
-			 ExplosionDamage();		
+			ExplosionDamage();		
 		}
-		if(Explode!=null){
-			Instantiate(Explode,transform.position,transform.rotation);
-		}
-        
-    }
+	}
 	
 	void ExplosionDamage() {
-        Collider[] hitColliders = Physics.OverlapSphere(transform.position, splashRadius);
-       
-        for(int i=0;i < hitColliders.Length;i++) {
+		Collider[] hitColliders = Physics.OverlapSphere(transform.position, splashRadius);
+		
+		for(int i=0;i < hitColliders.Length;i++) {
 			DamagebleObject obj = hitColliders[i].GetComponent <DamagebleObject>();
 			if (obj != null) {
 				obj.Damage(damage,owner);
 			}
-        }
-    }
+		}
+	}
 }
