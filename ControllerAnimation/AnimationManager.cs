@@ -107,8 +107,7 @@ public class AnimationManager : MonoBehaviour
 								animator.SetBool ("Jump", false);
 								animator.SetBool ("Grounded", true);
 								animator.SetBool ("StandUp", true);
-						} 
-						if (jump) {
+						}else{
 								animator.SetBool ("StandUp", false);
 								animator.SetBool ("Jump", true);
 								animator.SetBool ("Grounded", false);
@@ -116,6 +115,9 @@ public class AnimationManager : MonoBehaviour
 				}
 				
     }
+	public bool GetJump(){
+		return animator.GetBool("Jump");
+	} 
     /// <summary>
     /// Reset all animation to default
     /// </summary>

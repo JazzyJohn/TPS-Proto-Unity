@@ -12,6 +12,11 @@ public enum CharacterState {
 	PullingUp=6,
 	DoubleJump= 7
 }
+public enum WallState{
+	WallL,
+	WallR,
+	WallF
+}
 
 public class Pawn : DamagebleObject {
 
@@ -44,6 +49,8 @@ public class Pawn : DamagebleObject {
 	public AnimationManager animator;
 
 	private CharacterState characterState;
+
+	private WallState wallState;
 
 	private CharacterState nextState;
 
@@ -101,7 +108,28 @@ public class Pawn : DamagebleObject {
 
 	private Collider myCollider;
 
-	private bool isGrounded;
+	private bool _isGrounded;
+
+	private bool netIsGround;
+
+	public bool isGrounded
+	{
+		
+		get {
+			return _isGrounded;
+		}
+
+		
+		set {
+			if(_isGrounded!=value&& value){
+				SendMessage ("DidLand", SendMessageOptions.DontRequireReceiver);
+
+			}
+			_isGrounded = value;
+
+		}
+		
+	}
 
 	private ContactPoint[] contacts;
 
@@ -109,7 +137,7 @@ public class Pawn : DamagebleObject {
 
 	public Vector3 headOffset;
 
-	public static float gravity = 10.0f;
+	public static float gravity = 20.0f;
 
 	public InventoryManager ivnMan;
 
@@ -241,7 +269,9 @@ public class Pawn : DamagebleObject {
 				eurler.z =0;
 				eurler.x =0;
 				if(characterState == CharacterState.WallRunning){
-					myTransform.rotation= Quaternion.LookRotation(forwardRotation);
+					if(forwardRotation.sqrMagnitude>0){
+						myTransform.rotation= Quaternion.LookRotation(forwardRotation);
+					}
 				}else{
 					myTransform.rotation= Quaternion.Euler(eurler);
 				}
@@ -266,7 +296,9 @@ public class Pawn : DamagebleObject {
 				eurler.z =0;
 				eurler.x =0;
 				if(characterState == CharacterState.WallRunning){
-					myTransform.rotation= Quaternion.LookRotation(forwardRotation);
+					if(forwardRotation.sqrMagnitude>0){
+						myTransform.rotation= Quaternion.LookRotation(forwardRotation);
+					}
 				}else{
 					myTransform.rotation= Quaternion.Euler(eurler);
 				}
@@ -298,6 +330,21 @@ public class Pawn : DamagebleObject {
 				}
 				else if(characterState == CharacterState.Walking) {
 					animator.ApllyMotion(1.0f,0.0f);	
+				}
+				else if( characterState ==CharacterState.WallRunning){
+					//Debug.Log ("INSWITCH");
+					switch(wallState){
+						case WallState.WallF:
+						animator.WallAnimation(false,false,true);
+						 	break;
+						case WallState.WallR:
+							animator.WallAnimation(false,true,false);
+							break;
+						case WallState.WallL:
+							animator.WallAnimation(true,false,false);
+							break;
+					}
+
 				}
 			}
 
@@ -397,31 +444,55 @@ public class Pawn : DamagebleObject {
 		
 
 	//Movement section
-	public bool Movement(Vector3 movement,CharacterState state){
-		//Debug.Log (characterState);
+	public void Movement(Vector3 movement,CharacterState state){
+		//Debug.Log (state);
+
 		nextState = state;
+
 		nextMovement  = movement;
 
 
-		return isGrounded;
+
 	}
 
 	bool WallRun (Vector3 movement,CharacterState state)
 	{
-		if (!canWallRun) return false;
+		if (!canWallRun&&photonView.isMine) return false;
+
+		//if (isGrounded) return false;
 		
-		if(v < 0.2f) return false;
+		if(v < 0.2f&&photonView.isMine) return false;
 	
+		//Debug.Log (movement);
 		RaycastHit leftH,rightH,frontH;
 		
 		
 		bool leftW = Physics.Raycast (myTransform.position + myTransform.up,
-		                              myTransform.right * -1 + myTransform.forward/4, capsule.radius + 0.2f,leftH,wallRunLayers);
+		                              myTransform.right * -1 ,out leftH, capsule.radius + 0.2f,wallRunLayers);
 		bool rightW = Physics.Raycast (myTransform.position + myTransform.up,
-		                               myTransform.right + myTransform.forward/4, capsule.radius + 0.2f,rightH, wallRunLayers);
+		                               myTransform.right ,out rightH, capsule.radius + 0.2f, wallRunLayers);
 		bool frontW = Physics.Raycast (myTransform.position+ myTransform.up,
-		                               myTransform.forward, capsule.radius + 0.2f,frontH, wallRunLayers);
-		Vector3 tangVect;
+		                               myTransform.forward,out frontH, capsule.radius + 0.2f, wallRunLayers);
+
+		/*Debug.DrawRay (myTransform.position + myTransform.up,
+		               myTransform.right * -1 );
+		
+		Debug.DrawRay (myTransform.position + myTransform.up,
+		               myTransform.right );
+		
+		Debug.DrawRay (myTransform.position+ myTransform.up,
+		               myTransform.forward);*/
+		if (!photonView.isMine) {
+			if( leftW||rightW||frontW){
+					characterState = CharacterState.WallRunning;
+				return true;
+			}else
+				return false;
+			     
+		}
+
+
+		Vector3 tangVect = Vector3.zero;
 		
 		if(!animator.animator.IsInTransition(0) && !_rb.isKinematic)
 		{
@@ -429,11 +500,12 @@ public class Pawn : DamagebleObject {
 			{
 				
 				
-				tangVect = Vector3.Cross(forntL.normal,Vector3.up);
-				tangVect = Vector3.Project(movement,tangVect);
-				_rb.velocity = tangVect*wallRunSpeed + myTransform.up*3;
+				tangVect = Vector3.Cross(leftH.normal,Vector3.up);
+				//tangVect = Vector3.Project(movement,tangVect).normalized;
+				_rb.velocity = tangVect*wallRunSpeed + myTransform.up*wallRunSpeed/3;
 				if(!(characterState == CharacterState.WallRunning))
 				{
+					wallState =WallState.WallL;
 					characterState = CharacterState.WallRunning;
 					//animator.SetBool("WallRunL", true);
 					StartCoroutine( WallRunCoolDown(3f)); // Exclude if not needed
@@ -441,7 +513,7 @@ public class Pawn : DamagebleObject {
 				
 				if(state == CharacterState.Jumping)
 				{
-					_rb.velocity = myTransform.up*movement.y  +myTransform.right*movement.y;
+					_rb.velocity = myTransform.up*movement.y  +leftH.normal*movement.y;
 					StartCoroutine( WallJump(1f)); // Exclude if not needed
 				}
 			}
@@ -449,18 +521,19 @@ public class Pawn : DamagebleObject {
 			else if(rightW)
 			{
 				
-				tangVect = Vector3.Cross(forntR.normal,Vector3.up);
-				tangVect = Vector3.Project(movement,tangVect);
-				_rb.velocity = tangVect*wallRunSpeed + myTransform.up*3;
+				tangVect = -Vector3.Cross(rightH.normal,Vector3.up);
+				//tangVect = Vector3.Project(movement,tangVect).normalized;
+				_rb.velocity = tangVect*wallRunSpeed + myTransform.up*wallRunSpeed/3;
 				if(!(characterState == CharacterState.WallRunning))
 				{
+					wallState =WallState.WallR;
 					characterState = CharacterState.WallRunning;
 					StartCoroutine( WallRunCoolDown(3f)); // Exclude if not needed
 				}
 				
 				if(state == CharacterState.Jumping)
 				{
-					_rb.velocity = myTransform.up*movement.y  +myTransform.right*movement.y;
+					_rb.velocity = myTransform.up*movement.y  +rightH.normal*movement.y;
 					StartCoroutine( WallJump(1f)); // Exclude if not needed
 				}
 			}
@@ -468,9 +541,10 @@ public class Pawn : DamagebleObject {
 			else if(frontW)
 			{
 				_rb.velocity = myTransform.up*wallRunSpeed/1.5f;
-				forwardRotation = forntH.normal*-1;
+				tangVect = frontH.normal*-1;
 				if(!(characterState == CharacterState.WallRunning))
 				{
+					wallState =WallState.WallF;
 					characterState = CharacterState.WallRunning;
 					StartCoroutine( WallRunCoolDown(3f)); // Exclude if not needed
 				}
@@ -481,9 +555,10 @@ public class Pawn : DamagebleObject {
 					StartCoroutine( WallJump(1f)); // Exclude if not needed
 				}
 			}
-			
-			forwardRotation  = myTransform.position + tangVect*5;
-			animator.WallAnimation(leftW,rightW,frontW);
+
+			forwardRotation  =  tangVect*5;
+			//Debug.DrawLine(myTransform.position,forwardRotation);
+			//animator.WallAnimation(leftW,rightW,frontW);
 			
 
 			return leftW||rightW||frontW;
@@ -504,8 +579,8 @@ public class Pawn : DamagebleObject {
 	// Wall run cool-down
 	IEnumerator WallJump (float sec)
 	{
-
-		Debug.Log ("WALLJUMP");
+		Jump ();
+		//Debug.Log ("WALLJUMP");
 		canWallRun = false;
 		characterState = CharacterState.Jumping;
 		yield return new WaitForSeconds (sec);
@@ -533,19 +608,22 @@ public class Pawn : DamagebleObject {
 	}
 	public void FixedUpdate () {
 
-	
 
 
-		//		Debug.Log (lIsGrounded);
 		if (isGrounded) {
-			if (_rb.isKinematic) _rb.isKinematic= false;
-			Vector3 velocity = rigidbody.velocity;
-			Vector3 velocityChange = (nextMovement - velocity);
+			if (photonView.isMine) {
+				if (_rb.isKinematic) _rb.isKinematic= false;
+				Vector3 velocity = rigidbody.velocity;
+				Vector3 velocityChange = (nextMovement - velocity);
 			
-			rigidbody.AddForce(velocityChange, ForceMode.VelocityChange);
-			
+				rigidbody.AddForce(velocityChange, ForceMode.VelocityChange);
+			}
 			characterState = nextState;
-			animator.ApllyJump(false);
+			if(nextState==CharacterState.Jumping){
+				Jump ();
+
+			}
+
 		} else {
 			
 			v = nextMovement.normalized.magnitude;
@@ -555,22 +633,28 @@ public class Pawn : DamagebleObject {
 			case CharacterState.DoubleJump:
 				if(characterState!=CharacterState.WallRunning
 				   &&characterState!=CharacterState.PullingUp){
-					Vector3 velocity = rigidbody.velocity;
-					Vector3 velocityChange = (nextMovement - velocity);
-					Debug.Log("DOUBLE JUMP");
-					
-					rigidbody.AddForce(velocityChange, ForceMode.VelocityChange);
+					if (photonView.isMine) {
+						Vector3 velocity = rigidbody.velocity;
+						Vector3 velocityChange = (nextMovement - velocity);
+						//Debug.Log("DOUBLE JUMP");
+						
+						rigidbody.AddForce(velocityChange, ForceMode.VelocityChange);
+					}
 					characterState = nextState;
 				}
 				break;
 			default:
-				isGrounded =WallRun (nextMovement,nextState);
-				if(!isGrounded){
+
+				if(!WallRun (nextMovement,nextState)){
 					animator.ApllyJump(true);						
 					animator.WallAnimation(false,false,false);
+					
+					//Debug.Log ("My Name" +this +"  "+nextState+"  "+isGrounded);
+				}else{
+					SendMessage ("WallLand", SendMessageOptions.DontRequireReceiver);
 				}
 				if(PullUpCheck()){
-					isGrounded= false;
+
 					PullUp();
 				}
 				break;
@@ -583,14 +667,25 @@ public class Pawn : DamagebleObject {
 			
 			_rb.AddForce(new Vector3(0,-gravity * rigidbody.mass,0));
 		}	
-		isGrounded = false;
+		netIsGround = isGrounded;
+		if (photonView.isMine) {
+						isGrounded = false;
+		}
 	}
 	public bool IsGrounded ()
 	{	
 
 		return isGrounded;
 	}
+	public void Jump(){
+		animator.ApllyJump(true);		
+		//photonView.RPC("JumpChange",PhotonTargets.OthersBuffered,true);
+	}
 
+	public void DidLand(){
+		animator.ApllyJump(false);
+		//photonView.RPC("JumpChange",PhotonTargets.OthersBuffered,false);
+	}
 
 	bool PullUpCheck(){
 		if (characterState == CharacterState.PullingUp) {
@@ -652,7 +747,9 @@ public class Pawn : DamagebleObject {
 			stream.SendNext(aimRotation);
 			stream.SendNext(characterState);
 			stream.SendNext(health);
-
+			stream.SendNext(wallState);
+			stream.SendNext(netIsGround);
+			//stream.SendNext(animator.GetJump());
 
 		}
 		else
@@ -662,9 +759,13 @@ public class Pawn : DamagebleObject {
 			correctPlayerPos = newPosition;
 			correctPlayerRot = (Quaternion) stream.ReceiveNext();
 			this.aimRotation = (Vector3) stream.ReceiveNext();
-			characterState = (CharacterState) stream.ReceiveNext();
+			nextState = (CharacterState) stream.ReceiveNext();
+			//Debug.Log (characterState);
 			health=(float) stream.ReceiveNext();
-
+			wallState = (WallState) stream.ReceiveNext();
+			isGrounded =(bool) stream.ReceiveNext();
+			//animator.ApllyJump((bool)stream.ReceiveNext());
+			//Debug.Log (wallState);
 		}
 	}
 	public void Activate(){

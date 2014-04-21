@@ -49,7 +49,7 @@ public float trotAfterSeconds= 3.0f;
 public bool canJump= true;
 
 private float jumpRepeatTime= 0.05f;
-private float jumpTimeout= 0.15f;
+private float jumpTimeout= 0.05f;
 private float groundedTimeout= 0.25f;
 
 // The camera doesnt start following the target immediately but waits for a split second to avoid too much waving around.
@@ -236,13 +236,17 @@ void  UpdateSmoothedMovementDirection ()
 
 void  ApplyJumping (){
 	// Prevent jumping too fast after each other
-	if (lastJumpTime + jumpRepeatTime > Time.time)
-		return;
+		if (lastJumpTime + jumpRepeatTime > Time.time) {
+			//Debug.Log("timeOutReturn"+lastJumpTime+jumpRepeatTime +Time.time);
+			return;
+		}
 
 		// Jump
 		// - Only when pressing the button down
 		// - With a timeout so you can press the button slightly before landing		
-		if (canJump && Time.time < lastJumpButtonTime + jumpTimeout) {
+
+		if (canJump && Time.time <= lastJumpButtonTime + jumpTimeout) {
+			//Debug.Log(lastJumpButtonTime+jumpTimeout);
 			verticalSpeed = CalculateJumpVerticalSpeed (pawn.jumpHeight);
 			SendMessage("DidJump", SendMessageOptions.DontRequireReceiver);
 		}else{
@@ -256,27 +260,39 @@ public float CalculateJumpVerticalSpeed ( float targetJumpHeight  )
 {
 	// From the jump height and gravity we deduce the upwards speed 
 	// for the character to reach at the apex.
-	return Mathf.Sqrt(2 * targetJumpHeight * Physics.gravity.magnitude);
+	return Mathf.Sqrt(2 * targetJumpHeight * Pawn.gravity);
 }
 
-public void DidJump ()
-{
-	
-	jumpingReachedApex = false;
-	lastJumpTime = Time.time;
-	lastJumpStartHeight = transform.position.y;
-	lastJumpButtonTime = -10;
-	if (jumping == true && !doubleJump) {
-			doubleJump= true;
-			characterState = CharacterState.DoubleJump;
-	} else {
-			characterState = CharacterState.Jumping;	
+	public void DidJump ()
+	{
+		///Debug.Log ("DidJump");
+		jumpingReachedApex = false;
+		lastJumpTime = Time.time;
+
+		lastJumpStartHeight = transform.position.y;
+		lastJumpButtonTime = -10;
+		if (jumping == true && !doubleJump) {
+				doubleJump= true;
+				characterState = CharacterState.DoubleJump;
+		} else {
+				characterState = CharacterState.Jumping;	
+		}
+		jumping = true;
 	}
-	jumping = true;
-}
 	void Update ()
 	{
+		if (!isControllable)
+		{
+			// kill all inputs if not controllable.
+			Input.ResetInputAxes();
+		}
 		
+		if (Input.GetButtonDown ("Jump"))
+		{
+			lastJumpButtonTime = Time.time;
+			
+			
+		}
 		if (Input.GetButtonDown ("Fire1")) {
 			
 			pawn.StartFire();
@@ -298,39 +314,23 @@ public void DidJump ()
 void FixedUpdate ()
 {
 	moveDirection = Vector3.zero;
-	if (!isControllable)
-	{
-		// kill all inputs if not controllable.
-		Input.ResetInputAxes();
-	}
-
-	if (Input.GetButtonDown ("Jump"))
-	{
-		lastJumpButtonTime = Time.time;
-
-
-	}
+	
 	
 	UpdateSmoothedMovementDirection();
 	
 	
 	// Apply jumping logic
 	ApplyJumping ();
-	
+		//Debug.Log (jumping.ToString()+doubleJump);
 	// Calculate actual motion
 	Vector3 movement= moveDirection * moveSpeed + new Vector3 (0, verticalSpeed, 0) + inAirVelocity;
 	
 
-	if (pawn.Movement (movement, characterState)) {
-			lastGroundedTime = 0;
-			inAirVelocity = Vector3.zero;
-			if (jumping)
-			{
-				doubleJump=false;
-				jumping = false;
-				SendMessage("DidLand", SendMessageOptions.DontRequireReceiver);
-			}
-	}
+		pawn.Movement (movement, characterState);
+
+
+			
+	
 
 	// ANIMATION sector
 	
@@ -339,8 +339,33 @@ void FixedUpdate ()
 
 	
 }
+public void DidLand(){
+	//if(lastGroundedTime
+	if(	lastJumpTime +jumpRepeatTime>=	 Time.time){
+			return;
+	}
+	lastGroundedTime = 0;
+	inAirVelocity = Vector3.zero;
+	if (jumping) {
+			doubleJump = false;
+			jumping = false;
+			//
+	}
+}
 
-
+public void WallLand(){
+		//if(lastGroundedTime
+		if(	lastJumpTime +jumpRepeatTime>=	 Time.time){
+			return;
+		}
+		lastGroundedTime = 0;
+		inAirVelocity = Vector3.zero;
+		if (jumping) {
+			doubleJump = false;
+			jumping = false;
+			//
+		}
+	}
 
 public float GetSpeed ()
 {
