@@ -38,9 +38,10 @@ public class Pawn : DamagebleObject {
 	public string publicName;
 
 	private Vector3 aimRotation;
+	//rotation for moment when rotation of camera and pawn can be different e.t.c wall run	
+	private Vector3 forwardRotation;
 
 	public AnimationManager animator;
-	//rEplication Section
 
 	private CharacterState characterState;
 
@@ -239,7 +240,11 @@ public class Pawn : DamagebleObject {
 				Vector3 eurler = Quaternion.LookRotation(aimRotation-myTransform.position).eulerAngles;
 				eurler.z =0;
 				eurler.x =0;
-				myTransform.rotation= Quaternion.Euler(eurler);
+				if(characterState == CharacterState.WallRunning){
+					myTransform.rotation= Quaternion.LookRotation(forwardRotation);
+				}else{
+					myTransform.rotation= Quaternion.Euler(eurler);
+				}
 				//CurWeapon.curTransform.rotation =  Quaternion.LookRotation(aimRotation-CurWeapon.curTransform.position);
 				/*Quaternion diff = Quaternion.identity;
 				Vector3 target = (aimRotation-CurWeapon.transform.position).normalized;
@@ -260,7 +265,11 @@ public class Pawn : DamagebleObject {
 				Vector3 eurler = Quaternion.LookRotation(aimRotation-myTransform.position).eulerAngles;
 				eurler.z =0;
 				eurler.x =0;
-				myTransform.rotation= Quaternion.Euler(eurler);
+				if(characterState == CharacterState.WallRunning){
+					myTransform.rotation= Quaternion.LookRotation(forwardRotation);
+				}else{
+					myTransform.rotation= Quaternion.Euler(eurler);
+				}
 				
 
 				
@@ -402,20 +411,27 @@ public class Pawn : DamagebleObject {
 		if (!canWallRun) return false;
 		
 		if(v < 0.2f) return false;
+	
+		RaycastHit leftH,rightH,frontH;
+		
 		
 		bool leftW = Physics.Raycast (myTransform.position + myTransform.up,
-		                              myTransform.right * -1 + myTransform.forward/4, capsule.radius + 0.2f, wallRunLayers);
+		                              myTransform.right * -1 + myTransform.forward/4, capsule.radius + 0.2f,leftH,wallRunLayers);
 		bool rightW = Physics.Raycast (myTransform.position + myTransform.up,
-		                               myTransform.right + myTransform.forward/4, capsule.radius + 0.2f, wallRunLayers);
+		                               myTransform.right + myTransform.forward/4, capsule.radius + 0.2f,rightH, wallRunLayers);
 		bool frontW = Physics.Raycast (myTransform.position+ myTransform.up,
-		                               myTransform.forward, capsule.radius + 0.2f, wallRunLayers);
+		                               myTransform.forward, capsule.radius + 0.2f,frontH, wallRunLayers);
+		Vector3 tangVect;
 		
 		if(!animator.animator.IsInTransition(0) && !_rb.isKinematic)
 		{
 			if(leftW)
 			{
 				
-				_rb.velocity = movement.normalized*wallRunSpeed + myTransform.up*3;
+				
+				tangVect = Vector3.Cross(forntL.normal,Vector3.up);
+				tangVect = Vector3.Project(movement,tangVect);
+				_rb.velocity = tangVect*wallRunSpeed + myTransform.up*3;
 				if(!(characterState == CharacterState.WallRunning))
 				{
 					characterState = CharacterState.WallRunning;
@@ -432,7 +448,10 @@ public class Pawn : DamagebleObject {
 			
 			else if(rightW)
 			{
-				_rb.velocity = movement.normalized*wallRunSpeed + myTransform.up*3;
+				
+				tangVect = Vector3.Cross(forntR.normal,Vector3.up);
+				tangVect = Vector3.Project(movement,tangVect);
+				_rb.velocity = tangVect*wallRunSpeed + myTransform.up*3;
 				if(!(characterState == CharacterState.WallRunning))
 				{
 					characterState = CharacterState.WallRunning;
@@ -449,6 +468,7 @@ public class Pawn : DamagebleObject {
 			else if(frontW)
 			{
 				_rb.velocity = myTransform.up*wallRunSpeed/1.5f;
+				forwardRotation = forntH.normal*-1;
 				if(!(characterState == CharacterState.WallRunning))
 				{
 					characterState = CharacterState.WallRunning;
@@ -462,8 +482,9 @@ public class Pawn : DamagebleObject {
 				}
 			}
 			
-			
+			forwardRotation  = myTransform.position + tangVect*5;
 			animator.WallAnimation(leftW,rightW,frontW);
+			
 
 			return leftW||rightW||frontW;
 		}
