@@ -98,6 +98,7 @@ public class Player : MonoBehaviour {
 			if(respawnTimer<=0&&isStarted){
 				respawnTimer=respawnTime;
 				currentPawn =PlayerManager.instance.SpawmPlayer(prefabClass[selected],team);
+				PVPGameRule.instance.Kill(team);
 				AfterSpawnSetting(currentPawn,PawnType.PAWN);
 				prefabBot =PlayerManager.instance.avaibleBots[selected];
 				prefabGhostBot =PlayerManager.instance.ghostsBots[selected];
@@ -186,6 +187,7 @@ public class Player : MonoBehaviour {
 		int viewID = 0;
 		if(Killer!=null){
 			viewID = Killer.photonView.viewID;
+			PVPGameRule.instance.Kill(Killer.team);
 		}
 		photonView.RPC("RPCPawnDead",PhotonTargets.All,viewID);
 			
@@ -199,6 +201,7 @@ public class Player : MonoBehaviour {
 		Score.Death++;
 		if (viewId != 0) {
 			Player killer = PhotonView.Find (viewId).GetComponent<Player> ();
+			
 			StatisticHandler.SendPlayerKillbyPlayer(UID, PlayerName, killer.UID, killer.PlayerName);
 		} else {
 			StatisticHandler.SendPlayerKillbyNPC(UID, PlayerName);
@@ -207,16 +210,18 @@ public class Player : MonoBehaviour {
 		
 		
 	}
-	public void PawnKill(Player Victim){
-		photonView.RPC("RPCPawnKill",PhotonTargets.All);
+	public void PawnKill(Player Victim,Vector3 position){
+		photonView.RPC("RPCPawnKill",PhotonTargets.All,position);
 
 	}
 	[RPC]
-	public void RPCPawnKill(){
+	public void RPCPawnKill(Vector3 position){
 
 		if (!photonView.isMine) {
 			return;
 		}
+		//TODO: move text to config
+		PlayerMainGui.instance.AddMessage("NAILED IT",position,PlayerMainGui.MessageType.KILL_TEXT);
 
 		if(!inBot){
 			Score.Kill++;
@@ -226,6 +231,10 @@ public class Player : MonoBehaviour {
 
 
 
+	}
+	
+	public void DamagePawn(float damage, Vector3 position){
+		PlayerMainGui.instance.AddMessage(damage.toString(),position,PlayerMainGui.MessageType.DMG_TEXT);
 	}
 	public void PawnAssist(){
 		Score.Assist++;
@@ -306,19 +315,20 @@ public class Player : MonoBehaviour {
 	public void  SetName(String newname)
 	{
 		PlayerName = newname;
-		if (UID != 0) {
-			StatisticHandler.StartStats(UID,PlayerName);
-		}
+	
+		StatisticHandler.StartStats(UID,PlayerName);
+		
 	}
 	public void  SetUid(int uid)
 	{
 
 		UID = uid;
-		if (PlayerName != "") {
-			StatisticHandler.StartStats(UID,PlayerName);
-		}
+		
 	}
-
+	public void  SendData()
+	{
+		StatisticHandler.StartStats(UID,PlayerName);
+	}
 	
 	public String GetName(){
 		return PlayerName;
