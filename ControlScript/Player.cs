@@ -20,7 +20,9 @@ public class Player : MonoBehaviour {
 	
 	public bool inBot;
 	
-	private GameObject ghostBot;
+	private GhostObject ghostBot;
+	
+	private bool canSpawnBot=false;
 	
 	public int team =0;
 
@@ -79,7 +81,7 @@ public class Player : MonoBehaviour {
 	[RPC]
 	public void SetTeam(int intTeam){
 		Debug.Log ("setTeam" + intTeam);
-		team = intTeam;
+		team = intTeam;	
 	}
 	void Update(){
 		if (!photonView.isMine) {
@@ -111,32 +113,40 @@ public class Player : MonoBehaviour {
 				
 				if(robotTimer<=0){
 					if(Input.GetButtonUp("SpawnBot")){
-						if(ghostBot==null){
-							return;
-						}
-						Vector3 spamPoint =ghostBot.transform.position;
-						spamPoint.y+= 10;
-						robotPawn =PlayerManager.instance.SpawmPlayer(prefabBot,spamPoint,ghostBot.transform.rotation);
-						Debug.Log("robot spawn"+robotPawn);
-						AfterSpawnSetting(robotPawn,PawnType.BOT);
+						if(ghostBot!=null&&canSpawnBot){
+							Vector3 spamPoint =ghostBot.transform.position;
+							spamPoint.y+= 10;
+							robotPawn =PlayerManager.instance.SpawmPlayer(prefabBot,spamPoint,ghostBot.transform.rotation);
+							Debug.Log("robot spawn"+robotPawn);
+							AfterSpawnSetting(robotPawn,PawnType.BOT);
 
-						Destroy(ghostBot);				
-					}
-					if(Input.GetButtonDown("SpawnBot")){
-						
-						if(Physics.Raycast(centerofScreen, out hitinfo,50.0f)){
-							ghostBot =Instantiate(prefabGhostBot,hitinfo.point,currentPawn.transform.rotation) as GameObject;
-							
+							Destroy(ghostBot);	
+							canSpawnBot=false;							
 						}
+						
 					}
 					if(Input.GetButton("SpawnBot")){
 						
 						if(Physics.Raycast(centerofScreen, out hitinfo,50.0f)){
 							if(ghostBot==null){
-								ghostBot =Instantiate(prefabGhostBot,hitinfo.point,currentPawn.transform.rotation) as GameObject;
+									GameObject ghostGameObj = Instantiate(prefabGhostBot,hitinfo.point,currentPawn.transform.rotation) as GameObject;
+									ghostBot =ghostGameObj.geComponent<GhostObject>();
 							}
-							ghostBot.transform.position = hitinfo.point;
-							ghostBot.transform.rotation = currentPawn.transform.rotation;
+							ghostBot.myTransform.position = hitinfo.point;
+							ghostBot.myTransform.rotation = currentPawn.transform.rotation;
+						
+							if(Physics.Raycast(hitinfo.point,Vector3.up,100.0f)){
+								//ghostBot =Instantiate(prefabGhostBot,hitinfo.point,currentPawn.transform.rotation) as GameObject;
+								if(canSpawnBot){
+									ghostBot.renderer.material.color = ghostBot.badColor;
+								}
+								canSpawnBot=false;
+							}else{
+								if(!canSpawnBot){
+									ghostBot.renderer.material.color = ghostBot.normalColor;
+								}
+								canSpawnBot=true;
+							}
 						}
 					
 					}
