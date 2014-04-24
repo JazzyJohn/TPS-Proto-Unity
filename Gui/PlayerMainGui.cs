@@ -32,17 +32,17 @@ public class PlayerMainGui : MonoBehaviour {
 		public Vector3 worldPoint;
 		public string text="";
 		public MessageType type;
-		public float getMessageSize(){
-			if(messageSize.Leght<=(int)type){
-				return messageSize[0];
+		public float getMessageSize(PlayerMainGui outer){
+			if(outer.messageSize.Length<=(int)type){
+				return outer.messageSize[0];
 			}
-			return messageSize[(int)type];
+			return outer.messageSize[(int)type];
 		}
-		public Texture getTexture(){
-			if(messageTexture.Leght<=(int)type){
-				return messageTexture[0];
+		public Texture getTexture(PlayerMainGui outer){
+			if(outer.messageTexture.Length<=(int)type){
+				return outer.messageTexture[0];
 			}
-			return messageTexture[(int)type];
+			return outer.messageTexture[(int)type];
 		}
 		
 	}
@@ -183,28 +183,28 @@ public class PlayerMainGui : MonoBehaviour {
 
 		}
 		//game stats section
-		gamestats = PVPGameRule.instance.GetStats();
-		Rect rectforName = new Rect ((screenX-crosshairWidth)/2,0, crosshairWidth*4, crosshairHeight);
+		GameStats gamestats = PVPGameRule.instance.GetStats();
+		Rect rectforName = new Rect ((screenX-crosshairWidth*10)/2,0, crosshairWidth*4, crosshairHeight);
 		GUI.Label(rectforName,LocalPlayer.GetName()+ "Team:" +FormTeamName(LocalPlayer.team));
-		rectforName = new Rect ((screenX-crosshairWidth)/2,crosshairHeight/2, crosshairWidth*2, crosshairHeight);
+		rectforName = new Rect ((screenX-crosshairWidth*10)/2,crosshairHeight/2, crosshairWidth*5, crosshairHeight);
 		GUI.Label(rectforName,"K/D/A "  +LocalPlayer.Score.Kill+"/"+LocalPlayer.Score.Death+"/"+LocalPlayer.Score.Assist);
-		rectforName = new Rect ((screenX-crosshairWidth)/2,crosshairHeight, crosshairWidth*2, crosshairHeight);
-		GUI.Label(rectforName,FormTeamName(1)  +gamestats.score[0] +"|"+gamestats.maxScore+" |" FormTeamName(2) +gamestats.score[1]);
+		rectforName = new Rect ((screenX-crosshairWidth*10)/2,crosshairHeight, crosshairWidth*10, crosshairHeight);
+		GUI.Label(rectforName,FormTeamName(1)  +gamestats.score[0] +"|"+gamestats.maxScore+" |" +FormTeamName(2) +gamestats.score[1]);
 		
 		//Message Section
 		while(guiMessages.Count>0&&guiMessages.Peek().destroyTime<Time.time){
 			guiMessages.Dequeue();
 		}
 		
-		foreach (GuiMessages guiMessage in guiMessages)
+		foreach (GUIMessage guiMessage in guiMessages)
 		{
 			Vector3 Position = MainCamera.WorldToScreenPoint(guiMessage.worldPoint);
-			float size =guiMessage.getMessageSize();
+			float size =guiMessage.getMessageSize(this);
 			Rect messRect = new Rect (Position.x-size/2,Screen.height-Position.y,size,size);
 			
-			Texture messTesxture =guiMessage.getTexture();
-			if(messTesxture!=null){
-				GUI.Label(messRect,guiMessage.messTesxture);
+			Texture messTexture =guiMessage.getTexture(this);
+			if(messTexture!=null){
+				GUI.Label(messRect,messTexture);
 			}
 			if(guiMessage.text!=""){
 				GUI.Label(messRect,guiMessage.text);
@@ -218,7 +218,7 @@ public class PlayerMainGui : MonoBehaviour {
 		message.text = text;
 		message.worldPoint = worldPoint;
 		message.type = type;
-		guiMessages.Enqueue(messages);
+		guiMessages.Enqueue(message);
 	}
 	public static string GetFormatedTime(float input){
 		int seconds;

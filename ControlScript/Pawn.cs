@@ -144,6 +144,8 @@ public class Pawn : DamagebleObject {
 	public bool isAiming=false;
 
 	public float aimModCoef = -10.0f;
+
+	public bool isLookingAt = true;
 	// Use this for initialization
 	void Start () {
 		maxHealth = health;
@@ -357,9 +359,10 @@ public class Pawn : DamagebleObject {
 
 				}
 			}
-
-			animator.animator.SetLookAtPosition (aimRotation);
-			animator.animator.SetLookAtWeight(1, 0.5f, 0.7f, 0.0f, 0.5f);
+			if(isLookingAt){
+				animator.animator.SetLookAtPosition (aimRotation);
+				animator.animator.SetLookAtWeight(1, 0.5f, 0.7f, 0.0f, 0.5f);
+			}
 
 		}
 

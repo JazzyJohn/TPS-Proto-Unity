@@ -3,15 +3,17 @@ using System.Collections;
 
 public class PVPGameRule : MonoBehaviour {
 
-		private int[] teamKill;
+		protected int[] teamKill;
 		
-		private int[] teamScore;
+		protected int[] teamScore;
 		
-		private float timer;
+		protected float timer;
 		
-		private int maxScore;
+		protected int maxScore;
 		
 		public float gameTime;
+
+		public PhotonView photonView;
 		
 		 // s_Instance is used to cache the instance found in the scene so we don't have to look it up every time.
 		private static PVPGameRule s_Instance = null;
@@ -32,9 +34,10 @@ public class PVPGameRule : MonoBehaviour {
 
 
 		
-		void Awake(){
-			
-			teamScore= new Int(PlayerManager.instance.MaxTeam);
+		protected void Awake(){
+			photonView = GetComponent<PhotonView>();
+			teamScore= new int[PlayerManager.instance.MaxTeam];
+			teamKill= new int[PlayerManager.instance.MaxTeam];
 		}
 
 		void Update(){
@@ -44,17 +47,18 @@ public class PVPGameRule : MonoBehaviour {
 			}	
 			timer+= Time.deltaTime;			
 		}
-		virtual bool IsGameEnded(){
+		public virtual bool IsGameEnded(){
 			if(timer>gameTime){
 				return true;
 			}
 			return false;
 		}
-		virtual PlayerMainGui.GameStats GetStats(){
+		public virtual PlayerMainGui.GameStats GetStats(){
 			PlayerMainGui.GameStats  stats = new PlayerMainGui.GameStats();
 			stats.gameTime = gameTime-timer;
 			stats.score = teamScore;
 			stats.maxScore =maxScore;
+			return stats;	
 		}
 
 		string NextMap(){
@@ -69,7 +73,7 @@ public class PVPGameRule : MonoBehaviour {
 			//0 for neutral creature so lower teamIndex by 1
 			ActuakKillCount(team);
 		}
-		virtual void ActuakKillCount(int team){
+		public virtual void ActuakKillCount(int team){
 			teamKill[team-1]++;
 		}
 		//For ticket system like in Battlefield
@@ -80,7 +84,7 @@ public class PVPGameRule : MonoBehaviour {
 		public  void RPCSpawn(int team){
 			ActuakSpawnCount(team);
 		}
-		virtual void ActuakSpawnCount(int team){
+		public virtual void ActuakSpawnCount(int team){
 			
 		}
 		

@@ -1,11 +1,11 @@
 using UnityEngine;
 using System.Collections;
 
-public class TeamDeathmatch_PVPGameRule : MonoBehaviour {
+public class TeamDeathmatch_PVPGameRule : PVPGameRule {
 
 		public int killMax;
 		
-		virtual bool IsGameEnded(){
+		public override bool IsGameEnded(){
 			for(int i=0;i<teamKill.Length;i++){
 				if(killMax<=teamKill[i]){
 					return true;
@@ -18,7 +18,7 @@ public class TeamDeathmatch_PVPGameRule : MonoBehaviour {
 			base.Awake();
 			maxScore=killMax;
 		}
-		override void ActuakKillCount(int team){
+		public override void ActuakKillCount(int team){
 			teamKill[team-1]++;
 			teamScore[team-1]++;
 		}

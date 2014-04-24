@@ -33,7 +33,7 @@ public class BaseProjectile : UseObject {
 	void Update() {
 		
 		RaycastHit hit;
-		
+		mTransform.rotation = Quaternion.LookRotation ( mRigidBody.velocity);
 		if (Physics.Raycast (transform.position, mRigidBody.velocity.normalized, out hit)){
 			
 			if (hit.distance < mTransform.InverseTransformDirection (mRigidBody.velocity).z * 0.1f)
@@ -48,19 +48,19 @@ public class BaseProjectile : UseObject {
 		if (owner == hit.transform.gameObject) {
 			return;
 		}
-		if (hit.transform.gameObject.CompareTag ("decoration")) {
-			Debug.Log ("HADISH INTO " + hit.transform.gameObject.name);
-			if(hitParticle!=null){
-				Instantiate(hitParticle, hit.point, Quaternion.LookRotation(hit.normal));
-			}
-			Destroy (gameObject, 0.1f);
-		}
+
 		DamagebleObject obj = hit.transform.gameObject.GetComponent <DamagebleObject>();
 		if (obj != null) {
 			obj.Damage(damage,owner);
 			Debug.Log ("HADISH INTO SOME PLAYER! " + hit.transform.gameObject.name);
 			Destroy (gameObject, 0.1f);
 		}
+
+		if(hitParticle!=null){
+			Instantiate(hitParticle, hit.point, Quaternion.LookRotation(hit.normal));
+		}
+		Destroy (gameObject, 0.1f);
+
 	}
 	
 	void OnDestroy() {
@@ -73,6 +73,7 @@ public class BaseProjectile : UseObject {
 		Collider[] hitColliders = Physics.OverlapSphere(transform.position, splashRadius);
 		
 		for(int i=0;i < hitColliders.Length;i++) {
+			//Debug.Log(hitColliders[i]);
 			DamagebleObject obj = hitColliders[i].GetComponent <DamagebleObject>();
 			if (obj != null) {
 				obj.Damage(damage,owner);
