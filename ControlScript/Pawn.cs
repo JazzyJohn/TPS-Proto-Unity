@@ -144,6 +144,8 @@ public class Pawn : DamagebleObject {
 	public bool isAiming=false;
 
 	public float aimModCoef = -10.0f;
+
+	public bool isLookingAt = true;
 	// Use this for initialization
 	void Start () {
 		maxHealth = health;
@@ -172,13 +174,23 @@ public class Pawn : DamagebleObject {
 	}
 	
 	public override void Damage(float damage,GameObject killer){
-		if (!PhotonNetwork.isMasterClient){
-			return;
-		}
 		Pawn killerPawn =killer.GetComponent<Pawn> ();
 		if (killerPawn != null && killerPawn.team == team &&! PlayerManager.instance.frendlyFire) {
 			return;
 		}
+		if (killerPawn != null){
+			Player killerPlayer =  killerPawn.player;
+			if(killerPlayer!=null){
+				killerPlayer.DamagePawn(damage,myTransform.position +new Vector3 (Random.Range (-1 , 1),Random.Range (-1 , 1),Random.Range (-1 , 1)));
+			}
+		}
+		if (!PhotonNetwork.isMasterClient){
+			return;
+		}
+	
+		
+		
+		
 		//Debug.Log ("DAMAGE");
 		base.Damage(damage,killer);
 	}
@@ -201,10 +213,10 @@ public class Pawn : DamagebleObject {
 		if (killerPawn != null) {
 			killerPlayer = killerPawn.player;
 			if(killerPlayer!=null){
-				killerPlayer.PawnKill(player);
+				killerPlayer.PawnKill(player,myTransform.position);
 			}
 		}
-		Debug.Log ("KILLL IT" + player);
+		//Debug.Log ("KILLL IT" + player);
 		if (player != null) {
 			if(player.inBot){
 				player.RobotDead(killerPlayer);
@@ -347,9 +359,10 @@ public class Pawn : DamagebleObject {
 
 				}
 			}
-
-			animator.animator.SetLookAtPosition (aimRotation);
-			animator.animator.SetLookAtWeight(1, 0.5f, 0.7f, 0.0f, 0.5f);
+			if(isLookingAt){
+				animator.animator.SetLookAtPosition (aimRotation);
+				animator.animator.SetLookAtWeight(1, 0.5f, 0.7f, 0.0f, 0.5f);
+			}
 
 		}
 

@@ -20,7 +20,9 @@ public class Player : MonoBehaviour {
 	
 	public bool inBot;
 	
-	private GameObject ghostBot;
+	private GhostObject ghostBot;
+	
+	private bool canSpawnBot=false;
 	
 	public int team =0;
 
@@ -48,7 +50,7 @@ public class Player : MonoBehaviour {
 	
 	public PlayerScore Score = new PlayerScore();
 	
-	private Camera camera;
+	private Camera myCamera;
 
 	private bool isDead;
 
@@ -58,8 +60,8 @@ public class Player : MonoBehaviour {
 		photonView = GetComponent<PhotonView> ();
 
 		if (photonView.isMine) {
-		camera = Camera.main;
-			((PlayerMainGui)camera.GetComponent (typeof(PlayerMainGui))).LocalPlayer = this;
+			myCamera = Camera.main;
+			((PlayerMainGui)myCamera.GetComponent (typeof(PlayerMainGui))).LocalPlayer = this;
 			//TODO: UNCOMMENT
 			robotTimer = robotTime;
 		
@@ -79,7 +81,7 @@ public class Player : MonoBehaviour {
 	[RPC]
 	public void SetTeam(int intTeam){
 		Debug.Log ("setTeam" + intTeam);
-		team = intTeam;
+		team = intTeam;	
 	}
 	void Update(){
 		if (!photonView.isMine) {
@@ -98,6 +100,7 @@ public class Player : MonoBehaviour {
 			if(respawnTimer<=0&&isStarted){
 				respawnTimer=respawnTime;
 				currentPawn =PlayerManager.instance.SpawmPlayer(prefabClass[selected],team);
+				PVPGameRule.instance.Spawn(team);
 				AfterSpawnSetting(currentPawn,PawnType.PAWN);
 				prefabBot =PlayerManager.instance.avaibleBots[selected];
 				prefabGhostBot =PlayerManager.instance.ghostsBots[selected];
@@ -109,36 +112,49 @@ public class Player : MonoBehaviour {
 				robotTimer-=Time.deltaTime;
 				
 				if(robotTimer<=0){
-					if(Input.GetButtonUp("SpawnBot")){
-						if(ghostBot==null){
-							return;
-						}
-						Vector3 spamPoint =ghostBot.transform.position;
-						spamPoint.y+= 10;
-						robotPawn =PlayerManager.instance.SpawmPlayer(prefabBot,spamPoint,ghostBot.transform.rotation);
-						Debug.Log("robot spawn"+robotPawn);
-						AfterSpawnSetting(robotPawn,PawnType.BOT);
-
-						Destroy(ghostBot);				
-					}
-					if(Input.GetButtonDown("SpawnBot")){
-						
-						if(Physics.Raycast(centerofScreen, out hitinfo,50.0f)){
-							ghostBot =Instantiate(prefabGhostBot,hitinfo.point,currentPawn.transform.rotation) as GameObject;
-							
-						}
-					}
 					if(Input.GetButton("SpawnBot")){
 						
 						if(Physics.Raycast(centerofScreen, out hitinfo,50.0f)){
 							if(ghostBot==null){
-								ghostBot =Instantiate(prefabGhostBot,hitinfo.point,currentPawn.transform.rotation) as GameObject;
+								GameObject ghostGameObj = Instantiate(prefabGhostBot,hitinfo.point,currentPawn.transform.rotation) as GameObject;
+								ghostBot =ghostGameObj.GetComponent<GhostObject>();
 							}
-							ghostBot.transform.position = hitinfo.point;
-							ghostBot.transform.rotation = currentPawn.transform.rotation;
+							ghostBot.myTransform.position = hitinfo.point;
+							ghostBot.myTransform.rotation = currentPawn.transform.rotation;
+							
+							if(Physics.SphereCast(hitinfo.point+Vector3.up*ghostBot.size,ghostBot.size,Vector3.up,out hitinfo,100.0f)){
+								Debug.Log (hitinfo.collider);
+								if(canSpawnBot){
+									ghostBot.MakeBad();
+									//Debug.Log (ghostBot.myRenderer.sharedMaterial.color);
+								}
+								canSpawnBot=false;
+							}else{
+								if(!canSpawnBot){
+									
+									ghostBot.MakeNormal();
+									//Debug.Log (ghostBot.myRenderer.sharedMaterial.color);
+								}
+								canSpawnBot=true;
+							}
 						}
-					
+						
 					}
+					if(Input.GetButtonUp("SpawnBot")){
+						if(ghostBot!=null&&canSpawnBot){
+							Vector3 spamPoint =ghostBot.transform.position;
+							spamPoint.y+= 10;
+							robotPawn =PlayerManager.instance.SpawmPlayer(prefabBot,spamPoint,ghostBot.transform.rotation);
+							Debug.Log("robot spawn"+robotPawn);
+							AfterSpawnSetting(robotPawn,PawnType.BOT);
+
+						
+							canSpawnBot=false;							
+						}
+						Debug.Log("destory chost");
+						Destroy(ghostBot.gameObject);	
+					}
+
 				}
 			}
 
@@ -186,6 +202,7 @@ public class Player : MonoBehaviour {
 		int viewID = 0;
 		if(Killer!=null){
 			viewID = Killer.photonView.viewID;
+			PVPGameRule.instance.Kill(Killer.team);
 		}
 		photonView.RPC("RPCPawnDead",PhotonTargets.All,viewID);
 			
@@ -199,6 +216,7 @@ public class Player : MonoBehaviour {
 		Score.Death++;
 		if (viewId != 0) {
 			Player killer = PhotonView.Find (viewId).GetComponent<Player> ();
+			
 			StatisticHandler.SendPlayerKillbyPlayer(UID, PlayerName, killer.UID, killer.PlayerName);
 		} else {
 			StatisticHandler.SendPlayerKillbyNPC(UID, PlayerName);
@@ -207,16 +225,18 @@ public class Player : MonoBehaviour {
 		
 		
 	}
-	public void PawnKill(Player Victim){
-		photonView.RPC("RPCPawnKill",PhotonTargets.All);
+	public void PawnKill(Player Victim,Vector3 position){
+		photonView.RPC("RPCPawnKill",PhotonTargets.All,position);
 
 	}
 	[RPC]
-	public void RPCPawnKill(){
+	public void RPCPawnKill(Vector3 position){
 
 		if (!photonView.isMine) {
 			return;
 		}
+		//TODO: move text to config
+		PlayerMainGui.instance.AddMessage("NAILED IT",position,PlayerMainGui.MessageType.KILL_TEXT);
 
 		if(!inBot){
 			Score.Kill++;
@@ -226,6 +246,10 @@ public class Player : MonoBehaviour {
 
 
 
+	}
+	
+	public void DamagePawn(float damage, Vector3 position){
+		PlayerMainGui.instance.AddMessage(damage.ToString(),position,PlayerMainGui.MessageType.DMG_TEXT);
 	}
 	public void PawnAssist(){
 		Score.Assist++;
@@ -306,19 +330,20 @@ public class Player : MonoBehaviour {
 	public void  SetName(String newname)
 	{
 		PlayerName = newname;
-		if (UID != 0) {
-			StatisticHandler.StartStats(UID,PlayerName);
-		}
+	
+		StatisticHandler.StartStats(UID,PlayerName);
+		
 	}
 	public void  SetUid(int uid)
 	{
 
 		UID = uid;
-		if (PlayerName != "") {
-			StatisticHandler.StartStats(UID,PlayerName);
-		}
+		
 	}
-
+	public void  SendData()
+	{
+		StatisticHandler.StartStats(UID,PlayerName);
+	}
 	
 	public String GetName(){
 		return PlayerName;

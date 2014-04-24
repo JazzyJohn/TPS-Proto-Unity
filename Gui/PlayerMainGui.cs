@@ -18,7 +18,53 @@ public class PlayerMainGui : MonoBehaviour {
 
 	public Texture EnemyMark;
 	public Texture AliaMark;
+	
+	public enum MessageType{
+			STD_MESSAGE=0,
+			DMG_TEXT=1,
+			KILL_TEXT = 2
+	}
+	public Texture[] messageTexture;
+	public float[] messageSize;
+	public float messageDelay=1.0f;
+	public class GUIMessage{
+		public float destroyTime;
+		public Vector3 worldPoint;
+		public string text="";
+		public MessageType type;
+		public float getMessageSize(PlayerMainGui outer){
+			if(outer.messageSize.Length<=(int)type){
+				return outer.messageSize[0];
+			}
+			return outer.messageSize[(int)type];
+		}
+		public Texture getTexture(PlayerMainGui outer){
+			if(outer.messageTexture.Length<=(int)type){
+				return outer.messageTexture[0];
+			}
+			return outer.messageTexture[(int)type];
+		}
+		
+	}
+	
+	 // s_Instance is used to cache the instance found in the scene so we don't have to look it up every time.
+	private static PlayerMainGui s_Instance = null;
+	 
+	// This defines a static instance property that attempts to find the manager object in the scene and
+	// returns it to the caller.
+	public static PlayerMainGui instance {
+		get {
+			if (s_Instance == null) {
+				// This is where the magic happens.
+				//  FindObjectOfType(...) returns the first AManager object in the scene.
+				s_Instance =  FindObjectOfType(typeof (PlayerMainGui)) as PlayerMainGui;
+			}
+ 
+			return s_Instance;
+		}
+	}	
 
+	private Queue<GUIMessage> guiMessages = new Queue<GUIMessage>();
 	public class PlayerStats{
 		public float robotTime;
 		public float health;
@@ -26,6 +72,11 @@ public class PlayerMainGui : MonoBehaviour {
 		public float ammoInGunMax;
 		public float ammoInBag;
 			
+	}
+	public class GameStats{
+		public float gameTime;
+		public int[] score;
+		public int maxScore;
 	}
 
 	// Use this for initialization
@@ -39,6 +90,8 @@ public class PlayerMainGui : MonoBehaviour {
 			return;
 		}
 		float screenX = Screen.width, screenY = Screen.height;
+		
+		//MAIN HUD
 		if (LocalPlayer.IsDead()) {
 			Screen.lockCursor = false;
 
@@ -129,12 +182,43 @@ public class PlayerMainGui : MonoBehaviour {
 			GUI.Label(statsRect,"Ammo in Bag: "+localstats.ammoInBag);
 
 		}
-
-		Rect rectforName = new Rect ((screenX-crosshairWidth)/2,0, crosshairWidth*4, crosshairHeight);
+		//game stats section
+		GameStats gamestats = PVPGameRule.instance.GetStats();
+		Rect rectforName = new Rect ((screenX-crosshairWidth*10)/2,0, crosshairWidth*4, crosshairHeight);
 		GUI.Label(rectforName,LocalPlayer.GetName()+ "Team:" +FormTeamName(LocalPlayer.team));
-		rectforName = new Rect ((screenX-crosshairWidth)/2,crosshairHeight/2, crosshairWidth*2, crosshairHeight);
+		rectforName = new Rect ((screenX-crosshairWidth*10)/2,crosshairHeight/2, crosshairWidth*5, crosshairHeight);
 		GUI.Label(rectforName,"K/D/A "  +LocalPlayer.Score.Kill+"/"+LocalPlayer.Score.Death+"/"+LocalPlayer.Score.Assist);
-
+		rectforName = new Rect ((screenX-crosshairWidth*10)/2,crosshairHeight, crosshairWidth*10, crosshairHeight);
+		GUI.Label(rectforName,FormTeamName(1)  +gamestats.score[0] +"|"+gamestats.maxScore+" |" +FormTeamName(2) +gamestats.score[1]);
+		
+		//Message Section
+		while(guiMessages.Count>0&&guiMessages.Peek().destroyTime<Time.time){
+			guiMessages.Dequeue();
+		}
+		
+		foreach (GUIMessage guiMessage in guiMessages)
+		{
+			Vector3 Position = MainCamera.WorldToScreenPoint(guiMessage.worldPoint);
+			float size =guiMessage.getMessageSize(this);
+			Rect messRect = new Rect (Position.x-size/2,Screen.height-Position.y,size,size);
+			
+			Texture messTexture =guiMessage.getTexture(this);
+			if(messTexture!=null){
+				GUI.Label(messRect,messTexture);
+			}
+			if(guiMessage.text!=""){
+				GUI.Label(messRect,guiMessage.text);
+			}
+		}
+	}
+	
+	public void AddMessage(string text,Vector3 worldPoint, MessageType type ){
+		GUIMessage message = new GUIMessage();
+		message.destroyTime = Time.time + messageDelay;
+		message.text = text;
+		message.worldPoint = worldPoint;
+		message.type = type;
+		guiMessages.Enqueue(message);
 	}
 	public static string GetFormatedTime(float input){
 		int seconds;
