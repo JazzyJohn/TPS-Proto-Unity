@@ -86,6 +86,19 @@ public class PVPGameRule : MonoBehaviour {
 		}
 		public virtual void ActuakSpawnCount(int team){
 			
+
+		}
+
+		public void OnPhotonSerializeView(PhotonStream stream, PhotonMessageInfo info)
+		{
+				if (stream.isWriting) {
+
+				} else {
+
+
+
+				}
+
 		}
 		
 		

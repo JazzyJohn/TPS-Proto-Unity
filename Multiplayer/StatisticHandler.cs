@@ -1,4 +1,5 @@
 ﻿using UnityEngine;
+using System;
 using System.Collections;
 
 public class StatisticHandler : MonoBehaviour {
@@ -9,7 +10,7 @@ public class StatisticHandler : MonoBehaviour {
 
 	public static string STATISTIC_PHP="http://vk.rakgames.ru/kaspi/";
 
-
+	public static string STATISTIC_PHP_HTTPS="https://vk.rakgames.ru/kaspi/";
 
 	// s_Instance is used to cache the instance found in the scene so we don't have to look it up every time.
 	private static StatisticHandler s_Instance = null;
@@ -57,9 +58,21 @@ public class StatisticHandler : MonoBehaviour {
 	}
 	protected static IEnumerator SendForm(WWWForm form,string url){
 		Debug.Log (form + url);
-		WWW w =new WWW(STATISTIC_PHP+url, form);
-		yield return w;
-		Debug.Log (w.text);
+		WWW w = null;
+		if (String.Compare(Application.absoluteURL, 0, "https", 0,5) != 0) {
+
+						Debug.Log ("STATS HTTP SEND");
+						w = new WWW (STATISTIC_PHP + url, form);
+		}
+		else{
+			Debug.Log ("STATS HTTPS SEND");
+			 w = new WWW (STATISTIC_PHP_HTTPS + url, form);
+		}
+			yield return w;
+			Debug.Log (w.text);
+	
+
+
 
 	}
 }

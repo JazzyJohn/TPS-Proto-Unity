@@ -90,6 +90,10 @@ public class PlayerManager : MonoBehaviour {
 	public Pawn[] FindAllPawn(){
 		return GameObject.FindObjectsOfType<Pawn>();
 	}
+	public Player[] FindAllPlayer(){
+		return GameObject.FindObjectsOfType<Player>();
+
+	}
  
  }
 	

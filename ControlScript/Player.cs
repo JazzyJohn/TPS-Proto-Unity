@@ -331,23 +331,24 @@ public class Player : MonoBehaviour {
 	{
 		PlayerName = newname;
 	
-		StatisticHandler.StartStats(UID,PlayerName);
+		Application.ExternalCall( "SayMyUid");
 		
 	}
 	public void  SetUid(int uid)
 	{
 
 		UID = uid;
-		
-	}
-	public void  SendData()
-	{
+		Debug.Log ("BIG STATS SEND " + UID + " " + PlayerName);
 		StatisticHandler.StartStats(UID,PlayerName);
 	}
+
 	
 	public String GetName(){
 		return PlayerName;
 	}	
+	public int GetUid(){
+		return UID;
+	}
 	public Pawn GetCurrentPawn(){
 		return currentPawn;
 	}

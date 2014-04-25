@@ -7,7 +7,7 @@ public class ServerHolder : MonoBehaviour {
 		// Use this for initialization
 		void Start()
 		{
-			PhotonNetwork.ConnectUsingSettings("0.0.7");
+			PhotonNetwork.ConnectUsingSettings("0.0.8");
 		}
 		
 		void OnGUI()

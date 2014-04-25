@@ -208,6 +208,7 @@ public class Pawn : DamagebleObject {
 			return;		
 		}
 		isDead = true;
+		StartCoroutine (CoroutineRequestKillMe ());
 		Pawn killerPawn =killer.GetComponent<Pawn> ();
 		Player killerPlayer = null;
 		if (killerPawn != null) {
@@ -229,7 +230,7 @@ public class Pawn : DamagebleObject {
 			CurWeapon.	RequestKillMe();
 		}
 
-		RequestKillMe();
+
 		
 	}
 
@@ -421,6 +422,10 @@ public class Pawn : DamagebleObject {
 		}else{
 			return aimRotation;
 		}
+	}
+	public Vector3 getCachedAimRotation(){
+		return aimRotation;
+
 	}
 
 	public float AimingCoef(){
