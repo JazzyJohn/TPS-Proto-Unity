@@ -24,6 +24,8 @@ public class Pawn : DamagebleObject {
 	public LayerMask wallRunLayers = -1;
 	public LayerMask climbLayers = 1 << 9; // Layer 9
 
+	public bool isActive =true;
+
 	public BaseWeapon CurWeapon;
 
 	public Transform weaponSlot;
@@ -173,7 +175,7 @@ public class Pawn : DamagebleObject {
 		Debug.Log (distToGround);
 	}
 	
-	public override void Damage(float damage,GameObject killer){
+	public override void Damage(BaseDamage damage,GameObject killer){
 		Pawn killerPawn =killer.GetComponent<Pawn> ();
 		if (killerPawn != null && killerPawn.team == team &&! PlayerManager.instance.frendlyFire) {
 			return;
@@ -181,7 +183,7 @@ public class Pawn : DamagebleObject {
 		if (killerPawn != null){
 			Player killerPlayer =  killerPawn.player;
 			if(killerPlayer!=null){
-				killerPlayer.DamagePawn(damage,myTransform.position +new Vector3 (Random.Range (-1 , 1),Random.Range (-1 , 1),Random.Range (-1 , 1)));
+				killerPlayer.DamagePawn(damage.Damage,myTransform.position +new Vector3 (Random.Range (-1 , 1),Random.Range (-1 , 1),Random.Range (-1 , 1)));
 			}
 		}
 		if (!PhotonNetwork.isMasterClient){
@@ -238,6 +240,9 @@ public class Pawn : DamagebleObject {
 	// Update is called once per frame
 	void Update () {
 		//Debug.Log (photonView.isSceneView);
+		if (!isActive) {
+			return;		
+		}
 
 		if (photonView.isMine) {
 						if (isAi) {
@@ -626,7 +631,9 @@ public class Pawn : DamagebleObject {
 	}
 	public void FixedUpdate () {
 
-
+		if (!isActive) {
+			return;		
+		}
 
 		if (isGrounded) {
 			if (photonView.isMine) {
@@ -750,7 +757,7 @@ public class Pawn : DamagebleObject {
 
 	public void StopMachine(){
 		characterState = CharacterState.Idle;
-
+		nextMovement = Vector3.zero;
 	}
 	//end Movement Section
 
@@ -789,6 +796,8 @@ public class Pawn : DamagebleObject {
 	public void Activate(){
 		if(cameraController!=null){
 			_rb.isKinematic = false;
+			isActive = true;
+			_rb.detectCollisions = true;
 			cameraController.enabled = true;
 			cameraController.Reset();
 			GetComponent<ThirdPersonController> ().enabled= true;
@@ -804,6 +813,7 @@ public class Pawn : DamagebleObject {
 		Debug.Log ("RPCActivate");
 		if(cameraController!=null){
 			cameraController.enabled = true;
+			isActive = true;
 			GetComponent<ThirdPersonController> ().enabled= true;
 
 		}
@@ -814,6 +824,8 @@ public class Pawn : DamagebleObject {
 	public void DeActivate(){
 		if(cameraController!=null){
 			_rb.isKinematic = true;
+			isActive = false;
+			_rb.detectCollisions = false;
 			cameraController.enabled = false;
 
 			GetComponent<ThirdPersonController> ().enabled= false;
@@ -829,7 +841,7 @@ public class Pawn : DamagebleObject {
 		Debug.Log ("RPCDeActivate");
 		if(cameraController!=null){
 			cameraController.enabled = false;
-
+			isActive = false;
 			GetComponent<ThirdPersonController> ().enabled= false;
 		}
 		for (int i =0; i<myTransform.childCount; i++) {

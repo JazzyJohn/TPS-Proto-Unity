@@ -1,11 +1,20 @@
 ﻿using UnityEngine;
-using System.Collections;
+using System;
 
+using System.Collections;
+[Serializable]
+public class BaseDamage{
+	public float Damage;
+	public bool isVsArmor;
+
+}
 //We don't want to our projectile fly infinite time
 [RequireComponent (typeof (DelayDestroyedObject))]
 public class BaseProjectile : UseObject {
-	
-	public float damage;
+
+
+
+	public BaseDamage damage;
 	public float startImpulse;
 	public GameObject owner;
 	public GameObject hitParticle;

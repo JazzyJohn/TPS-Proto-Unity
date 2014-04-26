@@ -21,9 +21,7 @@ public class BaseWeapon : DestroyableNetworkObject {
 
 	public int clipSize;
 
-	public bool vsArmor;
-
-	public float damageAmount;
+	public BaseDamage damageAmount;
 
 	public float aimRandCoef;
 

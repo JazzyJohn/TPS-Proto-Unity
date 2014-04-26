@@ -20,7 +20,7 @@ public class HealingProjectile : BaseProjectile {
 		Pawn pawn = (Pawn)obj;
 		if (pawn!=null) {
 			if(pawn.team ==owner.GetComponent<Pawn>().team){
-				pawn.Heal(damage,owner);
+				pawn.Heal(damage.Damage,owner);
 
 			}else{
 				Destroy (gameObject, 0.1f);

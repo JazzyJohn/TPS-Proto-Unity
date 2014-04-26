@@ -12,7 +12,7 @@ public class HTHHitter : MonoBehaviour {
 
 	public GameObject  owner;
 
-	public float damage;
+	public BaseDamage damage;
 
 	
 	// Use this for initialization
@@ -36,7 +36,7 @@ public class HTHHitter : MonoBehaviour {
 
 		}
 	}
-	public void Activate(float newDamage,GameObject newOwner){
+	public void Activate(BaseDamage newDamage,GameObject newOwner){
 		isReadyToHit = true;
 		damage = newDamage;
 			owner = newOwner;

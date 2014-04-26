@@ -18,9 +18,9 @@ public class DamagebleObject : DestroyableNetworkObject {
 	
 	}
 
-	public virtual void Damage(float damage,GameObject killer){
+	public virtual void Damage(BaseDamage damage,GameObject killer){
 		if (destructableObject){
-			health-= damage;
+			health-= damage.Damage;
 			if(health<0){
 				KillIt(killer);
 
