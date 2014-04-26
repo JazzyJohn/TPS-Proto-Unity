@@ -16,6 +16,8 @@ public class PlayerManager : MonoBehaviour {
 	public int MaxTeam = 2;
 
 	public bool frendlyFire =false;
+
+	public string version = "0.0.8";
 	
 	public InventoryManager.AmmoBag[] AllTypeInGame;
     // s_Instance is used to cache the instance found in the scene so we don't have to look it up every time.

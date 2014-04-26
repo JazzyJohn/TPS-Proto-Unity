@@ -5,7 +5,10 @@ public class HTHWeapon : BaseWeapon {
 
 	public int attackId;
 
+	public override bool CanShoot (){
 
+		return true;
+	}
 
 	public override void ChangeWeaponStatus(bool status){
 		HTHHitter[] allhitters =owner.GetComponentsInChildren<HTHHitter> ();

@@ -175,7 +175,7 @@ public class BaseWeapon : DestroyableNetworkObject {
 		}
 		photonView.RPC("FireEffect",PhotonTargets.Others);
 	}
-	bool CanShoot (){
+	public virtual bool CanShoot (){
 		Vector3 aimDir = (owner.getCachedAimRotation() -muzzlePoint.position).normalized;
 		Vector3 realDir = muzzlePoint.forward;
 		float angle = Vector3.Dot (aimDir, realDir);

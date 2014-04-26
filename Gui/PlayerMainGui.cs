@@ -18,7 +18,11 @@ public class PlayerMainGui : MonoBehaviour {
 
 	public Texture EnemyMark;
 	public Texture AliaMark;
+
+	public float VersionSize;
 	
+	public Texture  VersionMark;
+
 	public enum MessageType{
 			STD_MESSAGE=0,
 			DMG_TEXT=1,
@@ -85,6 +89,7 @@ public class PlayerMainGui : MonoBehaviour {
 	}
 	private GUIState guiState;
 
+	public GUISkin guiSkin;
 	// Use this for initialization
 	void Start () {
 		MainCamera = Camera.main;
@@ -104,7 +109,7 @@ public class PlayerMainGui : MonoBehaviour {
 			return;
 		}
 		float screenX = Screen.width, screenY = Screen.height;
-
+		GUI.skin = guiSkin;
 		switch (guiState) {
 			case GUIState.Normal:
 			
@@ -246,6 +251,14 @@ public class PlayerMainGui : MonoBehaviour {
 				GUI.Label(messRect,guiMessage.text);
 			}
 		}
+		Rect versionrect = new Rect (screenX  - VersionSize,0, VersionSize, VersionSize);
+
+		GUI.Label(versionrect, VersionMark);
+		GUI.color = Color.black;
+		Vector3 pivotPoint = new Vector2(screenX  - VersionSize/2, VersionSize/2);
+		GUIUtility.RotateAroundPivot(45.0f, pivotPoint);
+		versionrect = new Rect (screenX  - VersionSize,VersionSize/2.5f, VersionSize, VersionSize);
+		GUI.Label(versionrect , "Version:" +PlayerManager.instance.version + " Date: "+ System.DateTime.Now.ToShortDateString());
 	}
 	
 	public void AddMessage(string text,Vector3 worldPoint, MessageType type ){
