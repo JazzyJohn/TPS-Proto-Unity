@@ -249,6 +249,9 @@ public class Player : MonoBehaviour {
 	}
 	
 	public void DamagePawn(float damage, Vector3 position){
+		if (!photonView.isMine) {
+			return;
+		}
 		PlayerMainGui.instance.AddMessage(damage.ToString(),position,PlayerMainGui.MessageType.DMG_TEXT);
 	}
 	public void PawnAssist(){

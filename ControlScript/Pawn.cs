@@ -148,6 +148,14 @@ public class Pawn : DamagebleObject {
 	public float aimModCoef = -10.0f;
 
 	public bool isLookingAt = true;
+	
+	public class BasePawnStatistic{
+		//Shoot Counter
+		public int shootCnt=0;
+	
+	};
+	
+	public BasePawnStatistic statistic;
 	// Use this for initialization
 	void Start () {
 		maxHealth = health;
@@ -716,14 +724,26 @@ public class Pawn : DamagebleObject {
 		if (characterState == CharacterState.PullingUp) {
 			return true;
 		}
-		Vector3 p1 = myTransform.position - (myTransform.up * -heightOffsetToEdge) + myTransform.forward;
+		RaycastHit frontH;
+		bool frontW = Physics.Raycast (myTransform.position,
+		                               myTransform.forward,out frontH, capsule.radius + 0.2f, wallRunLayers);
+
+	    if(frontW){
+			frontAir = Physics.Raycast (myTransform.position+ myTransform.up,
+		                               myTransform.forward,out frontH, capsule.radius + 0.2f, wallRunLayers);
+
+			
+		}
+		return false;
+		//Deprecated system of collider pullup system
+		/*Vector3 p1 = myTransform.position - (myTransform.up * -heightOffsetToEdge) + myTransform.forward;
 		Vector3 p2 = myTransform.position - (myTransform.up * -heightOffsetToEdge);
 		//Debug.DrawLine (p1, p2);
 		RaycastHit hit;
 		//Debug.DrawLine (p1-myTransform.up*climbCheckDistance, p2-myTransform.up*climbCheckDistance);
 		// Hit nothing and not at edge -> Out
-		return Physics.CapsuleCast (p1, p2, climbCheckRadius, -myTransform.up, out hit, climbCheckDistance, climbLayers);
-	
+		return Physics.CapsuleCast (p1, p2, climbCheckRadius, -myTransform.up, out hit, climbCheckDistance, climbLayers);*/
+		
 	}
 
 

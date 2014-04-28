@@ -10,7 +10,7 @@ public class BaseDamage{
 }
 //We don't want to our projectile fly infinite time
 [RequireComponent (typeof (DelayDestroyedObject))]
-public class BaseProjectile : UseObject {
+public class BaseProjectile : MonoBehaviour {
 
 
 
