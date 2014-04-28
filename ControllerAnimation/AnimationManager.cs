@@ -63,14 +63,15 @@ public class AnimationManager : MonoBehaviour
     /// </summary>
     /// <param name="directionAxisX">Анимация влево/вправо</param>
     /// <param name="directionAxisZ">Анимация вперед/назад</param>
-    public void ApllyMotion(float Speed, float direction)
+    public void ApllyMotion(float Speed,float forward, float direction)
     {
         //so... this line makes advanced idle
         //axis return 0f when it not pressed
         //animator.SetBool("Idle", (directionAxisX == 0f && directionAxisZ == 0f) ? true : false);
 		//Debug.Log (directionAxisZ);
 		animator.SetFloat("Speed", Speed);
-		animator.SetFloat("Direction", direction);
+		animator.SetFloat("Direction", -direction);
+		animator.SetFloat ("Forward", forward);
     }
     /// <summary>
     /// Служит для определения выбора одно из вариантов позы смерти.
@@ -136,6 +137,8 @@ public class AnimationManager : MonoBehaviour
 
 		if (leftW || rightW || frontW) {
 			animator.SetBool ("Jump", false);
+			animator.SetBool ("Grounded", false);
+			animator.SetBool ("StandUp", false);
 		}
 		animator.SetBool("WallRunL", leftW);
 		

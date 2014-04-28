@@ -133,7 +133,7 @@ public class InventoryManager : MonoBehaviour {
 		}
 	}
 	void SaveOldInfo(int index,BaseWeapon gun){
-		Debug.Log (index);
+		//Debug.Log (index);
 		weaponInfo[index].amount  = gun.curAmmo;
 	
 	}
@@ -198,7 +198,7 @@ public class InventoryManager : MonoBehaviour {
 		if(newIndex>=prefabWeapon.Length){
 			newIndex=0;
 		}
-		Debug.Log ("NextWeapon"+newIndex);
+		//Debug.Log ("NextWeapon"+newIndex);
 		ChangeWeapon(newIndex);
 	}
 	public void PrevWeapon(){
@@ -206,7 +206,7 @@ public class InventoryManager : MonoBehaviour {
 		if(newIndex<0){
 			newIndex=prefabWeapon.Length-1;
 		}
-		Debug.Log ("PrevWeapon"+newIndex);
+		//Debug.Log ("PrevWeapon"+newIndex);
 		ChangeWeapon(newIndex);
 	}
 	//Change weapon in hand

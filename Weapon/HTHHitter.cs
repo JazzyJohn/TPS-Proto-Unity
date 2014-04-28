@@ -51,13 +51,13 @@ public class HTHHitter : MonoBehaviour {
 			return;
 		}
 		if (hit.transform.gameObject.CompareTag ("decoration")) {
-			Debug.Log ("HADISH INTO " + hit.transform.gameObject.name);
+			//Debug.Log ("HADISH INTO " + hit.transform.gameObject.name);
 			isReadyToHit=false;
 		}
 		DamagebleObject obj = hit.transform.gameObject.GetComponent <DamagebleObject>();
 		if (obj != null) {
 			obj.Damage(damage,owner);
-			Debug.Log ("HADISH INTO SOME PLAYER! " + hit.transform.gameObject.name);
+			//Debug.Log ("HADISH INTO SOME PLAYER! " + hit.transform.gameObject.name);
 			isReadyToHit=false;
 		}
 	}

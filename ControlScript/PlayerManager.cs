@@ -37,7 +37,7 @@ public class PlayerManager : MonoBehaviour {
             if (s_Instance == null) {
                 GameObject obj = new GameObject("PlayerManager");
                 s_Instance = obj.AddComponent(typeof (PlayerManager)) as PlayerManager;
-                Debug.Log ("Could not locate an AManager object.  AManager was Generated Automaticly.");
+               
             }
  
             return s_Instance;

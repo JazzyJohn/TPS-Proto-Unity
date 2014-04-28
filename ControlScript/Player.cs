@@ -52,7 +52,7 @@ public class Player : MonoBehaviour {
 	
 	private Camera myCamera;
 
-	private bool isDead;
+	private bool isDead=true;
 
 	private PhotonView photonView;
 
@@ -123,7 +123,7 @@ public class Player : MonoBehaviour {
 							ghostBot.myTransform.rotation = currentPawn.transform.rotation;
 							
 							if(Physics.SphereCast(hitinfo.point+Vector3.up*ghostBot.size,ghostBot.size,Vector3.up,out hitinfo,100.0f)){
-								Debug.Log (hitinfo.collider);
+								//Debug.Log (hitinfo.collider);
 								if(canSpawnBot){
 									ghostBot.MakeBad();
 									//Debug.Log (ghostBot.myRenderer.sharedMaterial.color);
@@ -145,13 +145,13 @@ public class Player : MonoBehaviour {
 							Vector3 spamPoint =ghostBot.transform.position;
 							spamPoint.y+= 10;
 							robotPawn =PlayerManager.instance.SpawmPlayer(prefabBot,spamPoint,ghostBot.transform.rotation);
-							Debug.Log("robot spawn"+robotPawn);
+							//Debug.Log("robot spawn"+robotPawn);
 							AfterSpawnSetting(robotPawn,PawnType.BOT);
 
 						
 							canSpawnBot=false;							
 						}
-						Debug.Log("destory chost");
+						//Debug.Log("destory chost");
 						Destroy(ghostBot.gameObject);	
 					}
 
@@ -292,10 +292,13 @@ public class Player : MonoBehaviour {
 			curPawn= currentPawn;
 
 		}
-		stats.health = curPawn.health;
-		stats.ammoInGun = curPawn.CurWeapon.curAmmo;
-		stats.ammoInGunMax = curPawn.CurWeapon.clipSize;
-		stats.ammoInBag = curPawn.GetAmmoInBag ();
+		if (curPawn != null) {
+			stats.health = curPawn.health;
+			stats.ammoInGun = curPawn.CurWeapon.curAmmo;
+			stats.ammoInGunMax = curPawn.CurWeapon.clipSize;
+			stats.ammoInBag = curPawn.GetAmmoInBag ();
+		}
+
 		
 		return stats;
 
@@ -321,6 +324,7 @@ public class Player : MonoBehaviour {
 			// We own this player: send the others our data
 			stream.SendNext(PlayerName);
 			stream.SendNext(UID);
+			stream.SendNext(team);
 
 		}
 		else
@@ -328,6 +332,7 @@ public class Player : MonoBehaviour {
 			// Network player, receive data
 			PlayerName= (String) stream.ReceiveNext();
 			UID= (int) stream.ReceiveNext();
+			team = (int) stream.ReceiveNext();
 		}
 	}
 	public void  SetName(String newname)
@@ -370,7 +375,7 @@ public class Player : MonoBehaviour {
 	public void RPCAfterSpawnSetting(int viewid,int type){
 	
 		PawnType pType = (PawnType)type;
-		Debug.Log (viewid);
+		//Debug.Log (viewid);
 		Pawn pawn =PhotonView.Find (viewid).GetComponent<Pawn>();
 	
 		pawn.player = this;

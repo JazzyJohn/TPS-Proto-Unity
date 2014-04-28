@@ -60,6 +60,7 @@ public class BaseWeapon : DestroyableNetworkObject {
 		curTransform = transform;
 		photonView = GetComponent<PhotonView>();
 		rifleParticleController = GetComponentInChildren<RifleParticleController>();
+		rifleParticleController.SetOwner (owner.collider);
 		if (transform.parent == null) {
 
 		}
@@ -75,7 +76,7 @@ public class BaseWeapon : DestroyableNetworkObject {
 		owner = inowner;
 		curTransform.parent = weaponSlot;
 		curTransform.localPosition = Offset;
-		Debug.Log (name + weaponRotator);
+		//Debug.Log (name + weaponRotator);
 		curTransform.localRotation = weaponRotator;
 		if (photonView.isMine) {
 			photonView.RPC("AttachWeaponRep",PhotonTargets.OthersBuffered,inowner.photonView.viewID);

@@ -17,7 +17,7 @@ public class DestroyableNetworkObject : MonoBehaviour {
 	}
 	[RPC]
 	public void KillMe(){
-		Debug.Log ("RPC KILL ME");
+		//Debug.Log ("RPC KILL ME");
 		if(photonView.isMine){
 			PhotonNetwork.Destroy(gameObject);
 		}		

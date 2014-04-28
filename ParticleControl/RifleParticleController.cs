@@ -7,7 +7,7 @@ public class RifleParticleController : MonoBehaviour
 	private ParticleSystem flameParticles;
 	private ShellparticleSystem shellParticles;
 	private ParticleSystem smokeParticles;
-
+	protected Collider owner;
 	//Инициализация, получаем ссылки на необходимые нам компоненты
 	void Start()
 	{
@@ -16,6 +16,9 @@ public class RifleParticleController : MonoBehaviour
 		smokeParticles = transform.GetChild (2).GetComponent<ParticleSystem> ();
 	}
 
+	public void SetOwner(Collider newOwner){
+		owner = newOwner;
+	}
 	//Функция создания самого выстрела
 	public void CreateShootFlame()
 	{
@@ -27,7 +30,7 @@ public class RifleParticleController : MonoBehaviour
 
 		smokeParticles.Play ();
 		if (shellParticles != null) {
-			shellParticles.Play ();
+			shellParticles.Play (owner);
 		}
 	}
 }

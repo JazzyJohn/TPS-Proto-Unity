@@ -69,12 +69,18 @@ public class PlayerMainGui : MonoBehaviour {
 	}	
 
 	private Queue<GUIMessage> guiMessages = new Queue<GUIMessage>();
+	class LogMess{
+		public string mess;
+		public string trace;
+	}
+	private Queue<LogMess> logMessages = new Queue<LogMess>();
+	public bool showDebug = false;
 	public class PlayerStats{
-		public float robotTime;
-		public float health;
-		public float ammoInGun;
-		public float ammoInGunMax;
-		public float ammoInBag;
+		public float robotTime=0;
+		public float health=0;
+		public float ammoInGun=0;
+		public float ammoInGunMax=0;
+		public float ammoInBag=0;
 			
 	}
 	public class GameStats{
@@ -90,6 +96,8 @@ public class PlayerMainGui : MonoBehaviour {
 	private GUIState guiState;
 
 	public GUISkin guiSkin;
+
+	public GUISkin messageSkin;
 	// Use this for initialization
 	void Start () {
 		MainCamera = Camera.main;
@@ -100,165 +108,187 @@ public class PlayerMainGui : MonoBehaviour {
 		if (Input.GetButton ("ScoreBtn")) {
 			guiState =GUIState.Playerlist;
 		}
-
+		if (Input.GetButtonDown ("Debug")) {
+			showDebug= !showDebug;
+		}
 	}
 
 	// Update is called once per frame
 	void OnGUI () {
-		if (LocalPlayer == null) {
-			return;
-		}
-		float screenX = Screen.width, screenY = Screen.height;
-		GUI.skin = guiSkin;
-		switch (guiState) {
-			case GUIState.Normal:
+				if (LocalPlayer == null) {
+						return;
+				}
+				float screenX = Screen.width, screenY = Screen.height;
+				GUI.skin = guiSkin;
+				switch (guiState) {
+				case GUIState.Normal:
 			
 				//MAIN HUD
-				if (LocalPlayer.IsDead()) {
-					Screen.lockCursor = false;
+						if (LocalPlayer.IsDead ()) {
+								Screen.lockCursor = false;
 					
 					
-					Pawn[] prefabClass = PlayerManager.instance.avaiblePawn;
-					float slotsizeX =screenX/prefabClass.Length;
-					float slotsizeY = screenY/10;
-					int timer =(int) LocalPlayer.GetRespawnTimer();
-					for (int i=0; i<prefabClass.Length;i++) {
-					Rect crosrect = new Rect (slotsizeX*i,  crosshairHeight*4, slotsizeX, slotsizeY);
+								Pawn[] prefabClass = PlayerManager.instance.avaiblePawn;
+								float slotsizeX = screenX / prefabClass.Length;
+								float slotsizeY = screenY / 10;
+								int timer = (int)LocalPlayer.GetRespawnTimer ();
+								for (int i=0; i<prefabClass.Length; i++) {
+										Rect crosrect = new Rect (slotsizeX * i, crosshairHeight * 4, slotsizeX, slotsizeY);
 						
-						if(GUI.Button(crosrect, prefabClass[i].publicName+"("+timer+")")){
-							LocalPlayer.selected = i;
-							LocalPlayer.isStarted=true;
-						}
+										if (GUI.Button (crosrect, prefabClass [i].publicName + "(" + timer + ")")) {
+												LocalPlayer.selected = i;
+												LocalPlayer.isStarted = true;
+										}
 						
-					}
-					
-				} else{
-					Screen.lockCursor = true;
-					Rect crosrect = new Rect ((screenX  - crosshairWidth)/2,( screenY  - crosshairHeight)/2, crosshairWidth, crosshairHeight);
-					
-					GUI.Label(crosrect, crosshair);
-					crosrect = new Rect (screenX-crosshairWidth,0, crosshairWidth, crosshairHeight);
-					PlayerStats localstats  =LocalPlayer.GetPlayerStats();
-					if(!LocalPlayer.inBot){
-						float timer =localstats.robotTime; 
-						
-						if(timer==0){
-							GUI.Label(crosrect,"PRES F TO SPAMN ROBOT");
-						}else{
-							
-							GUI.Label(crosrect,GetFormatedTime(timer));
-						}
-					}else{
-						GUI.Label(crosrect,"PRES E  TO EXIT");
-						
-					}
-					
-					Pawn myPawn = LocalPlayer.GetCurrentPawn();
-					if(myPawn!=null){
-						if(myPawn.curLookTarget!=null){
-							Pawn targetPawn = myPawn.curLookTarget.GetComponent<Pawn>(); 
-							
-							if(targetPawn!=null){
-								Rect labelrect = new Rect ((screenX  - crosshairWidth)/2,screenY/2-crosshairHeight*2, crosshairWidth*2, crosshairHeight*2);
-								
-								if(targetPawn.player!=null&&targetPawn.player!=LocalPlayer){
-									//Rect labelrect = new Rect ((screenX  - crosshairWidth)/2,screenY/2-crosshairHeight*2, crosshairWidth*2, crosshairHeight*2);
-									GUI.Label(labelrect,targetPawn.player.GetName());
 								}
-								if(!LocalPlayer.inBot&&targetPawn==LocalPlayer.GetRobot()){
-									GUI.Label(labelrect,"PRESS E TO ENTER");
+					
+						} else {
+								Screen.lockCursor = true;
+								Rect crosrect = new Rect ((screenX - crosshairWidth) / 2, (screenY - crosshairHeight) / 2, crosshairWidth, crosshairHeight);
+					
+								GUI.Label (crosrect, crosshair);
+								crosrect = new Rect (screenX - crosshairWidth, 0, crosshairWidth, crosshairHeight);
+								PlayerStats localstats = LocalPlayer.GetPlayerStats ();
+								if (!LocalPlayer.inBot) {
+										float timer = localstats.robotTime; 
+						
+										if (timer == 0) {
+												GUI.Label (crosrect, "PRES F TO SPAMN ROBOT");
+										} else {
+							
+												GUI.Label (crosrect, GetFormatedTime (timer));
+										}
+								} else {
+										GUI.Label (crosrect, "PRES E  TO EXIT");
+						
 								}
+					
+								Pawn myPawn = LocalPlayer.GetCurrentPawn ();
+								if (myPawn != null) {
+										if (myPawn.curLookTarget != null) {
+												Pawn targetPawn = myPawn.curLookTarget.GetComponent<Pawn> (); 
+							
+												if (targetPawn != null) {
+														Rect labelrect = new Rect ((screenX - crosshairWidth) / 2, screenY / 2 - crosshairHeight * 2, crosshairWidth * 2, crosshairHeight * 2);
 								
-							}
+														if (targetPawn.player != null && targetPawn.player != LocalPlayer) {
+																//Rect labelrect = new Rect ((screenX  - crosshairWidth)/2,screenY/2-crosshairHeight*2, crosshairWidth*2, crosshairHeight*2);
+																GUI.Label (labelrect, targetPawn.player.GetName ());
+														}
+														if (!LocalPlayer.inBot && targetPawn == LocalPlayer.GetRobot ()) {
+																GUI.Label (labelrect, "PRESS E TO ENTER");
+														}
+								
+												}
 							
-						}
-					}
-					List<Pawn> seenablePawn = LocalPlayer.GetCurrentPawn().getAllSeenPawn ();
-					//Debug.Log (seenablePawn);
-					float maxsize =LocalPlayer.GetCurrentPawn().seenDistance;
-					Pawn robot = LocalPlayer.GetRobot ();
-					for (int i=0; i<seenablePawn.Count; i++) {
-						if(robot==seenablePawn[i]){
-							continue;
-						}
+										}
+								}
+								List<Pawn> seenablePawn = LocalPlayer.GetCurrentPawn ().getAllSeenPawn ();
+								//Debug.Log (seenablePawn);
+								float maxsize = LocalPlayer.GetCurrentPawn ().seenDistance;
+								Pawn robot = LocalPlayer.GetRobot ();
+								for (int i=0; i<seenablePawn.Count; i++) {
+										if (robot == seenablePawn [i]) {
+												continue;
+										}
 						
-						Pawn  target =seenablePawn[i];
-						Vector3 Position = MainCamera.WorldToScreenPoint(target.myTransform.position+target.headOffset);
+										Pawn target = seenablePawn [i];
+										Vector3 Position = MainCamera.WorldToScreenPoint (target.myTransform.position + target.headOffset);
 						
-						float size =MarkSize*maxsize/Position.z;
+										float size = MarkSize * maxsize / Position.z;
 						
-						Rect mark = new Rect (Position.x-size/2,Screen.height-Position.y,size,size);
-						if(seenablePawn[i].team ==LocalPlayer.team){
+										Rect mark = new Rect (Position.x - size / 2, Screen.height - Position.y, size, size);
+										if (seenablePawn [i].team == LocalPlayer.team) {
 							
-							GUI.Label(mark,AliaMark);
-						}else{
-							GUI.Label(mark,EnemyMark);
+												GUI.Label (mark, AliaMark);
+										} else {
+												GUI.Label (mark, EnemyMark);
+										}
+								}	
+					
+								Rect statsRect = new Rect (screenX - crosshairWidth * 4, Screen.height - crosshairHeight * 3, crosshairWidth * 4, crosshairHeight);
+								GUI.Label (statsRect, "Health: " + localstats.health);
+								statsRect = new Rect (screenX - crosshairWidth * 4, Screen.height - crosshairHeight * 2, crosshairWidth * 4, crosshairHeight);
+								GUI.Label (statsRect, "Ammo: " + localstats.ammoInGun + "/" + localstats.ammoInGunMax);
+								statsRect = new Rect (screenX - crosshairWidth * 4, Screen.height - crosshairHeight, crosshairWidth * 4, crosshairHeight);
+								GUI.Label (statsRect, "Ammo in Bag: " + localstats.ammoInBag);
+					
 						}
-					}	
-					
-					Rect statsRect = new Rect (screenX-crosshairWidth*4,Screen.height -crosshairHeight*3, crosshairWidth*4, crosshairHeight);
-					GUI.Label(statsRect,"Health: "+localstats.health);
-					statsRect = new Rect (screenX-crosshairWidth*4,Screen.height -crosshairHeight*2, crosshairWidth*4, crosshairHeight);
-					GUI.Label(statsRect,"Ammo: "+localstats.ammoInGun+"/"+localstats.ammoInGunMax);
-					statsRect = new Rect (screenX-crosshairWidth*4,Screen.height -crosshairHeight, crosshairWidth*4, crosshairHeight);
-					GUI.Label(statsRect,"Ammo in Bag: "+localstats.ammoInBag);
-					
+
+						break;
+
+				case GUIState.Playerlist:
+						Player[] players = PlayerManager.instance.FindAllPlayer ();
+						for (int i =0; i<players.Length; i++) {
+								float size = crosshairWidth / 2;
+								Rect messRect = new Rect (size, size * (6 + i), size * 10, size);
+								GUI.Label (messRect, players [i].GetName ());
+
+
+						}
+
+						break;
+
+
+
 				}
 
-				break;
-
-		case GUIState.Playerlist:
-			Player[] players  = PlayerManager.instance.FindAllPlayer();
-			for(int i =0;i<players.Length;i++){
-				float size =crosshairWidth/2;
-				Rect messRect = new Rect (size,size*(6+i),size*10,size);
-				GUI.Label(messRect,players[i].GetName());
-
-
-			}
-
-			break;
-
-
-
-		}
-
-		//game stats section
-		GameStats gamestats = PVPGameRule.instance.GetStats();
-		Rect rectforName = new Rect ((screenX-crosshairWidth*10)/2,0, crosshairWidth*4, crosshairHeight);
-		GUI.Label(rectforName,LocalPlayer.GetName()+" Team:" +FormTeamName(LocalPlayer.team));
-		rectforName = new Rect ((screenX-crosshairWidth*10)/2,crosshairHeight/2, crosshairWidth*5, crosshairHeight);
-		GUI.Label(rectforName,"K/D/A "  +LocalPlayer.Score.Kill+"/"+LocalPlayer.Score.Death+"/"+LocalPlayer.Score.Assist);
-		rectforName = new Rect ((screenX-crosshairWidth*10)/2,crosshairHeight, crosshairWidth*10, crosshairHeight);
-		GUI.Label(rectforName,FormTeamName(1)  +gamestats.score[0] +"|"+gamestats.maxScore+" |" +FormTeamName(2) +gamestats.score[1]);
+				//game stats section
+				GameStats gamestats = PVPGameRule.instance.GetStats ();
+				Rect rectforName = new Rect ((screenX - crosshairWidth * 10) / 2, 0, crosshairWidth * 10, crosshairHeight);
+				GUI.Label (rectforName, LocalPlayer.GetName () + " Team:" + FormTeamName (LocalPlayer.team));
+				rectforName = new Rect ((screenX - crosshairWidth * 10) / 2, crosshairHeight / 2, crosshairWidth * 10, crosshairHeight);
+				GUI.Label (rectforName, "K/D/A " + LocalPlayer.Score.Kill + "/" + LocalPlayer.Score.Death + "/" + LocalPlayer.Score.Assist);
+				rectforName = new Rect ((screenX - crosshairWidth * 10) / 2, crosshairHeight, crosshairWidth * 10, crosshairHeight);
+				GUI.Label (rectforName, FormTeamName (1) + gamestats.score [0] + "|" + gamestats.maxScore + " |" + FormTeamName (2) + gamestats.score [1]);
 		
-		//Message Section
-		while(guiMessages.Count>0&&guiMessages.Peek().destroyTime<Time.time){
-			guiMessages.Dequeue();
-		}
+				//Message Section
+				GUI.skin = messageSkin;
+				while (guiMessages.Count>0&&guiMessages.Peek().destroyTime<Time.time) {
+						guiMessages.Dequeue ();
+				}
 		
-		foreach (GUIMessage guiMessage in guiMessages)
-		{
-			Vector3 Position = MainCamera.WorldToScreenPoint(guiMessage.worldPoint);
-			float size =guiMessage.getMessageSize(this);
-			Rect messRect = new Rect (Position.x-size/2,Screen.height-Position.y,size,size);
+				foreach (GUIMessage guiMessage in guiMessages) {
+						Vector3 Position = MainCamera.WorldToScreenPoint (guiMessage.worldPoint);
+						float size = guiMessage.getMessageSize (this);
+						Rect messRect = new Rect (Position.x - size / 2, Screen.height - Position.y, size, size);
 			
-			Texture messTexture =guiMessage.getTexture(this);
-			if(messTexture!=null){
-				GUI.Label(messRect,messTexture);
-			}
-			if(guiMessage.text!=""){
-				GUI.Label(messRect,guiMessage.text);
-			}
-		}
+						Texture messTexture = guiMessage.getTexture (this);
+						if (messTexture != null) {
+								GUI.Label (messRect, messTexture);
+						}
+						if (guiMessage.text != "") {
+								GUI.Label (messRect, guiMessage.text);
+						}
+				}
+				while (logMessages.Count>50) {
+						logMessages.Dequeue ();
+
+				}
+				if (showDebug) {
+					GUI.BeginGroup (new Rect (0, Screen.height - 300, 400, 300));
+						int j = 0;
+						foreach (LogMess logMessage in logMessages) {
+								j++;
+								Rect messRect = new Rect (0, 40 * (logMessages.Count - j), 300, 40);
+								GUI.Label (messRect, logMessage.mess);
+								//messRect = new Rect (0,50*(j*2+1),300,50);
+								//GUI.Label(messRect,logMessage.trace);
+						}
+						GUI.EndGroup ();
+				}
+
+		//LABEL SECTION
+		GUI.skin = guiSkin;
 		Rect versionrect = new Rect (screenX  - VersionSize,0, VersionSize, VersionSize);
 
 		GUI.Label(versionrect, VersionMark);
 		GUI.color = Color.black;
 		Vector3 pivotPoint = new Vector2(screenX  - VersionSize/2, VersionSize/2);
 		GUIUtility.RotateAroundPivot(45.0f, pivotPoint);
-		versionrect = new Rect (screenX  - VersionSize,VersionSize/2.5f, VersionSize, VersionSize);
+		versionrect = new Rect (screenX  - VersionSize,VersionSize/2.5f, VersionSize*10, VersionSize);
 		GUI.Label(versionrect , "Version:" +PlayerManager.instance.version + " Date: "+ System.DateTime.Now.ToShortDateString());
+
 	}
 	
 	public void AddMessage(string text,Vector3 worldPoint, MessageType type ){
@@ -287,5 +317,18 @@ public class PlayerMainGui : MonoBehaviour {
 				break;
 		}
 		return "";
+	}
+	void HandleLog(string logString, string stackTrace, LogType type) {
+		if (type == LogType.Warning) {
+			return;		
+		}
+		LogMess mess = new LogMess ();
+		mess.mess = logString;
+		mess.trace = stackTrace;
+		logMessages.Enqueue( mess);
+
+	}
+	void OnEnable() {
+		Application.RegisterLogCallback(HandleLog);
 	}
 }

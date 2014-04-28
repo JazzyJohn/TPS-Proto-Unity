@@ -10,7 +10,7 @@ public class HealingProjectile : BaseProjectile {
 			return;
 		}
 		if (hit.transform.gameObject.CompareTag ("decoration")) {
-			Debug.Log ("HADISH INTO " + hit.transform.gameObject.name);
+			//Debug.Log ("HADISH INTO " + hit.transform.gameObject.name);
 			if(hitParticle!=null){
 				Instantiate(hitParticle, hit.point, Quaternion.LookRotation(hit.normal));
 			}
@@ -25,12 +25,12 @@ public class HealingProjectile : BaseProjectile {
 			}else{
 				Destroy (gameObject, 0.1f);
 			}
-			Debug.Log ("HADISH INTO SOME PLAYER! " + hit.transform.gameObject.name);
+			//Debug.Log ("HADISH INTO SOME PLAYER! " + hit.transform.gameObject.name);
 			return;
 		}
 		if (obj != null) {
 			obj.Damage(damage,owner);
-			Debug.Log ("HADISH INTO SOME PLAYER! " + hit.transform.gameObject.name);
+			//Debug.Log ("HADISH INTO SOME PLAYER! " + hit.transform.gameObject.name);
 			Destroy (gameObject, 0.1f);
 		}
 	}

@@ -61,7 +61,7 @@ public class BaseProjectile : MonoBehaviour {
 		DamagebleObject obj = hit.transform.gameObject.GetComponent <DamagebleObject>();
 		if (obj != null) {
 			obj.Damage(damage,owner);
-			Debug.Log ("HADISH INTO SOME PLAYER! " + hit.transform.gameObject.name);
+			//Debug.Log ("HADISH INTO SOME PLAYER! " + hit.transform.gameObject.name);
 			Destroy (gameObject, 0.1f);
 		}
 

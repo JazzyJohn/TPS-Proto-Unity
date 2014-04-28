@@ -61,7 +61,7 @@ public class ThirdPersonCamera : MonoBehaviour
 			cameraTransform = Camera.main.transform;
 	
 		if(!cameraTransform) {
-			Debug.Log("Please assign a camera to the ThirdPersonCamera script.");
+			//Debug.Log("Please assign a camera to the ThirdPersonCamera script.");
 			enabled = false;	
 		}
 				
@@ -73,17 +73,15 @@ public class ThirdPersonCamera : MonoBehaviour
 			controller = _target.GetComponent<ThirdPersonController>();
 		}
 		
-		if (controller)
-		{
-			CapsuleCollider characterController = _target.GetComponent<CapsuleCollider>();
-			centerOffset = characterController.bounds.center - _target.position;
-			headOffset = centerOffset;
-			headOffset.y = characterController.bounds.max.y - _target.position.y;
-		}
-		else
-			Debug.Log("Please assign a target to the camera that has a ThirdPersonController script attached.");
+		if (controller) {
+						CapsuleCollider characterController = _target.GetComponent<CapsuleCollider> ();
+						centerOffset = characterController.bounds.center - _target.position;
+						headOffset = centerOffset;
+						headOffset.y = characterController.bounds.max.y - _target.position.y;
+		} else {
+						//Debug.Log("Please assign a target to the camera that has a ThirdPersonController script attached.");
 	
-		
+		}
 		Cut(_target, centerOffset);
 	}
 
@@ -94,7 +92,7 @@ public class ThirdPersonCamera : MonoBehaviour
 	}
 
 	void  DebugDrawStuff (){
-		Debug.DrawLine(_target.position, _target.position + headOffset);
+		//Debug.DrawLine(_target.position, _target.position + headOffset);
 	
 	}
 	
