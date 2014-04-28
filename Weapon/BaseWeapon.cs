@@ -60,9 +60,9 @@ public class BaseWeapon : DestroyableNetworkObject {
 		curTransform = transform;
 		photonView = GetComponent<PhotonView>();
 		rifleParticleController = GetComponentInChildren<RifleParticleController>();
-		rifleParticleController.SetOwner (owner.collider);
-		if (transform.parent == null) {
-
+	
+		if (rifleParticleController != null) {
+			rifleParticleController.SetOwner (owner.collider);
 		}
 	}
 

@@ -22,6 +22,7 @@ public class BaseProjectile : MonoBehaviour {
 	
 	private Transform mTransform;
 	private Rigidbody mRigidBody;
+	private bool used=false;
 	
 	void Start () {
 		mTransform = transform;
@@ -54,9 +55,10 @@ public class BaseProjectile : MonoBehaviour {
 	
 	public virtual  void onBulletHit(RaycastHit hit)
 	{
-		if (owner == hit.transform.gameObject) {
+		if (owner == hit.transform.gameObject||used) {
 			return;
 		}
+
 
 		DamagebleObject obj = hit.transform.gameObject.GetComponent <DamagebleObject>();
 		if (obj != null) {
@@ -68,6 +70,7 @@ public class BaseProjectile : MonoBehaviour {
 		if(hitParticle!=null){
 			Instantiate(hitParticle, hit.point, Quaternion.LookRotation(hit.normal));
 		}
+		used = true;
 		Destroy (gameObject, 0.1f);
 
 	}

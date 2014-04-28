@@ -102,8 +102,8 @@ public class AnimationManager : MonoBehaviour
     /// <param name="jump"></param>
     public void ApllyJump(bool jump)
     {	
-		if (animator.layerCount >= 4) {
-						AnimatorStateInfo state = animator.GetCurrentAnimatorStateInfo (3);
+		//if (animator.layerCount >= 3) {
+						//AnimatorStateInfo state = animator.GetCurrentAnimatorStateInfo ();
 						if (!jump) {
 								animator.SetBool ("Jump", false);
 								animator.SetBool ("Grounded", true);
@@ -113,7 +113,7 @@ public class AnimationManager : MonoBehaviour
 								animator.SetBool ("Jump", true);
 								animator.SetBool ("Grounded", false);
 						}
-				}
+			//	}
 				
     }
 	public bool GetJump(){
@@ -158,5 +158,23 @@ public class AnimationManager : MonoBehaviour
 		animator.SetBool(name, false);	
 		
 	}
+	public void StartPullingUp(){
+		animator.SetBool("PullUp", true);	
+		SetNotMainLayer (0.0f);
+	}
+	public void FinishPullingUp(){
+		animator.SetBool("PullUp", false);	
+		SetNotMainLayer (1.0f);
+	}
+	private void SetNotMainLayer(float weight){
+		for(int i =1; i<animator.layerCount;i++){
+			animator.SetLayerWeight (i, weight);
+			
+			
+		}
 
+	}
+	public void SetLong(bool longPull){
+		animator.SetBool("LongPull", longPull);
+	}
 }

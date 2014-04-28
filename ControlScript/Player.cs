@@ -331,7 +331,7 @@ public class Player : MonoBehaviour {
 		{
 			// Network player, receive data
 			PlayerName= (String) stream.ReceiveNext();
-			UID= (int) stream.ReceiveNext();
+			UID= (String) stream.ReceiveNext();
 			team = (int) stream.ReceiveNext();
 		}
 	}
@@ -354,7 +354,7 @@ public class Player : MonoBehaviour {
 	public String GetName(){
 		return PlayerName;
 	}	
-	public int GetUid(){
+	public String GetUid(){
 		return UID;
 	}
 	public Pawn GetCurrentPawn(){

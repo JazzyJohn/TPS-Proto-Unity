@@ -160,7 +160,7 @@ public class Pawn : DamagebleObject {
 	
 	};
 	
-	public BasePawnStatistic statistic;
+	public BasePawnStatistic statistic = new BasePawnStatistic();
 	// Use this for initialization
 	void Start () {
 		maxHealth = health;
@@ -299,7 +299,7 @@ public class Pawn : DamagebleObject {
 				Vector3 eurler = Quaternion.LookRotation(aimRotation-myTransform.position).eulerAngles;
 				eurler.z =0;
 				eurler.x =0;
-				if(characterState == CharacterState.WallRunning){
+				if(characterState == CharacterState.WallRunning||characterState ==CharacterState.PullingUp){
 					if(forwardRotation.sqrMagnitude>0){
 						myTransform.rotation= Quaternion.LookRotation(forwardRotation);
 					}
@@ -326,7 +326,7 @@ public class Pawn : DamagebleObject {
 				Vector3 eurler = Quaternion.LookRotation(aimRotation-myTransform.position).eulerAngles;
 				eurler.z =0;
 				eurler.x =0;
-				if(characterState == CharacterState.WallRunning){
+				if(characterState == CharacterState.WallRunning||characterState ==CharacterState.PullingUp){
 					if(forwardRotation.sqrMagnitude>0){
 						myTransform.rotation= Quaternion.LookRotation(forwardRotation);
 					}
@@ -702,6 +702,7 @@ public class Pawn : DamagebleObject {
 			return;		
 		}
 
+
 		if (isGrounded) {
 			//Debug.Log ("Ground"+characterState);
 			if (photonView.isMine) {
@@ -779,6 +780,7 @@ public class Pawn : DamagebleObject {
 
 	public void DidLand(){
 		animator.ApllyJump(false);
+		//Debug.Log ("LAND");
 		lastTimeOnWall = -10.0f;
 		//photonView.RPC("JumpChange",PhotonTargets.OthersBuffered,false);
 	}
@@ -787,16 +789,27 @@ public class Pawn : DamagebleObject {
 		if (characterState == CharacterState.PullingUp) {
 			return true;
 		}
+
 		RaycastHit frontH;
 		bool frontW = Physics.Raycast (myTransform.position,
 		                               myTransform.forward,out frontH, capsule.radius + 0.2f, wallRunLayers);
-
-	    if(frontW){
-			frontAir = Physics.Raycast (myTransform.position+ myTransform.up,
+		bool middleAir = Physics.Raycast (myTransform.position+ myTransform.up/2,
+		                                  myTransform.forward,out frontH, capsule.radius + 0.2f, wallRunLayers);
+		if(frontW||middleAir){
+			bool frontAir = Physics.Raycast (myTransform.position+ myTransform.up,
 		                               myTransform.forward,out frontH, capsule.radius + 0.2f, wallRunLayers);
+			forwardRotation= frontH.normal*-1;
+	
 
+			animator.SetLong(!middleAir);
+
+			return !frontAir;
 			
 		}
+		/*Debug.DrawRay (myTransform.position ,
+		               myTransform.forward * -1 );
+		Debug.DrawRay (myTransform.position+ myTransform.up ,
+		               myTransform.forward * -1 );*/
 		return false;
 		//Deprecated system of collider pullup system
 		/*Vector3 p1 = myTransform.position - (myTransform.up * -heightOffsetToEdge) + myTransform.forward;
@@ -808,7 +821,18 @@ public class Pawn : DamagebleObject {
 		return Physics.CapsuleCast (p1, p2, climbCheckRadius, -myTransform.up, out hit, climbCheckDistance, climbLayers);*/
 		
 	}
+	// Wall run cool-down
+	IEnumerator PullUpEnd (float sec)
+	{
+	
+		yield return new WaitForSeconds (sec);
+		_rb.isKinematic = false;
+		animator.FinishPullingUp();
+		characterState = CharacterState.Idle;
+		isGrounded = true;
+		SendMessage ("DidLand", SendMessageOptions.DontRequireReceiver);
 
+	}
 
 	void PullUp ()
 	{
@@ -816,6 +840,8 @@ public class Pawn : DamagebleObject {
 			if(	characterState != CharacterState.PullingUp){
 				characterState = CharacterState.PullingUp;
 				_rb.isKinematic = true;
+				StartCoroutine("PullUpEnd",PullUpTime);
+				animator.StartPullingUp();
 				PullUpStartTimer = 0.0f;
 			}
 			PullUpStartTimer += Time.deltaTime;
@@ -832,10 +858,9 @@ public class Pawn : DamagebleObject {
 								if (!_rb.isKinematic)
 										_rb.velocity = new Vector3 (0, _rb.velocity.y, 0);
 						}
-				} else { // Animation is finished 
-						_rb.isKinematic = false;
-						characterState = CharacterState.Idle;
 				}
+						
+				
 	}
 
 	public void StopMachine(){

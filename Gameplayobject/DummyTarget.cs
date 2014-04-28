@@ -9,6 +9,7 @@ public class DummyTarget : DamagebleObject {
 				if(Critical){
 					dmgflaot*=2;
 				}
+				//Debug.Log (killer.ToString()+ damage);
 				hitCounter.ShootCnt(killer);
 				PlayerMainGui.instance.AddMessage(dmgflaot.ToString(),transform.position,PlayerMainGui.MessageType.DMG_TEXT);
 	

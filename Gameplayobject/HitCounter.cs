@@ -10,9 +10,11 @@ public class HitCounter : MonoBehaviour {
 		public void ShootCnt(GameObject newkiller){
 			Pawn killerp =newkiller.GetComponent<Pawn>();
 			if(killerp!=killer){
-				//-1 because  we must count first shoot before enter
-				startCount=killer.statistic.shootCnt-1;
+				
 				killer=killerp;
+			//-1 because  we must count first shoot before enter
+				startCount=killer.statistic.shootCnt-1;
+				
 				count=0;
 			}
 			count++;
@@ -26,7 +28,7 @@ public class HitCounter : MonoBehaviour {
 			}
 			float accuracy=0;
 			
-			if(killer!=null)
+			if(killer!=null){
 				float shootCnt =killer.statistic.shootCnt- startCount;
 				if(shootCnt!=0){
 					accuracy= count/shootCnt*100;
