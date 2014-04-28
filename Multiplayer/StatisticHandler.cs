@@ -32,7 +32,7 @@ public class StatisticHandler : MonoBehaviour {
 	}
 
 
-	public static void SendPlayerKillbyPlayer(int Uid,string Name, int KillerUid,string KillerName)
+	public static void SendPlayerKillbyPlayer(string Uid,string Name, string KillerUid,string KillerName)
 	{
 		var form = new WWWForm();
 
@@ -42,14 +42,14 @@ public class StatisticHandler : MonoBehaviour {
 		form.AddField("killername",KillerName);
 		StatisticHandler.instance.StartCoroutine(SendForm (form,KILLED_BY));
 	}
-	public static void SendPlayerKillbyNPC(int Uid,string Name){
+	public static void SendPlayerKillbyNPC(string Uid,string Name){
 		var form = new WWWForm ();
 	
 		form.AddField ("uid", Uid);
 		form.AddField ("name", Name);
 		StatisticHandler.instance.StartCoroutine(SendForm (form,KILLED_BY));
 }
-	public static void StartStats(int Uid,string Name){
+	public static void StartStats(string Uid,string Name){
 		var form = new WWWForm ();
 		
 		form.AddField ("uid", Uid);

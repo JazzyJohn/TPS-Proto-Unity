@@ -32,7 +32,7 @@ public class Player : MonoBehaviour {
 
 	public string PlayerName="VK NAME";
 
-	public int UID;
+	public string UID;
 	
 	 // Declare your serializable data.
 	[System.Serializable]
@@ -337,7 +337,7 @@ public class Player : MonoBehaviour {
 		Application.ExternalCall( "SayMyUid");
 		
 	}
-	public void  SetUid(int uid)
+	public void  SetUid(string uid)
 	{
 
 		UID = uid;
