@@ -6,6 +6,11 @@ using System.Collections;
 public class BaseDamage{
 	public float Damage;
 	public bool isVsArmor;
+	
+	public BaseDamage(BaseDamage old){
+		Damage = old.Damage;
+		isVsArmor = old.isVsArmor;
+	}
 
 }
 //We don't want to our projectile fly infinite time

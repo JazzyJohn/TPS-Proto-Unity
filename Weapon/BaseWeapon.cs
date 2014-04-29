@@ -214,7 +214,7 @@ public class BaseWeapon : DestroyableNetworkObject {
 		if (Physics.Raycast (centerRay, out hitInfo, weaponRange)) {
 			DamagebleObject target =(DamagebleObject) hitInfo.collider.GetComponent(typeof(DamagebleObject));
 			if(target!=null){
-				target.Damage(damageAmount,owner.gameObject);
+				target.Damage(new BaseDamage(damageAmount) ,owner.gameObject);
 			}
 		}
 	}
@@ -231,14 +231,14 @@ public class BaseWeapon : DestroyableNetworkObject {
 			photonView.RPC("GenerateProjectileRep",PhotonTargets.Others,startPoint,startRotation);
 		}
 		BaseProjectile projScript =proj.GetComponent<BaseProjectile>();
-		projScript.damage =damageAmount ;
+		projScript.damage =new BaseDamage(damageAmount) ;
 		projScript.owner = owner.gameObject;
 	}
 	[RPC]
 	void GenerateProjectileRep(Vector3 startPoint,Quaternion startRotation){
 		GameObject proj=Instantiate(projectilePrefab,startPoint,startRotation) as GameObject;
 		BaseProjectile projScript = proj.GetComponent<BaseProjectile>();
-		projScript.damage =damageAmount ;
+		projScript.damage =new BaseDamage(damageAmount) ;
 		projScript.owner = owner.gameObject;
 	}
 	Quaternion getAimRotation(){
