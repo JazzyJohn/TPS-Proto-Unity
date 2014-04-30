@@ -1,5 +1,7 @@
 ﻿using UnityEngine;
 using System.Collections;
+using System;
+using System.Collections.Generic;
 //TODO GENERIC TYPE  CHARCTERISTIC CLASS + Interface Implament ob base Class
 
 public enum EffectType{
@@ -16,25 +18,27 @@ public enum CharacteristicList{
 		STANDFORCE,
 		STANDFORCEAIR,
 }
-class BaseEffect{
+public class BaseEffect{
 	public int timeEnd;
 	public EffectType type;
 	
 }
-class Effect<T>:BaseEffect{
+public class Effect<T>:BaseEffect{
 	public T value;
 	
 }
-class BaseCharacteristic{
+public class BaseCharacteristic{
 	protected List<BaseEffect> effectList  = new List<BaseEffect>();
-	protected int timeUpdate =0;
-	protected int timeLastUpdate =-1;
+	protected float timeUpdate =0;
+	protected float timeLastUpdate =-1;
+	protected bool needUpdate = true;
 	protected void AddEffect(BaseEffect newEffect){
-		if(newEffect.TimeEnd!=-1&&timeUpdate>newEffect.TimeEnd){
-			timeUpdate = 	newEffect.TimeEnd;
+		if(newEffect.timeEnd!=-1&&timeUpdate>newEffect.timeEnd){
+			timeUpdate = 	newEffect.timeEnd;
+
 		}
 		effectList.Add(newEffect);
-		
+		needUpdate= true;
 	}
 	
 	public void UpdateList(){
@@ -43,85 +47,178 @@ class BaseCharacteristic{
 			effectList.RemoveAll(delegate(BaseEffect eff) {
 			return eff.timeEnd <Time.time;
 			});
+			needUpdate= true;
 		}
 		
 	
 	}
 	
 }
-class Characteristic<T> : BaseCharacteristic {
+public class Characteristic<T> : BaseCharacteristic {
 	public T startValue;
-	private T tempValue;
-	public Characteristic<T init){
-	
+	protected T tempValue;
+	public Characteristic(T init){
+		startValue = init;
 	}
-	public AddEffect(Effect<T> newEffect){
-		base.Add(newEffect);
+	public Characteristic(){
+
+	}
+	public void AddEffect(Effect<T> newEffect){
+		base.AddEffect(newEffect);
 	}
 	public T GetValue(){
-		if(timeUpdate>timeLastUpdate&&timeUpdate<Time.time){
-			return tempValue;
-		}else{
+		if(needUpdate){
 			ReCount();
+			needUpdate= false;
 		}
+		return tempValue;
 	}
-	virtual void ReCount(){
-			
+	virtual public void ReCount(){
+		tempValue = startValue;
+
 	}
 }
+public class IntCharacteristic :Characteristic<int> {
+	public IntCharacteristic(int init){
+		startValue = init;
+	}
+	override public void ReCount(){
+		tempValue = startValue;
+		foreach (BaseEffect eff in effectList) {
+			Effect<int> curEffect = (Effect<int>) eff;
+			if(curEffect!=null){
+				switch(curEffect.type){
+				case EffectType.ADD:	
+					tempValue=tempValue +curEffect.value;
+					break;
+				case EffectType.MULIPLIE:	
+					tempValue*=curEffect.value;
+					break;
+				case EffectType.ASSIGN:
+					tempValue=curEffect.value;
+					return;
+				}
+				
+			}
+		}
+		
+	}
+
+
+}
+public class BoolCharacteristic :Characteristic<bool> {
+	public BoolCharacteristic(bool init){
+		startValue = init;
+	}
+	override public void ReCount(){
+		tempValue = startValue;
+		foreach (BaseEffect eff in effectList) {
+			Effect<bool> curEffect = (Effect<bool>) eff;
+			if(curEffect!=null){
+				switch(curEffect.type){
+				case EffectType.ADD:	
+					tempValue=tempValue ||curEffect.value;
+					break;
+				case EffectType.MULIPLIE:	
+					tempValue=tempValue&&curEffect.value;
+					break;
+				case EffectType.ASSIGN:
+					tempValue=curEffect.value;
+					return;
+				}
+				
+			}
+		}
+		
+	}
+	
+	
+}
+public class FloatCharacteristic :Characteristic<float> {
+	public FloatCharacteristic(float init){
+		startValue = init;
+	}
+	override public void ReCount(){
+		tempValue = startValue;
+		foreach (BaseEffect eff in effectList) {
+			Effect<float> curEffect = (Effect<float>) eff;
+			if(curEffect!=null){
+				switch(curEffect.type){
+				case EffectType.ADD:	
+					tempValue=tempValue +curEffect.value;
+					break;
+				case EffectType.MULIPLIE:	
+					tempValue*=curEffect.value;
+					break;
+				case EffectType.ASSIGN:
+					tempValue=curEffect.value;
+					return;
+				}
+				
+			}
+		}
+		
+	}
+	
+	
+}
+
 [Serializable]
-class IntCharacteristic{
+public class StartIntCharacteristic{
 	public int startValue;
 	public CharacteristicList characteristic;
 }
 [Serializable]
-class BoolCharacteristic{
+public class StartBoolCharacteristic{
 	public bool startValue;
 	public CharacteristicList characteristic;
 }
 [Serializable]
-class FloatCharacteristic{
+public class StartFloatCharacteristic{
 	public float startValue;
 	public CharacteristicList characteristic;
 }
 public class CharacteristicManager : MonoBehaviour {
 	
-	public IntCharacteristic[] startIntSharacteristic;
-	public BoolCharacteristic[] startBoolSharacteristic;
-	public FloatCharacteristic[] startFloatSharacteristic;
+	public StartIntCharacteristic[] startIntCharacteristic;
+	public StartBoolCharacteristic[] startBoolCharacteristic;
+	public StartFloatCharacteristic[] startFloatCharacteristic;
 	
 	
 	private BaseCharacteristic[] allCharacteristic;
 	
-	void Init(){
-		allCharacteristic = new Characteristic(Enum.GetValues(typeof(CharacteristicList)).Length);
-		for(int  i=0; i<startIntSharacteristic.Lenght;i++){
-			allCharacteristic[(int)startIntSharacteristic[i].characteristic] = new Characteristic<int>(startIntSharacteristic[i].startValue);
+	public 	void Init(){
+		allCharacteristic = new BaseCharacteristic[Enum.GetValues (typeof(CharacteristicList)).Length];
+		for(int  i=0; i<startIntCharacteristic.Length;i++){
+			allCharacteristic[(int)startIntCharacteristic[i].characteristic] = new IntCharacteristic(startIntCharacteristic[i].startValue);
 		}
-		for(int  i=0; i<startBoolSharacteristic.Lenght;i++){
-			allCharacteristic[(int)startBoolSharacteristic[i].characteristic] = new Characteristic<bool>(startBoolSharacteristic[i].startValue);
+		for(int  i=0; i<startBoolCharacteristic.Length;i++){
+			allCharacteristic[(int)startBoolCharacteristic[i].characteristic] = new BoolCharacteristic(startBoolCharacteristic[i].startValue);
 		}
-		for(int  i=0; i<startFloatSharacteristic.Lenght;i++){
-			allCharacteristic[(int)startFloatSharacteristic[i].characteristic] = new Characteristic<float>(startFloatSharacteristic[i].startValue);
+		for(int  i=0; i<startFloatCharacteristic.Length;i++){
+			allCharacteristic[(int)startFloatCharacteristic[i].characteristic] = new FloatCharacteristic(startFloatCharacteristic[i].startValue);
 		}
 	
 	}
 	void Update(){
-		for(int  i=0; i<allCharacteristic.Lenght;i++){
-			allCharacteristic[i].UpdateList();
+		for(int  i=0; i<allCharacteristic.Length;i++){
+			if(allCharacteristic[i]!=null){
+				allCharacteristic[i].UpdateList();
+			}
 		}
 	}
 	public int GetIntChar(CharacteristicList characteristic){
-			return((Characteristic<int>)allCharacteristic[(int)characteristic]).GetValue();
+		Debug.Log (allCharacteristic [(int)characteristic]);
+			return((IntCharacteristic)allCharacteristic[(int)characteristic]).GetValue();
 
 	
 	}
-	public float GetIntChar(CharacteristicList characteristic){
-			return((Characteristic<float>)allCharacteristic[(int)characteristic]).GetValue();
+	public float GetFloatChar(CharacteristicList characteristic){
+			return((FloatCharacteristic)allCharacteristic[(int)characteristic]).GetValue();
 	
 	}
-	public bool GetIntChar(CharacteristicList characteristic){
-			return((Characteristic<bool>)allCharacteristic[(int)characteristic]).GetValue();
+	public bool GetBoolChar(CharacteristicList characteristic){
+			return((BoolCharacteristic)allCharacteristic[(int)characteristic]).GetValue();
 	
 	}
 	
