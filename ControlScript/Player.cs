@@ -13,6 +13,8 @@ public class Player : MonoBehaviour {
 	public bool isStarted = false;
 
 	public int selected;
+
+	public int selectedBot;
 	
 	private Pawn currentPawn;
 	
@@ -102,8 +104,8 @@ public class Player : MonoBehaviour {
 				currentPawn =PlayerManager.instance.SpawmPlayer(prefabClass[selected],team);
 				PVPGameRule.instance.Spawn(team);
 				AfterSpawnSetting(currentPawn,PawnType.PAWN);
-				prefabBot =PlayerManager.instance.avaibleBots[selected];
-				prefabGhostBot =PlayerManager.instance.ghostsBots[selected];
+				prefabBot =PlayerManager.instance.avaibleBots[selectedBot];
+				prefabGhostBot =PlayerManager.instance.ghostsBots[selectedBot];
 			}
 		}else{
 			Ray centerofScreen =Camera.main.ViewportPointToRay(new Vector3(0.5f, 0.5f, 0f));
