@@ -182,11 +182,12 @@ public class Pawn : DamagebleObject {
 		public int shootCnt=0;
 	
 	};
-	
+
+	private CharacteristicManager charMan;
 	public BasePawnStatistic statistic = new BasePawnStatistic();
 	// Use this for initialization
 	void Start () {
-		maxHealth = health;
+	
 		 photonView = GetComponent<PhotonView>();
 		if (!photonView.isMine) {
 						Destroy (GetComponent<ThirdPersonController> ());
@@ -208,6 +209,9 @@ public class Pawn : DamagebleObject {
 		headOffset.y = capsule.bounds.max.y - myTransform.position.y;
 
 		distToGround = capsule.height/2-capsule.center.y;
+		charMan = GetComponent<CharacteristicManager> ();
+		charMan.Init ();
+		health= charMan.GetIntChar(CharacteristicList.MAXHEALTH);
 		//Debug.Log (distToGround);
 	}
 	
@@ -234,6 +238,7 @@ public class Pawn : DamagebleObject {
 	}
 
 	public void Heal(float damage,GameObject Healler){
+		int maxHealth =charMan.GetIntChar(CharacteristicList.MAXHEALTH);
 		health += damage;
 		if (maxHealth < health) {
 			health=maxHealth;		

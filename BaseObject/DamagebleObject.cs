@@ -4,13 +4,12 @@ using System.Collections;
 public class DamagebleObject : DestroyableNetworkObject {
 
 	public float health;
-	[HideInInspector] 
-	public float maxHealth;
+
 
 	public bool destructableObject = true;
 	// Use this for initialization
 	void Start () {
-		maxHealth = health;
+
 	}
 	
 	// Update is called once per frame
