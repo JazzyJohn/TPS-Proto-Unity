@@ -20,6 +20,8 @@ public enum WallState{
 
 public class Pawn : DamagebleObject {
 
+	public const int SYNC_MULTUPLIER = 5;
+
 	public LayerMask groundLayers = -1;
 	public LayerMask wallRunLayers = -1;
 	public LayerMask climbLayers = 1 << 9; // Layer 9
@@ -364,8 +366,8 @@ public class Pawn : DamagebleObject {
 
 		} else {
 
-			myTransform.position = Vector3.Lerp(myTransform.position, correctPlayerPos, Time.deltaTime * 5);
-			myTransform.rotation = Quaternion.Lerp(myTransform.rotation, correctPlayerRot, Time.deltaTime * 5);
+			myTransform.position = Vector3.Lerp(myTransform.position, correctPlayerPos, Time.deltaTime *SYNC_MULTUPLIER);
+			myTransform.rotation = Quaternion.Lerp(myTransform.rotation, correctPlayerRot, Time.deltaTime * SYNC_MULTUPLIER);
 
 		}
 //		Debug.Log (characterState);
@@ -408,7 +410,9 @@ public class Pawn : DamagebleObject {
 							
 				//
 					}else{
-
+				strafe = CalculateRepStarfe();
+				//Debug.Log (strafe);	
+				 speed =CalculateRepSpeed();
 							switch(nextState){
 								case CharacterState.Idle:
 									if(characterState == CharacterState.Jumping){
@@ -591,6 +595,27 @@ public class Pawn : DamagebleObject {
 		}
 		if (result > groundTrotSpeed) {
 			return 2.0f*Mathf.Sign(Vector3.Dot(_rb.velocity.normalized,myTransform.forward));	
+		}
+		return 0.0f;		
+	}
+	float CalculateRepStarfe(){
+		Vector3 velocity =  correctPlayerPos-myTransform.position;
+		return Vector3.Dot (myTransform.right, velocity.normalized);
+				
+	
+	}
+	float CalculateRepSpeed(){
+		Vector3 velocity =  correctPlayerPos-myTransform.position;
+		velocity = velocity/(Time.deltaTime * SYNC_MULTUPLIER);
+		float result =Vector3.Project (velocity,myTransform.forward).magnitude;
+		if (result < groundWalkSpeed) {
+			return 0.0f;		
+		}
+		if (result > groundWalkSpeed && result < groundTrotSpeed) {
+			return 1.0f*Mathf.Sign(Vector3.Dot(velocity.normalized,myTransform.forward));	
+		}
+		if (result > groundTrotSpeed) {
+			return 2.0f*Mathf.Sign(Vector3.Dot(velocity,myTransform.forward));	
 		}
 		return 0.0f;		
 	}
