@@ -100,10 +100,22 @@ public class PlayerMainGui : MonoBehaviour {
 	public GUISkin messageSkin;
 
 	private MenuTF respawnMenu;
+
+	private ChatHolder[] chats;
+
+	public static bool IsMouseAV;
 	// Use this for initialization
 	void Start () {
 		MainCamera = Camera.main;
 		respawnMenu = GetComponent<MenuTF>();
+	}
+
+	public void SetLocalPlayer(Player newPlayer){
+		LocalPlayer = newPlayer;
+		chats = FindObjectsOfType<ChatHolder> ();
+		foreach (ChatHolder holder in chats) {
+			holder.SetPlayer(newPlayer);	
+		}
 	}
 
 	void Update(){
@@ -118,6 +130,7 @@ public class PlayerMainGui : MonoBehaviour {
 
 	// Update is called once per frame
 	void OnGUI () {
+				IsMouseAV = Screen.lockCursor;
 				if (LocalPlayer == null) {
 						return;
 				}
@@ -134,6 +147,11 @@ public class PlayerMainGui : MonoBehaviour {
 						} else {
 							
 							MainHud();	
+							if (GUI.GetNameOfFocusedControl () != "") {
+									Screen.lockCursor = false;
+							}else{
+								Screen.lockCursor = true;
+							}
 						}
 
 						break;
@@ -170,7 +188,7 @@ public class PlayerMainGui : MonoBehaviour {
 
 				}
 				if (showDebug) {
-					GUI.BeginGroup (new Rect (0, Screen.height - 300, 400, 300));
+						GUI.BeginGroup (new Rect (0, Screen.height - 300, 400, 300));
 						int j = 0;
 						foreach (LogMess logMessage in logMessages) {
 								j++;
@@ -180,6 +198,10 @@ public class PlayerMainGui : MonoBehaviour {
 								//GUI.Label(messRect,logMessage.trace);
 						}
 						GUI.EndGroup ();
+				} else {
+
+					chats[0].DrawChatBox();
+
 				}
 
 		//LABEL SECTION
@@ -192,6 +214,8 @@ public class PlayerMainGui : MonoBehaviour {
 		GUIUtility.RotateAroundPivot(45.0f, pivotPoint);
 		versionrect = new Rect (screenX  - VersionSize,VersionSize/2.5f, VersionSize*10, VersionSize);
 		GUI.Label(versionrect , "Version:" +PlayerManager.instance.version + " Date: "+ System.DateTime.Now.ToShortDateString());
+
+
 
 	}
 
@@ -224,7 +248,7 @@ public class PlayerMainGui : MonoBehaviour {
 
 	void MainHud(){
 		float screenX = Screen.width, screenY = Screen.height;
-		Screen.lockCursor = true;
+		//Screen.lockCursor = true;
 		Rect crosrect = new Rect ((screenX - crosshairWidth) / 2, (screenY - crosshairHeight) / 2, crosshairWidth, crosshairHeight);
 		
 		GUI.Label (crosrect, crosshair);

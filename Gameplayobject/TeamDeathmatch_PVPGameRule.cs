@@ -19,6 +19,7 @@ public class TeamDeathmatch_PVPGameRule : PVPGameRule {
 			maxScore=killMax;
 		}
 		public override void ActuakKillCount(int team){
+		Debug.Log ("KILL COUNT" + team);
 			teamKill[team-1]++;
 			teamScore[team-1]++;
 		}

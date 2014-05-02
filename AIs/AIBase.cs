@@ -2,21 +2,23 @@
 using System.Collections;
 using System.Collections.Generic;
 
-[RequireComponent(typeof(SphereCollider))]
+
 public class AIBase : MonoBehaviour
 {
     public AIType TypeofBehavior;
 
     public float
-        DetectionRadius,
-        XRayDistance,
+        //DetectionRadius,
+        AngleRange,
         TickPause;
 
-    private SphereCollider _SC;
+   // private SphereCollider _SC;
 
     private List<GameObject> _arrayPlayerInRadius = new List<GameObject>();
 
-    private AITurret _turret;
+	private AIState _currentState;
+
+	private Pawn controlledPawn;
     //private AIPatrol _patrol;
     //private AIHolder _holder;
     //private AIRusher _rusher;
@@ -25,15 +27,17 @@ public class AIBase : MonoBehaviour
 
     private void Awake()
     {
-        _SC = GetComponent<SphereCollider>();
+        /*_SC = GetComponent<SphereCollider>();
         _SC.isTrigger = true;
-        _SC.radius = DetectionRadius;
+        _SC.radius = DetectionRadius;*/
+		controlledPawn = GetComponent<Pawn> ();
         switch (TypeofBehavior)
         {
             case AIType.Turret:
                 {
-                    _turret = gameObject.AddComponent<AITurret>();
-                    _turret.DistanceXRay = XRayDistance;
+				_currentState = gameObject.AddComponent<AITurret>();
+				_currentState.controlledPawn = controlledPawn;
+				_currentState.AngleRange = AngleRange;		
                 }
                 break;
             //case AIType.Patrol:
@@ -56,50 +60,22 @@ public class AIBase : MonoBehaviour
             //    break;
 
         }
+		StartCoroutine("Tick");
     }
     private IEnumerator Tick()
     {
         while (true)
         {
-            switch (TypeofBehavior)
-            {
-                case AIType.Turret:
-                    _turret.Tick();
-                    break;
-
-            }
+          
+			_currentState.PawnList = controlledPawn.getAllSeenPawn().ToArray();
+			_currentState.Tick();                  
+      
             yield return new WaitForSeconds(TickPause);
-            Debug.Log("Work");
+            //Debug.Log("Work");
         }
     }
 
-    private void OnTriggerEnter(Collider col)
-    {
-        if (col.CompareTag("Player"))
-        {
-            _arrayPlayerInRadius.Add(col.gameObject);
-            if (_arrayPlayerInRadius.Count > 0)
-                switch (TypeofBehavior)
-                {
-                    case AIType.Turret:
-                        _turret.PlayersList = _arrayPlayerInRadius.ToArray();
-                        break;
 
-                }
-            if (_arrayPlayerInRadius.Count == 1)
-                StartCoroutine("Tick");
-
-        }
-    }
-    private void OnTriggerExit(Collider col)
-    {
-        if (col.CompareTag("Player"))
-        {
-            _arrayPlayerInRadius.Remove(col.gameObject);
-            if (_arrayPlayerInRadius.Count == 0)
-                StopCoroutine("Tick");
-        }
-    }
 }
 
 public enum AIType

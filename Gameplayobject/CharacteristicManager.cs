@@ -208,16 +208,24 @@ public class CharacteristicManager : MonoBehaviour {
 		}
 	}
 	public int GetIntChar(CharacteristicList characteristic){
-		Debug.Log (allCharacteristic [(int)characteristic]);
+			if ((IntCharacteristic)allCharacteristic [(int)characteristic] == null) {
+				return 0;	
+			}
 			return((IntCharacteristic)allCharacteristic[(int)characteristic]).GetValue();
 
 	
 	}
 	public float GetFloatChar(CharacteristicList characteristic){
+			if ((FloatCharacteristic)allCharacteristic [(int)characteristic] == null) {
+				return 0.0f;	
+			}
 			return((FloatCharacteristic)allCharacteristic[(int)characteristic]).GetValue();
 	
 	}
 	public bool GetBoolChar(CharacteristicList characteristic){
+			if ((BoolCharacteristic)allCharacteristic [(int)characteristic] == null) {
+				return false;	
+			}
 			return((BoolCharacteristic)allCharacteristic[(int)characteristic]).GetValue();
 	
 	}

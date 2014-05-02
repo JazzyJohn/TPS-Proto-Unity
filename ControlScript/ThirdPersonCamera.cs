@@ -190,8 +190,11 @@ public class ThirdPersonCamera : MonoBehaviour
 		// distance meters behind the target
 		float vert =Input.GetAxis("Mouse Y");
 		float horizont =Input.GetAxis("Mouse X");
-		yAngle -= vert * angularMaxSpeed;
-		xAngle += horizont * angularMaxSpeed;
+		if (PlayerMainGui.IsMouseAV) {
+				yAngle -= vert * angularMaxSpeed;
+
+				xAngle += horizont * angularMaxSpeed;
+		}
 		if (yAngle > MaxYAngle) {
 			yAngle = MaxYAngle;
 		}

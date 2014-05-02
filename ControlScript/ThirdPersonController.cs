@@ -294,21 +294,24 @@ public float CalculateJumpVerticalSpeed ( float targetJumpHeight  )
 			
 			
 		}
-		if (Input.GetButtonDown ("Fire1")) {
-			
-			pawn.StartFire();
-		}
-		if (Input.GetButtonUp ("Fire1")) {
-			
-			pawn.StopFire();
-		}
-		float wheel =Input.GetAxis ("Mouse ScrollWheel");
+		if (PlayerMainGui.IsMouseAV) {
+						if (Input.GetButtonDown ("Fire1")) {
+				
+								pawn.StartFire ();
+						}
+						if (Input.GetButtonUp ("Fire1")) {
+				
+								pawn.StopFire ();
+						}
 		
-		if (wheel < 0) {
-			pawn.GetComponent<InventoryManager>().PrevWeapon();
-		}
-		if(wheel>0){
-			pawn.GetComponent<InventoryManager>().NextWeapon();
+						float wheel = Input.GetAxis ("Mouse ScrollWheel");
+		
+						if (wheel < 0) {
+								pawn.GetComponent<InventoryManager> ().PrevWeapon ();
+						}
+						if (wheel > 0) {
+								pawn.GetComponent<InventoryManager> ().NextWeapon ();
+						}
 		}
 
 }

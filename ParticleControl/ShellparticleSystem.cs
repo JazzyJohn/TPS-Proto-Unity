@@ -7,6 +7,8 @@ public class ShellparticleSystem : MonoBehaviour
 	//гильза должна имень rigidbody и любой коллайдер
 	public GameObject shellPrefab;
 
+	public float sheelSpeed=1.0f;
+
 	//Функция создания гильзы
 	public void Play(Collider owner)
 	{
@@ -17,7 +19,7 @@ public class ShellparticleSystem : MonoBehaviour
 		//transform.TransformDirection используется для конвертации координат
 		//ибо rigidbody.velocity поумолчанию работает только с глобальным
 		//Physics.IgnoreCollision(shellObject.collider, owner);
-		shellObject.rigidbody.velocity = transform.TransformDirection(new Vector3(Random.Range(0f, 0.1f), Random.Range(0.2f, 1f), Random.Range(-1.5f, -0.5f)));
+		shellObject.rigidbody.velocity = sheelSpeed*transform.TransformDirection(new Vector3(Random.Range(0f, 0.1f), Random.Range(0.2f, 1f), Random.Range(-1.5f, -0.5f)));
 		shellObject.rigidbody.angularVelocity = - transform.TransformDirection(new Vector3(Random.Range(10f, 10f), Random.Range(10f, 10f), Random.Range(10f, 10f)));
 	}
 }

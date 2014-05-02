@@ -62,22 +62,25 @@ public class Player : MonoBehaviour {
 		photonView = GetComponent<PhotonView> ();
 
 		if (photonView.isMine) {
-			myCamera = Camera.main;
-			((PlayerMainGui)myCamera.GetComponent (typeof(PlayerMainGui))).LocalPlayer = this;
-			//TODO: UNCOMMENT
-			robotTimer = robotTime;
+						myCamera = Camera.main;
+						((PlayerMainGui)myCamera.GetComponent (typeof(PlayerMainGui))).SetLocalPlayer(this);
+						//TODO: UNCOMMENT
+						robotTimer = robotTime;
 		
-			this.name = "Player";		
-			PlayerName = "Player" + PhotonNetwork.playerList.Length;
-			photonView.RPC("ASKTeam",PhotonTargets.MasterClient);
-			Application.ExternalCall( "SayMyName");
+						this.name = "Player";		
+						PlayerName = "Player" + PhotonNetwork.playerList.Length;
+						photonView.RPC ("ASKTeam", PhotonTargets.MasterClient);
+						Application.ExternalCall ("SayMyName");
 		
-			//StatisticHandler.StartStats(UID,PlayerName);
+						//StatisticHandler.StartStats(UID,PlayerName);
+		} else {
+			Destroy(GetComponent<MusicHolder>());
+			Destroy(GetComponent<AudioSource>());	
 		}
 	}
 	[RPC]
 	public void ASKTeam(){
-
+		Debug.Log ("ASKTeam" + this);
 		photonView.RPC("SetTeam",PhotonTargets.AllBuffered,PlayerManager.instance.NextTeam());
 	}
 	[RPC]

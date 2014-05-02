@@ -22,9 +22,14 @@ public class ServerHolder : MonoBehaviour {
 		{
 			PhotonNetwork.CreateRoom(null);
 		}
+		void OnCreatedRoom()
+		{
+			FindObjectOfType<PVPGameRule> ().StartGame ();
+		}
 		void OnJoinedRoom()
 		{
 			Camera.main.GetComponent<PlayerMainGui> ().enabled = true;
+
 			PhotonNetwork.Instantiate ("Player",Vector3.zero,Quaternion.identity,0);
 		}
 }

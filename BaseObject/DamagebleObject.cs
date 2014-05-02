@@ -3,7 +3,27 @@ using System.Collections;
 
 public class DamagebleObject : DestroyableNetworkObject {
 
-	public float health;
+	private float _health;
+
+	public float health{
+		
+		get {
+			return _health;
+		}
+		
+		
+		set {
+			if(_health!=value){
+				_health = value;
+				SendMessage ("HPChange", SendMessageOptions.DontRequireReceiver);
+				
+			}
+		
+			
+		}
+		
+	}
+
 
 
 	public bool destructableObject = true;

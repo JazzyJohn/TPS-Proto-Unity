@@ -92,13 +92,21 @@ public class PVPGameRule : MonoBehaviour {
 		public void OnPhotonSerializeView(PhotonStream stream, PhotonMessageInfo info)
 		{
 				if (stream.isWriting) {
-
+					for(int i=0;i<teamScore.Length;i++){
+						stream.SendNext(teamScore[i]);
+					}
 				} else {
-
+					for(int i=0;i<teamScore.Length;i++){
+					teamScore[i] =(int) stream.ReceiveNext();
+					}
 
 
 				}
 
+		}
+		public void StartGame(){
+
+		FindObjectOfType<AIDirector> ().SpawnBot ();
 		}
 		
 		

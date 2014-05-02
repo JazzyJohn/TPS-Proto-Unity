@@ -21,12 +21,11 @@ public class HealingProjectile : BaseProjectile {
 		if (pawn!=null) {
 			if(pawn.team ==owner.GetComponent<Pawn>().team){
 				pawn.Heal(damage.Damage,owner);
-
-			}else{
 				Destroy (gameObject, 0.1f);
+				return;
 			}
 			//Debug.Log ("HADISH INTO SOME PLAYER! " + hit.transform.gameObject.name);
-			return;
+
 		}
 		if (obj != null) {
 			obj.Damage(damage,owner);

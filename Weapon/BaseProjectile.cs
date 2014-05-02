@@ -6,10 +6,14 @@ using System.Collections;
 public class BaseDamage{
 	public float Damage;
 	public bool isVsArmor;
+	public float pushForce;
+	public Vector3 pushDirection;
+	public Vector3 hitPosition;
 	
 	public BaseDamage(BaseDamage old){
 		Damage = old.Damage;
 		isVsArmor = old.isVsArmor;
+		pushForce = old.pushForce;
 	}
 
 }
@@ -63,8 +67,9 @@ public class BaseProjectile : MonoBehaviour {
 		if (owner == hit.transform.gameObject||used) {
 			return;
 		}
-
-
+		used = true;
+		damage.pushDirection = mTransform.forward;
+		damage.hitPosition = hit.point;
 		DamagebleObject obj = hit.transform.gameObject.GetComponent <DamagebleObject>();
 		if (obj != null) {
 			obj.Damage(damage,owner);
@@ -75,7 +80,7 @@ public class BaseProjectile : MonoBehaviour {
 		if(hitParticle!=null){
 			Instantiate(hitParticle, hit.point, Quaternion.LookRotation(hit.normal));
 		}
-		used = true;
+	
 		Destroy (gameObject, 0.1f);
 
 	}
