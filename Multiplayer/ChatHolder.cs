@@ -81,6 +81,7 @@ public class ChatHolder : MonoBehaviour {
 		}
 
 		GUILayout.EndArea();
+		GUI.color = Color.white;
 	}
 
 	void AddMessage(string Message){

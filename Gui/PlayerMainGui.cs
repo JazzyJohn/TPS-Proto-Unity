@@ -1,4 +1,4 @@
-﻿using UnityEngine;
+﻿	using UnityEngine;
 using System.Collections;
 using System.Collections.Generic;
 
@@ -206,16 +206,17 @@ public class PlayerMainGui : MonoBehaviour {
 
 		//LABEL SECTION
 		GUI.skin = guiSkin;
-		Rect versionrect = new Rect (screenX  - VersionSize,0, VersionSize, VersionSize);
 
-		GUI.Label(versionrect, VersionMark);
+		Rect versionrect = new Rect (screenX  - VersionSize,0, VersionSize, VersionSize);
+		
+		GUI.DrawTexture(versionrect, VersionMark);
 		GUI.color = Color.black;
 		Vector3 pivotPoint = new Vector2(screenX  - VersionSize/2, VersionSize/2);
 		GUIUtility.RotateAroundPivot(45.0f, pivotPoint);
 		versionrect = new Rect (screenX  - VersionSize,VersionSize/2.5f, VersionSize*10, VersionSize);
 		GUI.Label(versionrect , "Version:" +PlayerManager.instance.version + " Date: "+ System.DateTime.Now.ToShortDateString());
-
-
+		
+		
 
 	}
 

@@ -949,13 +949,17 @@ public class Pawn : DamagebleObject {
 		return isGrounded;
 	}
 	public void Jump(){
-		animator.ApllyJump(true);	
+		if (animator != null) {
+						animator.ApllyJump (true);	
+		}
 		lastJumpTime = Time.time;
 		//photonView.RPC("JumpChange",PhotonTargets.OthersBuffered,true);
 	}
 
 	public void DidLand(){
-		animator.ApllyJump(false);
+		if (animator != null) {
+						animator.ApllyJump (false);
+		}
 		//Debug.Log ("LAND");
 		lastTimeOnWall = -10.0f;
 		//photonView.RPC("JumpChange",PhotonTargets.OthersBuffered,false);
