@@ -154,8 +154,10 @@ public class Pawn : DamagebleObject {
 		public int shootCnt=0;
 	
 	};
-	
+
 	public BasePawnStatistic statistic;
+
+	public ParticleEmitter emitter;
 
 
 	private bool isSpawn=false;//флаг респавна
@@ -164,8 +166,6 @@ public class Pawn : DamagebleObject {
 	void Start () {
 
 		isSpawn = true;//отключаем движения и повреждения
-		ParticleEmitter emitter;//получаем ссылку на эмиттер партикла
-		emitter=transform.GetChild(0).GetComponent<ParticleEmitter>();
 		emitter.Emit ();//запускаем эмиттер
 
 		maxHealth = health;
@@ -269,13 +269,11 @@ public class Pawn : DamagebleObject {
 			return;		
 		}
 		if (isSpawn) {//если респавн
-			ParticleEmitter emitter;
-			emitter = transform.GetChild (0).GetComponent<ParticleEmitter> ();
+
 			if (emitter.particleCount == 0) {//если все партиклы кончились
 				isSpawn=false;//то освобождаем все движения и повреждения
 			}
 		}
-
 
 		if (photonView.isMine) {
 						if (isAi) {
