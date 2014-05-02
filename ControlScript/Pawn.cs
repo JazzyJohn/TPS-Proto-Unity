@@ -193,6 +193,10 @@ public class Pawn : DamagebleObject {
 
 	public GameObject bloodSplash;
 
+	public ParticleEmitter emitter;
+
+	private bool isSpawn=false;//флаг респавна
+
 	protected void Awake(){
 		myTransform = transform;
 		ivnMan =GetComponent<InventoryManager> ();
@@ -202,8 +206,11 @@ public class Pawn : DamagebleObject {
 	}
 	// Use this for initialization
 	void Start () {
-	
 
+		if (emitter != null) {
+				emitter.Emit ();//запускаем эмиттер
+				isSpawn = true;//отключаем движения и повреждения
+		}
 		if (!photonView.isMine) {
 
 						Destroy (GetComponent<ThirdPersonController> ());
@@ -232,6 +239,10 @@ public class Pawn : DamagebleObject {
 	}
 	
 	public override void Damage(BaseDamage damage,GameObject killer){
+		if (isSpawn) {//если только респавнились, то повреждений не получаем
+			return;
+		}
+
 		Pawn killerPawn =killer.GetComponent<Pawn> ();
 		if (killerPawn != null && killerPawn.team == team &&! PlayerManager.instance.frendlyFire) {
 			return;
@@ -469,6 +480,12 @@ public class Pawn : DamagebleObject {
 		if (!isActive) {
 			return;		
 		}
+		if (isSpawn) {//если респавн
+
+			if (emitter==null) {//если все партиклы кончились
+				isSpawn=false;//то освобождаем все движения и повреждения
+			}
+		}
 
 		if (photonView.isMine) {
 
@@ -688,6 +705,10 @@ public class Pawn : DamagebleObject {
 	}
 	public void Movement(Vector3 movement,CharacterState state){
 		//Debug.Log (state);
+		//Debug.Log (state);
+		if (isSpawn) {//если только респавнились, то не шевелимся
+			return;
+		}
 
 		nextState = state;
 
