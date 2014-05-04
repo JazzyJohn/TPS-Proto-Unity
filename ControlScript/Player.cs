@@ -58,6 +58,8 @@ public class Player : MonoBehaviour {
 
 	private PhotonView photonView;
 
+	public UseObject useTarget;
+
 	void Start(){
 		photonView = GetComponent<PhotonView> ();
 
@@ -162,8 +164,9 @@ public class Player : MonoBehaviour {
 
 				}
 			}
-
+				
 				if(inBot){
+					useTarget= null;
 					if(Input.GetButtonDown("Use")){
 						ExitBot();
 					}
@@ -177,6 +180,18 @@ public class Player : MonoBehaviour {
 								}
 							}
 						}
+
+					if(currentPawn.curLookTarget!=null){
+
+						useTarget = currentPawn.curLookTarget.GetComponent<UseObject>();
+						if(useTarget!=null&&Input.GetButtonDown("Use")){
+							useTarget.Use(currentPawn);
+
+						}
+					}else{
+						useTarget= null;
+					}
+					//Debug.Log (currentPawn.curLookTarget);
 
 				}
 			if(Input.GetButtonDown("Fire2")){
@@ -302,6 +317,7 @@ public class Player : MonoBehaviour {
 			stats.ammoInGun = curPawn.CurWeapon.curAmmo;
 			stats.ammoInGunMax = curPawn.CurWeapon.clipSize;
 			stats.ammoInBag = curPawn.GetAmmoInBag ();
+			stats.gunName = curPawn.CurWeapon.weaponName;
 		}
 
 		

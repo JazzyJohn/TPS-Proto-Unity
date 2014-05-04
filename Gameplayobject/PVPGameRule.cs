@@ -106,7 +106,7 @@ public class PVPGameRule : MonoBehaviour {
 		}
 		public void StartGame(){
 
-		FindObjectOfType<AIDirector> ().SpawnBot ();
+		FindObjectOfType<AIDirector> ().StartDirector ();
 		}
 		
 		

@@ -55,6 +55,10 @@ public class BaseWeapon : DestroyableNetworkObject {
 
 	public string attackAnim;
 
+	public string weaponName;
+
+	public float recoilMod;
+
 	// Use this for initialization
 	void Start () {
 		curTransform = transform;
@@ -140,6 +144,9 @@ public class BaseWeapon : DestroyableNetworkObject {
 	public bool IsReloading(){
 		return isReload;
 	}
+	public bool IsShooting(){
+		return isShooting && !isReload;
+	}
 	void Fire(){
 		if (!CanShoot ()) {
 			return;		
@@ -173,6 +180,7 @@ public class BaseWeapon : DestroyableNetworkObject {
 			break;
 			
 		}
+		owner.HasShoot ();
 		photonView.RPC("FireEffect",PhotonTargets.Others);
 	}
 	public virtual bool CanShoot (){
@@ -210,7 +218,7 @@ public class BaseWeapon : DestroyableNetworkObject {
 		Camera maincam = Camera.main;
 		Ray centerRay= maincam.ViewportPointToRay(new Vector3(.5f, 0.5f, 1f));
 		RaycastHit hitInfo;
-		Vector3 targetpoint;
+
 		if (Physics.Raycast (centerRay, out hitInfo, weaponRange)) {
 			DamagebleObject target =(DamagebleObject) hitInfo.collider.GetComponent(typeof(DamagebleObject));
 			if(target!=null){
@@ -218,7 +226,7 @@ public class BaseWeapon : DestroyableNetworkObject {
 			}
 		}
 	}
-	void GenerateProjectile(){
+	protected virtual void GenerateProjectile(){
 		Vector3 startPoint  = muzzlePoint.position+muzzleOffset;
 		Quaternion startRotation = getAimRotation();
 		GameObject proj;
@@ -235,13 +243,13 @@ public class BaseWeapon : DestroyableNetworkObject {
 		projScript.owner = owner.gameObject;
 	}
 	[RPC]
-	void GenerateProjectileRep(Vector3 startPoint,Quaternion startRotation){
+	protected void GenerateProjectileRep(Vector3 startPoint,Quaternion startRotation){
 		GameObject proj=Instantiate(projectilePrefab,startPoint,startRotation) as GameObject;
 		BaseProjectile projScript = proj.GetComponent<BaseProjectile>();
 		projScript.damage =new BaseDamage(damageAmount) ;
 		projScript.owner = owner.gameObject;
 	}
-	Quaternion getAimRotation(){
+	protected Quaternion getAimRotation(){
 		/*Vector3 randVec = Random.onUnitSphere;
 		Vector3 normalDirection  = owner.getAimRotation(weaponRange)-muzzlePoint.position;
 		normalDirection =normalDirection + randVec.normalized * normalDirection.magnitude * aimRandCoef / 100;*/

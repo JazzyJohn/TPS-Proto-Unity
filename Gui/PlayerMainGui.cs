@@ -81,6 +81,7 @@ public class PlayerMainGui : MonoBehaviour {
 		public float ammoInGun=0;
 		public float ammoInGunMax=0;
 		public float ammoInBag=0;
+		public string gunName="";
 			
 	}
 	public class GameStats{
@@ -141,6 +142,7 @@ public class PlayerMainGui : MonoBehaviour {
 			
 				//MAIN HUD
 						if (LocalPlayer.IsDead ()) {
+							Screen.lockCursor = false;
 							RespawnGui();
 								
 					
@@ -160,7 +162,6 @@ public class PlayerMainGui : MonoBehaviour {
 					PlayerList();
 				
 					break;
-
 
 
 				}
@@ -239,7 +240,8 @@ public class PlayerMainGui : MonoBehaviour {
 			
 		}*/
 		respawnMenu.DrawMenu ();
-		if (Choice._Player != -1 && Choice._Robot != -1) {
+		if (Choice._Player != -1 && Choice._Robot != -1&&Choice._Team!= -1) {
+			LocalPlayer.SetTeam (Choice._Team);
 			LocalPlayer.selected = Choice._Player;
 			LocalPlayer.selectedBot = Choice._Robot;
 			LocalPlayer.isStarted = true;
@@ -251,8 +253,18 @@ public class PlayerMainGui : MonoBehaviour {
 		float screenX = Screen.width, screenY = Screen.height;
 		//Screen.lockCursor = true;
 		Rect crosrect = new Rect ((screenX - crosshairWidth) / 2, (screenY - crosshairHeight) / 2, crosshairWidth, crosshairHeight);
-		
+
+
 		GUI.Label (crosrect, crosshair);
+		if (LocalPlayer.useTarget != null) {
+			GUI.Label (crosrect, LocalPlayer.useTarget.guiIcon);
+			crosrect = new Rect ((screenX - crosshairWidth) / 2, (screenY - crosshairHeight) / 2, crosshairWidth*5, crosshairHeight);
+			if(LocalPlayer.useTarget is WeaponPicker){
+				GUI.Label (crosrect, "Pick Up " + LocalPlayer.useTarget.tooltip);
+			}else{
+				GUI.Label (crosrect, "use" + LocalPlayer.useTarget.tooltip);
+			}
+		}
 		crosrect = new Rect (screenX - crosshairWidth, 0, crosshairWidth, crosshairHeight);
 		PlayerStats localstats = LocalPlayer.GetPlayerStats ();
 		if (!LocalPlayer.inBot) {
@@ -311,8 +323,9 @@ public class PlayerMainGui : MonoBehaviour {
 				GUI.Label (mark, EnemyMark);
 			}
 		}	
-		
-		Rect statsRect = new Rect (screenX - crosshairWidth * 4, Screen.height - crosshairHeight * 3, crosshairWidth * 4, crosshairHeight);
+		Rect statsRect = new Rect (screenX - crosshairWidth * 4, Screen.height - crosshairHeight * 4, crosshairWidth * 4, crosshairHeight);
+		GUI.Label (statsRect, "Weapon: " + localstats.gunName);
+		statsRect = new Rect (screenX - crosshairWidth * 4, Screen.height - crosshairHeight * 3, crosshairWidth * 4, crosshairHeight);
 		GUI.Label (statsRect, "Health: " + localstats.health);
 		statsRect = new Rect (screenX - crosshairWidth * 4, Screen.height - crosshairHeight * 2, crosshairWidth * 4, crosshairHeight);
 		GUI.Label (statsRect, "Ammo: " + localstats.ammoInGun + "/" + localstats.ammoInGunMax);
@@ -361,7 +374,7 @@ public class PlayerMainGui : MonoBehaviour {
 		seconds = Mathf.FloorToInt(input - minutes * 60);
 		return string.Format("{0:0}:{1:00}", minutes, seconds);
 	}
-	public string FormTeamName(int team){
+	public static string FormTeamName(int team){
 		switch (team) {
 			case 1:
 			return "A TEAM"	;

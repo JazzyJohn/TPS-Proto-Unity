@@ -1,7 +1,7 @@
 using UnityEngine;
 using System;
 
-public enum AMMOTYPE{PISTOL,RIFLE,ROCKETS,MACHINEGUN};
+public enum AMMOTYPE{PISTOL,RIFLE,ROCKETS,MACHINEGUN,SHOOTGUNSHEELL};
 
 [RequireComponent (typeof (Pawn))]
 public class InventoryManager : MonoBehaviour {
@@ -163,6 +163,7 @@ public class InventoryManager : MonoBehaviour {
 				DropWeapon(prefabWeapon[i],weaponInfo[i]);
 				prefabWeapon[i]=newWeapon;
 				weaponInfo[i]=new WeaponBackUp(prefabWeapon[i].clipSize, prefabWeapon[i].ammoType);
+				ChangeWeapon(i);
 				return;
 			}
 		}
@@ -186,10 +187,10 @@ public class InventoryManager : MonoBehaviour {
 	//TODO: implementation of dropping weapon on ground after picking another one 
 	void DropWeapon(BaseWeapon oldWeapon,WeaponBackUp weaponinfo){
 		GameObject droppedWeapon =PhotonNetwork.Instantiate(oldWeapon.pickupPrefabPrefab.name,transform.position,transform.rotation,0) as GameObject;
-		OldWeaponPicker picker = (OldWeaponPicker)droppedWeapon.GetComponent(typeof(OldWeaponPicker));
-		picker.info =weaponinfo;
-		picker.prefabWeapon =oldWeapon;
-		picker.isOneUse = true;
+		WeaponPicker picker = droppedWeapon.GetComponent<WeaponPicker>();
+		picker.SetNewData (weaponinfo);
+		//picker.info =weaponinfo;
+
 	}
 	
 	public void NextWeapon(){

@@ -72,6 +72,7 @@ public class MenuTF : MonoBehaviour {
 
 	public GUIStyle[] _GunsGS = new GUIStyle[10];
 
+	public GUIStyle _TS = new GUIStyle ();
 
 	//Preview image's
 	private Texture2D _ImgCont;
@@ -118,6 +119,7 @@ public class MenuTF : MonoBehaviour {
 
 		Choice._Player = -1;
 		Choice._Robot = -1;
+		Choice._Team = -1;
 		//_OpenAnimate = true;
 
 	}
@@ -371,7 +373,19 @@ public class MenuTF : MonoBehaviour {
 		{
 			GUI.Label(new Rect(Screen.width/_PosPrevImgX, Screen.height/_PosPrevImgY, Screen.width/_SizePrevImg, Screen.height/_SizePrevImg), _ImgCont);
 		}
-	
+#region selectTeam
+		for (int i = 1; i<3; i++) {
+			if (GUI.Button (new Rect(
+						i * (Screen.width * 0.2f), 
+						0, 
+						Screen.width * 0.2f, 
+						Screen.width * 0.05f
+				), PlayerMainGui.FormTeamName(i),_TS)) {
+				Choice._Team = i;
+			}
+		}
+#endregion
+
 	}//GUI
 
 }
@@ -380,5 +394,6 @@ public class MenuTF : MonoBehaviour {
 public static class Choice
 {
 	public static int _Player=-1;
-	public static int _Robot=-1;	
+	public static int _Robot=-1;
+	public static int _Team=-1;	
 }

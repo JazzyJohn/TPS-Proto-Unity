@@ -11,10 +11,11 @@ public class ThirdPersonCamera : MonoBehaviour
 	private Transform minimapTransform;
 	private Camera minimapCamera;
 	private Transform _target;
+	private Pawn _pawn;
 	
 	// The distance in the x-z plane to the target
 	
-	public float distance= 7.0f;
+	//public float distance= 7.0f;
 	
 	// the height we want the camera to be above the target
 	public float height= 3.0f;
@@ -55,6 +56,8 @@ public class ThirdPersonCamera : MonoBehaviour
 
 	public float yAngle =0.0f;
 	public float xAngle = 0.0f;
+
+	public const float RECOIL_GLOBAL_MOD = 3.0f;
 	void  Awake (){
 		
 		if(!cameraTransform && Camera.main)
@@ -68,6 +71,7 @@ public class ThirdPersonCamera : MonoBehaviour
 		minimapTransform = GameObject.FindGameObjectWithTag ("MinimapCamera").GetComponent<Transform> ();
 		minimapCamera = minimapTransform.camera;
 		_target = transform;
+		_pawn = GetComponent<Pawn> ();
 		if (_target)
 		{
 			controller = _target.GetComponent<ThirdPersonController>();
@@ -201,10 +205,12 @@ public class ThirdPersonCamera : MonoBehaviour
 		if(yAngle < MinYAngle) {
 			yAngle = MinYAngle;
 		}
-
+		float distance = -targetOffset.z;
+		Vector3 FlatOffset = targetOffset;
+		FlatOffset.z = 0;
 		Quaternion pitchRotation= Quaternion.Euler (yAngle, xAngle, 0);
 		Vector3 localCamOffset = pitchRotation* Vector3.back * distance;
-		Vector3 localTargetOffset = pitchRotation* targetOffset;
+		Vector3 localTargetOffset = pitchRotation* FlatOffset;
 		Vector3 resultcameraPos = targetCenter ;
 		
 		//Debug.Log(pitchRotation* Vector3.back );
@@ -212,24 +218,44 @@ public class ThirdPersonCamera : MonoBehaviour
 		localCamOffset += localTargetOffset;
 		//localCamOffset =  localCamOffset;
 		resultcameraPos +=localCamOffset;
-		Vector3 direction =  (cameraTransform.position - resultcameraPos);
-		Ray wallRay = new Ray (targetCenter, direction.normalized);
-		RaycastHit hit;
-	/*	if (Physics.Raycast (wallRay, out hit, direction.magnitude)) {
-			Debug.Log(hit.collider);
-				cameraTransform.position = 	hit.point;
-		} else {
-*/
-				cameraTransform.position = resultcameraPos;
-		//}
+		Vector3 direction =  (resultcameraPos - targetCenter -localTargetOffset);
+		Ray wallRay = new Ray (targetCenter+localTargetOffset, direction.normalized);
+		Debug.DrawLine (targetCenter+ localTargetOffset, targetCenter+ localTargetOffset + direction.normalized*distance);
+
+
 		
+		foreach (RaycastHit target  in Physics.RaycastAll (wallRay, distance)) {
+			if(target.transform!= _target){
+				//Debug.Log(target.collider);
+				Vector3 newPostion  = 	target.point-direction.normalized*1.0f;
+			
+
+				resultcameraPos = 	target.point-direction.normalized*1.0f;
+			} 
+
+		}
+		cameraTransform.position = resultcameraPos + GetShaker ();
 		// Always look at the target	
 		Vector3 relativePos=(targetCenter + localTargetOffset)-cameraTransform.position;
 
-		cameraTransform.rotation = Quaternion.LookRotation(relativePos.normalized);
+			cameraTransform.rotation = Quaternion.LookRotation (-direction);
+
 		///SetUpRotation(targetCenter+ localTargetOffset, targetHead);
 	}
+	Vector3 curAddShake= Vector3.zero;
+	Vector3 GetShaker(){
+
 	
+		curAddShake= Vector3.Lerp (curAddShake,Vector3.zero,Time.deltaTime*10);
+		return curAddShake;
+
+	}
+	public void AddShake(float mod){
+		if (_pawn != null) {
+			curAddShake = UnityEngine.Random.onUnitSphere/RECOIL_GLOBAL_MOD*mod;
+		}
+	}
+
 	void  LateUpdate (){
 		Apply (transform, Vector3.zero);
 	}
@@ -255,7 +281,7 @@ public class ThirdPersonCamera : MonoBehaviour
 
 		xAngle = 0;
 	}
-	void  SetUpRotation ( Vector3 centerPos ,   Vector3 headPos  ){
+	/*void  SetUpRotation ( Vector3 centerPos ,   Vector3 headPos  ){
 		// Now it's getting hairy. The devil is in the details here, the big issue is jumping of course.
 		// * When jumping up and down we don't want to center the guy in screen space.
 		//  This is important to give a feel for how high you jump and avoiding large camera movements.
@@ -298,7 +324,7 @@ public class ThirdPersonCamera : MonoBehaviour
 			extraLookAngle = extraLookAngle - centerToTopAngle;
 			cameraTransform.rotation *= Quaternion.Euler(-extraLookAngle, 0, 0);
 		}
-	}
+	}*/
 	
 	public Vector3 GetCenterOffset (){
 		return centerOffset;

@@ -36,7 +36,12 @@ public class AITurret : AIState
 			}
         }
     }
-
+	public override void WasHitBy(Pawn killer){
+		if (_enemy != null) {
+			return;
+		}
+		SetEnemy(killer);
+	}
     private Pawn SelectTarget()
     {
         //select target by distance
