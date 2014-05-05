@@ -59,6 +59,11 @@ public class BaseWeapon : DestroyableNetworkObject {
 
 	public float recoilMod;
 
+	//звуки
+	public AudioSource shootSoundSource;
+
+	public AudioSource reloadSoundSource;
+
 	// Use this for initialization
 	void Start () {
 		curTransform = transform;
@@ -100,6 +105,14 @@ public class BaseWeapon : DestroyableNetworkObject {
 
 	// Update is called once per frame
 	void Update () {
+
+						if (Input.GetMouseButtonDown (0)) {
+							Fire();
+						}
+						if (Input.GetMouseButtonDown (1)) {
+							Reload();
+						}
+
 		if(isReload){
 			if(reloadTimer<0){
 				Reload();
@@ -139,7 +152,15 @@ public class BaseWeapon : DestroyableNetworkObject {
 	}
 	public void Reload(){
 		isReload = false;
-		curAmmo =owner.GetComponent<InventoryManager>().GiveAmmo(ammoType,clipSize);	
+		curAmmo =owner.GetComponent<InventoryManager>().GiveAmmo(ammoType,clipSize);
+		if (reloadSoundSource!=null & reloadSoundSource.clip!=null) {//если источник и клип определен
+			if(reloadSoundSource.clip.length<reloadTime){//если длина клипа меньше интервала перезарядки
+				reloadSoundSource.PlayOneShot (reloadSoundSource.clip);// то проигрываем
+			}
+			else{
+				Debug.LogError("Duration of sound clip "+"<"+reloadSoundSource.clip.name+">"+"  more reload time of this weapon!!!");
+			}
+		}
 	}
 	public bool IsReloading(){
 		return isReload;
@@ -162,13 +183,21 @@ public class BaseWeapon : DestroyableNetworkObject {
 		if (rifleParticleController != null) {
 			rifleParticleController.CreateShootFlame ();
 		}
-		owner.statistic.shootCnt++;
+		if (shootSoundSource!=null & shootSoundSource.clip!=null) {//если источник и клип определен
+			if(shootSoundSource.clip.length<fireInterval){//если длина клипа меньше интервала стрельбы
+				shootSoundSource.PlayOneShot (shootSoundSource.clip);// то проигрываем
+			}
+			else{
+				Debug.LogError("Duration of sound clip "+"<"+shootSoundSource.clip.name+">"+"  more fire interval of this weapon!!!");
+			}
+		}
+				
 		switch (amunitionType) {
 		case AMUNITONTYPE.SIMPLEHIT:
 			DoSimpleDamage();
 			break;
 		case AMUNITONTYPE.PROJECTILE:
-			
+	
 			GenerateProjectile();
 			break;
 		case AMUNITONTYPE.RAY:
@@ -184,13 +213,13 @@ public class BaseWeapon : DestroyableNetworkObject {
 		photonView.RPC("FireEffect",PhotonTargets.Others);
 	}
 	public virtual bool CanShoot (){
-		Vector3 aimDir = (owner.getCachedAimRotation() -muzzlePoint.position).normalized;
-		Vector3 realDir = muzzlePoint.forward;
-		float angle = Vector3.Dot (aimDir, realDir);
-
-		if (angle < 0.8) {
-			return false;		
-		}
+//		Vector3 aimDir = (owner.getCachedAimRotation() -muzzlePoint.position).normalized;
+//		Vector3 realDir = muzzlePoint.forward;
+//		float angle = Vector3.Dot (aimDir, realDir);
+//
+//		if (angle < 0.8) {
+//			return false;		
+//		}
 		return true;
 	}
 
