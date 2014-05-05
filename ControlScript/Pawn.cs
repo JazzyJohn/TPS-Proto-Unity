@@ -978,7 +978,7 @@ public class Pawn : DamagebleObject {
 
 					animator.ApllyJump(true);						
 					animator.WallAnimation(false,false,false);
-					
+					FreeFall();
 					//Debug.Log ("My Name" +this +"  "+nextState+"  "+isGrounded);
 				}else{
 					SendMessage ("WallLand", SendMessageOptions.DontRequireReceiver);
