@@ -220,17 +220,17 @@ public class ThirdPersonCamera : MonoBehaviour
 		resultcameraPos +=localCamOffset;
 		Vector3 direction =  (resultcameraPos - targetCenter -localTargetOffset);
 		Ray wallRay = new Ray (targetCenter+localTargetOffset, direction.normalized);
-		Debug.DrawLine (targetCenter+ localTargetOffset, targetCenter+ localTargetOffset + direction.normalized*distance);
+		//Debug.DrawLine (targetCenter+ localTargetOffset, targetCenter+ localTargetOffset + direction.normalized*distance);
 
 
 		
-		foreach (RaycastHit target  in Physics.RaycastAll (wallRay, distance)) {
+		foreach (RaycastHit target  in Physics.SphereCastAll (wallRay, 0.5f,distance)) {
 			if(target.transform!= _target){
 				//Debug.Log(target.collider);
-				Vector3 newPostion  = 	target.point-direction.normalized*1.0f;
-			
+				//Vector3 newPostion  = 	target.point-direction.normalized*1.0f;
+				Vector3 offsetDirection =  (target.point - targetCenter -localTargetOffset);
 
-				resultcameraPos = 	target.point-direction.normalized*1.0f;
+				resultcameraPos = 	target.point-offsetDirection.normalized*1.0f;
 			} 
 
 		}

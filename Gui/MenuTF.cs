@@ -9,13 +9,11 @@ public class MenuTF : MonoBehaviour {
 	private int _PlayerNum;
 	private int _RobotNum;
 
-	//public float _TextSize;
-
 	
 //Background-----------------------
 	//0.8f
-	public float _BGWidthСoefficient;
-	public float _BGHeightСoefficient;
+	public float _BGWidthСoefficient = 0.98f;
+	public float _BGHeightСoefficient = 0.98f;
 
 	private int _BackgroundWidth;
 	private int _BackgroundHeight;
@@ -45,8 +43,7 @@ public class MenuTF : MonoBehaviour {
 	public Texture2D[] _ButtonPlayerTexPress;
 
 	public GUIStyle[] _GSbutton = new GUIStyle[4];
-	
-	public bool[] _playerActiveButton = new bool[3];
+
 
 	//Robot
 	public float _robButtonSizeX = 14f;
@@ -59,12 +56,23 @@ public class MenuTF : MonoBehaviour {
 	
 	public GUIStyle[] _robGSbutton = new GUIStyle[3];
 
-	public bool[] _robotActiveButton;
 
 	//Y
-	public int _ButtonIntervalY = 10;
+	//public int _ButtonIntervalY = 10;
 	//X
-	public int _ButtonIntervalX = 10;
+	//public int _ButtonIntervalX = 10;
+
+
+	//Team
+	public float _TeamButtonSizeX = 4.7f;
+	public float _TeamButtonSizeY = 20f;
+	public float _TeamButtonPosX = 3.4f;
+	public float _TeamButtonPosY = 44.4f;
+
+	public Texture2D[] _ButtonTeamTex;
+	public Texture2D[] _ButtonTeamTexPress;
+
+	public GUIStyle[] _TeamGSbutton = new GUIStyle[2];
 //---------------------------------
 
 
@@ -72,7 +80,10 @@ public class MenuTF : MonoBehaviour {
 
 	public GUIStyle[] _GunsGS = new GUIStyle[10];
 
-	public GUIStyle _TS = new GUIStyle ();
+	//StarpButton
+	public GUIStyle _StartGS = new GUIStyle();
+	public float _TextSize = 0.022f;
+
 
 	//Preview image's
 	private Texture2D _ImgCont;
@@ -81,17 +92,21 @@ public class MenuTF : MonoBehaviour {
 	public Texture2D[] _RobotPrevImg;
 
 	public float _SizePrevImg = 1.4f;
-	public float _PosPrevImgX = 3.4f;
+	public float _PosPrevImgX = 3f;
 	public float _PosPrevImgY = 3.9f;
+
+	
+
+	//TimerSpawn
+	private float _TimerSpawn;
+	private string _TimerSpawnView;
 
 //-----------------------------------------------------------------------------------------------------------
 	void Start () 
 	{
 		_Pl_Ro = -1;
-		_playerActiveButton = new bool[4];
-		_robotActiveButton = new bool[3];
 
-		//_GS.fontSize = Mathf.RoundToInt(Screen.width * _TextSize);
+		_StartGS.fontSize = Mathf.RoundToInt(Screen.width * _TextSize);
 
 		_BackgroundWidth = Mathf.RoundToInt(Screen.width/_BGWidthСoefficient);
 		_BackgroundHeight = Mathf.RoundToInt(Screen.height/_BGHeightСoefficient);
@@ -116,49 +131,36 @@ public class MenuTF : MonoBehaviour {
 			_robGSbutton[t].active.background = _ButtonRobotTexPress[t];
 			_robGSbutton[t].onNormal.background = _ButtonRobotTexPress[t];
 		}
+		for(int t = 0; t < _ButtonTeamTex.Length; t++)
+		{	
+			_TeamGSbutton[t].normal.background = _ButtonTeamTex[t];
+			_TeamGSbutton[t].active.background = _ButtonTeamTexPress[t];
+			_TeamGSbutton[t].onNormal.background = _ButtonTeamTexPress[t];
+		}
 
 		Choice._Player = -1;
 		Choice._Robot = -1;
 		Choice._Team = -1;
-		//_OpenAnimate = true;
 
+		_TimerSpawn = 5;
+
+
+
+		//_OpenAnimate = true;
 	}
 	
 //---------------------------------------------------------------------------------------------------------------
-	void Update () 
+	void FixedUpdate () 
 	{
 		//Debug.Log(Choice._Robot + "lol" + Choice._Player);
 
-		/*//OpenAnimate
-		if(_OpenAnimate == true)
-		{
-			_BackGroungRect.x += 20f;
-
-			if(_BackGroungRect.x >= _BoxX)
-			{
-				_OpenAnimate = false;
-				_BackGroungRect.x = _BoxX;
-			}
-		}
-		//CloseAnimate
-		if(_CloseAnimate == true)
-		{
-			_BackGroungRect.x -= 20f;
-			
-			if(_BackGroungRect.x <= _BoxXsp)
-			{
-				_CloseAnimate = false;
-				_BackGroungRect.x = _BoxXsp;
-				_OpenAnimate = true;
-			}
-		}
-
-		//MouseMenuLol
+		/*//MouseMenuLol
 		if(_OpenAnimate == false && _CloseAnimate == false)
 		{
 			_BackGroungRect.x = - Mathf.Clamp((Input.mousePosition.x - Screen.width/2 * -5) * 0.05f, -10, 10);
 			_BackGroungRect.y = + Mathf.Clamp((Input.mousePosition.y - Screen.height/2 * 5) * 0.05f, -10, 10);
 		}*/
+
 //----------------------------------------------------------------------------------------------------------------------------------
 
 		//Preview player, robot, bla-bla-bla
@@ -177,6 +179,22 @@ public class MenuTF : MonoBehaviour {
 		}
 		//----------------------------------------------
 
+
+		/*//TimerSpawn
+		if(_TimerSpawn > 0 && Choice._Player != -1 && Choice._Robot != -1 && Choice._Team != -1)
+		{
+			_TimerSpawn -= Time.deltaTime; 
+		}
+
+		if(_TimerSpawn > 0)
+		{
+		    _TimerSpawnView = Mathf.RoundToInt(_TimerSpawn).ToString();
+		}
+		else
+		{
+			_TimerSpawnView = "В БОЙ";
+		}
+		*/
 	}
 	
 //-----------------------------------------------------------------------------------------------------------------------------------
@@ -191,7 +209,7 @@ public class MenuTF : MonoBehaviour {
 			if(GUI.Button(new Rect(Screen.width/_ButtonPosX, Screen.height/_ButtonPosY, Screen.width/_ButtonSizeX, Screen.height/_ButtonSizeY), "", _GSbutton[0]))
 			{
 
-				for(int i = 0; i < _playerActiveButton.Length; i ++)
+			    for(int i = 0; i < _GSbutton.Length; i ++)
 				{
 					_GSbutton[i].normal.background = _ButtonPlayerTex[i];
 				}
@@ -366,34 +384,81 @@ public class MenuTF : MonoBehaviour {
 
 		}
 		//Robot--------------------
-
+//GunsMenu----------------------------------------------------------------------
 
 		//SetImage
 		if(_ImgCont != null)
 		{
 			GUI.Label(new Rect(Screen.width/_PosPrevImgX, Screen.height/_PosPrevImgY, Screen.width/_SizePrevImg, Screen.height/_SizePrevImg), _ImgCont);
 		}
-#region selectTeam
-		for (int i = 1; i<3; i++) {
-			if (GUI.Button (new Rect(
-						i * (Screen.width * 0.2f), 
-						0, 
-						Screen.width * 0.2f, 
-						Screen.width * 0.05f
-				), PlayerMainGui.FormTeamName(i),_TS)) {
-				Choice._Team = i;
+
+
+
+
+	//Team
+
+		if(GUI.Button(new Rect(Screen.width/_TeamButtonPosX, Screen.height/_TeamButtonPosY, Screen.width/_TeamButtonSizeX, Screen.height/_TeamButtonSizeY), "", _TeamGSbutton[0]))
+		{
+			
+			for(int i = 0; i <  _TeamGSbutton.Length; i ++)
+			{
+				_TeamGSbutton[i].normal.background = _ButtonTeamTex[i];
 			}
+			_TeamGSbutton[0].normal.background = _ButtonTeamTexPress[0];
+			
+			
+			Choice._Team = 1;
 		}
-#endregion
 
+		if(GUI.Button(new Rect(Screen.width/_TeamButtonPosX + Screen.width/_TeamButtonSizeX, Screen.height/_TeamButtonPosY, Screen.width/_TeamButtonSizeX, Screen.height/_TeamButtonSizeY), "", _TeamGSbutton[1]))
+		{
+			
+			for(int i = 0; i < _TeamGSbutton.Length; i ++)
+			{
+				_TeamGSbutton[i].normal.background = _ButtonTeamTex[i];
+			}
+			_TeamGSbutton[1].normal.background = _ButtonTeamTexPress[1];
+			
+			
+			Choice._Team = 2;
+		}
+	//Team-------------------------
+
+
+	
+		/*if(Choice._Player != -1 && Choice._Robot != -1 && Choice._Team != -1)
+		{
+			if(GUI.Button(new Rect(Screen.width/2 - (Screen.width/5)/2 , Screen.height/4 * 3.5f, Screen.width/5, Screen.height/15), _TimerSpawnView, _StartGS))
+			{
+				if(_TimerSpawn < 0)
+				{
+
+				}
+			}
+		}*/
+
+
+	
 	}//GUI
-
+	//StartButton
+	public bool SetTimer(int timer){
+		if(timer > 0)
+		{
+			_TimerSpawnView = Mathf.RoundToInt(timer).ToString();
+		}
+		else
+		{
+			_TimerSpawnView = "В БОЙ";
+		}
+		return GUI.Button (new Rect (Screen.width / 2 - (Screen.width / 5) / 2, Screen.height / 4 * 3.5f, Screen.width / 5, Screen.height / 15), _TimerSpawnView, _StartGS);
+	}
+	//StartButton-------------------
 }
 
 
 public static class Choice
 {
-	public static int _Player=-1;
-	public static int _Robot=-1;
-	public static int _Team=-1;	
+	public static int _Player;
+	public static int _Robot;
+	public static int _Team;
 }

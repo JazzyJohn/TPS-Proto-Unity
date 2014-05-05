@@ -685,6 +685,12 @@ public class Pawn : DamagebleObject {
 			cameraController.AddShake(RecoilMod());
 		}
 	}
+	public void Reload(){
+		if (CurWeapon != null) {
+			CurWeapon.ReloadStart();
+		}
+
+	}
 	//END WEAPON SECTION
 	void OnCollisionEnter(Collision collision) {
 		//Debug.Log ("COLLISION ENTER PAWN " + this + collision);

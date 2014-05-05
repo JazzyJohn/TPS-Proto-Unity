@@ -87,7 +87,7 @@ public class Player : MonoBehaviour {
 	}
 	[RPC]
 	public void SetTeam(int intTeam){
-		Debug.Log ("setTeam" + intTeam);
+		//Debug.Log ("setTeam" + intTeam);
 		team = intTeam;	
 	}
 	void Update(){
@@ -174,7 +174,7 @@ public class Player : MonoBehaviour {
 				}else {
 					
 						if(!inBot&&robotPawn!=null){
-							if(currentPawn.curLookTarget.gameObject==robotPawn.gameObject){
+							if(currentPawn.curLookTarget!=null&&currentPawn.curLookTarget.gameObject==robotPawn.gameObject){
 								if(Input.GetButtonDown("Use")){
 									EnterBot();
 								}

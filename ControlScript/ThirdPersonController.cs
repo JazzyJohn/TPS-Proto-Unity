@@ -303,6 +303,10 @@ public float CalculateJumpVerticalSpeed ( float targetJumpHeight  )
 				
 								pawn.StopFire ();
 						}
+						if (Input.GetButtonUp ("Reload")) {
+							
+							pawn.Reload ();
+						}
 		
 						float wheel = Input.GetAxis ("Mouse ScrollWheel");
 		

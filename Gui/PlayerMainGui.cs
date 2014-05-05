@@ -243,8 +243,12 @@ public class PlayerMainGui : MonoBehaviour {
 		if (Choice._Player != -1 && Choice._Robot != -1&&Choice._Team!= -1) {
 			LocalPlayer.SetTeam (Choice._Team);
 			LocalPlayer.selected = Choice._Player;
-			LocalPlayer.selectedBot = Choice._Robot;
-			LocalPlayer.isStarted = true;
+			LocalPlayer.selectedBot = Choice._Robot;		
+			int timer = (int)LocalPlayer.GetRespawnTimer ();
+			if(respawnMenu.SetTimer(timer)){
+				LocalPlayer.isStarted  =true;
+
+			}
 		}
 		
 	}
