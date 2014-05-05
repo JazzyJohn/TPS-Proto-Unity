@@ -61,8 +61,9 @@ public class BaseWeapon : DestroyableNetworkObject {
 
 	//звуки
 	public AudioSource shootSoundSource;
-
 	public AudioSource reloadSoundSource;
+
+	private soundControl sControl;//глобальный обьект контроллера звука
 
 	// Use this for initialization
 	void Start () {
@@ -183,14 +184,13 @@ public class BaseWeapon : DestroyableNetworkObject {
 		if (rifleParticleController != null) {
 			rifleParticleController.CreateShootFlame ();
 		}
-		if (shootSoundSource!=null & shootSoundSource.clip!=null) {//если источник и клип определен
-			if(shootSoundSource.clip.length<fireInterval){//если длина клипа меньше интервала стрельбы
+			if(sControl.checkTheLength(shootSoundSource,fireInterval)){//если длина клипа меньше интервала стрельбы
 				shootSoundSource.PlayOneShot (shootSoundSource.clip);// то проигрываем
 			}
 			else{
 				Debug.LogError("Duration of sound clip "+"<"+shootSoundSource.clip.name+">"+"  more fire interval of this weapon!!!");
 			}
-		}
+
 				
 		switch (amunitionType) {
 		case AMUNITONTYPE.SIMPLEHIT:

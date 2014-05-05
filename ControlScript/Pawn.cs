@@ -2,6 +2,7 @@
 using System.Collections;
 using System.Collections.Generic;
 
+
 public enum CharacterState {
 	Idle = 0,
 	Walking = 1,
@@ -197,7 +198,22 @@ public class Pawn : DamagebleObject {
 
 	public ParticleEmitter emitter;
 
+	//звуки
+	public AudioSource stepSound;
+	public AudioSource painSound1;
+	public AudioSource painSound2;
+	public AudioSource painSound3;
+	public AudioSource painSound4;
+	public AudioSource jumpSound;
+	public AudioSource spawnSound;
+
+	private soundControl sControl;//глобальный обьект контроллера звука
+
+
 	private bool isSpawn=false;//флаг респавна
+
+
+
 
 	protected void Awake(){
 		myTransform = transform;
@@ -241,9 +257,30 @@ public class Pawn : DamagebleObject {
 	}
 	
 	public override void Damage(BaseDamage damage,GameObject killer){
-		if (isSpawn) {//если только респавнились, то повреждений не получаем
+		if (isSpawn) {//если только респавнились
+			sControl.playAudioSourceOne(spawnSound);//играем звук и выходим что-бы не огребать
 			return;
 		}
+
+		//вопли при попадании
+		AudioSource tmpSource;
+		tmpSource = painSound1;
+		switch (Random.Range (0, 3)) {//случайно выбираем один
+				case 0:
+						tmpSource = painSound2;
+						break;
+
+				case 1:
+						tmpSource = painSound3;
+						break;
+
+				case 2:
+						tmpSource = painSound4;
+						break;
+				}
+		sControl.playAudioSourcePossibly (tmpSource);//играем
+
+
 
 
 		Pawn killerPawn =killer.GetComponent<Pawn> ();
