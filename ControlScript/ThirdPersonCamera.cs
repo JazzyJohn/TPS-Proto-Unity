@@ -223,8 +223,15 @@ public class ThirdPersonCamera : MonoBehaviour
 		//Debug.DrawLine (targetCenter+ localTargetOffset, targetCenter+ localTargetOffset + direction.normalized*distance);
 
 
-		
+		float magnitude = distance*distance;
 		foreach (RaycastHit target  in Physics.SphereCastAll (wallRay, 0.5f,distance)) {
+
+			float range =(target.point-targetCenter+localTargetOffset).sqrMagnitude;
+			if(range<magnitude){
+				magnitude=range;
+			}else{
+				continue;
+			}
 			if(target.transform!= _target){
 				//Debug.Log(target.collider);
 				//Vector3 newPostion  = 	target.point-direction.normalized*1.0f;

@@ -615,22 +615,48 @@ public class Pawn : DamagebleObject {
 				}
 				Camera maincam = Camera.main;
 				Ray centerRay= maincam.ViewportPointToRay(new Vector3(.5f, 0.5f, 1f));
-				RaycastHit hitInfo;
+
 				Vector3 targetpoint = Vector3.zero;
-				if (Physics.Raycast (centerRay,out hitInfo, weaponRange)&&hitInfo.collider!=collider) {
+				bool wasHit = false;
+				float magnitude = weaponRange;
+				float range=weaponRange;
+				foreach( RaycastHit hitInfo  in Physics.RaycastAll(centerRay, weaponRange))				
+				{
+					if(hitInfo.collider==myCollider)
+					{
+						continue;
+					}
+
+					//
+					//Debug.DrawRay(centerRay.origin,centerRay.direction);
 					targetpoint =hitInfo.point;
+					range =(targetpoint-centerRay.origin).magnitude;
+					if(range<magnitude){
+						magnitude=range;
+					}else{
+						continue;
+					}
+					wasHit= true;
 					curLookTarget= hitInfo.transform;
 					//Debug.Log (curLookTarget);
-				//	Debug.Log((targetpoint-myTransform.position).sqrMagnitude.ToString()+(cameraController.normalOffset.magnitude+5));
-					if((targetpoint-myTransform.position).sqrMagnitude<cameraController.normalOffset.magnitude+5){
+				
+
+
+				}
+
+				if(!wasHit){
+					//Debug.Log("NO HIT");
+					curLookTarget= null;
+					animator.WeaponDown(false);
+					targetpoint =maincam.transform.forward*weaponRange +maincam.ViewportToWorldPoint(new Vector3(.5f, 0.5f, 1f));
+				}else{
+					//Debug.Log(range.ToString()+(cameraController.normalOffset.magnitude+5));
+					if(magnitude<cameraController.normalOffset.magnitude+1){
 						targetpoint =maincam.transform.forward*weaponRange +maincam.ViewportToWorldPoint(new Vector3(.5f, 0.5f, 1f));
 						animator.WeaponDown(true);
 					}else{
 						animator.WeaponDown(false);
 					}
-				}else{
-					curLookTarget= null;
-					targetpoint =maincam.transform.forward*weaponRange +maincam.ViewportToWorldPoint(new Vector3(.5f, 0.5f, 1f));
 				}
 				aimRotation=targetpoint; 
 				
