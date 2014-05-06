@@ -10,10 +10,11 @@ public class JetAnimationManager : AnimationManager
 				
 			jetController.StopAll();
 		}
-				
+		base.ApllyJump(jump);		
     }
 	public override void DoubleJump(){
 		jetController.StartAll();
+		base.DoubleJump();
 	
 	}
 	public override void WallAnimation(bool leftW,bool rightW,bool frontW)
@@ -29,10 +30,12 @@ public class JetAnimationManager : AnimationManager
 		if (frontW ) {
 			jetController.StartMiddle();
 		}
+		base.WallAnimation (leftW, rightW, frontW);
 		
 	}
 	public override void FreeFall(){
 		jetController.StopAll();
+		base.FreeFall();		
 	}
 
 }

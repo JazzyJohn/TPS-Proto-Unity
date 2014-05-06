@@ -417,6 +417,7 @@ public class Pawn : DamagebleObject {
 				case CharacterState.Idle:
 					if(characterState == CharacterState.Jumping){
 						animator.ApllyJump(false);
+
 					}
 					animator.ApllyMotion (0.0f, speed, strafe);
 					break;
@@ -455,10 +456,13 @@ public class Pawn : DamagebleObject {
 					animator.ApllyJump(true);
 					if(characterState==CharacterState.WallRunning){					
 						animator.WallAnimation(false,false,false);
+						animator.FreeFall();
+
 					}
 					break;
 				case CharacterState.DoubleJump:
 					animator.ApllyJump(true);
+					animator.DoubleJump();
 					if(characterState==CharacterState.WallRunning){					
 						animator.WallAnimation(false,false,false);
 					}
@@ -998,7 +1002,7 @@ public class Pawn : DamagebleObject {
 					Vector3 velocity = rigidbody.velocity;
 					Vector3 velocityChange = (nextMovement - velocity);
 					//Debug.Log("DOUBLE JUMP");
-					
+					animator.DoubleJump();
 					rigidbody.AddForce(velocityChange, ForceMode.VelocityChange);
 
 					characterState = nextState;
@@ -1010,7 +1014,9 @@ public class Pawn : DamagebleObject {
 
 					animator.ApllyJump(true);						
 					animator.WallAnimation(false,false,false);
-					FreeFall();
+					if(characterState!=CharacterState.DoubleJump){
+						animator.FreeFall();
+					}
 					//Debug.Log ("My Name" +this +"  "+nextState+"  "+isGrounded);
 				}else{
 					SendMessage ("WallLand", SendMessageOptions.DontRequireReceiver);

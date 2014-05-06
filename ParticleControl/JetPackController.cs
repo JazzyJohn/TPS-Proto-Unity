@@ -8,19 +8,19 @@ public class JetPackController : MonoBehaviour {
 						   rightExhaust;
 						   
 	public void StartLeft(){
-		StopAll();
+		//StopAll();
 		if(!leftExhaust.isPlaying){
 			leftExhaust.Play();
 		}
 	}
 	public void StartRight(){
-		StopAll();
+		//StopAll();
 		if(!rightExhaust.isPlaying){
 			rightExhaust.Play();
 		}
 	}
 	public void StartMiddle(){
-		StopAll();
+		//StopAll();
 		if(!middleExhaust.isPlaying){
 			middleExhaust.Play();
 		}
@@ -37,8 +37,8 @@ public class JetPackController : MonoBehaviour {
 		}
 	}
 	public void StopAll(){
-		leftExhaust.Pause();
-		middleExhaust.Pause();
-		rightExhaust.Pause();
+		leftExhaust.Stop();
+		middleExhaust.Stop();
+		rightExhaust.Stop();
 	}
 }
