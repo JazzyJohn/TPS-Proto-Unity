@@ -7,10 +7,13 @@ public class AIDirector : MonoBehaviour {
 
 	private AISpawnPoint[] respawns;
 
+	private SelfSpawnPoint[] selfRespawns;
+	
 	public float directorTick= 0.5f;
 
 	public void StartDirector(){
 		respawns = FindObjectsOfType<AISpawnPoint> ();
+		selfRespawns = FindObjectsOfType<SelfSpawnPoint> ();
 		StartCoroutine("Tick");
 
 	}
@@ -32,6 +35,12 @@ public class AIDirector : MonoBehaviour {
 				if(go.isAvalable){
 					GameObject obj = PhotonNetwork.Instantiate (Bots[(int)(UnityEngine.Random.value*Bots.Length)].name, go.transform.position, go.transform.rotation, 0) as GameObject;
 					go.Spawned(obj.GetComponent<Pawn>());
+				}
+			}
+			foreach (SelfSpawnPoint go in selfRespawns) {
+				if(go.isAvalable){
+					
+					go.SpawObject();
 				}
 			}
 			yield return new WaitForSeconds(directorTick);
