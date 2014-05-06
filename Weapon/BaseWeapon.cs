@@ -59,6 +59,8 @@ public class BaseWeapon : DestroyableNetworkObject {
 
 	public float recoilMod;
 
+	public const float MAXDIFFERENCEINANGLE=0.7f;
+
 	// Use this for initialization
 	void Start () {
 		curTransform = transform;
@@ -188,7 +190,7 @@ public class BaseWeapon : DestroyableNetworkObject {
 		Vector3 realDir = muzzlePoint.forward;
 		float angle = Vector3.Dot (aimDir, realDir);
 
-		if (angle < 0.8) {
+		if (angle < MAXDIFFERENCEINANGLE) {
 			return false;		
 		}
 		return true;

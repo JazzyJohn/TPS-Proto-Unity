@@ -6,9 +6,20 @@ public class ServerHolder : MonoBehaviour {
 
 		// Use this for initialization
 		void Start()
-		{
-			PhotonNetwork.ConnectUsingSettings(PlayerManager.instance.version);
+			{
+
+				if (PhotonNetwork.inRoom) {
+						Camera.main.GetComponent<PlayerMainGui> ().enabled = true;
+			
+						PhotonNetwork.Instantiate ("Player", Vector3.zero, Quaternion.identity, 0);
+						if (PhotonNetwork.isMasterClient) {
+							FindObjectOfType<PVPGameRule> ().StartGame ();
+						}
+				} else {
+					PhotonNetwork.ConnectUsingSettings(PlayerManager.instance.version);
+				}
 		}
+		
 		
 		void OnGUI()
 		{

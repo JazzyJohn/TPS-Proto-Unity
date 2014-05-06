@@ -186,4 +186,7 @@ public class AnimationManager : MonoBehaviour
 	public void SetLong(bool longPull){
 		animator.SetBool("LongPull", longPull);
 	}
+	public bool isWeaponAimable(){
+		return !animator.GetBool("wall_stop");
+	}
 }

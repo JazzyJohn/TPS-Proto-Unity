@@ -3,7 +3,7 @@ using System.Collections;
 
 public class SelfSpawnPoint : ObjectSpawnPoint {
 
-	public GameObjects[] prefabs;
+	public GameObject[] prefabs;
 	
 	public void SpawObject(){
 		if(prefabs.Length>0){

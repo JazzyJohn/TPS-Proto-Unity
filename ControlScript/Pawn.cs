@@ -479,8 +479,17 @@ public class Pawn : DamagebleObject {
 				characterState = nextState;
 			}
 			if (isLookingAt) {
-				animator.animator.SetLookAtPosition (aimRotation);
+				Vector3 laimRotation =aimRotation;
+				/*if(animator.isWeaponAimable()){
+					Quaternion diference = Quaternion.FromToRotation(CurWeapon.muzzlePoint.forward,myTransform.forward);
+
+					Vector3 direction= laimRotation-myTransform.position;
+				
+					laimRotation =(diference *direction.normalized)*direction.magnitude +myTransform.position;
+				}*/
+				animator.animator.SetLookAtPosition (laimRotation);
 				animator.animator.SetLookAtWeight (1, 0.5f, 0.7f, 0.0f, 0.5f);
+
 			}
 		}
 
@@ -517,6 +526,8 @@ public class Pawn : DamagebleObject {
 				}else{
 					myTransform.rotation= Quaternion.Euler(eurler);
 				}
+				//animator.animator.SetLookAtPosition (aimRotation);
+				//animator.animator.SetLookAtWeight (1, 0.5f, 0.7f, 0.0f, 0.5f);
 				//CurWeapon.curTransform.rotation =  Quaternion.LookRotation(aimRotation-CurWeapon.curTransform.position);
 				/*Quaternion diff = Quaternion.identity;
 				Vector3 target = (aimRotation-CurWeapon.transform.position).normalized;
@@ -671,10 +682,10 @@ public class Pawn : DamagebleObject {
 			return aimRotation;
 		}
 	}
-	/*void OnDrawGizmos() {
-		Gizmos.color = Color.yellow;
-		Gizmos.DrawSphere(aimRotation, 1);
-	}*/
+	void OnDrawGizmos() {
+		//Gizmos.color = Color.yellow;
+		//Gizmos.DrawSphere(aimRotation, 1);
+	}
 	public Vector3 getCachedAimRotation(){
 		return aimRotation;
 
@@ -973,14 +984,14 @@ public class Pawn : DamagebleObject {
 		if (!photonView.isMine) {
 			return;
 		}
-
+		//Debug.Log (_rb.velocity.magnitude);
 		if (isGrounded) {
 			//Debug.Log ("Ground"+characterState);
 
 			if (_rb.isKinematic) _rb.isKinematic= false;
-			Vector3 velocity = rigidbody.velocity;
+			Vector3 velocity = _rb.velocity;
 			Vector3 velocityChange = (nextMovement - velocity);
-		
+			//Debug.Log (velocityChange);
 			rigidbody.AddForce(velocityChange, ForceMode.VelocityChange);
 
 			characterState = nextState;
@@ -999,7 +1010,7 @@ public class Pawn : DamagebleObject {
 				if(characterState!=CharacterState.WallRunning
 				   &&characterState!=CharacterState.PullingUp){
 
-					Vector3 velocity = rigidbody.velocity;
+					Vector3 velocity = _rb.velocity;
 					Vector3 velocityChange = (nextMovement - velocity);
 					//Debug.Log("DOUBLE JUMP");
 					animator.DoubleJump();
@@ -1189,7 +1200,7 @@ public class Pawn : DamagebleObject {
 			correctPlayerRot = (Quaternion) stream.ReceiveNext();
 		
 			this.aimRotation = (Vector3) stream.ReceiveNext();
-			Debug.Log(aimRotation);
+			//Debug.Log(aimRotation);
 			//nextState = (CharacterState) stream.ReceiveNext();
 			//Debug.Log (characterState);
 			//health=(float) stream.ReceiveNext();
