@@ -42,6 +42,7 @@ public class PVPGameRule : MonoBehaviour {
 
 		void Update(){
 			if(IsGameEnded()){
+				PhotonNetwork.automaticallySyncScene = true;
 				PhotonNetwork.LoadLevel(NextMap());
 			
 			}	
