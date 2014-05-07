@@ -41,6 +41,9 @@ public class PVPGameRule : GameRule {
 		}
 
 		void Update(){
+			if (!PhotonNetwork.isMasterClient) {
+				return;
+			}
 			if(IsGameEnded()){
 			IsLvlChanging= true;
 				PhotonNetwork.automaticallySyncScene = true;

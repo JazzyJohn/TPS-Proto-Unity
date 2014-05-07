@@ -91,7 +91,8 @@ public class PlayerMainGui : MonoBehaviour {
 	}
 	enum GUIState{
 		Normal,
-		Playerlist
+		Playerlist,
+		Dedicated,
 			
 	}
 	private GUIState guiState;
@@ -120,6 +121,9 @@ public class PlayerMainGui : MonoBehaviour {
 	}
 
 	void Update(){
+		if (guiState == GUIState.Dedicated) {
+			return;
+		}
 		guiState = GUIState.Normal;
 		if (Input.GetButton ("ScoreBtn")) {
 			guiState =GUIState.Playerlist;
@@ -132,6 +136,9 @@ public class PlayerMainGui : MonoBehaviour {
 	// Update is called once per frame
 	void OnGUI () {
 				IsMouseAV = Screen.lockCursor;
+				if (guiState == GUIState.Dedicated) {
+					DedicatedDraw();
+				}
 				if (LocalPlayer == null) {
 						return;
 				}
@@ -239,6 +246,7 @@ public class PlayerMainGui : MonoBehaviour {
 			}
 			
 		}*/
+
 		respawnMenu.DrawMenu ();
 		if (Choice._Player != -1 && Choice._Robot != -1&&Choice._Team!= -1) {
 			LocalPlayer.SetTeam (Choice._Team);
@@ -248,6 +256,14 @@ public class PlayerMainGui : MonoBehaviour {
 			if(respawnMenu.SetTimer(timer)){
 				LocalPlayer.isStarted  =true;
 
+			}
+		}
+		if (PhotonNetwork.isMasterClient&&(Application.platform==RuntimePlatform.WindowsPlayer||Application.platform==RuntimePlatform.WindowsEditor)) {
+			Debug.Log("olololo");
+			Rect crosrect = new Rect (0, 0, 100, 50);
+			if(GUI.Button(crosrect,"Dedicated")){
+				PhotonNetwork.Destroy(LocalPlayer.GetView());
+				guiState = GUIState.Dedicated;
 			}
 		}
 		
@@ -348,13 +364,30 @@ public class PlayerMainGui : MonoBehaviour {
 		
 
 	}
+
+	void DedicatedDraw(){
+		float screenX = Screen.width, screenY = Screen.height;
+		GameStats gamestats = PVPGameRule.instance.GetStats ();
+		Rect rectforName = new Rect ((screenX - crosshairWidth * 10) / 2, crosshairHeight, crosshairWidth * 10, crosshairHeight);
+		GUI.Label (rectforName, FormTeamName (1) + gamestats.score [0] + "|" + gamestats.maxScore + " |" + FormTeamName (2) + gamestats.score [1]);
+
+		Player[] players = PlayerManager.instance.FindAllPlayer ();
+		for (int i =0; i<players.Length; i++) {
+			float size = crosshairWidth / 2;
+			Rect messRect = new Rect (size, size * (6 + i), screenX, size);
+			GUI.Label (messRect, players [i].GetName () +"    Kill:"+players [i].Score.Kill +"    Death:"+players [i].Score.Death +"    Assist:"+players [i].Score.Assist);
+			
+			
+		}
+
+	}
 	
 	void PlayerList(){
 		float screenX = Screen.width, screenY = Screen.height;
 		Player[] players = PlayerManager.instance.FindAllPlayer ();
 		for (int i =0; i<players.Length; i++) {
 			float size = crosshairWidth / 2;
-			Rect messRect = new Rect (size, size * (6 + i), size * 10, size);
+			Rect messRect = new Rect (size, size * (6 + i), screenX, size);
 			GUI.Label (messRect, players [i].GetName ());
 			
 			

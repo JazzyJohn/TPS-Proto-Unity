@@ -63,7 +63,7 @@ public class Pawn : DamagebleObject {
 		
 		
 		set {
-			if(_characterState!=value){
+			if(_characterState!=value&&photonView.isMine){
 				photonView.RPC("SendCharacterState",PhotonTargets.Others,value,wallState);
 				
 			}
@@ -263,6 +263,7 @@ public class Pawn : DamagebleObject {
 			forcePush =damage.pushForce-forcePush;
 			//Debug.Log(forcePush);
 			if(forcePush>0){
+				damage.pushDirection.y=0;
 				AddPushForce(forcePush*damage.pushDirection*FORCE_MULIPLIER);
 
 

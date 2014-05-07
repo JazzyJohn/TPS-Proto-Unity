@@ -121,5 +121,11 @@ public class ChatHolder : MonoBehaviour {
 
 
 	}
+	public void OnPhotonSerializeView(PhotonStream stream, PhotonMessageInfo info)
+	{
+
+
+
+	}
 
 }

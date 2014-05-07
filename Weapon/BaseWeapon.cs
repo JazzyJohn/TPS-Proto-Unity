@@ -90,7 +90,6 @@ public class BaseWeapon : DestroyableNetworkObject {
 	}
 
 	[RPC]
-
 	public void AttachWeaponRep(int viewid){
 		if (curTransform == null) {
 			curTransform = transform;		
@@ -183,7 +182,7 @@ public class BaseWeapon : DestroyableNetworkObject {
 			
 		}
 		owner.HasShoot ();
-		photonView.RPC("FireEffect",PhotonTargets.Others);
+		//photonView.RPC("FireEffect",PhotonTargets.Others);
 	}
 	public virtual bool CanShoot (){
 		Vector3 aimDir = (owner.getCachedAimRotation() -muzzlePoint.position).normalized;
@@ -206,12 +205,7 @@ public class BaseWeapon : DestroyableNetworkObject {
 			
 		}
 	}
-	[RPC]
-	void FireEffect(){
-		if (rifleParticleController != null) {
-			rifleParticleController.CreateShootFlame ();
-		}
-	}
+
 	public virtual void ChangeWeaponStatus(bool status){
 
 
@@ -250,6 +244,9 @@ public class BaseWeapon : DestroyableNetworkObject {
 		BaseProjectile projScript = proj.GetComponent<BaseProjectile>();
 		projScript.damage =new BaseDamage(damageAmount) ;
 		projScript.owner = owner.gameObject;
+		if (rifleParticleController != null) {
+			rifleParticleController.CreateShootFlame ();
+		}
 	}
 	protected Quaternion getAimRotation(){
 		/*Vector3 randVec = Random.onUnitSphere;
