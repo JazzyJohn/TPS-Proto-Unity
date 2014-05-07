@@ -259,7 +259,7 @@ public class PlayerMainGui : MonoBehaviour {
 			}
 		}
 		if (PhotonNetwork.isMasterClient&&(Application.platform==RuntimePlatform.WindowsPlayer||Application.platform==RuntimePlatform.WindowsEditor)) {
-			Debug.Log("olololo");
+			//Debug.Log("olololo");
 			Rect crosrect = new Rect (0, 0, 100, 50);
 			if(GUI.Button(crosrect,"Dedicated")){
 				PhotonNetwork.Destroy(LocalPlayer.GetView());

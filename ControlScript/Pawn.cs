@@ -64,7 +64,7 @@ public class Pawn : DamagebleObject {
 		
 		set {
 			if(_characterState!=value&&photonView.isMine){
-				photonView.RPC("SendCharacterState",PhotonTargets.Others,value,wallState);
+				//photonView.RPC("SendCharacterState",PhotonTargets.Others,value,wallState);
 				
 			}
 			_characterState = value;
@@ -416,26 +416,26 @@ public class Pawn : DamagebleObject {
 				speed =CalculateRepSpeed();
 				switch(nextState){
 				case CharacterState.Idle:
-					if(characterState == CharacterState.Jumping){
+					if(characterState == CharacterState.Jumping||characterState == CharacterState.DoubleJump){
 						animator.ApllyJump(false);
 
 					}
 					animator.ApllyMotion (0.0f, speed, strafe);
 					break;
 				case CharacterState.Running:
-					if(characterState == CharacterState.Jumping){
+					if(characterState == CharacterState.Jumping||characterState == CharacterState.DoubleJump){
 						animator.ApllyJump(false);
 					}
 					animator.ApllyMotion (2.0f, speed, strafe);
 					break;
 				case CharacterState.Trotting:
-					if(characterState == CharacterState.Jumping){
+					if(characterState == CharacterState.Jumping||characterState == CharacterState.DoubleJump){
 						animator.ApllyJump(false);
 					}
 					animator.ApllyMotion (1.0f, speed, strafe);
 					break;
 				case CharacterState.Walking:
-					if(characterState == CharacterState.Jumping){
+					if(characterState == CharacterState.Jumping||characterState == CharacterState.DoubleJump){
 						animator.ApllyJump(false);
 					}
 					animator.ApllyMotion (1.0f, speed, strafe);
@@ -1189,9 +1189,9 @@ public class Pawn : DamagebleObject {
 			stream.SendNext(transform.rotation.eulerAngles.y);
 			ServerHolder.WriteVectorToShort(stream,aimRotation);
 			
-			//stream.SendNext(characterState);
+			stream.SendNext(characterState);
 			//stream.SendNext(health);
-			//stream.SendNext(wallState);
+			stream.SendNext(wallState);
 			//stream.SendNext(netIsGround);
 			//stream.SendNext(animator.GetJump());
 
@@ -1205,10 +1205,10 @@ public class Pawn : DamagebleObject {
 		
 			this.aimRotation = ServerHolder.ReadVectorFromShort(stream);
 			//Debug.Log(aimRotation);
-			//nextState = (CharacterState) stream.ReceiveNext();
+			nextState = (CharacterState) stream.ReceiveNext();
 			//Debug.Log (characterState);
 			//health=(float) stream.ReceiveNext();
-			//wallState = (WallState) stream.ReceiveNext();
+			wallState = (WallState) stream.ReceiveNext();
 			//isGrounded =(bool) stream.ReceiveNext();
 			//animator.ApllyJump((bool)stream.ReceiveNext());
 			//Debug.Log (wallState);

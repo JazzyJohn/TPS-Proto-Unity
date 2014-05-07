@@ -85,13 +85,18 @@ public class Player : MonoBehaviour {
 		Debug.Log ("ASKTeam" + this);
 		photonView.RPC("RPCSetTeam",PhotonTargets.AllBuffered,PlayerManager.instance.NextTeam());
 	}
-	public void SetTeam(){
+	public void SetTeam(int intTeam){
 		team = intTeam;	
 	}
 	[RPC]
 	public void RPCSetTeam(int intTeam){
 		//Debug.Log ("setTeam" + intTeam);
 		team = intTeam;	
+	}
+
+	public PhotonView GetView(){
+
+		return photonView;
 	}
 	void Update(){
 		if (!photonView.isMine) {
@@ -157,7 +162,7 @@ public class Player : MonoBehaviour {
 							spamPoint.y+= 10;
 							robotPawn =PlayerManager.instance.SpawmPlayer(prefabBot,spamPoint,ghostBot.transform.rotation);
 							//Debug.Log("robot spawn"+robotPawn);
-							AfterSpawnSetting(robotPawn,PawnType.BOT);
+							AfterSpawnSetting(robotPawn,PawnType.BOT,team);
 
 						
 							canSpawnBot=false;							
@@ -384,6 +389,7 @@ public class Player : MonoBehaviour {
 	public Pawn GetRobot(){
 		return robotPawn;
 	}
+
 	public void AfterSpawnSetting(Pawn pawn,PawnType type,int rTeam){
 	
 		if (photonView.isMine) {
@@ -411,7 +417,7 @@ public class Player : MonoBehaviour {
 		}
 	}
 	[RPC]
-	public void RPCSetNameUID(int rUID,String rPlayerName){
+	public void RPCSetNameUID(string rUID,String rPlayerName){
 		UID=rUID;
 		PlayerName=rPlayerName;
 	}
