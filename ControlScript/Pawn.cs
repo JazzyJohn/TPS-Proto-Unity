@@ -294,7 +294,7 @@ public class Pawn : DamagebleObject {
 
 	public void HPChange(){
 		if (PhotonNetwork.isMasterClient) {
-			photonView.RPC ("RPCSetHealth", PhotonTargets.Others, health);
+			photonView.RPC ("RPCSetHealth", photonView.owner, health);
 		}
 	}
 	public override void KillIt(GameObject killer){
@@ -1176,36 +1176,39 @@ public class Pawn : DamagebleObject {
 	                        
 	//end Movement Section
 
+
+	
 	//NetworkSection
 	public void OnPhotonSerializeView(PhotonStream stream, PhotonMessageInfo info)
 	{
 		if (stream.isWriting)
 		{
 			// We own this player: send the others our data
-			stream.SendNext(transform.position);
-			stream.SendNext(transform.rotation);
-			stream.SendNext(aimRotation);
+			ServerHolder.WriteVectorToShort(stream,transform.position);
+			stream.SendNext(transform.rotation.eulerAngles.y);
+			ServerHolder.WriteVectorToShort(stream,aimRotation);
+			
 			//stream.SendNext(characterState);
 			//stream.SendNext(health);
 			//stream.SendNext(wallState);
-			stream.SendNext(netIsGround);
+			//stream.SendNext(netIsGround);
 			//stream.SendNext(animator.GetJump());
 
 		}
 		else
 		{
 			// Network player, receive data
-			Vector3 newPosition= (Vector3) stream.ReceiveNext();
-			correctPlayerPos = newPosition;
-			correctPlayerRot = (Quaternion) stream.ReceiveNext();
 		
-			this.aimRotation = (Vector3) stream.ReceiveNext();
+			correctPlayerPos = ServerHolder.ReadVectorFromShort(stream);
+			correctPlayerRot =  Quaternion.Euler(0,(float)stream.ReceiveNext(),0);
+		
+			this.aimRotation = ServerHolder.ReadVectorFromShort(stream);
 			//Debug.Log(aimRotation);
 			//nextState = (CharacterState) stream.ReceiveNext();
 			//Debug.Log (characterState);
 			//health=(float) stream.ReceiveNext();
 			//wallState = (WallState) stream.ReceiveNext();
-			isGrounded =(bool) stream.ReceiveNext();
+			//isGrounded =(bool) stream.ReceiveNext();
 			//animator.ApllyJump((bool)stream.ReceiveNext());
 			//Debug.Log (wallState);
 		}

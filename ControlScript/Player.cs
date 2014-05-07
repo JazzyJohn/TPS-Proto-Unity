@@ -71,7 +71,7 @@ public class Player : MonoBehaviour {
 		
 						this.name = "Player";		
 						PlayerName = "Player" + PhotonNetwork.playerList.Length;
-						photonView.RPC ("ASKTeam", PhotonTargets.MasterClient);
+						//	photonView.RPC ("ASKTeam", PhotonTargets.MasterClient);
 						Application.ExternalCall ("SayMyName");
 		
 						//StatisticHandler.StartStats(UID,PlayerName);
@@ -83,10 +83,13 @@ public class Player : MonoBehaviour {
 	[RPC]
 	public void ASKTeam(){
 		Debug.Log ("ASKTeam" + this);
-		photonView.RPC("SetTeam",PhotonTargets.AllBuffered,PlayerManager.instance.NextTeam());
+		photonView.RPC("RPCSetTeam",PhotonTargets.AllBuffered,PlayerManager.instance.NextTeam());
+	}
+	public void SetTeam(){
+		team = intTeam;	
 	}
 	[RPC]
-	public void SetTeam(int intTeam){
+	public void RPCSetTeam(int intTeam){
 		//Debug.Log ("setTeam" + intTeam);
 		team = intTeam;	
 	}
@@ -108,9 +111,10 @@ public class Player : MonoBehaviour {
 				respawnTimer=respawnTime;
 				currentPawn =PlayerManager.instance.SpawmPlayer(prefabClass[selected],team);
 				PVPGameRule.instance.Spawn(team);
-				AfterSpawnSetting(currentPawn,PawnType.PAWN);
+				AfterSpawnSetting(currentPawn,PawnType.PAWN,team);
 				prefabBot =PlayerManager.instance.avaibleBots[selectedBot];
 				prefabGhostBot =PlayerManager.instance.ghostsBots[selectedBot];
+
 			}
 		}else{
 			Ray centerofScreen =Camera.main.ViewportPointToRay(new Vector3(0.5f, 0.5f, 0f));
@@ -224,15 +228,13 @@ public class Player : MonoBehaviour {
 			viewID = Killer.photonView.viewID;
 			PVPGameRule.instance.Kill(Killer.team);
 		}
-		photonView.RPC("RPCPawnDead",PhotonTargets.All,viewID);
+		photonView.RPC("RPCPawnDead",photonView.owner,viewID);
 			
 
 	}
 	[RPC]
 	public void RPCPawnDead(int viewId){
-		if (!photonView.isMine) {
-			return;
-		}
+		
 		Score.Death++;
 		if (viewId != 0) {
 			Player killer = PhotonView.Find (viewId).GetComponent<Player> ();
@@ -246,15 +248,12 @@ public class Player : MonoBehaviour {
 		
 	}
 	public void PawnKill(Player Victim,Vector3 position){
-		photonView.RPC("RPCPawnKill",PhotonTargets.All,position);
+		photonView.RPC("RPCPawnKill",photonView.owner,position);
 
 	}
 	[RPC]
 	public void RPCPawnKill(Vector3 position){
 
-		if (!photonView.isMine) {
-			return;
-		}
 		//TODO: move text to config
 		PlayerMainGui.instance.AddMessage("NAILED IT",position,PlayerMainGui.MessageType.KILL_TEXT);
 
@@ -340,7 +339,7 @@ public class Player : MonoBehaviour {
 	//NetworkSection
 	public void OnPhotonSerializeView(PhotonStream stream, PhotonMessageInfo info)
 	{
-		if (stream.isWriting)
+		/*if (stream.isWriting)
 		{
 			// We own this player: send the others our data
 			stream.SendNext(PlayerName);
@@ -354,7 +353,7 @@ public class Player : MonoBehaviour {
 			PlayerName= (String) stream.ReceiveNext();
 			UID= (String) stream.ReceiveNext();
 			team = (int) stream.ReceiveNext();
-		}
+		}*/
 	}
 	public void  SetName(String newname)
 	{
@@ -367,8 +366,9 @@ public class Player : MonoBehaviour {
 	{
 
 		UID = uid;
-		Debug.Log ("BIG STATS SEND " + UID + " " + PlayerName);
+		
 		StatisticHandler.StartStats(UID,PlayerName);
+		photonView.RPC("RPCSetNameUID",PhotonTargets.AllBuffered,UID,PlayerName);
 	}
 
 	
@@ -384,21 +384,21 @@ public class Player : MonoBehaviour {
 	public Pawn GetRobot(){
 		return robotPawn;
 	}
-	public void AfterSpawnSetting(Pawn pawn,PawnType type){
+	public void AfterSpawnSetting(Pawn pawn,PawnType type,int rTeam){
 	
 		if (photonView.isMine) {
-			photonView.RPC("RPCAfterSpawnSetting",PhotonTargets.AllBuffered,pawn.GetComponent<PhotonView>().viewID,(int)type);
+			photonView.RPC("RPCAfterSpawnSetting",PhotonTargets.AllBuffered,pawn.GetComponent<PhotonView>().viewID,(int)type,rTeam);
 		}
 	}
 
 
 	[RPC]
-	public void RPCAfterSpawnSetting(int viewid,int type){
+	public void RPCAfterSpawnSetting(int viewid,int type,int iteam){
 	
 		PawnType pType = (PawnType)type;
 		//Debug.Log (viewid);
 		Pawn pawn =PhotonView.Find (viewid).GetComponent<Pawn>();
-	
+		team = iteam;	
 		pawn.player = this;
 		pawn.team = this.team;
 		switch (pType) {
@@ -410,6 +410,10 @@ public class Player : MonoBehaviour {
 			break;
 		}
 	}
-	
+	[RPC]
+	public void RPCSetNameUID(int rUID,String rPlayerName){
+		UID=rUID;
+		PlayerName=rPlayerName;
+	}
 
 }
