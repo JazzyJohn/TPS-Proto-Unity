@@ -569,6 +569,12 @@ public class Pawn : DamagebleObject {
 
 		}
 //		Debug.Log (characterState);
+
+		if (!Application.isPlaying&&Application.isEditor)
+		{
+			foreach (BodyHurt bh in this.GetComponentsInChildren<BodyHurt>()) {bh.TargetHarm = this;}
+		}
+		//		Debug.Log (characterState);
 		UpdateAnimator ();
 	}
 
