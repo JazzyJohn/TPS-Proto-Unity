@@ -224,7 +224,7 @@ void  UpdateSmoothedMovementDirection ()
 		}
 		
 		moveSpeed = Mathf.Lerp(moveSpeed, targetSpeed, curSmooth);
-		
+	
 		// Reset walk time start when we slow down
 		if (moveSpeed < pawn.groundWalkSpeed * 0.3f)
 			walkTimeStart = Time.time;
@@ -303,6 +303,10 @@ public float CalculateJumpVerticalSpeed ( float targetJumpHeight  )
 				
 								pawn.StopFire ();
 						}
+						if (Input.GetButtonUp ("Reload")) {
+							
+							pawn.Reload ();
+						}
 		
 						float wheel = Input.GetAxis ("Mouse ScrollWheel");
 		
@@ -329,7 +333,7 @@ void FixedUpdate ()
 	// Calculate actual motion
 	Vector3 movement= moveDirection * moveSpeed + new Vector3 (0, verticalSpeed, 0) + inAirVelocity;
 	
-
+		//Debug.Log (movement.magnitude);
 		pawn.Movement (movement, characterState);
 
 

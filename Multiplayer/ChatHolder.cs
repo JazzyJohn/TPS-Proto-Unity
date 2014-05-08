@@ -20,22 +20,43 @@ public class ChatHolder : MonoBehaviour {
 		
 	}
 
-	private Queue<ChatMessage> messages = new Queue<ChatMessage>();
+	private Queue<ChatMessage> messages = new Queue<ChatMessage>(),
+	tempMessages= new Queue<ChatMessage>();
 
 	public Player localPlayer;
 	private Vector2 scrollPos = Vector2.zero;
 
 	public float chatHeight =300.0f;
 	public float chatWidth = 400.0f;
+	private string chatInput = "";
+	private bool needChat = false;
+	private bool closeChat = true;
 	// Use this for initialization
 	void Start(){
 		photonview = GetComponent<PhotonView> ();
-
+		//scrollPos.y = 1000000;
 	}
 	public void SetPlayer (Player newPlayer) {
 		localPlayer = newPlayer;
 	}
-	private string chatInput = "";
+
+
+	void Update(){
+		
+		if(Input.GetButtonDown("Send")){
+			//Debug.Log (GUI.GetNameOfFocusedControl());
+			needChat=true;	
+			chatInput="";
+			
+		}
+		while (tempMessages.Count>0) {
+			messages.Enqueue(tempMessages.Dequeue ());
+			scrollPos.y = Mathf.Infinity;
+			
+		}
+
+
+	}
 	// Update is called once per frame
 	public void DrawChatBox () {
 		while (messages.Count>50) {
@@ -46,29 +67,29 @@ public class ChatHolder : MonoBehaviour {
 		
 		//Show scroll list of chat messages
 		scrollPos = GUILayout.BeginScrollView(scrollPos);
+
 		GUI.color = Color.black;
 		foreach (ChatMessage chatMessage in messages) {
 		
 			GUILayout.Label(chatMessage.playerName + ":" + chatMessage.message);
 		}
+
 		GUILayout.EndScrollView();
-		GUI.SetNextControlName("ChatField");
-		chatInput = GUILayout.TextField(chatInput);
-		if(Input.GetButtonDown("Send")){
-			//Debug.Log (GUI.GetNameOfFocusedControl());
-		
-			if(GUI.GetNameOfFocusedControl()==""){
-				GUI.FocusControl("ChatField");
-				
-			}
 
 
 
+		if (needChat) {
+			GUI.SetNextControlName("ChatField"+roomId);
+			chatInput = GUILayout.TextField(chatInput);
+			GUI.FocusControl("ChatField"+roomId);
 		}
-		if (GUILayout.Button("Send", GUILayout.Height(17))){
+
+		Event e = Event.current;
+		if (e.keyCode == KeyCode.Return) {
 	
 		
-			if(GUI.GetNameOfFocusedControl()=="ChatField"){
+			if(GUI.GetNameOfFocusedControl()=="ChatField"+roomId){
+				needChat= false;
 				GUI.FocusControl("");
 				if(chatInput!=""){
 					AddMessage(chatInput);
@@ -95,7 +116,15 @@ public class ChatHolder : MonoBehaviour {
 		mess.playerName = name;
 		mess.uid = uid;
 		mess.team = team;
-		messages.Enqueue (mess);
+
+		tempMessages.Enqueue (mess);
+
+
+	}
+	public void OnPhotonSerializeView(PhotonStream stream, PhotonMessageInfo info)
+	{
+
+
 
 	}
 

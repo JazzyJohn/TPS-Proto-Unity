@@ -1,7 +1,7 @@
 using UnityEngine;
 using System.Collections;
 
-public class PVPGameRule : MonoBehaviour {
+public class PVPGameRule : GameRule {
 
 		protected int[] teamKill;
 		
@@ -41,7 +41,12 @@ public class PVPGameRule : MonoBehaviour {
 		}
 
 		void Update(){
+			if (!PhotonNetwork.isMasterClient) {
+				return;
+			}
 			if(IsGameEnded()){
+			IsLvlChanging= true;
+				PhotonNetwork.automaticallySyncScene = true;
 				PhotonNetwork.LoadLevel(NextMap());
 			
 			}	
@@ -105,8 +110,8 @@ public class PVPGameRule : MonoBehaviour {
 
 		}
 		public void StartGame(){
-
-		FindObjectOfType<AIDirector> ().SpawnBot ();
+			IsLvlChanging = false;
+			FindObjectOfType<AIDirector> ().StartDirector ();
 		}
 		
 		

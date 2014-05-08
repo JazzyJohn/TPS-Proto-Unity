@@ -42,6 +42,10 @@ public class AIState : MonoBehaviour {
 	public virtual void Tick () {
 	
 	}
+
+	public virtual void WasHitBy(Pawn killer){
+
+	}
 	public void SetEnemy(Pawn enemy){
 		_enemy = enemy;
 		controlledPawn.enemy = enemy;

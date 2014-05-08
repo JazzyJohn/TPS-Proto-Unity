@@ -100,7 +100,7 @@ public class AnimationManager : MonoBehaviour
     /// Служит для начала анимаций прыжка. Принимает значение true или false
     /// </summary>
     /// <param name="jump"></param>
-    public void ApllyJump(bool jump)
+    public virtual void ApllyJump(bool jump)
     {	
 		//if (animator.layerCount >= 3) {
 						//AnimatorStateInfo state = animator.GetCurrentAnimatorStateInfo ();
@@ -116,6 +116,12 @@ public class AnimationManager : MonoBehaviour
 			//	}
 				
     }
+	public virtual void DoubleJump(){
+		animator.SetBool ("StandUp", false);
+		animator.SetBool ("Jump", true);
+		animator.SetBool ("Grounded", false);
+	
+	}
 	public bool GetJump(){
 		return animator.GetBool("Jump");
 	} 
@@ -132,7 +138,7 @@ public class AnimationManager : MonoBehaviour
 	/// <summary>
 	/// Wall run animation
 	/// </summary>
-	public void WallAnimation(bool leftW,bool rightW,bool frontW)
+	public virtual void WallAnimation(bool leftW,bool rightW,bool frontW)
 	{
 
 		if (leftW || rightW || frontW) {
@@ -145,6 +151,9 @@ public class AnimationManager : MonoBehaviour
 		animator.SetBool("WallRunR", rightW);
 		
 		animator.SetBool("WallRunUp", frontW);
+	}
+	public virtual void FreeFall(){
+		
 	}
 	public void WeaponDown(bool value){
 		animator.SetBool("wall_stop", value);	
@@ -176,5 +185,8 @@ public class AnimationManager : MonoBehaviour
 	}
 	public void SetLong(bool longPull){
 		animator.SetBool("LongPull", longPull);
+	}
+	public bool isWeaponAimable(){
+		return !animator.GetBool("wall_stop");
 	}
 }

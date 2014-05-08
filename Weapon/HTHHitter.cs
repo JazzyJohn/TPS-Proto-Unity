@@ -61,4 +61,8 @@ public class HTHHitter : MonoBehaviour {
 			isReadyToHit=false;
 		}
 	}
+	void OnDrawGizmos() {
+		Gizmos.color = Color.yellow;
+		Gizmos.DrawSphere(transform.position, radiusOfImpact);
+	}
 }

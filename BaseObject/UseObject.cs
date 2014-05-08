@@ -14,6 +14,8 @@ public class UseObject : DestroyableNetworkObject {
 	
 	public Texture guiIcon;
 
+	public string tooltip;
+
 
 	
 	//	Use function check if this object can be used turn on cooldown
@@ -33,8 +35,11 @@ public class UseObject : DestroyableNetworkObject {
 		}
 	
 	}
-	void Start () {
+	protected void Awake () {
 		photonView = GetComponent<PhotonView> ();
+
+	}
+	protected void Start(){
 
 	}
 

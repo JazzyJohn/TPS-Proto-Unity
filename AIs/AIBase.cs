@@ -23,7 +23,13 @@ public class AIBase : MonoBehaviour
     //private AIHolder _holder;
     //private AIRusher _rusher;
 
+	public void WasHitBy(GameObject killer){
+		Pawn killerPawn = killer.GetComponent<Pawn> ();
+		if (killerPawn != null) {
+			_currentState.WasHitBy(killerPawn);
+		}
 
+	}
 
     private void Awake()
     {

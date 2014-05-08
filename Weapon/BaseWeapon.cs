@@ -55,6 +55,12 @@ public class BaseWeapon : DestroyableNetworkObject {
 
 	public string attackAnim;
 
+	public string weaponName;
+
+	public float recoilMod;
+
+	public const float MAXDIFFERENCEINANGLE=0.7f;
+
 	// Use this for initialization
 	void Start () {
 		curTransform = transform;
@@ -84,7 +90,6 @@ public class BaseWeapon : DestroyableNetworkObject {
 	}
 
 	[RPC]
-
 	public void AttachWeaponRep(int viewid){
 		if (curTransform == null) {
 			curTransform = transform;		
@@ -140,6 +145,9 @@ public class BaseWeapon : DestroyableNetworkObject {
 	public bool IsReloading(){
 		return isReload;
 	}
+	public bool IsShooting(){
+		return isShooting && !isReload;
+	}
 	void Fire(){
 		if (!CanShoot ()) {
 			return;		
@@ -173,14 +181,15 @@ public class BaseWeapon : DestroyableNetworkObject {
 			break;
 			
 		}
-		photonView.RPC("FireEffect",PhotonTargets.Others);
+		owner.HasShoot ();
+		//photonView.RPC("FireEffect",PhotonTargets.Others);
 	}
 	public virtual bool CanShoot (){
 		Vector3 aimDir = (owner.getCachedAimRotation() -muzzlePoint.position).normalized;
 		Vector3 realDir = muzzlePoint.forward;
 		float angle = Vector3.Dot (aimDir, realDir);
 
-		if (angle < 0.8) {
+		if (angle < MAXDIFFERENCEINANGLE) {
 			return false;		
 		}
 		return true;
@@ -196,12 +205,7 @@ public class BaseWeapon : DestroyableNetworkObject {
 			
 		}
 	}
-	[RPC]
-	void FireEffect(){
-		if (rifleParticleController != null) {
-			rifleParticleController.CreateShootFlame ();
-		}
-	}
+
 	public virtual void ChangeWeaponStatus(bool status){
 
 
@@ -210,7 +214,7 @@ public class BaseWeapon : DestroyableNetworkObject {
 		Camera maincam = Camera.main;
 		Ray centerRay= maincam.ViewportPointToRay(new Vector3(.5f, 0.5f, 1f));
 		RaycastHit hitInfo;
-		Vector3 targetpoint;
+
 		if (Physics.Raycast (centerRay, out hitInfo, weaponRange)) {
 			DamagebleObject target =(DamagebleObject) hitInfo.collider.GetComponent(typeof(DamagebleObject));
 			if(target!=null){
@@ -218,7 +222,7 @@ public class BaseWeapon : DestroyableNetworkObject {
 			}
 		}
 	}
-	void GenerateProjectile(){
+	protected virtual void GenerateProjectile(){
 		Vector3 startPoint  = muzzlePoint.position+muzzleOffset;
 		Quaternion startRotation = getAimRotation();
 		GameObject proj;
@@ -235,13 +239,16 @@ public class BaseWeapon : DestroyableNetworkObject {
 		projScript.owner = owner.gameObject;
 	}
 	[RPC]
-	void GenerateProjectileRep(Vector3 startPoint,Quaternion startRotation){
+	protected void GenerateProjectileRep(Vector3 startPoint,Quaternion startRotation){
 		GameObject proj=Instantiate(projectilePrefab,startPoint,startRotation) as GameObject;
 		BaseProjectile projScript = proj.GetComponent<BaseProjectile>();
 		projScript.damage =new BaseDamage(damageAmount) ;
 		projScript.owner = owner.gameObject;
+		if (rifleParticleController != null) {
+			rifleParticleController.CreateShootFlame ();
+		}
 	}
-	Quaternion getAimRotation(){
+	protected Quaternion getAimRotation(){
 		/*Vector3 randVec = Random.onUnitSphere;
 		Vector3 normalDirection  = owner.getAimRotation(weaponRange)-muzzlePoint.position;
 		normalDirection =normalDirection + randVec.normalized * normalDirection.magnitude * aimRandCoef / 100;*/

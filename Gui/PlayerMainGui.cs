@@ -81,6 +81,7 @@ public class PlayerMainGui : MonoBehaviour {
 		public float ammoInGun=0;
 		public float ammoInGunMax=0;
 		public float ammoInBag=0;
+		public string gunName="";
 			
 	}
 	public class GameStats{
@@ -90,7 +91,8 @@ public class PlayerMainGui : MonoBehaviour {
 	}
 	enum GUIState{
 		Normal,
-		Playerlist
+		Playerlist,
+		Dedicated,
 			
 	}
 	private GUIState guiState;
@@ -119,6 +121,9 @@ public class PlayerMainGui : MonoBehaviour {
 	}
 
 	void Update(){
+		if (guiState == GUIState.Dedicated) {
+			return;
+		}
 		guiState = GUIState.Normal;
 		if (Input.GetButton ("ScoreBtn")) {
 			guiState =GUIState.Playerlist;
@@ -131,6 +136,9 @@ public class PlayerMainGui : MonoBehaviour {
 	// Update is called once per frame
 	void OnGUI () {
 				IsMouseAV = Screen.lockCursor;
+				if (guiState == GUIState.Dedicated) {
+					DedicatedDraw();
+				}
 				if (LocalPlayer == null) {
 						return;
 				}
@@ -141,6 +149,7 @@ public class PlayerMainGui : MonoBehaviour {
 			
 				//MAIN HUD
 						if (LocalPlayer.IsDead ()) {
+							Screen.lockCursor = false;
 							RespawnGui();
 								
 					
@@ -160,7 +169,6 @@ public class PlayerMainGui : MonoBehaviour {
 					PlayerList();
 				
 					break;
-
 
 
 				}
@@ -238,11 +246,25 @@ public class PlayerMainGui : MonoBehaviour {
 			}
 			
 		}*/
+
 		respawnMenu.DrawMenu ();
-		if (Choice._Player != -1 && Choice._Robot != -1) {
+		if (Choice._Player != -1 && Choice._Robot != -1&&Choice._Team!= -1) {
+			LocalPlayer.SetTeam (Choice._Team);
 			LocalPlayer.selected = Choice._Player;
-			LocalPlayer.selectedBot = Choice._Robot;
-			LocalPlayer.isStarted = true;
+			LocalPlayer.selectedBot = Choice._Robot;		
+			int timer = (int)LocalPlayer.GetRespawnTimer ();
+			if(respawnMenu.SetTimer(timer)){
+				LocalPlayer.isStarted  =true;
+
+			}
+		}
+		if (PhotonNetwork.isMasterClient&&(Application.platform==RuntimePlatform.WindowsPlayer||Application.platform==RuntimePlatform.WindowsEditor)) {
+			Debug.Log("olololo");
+			Rect crosrect = new Rect (0, 0, 100, 50);
+			if(GUI.Button(crosrect,"Dedicated")){
+				PhotonNetwork.Destroy(LocalPlayer.GetView());
+				guiState = GUIState.Dedicated;
+			}
 		}
 		
 	}
@@ -251,8 +273,18 @@ public class PlayerMainGui : MonoBehaviour {
 		float screenX = Screen.width, screenY = Screen.height;
 		//Screen.lockCursor = true;
 		Rect crosrect = new Rect ((screenX - crosshairWidth) / 2, (screenY - crosshairHeight) / 2, crosshairWidth, crosshairHeight);
-		
+
+
 		GUI.Label (crosrect, crosshair);
+		if (LocalPlayer.useTarget != null) {
+			GUI.Label (crosrect, LocalPlayer.useTarget.guiIcon);
+			crosrect = new Rect ((screenX - crosshairWidth) / 2, (screenY - crosshairHeight) / 2, crosshairWidth*5, crosshairHeight);
+			if(LocalPlayer.useTarget is WeaponPicker){
+				GUI.Label (crosrect, "Pick Up " + LocalPlayer.useTarget.tooltip);
+			}else{
+				GUI.Label (crosrect, "use" + LocalPlayer.useTarget.tooltip);
+			}
+		}
 		crosrect = new Rect (screenX - crosshairWidth, 0, crosshairWidth, crosshairHeight);
 		PlayerStats localstats = LocalPlayer.GetPlayerStats ();
 		if (!LocalPlayer.inBot) {
@@ -311,8 +343,9 @@ public class PlayerMainGui : MonoBehaviour {
 				GUI.Label (mark, EnemyMark);
 			}
 		}	
-		
-		Rect statsRect = new Rect (screenX - crosshairWidth * 4, Screen.height - crosshairHeight * 3, crosshairWidth * 4, crosshairHeight);
+		Rect statsRect = new Rect (screenX - crosshairWidth * 4, Screen.height - crosshairHeight * 4, crosshairWidth * 4, crosshairHeight);
+		GUI.Label (statsRect, "Weapon: " + localstats.gunName);
+		statsRect = new Rect (screenX - crosshairWidth * 4, Screen.height - crosshairHeight * 3, crosshairWidth * 4, crosshairHeight);
 		GUI.Label (statsRect, "Health: " + localstats.health);
 		statsRect = new Rect (screenX - crosshairWidth * 4, Screen.height - crosshairHeight * 2, crosshairWidth * 4, crosshairHeight);
 		GUI.Label (statsRect, "Ammo: " + localstats.ammoInGun + "/" + localstats.ammoInGunMax);
@@ -331,13 +364,30 @@ public class PlayerMainGui : MonoBehaviour {
 		
 
 	}
+
+	void DedicatedDraw(){
+		float screenX = Screen.width, screenY = Screen.height;
+		GameStats gamestats = PVPGameRule.instance.GetStats ();
+		Rect rectforName = new Rect ((screenX - crosshairWidth * 10) / 2, crosshairHeight, crosshairWidth * 10, crosshairHeight);
+		GUI.Label (rectforName, FormTeamName (1) + gamestats.score [0] + "|" + gamestats.maxScore + " |" + FormTeamName (2) + gamestats.score [1]);
+
+		Player[] players = PlayerManager.instance.FindAllPlayer ();
+		for (int i =0; i<players.Length; i++) {
+			float size = crosshairWidth / 2;
+			Rect messRect = new Rect (size, size * (6 + i), screenX, size);
+			GUI.Label (messRect, players [i].GetName () +"    Kill:"+players [i].Score.Kill +"    Death:"+players [i].Score.Death +"    Assist:"+players [i].Score.Assist);
+			
+			
+		}
+
+	}
 	
 	void PlayerList(){
 		float screenX = Screen.width, screenY = Screen.height;
 		Player[] players = PlayerManager.instance.FindAllPlayer ();
 		for (int i =0; i<players.Length; i++) {
 			float size = crosshairWidth / 2;
-			Rect messRect = new Rect (size, size * (6 + i), size * 10, size);
+			Rect messRect = new Rect (size, size * (6 + i), screenX, size);
 			GUI.Label (messRect, players [i].GetName ());
 			
 			
@@ -361,7 +411,7 @@ public class PlayerMainGui : MonoBehaviour {
 		seconds = Mathf.FloorToInt(input - minutes * 60);
 		return string.Format("{0:0}:{1:00}", minutes, seconds);
 	}
-	public string FormTeamName(int team){
+	public static string FormTeamName(int team){
 		switch (team) {
 			case 1:
 			return "A TEAM"	;

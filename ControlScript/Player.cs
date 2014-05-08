@@ -58,6 +58,8 @@ public class Player : MonoBehaviour {
 
 	private PhotonView photonView;
 
+	public UseObject useTarget;
+
 	void Start(){
 		photonView = GetComponent<PhotonView> ();
 
@@ -85,7 +87,7 @@ public class Player : MonoBehaviour {
 	}
 	[RPC]
 	public void SetTeam(int intTeam){
-		Debug.Log ("setTeam" + intTeam);
+		//Debug.Log ("setTeam" + intTeam);
 		team = intTeam;	
 	}
 	void Update(){
@@ -162,8 +164,9 @@ public class Player : MonoBehaviour {
 
 				}
 			}
-
+				
 				if(inBot){
+					useTarget= null;
 					if(Input.GetButtonDown("Use")){
 						ExitBot();
 					}
@@ -171,12 +174,24 @@ public class Player : MonoBehaviour {
 				}else {
 					
 						if(!inBot&&robotPawn!=null){
-							if(currentPawn.curLookTarget.gameObject==robotPawn.gameObject){
+							if(currentPawn.curLookTarget!=null&&currentPawn.curLookTarget.gameObject==robotPawn.gameObject){
 								if(Input.GetButtonDown("Use")){
 									EnterBot();
 								}
 							}
 						}
+
+					if(currentPawn.curLookTarget!=null){
+
+						useTarget = currentPawn.curLookTarget.GetComponent<UseObject>();
+						if(useTarget!=null&&Input.GetButtonDown("Use")){
+							useTarget.Use(currentPawn);
+
+						}
+					}else{
+						useTarget= null;
+					}
+					//Debug.Log (currentPawn.curLookTarget);
 
 				}
 			if(Input.GetButtonDown("Fire2")){
@@ -201,6 +216,9 @@ public class Player : MonoBehaviour {
 		currentPawn.transform.parent = null;
 		currentPawn.Activate ();
 	}
+	public PhotonView GetView(){
+		return photonView;
+	}
 	public void PawnDead(Player Killer){
 	
 
@@ -209,7 +227,9 @@ public class Player : MonoBehaviour {
 			viewID = Killer.photonView.viewID;
 			PVPGameRule.instance.Kill(Killer.team);
 		}
-		photonView.RPC("RPCPawnDead",PhotonTargets.All,viewID);
+		if (PhotonNetwork.isMasterClient) {
+				photonView.RPC ("RPCPawnDead", PhotonTargets.All, viewID);
+		}
 			
 
 	}
@@ -231,7 +251,9 @@ public class Player : MonoBehaviour {
 		
 	}
 	public void PawnKill(Player Victim,Vector3 position){
-		photonView.RPC("RPCPawnKill",PhotonTargets.All,position);
+		if (PhotonNetwork.isMasterClient) {
+			photonView.RPC ("RPCPawnKill", PhotonTargets.All, position);
+		}
 
 	}
 	[RPC]
@@ -302,6 +324,7 @@ public class Player : MonoBehaviour {
 			stats.ammoInGun = curPawn.CurWeapon.curAmmo;
 			stats.ammoInGunMax = curPawn.CurWeapon.clipSize;
 			stats.ammoInBag = curPawn.GetAmmoInBag ();
+			stats.gunName = curPawn.CurWeapon.weaponName;
 		}
 
 		

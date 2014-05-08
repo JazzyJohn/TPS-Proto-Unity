@@ -63,7 +63,7 @@ public class Pawn : DamagebleObject {
 		
 		
 		set {
-			if(_characterState!=value){
+			if(_characterState!=value&&photonView.isMine){
 				photonView.RPC("SendCharacterState",PhotonTargets.Others,value,wallState);
 				
 			}
@@ -81,7 +81,7 @@ public class Pawn : DamagebleObject {
 
 	public ThirdPersonCamera cameraController;
 
-	public float pitchAngle;
+	public AIBase mainAi;	
 
 	public bool isAi;
 
@@ -180,7 +180,9 @@ public class Pawn : DamagebleObject {
 	public float aimModCoef = -10.0f;
 
 	public bool isLookingAt = true;
-	
+
+	public bool initialReplication= true;
+
 	public class BasePawnStatistic{
 		//Shoot Counter
 		public int shootCnt=0;
@@ -205,7 +207,7 @@ public class Pawn : DamagebleObject {
 		photonView = GetComponent<PhotonView>();
 	}
 	// Use this for initialization
-	void Start () {
+	protected void Start () {
 
 		if (emitter != null) {
 				emitter.Emit ();//запускаем эмиттер
@@ -221,8 +223,8 @@ public class Pawn : DamagebleObject {
 			cameraController=GetComponent<ThirdPersonCamera> ();
 			isAi = cameraController==null;
 		}
-		AIBase comp =  GetComponent<AIBase> ();
-		isAi = comp!=null;
+		mainAi =  GetComponent<AIBase> ();
+		isAi = mainAi!=null;
 
 		correctPlayerPos = transform.position;
 		myCollider = collider;
@@ -243,6 +245,7 @@ public class Pawn : DamagebleObject {
 			return;
 		}
 
+
 		Pawn killerPawn =killer.GetComponent<Pawn> ();
 		if (killerPawn != null && killerPawn.team == team &&! PlayerManager.instance.frendlyFire) {
 			return;
@@ -260,6 +263,7 @@ public class Pawn : DamagebleObject {
 			forcePush =damage.pushForce-forcePush;
 			//Debug.Log(forcePush);
 			if(forcePush>0){
+				damage.pushDirection.y=0;
 				AddPushForce(forcePush*damage.pushDirection*FORCE_MULIPLIER);
 
 
@@ -269,7 +273,10 @@ public class Pawn : DamagebleObject {
 		if (!PhotonNetwork.isMasterClient){
 			return;
 		}
-	
+		if (isAi) {
+			mainAi.WasHitBy(killer);
+
+		}
 
 		
 		
@@ -411,6 +418,7 @@ public class Pawn : DamagebleObject {
 				case CharacterState.Idle:
 					if(characterState == CharacterState.Jumping){
 						animator.ApllyJump(false);
+
 					}
 					animator.ApllyMotion (0.0f, speed, strafe);
 					break;
@@ -449,10 +457,13 @@ public class Pawn : DamagebleObject {
 					animator.ApllyJump(true);
 					if(characterState==CharacterState.WallRunning){					
 						animator.WallAnimation(false,false,false);
+						animator.FreeFall();
+
 					}
 					break;
 				case CharacterState.DoubleJump:
 					animator.ApllyJump(true);
+					animator.DoubleJump();
 					if(characterState==CharacterState.WallRunning){					
 						animator.WallAnimation(false,false,false);
 					}
@@ -469,8 +480,17 @@ public class Pawn : DamagebleObject {
 				characterState = nextState;
 			}
 			if (isLookingAt) {
-				animator.animator.SetLookAtPosition (aimRotation);
+				Vector3 laimRotation =aimRotation;
+				/*if(animator.isWeaponAimable()){
+					Quaternion diference = Quaternion.FromToRotation(CurWeapon.muzzlePoint.forward,myTransform.forward);
+
+					Vector3 direction= laimRotation-myTransform.position;
+				
+					laimRotation =(diference *direction.normalized)*direction.magnitude +myTransform.position;
+				}*/
+				animator.animator.SetLookAtPosition (laimRotation);
 				animator.animator.SetLookAtWeight (1, 0.5f, 0.7f, 0.0f, 0.5f);
+
 			}
 		}
 
@@ -507,6 +527,8 @@ public class Pawn : DamagebleObject {
 				}else{
 					myTransform.rotation= Quaternion.Euler(eurler);
 				}
+				//animator.animator.SetLookAtPosition (aimRotation);
+				//animator.animator.SetLookAtWeight (1, 0.5f, 0.7f, 0.0f, 0.5f);
 				//CurWeapon.curTransform.rotation =  Quaternion.LookRotation(aimRotation-CurWeapon.curTransform.position);
 				/*Quaternion diff = Quaternion.identity;
 				Vector3 target = (aimRotation-CurWeapon.transform.position).normalized;
@@ -543,13 +565,28 @@ public class Pawn : DamagebleObject {
 			//animator.SetFloat("Pitch",pitchAngle);
 
 		} else {
-
-			myTransform.position = Vector3.Lerp(myTransform.position, correctPlayerPos, Time.deltaTime *SYNC_MULTUPLIER);
-			myTransform.rotation = Quaternion.Lerp(myTransform.rotation, correctPlayerRot, Time.deltaTime * SYNC_MULTUPLIER);
+			ReplicatePosition();
 
 		}
-//		Debug.Log (characterState);
+
+		if (!Application.isPlaying&&Application.isEditor)
+		{
+			foreach (BodyHurt bh in this.GetComponentsInChildren<BodyHurt>()) {bh.TargetHarm = this;}
+		}
+		//		Debug.Log (characterState);
 		UpdateAnimator ();
+	}
+
+	public void ReplicatePosition(){
+		if (initialReplication) {
+			myTransform.position = correctPlayerPos;
+			myTransform.rotation = correctPlayerRot;
+			initialReplication= false;
+		}
+		myTransform.position = Vector3.Lerp(myTransform.position, correctPlayerPos, Time.deltaTime *SYNC_MULTUPLIER);
+		myTransform.rotation = Quaternion.Lerp(myTransform.rotation, correctPlayerRot, Time.deltaTime * SYNC_MULTUPLIER);
+
+
 	}
 	[RPC]
 	public void SendCharacterState(int nextrpcState,int nextwallState){
@@ -599,21 +636,48 @@ public class Pawn : DamagebleObject {
 				}
 				Camera maincam = Camera.main;
 				Ray centerRay= maincam.ViewportPointToRay(new Vector3(.5f, 0.5f, 1f));
-				RaycastHit hitInfo;
+
 				Vector3 targetpoint = Vector3.zero;
-				if (Physics.Raycast (centerRay,out hitInfo, weaponRange)&&hitInfo.collider!=collider) {
+				bool wasHit = false;
+				float magnitude = weaponRange;
+				float range=weaponRange;
+				foreach( RaycastHit hitInfo  in Physics.RaycastAll(centerRay, weaponRange))				
+				{
+					if(hitInfo.collider==myCollider)
+					{
+						continue;
+					}
+
+					//
+					//Debug.DrawRay(centerRay.origin,centerRay.direction);
 					targetpoint =hitInfo.point;
+					range =(targetpoint-centerRay.origin).magnitude;
+					if(range<magnitude){
+						magnitude=range;
+					}else{
+						continue;
+					}
+					wasHit= true;
 					curLookTarget= hitInfo.transform;
 					//Debug.Log (curLookTarget);
-				//	Debug.Log((targetpoint-myTransform.position).sqrMagnitude.ToString()+(cameraController.normalOffset.magnitude+5));
-					if((targetpoint-myTransform.position).sqrMagnitude<cameraController.normalOffset.magnitude+5){
+				
+
+
+				}
+
+				if(!wasHit){
+					//Debug.Log("NO HIT");
+					curLookTarget= null;
+					animator.WeaponDown(false);
+					targetpoint =maincam.transform.forward*weaponRange +maincam.ViewportToWorldPoint(new Vector3(.5f, 0.5f, 1f));
+				}else{
+					//Debug.Log(range.ToString()+(cameraController.normalOffset.magnitude+5));
+					if(magnitude<cameraController.normalOffset.magnitude+1){
 						targetpoint =maincam.transform.forward*weaponRange +maincam.ViewportToWorldPoint(new Vector3(.5f, 0.5f, 1f));
 						animator.WeaponDown(true);
 					}else{
 						animator.WeaponDown(false);
 					}
-				}else{
-					targetpoint =maincam.transform.forward*weaponRange +maincam.ViewportToWorldPoint(new Vector3(.5f, 0.5f, 1f));
 				}
 				aimRotation=targetpoint; 
 				
@@ -623,6 +687,10 @@ public class Pawn : DamagebleObject {
 		}else{
 			return aimRotation;
 		}
+	}
+	void OnDrawGizmos() {
+		//Gizmos.color = Color.yellow;
+		//Gizmos.DrawSphere(aimRotation, 1);
 	}
 	public Vector3 getCachedAimRotation(){
 		return aimRotation;
@@ -645,6 +713,29 @@ public class Pawn : DamagebleObject {
 
 	public int 	GetAmmoInBag (){
 		return ivnMan.GetAmmo (CurWeapon.ammoType);
+
+	}
+	public bool IsShooting(){
+		if (CurWeapon == null) {
+			return false;
+		}
+		return CurWeapon.IsShooting ();
+	}
+	public float RecoilMod(){
+		if (CurWeapon == null) {
+			return 0;
+		}
+		return CurWeapon.recoilMod;
+	}
+	public void HasShoot(){
+		if (cameraController != null) {
+			cameraController.AddShake(RecoilMod());
+		}
+	}
+	public void Reload(){
+		if (CurWeapon != null) {
+			CurWeapon.ReloadStart();
+		}
 
 	}
 	//END WEAPON SECTION
@@ -899,14 +990,14 @@ public class Pawn : DamagebleObject {
 		if (!photonView.isMine) {
 			return;
 		}
-
+		//Debug.Log (_rb.velocity.magnitude);
 		if (isGrounded) {
 			//Debug.Log ("Ground"+characterState);
 
 			if (_rb.isKinematic) _rb.isKinematic= false;
-			Vector3 velocity = rigidbody.velocity;
+			Vector3 velocity = _rb.velocity;
 			Vector3 velocityChange = (nextMovement - velocity);
-		
+			//Debug.Log (velocityChange);
 			rigidbody.AddForce(velocityChange, ForceMode.VelocityChange);
 
 			characterState = nextState;
@@ -925,10 +1016,10 @@ public class Pawn : DamagebleObject {
 				if(characterState!=CharacterState.WallRunning
 				   &&characterState!=CharacterState.PullingUp){
 
-					Vector3 velocity = rigidbody.velocity;
+					Vector3 velocity = _rb.velocity;
 					Vector3 velocityChange = (nextMovement - velocity);
 					//Debug.Log("DOUBLE JUMP");
-					
+					animator.DoubleJump();
 					rigidbody.AddForce(velocityChange, ForceMode.VelocityChange);
 
 					characterState = nextState;
@@ -940,7 +1031,9 @@ public class Pawn : DamagebleObject {
 
 					animator.ApllyJump(true);						
 					animator.WallAnimation(false,false,false);
-					
+					if(characterState!=CharacterState.DoubleJump){
+						animator.FreeFall();
+					}
 					//Debug.Log ("My Name" +this +"  "+nextState+"  "+isGrounded);
 				}else{
 					SendMessage ("WallLand", SendMessageOptions.DontRequireReceiver);
@@ -1111,7 +1204,9 @@ public class Pawn : DamagebleObject {
 			Vector3 newPosition= (Vector3) stream.ReceiveNext();
 			correctPlayerPos = newPosition;
 			correctPlayerRot = (Quaternion) stream.ReceiveNext();
+		
 			this.aimRotation = (Vector3) stream.ReceiveNext();
+			//Debug.Log(aimRotation);
 			//nextState = (CharacterState) stream.ReceiveNext();
 			//Debug.Log (characterState);
 			//health=(float) stream.ReceiveNext();
