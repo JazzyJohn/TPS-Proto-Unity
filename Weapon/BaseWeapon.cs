@@ -119,12 +119,10 @@ public class BaseWeapon : DestroyableNetworkObject {
 		}
 	}
 	public virtual void StartFire(){
-		Debug.Log("Base START")	;
 		isShooting = true;
 
 	}
 	public virtual void StopFire(){
-		Debug.Log("Base STOP")	;
 		isShooting = false;
 		ReleaseFire ();
 	}
