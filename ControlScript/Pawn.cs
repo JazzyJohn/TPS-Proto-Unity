@@ -767,11 +767,12 @@ public class Pawn : DamagebleObject {
 	void OnTriggerExit (Collider other)
 	{
 		if (other.tag == "damageArea") {
-//			newDPS = other.GetComponent<ContiniusGun> ().getId ();
-//			foreach (singleDPS i in activeDPS) {
-//			
-//			}
-			activeDPS.RemoveAt (0);	
+			singleDPS newDPS = other.GetComponent<ContiniusGun> ().getId ();
+			foreach (singleDPS key in activeDPS) {
+				if(newDPS.killer == key.killer){
+					activeDPS.Remove(key);	
+				}	
+			}
 		}
 	}
 
