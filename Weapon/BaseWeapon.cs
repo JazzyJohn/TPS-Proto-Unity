@@ -5,7 +5,7 @@ using System.Collections;
 
 public class BaseWeapon : DestroyableNetworkObject {
 
-	public enum AMUNITONTYPE{SIMPLEHIT, PROJECTILE, RAY, HTHWEAPON};
+	public enum AMUNITONTYPE{SIMPLEHIT, PROJECTILE, RAY, HTHWEAPON, AOE};
 
 	public AMUNITONTYPE amunitionType;
 	
@@ -45,13 +45,13 @@ public class BaseWeapon : DestroyableNetworkObject {
 
 	private bool isReload = false;
 
-	private bool isShooting = false;
+	protected bool isShooting = false;
 
 	private float fireTimer =  0.0f;
 	
 	private float reloadTimer =  0.0f;
 
-	private RifleParticleController rifleParticleController;
+	protected RifleParticleController rifleParticleController;
 
 	public string attackAnim;
 
@@ -118,11 +118,13 @@ public class BaseWeapon : DestroyableNetworkObject {
 			fireTimer-=Time.deltaTime;
 		}
 	}
-	public void StartFire(){
+	public virtual void StartFire(){
+		Debug.Log("Base START")	;
 		isShooting = true;
 
 	}
-	public void StopFire(){
+	public virtual void StopFire(){
+		Debug.Log("Base STOP")	;
 		isShooting = false;
 		ReleaseFire ();
 	}
@@ -195,7 +197,7 @@ public class BaseWeapon : DestroyableNetworkObject {
 		return true;
 	}
 
-	void ReleaseFire(){
+	protected void ReleaseFire(){
 		switch (amunitionType) {
 
 		case AMUNITONTYPE.HTHWEAPON:
