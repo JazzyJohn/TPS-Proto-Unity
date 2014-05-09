@@ -60,13 +60,24 @@ public class BaseWeapon : DestroyableNetworkObject {
 	public float recoilMod;
 
 	//звуки
-	public AudioSource shootSoundSource;
-	public AudioSource reloadSoundSource;
-
 	private soundControl sControl;//глобальный обьект контроллера звука
+	public AudioSource aSource;//источник звука. добавляется в редакторе
+	public AudioClip fireSound;
+	public AudioClip reloadSound;
 
 	// Use this for initialization
 	void Start () {
+
+		sControl = new soundControl (aSource);//создаем обьект контроллера звука
+
+		//проверяем длительности звуков стрельбы и перезарядки
+		if (fireSound.length >= fireInterval) {
+			Debug.LogError("fireSound clip length is greater than fireIntrval value");
+		}
+		if (reloadSound.length >= reloadTime) {
+			Debug.LogError("reloadSound clip length is greater than reloadTime value");
+		}
+		
 		curTransform = transform;
 		photonView = GetComponent<PhotonView>();
 		rifleParticleController = GetComponentInChildren<RifleParticleController>();
@@ -107,13 +118,6 @@ public class BaseWeapon : DestroyableNetworkObject {
 	// Update is called once per frame
 	void Update () {
 
-						if (Input.GetMouseButtonDown (0)) {
-							Fire();
-						}
-						if (Input.GetMouseButtonDown (1)) {
-							Reload();
-						}
-
 		if(isReload){
 			if(reloadTimer<0){
 				Reload();
@@ -152,16 +156,10 @@ public class BaseWeapon : DestroyableNetworkObject {
 		
 	}
 	public void Reload(){
+		//играем звук перезарядки
+		sControl.playClip (reloadSound);
 		isReload = false;
 		curAmmo =owner.GetComponent<InventoryManager>().GiveAmmo(ammoType,clipSize);
-		if (reloadSoundSource!=null & reloadSoundSource.clip!=null) {//если источник и клип определен
-			if(reloadSoundSource.clip.length<reloadTime){//если длина клипа меньше интервала перезарядки
-				reloadSoundSource.PlayOneShot (reloadSoundSource.clip);// то проигрываем
-			}
-			else{
-				Debug.LogError("Duration of sound clip "+"<"+reloadSoundSource.clip.name+">"+"  more reload time of this weapon!!!");
-			}
-		}
 	}
 	public bool IsReloading(){
 		return isReload;
@@ -173,6 +171,9 @@ public class BaseWeapon : DestroyableNetworkObject {
 		if (!CanShoot ()) {
 			return;		
 		}
+		//играем звук стрельбы
+		sControl.playClip (fireSound);
+
 		if(curAmmo>0){
 			curAmmo--;
 		}else{
@@ -184,12 +185,7 @@ public class BaseWeapon : DestroyableNetworkObject {
 		if (rifleParticleController != null) {
 			rifleParticleController.CreateShootFlame ();
 		}
-			if(sControl.checkTheLength(shootSoundSource,fireInterval)){//если длина клипа меньше интервала стрельбы
-				shootSoundSource.PlayOneShot (shootSoundSource.clip);// то проигрываем
-			}
-			else{
-				Debug.LogError("Duration of sound clip "+"<"+shootSoundSource.clip.name+">"+"  more fire interval of this weapon!!!");
-			}
+			
 
 				
 		switch (amunitionType) {

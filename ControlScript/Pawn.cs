@@ -1,4 +1,5 @@
 ﻿using UnityEngine;
+using System;
 using System.Collections;
 using System.Collections.Generic;
 
@@ -199,16 +200,14 @@ public class Pawn : DamagebleObject {
 	public ParticleEmitter emitter;
 
 	//звуки
-	public AudioSource stepSound;
-	public AudioSource painSound1;
-	public AudioSource painSound2;
-	public AudioSource painSound3;
-	public AudioSource painSound4;
-	public AudioSource jumpSound;
-	public AudioSource spawnSound;
+
+	public AudioSource aSource;
+	public AudioClip stepSound;
+	public AudioClip jumpSound;
+	public AudioClip spawnSound;
+	public AudioClip[] painSoundsArray;//массив звуков воплей при попадании
 
 	private soundControl sControl;//глобальный обьект контроллера звука
-
 
 	private bool isSpawn=false;//флаг респавна
 
@@ -225,10 +224,16 @@ public class Pawn : DamagebleObject {
 	// Use this for initialization
 	protected void Start () {
 
+		sControl = new soundControl (aSource);//создаем обьект контроллера звука
+
+		//проигрываем звук респавна
+		sControl.playClip (spawnSound);
+
 		if (emitter != null) {
 				emitter.Emit ();//запускаем эмиттер
 				isSpawn = true;//отключаем движения и повреждения
 		}
+
 		if (!photonView.isMine) {
 
 						Destroy (GetComponent<ThirdPersonController> ());
@@ -258,31 +263,13 @@ public class Pawn : DamagebleObject {
 	
 	public override void Damage(BaseDamage damage,GameObject killer){
 		if (isSpawn) {//если только респавнились
-			sControl.playAudioSourceOne(spawnSound);//играем звук и выходим что-бы не огребать
 			return;
 		}
 
 		//вопли при попадании
-		AudioSource tmpSource;
-		tmpSource = painSound1;
-		switch (Random.Range (0, 3)) {//случайно выбираем один
-				case 0:
-						tmpSource = painSound2;
-						break;
-
-				case 1:
-						tmpSource = painSound3;
-						break;
-
-				case 2:
-						tmpSource = painSound4;
-						break;
-				}
-		sControl.playAudioSourcePossibly (tmpSource);//играем
-
-
-
-
+		//выбираются случайно из массива. Звучат не прерываясь при следующем вызове
+		sControl.playClipsRandom (painSoundsArray);
+		
 		Pawn killerPawn =killer.GetComponent<Pawn> ();
 		if (killerPawn != null && killerPawn.team == team &&! PlayerManager.instance.frendlyFire) {
 			return;
@@ -520,6 +507,7 @@ public class Pawn : DamagebleObject {
 	}
 	void Update () {
 		//Debug.Log (photonView.isSceneView);
+
 		if (!isActive) {
 			return;		
 		}
@@ -785,6 +773,9 @@ public class Pawn : DamagebleObject {
 			return;
 		}
 
+		//проигрываем звук шагов
+		sControl.playClip (stepSound);
+
 		nextState = state;
 
 		if (nextState != CharacterState.Jumping&&nextState != CharacterState.DoubleJump) {
@@ -1047,6 +1038,8 @@ public class Pawn : DamagebleObject {
 	public void Jump(){
 		if (animator != null) {
 						animator.ApllyJump (true);	
+			//звук прыжка
+			sControl.playClip(jumpSound);
 		}
 		lastJumpTime = Time.time;
 		//photonView.RPC("JumpChange",PhotonTargets.OthersBuffered,true);
