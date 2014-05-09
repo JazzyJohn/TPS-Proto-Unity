@@ -18,7 +18,15 @@ public enum WallState{
 	WallF
 }
 
+public struct singleDPS
+{
+	public BaseDamage damage;
+	public GameObject killer;
+}	
+
 public class Pawn : DamagebleObject {
+
+	public List<singleDPS> activeDPS = new List<singleDPS> ();
 
 	public const int SYNC_MULTUPLIER = 5;
 
@@ -576,6 +584,13 @@ public class Pawn : DamagebleObject {
 		}
 		//		Debug.Log (characterState);
 		UpdateAnimator ();
+
+		if (activeDPS.Count > 0) {
+			foreach (singleDPS key in activeDPS) {
+				Damage(key.damage,key.killer);
+			}
+		} 
+		
 	}
 
 	public void ReplicatePosition(){
@@ -596,10 +611,9 @@ public class Pawn : DamagebleObject {
 	}
 	//Weapon Section
 	public void StartFire(){
-
 		if (CurWeapon != null) {
 			CurWeapon.StartFire ();
-		}
+		} 
 	}
 	public void StopFire(){
 		if (CurWeapon != null) {
@@ -743,8 +757,23 @@ public class Pawn : DamagebleObject {
 	void OnCollisionEnter(Collision collision) {
 		//Debug.Log ("COLLISION ENTER PAWN " + this + collision);
 	}
-	void OnTriggerEnter	(Collider other) {
-		//Debug.Log ("TRIGGER ENTER PAWN "+ this +  other);
+	void OnTriggerEnter (Collider other)
+	{
+		if (other.tag == "damageArea") {
+			other.GetComponent<ContiniusGun> ().fireDamage (this);
+		}
+	}
+	
+	void OnTriggerExit (Collider other)
+	{
+		if (other.tag == "damageArea") {
+			singleDPS newDPS = other.GetComponent<ContiniusGun> ().getId ();
+			foreach (singleDPS key in activeDPS) {
+				if(newDPS.killer == key.killer){
+					activeDPS.Remove(key);	
+				}	
+			}
+		}
 	}
 
 	//TODO: MOVE THAT to PAwn and turn on replication of aiming
@@ -1291,4 +1320,13 @@ public class Pawn : DamagebleObject {
 
 
 	//end seen hear work
+
+	public void addDPS (BaseDamage damage, GameObject killer)
+	{
+		singleDPS newDPS = new singleDPS ();
+		newDPS.damage = damage;
+		newDPS.killer = killer;
+		
+		activeDPS.Add (newDPS);
+	}
 }
