@@ -28,12 +28,22 @@ public class BaseProjectile : MonoBehaviour {
 	public GameObject owner;
 	public GameObject hitParticle;
 	public int splashRadius;
+
+	//звуки
+	public AudioSource aSource;//источник звука задается в редакторе
+	public AudioClip reactiveEngineSound;
+	public AudioClip exploseSound;
+	private soundControl sControl;//контроллер звука
 	
 	private Transform mTransform;
 	private Rigidbody mRigidBody;
 	private bool used=false;
 	
 	void Start () {
+		
+		sControl = new soundControl (aSource);//создаем обьект контроллера звука и передаем указатель на источник
+		sControl.playClip (reactiveEngineSound);
+
 		mTransform = transform;
 		mRigidBody = rigidbody;
 		mRigidBody.velocity = mTransform.TransformDirection(Vector3.forward * startImpulse);
@@ -92,6 +102,10 @@ public class BaseProjectile : MonoBehaviour {
 	}
 	
 	void ExplosionDamage() {
+
+		sControl.stopSound ();//останавливаем звук реактивного двигателя
+		sControl.playClip (exploseSound);//звук взрыва
+
 		Collider[] hitColliders = Physics.OverlapSphere(transform.position, splashRadius);
 		
 		for(int i=0;i < hitColliders.Length;i++) {

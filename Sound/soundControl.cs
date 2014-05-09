@@ -45,6 +45,30 @@ public class soundControl
 		}
 	}
 //--------------------------------------------------------------------------------------------------------------
+	//останавливает воспроизведение(для зацикленых звуков)
+	public void stopSound(){
+		if(source!=null){
+			source.Stop();
+		}
+	}
+//--------------------------------------------------------------------------------------------------------------
+	//проигрывает заданный клип целиком, не прерывая
+	public void playFullClip(AudioClip clip){
+		if (source != null) {
+			if(!source.isPlaying){
+				if (clip != null) {
+					source.clip = clip;
+					source.Play ();
+				} 
+				else {
+					Debug.LogError("soundControl:playFullClip: Clip not defined!!");
+				}
+			}
+		}
+		else {
+			Debug.LogError("soundControl:playFullClip: Source not defined!!");
+		}
+	}
 }
-
+//---------------------------------------------------------------------------------------------------------------
 
