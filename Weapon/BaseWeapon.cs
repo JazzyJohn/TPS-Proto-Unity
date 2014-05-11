@@ -1,9 +1,31 @@
 ﻿using UnityEngine;
 using System.Collections;
+using System.Collections.Generic;
+
 
 
 
 public class BaseWeapon : DestroyableNetworkObject {
+	class ShootData{
+		public double timeShoot;
+		public Quaternion  direction;
+		public Vector3 position;
+		public void PhotonSerialization(PhotonStream stream){
+			stream.SendNext (timeShoot);
+
+			stream.SendNext( direction);
+			ServerHolder.WriteVectorToShort (stream, position);
+		}
+		public void PhotonDeserialization(PhotonStream stream){
+			timeShoot = (double)stream.ReceiveNext ();
+			direction = (Quaternion)stream.ReceiveNext ();
+			position = ServerHolder.ReadVectorFromShort (stream);
+		}
+	}
+
+	private Queue<ShootData> shootsToSend = new Queue<ShootData>();
+
+	private Queue<ShootData> shootsToSpawn = new Queue<ShootData>();
 
 	public enum AMUNITONTYPE{SIMPLEHIT, PROJECTILE, RAY, HTHWEAPON, AOE};
 
@@ -101,6 +123,11 @@ public class BaseWeapon : DestroyableNetworkObject {
 
 	// Update is called once per frame
 	void Update () {
+		AimFix ();
+		if (!photonView.isMine) {
+			ReplicationGenerate ();
+			return;
+		}
 		if(isReload){
 			if(reloadTimer<0){
 				Reload();
@@ -140,13 +167,24 @@ public class BaseWeapon : DestroyableNetworkObject {
 	}
 	public void Reload(){
 		isReload = false;
-		curAmmo =owner.GetComponent<InventoryManager>().GiveAmmo(ammoType,clipSize);	
+		int oldClip = curAmmo;
+		curAmmo =owner.GetComponent<InventoryManager>().GiveAmmo(ammoType,clipSize-curAmmo)+oldClip;	
 	}
 	public bool IsReloading(){
 		return isReload;
 	}
 	public bool IsShooting(){
 		return isShooting && !isReload;
+	}
+	public float ReloadTimer(){
+		if (isReload) {
+			return reloadTimer;
+		}
+		return 0.0f;
+	}
+	//temporary function to fix wrong aiming
+	public virtual void AimFix(){
+
 	}
 	void Fire(){
 		if (!CanShoot ()) {
@@ -181,6 +219,7 @@ public class BaseWeapon : DestroyableNetworkObject {
 			break;
 			
 		}
+	
 		owner.HasShoot ();
 		//photonView.RPC("FireEffect",PhotonTargets.Others);
 	}
@@ -232,21 +271,36 @@ public class BaseWeapon : DestroyableNetworkObject {
 		}
 		proj=Instantiate(projectilePrefab,startPoint,startRotation) as GameObject;
 		if (photonView.isMine) {
-			photonView.RPC("GenerateProjectileRep",PhotonTargets.Others,startPoint,startRotation);
+			SendShoot(startPoint,startRotation);
 		}
 		BaseProjectile projScript =proj.GetComponent<BaseProjectile>();
 		projScript.damage =new BaseDamage(damageAmount) ;
 		projScript.owner = owner.gameObject;
 	}
-	[RPC]
-	protected void GenerateProjectileRep(Vector3 startPoint,Quaternion startRotation){
+	protected void ReplicationGenerate (){
+		while(shootsToSpawn.Count>0){
+			ShootData spawnShoot = shootsToSpawn.Dequeue();
+			GenerateProjectileRep(spawnShoot.position,spawnShoot.direction,spawnShoot.timeShoot);
+		}
+	}
+	protected void GenerateProjectileRep(Vector3 startPoint,Quaternion startRotation,double timeShoot){
+
 		GameObject proj=Instantiate(projectilePrefab,startPoint,startRotation) as GameObject;
 		BaseProjectile projScript = proj.GetComponent<BaseProjectile>();
+		projScript.transform.Translate (startRotation*Vector3.forward*(float)(PhotonNetwork.time-timeShoot));
 		projScript.damage =new BaseDamage(damageAmount) ;
 		projScript.owner = owner.gameObject;
 		if (rifleParticleController != null) {
 			rifleParticleController.CreateShootFlame ();
 		}
+	}
+
+	protected void SendShoot(Vector3 position, Quaternion rotation){
+		ShootData send = new ShootData ();
+		send.position = position;
+		send.direction = rotation;
+		send.timeShoot = PhotonNetwork.time;
+		shootsToSend.Enqueue (send);
 	}
 	protected Quaternion getAimRotation(){
 		/*Vector3 randVec = Random.onUnitSphere;
@@ -260,20 +314,28 @@ public class BaseWeapon : DestroyableNetworkObject {
 	
 	public void OnPhotonSerializeView(PhotonStream stream, PhotonMessageInfo info)
 	{
-		/*if (stream.isWriting)
+		if (stream.isWriting)
 		{
 			// We own this player: send the others our data
-			stream.SendNext(transform.position);
-			stream.SendNext(transform.rotation);
+			stream.SendNext(shootsToSend.Count);
+			while(shootsToSend.Count>0){
+				shootsToSend.Dequeue().PhotonSerialization(stream);
+			}
+			///stream.SendNext(transform.rotation);
 
 		}
 		else
 		{
 			// Network player, receive data
-			this.transform.position = (Vector3) stream.ReceiveNext();
-			this.transform.rotation = (Quaternion) stream.ReceiveNext();
+			int shootCount = (int) stream.ReceiveNext();
+			for(int i=0;i<shootCount;i++){
+				ShootData data = new ShootData();
+				data.PhotonDeserialization(stream);
+				shootsToSpawn.Enqueue(data);
+			}
+			//this.transform.rotation = (Quaternion) stream.ReceiveNext();
 
-		}*/
+		}
 	}
 	
 

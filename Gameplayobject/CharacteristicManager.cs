@@ -17,6 +17,7 @@ public enum CharacteristicList{
 		ARMOR,
 		STANDFORCE,
 		STANDFORCEAIR,
+	    JETPACKCHARGE
 }
 public class BaseEffect{
 	public int timeEnd;

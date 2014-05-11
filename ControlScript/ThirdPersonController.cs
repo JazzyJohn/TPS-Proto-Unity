@@ -98,7 +98,7 @@ void  Awake ()
 	_animation = GetComponent<Animation>();
 	pawn= GetComponent<Pawn>();
 	myTransform = transform;
-	
+		canJump = pawn.canJump;
 	/*if(!_animation)
 		//Debug.Log("The character you would like to control doesn't have animations. Moving her might look weird.");
 	

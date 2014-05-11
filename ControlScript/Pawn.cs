@@ -22,6 +22,10 @@ public struct singleDPS
 {
 	public BaseDamage damage;
 	public GameObject killer;
+	public float lastTime;
+	public void SetTime(float time){
+		lastTime = time;
+	}
 }	
 
 public class Pawn : DamagebleObject {
@@ -85,6 +89,12 @@ public class Pawn : DamagebleObject {
 
 	private CharacterState nextState;
 
+	private int jetPackCharge;
+
+	private float jetPackTimer= 0.0f;
+
+	public float jetPackTime=5.0f;
+
 	private Vector3 nextMovement;
 
 	public ThirdPersonCamera cameraController;
@@ -109,7 +119,13 @@ public class Pawn : DamagebleObject {
 
 	public bool canPullUp;
 
+	public bool canJump;
+
 	public float wallRunSpeed;
+
+	public const float  WALL_TIME_UP=1.5f;
+
+	public const float  WALL_TIME_SIDE=3.0f;
 
 	public float groundRunSpeed;
 
@@ -245,14 +261,20 @@ public class Pawn : DamagebleObject {
 		charMan = GetComponent<CharacteristicManager> ();
 		charMan.Init ();
 		health= charMan.GetIntChar(CharacteristicList.MAXHEALTH);
+		if (canJump) {
+			jetPackCharge = charMan.GetIntChar(CharacteristicList.JETPACKCHARGE);
+		}
 		//Debug.Log (distToGround);
 	}
 	
 	public override void Damage(BaseDamage damage,GameObject killer){
-		if (isSpawn) {//если только респавнились, то повреждений не получаем
+		if (isSpawn||killer==null) {//если только респавнились, то повреждений не получаем
 			return;
 		}
-
+		bool isVs =( damage.isVsArmor && charMan.GetBoolChar (CharacteristicList.ARMOR))||( !damage.isVsArmor && !charMan.GetBoolChar (CharacteristicList.ARMOR));
+		if (!isVs) {
+			damage.Damage*=0.5f;		
+		}
 
 		Pawn killerPawn =killer.GetComponent<Pawn> ();
 		if (killerPawn != null && killerPawn.team == team &&! PlayerManager.instance.frendlyFire) {
@@ -261,7 +283,7 @@ public class Pawn : DamagebleObject {
 		if (killerPawn != null){
 			Player killerPlayer =  killerPawn.player;
 			if(killerPlayer!=null){
-				killerPlayer.DamagePawn(damage.Damage,damage.hitPosition);
+				killerPlayer.DamagePawn(damage);
 			}
 		}
 		if (photonView.isMine) {
@@ -287,7 +309,6 @@ public class Pawn : DamagebleObject {
 		}
 
 		
-		
 		//Debug.Log ("DAMAGE");
 		base.Damage(damage,killer);
 	}
@@ -303,7 +324,11 @@ public class Pawn : DamagebleObject {
 
 	public void HPChange(){
 		if (PhotonNetwork.isMasterClient) {
-			photonView.RPC ("RPCSetHealth", photonView.owner, health);
+			if(photonView.owner!=null){
+				photonView.RPC ("RPCSetHealth", photonView.owner, health);
+			}else{
+				photonView.RPC ("RPCSetHealth", PhotonTargets.MasterClient, health);
+			}
 		}
 	}
 	public override void KillIt(GameObject killer){
@@ -518,6 +543,14 @@ public class Pawn : DamagebleObject {
 		if (photonView.isMine) {
 
 			UpdateSeenList();
+			if (canJump&&jetPackCharge<charMan.GetIntChar(CharacteristicList.JETPACKCHARGE)){
+				jetPackTimer+=Time.deltaTime;
+				if(jetPackTimer>=jetPackTime){
+					jetPackTimer=0.0f;
+					jetPackCharge++;
+				}
+			}
+
 
 			if(CurWeapon!=null){
 				//if(aimRotation.sqrMagnitude==0){
@@ -584,15 +617,30 @@ public class Pawn : DamagebleObject {
 		}
 		//		Debug.Log (characterState);
 		UpdateAnimator ();
+		DpsCheck ();
 
-		if (activeDPS.Count > 0) {
-			foreach (singleDPS key in activeDPS) {
-				Damage(key.damage,key.killer);
-			}
-		} 
 		
 	}
+	public void DpsCheck(){
+		//Debug.Log ("dps"+this+activeDPS.Count );
+		if (activeDPS.Count > 0) {
 
+			foreach (singleDPS key in activeDPS) {
+				BaseDamage ldamage = new BaseDamage(key.damage);
+				ldamage.hitPosition =myTransform.position;
+				ldamage.isContinius = true;
+				ldamage.Damage *= Time.deltaTime;
+				if(key.lastTime+0.1f<Time.time){
+					ldamage.sendMessage = true;
+					key.SetTime(Time.time);
+				}else{
+					ldamage.sendMessage = false;
+				}
+
+				Damage(ldamage,key.killer);
+			}
+		} 
+	}
 	public void ReplicatePosition(){
 		if (initialReplication) {
 			myTransform.position = correctPlayerPos;
@@ -624,6 +672,9 @@ public class Pawn : DamagebleObject {
 		CurWeapon = newWeapon;
 		//Debug.Log (newWeapon);
 		CurWeapon.AttachWeapon(weaponSlot,weaponOffset,Quaternion.Euler (weaponRotatorOffset),this);
+	}
+	public void ChangeWeapon(int weaponIndex){
+		ivnMan.ChangeWeapon (weaponIndex);
 	}
 
 	public bool isAimimngAtEnemy(){
@@ -760,17 +811,19 @@ public class Pawn : DamagebleObject {
 	void OnTriggerEnter (Collider other)
 	{
 		if (other.tag == "damageArea") {
-			other.GetComponent<ContiniusGun> ().fireDamage (this);
+			//Debug.Log (other.GetComponent<ContiniusGun> ());
+			other.GetComponent<MuzzlePoint>().gun.GetComponent<ContiniusGun> ().fireDamage (this);
 		}
 	}
 	
 	void OnTriggerExit (Collider other)
 	{
 		if (other.tag == "damageArea") {
-			singleDPS newDPS = other.GetComponent<ContiniusGun> ().getId ();
+			singleDPS newDPS = other.GetComponent<MuzzlePoint>().gun.GetComponent<ContiniusGun> ().getId ();
 			foreach (singleDPS key in activeDPS) {
 				if(newDPS.killer == key.killer){
-					activeDPS.Remove(key);	
+					activeDPS.Remove(key);
+					break;
 				}	
 			}
 		}
@@ -853,15 +906,24 @@ public class Pawn : DamagebleObject {
 			return false;
 		}
 		
-		if (_rb.velocity.sqrMagnitude < 0.2f ) {
+		/*if (_rb.velocity.sqrMagnitude < 0.02f ) {
 			if(characterState == CharacterState.WallRunning){
 					characterState = CharacterState.Jumping;
 					lastTimeOnWall = Time.time;
 			}
 			return false;
+		}*/
+		
+		if (_rb.velocity.sqrMagnitude < 0.02f&&characterState == CharacterState.WallRunning) {
+			characterState = CharacterState.Jumping;
+			lastTimeOnWall = Time.time;
+
+			return false;
 		}
-	
-		//Debug.Log (movement);
+		if (characterState != CharacterState.DoubleJump&&characterState != CharacterState.WallRunning) {
+			return false;
+		}
+		//Debug.Log (characterState);
 		RaycastHit leftH,rightH,frontH;
 		
 		
@@ -900,7 +962,7 @@ public class Pawn : DamagebleObject {
 					wallState =WallState.WallL;
 					characterState = CharacterState.WallRunning;
 					//animator.SetBool("WallRunL", true);
-					StartCoroutine( WallRunCoolDown(3f)); // Exclude if not needed
+					StartCoroutine( WallRunCoolDown(WALL_TIME_SIDE)); // Exclude if not needed
 				}
 				
 				if(state == CharacterState.Jumping)
@@ -920,7 +982,7 @@ public class Pawn : DamagebleObject {
 				{
 					wallState =WallState.WallR;
 					characterState = CharacterState.WallRunning;
-					StartCoroutine( WallRunCoolDown(3f)); // Exclude if not needed
+					StartCoroutine( WallRunCoolDown(WALL_TIME_SIDE)); // Exclude if not needed
 				}
 				
 				if(state == CharacterState.Jumping)
@@ -938,7 +1000,7 @@ public class Pawn : DamagebleObject {
 				{
 					wallState =WallState.WallF;
 					characterState = CharacterState.WallRunning;
-					StartCoroutine( WallRunCoolDown(3f)); // Exclude if not needed
+					StartCoroutine( WallRunCoolDown(WALL_TIME_UP)); // Exclude if not needed
 				}
 				
 				if(state == CharacterState.Jumping)
@@ -1045,14 +1107,16 @@ public class Pawn : DamagebleObject {
 			case CharacterState.DoubleJump:
 				if(characterState!=CharacterState.WallRunning
 				   &&characterState!=CharacterState.PullingUp){
+					if(jetPackCharge>0){
+						Vector3 velocity = _rb.velocity;
+						Vector3 velocityChange = (nextMovement - velocity);
+						jetPackCharge--;
+						animator.DoubleJump();
+						rigidbody.AddForce(velocityChange, ForceMode.VelocityChange);
 
-					Vector3 velocity = _rb.velocity;
-					Vector3 velocityChange = (nextMovement - velocity);
-					//Debug.Log("DOUBLE JUMP");
-					animator.DoubleJump();
-					rigidbody.AddForce(velocityChange, ForceMode.VelocityChange);
+						characterState = nextState;
+					}
 
-					characterState = nextState;
 				}
 				break;
 			default:
@@ -1099,7 +1163,10 @@ public class Pawn : DamagebleObject {
 		lastJumpTime = Time.time;
 		//photonView.RPC("JumpChange",PhotonTargets.OthersBuffered,true);
 	}
-
+	public int GetJetPackCharges(){
+		return jetPackCharge;
+	
+	}
 	public void DidLand(){
 		if (animator != null) {
 						animator.ApllyJump (false);
@@ -1227,6 +1294,7 @@ public class Pawn : DamagebleObject {
 			stream.SendNext(characterState);
 			//stream.SendNext(health);
 			stream.SendNext(wallState);
+			stream.SendNext(health);
 			//stream.SendNext(netIsGround);
 			//stream.SendNext(animator.GetJump());
 
@@ -1244,6 +1312,10 @@ public class Pawn : DamagebleObject {
 			//Debug.Log (characterState);
 			//health=(float) stream.ReceiveNext();
 			wallState = (WallState) stream.ReceiveNext();
+			float newHealth =(float)stream.ReceiveNext();
+			if(!PhotonNetwork.isMasterClient){
+				health =newHealth;
+			}
 			//isGrounded =(bool) stream.ReceiveNext();
 			//animator.ApllyJump((bool)stream.ReceiveNext());
 			//Debug.Log (wallState);

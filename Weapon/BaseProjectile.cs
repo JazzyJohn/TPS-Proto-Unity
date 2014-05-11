@@ -9,7 +9,8 @@ public class BaseDamage{
 	public float pushForce;
 	public Vector3 pushDirection;
 	public Vector3 hitPosition;
-	
+	public bool sendMessage= true;
+	public bool isContinius =false;
 	public BaseDamage(BaseDamage old){
 		Damage = old.Damage;
 		isVsArmor = old.isVsArmor;
@@ -27,11 +28,11 @@ public class BaseProjectile : MonoBehaviour {
 	public float startImpulse;
 	public GameObject owner;
 	public GameObject hitParticle;
-	public int splashRadius;
+	public float splashRadius;
 	
-	private Transform mTransform;
+	protected Transform mTransform;
 	private Rigidbody mRigidBody;
-	private bool used=false;
+	protected bool used=false;
 	
 	void Start () {
 		mTransform = transform;

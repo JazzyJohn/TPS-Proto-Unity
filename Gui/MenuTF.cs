@@ -72,6 +72,9 @@ public class MenuTF : MonoBehaviour {
 	public Texture2D[] _ButtonTeamTex;
 	public Texture2D[] _ButtonTeamTexPress;
 
+	public Color[] _ButtonTeamFontColor;
+	public Color[] _ButtonTeamFontColorPress;
+
 	public GUIStyle[] _TeamGSbutton = new GUIStyle[2];
 //---------------------------------
 
@@ -105,9 +108,10 @@ public class MenuTF : MonoBehaviour {
 	void Start () 
 	{
 		_Pl_Ro = -1;
-
-		_StartGS.fontSize = Mathf.RoundToInt(Screen.width * _TextSize);
-
+		int fontSize= Mathf.RoundToInt(Screen.width * _TextSize);
+		_StartGS.fontSize = fontSize;
+		_TeamGSbutton[0].fontSize = fontSize;
+		_TeamGSbutton[1].fontSize = fontSize;
 		_BackgroundWidth = Mathf.RoundToInt(Screen.width/_BGWidthСoefficient);
 		_BackgroundHeight = Mathf.RoundToInt(Screen.height/_BGHeightСoefficient);
 
@@ -396,28 +400,38 @@ public class MenuTF : MonoBehaviour {
 
 
 	//Team
-
-		if(GUI.Button(new Rect(Screen.width/_TeamButtonPosX, Screen.height/_TeamButtonPosY, Screen.width/_TeamButtonSizeX, Screen.height/_TeamButtonSizeY), "", _TeamGSbutton[0]))
+		int[] teamCount = new int[2];
+		Player[] players = PlayerManager.instance.FindAllPlayer ();
+		foreach(Player player in players) {
+			if(player.team!=0){
+				teamCount[player.team-1]++;
+			}
+		}
+		if(GUI.Button(new Rect(Screen.width/_TeamButtonPosX, Screen.height/_TeamButtonPosY, Screen.width/_TeamButtonSizeX, Screen.height/_TeamButtonSizeY), "Команда 1 ("+teamCount[0]+")", _TeamGSbutton[0]))
 		{
 			
 			for(int i = 0; i <  _TeamGSbutton.Length; i ++)
 			{
 				_TeamGSbutton[i].normal.background = _ButtonTeamTex[i];
+				_TeamGSbutton[i].normal.textColor =_ButtonTeamFontColor[i];
 			}
 			_TeamGSbutton[0].normal.background = _ButtonTeamTexPress[0];
+			_TeamGSbutton[0].normal.textColor =_ButtonTeamFontColorPress[0];
 			
 			
 			Choice._Team = 1;
 		}
 
-		if(GUI.Button(new Rect(Screen.width/_TeamButtonPosX + Screen.width/_TeamButtonSizeX, Screen.height/_TeamButtonPosY, Screen.width/_TeamButtonSizeX, Screen.height/_TeamButtonSizeY), "", _TeamGSbutton[1]))
+		if(GUI.Button(new Rect(Screen.width/_TeamButtonPosX + Screen.width/_TeamButtonSizeX, Screen.height/_TeamButtonPosY, Screen.width/_TeamButtonSizeX, Screen.height/_TeamButtonSizeY), "Команда 2 ("+teamCount[1]+")", _TeamGSbutton[1]))
 		{
 			
 			for(int i = 0; i < _TeamGSbutton.Length; i ++)
 			{
 				_TeamGSbutton[i].normal.background = _ButtonTeamTex[i];
+				_TeamGSbutton[i].normal.textColor =_ButtonTeamFontColor[i];
 			}
 			_TeamGSbutton[1].normal.background = _ButtonTeamTexPress[1];
+			_TeamGSbutton[1].normal.textColor =_ButtonTeamFontColorPress[1];
 			
 			
 			Choice._Team = 2;

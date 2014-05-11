@@ -3,14 +3,20 @@ using System;
 
 
 public class AmmoPicker : UseObject {
-	
-	public AMMOTYPE ammo;
-	
-	public int amount;
-	
+	[Serializable]
+	public class AmmoBoxPicker{
+		public AMMOTYPE ammo;
+		
+		public int amount;
+	}
+
+	public AmmoBoxPicker[] ammoList;
 	override public bool ActualUse(Pawn target){
-		target.GetComponent<InventoryManager>().AddAmmo(ammo,amount);
+		foreach (AmmoBoxPicker abp in ammoList) {
+			target.GetComponent<InventoryManager> ().AddAmmo (abp.ammo, abp.amount);
+		}
 		return base.ActualUse(target);
+
 	}
 	
 

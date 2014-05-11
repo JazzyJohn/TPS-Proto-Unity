@@ -60,6 +60,8 @@ public class Player : MonoBehaviour {
 
 	public UseObject useTarget;
 
+	public const float SQUERED_RADIUS_OF_ACTION = 16.0f;
+
 	void Start(){
 		photonView = GetComponent<PhotonView> ();
 
@@ -193,7 +195,7 @@ public class Player : MonoBehaviour {
 					if(currentPawn.curLookTarget!=null){
 
 						useTarget = currentPawn.curLookTarget.GetComponent<UseObject>();
-						if(useTarget!=null&&Input.GetButtonDown("Use")){
+					if(useTarget!=null&&(currentPawn.myTransform.position-useTarget.myTransform.position).sqrMagnitude<SQUERED_RADIUS_OF_ACTION&&Input.GetButtonDown("Use")){
 							useTarget.Use(currentPawn);
 
 						}
@@ -213,6 +215,24 @@ public class Player : MonoBehaviour {
 				currentPawn.ToggleAim();
 				if(robotPawn!=null){
 					robotPawn.ToggleAim();
+				}
+			}
+			if(Input.GetButtonDown("Weapon1")){
+				currentPawn.ChangeWeapon (0);
+				if(robotPawn!=null){
+					robotPawn.ChangeWeapon (0);
+				}
+			}
+			if(Input.GetButtonDown("Weapon2")){
+				currentPawn.ChangeWeapon (1);
+				if(robotPawn!=null){
+					robotPawn.ChangeWeapon (1);
+				}
+			}
+			if(Input.GetButtonDown("Weapon3")){
+				currentPawn.ChangeWeapon (2);
+				if(robotPawn!=null){
+					robotPawn.ChangeWeapon (2);
 				}
 			}
 		}
@@ -241,6 +261,7 @@ public class Player : MonoBehaviour {
 	public void RPCPawnDead(int viewId){
 		
 		Score.Death++;
+		isStarted = false;
 		if (viewId != 0) {
 			Player killer = PhotonView.Find (viewId).GetComponent<Player> ();
 			
@@ -272,11 +293,17 @@ public class Player : MonoBehaviour {
 
 	}
 	
-	public void DamagePawn(float damage, Vector3 position){
+	public void DamagePawn(BaseDamage damage){
 		if (!photonView.isMine) {
 			return;
 		}
-		PlayerMainGui.instance.AddMessage(damage.ToString(),position,PlayerMainGui.MessageType.DMG_TEXT);
+		if (damage.sendMessage) {
+			if(damage.isContinius){
+				PlayerMainGui.instance.AddMessage ((damage.Damage/Time.deltaTime).ToString ("0.0"), damage.hitPosition, PlayerMainGui.MessageType.DMG_TEXT);
+			}else{
+				PlayerMainGui.instance.AddMessage (damage.Damage.ToString (), damage.hitPosition, PlayerMainGui.MessageType.DMG_TEXT);
+			}
+		}
 	}
 	public void PawnAssist(){
 		Score.Assist++;
@@ -321,6 +348,8 @@ public class Player : MonoBehaviour {
 			stats.ammoInGun = curPawn.CurWeapon.curAmmo;
 			stats.ammoInGunMax = curPawn.CurWeapon.clipSize;
 			stats.ammoInBag = curPawn.GetAmmoInBag ();
+			stats.reloadTime = curPawn.CurWeapon.ReloadTimer();
+			stats.jetPackCharge  = curPawn.GetJetPackCharges();
 			stats.gunName = curPawn.CurWeapon.weaponName;
 		}
 
@@ -328,7 +357,12 @@ public class Player : MonoBehaviour {
 		return stats;
 
 	}
-
+	public string IsMaster(){
+		if (photonView.owner.isMasterClient) {
+			return "Host";		
+		}
+		return "";
+	}
 	public float GetRobotTimer(){
 		if (robotTimer < 0) {
 			return 0;

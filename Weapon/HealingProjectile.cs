@@ -6,9 +6,12 @@ public class HealingProjectile : BaseProjectile {
 
 	public override void onBulletHit(RaycastHit hit)
 	{
-		if (owner == hit.transform.gameObject) {
+		if (owner == hit.transform.gameObject||used) {
 			return;
 		}
+		used = true;
+		damage.pushDirection = mTransform.forward;
+		damage.hitPosition = hit.point;
 		if (hit.transform.gameObject.CompareTag ("decoration")) {
 			//Debug.Log ("HADISH INTO " + hit.transform.gameObject.name);
 			if(hitParticle!=null){
@@ -29,7 +32,7 @@ public class HealingProjectile : BaseProjectile {
 		}
 		if (obj != null) {
 			obj.Damage(damage,owner);
-			//Debug.Log ("HADISH INTO SOME PLAYER! " + hit.transform.gameObject.name);
+			Debug.Log ("HADISH INTO SOME PLAYER! " + hit.transform.gameObject.name);
 			Destroy (gameObject, 0.1f);
 		}
 	}

@@ -1,7 +1,7 @@
 using UnityEngine;
 using System;
 
-public enum AMMOTYPE{PISTOL,RIFLE,ROCKETS,MACHINEGUN,SHOOTGUNSHEELL};
+public enum AMMOTYPE{PISTOL,RIFLE,ROCKETS,MACHINEGUN,SHOOTGUNSHEELL,FUEL};
 
 [RequireComponent (typeof (Pawn))]
 public class InventoryManager : MonoBehaviour {
@@ -58,7 +58,7 @@ public class InventoryManager : MonoBehaviour {
 		
 			GenerateBag ();
 			GenerateInfo ();
-			ChangeWeapon (0);
+			_ChangeWeapon (0);
 		}
 	}
 	
@@ -163,7 +163,7 @@ public class InventoryManager : MonoBehaviour {
 				DropWeapon(prefabWeapon[i],weaponInfo[i]);
 				prefabWeapon[i]=newWeapon;
 				weaponInfo[i]=new WeaponBackUp(prefabWeapon[i].clipSize, prefabWeapon[i].ammoType);
-				ChangeWeapon(i);
+				_ChangeWeapon(i);
 				return;
 			}
 		}
@@ -201,7 +201,7 @@ public class InventoryManager : MonoBehaviour {
 			newIndex=0;
 		}
 		//Debug.Log ("NextWeapon"+newIndex);
-		ChangeWeapon(newIndex);
+		_ChangeWeapon(newIndex);
 	}
 	public void PrevWeapon(){
 		int newIndex = indexWeapon-1;
@@ -209,10 +209,16 @@ public class InventoryManager : MonoBehaviour {
 			newIndex=prefabWeapon.Length-1;
 		}
 		//Debug.Log ("PrevWeapon"+newIndex);
-		ChangeWeapon(newIndex);
+		_ChangeWeapon(newIndex);
 	}
 	//Change weapon in hand
 	public void ChangeWeapon(int newWeapon){
+		if (indexWeapon != newWeapon) {
+			_ChangeWeapon(newWeapon);	
+		}
+	}
+
+	protected void _ChangeWeapon(int newWeapon){
 		if(prefabWeapon.Length<=newWeapon){
 			Debug.Log("Selected weapon doesn't exist in current inventory manager");
 			return;

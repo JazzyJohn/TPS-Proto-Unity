@@ -17,7 +17,7 @@ public class PlayerMainGui : MonoBehaviour {
 	public float MarkSize;
 
 	public Texture EnemyMark;
-	public Texture AliaMark;
+	public GUIStyle AliaMark;
 
 	public float VersionSize;
 	
@@ -81,6 +81,8 @@ public class PlayerMainGui : MonoBehaviour {
 		public float ammoInGun=0;
 		public float ammoInGunMax=0;
 		public float ammoInBag=0;
+		public float reloadTime=0;
+		public int jetPackCharge= 0;
 		public string gunName="";
 			
 	}
@@ -273,10 +275,11 @@ public class PlayerMainGui : MonoBehaviour {
 		float screenX = Screen.width, screenY = Screen.height;
 		//Screen.lockCursor = true;
 		Rect crosrect = new Rect ((screenX - crosshairWidth) / 2, (screenY - crosshairHeight) / 2, crosshairWidth, crosshairHeight);
-
+		
+		Pawn myPawn = LocalPlayer.GetCurrentPawn ();
 
 		GUI.Label (crosrect, crosshair);
-		if (LocalPlayer.useTarget != null) {
+		if (myPawn!=null&&LocalPlayer.useTarget != null&&(myPawn.myTransform.position-LocalPlayer.useTarget.myTransform.position).sqrMagnitude<Player.SQUERED_RADIUS_OF_ACTION) {
 			GUI.Label (crosrect, LocalPlayer.useTarget.guiIcon);
 			crosrect = new Rect ((screenX - crosshairWidth) / 2, (screenY - crosshairHeight) / 2, crosshairWidth*5, crosshairHeight);
 			if(LocalPlayer.useTarget is WeaponPicker){
@@ -300,8 +303,7 @@ public class PlayerMainGui : MonoBehaviour {
 			GUI.Label (crosrect, "PRES E  TO EXIT");
 			
 		}
-		
-		Pawn myPawn = LocalPlayer.GetCurrentPawn ();
+	
 		if (myPawn != null) {
 			if (myPawn.curLookTarget != null) {
 				Pawn targetPawn = myPawn.curLookTarget.GetComponent<Pawn> (); 
@@ -336,15 +338,24 @@ public class PlayerMainGui : MonoBehaviour {
 			float size = MarkSize * maxsize / Position.z;
 			
 			Rect mark = new Rect (Position.x - size / 2, Screen.height - Position.y, size, size);
+
 			if (seenablePawn [i].team == LocalPlayer.team) {
-				
-				GUI.Label (mark, AliaMark);
+				AliaMark.fontSize  = Mathf.RoundToInt(size/2.5f);
+				GUI.Label (mark,target.health.ToString(), AliaMark);
 			} else {
 				GUI.Label (mark, EnemyMark);
 			}
-		}	
-		Rect statsRect = new Rect (screenX - crosshairWidth * 4, Screen.height - crosshairHeight * 4, crosshairWidth * 4, crosshairHeight);
-		GUI.Label (statsRect, "Weapon: " + localstats.gunName);
+		}
+		Rect statsRect = new Rect (screenX - crosshairWidth * 4, Screen.height - crosshairHeight * 5, crosshairWidth * 4, crosshairHeight);
+
+		GUI.Label (statsRect, "JetPack Charges: " + localstats.jetPackCharge);
+	
+	    statsRect = new Rect (screenX - crosshairWidth * 4, Screen.height - crosshairHeight * 4, crosshairWidth * 4, crosshairHeight);
+		if(localstats.reloadTime<=0){
+			GUI.Label (statsRect, "Weapon: " + localstats.gunName);
+		}else{
+			GUI.Label (statsRect, "Reloading: " + localstats.gunName+"("+localstats.reloadTime.ToString("0.0")+")");
+		}
 		statsRect = new Rect (screenX - crosshairWidth * 4, Screen.height - crosshairHeight * 3, crosshairWidth * 4, crosshairHeight);
 		GUI.Label (statsRect, "Health: " + localstats.health);
 		statsRect = new Rect (screenX - crosshairWidth * 4, Screen.height - crosshairHeight * 2, crosshairWidth * 4, crosshairHeight);
@@ -388,7 +399,7 @@ public class PlayerMainGui : MonoBehaviour {
 		for (int i =0; i<players.Length; i++) {
 			float size = crosshairWidth / 2;
 			Rect messRect = new Rect (size, size * (6 + i), screenX, size);
-			GUI.Label (messRect, players [i].GetName ());
+			GUI.Label (messRect, players [i].GetName ()+" "+players [i].IsMaster());
 			
 			
 		}

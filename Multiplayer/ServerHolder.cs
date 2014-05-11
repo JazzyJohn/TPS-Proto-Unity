@@ -59,4 +59,11 @@ public class ServerHolder : MonoBehaviour {
 			stream.SendNext((short)(vect.z*FLOAT_COEF));
 			
 		}
+		void OnMasterClientSwitched( PhotonPlayer newMaster )
+		{
+			//TODO: director fix
+			if (PhotonNetwork.isMasterClient) {
+				//FindObjectOfType<PVPGameRule> ().StartGame ();	
+			}
+		}
 }

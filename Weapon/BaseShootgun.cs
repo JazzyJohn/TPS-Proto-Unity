@@ -16,7 +16,7 @@ public class BaseShootgun : BaseWeapon {
 				}
 				proj = Instantiate (projectilePrefab, startPoint, startRotation) as GameObject;
 				if (photonView.isMine) {
-						photonView.RPC ("GenerateProjectileRep", PhotonTargets.Others, startPoint, startRotation);
+					SendShoot(startPoint,startRotation);
 				}
 				BaseProjectile projScript = proj.GetComponent<BaseProjectile> ();
 				projScript.damage = new BaseDamage (damageAmount);

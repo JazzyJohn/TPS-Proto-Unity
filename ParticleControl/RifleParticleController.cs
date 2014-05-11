@@ -27,10 +27,17 @@ public class RifleParticleController : MonoBehaviour
 		{
 			flameParticles.Play();
 		}
-
-		smokeParticles.Play ();
+		if (smokeParticles != null) {
+				smokeParticles.Play ();
+		}
 		if (shellParticles != null) {
 			shellParticles.Play (owner);
 		}
+	}
+	public void StartFlame(){
+		flameParticles.Play();
+	}
+	public void StopFlame(){
+		flameParticles.Stop();
 	}
 }

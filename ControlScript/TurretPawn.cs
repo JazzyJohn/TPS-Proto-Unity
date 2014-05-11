@@ -48,5 +48,6 @@ public class TurretPawn : Pawn {
 		}
 		//		Debug.Log (characterState);
 		UpdateAnimator ();
+		DpsCheck ();
 	}
 }

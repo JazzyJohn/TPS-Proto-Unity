@@ -16,6 +16,7 @@ public class UseObject : DestroyableNetworkObject {
 
 	public string tooltip;
 
+	public Transform myTransform;
 
 	
 	//	Use function check if this object can be used turn on cooldown
@@ -37,7 +38,7 @@ public class UseObject : DestroyableNetworkObject {
 	}
 	protected void Awake () {
 		photonView = GetComponent<PhotonView> ();
-
+		myTransform = transform;
 	}
 	protected void Start(){
 
