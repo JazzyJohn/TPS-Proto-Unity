@@ -45,6 +45,8 @@ public class BaseWeapon : DestroyableNetworkObject {
 
 	public BaseDamage damageAmount;
 
+	public float normalRandCoef;
+
 	public float aimRandCoef;
 
 	public GameObject projectilePrefab;
@@ -82,6 +84,8 @@ public class BaseWeapon : DestroyableNetworkObject {
 	public float recoilMod;
 
 	public const float MAXDIFFERENCEINANGLE=0.7f;
+
+	private bool shootAfterReload;
 
 	// Use this for initialization
 	void Start () {
@@ -151,6 +155,7 @@ public class BaseWeapon : DestroyableNetworkObject {
 	}
 	public virtual void StopFire(){
 		isShooting = false;
+		shootAfterReload = false;
 		ReleaseFire ();
 	}
 	
@@ -159,8 +164,12 @@ public class BaseWeapon : DestroyableNetworkObject {
 		if(owner.GetComponent<InventoryManager>().HasAmmo(ammoType)){
 			isReload= true;
 			reloadTimer=reloadTime;
+			if(isShooting){
+				StopFire();
+				shootAfterReload = true;
+			}
 		}else{
-			isShooting = false;
+			StopFire();
 			return;
 		}
 		
@@ -169,6 +178,13 @@ public class BaseWeapon : DestroyableNetworkObject {
 		isReload = false;
 		int oldClip = curAmmo;
 		curAmmo =owner.GetComponent<InventoryManager>().GiveAmmo(ammoType,clipSize-curAmmo)+oldClip;	
+		if (shootAfterReload) {
+			shootAfterReload=false;
+			StartFire();
+		}
+		if (owner.player != null) {
+			EventHolder.instance.FireEvent (typeof(LocalPlayerListener), "EventPawnReload", owner.player);
+		}
 	}
 	public bool IsReloading(){
 		return isReload;
@@ -265,7 +281,14 @@ public class BaseWeapon : DestroyableNetworkObject {
 		Vector3 startPoint  = muzzlePoint.position+muzzleOffset;
 		Quaternion startRotation = getAimRotation();
 		GameObject proj;
-		float effAimRandCoef = aimRandCoef + owner.AimingCoef ();
+		float effAimRandCoef = 0.0f;
+		if (owner.isAiming) {
+			effAimRandCoef=aimRandCoef;
+		}else{
+			effAimRandCoef=normalRandCoef;
+		}
+
+		effAimRandCoef+= owner.AimingCoef ();
 		if (effAimRandCoef > 0) {
 			startRotation = Quaternion.Euler (startRotation.eulerAngles + new Vector3 (Random.Range (-1 * effAimRandCoef, 1 * effAimRandCoef), Random.Range (-1 * effAimRandCoef, 1 * effAimRandCoef), Random.Range (-1 * effAimRandCoef, 1 * effAimRandCoef)));
 		}

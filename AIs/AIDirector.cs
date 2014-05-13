@@ -33,7 +33,8 @@ public class AIDirector : MonoBehaviour {
 			
 			foreach (AISpawnPoint go in respawns) {
 				if(go.isAvalable){
-					GameObject obj = PhotonNetwork.InstantiateSceneObject (Bots[(int)(UnityEngine.Random.value*Bots.Length)].name, go.transform.position, go.transform.rotation, 0,null) as GameObject;
+					//GameObject obj = PhotonNetwork.InstantiateSceneObject (Bots[(int)(UnityEngine.Random.value*Bots.Length)].name, go.transform.position, go.transform.rotation, 0,null) as GameObject;
+					GameObject obj = PhotonNetwork.Instantiate (Bots[(int)(UnityEngine.Random.value*Bots.Length)].name, go.transform.position, go.transform.rotation, 0,null) as GameObject;
 					go.Spawned(obj.GetComponent<Pawn>());
 				}
 			}

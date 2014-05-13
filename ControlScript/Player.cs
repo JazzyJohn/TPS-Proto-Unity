@@ -75,7 +75,7 @@ public class Player : MonoBehaviour {
 						PlayerName = "Player" + PhotonNetwork.playerList.Length;
 						//	photonView.RPC ("ASKTeam", PhotonTargets.MasterClient);
 						Application.ExternalCall ("SayMyName");
-		
+						EventHolder.instance.FireEvent(typeof(LocalPlayerListener),"EventAppear",this);
 						//StatisticHandler.StartStats(UID,PlayerName);
 		} else {
 			Destroy(GetComponent<MusicHolder>());
@@ -100,6 +100,15 @@ public class Player : MonoBehaviour {
 
 		return photonView;
 	}
+	public void GameEnd(){
+		if (currentPawn != null) {
+			currentPawn.RequestKillMe ();
+		}
+		if(robotPawn!= null) {
+			robotPawn.RequestKillMe ();
+		}
+	}
+
 	void Update(){
 		if (!photonView.isMine) {
 			return;
@@ -249,9 +258,12 @@ public class Player : MonoBehaviour {
 	
 
 		int viewID = 0;
-		if(Killer!=null){
+		if (Killer != null) {
 			viewID = Killer.photonView.viewID;
-			PVPGameRule.instance.Kill(Killer.team);
+			PVPGameRule.instance.Kill (Killer.team);
+			EventHolder.instance.FireEvent(typeof(LocalPlayerListener),"EventPawnDeadByPlayer",this);
+		} else {
+			EventHolder.instance.FireEvent(typeof(LocalPlayerListener),"EventPawnDeadByAI",this);
 		}
 		photonView.RPC("RPCPawnDead",photonView.owner,viewID);
 			
@@ -291,6 +303,11 @@ public class Player : MonoBehaviour {
 
 
 
+	}
+
+	public void AchivmenUnlock(Achievement achv){
+		PlayerMainGui.instance.AddMessage(achv.name+"\n"+achv.description,Vector3.zero,PlayerMainGui.MessageType.ACHIVEMENT);
+		Application.ExternalCall("AchivmenUnlock", achv.name+" "+achv.description);
 	}
 	
 	public void DamagePawn(BaseDamage damage){

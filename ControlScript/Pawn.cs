@@ -34,9 +34,9 @@ public class Pawn : DamagebleObject {
 
 	public const int SYNC_MULTUPLIER = 5;
 
-	public LayerMask groundLayers = -1;
-	public LayerMask wallRunLayers = -1;
-	public LayerMask climbLayers = 1 << 9; // Layer 9
+	private LayerMask groundLayers =  1;
+	private LayerMask wallRunLayers = 1;
+	private LayerMask climbLayers = 1 << 9; // Layer 9
 
 	public bool isActive =true;
 
@@ -268,7 +268,7 @@ public class Pawn : DamagebleObject {
 	}
 	
 	public override void Damage(BaseDamage damage,GameObject killer){
-		if (isSpawn||killer==null) {//если только респавнились, то повреждений не получаем
+		if (isSpawn||killer==null||!isActive) {//если только респавнились, то повреждений не получаем
 			return;
 		}
 		bool isVs =( damage.isVsArmor && charMan.GetBoolChar (CharacteristicList.ARMOR))||( !damage.isVsArmor && !charMan.GetBoolChar (CharacteristicList.ARMOR));
@@ -286,8 +286,9 @@ public class Pawn : DamagebleObject {
 				killerPlayer.DamagePawn(damage);
 			}
 		}
+		AddEffect(damage.hitPosition);
 		if (photonView.isMine) {
-			AddEffect(damage.hitPosition);
+		
 			float forcePush =  charMan.GetFloatChar(CharacteristicList.STANDFORCE);
 			///Debug.Log(forcePush +" "+damage.pushForce);
 			forcePush =damage.pushForce-forcePush;
@@ -300,7 +301,7 @@ public class Pawn : DamagebleObject {
 			}	
 		
 		}
-		if (!PhotonNetwork.isMasterClient){
+		if (!photonView.isMine){
 			return;
 		}
 		if (isAi) {
@@ -322,15 +323,7 @@ public class Pawn : DamagebleObject {
 
 	}
 
-	public void HPChange(){
-		if (PhotonNetwork.isMasterClient) {
-			if(photonView.owner!=null){
-				photonView.RPC ("RPCSetHealth", photonView.owner, health);
-			}else{
-				photonView.RPC ("RPCSetHealth", PhotonTargets.MasterClient, health);
-			}
-		}
-	}
+
 	public override void KillIt(GameObject killer){
 		if (isDead) {
 			return;		

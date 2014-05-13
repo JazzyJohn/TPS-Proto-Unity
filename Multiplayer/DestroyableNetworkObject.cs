@@ -7,20 +7,20 @@ public class DestroyableNetworkObject : MonoBehaviour {
 
 	public IEnumerator CoroutineRequestKillMe(){
 		yield return new WaitForSeconds(0.2f);
-		photonView.RPC("KillMe",PhotonTargets.All);
+		photonView.RPC("KillMe",photonView.owner);
 
 	}
 	public void RequestKillMe(){
 
-		photonView.RPC("KillMe",PhotonTargets.All);
+		photonView.RPC("KillMe",photonView.owner);
 		
 	}
 	[RPC]
 	public void KillMe(){
 		//Debug.Log ("RPC KILL ME");
-		if(photonView.isMine){
-			PhotonNetwork.Destroy(gameObject);
-		}		
+
+		PhotonNetwork.Destroy(gameObject);
+			
 	}
 
 

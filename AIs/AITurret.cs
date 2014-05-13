@@ -24,9 +24,11 @@ public class AITurret : AIState
         {
 			if(_enemy!= null){
 				controlledPawn.StopFire();
-				_lostTimer+=Time.deltaTime;
+				//Debug.Log(Time.deltaTime+" "+_lostTimer+" "+lostTime);
+				_lostTimer+=AIBase.TickPause;
 				if(_lostTimer>lostTime){
 					_lostTimer = 0.0f;
+					Debug.Log("enemyLOST");
 					LostEnemy();
 
 				}

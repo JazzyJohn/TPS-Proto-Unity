@@ -19,23 +19,23 @@ public class BodyHurt : DamagebleObject {
 	}
 	
 	// Update is called once per fra
-	void Update () {
-	if (!Application.isPlaying)
-		{
-			switch (Organ)
+		void Update () {
+		if (!Application.isPlaying)
 			{
-			case BodySegment.Chest:
-				multiDamage = 5f;
-				break;
-			case BodySegment.Head:
-				multiDamage = 1f;
-				break;
-			case BodySegment.None:
-				break;
+				switch (Organ)
+				{
+				case BodySegment.Chest:
+					multiDamage = 5f;
+					break;
+				case BodySegment.Head:
+					multiDamage = 1f;
+					break;
+				case BodySegment.None:
+					break;
+				}
+				destructableObject = false;
 			}
-			destructableObject = false;
 		}
-	}
 
 	public virtual void Damage(BaseDamage damage,GameObject killer)
 	{

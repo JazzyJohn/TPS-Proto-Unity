@@ -407,7 +407,7 @@ public class MenuTF : MonoBehaviour {
 				teamCount[player.team-1]++;
 			}
 		}
-		if(GUI.Button(new Rect(Screen.width/_TeamButtonPosX, Screen.height/_TeamButtonPosY, Screen.width/_TeamButtonSizeX, Screen.height/_TeamButtonSizeY), "Команда 1 ("+teamCount[0]+")", _TeamGSbutton[0]))
+		if(GUI.Button(new Rect(Screen.width/_TeamButtonPosX, Screen.height/_TeamButtonPosY, Screen.width/_TeamButtonSizeX, Screen.height/_TeamButtonSizeY), PlayerMainGui.FormTeamName(1)+" ("+teamCount[0]+")", _TeamGSbutton[0]))
 		{
 			
 			for(int i = 0; i <  _TeamGSbutton.Length; i ++)
@@ -422,7 +422,7 @@ public class MenuTF : MonoBehaviour {
 			Choice._Team = 1;
 		}
 
-		if(GUI.Button(new Rect(Screen.width/_TeamButtonPosX + Screen.width/_TeamButtonSizeX, Screen.height/_TeamButtonPosY, Screen.width/_TeamButtonSizeX, Screen.height/_TeamButtonSizeY), "Команда 2 ("+teamCount[1]+")", _TeamGSbutton[1]))
+		if(GUI.Button(new Rect(Screen.width/_TeamButtonPosX + Screen.width/_TeamButtonSizeX, Screen.height/_TeamButtonPosY, Screen.width/_TeamButtonSizeX, Screen.height/_TeamButtonSizeY), PlayerMainGui.FormTeamName(2)+" ("+teamCount[1]+")", _TeamGSbutton[1]))
 		{
 			
 			for(int i = 0; i < _TeamGSbutton.Length; i ++)

@@ -26,9 +26,11 @@ public class PlayerMainGui : MonoBehaviour {
 	public enum MessageType{
 			STD_MESSAGE=0,
 			DMG_TEXT=1,
-			KILL_TEXT = 2
+			KILL_TEXT = 2,
+			ACHIVEMENT = 3
 	}
 	public Texture[] messageTexture;
+	public GUIStyle[] messageStyle;
 	public float[] messageSize;
 	public float messageDelay=1.0f;
 	public class GUIMessage{
@@ -42,11 +44,11 @@ public class PlayerMainGui : MonoBehaviour {
 			}
 			return outer.messageSize[(int)type];
 		}
-		public Texture getTexture(PlayerMainGui outer){
-			if(outer.messageTexture.Length<=(int)type){
-				return outer.messageTexture[0];
+		public GUIStyle getStyle(PlayerMainGui outer){
+			if(outer.messageStyle.Length<=(int)type){
+				return outer.messageStyle[0];
 			}
-			return outer.messageTexture[(int)type];
+			return outer.messageStyle[(int)type];
 		}
 		
 	}
@@ -95,6 +97,7 @@ public class PlayerMainGui : MonoBehaviour {
 		Normal,
 		Playerlist,
 		Dedicated,
+		GameResult,
 			
 	}
 	private GUIState guiState;
@@ -132,6 +135,9 @@ public class PlayerMainGui : MonoBehaviour {
 		}
 		if (Input.GetButtonDown ("Debug")) {
 			showDebug= !showDebug;
+		}
+		if (PVPGameRule.isGameEnded) {
+			guiState =GUIState.GameResult;
 		}
 	}
 
@@ -171,8 +177,12 @@ public class PlayerMainGui : MonoBehaviour {
 					PlayerList();
 				
 					break;
+				case GUIState.GameResult:
+					GameResult();
+					
+					break;
 
-
+				
 				}
 				//Message Section
 				GUI.skin = messageSkin;
@@ -181,16 +191,26 @@ public class PlayerMainGui : MonoBehaviour {
 				}
 		
 				foreach (GUIMessage guiMessage in guiMessages) {
-						Vector3 Position = MainCamera.WorldToScreenPoint (guiMessage.worldPoint);
-						float size = guiMessage.getMessageSize (this);
-						Rect messRect = new Rect (Position.x - size / 2, Screen.height - Position.y, size, size);
-			
-						Texture messTexture = guiMessage.getTexture (this);
-						if (messTexture != null) {
-								GUI.Label (messRect, messTexture);
-						}
-						if (guiMessage.text != "") {
-								GUI.Label (messRect, guiMessage.text);
+					
+						float size=0;
+						GUIStyle messStyle = guiMessage.getStyle (this);
+						switch(guiMessage.type){
+						case MessageType.ACHIVEMENT:
+						size = guiMessage.getMessageSize (this);
+						Rect achvmessRect = new Rect (screenX - size ,screenY - size/1.5f, size, size);
+
+							GUI.Label (achvmessRect,"ACHIVMENT UNLOCK: \n " +guiMessage.text,messStyle);
+						
+						break;
+						default:
+									Vector3 Position = MainCamera.WorldToScreenPoint (guiMessage.worldPoint);
+									size = guiMessage.getMessageSize (this);
+									Rect messRect = new Rect (Position.x - size / 2, screenY - Position.y, size, size);
+						
+								
+								GUI.Label (messRect, guiMessage.text,messStyle);
+								
+						break;
 						}
 				}
 				while (logMessages.Count>50) {
@@ -270,7 +290,14 @@ public class PlayerMainGui : MonoBehaviour {
 		}
 		
 	}
-
+	void GameResult(){
+		float screenX = Screen.width, screenY = Screen.height;
+		float TimerLabel = screenX / 4;
+		Rect crosrect = new Rect ((screenX - TimerLabel) / 2, (screenY - TimerLabel) / 2, TimerLabel, TimerLabel);	
+		GUI.Label (crosrect, "WINNER: " + FormTeamName(PVPGameRule.instance.Winner())+"");
+		crosrect = new Rect ((screenX - TimerLabel) / 2, (screenY - TimerLabel) / 2 +TimerLabel, TimerLabel, TimerLabel);	
+		GUI.Label (crosrect, "NEXT ROUND IN  " + PVPGameRule.instance.GetRestartTimer().ToString("0.0") +" sec.");
+	}
 	void MainHud(){
 		float screenX = Screen.width, screenY = Screen.height;
 		//Screen.lockCursor = true;
@@ -403,7 +430,15 @@ public class PlayerMainGui : MonoBehaviour {
 			
 			
 		}
-		
+		List<Achievement> achivments = AchievementManager.instance.GetAchivment ();
+		for (int i =0; i<achivments.Count; i++) {
+			float size = crosshairWidth / 2;
+			Rect messRect = new Rect ( screenX/2-size, size * (6 + i), screenX/2, size);
+			GUI.Label (messRect, achivments [i].name+" "+achivments [i].description);
+			
+			
+		}
+
 	}
 	
 	public void AddMessage(string text,Vector3 worldPoint, MessageType type ){
@@ -425,10 +460,10 @@ public class PlayerMainGui : MonoBehaviour {
 	public static string FormTeamName(int team){
 		switch (team) {
 			case 1:
-			return "A TEAM"	;
+			return "Команда А"	;
 				break;
 		case 2:
-			return"POWER RANGERS";
+			return"Команда B";
 				break;
 		}
 		return "";

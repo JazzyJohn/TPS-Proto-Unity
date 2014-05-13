@@ -63,7 +63,7 @@ public class ServerHolder : MonoBehaviour {
 		{
 			//TODO: director fix
 			if (PhotonNetwork.isMasterClient) {
-				//FindObjectOfType<PVPGameRule> ().StartGame ();	
+				FindObjectOfType<PVPGameRule> ().StartGame ();	
 			}
 		}
 }
