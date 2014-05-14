@@ -94,12 +94,24 @@ public class BaseProjectile : MonoBehaviour {
 	
 	void ExplosionDamage() {
 		Collider[] hitColliders = Physics.OverlapSphere(transform.position, splashRadius);
-		
+		Vector3 Position = transform.position;
+		RaycastHit[] hits;
 		for(int i=0;i < hitColliders.Length;i++) {
 			//Debug.Log(hitColliders[i]);
-			DamagebleObject obj = hitColliders[i].GetComponent <DamagebleObject>();
-			if (obj != null) {
-				obj.Damage(damage,owner);
+			bool isHit = false;
+			hits = Physics.RaycastAll(Position, hitColliders[i].transform.position);
+			for (int j = 0; j < hits.Length; j++) {
+				if(hits[j].collider.tag != "Player")
+				{
+					isHit = true;
+					break;
+				}
+			}
+			if (isHit) {
+				DamagebleObject obj = hitColliders[i].GetComponent <DamagebleObject>();
+				if (obj != null) {
+					obj.Damage(damage,owner);
+				}	
 			}
 		}
 	}
