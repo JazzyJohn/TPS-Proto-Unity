@@ -20,8 +20,10 @@ public class MusicHolder : MonoBehaviour {
 	void Start () {
 		musicPlayer = GetComponent<AudioSource> ();
 		MusicBefore = new int[MusicInStage.Length];
+		int tempMusic = 0;
 		for (int i = 0; i < MusicBefore.Length; i++) {
-			MusicBefore[i] = MusicBeforeInt(i);
+			MusicBefore[i] = MusicInStage[i] + tempMusic;
+			tempMusic += MusicInStage[i];
 		}
 	}
 	
@@ -41,10 +43,5 @@ public class MusicHolder : MonoBehaviour {
 	
 	public void NextStage(){
 		if(curStage < MusicInStage.Length) curStage++;
-	}
-	
-	int MusicBeforeInt(int Stage){
-		if(Stage == 0)return MusicInStage[0];
-		return MusicInStage[Stage] + MusicBeforeInt(Stage - 1);
 	}
 }
