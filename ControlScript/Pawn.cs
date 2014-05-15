@@ -221,7 +221,7 @@ public class Pawn : DamagebleObject {
 
 	public ParticleEmitter emitter;
 
-	private bool isSpawn=false;//флаг респавна
+	protected bool isSpawn=false;//флаг респавна
 
 	protected void Awake(){
 		myTransform = transform;
@@ -1160,7 +1160,7 @@ public class Pawn : DamagebleObject {
 		return jetPackCharge;
 	
 	}
-	public void DidLand(){
+	public virtual void DidLand(){
 		if (animator != null) {
 						animator.ApllyJump (false);
 		}

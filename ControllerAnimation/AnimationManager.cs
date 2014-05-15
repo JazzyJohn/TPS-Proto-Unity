@@ -183,6 +183,8 @@ public class AnimationManager : MonoBehaviour
 		}
 
 	}
+	
+	//Setting is taht pull long or short
 	public void SetLong(bool longPull){
 		animator.SetBool("LongPull", longPull);
 	}

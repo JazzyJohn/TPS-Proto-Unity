@@ -16,7 +16,7 @@ public class PlayerMainGui : MonoBehaviour {
 
 	public float MarkSize;
 
-	public Texture EnemyMark;
+	public GUIStyle EnemyMark;
 	public GUIStyle AliaMark;
 
 	public float VersionSize;
@@ -365,12 +365,17 @@ public class PlayerMainGui : MonoBehaviour {
 			float size = MarkSize * maxsize / Position.z;
 			
 			Rect mark = new Rect (Position.x - size / 2, Screen.height - Position.y, size, size);
-
+			string publicName = "";
+			if(target.player!=null){
+				publicName	=target.player.GetName();
+			}else{
+				publicName	=target.publicName;
+			}
 			if (seenablePawn [i].team == LocalPlayer.team) {
-				AliaMark.fontSize  = Mathf.RoundToInt(size/2.5f);
-				GUI.Label (mark,target.health.ToString(), AliaMark);
+			
+				GUI.Label (mark, publicName"\n"+target.health.ToString(), AliaMark);
 			} else {
-				GUI.Label (mark, EnemyMark);
+				GUI.Label (mark, publicName , EnemyMark);
 			}
 		}
 		Rect statsRect = new Rect (screenX - crosshairWidth * 4, Screen.height - crosshairHeight * 5, crosshairWidth * 4, crosshairHeight);
@@ -423,17 +428,30 @@ public class PlayerMainGui : MonoBehaviour {
 	void PlayerList(){
 		float screenX = Screen.width, screenY = Screen.height;
 		Player[] players = PlayerManager.instance.FindAllPlayer ();
+		int teamA =0 , teamB =0; 
+		float size = crosshairWidth / 2;
 		for (int i =0; i<players.Length; i++) {
-			float size = crosshairWidth / 2;
-			Rect messRect = new Rect (size, size * (6 + i), screenX, size);
+			float yPos=0.0f,xPos = 0.0f;
+			if(player.team<=1){
+				yPos= size * (6 + teamA);
+				xPos= size;
+				teamA ++;
+			}else{
+				xPos=  1*screenX/3+size;
+				yPos= size * (6 + teamB);
+				teamB ++;
+			}
+			Rect messRect = new Rect (xPos,yPos, screenX/3, size);
 			GUI.Label (messRect, players [i].GetName ()+" "+players [i].IsMaster());
 			
 			
 		}
+		Rect totalRect = new Rect (size,size*5,screenX, screenY);
+		GUI.Label (totalRect, "Всего Игроков" +players.Length.ToString());
 		List<Achievement> achivments = AchievementManager.instance.GetAchivment ();
 		for (int i =0; i<achivments.Count; i++) {
 			float size = crosshairWidth / 2;
-			Rect messRect = new Rect ( screenX/2-size, size * (6 + i), screenX/2, size);
+			Rect messRect = new Rect ( 2*screenX/3+size, size * (6 + i), screenX/3, size);
 			GUI.Label (messRect, achivments [i].name+" "+achivments [i].description);
 			
 			

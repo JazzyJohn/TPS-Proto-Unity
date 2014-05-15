@@ -18,7 +18,7 @@ public class Player : MonoBehaviour {
 	
 	private Pawn currentPawn;
 	
-	private Pawn robotPawn;
+	private RobotPawn robotPawn;
 	
 	public bool inBot;
 	
@@ -28,7 +28,7 @@ public class Player : MonoBehaviour {
 	
 	public int team =0;
 
-	private Pawn prefabBot;
+	private RobotPawn prefabBot;
 	
 	private GameObject prefabGhostBot;
 
@@ -59,7 +59,11 @@ public class Player : MonoBehaviour {
 	private PhotonView photonView;
 
 	public UseObject useTarget;
-
+	//Func name for delayed external call
+	public string delayedExternalCallName;
+	//param for delayed external call
+	public string delayedExternalCallData;
+	
 	public const float SQUERED_RADIUS_OF_ACTION = 16.0f;
 
 	void Start(){
@@ -118,10 +122,7 @@ public class Player : MonoBehaviour {
 		if(isDead){
 		
 			Pawn[] prefabClass=	PlayerManager.instance.avaiblePawn;
-
-
-
-
+			SendDelayedExternal();
 			respawnTimer-=Time.deltaTime;
 			if(respawnTimer<=0&&isStarted){
 				respawnTimer=respawnTime;
@@ -305,9 +306,19 @@ public class Player : MonoBehaviour {
 
 	}
 
+	//Delayed external for that function that can destrupt user like VK wallpost
+	public void SendDelayedExternal(){
+		if(delayedExternalCallName!=""){
+			Application.ExternalCall(delayedExternalCallName,delayedExternalCallName);
+			delayedExternalCallName="";
+		}
+	}
+		
 	public void AchivmenUnlock(Achievement achv){
 		PlayerMainGui.instance.AddMessage(achv.name+"\n"+achv.description,Vector3.zero,PlayerMainGui.MessageType.ACHIVEMENT);
-		Application.ExternalCall("AchivmenUnlock", achv.name+" "+achv.description);
+		delayedExternalCallName ="AchivmenUnlock";
+		delayedExternalCallName = achv.name+" "+achv.description
+		
 	}
 	
 	public void DamagePawn(BaseDamage damage){
@@ -338,7 +349,8 @@ public class Player : MonoBehaviour {
 	public void ExitBot(){
 		//robotTimer=robotTime;
 		inBot= false;
-		currentPawn.transform.parent = null;
+		currentPawn.myTarnsform.parent = null;
+		currentPawn.myTarnsform.position = robotPawn.playerExitPositon;
 		currentPawn.Activate ();
 		robotPawn.GetComponent<ThirdPersonController>().enabled = false;
 		robotPawn.GetComponent<ThirdPersonCamera>().enabled = false;
