@@ -12,6 +12,8 @@ public interface  LocalPlayerListener{
 	void EventPawnKillAI(Player target);
 	void EventPawnGround(Player target);
 	void EventPawnDoubleJump(Player target);
+	void EventStartSprintRun(Player target,Vector3 Position);
+	void EventEndSprintRun(Player target,Vector3 Position);
 	void EventStartWallRun(Player target,Vector3 Position);
 	void EventEndWallRun(Player target, Vector3 Position);
 	void EventPawnReload(Player target);
@@ -39,7 +41,9 @@ public class ListnerHolder<T>:HolderBase{
 	}
 	public void FireEvent(MethodInfo theMethod,params object[] values){
 		foreach(T t in listenerList){
-			theMethod.Invoke(t, values);
+			if(t!=null){
+				theMethod.Invoke(t, values);
+			}
 		}
 	}
 

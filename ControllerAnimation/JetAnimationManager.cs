@@ -6,12 +6,17 @@ public class JetAnimationManager : AnimationManager
 	public JetPackController jetController;
 	public override void ApllyJump(bool jump)
     {	
+		//Debug.Log (jump);
 		if (!jump) {
 				
 			jetController.StopAll();
 		}
 		base.ApllyJump(jump);		
     }
+	public override void Sprint(){
+		jetController.StartMiddle();
+		base.ApllyJump(false);	
+	}
 	public override void DoubleJump(){
 		jetController.StartAll();
 		base.DoubleJump();

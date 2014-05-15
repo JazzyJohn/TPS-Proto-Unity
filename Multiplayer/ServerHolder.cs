@@ -31,7 +31,9 @@ public class ServerHolder : MonoBehaviour {
 		}
 		void OnPhotonRandomJoinFailed()
 		{
-			PhotonNetwork.CreateRoom(null);
+			RoomOptions options = new RoomOptions ();
+			options.maxPlayers = 8;
+			PhotonNetwork.CreateRoom("My Room",options,null);
 		}
 		void OnCreatedRoom()
 		{

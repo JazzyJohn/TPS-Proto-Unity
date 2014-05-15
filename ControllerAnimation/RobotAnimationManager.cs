@@ -3,12 +3,13 @@ using System.Collections;
 
 public class RobotAnimationManager : AnimationManager
 {
-	public string DeactiveName="IDLE";
+	public new string DeactiveName="Ready";
 	public void DeActivation(){
 		 animator.CrossFade(DeactiveName, 2.0f);
 	}
-	public void Activation(){
-		animator.SetBool ("StandUp", true);
+	public new void Activation(){
+		Debug.Log ("ctivate");
+		animator.SetBool ("Pilotin", true);
 	}
 
 }

@@ -6,18 +6,20 @@ public class RobotPawn : Pawn {
 	public float ActivationTime=2.0f;
 	public Transform playerExitPositon;
 	//Player get in robot
-	public void new Activate(){
+	public new void  Activate(){
 		((RobotAnimationManager)animator).Activation();
+		Debug.Log ("ctivate");
 		StartCoroutine(WaitBeforeActive(ActivationTime));
 	}
 	
-	public void WaitBeforeActive(float waitTime) {
+	public IEnumerator WaitBeforeActive(float waitTime) {
         yield return new WaitForSeconds(waitTime);
+		GetComponent<ThirdPersonController>().enabled = true;
 		base.Activate();
 	}
 	//Player have left roboot
-	public void new Deactivate(){
+	public new void  Deactivate(){
 		((RobotAnimationManager)animator).DeActivation();
-		base.DeActivate();
+
 	}
 }

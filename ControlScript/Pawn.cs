@@ -5,12 +5,14 @@ using System.Collections.Generic;
 public enum CharacterState {
 	Idle = 0,
 	Walking = 1,
-	Trotting = 2,
-	Running = 3,
+	Running = 2,
+	Sprinting = 3,
+
 	Jumping = 4,
 	WallRunning = 5,
 	PullingUp=6,
-	DoubleJump= 7
+	DoubleJump= 7,
+
 }
 public enum WallState{
 	WallL,
@@ -127,9 +129,9 @@ public class Pawn : DamagebleObject {
 
 	public const float  WALL_TIME_SIDE=3.0f;
 
-	public float groundRunSpeed;
+	public float groundSprintSpeed;
 
-	public float groundTrotSpeed;
+	public float groundRunSpeed;
 
 	public float groundWalkSpeed;
 
@@ -146,7 +148,11 @@ public class Pawn : DamagebleObject {
 	public float PullUpStartTimer= 0.0f;
 	
 	public float PullUpTime=2.0f;
-	
+
+	private float sprintTimer=0.0f;
+
+	public float sprintTime = 3.0f;
+
 	private float v;
 
 	public Transform curLookTarget= null;
@@ -221,7 +227,7 @@ public class Pawn : DamagebleObject {
 
 	public ParticleEmitter emitter;
 
-	protected bool isSpawn=false;//флаг респавна
+	private bool isSpawn=false;//флаг респавна
 
 	protected void Awake(){
 		myTransform = transform;
@@ -407,18 +413,29 @@ public class Pawn : DamagebleObject {
 				
 				
 				strafe = CalculateStarfe();
-				//Debug.Log (strafe);	
+				//Debug.Log(characterState);
 				speed =CalculateSpeed();
-				if (characterState == CharacterState.Idle) {
+				switch(characterState){
+				case CharacterState.Jumping:
+					animator.ApllyJump(true);
+					break;
+				case CharacterState.Idle:
+					animator.ApllyJump(false);
 					animator.ApllyMotion (0.0f, speed, strafe);
-				} else {
-					if (characterState == CharacterState.Running) {
-						animator.ApllyMotion (2.0f, speed, strafe);
-					} else if (characterState == CharacterState.Trotting) {
-						animator.ApllyMotion (1.0f, speed, strafe);	
-					} else if (characterState == CharacterState.Walking) {
-						animator.ApllyMotion (1.0f, speed, strafe);	
-					} else if (characterState == CharacterState.WallRunning) {
+					break;
+				case CharacterState.Running:
+					animator.ApllyJump(false);
+					animator.ApllyMotion (2.0f, speed, strafe);
+					break;
+				case CharacterState.Sprinting:
+					animator.Sprint();
+					animator.ApllyMotion (2.0f, speed, strafe);	
+					break;
+				case CharacterState.Walking:
+					animator.ApllyJump(false);
+					animator.ApllyMotion (1.0f, speed, strafe);	
+					break;
+				case CharacterState.WallRunning:
 						//Debug.Log ("INSWITCH");
 						switch (wallState) {
 						case WallState.WallF:
@@ -432,7 +449,7 @@ public class Pawn : DamagebleObject {
 							break;
 						}
 						
-					}
+					break;
 				}
 				
 				//
@@ -454,11 +471,12 @@ public class Pawn : DamagebleObject {
 					}
 					animator.ApllyMotion (2.0f, speed, strafe);
 					break;
-				case CharacterState.Trotting:
+				case CharacterState.Sprinting:
 					if(characterState == CharacterState.Jumping||characterState == CharacterState.DoubleJump){
 						animator.ApllyJump(false);
+						animator.Sprint();
 					}
-					animator.ApllyMotion (1.0f, speed, strafe);
+					animator.ApllyMotion (2.0f, speed, strafe);
 					break;
 				case CharacterState.Walking:
 					if(characterState == CharacterState.Jumping||characterState == CharacterState.DoubleJump){
@@ -838,13 +856,16 @@ public class Pawn : DamagebleObject {
 	}
 	float CalculateSpeed(){
 		float result =Vector3.Project (_rb.velocity,myTransform.forward).magnitude;
-		if (result < groundWalkSpeed) {
-			return 0.0f;		
+		if (result < 0.2f) {
+			return 0.0f;	
 		}
-		if (result > groundWalkSpeed && result < groundTrotSpeed) {
+		if (result>0.2f&&result < groundWalkSpeed) {
 			return 1.0f*Mathf.Sign(Vector3.Dot(_rb.velocity.normalized,myTransform.forward));	
 		}
-		if (result > groundTrotSpeed) {
+		if (result > groundWalkSpeed && result < groundRunSpeed) {
+			return 2.0f*Mathf.Sign(Vector3.Dot(_rb.velocity.normalized,myTransform.forward));	
+		}
+		if (result > groundRunSpeed) {
 			return 2.0f*Mathf.Sign(Vector3.Dot(_rb.velocity.normalized,myTransform.forward));	
 		}
 		return 0.0f;		
@@ -859,13 +880,16 @@ public class Pawn : DamagebleObject {
 		Vector3 velocity =  correctPlayerPos-myTransform.position;
 		velocity = velocity/(Time.deltaTime * SYNC_MULTUPLIER);
 		float result =Vector3.Project (velocity,myTransform.forward).magnitude;
-		if (result < groundWalkSpeed) {
+		if (result <  0.2f) {
 			return 0.0f;		
 		}
-		if (result > groundWalkSpeed && result < groundTrotSpeed) {
-			return 1.0f*Mathf.Sign(Vector3.Dot(velocity.normalized,myTransform.forward));	
+		if (result>0.2f&&result < groundWalkSpeed) {
+			return 1.0f*Mathf.Sign(Vector3.Dot(velocity.normalized,myTransform.forward));			
 		}
-		if (result > groundTrotSpeed) {
+		if (result > groundWalkSpeed && result < groundRunSpeed) {
+			return 2.0f*Mathf.Sign(Vector3.Dot(velocity.normalized,myTransform.forward));	
+		}
+		if (result > groundRunSpeed) {
 			return 2.0f*Mathf.Sign(Vector3.Dot(velocity,myTransform.forward));	
 		}
 		return 0.0f;		
@@ -889,7 +913,13 @@ public class Pawn : DamagebleObject {
 			}
 
 	}
-
+	public bool IsSprinting (){
+		return characterState == CharacterState.Sprinting;
+	
+	}
+	public bool CanSprint(){
+		return jetPackCharge > 0||characterState==CharacterState.Sprinting;
+	}
 	bool WallRun (Vector3 movement,CharacterState state)
 	{
 		if (!canWallRun&&photonView.isMine) return false;
@@ -913,7 +943,7 @@ public class Pawn : DamagebleObject {
 
 			return false;
 		}
-		if (characterState != CharacterState.DoubleJump&&characterState != CharacterState.WallRunning) {
+		if (characterState != CharacterState.DoubleJump&&characterState != CharacterState.Sprinting&&characterState != CharacterState.WallRunning) {
 			return false;
 		}
 		//Debug.Log (characterState);
@@ -921,20 +951,20 @@ public class Pawn : DamagebleObject {
 		
 		
 		bool leftW = Physics.Raycast (myTransform.position ,
-		                              myTransform.right * -1 ,out leftH, capsule.radius + 0.2f,wallRunLayers);
+		                              (-1*myTransform.right).normalized ,out leftH, capsule.radius + 0.3f,wallRunLayers);
 		bool rightW = Physics.Raycast (myTransform.position,
-		                               myTransform.right ,out rightH, capsule.radius + 0.2f, wallRunLayers);
+		                               (myTransform.forward).normalized,out rightH, capsule.radius + 0.3f, wallRunLayers);
 		bool frontW = Physics.Raycast (myTransform.position,
 		                               myTransform.forward,out frontH, capsule.radius + 0.2f, wallRunLayers);
 
-		/*Debug.DrawRay (myTransform.position ,
-		               myTransform.right * -1 );
+		Debug.DrawLine (myTransform.position ,
+		                myTransform.position +(0.5f*myTransform.forward-myTransform.right).normalized *(capsule.radius + 0.2f));
 		
-		Debug.DrawRay (myTransform.position,
-		               myTransform.right );
+		Debug.DrawLine (myTransform.position,
+		                myTransform.position +(0.5f*myTransform.forward+myTransform.right).normalized *(capsule.radius + 0.2f));
 		
-		Debug.DrawRay (myTransform.position,
-		               myTransform.forward);*/
+		//Debug.DrawLine (myTransform.position,
+		              // myTransform.forward);
 	
 	
 
@@ -1067,6 +1097,17 @@ public class Pawn : DamagebleObject {
 		}
 
 	}
+
+
+	public void StartSprint(){
+	
+		sprintTimer = 0.0f;
+		jetPackCharge--;
+
+
+	}
+
+
 	public void FixedUpdate () {
 
 		if (!isActive) {
@@ -1075,16 +1116,120 @@ public class Pawn : DamagebleObject {
 		if (!photonView.isMine) {
 			return;
 		}
+		Vector3 velocity = _rb.velocity;
+		Vector3 velocityChange = (nextMovement - velocity);
+		switch (characterState) {
+			case CharacterState.Idle:
+			case CharacterState.Running:
+			case CharacterState.Walking:
+				if (isGrounded) {
+					if (_rb.isKinematic) _rb.isKinematic= false;
+					
+					//Debug.Log (velocityChange);
+					rigidbody.AddForce(velocityChange, ForceMode.VelocityChange);
+					characterState = nextState;
+					if(nextState==CharacterState.Sprinting){
+						StartSprint();
+					}
+					if(nextState==CharacterState.Jumping){
+						Jump ();
+						
+					}
+				}else{
+					characterState=CharacterState.Jumping;
+				}
+			break;
+		case CharacterState.Sprinting:
+
+				if (_rb.isKinematic) _rb.isKinematic= false;
+				velocityChange=nextMovement.normalized*groundSprintSpeed-velocity;
+				//Debug.Log (velocityChange);
+				if (isGrounded) {
+					rigidbody.AddForce(velocityChange, ForceMode.VelocityChange);
+
+					if(nextState==CharacterState.Jumping){
+						Jump ();
+						
+					}
+				}
+				sprintTimer+=Time.fixedDeltaTime;
+				if(sprintTimer>=sprintTime){
+					if (isGrounded) {
+						characterState = nextState;
+					}else{
+						characterState=CharacterState.Jumping;
+					}
+				}
+				if(WallRun (nextMovement,nextState)){
+					SendMessage ("WallLand", SendMessageOptions.DontRequireReceiver);
+				}
+
+				
+				
+			
+			break;
+		case CharacterState.Jumping:
+			if(characterState!=CharacterState.DoubleJump){
+				animator.FreeFall();
+			}
+			animator.ApllyJump(true);						
+			animator.WallAnimation(false,false,false);
+			
+			if(WallRun (nextMovement,nextState)){
+				SendMessage ("WallLand", SendMessageOptions.DontRequireReceiver);
+			}
+			PullUp();
+			if(nextState==CharacterState.DoubleJump){
+				DoubleJump();
+				
+			}
+			if (isGrounded) {
+				characterState = nextState;
+			}
+			break;
+		case CharacterState.DoubleJump:
+
+			animator.ApllyJump(true);						
+			animator.WallAnimation(false,false,false);
+
+			if(WallRun (nextMovement,nextState)){
+				SendMessage ("WallLand", SendMessageOptions.DontRequireReceiver);
+			}
+			PullUp();
+			if(nextState==CharacterState.DoubleJump){
+				DoubleJump();
+				
+			}
+			if (isGrounded) {
+				characterState = nextState;
+			}
+
+			break;
+		case CharacterState.WallRunning:
+			if(!WallRun (nextMovement,nextState)){
+				characterState=CharacterState.Jumping;
+				animator.ApllyJump(true);						
+				animator.WallAnimation(false,false,false);
+				if(characterState!=CharacterState.DoubleJump){
+					animator.FreeFall();
+				}
+			}			
+			PullUp();
+			break;
+		case CharacterState.PullingUp:
+			PullUp();
+			break;
+			
+		}
+		/*
 		//Debug.Log (_rb.velocity.magnitude);
 		if (isGrounded) {
 			//Debug.Log ("Ground"+characterState);
 
-			if (_rb.isKinematic) _rb.isKinematic= false;
-			Vector3 velocity = _rb.velocity;
-			Vector3 velocityChange = (nextMovement - velocity);
-			//Debug.Log (velocityChange);
-			rigidbody.AddForce(velocityChange, ForceMode.VelocityChange);
 
+			if(nextState==CharacterState.Sprinting&&characterState!=CharacterState.Sprinting){
+				StartSprint();
+			}
 			characterState = nextState;
 			if(nextState==CharacterState.Jumping){
 				Jump ();
@@ -1100,22 +1245,19 @@ public class Pawn : DamagebleObject {
 			case CharacterState.DoubleJump:
 				if(characterState!=CharacterState.WallRunning
 				   &&characterState!=CharacterState.PullingUp){
-					if(jetPackCharge>0){
-						Vector3 velocity = _rb.velocity;
-						Vector3 velocityChange = (nextMovement - velocity);
-						jetPackCharge--;
-						animator.DoubleJump();
-						rigidbody.AddForce(velocityChange, ForceMode.VelocityChange);
 
-						characterState = nextState;
-					}
 
 				}
 				break;
 			default:
 
 				if(!WallRun (nextMovement,nextState)){
-
+					if(characterState==CharacterState.Idle
+					   ||characterState==CharacterState.Walking 
+					   ||characterState==CharacterState.Running 
+					   ||characterState==CharacterState.Sprinting){
+						characterState=CharacterState.Jumping;
+					}
 					animator.ApllyJump(true);						
 					animator.WallAnimation(false,false,false);
 					if(characterState!=CharacterState.DoubleJump){
@@ -1134,7 +1276,7 @@ public class Pawn : DamagebleObject {
 			
 		}
 		//Debug.Log(_rb.isKinematic);
-
+		*/
 		if (!_rb.isKinematic) {
 			
 			_rb.AddForce(new Vector3(0,-gravity * rigidbody.mass,0)+pushingForce);
@@ -1160,10 +1302,8 @@ public class Pawn : DamagebleObject {
 		return jetPackCharge;
 	
 	}
-	public virtual void DidLand(){
-		if (animator != null) {
-						animator.ApllyJump (false);
-		}
+	public void DidLand(){
+
 		//Debug.Log ("LAND");
 		lastTimeOnWall = -10.0f;
 		//photonView.RPC("JumpChange",PhotonTargets.OthersBuffered,false);
@@ -1228,7 +1368,11 @@ public class Pawn : DamagebleObject {
 
 	void PullUp ()
 	{
-			//Debug.Log (characterState);
+
+			if (!PullUpCheck ()) {
+				return;
+			}
+		   //Debug.Log (characterState);
 			if(	characterState != CharacterState.PullingUp){
 				characterState = CharacterState.PullingUp;
 				_rb.isKinematic = true;
@@ -1254,7 +1398,19 @@ public class Pawn : DamagebleObject {
 						
 				
 	}
-
+	void DoubleJump(){
+		if(jetPackCharge>0){
+			Vector3 velocity = _rb.velocity;
+			Vector3 velocityChange = (nextMovement - velocity);
+			jetPackCharge--;
+			animator.DoubleJump();
+			rigidbody.AddForce(velocityChange, ForceMode.VelocityChange);
+			
+			characterState = CharacterState.DoubleJump;
+		}
+		
+		
+	}
 	public void StopMachine(){
 		characterState = CharacterState.Idle;
 		nextMovement = Vector3.zero;

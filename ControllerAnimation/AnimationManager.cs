@@ -152,9 +152,15 @@ public class AnimationManager : MonoBehaviour
 		
 		animator.SetBool("WallRunUp", frontW);
 	}
+	//for Sprint Aditional animation like jetpack in subclasss
+	public virtual void Sprint(){
+
+	}
+	//for freefall no DoubleJump Aditional animation like jetpack in subclasss
 	public virtual void FreeFall(){
 		
 	}
+	//Pulling weapon up near wall;
 	public void WeaponDown(bool value){
 		animator.SetBool("wall_stop", value);	
 	}

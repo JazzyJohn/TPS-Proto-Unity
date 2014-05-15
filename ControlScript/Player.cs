@@ -172,7 +172,7 @@ public class Player : MonoBehaviour {
 						if(ghostBot!=null&&canSpawnBot){
 							Vector3 spamPoint =ghostBot.transform.position;
 							spamPoint.y+= 10;
-							robotPawn =PlayerManager.instance.SpawmPlayer(prefabBot,spamPoint,ghostBot.transform.rotation);
+							robotPawn =(RobotPawn)PlayerManager.instance.SpawmPlayer(prefabBot,spamPoint,ghostBot.transform.rotation);
 							//Debug.Log("robot spawn"+robotPawn);
 							AfterSpawnSetting(robotPawn,PawnType.BOT,team);
 
@@ -317,7 +317,7 @@ public class Player : MonoBehaviour {
 	public void AchivmenUnlock(Achievement achv){
 		PlayerMainGui.instance.AddMessage(achv.name+"\n"+achv.description,Vector3.zero,PlayerMainGui.MessageType.ACHIVEMENT);
 		delayedExternalCallName ="AchivmenUnlock";
-		delayedExternalCallName = achv.name+" "+achv.description
+		delayedExternalCallName = achv.name + " " + achv.description;
 		
 	}
 	
@@ -340,8 +340,8 @@ public class Player : MonoBehaviour {
 		inBot=true;
 		currentPawn.DeActivate();
 		currentPawn.transform.parent = robotPawn.transform;
+		robotPawn.Activate ();
 
-		robotPawn.GetComponent<ThirdPersonController>().enabled = true;
 		robotPawn.GetComponent<ThirdPersonCamera>().enabled = true;
 		robotPawn.GetComponent<ThirdPersonCamera>().Reset ();
 
@@ -349,8 +349,9 @@ public class Player : MonoBehaviour {
 	public void ExitBot(){
 		//robotTimer=robotTime;
 		inBot= false;
-		currentPawn.myTarnsform.parent = null;
-		currentPawn.myTarnsform.position = robotPawn.playerExitPositon;
+		currentPawn.myTransform.parent = null;
+		currentPawn.myTransform.position = robotPawn.playerExitPositon.position;
+		currentPawn.myTransform.rotation = robotPawn.playerExitPositon.rotation;
 		currentPawn.Activate ();
 		robotPawn.GetComponent<ThirdPersonController>().enabled = false;
 		robotPawn.GetComponent<ThirdPersonCamera>().enabled = false;
@@ -475,7 +476,7 @@ public class Player : MonoBehaviour {
 			currentPawn = pawn;
 			break;
 			case PawnType.BOT:
-			robotPawn = pawn;
+			robotPawn = (RobotPawn)pawn;
 			break;
 		}
 	}

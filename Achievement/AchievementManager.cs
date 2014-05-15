@@ -133,7 +133,11 @@ public class AchievementManager : MonoBehaviour, LocalPlayerListener{
 						Thread.Sleep (1000);
 				}
 	}
-
+	
+	void OnDestroy(){
+		myThread.Abort ();
+		
+	}
 	void Update(){
 		while (outcomeQueue.Count>0) {
 			Achievement finished = outcomeQueue.Dequeue();
@@ -184,7 +188,6 @@ public class AchievementManager : MonoBehaviour, LocalPlayerListener{
 
 		}
 	}
-
 
 	public void EventPawnDeadByPlayer(Player target){
 		if (target == myPlayer) {
@@ -238,13 +241,19 @@ public class AchievementManager : MonoBehaviour, LocalPlayerListener{
 			wallRunningStartPosition=position;
 		}
 	}
+	public void EventStartSprintRun(Player target, Vector3 position){
+
+	}
+	public void EventEndSprintRun(Player target,Vector3 position){
+
+	}
 	public void EventEndWallRun(Player target, Vector3 position){
 		if (target == myPlayer) {
 			IncomingMessage mess = new IncomingMessage();
 			mess.delta=(wallRunningStartPosition -position).magnitude;
 			mess.param =PARAM_WALL_RUN;
 			incomeQueue.Enqueue(mess);
-
+			
 		}
 	}
 	public void EventPawnReload(Player target){
