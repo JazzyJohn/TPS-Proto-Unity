@@ -45,12 +45,6 @@ public class ServerHolder : MonoBehaviour
 				nextUpdateTime += updateRate;
 			}
 		}
-		
-		//if (PhotonNetwork.connected && allRooms.Length != PhotonNetwork.GetRoomList().Length)
-		//{
-		//	allRooms = PhotonNetwork.GetRoomList();
-		//	print ("Обновлен список комнат. Сейчас их " + allRooms.Length + ".");
-		//}
 	}
 	
 	void OnReceivedRoomList()
@@ -75,7 +69,7 @@ public class ServerHolder : MonoBehaviour
 		
 		if (!PhotonNetwork.inRoom && PhotonNetwork.connected)
 		{
-			GUILayout.BeginArea(new Rect (Screen.width/2 - 250, Screen.height/2 - 150, 500, 330), "Соединение", GUI.skin.GetStyle("window"));
+			GUILayout.BeginArea(new Rect (Screen.width / 2 - 250, Screen.height/2 - 150, 500, 330), "Соединение", GUI.skin.GetStyle("window"));
 			ShowConnectMenu ();
 			GUILayout.EndArea();
 		}
@@ -174,39 +168,6 @@ public class ServerHolder : MonoBehaviour
 	void OnJoinedLobby()
 	{
 		print ("Мы в лобби.");
-		
-		/*
-		for (int i = 0; i < 10; i++)
-		{
-			PhotonNetwork.CreateRoom("Test chamber " + i, true, true, 10);
-		}
-
-		Debug.Log("Подключились.");
-		Debug.Log("Сейчас мы создадим кучу комнат.");
-		for (int i = 0; i < 10; i++)
-			PhotonNetwork.CreateRoom("Test chamber " + i, true, true, 10);
-		PhotonNetwork.JoinRoom("Test chamber 3");
-		Debug.Log ("Вроде как создали.");
-		Debug.Log ("Комнат " + PhotonNetwork.GetRoomList().Length);
-
-			Debug.Log ("- Мы сейчас в лобби, дай угадаю? - " + PhotonNetwork.insideLobby);
-			Debug.Log ("- И оффлайн ведь наверняка включен? - " + PhotonNetwork.offlineMode);
-			Debug.Log ("- А autoJoinLobby? - " + PhotonNetwork.autoJoinLobby);
-			Debug.Log ("- А с сервером что? - " + PhotonNetwork.Server.ToString());
-			Debug.Log ("- Стало быть, все хорошо? - " + PhotonNetwork.connectedAndReady);
-			Debug.Log ("- Прекрасно.");
-
-		Debug.Log("Кажется, все идет по плану.");
-		
-		RoomInfo[] availableRooms = new RoomInfo[0];
-		availableRooms = PhotonNetwork.GetRoomList();
-		
-		//Debug.Log("Сейчас будет выведен список комнат. Их сейчас " + availableRooms.Length.ToString() + ".");
-		Debug.Log("Сейчас будет выведен список комнат. Их сейчас " + PhotonNetwork.GetRoomList().Length + ".");
-		foreach (RoomInfo i in PhotonNetwork.GetRoomList())
-			Debug.Log(i.name);
-		Debug.Log("На этом список трагически обрывается.");
-		*/
 		
 	}
 	
