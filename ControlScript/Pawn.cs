@@ -1,6 +1,8 @@
 ﻿using UnityEngine;
+using System;
 using System.Collections;
 using System.Collections.Generic;
+
 
 public enum CharacterState {
 	Idle = 0,
@@ -227,7 +229,20 @@ public class Pawn : DamagebleObject {
 
 	public ParticleEmitter emitter;
 
+	//звуки
+
+	public AudioSource aSource;
+	public AudioClip stepSound;
+	public AudioClip jumpSound;
+	public AudioClip spawnSound;
+	public AudioClip[] painSoundsArray;//массив звуков воплей при попадании
+
+	private soundControl sControl;//глобальный обьект контроллера звука
+
 	private bool isSpawn=false;//флаг респавна
+
+
+
 
 	protected void Awake(){
 		myTransform = transform;
@@ -239,10 +254,16 @@ public class Pawn : DamagebleObject {
 	// Use this for initialization
 	protected void Start () {
 
+		sControl = new soundControl (aSource);//создаем обьект контроллера звука
+
+		//проигрываем звук респавна
+		sControl.playClip (spawnSound);
+
 		if (emitter != null) {
 				emitter.Emit ();//запускаем эмиттер
 				isSpawn = true;//отключаем движения и повреждения
 		}
+
 		if (!photonView.isMine) {
 
 						Destroy (GetComponent<ThirdPersonController> ());
@@ -281,6 +302,10 @@ public class Pawn : DamagebleObject {
 		if (!isVs) {
 			damage.Damage*=0.5f;		
 		}
+		//вопли при попадании
+		//выбираются случайно из массива. Звучат не прерываясь при следующем вызове
+		sControl.playClipsRandom (painSoundsArray);
+		
 
 		Pawn killerPawn =killer.GetComponent<Pawn> ();
 		if (killerPawn != null && killerPawn.team == team &&! PlayerManager.instance.frendlyFire) {
@@ -541,6 +566,7 @@ public class Pawn : DamagebleObject {
 	}
 	void Update () {
 		//Debug.Log (photonView.isSceneView);
+
 		if (!isActive) {
 			return;		
 		}
@@ -900,6 +926,9 @@ public class Pawn : DamagebleObject {
 		if (isSpawn) {//если только респавнились, то не шевелимся
 			return;
 		}
+
+		//проигрываем звук шагов
+		sControl.playClip (stepSound);
 
 		nextState = state;
 
@@ -1294,6 +1323,8 @@ public class Pawn : DamagebleObject {
 	public void Jump(){
 		if (animator != null) {
 						animator.ApllyJump (true);	
+			//звук прыжка
+			sControl.playClip(jumpSound);
 		}
 		lastJumpTime = Time.time;
 		//photonView.RPC("JumpChange",PhotonTargets.OthersBuffered,true);
