@@ -152,11 +152,11 @@ public class AnimationManager : MonoBehaviour
 		
 		animator.SetBool("WallRunUp", frontW);
 	}
-	//for Sprint Aditional animation like jetpack in subclasss
+	//for Sprint Additional animation like jetpack in subclass
 	public virtual void Sprint(){
 
 	}
-	//for freefall no DoubleJump Aditional animation like jetpack in subclasss
+	//for freefall no DoubleJump Additional animation like jetpack in subclass
 	public virtual void FreeFall(){
 		
 	}
@@ -164,6 +164,7 @@ public class AnimationManager : MonoBehaviour
 	public void WeaponDown(bool value){
 		animator.SetBool("wall_stop", value);	
 	}
+	//HTH attack anim switch
 	public void StartAttackAnim(string name){
 		//Debug.Log (name);
 		animator.SetBool(name, true);	
@@ -190,10 +191,11 @@ public class AnimationManager : MonoBehaviour
 
 	}
 	
-	//Setting is taht pull long or short
+	//Setting is that pull long or short
 	public void SetLong(bool longPull){
 		animator.SetBool("LongPull", longPull);
 	}
+	//Check if weapon look forward or in air because of near wall
 	public bool isWeaponAimable(){
 		return !animator.GetBool("wall_stop");
 	}

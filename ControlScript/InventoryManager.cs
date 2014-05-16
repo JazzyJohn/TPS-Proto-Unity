@@ -52,18 +52,32 @@ public class InventoryManager : MonoBehaviour {
 	private AmmoBag[] allAmmo;
 	 	
 
-	void Start(){
+	void Awake(){
 		owner = GetComponent<Pawn>();
 		if (owner.photonView.isMine) {
 		
 			GenerateBag ();
 			GenerateInfo ();
-			_ChangeWeapon (0);
+		
 		}
+	}
+	//Start Weapon generation
+	public void GenerateWeaponStart(){
+			_ChangeWeapon (0);
+	}
+	//Destroy weapon and make pawn empty handed
+	public void TakeWeaponAway(){
+		if(currentWeapon!=null){
+			if(indexWeapon!=newWeapon){
+				SaveOldInfo(indexWeapon,currentWeapon);
+			}
+			currentWeapon.RequestKillMe();
+		}
+		owner.setWeapon(null)
 	}
 	
 	//AMMO BAG SECTION
-	
+	//Generate bas bag of all ammo
 	void GenerateBag(){
 		AmmoBag[] allTypeInGame = PlayerManager.instance.AllTypeInGame;
 		allAmmo = new AmmoBag[allTypeInGame.Length];
@@ -74,7 +88,7 @@ public class InventoryManager : MonoBehaviour {
 			allAmmo[i].maxSize = allTypeInGame[i].maxSize;
 		}
 	}
-	
+	//Check is there ammo in bag
 	public bool HasAmmo(AMMOTYPE ammo){
 		for(int i=0;i<allAmmo.Length;i++){
 			if(allAmmo[i].type ==ammo){
@@ -83,6 +97,7 @@ public class InventoryManager : MonoBehaviour {
 		}
 		return false;
 	}
+	//Get amount ammo for current ammotype
 	public int GetAmmo(AMMOTYPE ammo){
 		for(int i=0;i<allAmmo.Length;i++){
 			if(allAmmo[i].type ==ammo){
@@ -91,6 +106,7 @@ public class InventoryManager : MonoBehaviour {
 		}
 		return 0;
 	}
+	//Return ammo from bag
 	public int GiveAmmo(AMMOTYPE ammo,int amount){
 		for(int i=0;i<allAmmo.Length;i++){
 			if(allAmmo[i].type ==ammo){
@@ -105,7 +121,7 @@ public class InventoryManager : MonoBehaviour {
 		}
 		return 0;
 	}
-	
+	//Add Ammo to bag
 	public void AddAmmo(AMMOTYPE ammo,int amount){
 		for(int i=0;i<allAmmo.Length;i++){
 			if(allAmmo[i].type ==ammo){
@@ -124,7 +140,9 @@ public class InventoryManager : MonoBehaviour {
 	
 	
 	//INGAMEINFO SECTION
-	
+	/*Generate cahche info for bag
+		We don't store all weapon just important info about it when player put  weapon down
+	*/
 	void 	GenerateInfo(){
 		weaponInfo = new WeaponBackUp[prefabWeapon.Length];
 		for(int i=0;i<prefabWeapon.Length;i++){
@@ -132,15 +150,17 @@ public class InventoryManager : MonoBehaviour {
 		
 		}
 	}
+	//save old info about weapon
 	void SaveOldInfo(int index,BaseWeapon gun){
 		//Debug.Log (index);
 		weaponInfo[index].amount  = gun.curAmmo;
 	
 	}
+	//load cur weapon info
 	void LoadOldInfo(){
 		LoadOldInfo(indexWeapon,currentWeapon);
 	}
-	
+	//Load needed weapon info
 	void LoadOldInfo(int index,BaseWeapon gun){
 		gun.curAmmo=weaponInfo[index].amount;
 		
@@ -184,7 +204,7 @@ public class InventoryManager : MonoBehaviour {
 	public void ChangePrefab(BaseWeapon newWeapon){
 		ChangePrefab (newWeapon, new WeaponBackUp (newWeapon.clipSize, newWeapon.ammoType));
 	}
-	//TODO: implementation of dropping weapon on ground after picking another one 
+	//implementation of dropping weapon on ground after picking another one 
 	void DropWeapon(BaseWeapon oldWeapon,WeaponBackUp weaponinfo){
 
 		GameObject droppedWeapon =PhotonNetwork.Instantiate(oldWeapon.pickupPrefabPrefab.name,transform.position,transform.rotation,0) as GameObject;
@@ -227,12 +247,7 @@ public class InventoryManager : MonoBehaviour {
 		firstWeapon =PhotonNetwork.Instantiate(prefabWeapon[newWeapon].name,transform.position,Quaternion.identity,0).GetComponent<BaseWeapon>();
 	
 		owner.setWeapon(firstWeapon);
-		if(currentWeapon!=null){
-			if(indexWeapon!=newWeapon){
-				SaveOldInfo(indexWeapon,currentWeapon);
-			}
-			currentWeapon.RequestKillMe();
-		}
+		TakeWeaponAway()
 		indexWeapon=newWeapon;
 		currentWeapon=firstWeapon;
 		owner.setWeapon(firstWeapon);

@@ -14,7 +14,8 @@ public enum CharacterState {
 	WallRunning = 5,
 	PullingUp=6,
 	DoubleJump= 7,
-
+	DeActivate = 8,
+	Activate = 8,
 }
 public enum WallState{
 	WallL,
@@ -291,9 +292,13 @@ public class Pawn : DamagebleObject {
 		if (canJump) {
 			jetPackCharge = charMan.GetIntChar(CharacteristicList.JETPACKCHARGE);
 		}
+		AfterSpawnAction();
 		//Debug.Log (distToGround);
 	}
+	public virtual 	AfterSpawnAction(){
+		 ivnMan.GenerateWeaponStart();
 	
+	}
 	public override void Damage(BaseDamage damage,GameObject killer){
 		if (isSpawn||killer==null||!isActive) {//если только респавнились, то повреждений не получаем
 			return;
@@ -428,7 +433,7 @@ public class Pawn : DamagebleObject {
 		}
 
 	}
-	protected void UpdateAnimator(){
+	protected virtual UpdateAnimator(){
 		float strafe = 0;
 		//Debug.Log (strafe);	
 		float speed =0 ;
@@ -667,7 +672,7 @@ public class Pawn : DamagebleObject {
 				ldamage.hitPosition =myTransform.position;
 				ldamage.isContinius = true;
 				ldamage.Damage *= Time.deltaTime;
-				if(key.lastTime+0.1f<Time.time){
+				if(key.lastTime+1.0f<Time.time){
 					ldamage.sendMessage = true;
 					key.SetTime(Time.time);
 				}else{
@@ -678,6 +683,7 @@ public class Pawn : DamagebleObject {
 			}
 		} 
 	}
+	//Net replication of position 
 	public void ReplicatePosition(){
 		if (initialReplication) {
 			myTransform.position = correctPlayerPos;
@@ -705,10 +711,13 @@ public class Pawn : DamagebleObject {
 			CurWeapon.StopFire ();
 		}
 	}
+	//Setting new weapon if not null try to attach it
 	public void setWeapon(BaseWeapon newWeapon){
 		CurWeapon = newWeapon;
 		//Debug.Log (newWeapon);
-		CurWeapon.AttachWeapon(weaponSlot,weaponOffset,Quaternion.Euler (weaponRotatorOffset),this);
+		if(CurWeapon!=null){
+			CurWeapon.AttachWeapon(weaponSlot,weaponOffset,Quaternion.Euler (weaponRotatorOffset),this);
+		}
 	}
 	public void ChangeWeapon(int weaponIndex){
 		ivnMan.ChangeWeapon (weaponIndex);
@@ -1171,7 +1180,9 @@ public class Pawn : DamagebleObject {
 		case CharacterState.Sprinting:
 
 				if (_rb.isKinematic) _rb.isKinematic= false;
-				velocityChange=nextMovement.normalized*groundSprintSpeed-velocity;
+				if(nextState!=CharacterState.Jumping){
+					velocityChange=nextMovement.normalized*groundSprintSpeed-velocity;
+				}
 				//Debug.Log (velocityChange);
 				if (isGrounded) {
 					rigidbody.AddForce(velocityChange, ForceMode.VelocityChange);
@@ -1247,6 +1258,9 @@ public class Pawn : DamagebleObject {
 			break;
 		case CharacterState.PullingUp:
 			PullUp();
+			break;
+		default:
+			characterState = nextState;
 			break;
 			
 		}

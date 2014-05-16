@@ -342,8 +342,7 @@ public class Player : MonoBehaviour {
 		currentPawn.transform.parent = robotPawn.transform;
 		robotPawn.Activate ();
 
-		robotPawn.GetComponent<ThirdPersonCamera>().enabled = true;
-		robotPawn.GetComponent<ThirdPersonCamera>().Reset ();
+	
 
 	}
 	public void ExitBot(){
@@ -353,10 +352,8 @@ public class Player : MonoBehaviour {
 		currentPawn.myTransform.position = robotPawn.playerExitPositon.position;
 		currentPawn.myTransform.rotation = robotPawn.playerExitPositon.rotation;
 		currentPawn.Activate ();
-		robotPawn.GetComponent<ThirdPersonController>().enabled = false;
-		robotPawn.GetComponent<ThirdPersonCamera>().enabled = false;
-
-		robotPawn.StopMachine ();
+		robotPawn.DeActivate();
+		
 	}
 	public bool IsDead(){
 		return isDead;

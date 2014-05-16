@@ -407,7 +407,14 @@ public class MenuTF : MonoBehaviour {
 				teamCount[player.team-1]++;
 			}
 		}
-		if(GUI.Button(new Rect(Screen.width/_TeamButtonPosX, Screen.height/_TeamButtonPosY, Screen.width/_TeamButtonSizeX, Screen.height/_TeamButtonSizeY), PlayerMainGui.FormTeamName(1)+" ("+teamCount[0]+")", _TeamGSbutton[0]))
+		bool teamAblock=false,TeamBblock=false;
+		if(teamCount[0]>teamCount[1]+1){
+			teamAblock=true;
+		}
+		if(teamCount[1]>teamCount[0]+1){
+			TeamBblock=true;
+		}
+		if(GUI.Button(new Rect(Screen.width/_TeamButtonPosX, Screen.height/_TeamButtonPosY, Screen.width/_TeamButtonSizeX, Screen.height/_TeamButtonSizeY), PlayerMainGui.FormTeamName(1)+" ("+teamCount[0]+")", _TeamGSbutton[0])&&!teamAblock)
 		{
 			
 			for(int i = 0; i <  _TeamGSbutton.Length; i ++)
@@ -422,7 +429,7 @@ public class MenuTF : MonoBehaviour {
 			Choice._Team = 1;
 		}
 
-		if(GUI.Button(new Rect(Screen.width/_TeamButtonPosX + Screen.width/_TeamButtonSizeX, Screen.height/_TeamButtonPosY, Screen.width/_TeamButtonSizeX, Screen.height/_TeamButtonSizeY), PlayerMainGui.FormTeamName(2)+" ("+teamCount[1]+")", _TeamGSbutton[1]))
+		if(GUI.Button(new Rect(Screen.width/_TeamButtonPosX + Screen.width/_TeamButtonSizeX, Screen.height/_TeamButtonPosY, Screen.width/_TeamButtonSizeX, Screen.height/_TeamButtonSizeY), PlayerMainGui.FormTeamName(2)+" ("+teamCount[1]+")", _TeamGSbutton[1])&&!teamBblock)
 		{
 			
 			for(int i = 0; i < _TeamGSbutton.Length; i ++)
