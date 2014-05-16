@@ -358,7 +358,7 @@ public class PlayerMainGui : MonoBehaviour {
 		float maxsize = LocalPlayer.GetCurrentPawn ().seenDistance;
 		Pawn robot = LocalPlayer.GetRobot ();
 		for (int i=0; i<seenablePawn.Count; i++) {
-			if (robot == seenablePawn [i]) {
+			if (robot == seenablePawn [i]||!seenablePawn [i].isActive) {
 				continue;
 			}
 			

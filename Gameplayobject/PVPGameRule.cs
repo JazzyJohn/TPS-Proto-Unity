@@ -21,6 +21,7 @@ public class PVPGameRule : GameRule {
 
 		public PhotonView photonView;
 		
+		public int curStage=0;
 		 // s_Instance is used to cache the instance found in the scene so we don't have to look it up every time.
 		private static PVPGameRule s_Instance = null;
 	 
@@ -49,7 +50,9 @@ public class PVPGameRule : GameRule {
 		}
 
 		void Update(){
-			
+			if (FinalStage ()&&curStage==0) {
+				curStage=1;
+			}
 			if (isGameEnded) {
 				restartTimer+= Time.deltaTime;				
 				if(restartTimer>restartTime){
@@ -151,5 +154,14 @@ public class PVPGameRule : GameRule {
 			isGameEnded=true;
 			Player player = GameObject.Find ("Player").GetComponent<Player> ();
 			player.GameEnd ();
+		}
+
+		public bool FinalStage (){
+			for(int i=0;i<teamScore.Length;i++){
+				if(maxScore<teamScore[i]+5){
+					return true;
+				}
+			}
+			return false;
 		}
 }

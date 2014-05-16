@@ -8,8 +8,8 @@ public class RobotAnimationManager : AnimationManager
 		 animator.CrossFade(DeactiveName, 2.0f);
 	}
 	public new void Activation(){
-		Debug.Log ("ctivate");
-		animator.SetBool ("Pilotin", true);
+		//Debug.Log ("ctivate");
+		animator.SetBool ("TakeToIdle", true);
 	}
 
 }

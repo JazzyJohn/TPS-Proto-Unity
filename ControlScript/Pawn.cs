@@ -953,7 +953,7 @@ public class Pawn : DamagebleObject {
 		bool leftW = Physics.Raycast (myTransform.position ,
 		                              (-1*myTransform.right).normalized ,out leftH, capsule.radius + 0.3f,wallRunLayers);
 		bool rightW = Physics.Raycast (myTransform.position,
-		                               (myTransform.forward).normalized,out rightH, capsule.radius + 0.3f, wallRunLayers);
+		                               (myTransform.right).normalized,out rightH, capsule.radius + 0.3f, wallRunLayers);
 		bool frontW = Physics.Raycast (myTransform.position,
 		                               myTransform.forward,out frontH, capsule.radius + 0.2f, wallRunLayers);
 
