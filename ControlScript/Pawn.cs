@@ -15,7 +15,7 @@ public enum CharacterState {
 	PullingUp=6,
 	DoubleJump= 7,
 	DeActivate = 8,
-	Activate = 8,
+	Activate = 9,
 }
 public enum WallState{
 	WallL,
@@ -92,7 +92,7 @@ public class Pawn : DamagebleObject {
 
 	private WallState wallState;
 
-	private CharacterState nextState;
+	protected CharacterState nextState;
 
 	private int jetPackCharge;
 
@@ -121,6 +121,8 @@ public class Pawn : DamagebleObject {
 	private CapsuleCollider capsule;
 
 	public bool canWallRun;
+
+	protected bool _canWallRun;
 
 	public bool canPullUp;
 
@@ -192,7 +194,7 @@ public class Pawn : DamagebleObject {
 		}
 		
 	}
-	private float lastTimeOnWall;
+	protected float lastTimeOnWall;
 
 	private float lastJumpTime;
 
@@ -256,7 +258,7 @@ public class Pawn : DamagebleObject {
 	protected void Start () {
 
 		sControl = new soundControl (aSource);//создаем обьект контроллера звука
-
+		_canWallRun = canWallRun;
 		//проигрываем звук респавна
 		sControl.playClip (spawnSound);
 
@@ -280,7 +282,7 @@ public class Pawn : DamagebleObject {
 
 		correctPlayerPos = transform.position;
 		myCollider = collider;
-
+		ivnMan.Init ();
 		centerOffset = capsule.bounds.center - myTransform.position;
 		headOffset = centerOffset;
 		headOffset.y = capsule.bounds.max.y - myTransform.position.y;
@@ -295,7 +297,7 @@ public class Pawn : DamagebleObject {
 		AfterSpawnAction();
 		//Debug.Log (distToGround);
 	}
-	public virtual 	AfterSpawnAction(){
+	public virtual void AfterSpawnAction(){
 		 ivnMan.GenerateWeaponStart();
 	
 	}
@@ -433,7 +435,7 @@ public class Pawn : DamagebleObject {
 		}
 
 	}
-	protected virtual UpdateAnimator(){
+	protected virtual void UpdateAnimator(){
 		float strafe = 0;
 		//Debug.Log (strafe);	
 		float speed =0 ;
@@ -960,7 +962,7 @@ public class Pawn : DamagebleObject {
 	}
 	bool WallRun (Vector3 movement,CharacterState state)
 	{
-		if (!canWallRun&&photonView.isMine) return false;
+		if ((!canWallRun||!_canWallRun)&&photonView.isMine) return false;
 
 		//if (isGrounded) return false;
 		if (lastTimeOnWall + 1.0f > Time.time) {
@@ -1090,22 +1092,22 @@ public class Pawn : DamagebleObject {
 	// Wall run cool-down
 	IEnumerator WallRunCoolDown (float sec)
 	{
-		canWallRun = true;
+		_canWallRun = true;
 		yield return new WaitForSeconds (sec);
-		canWallRun = false;
+		_canWallRun = false;
 		characterState = CharacterState.Jumping;
 		yield return new WaitForSeconds (sec);
-		canWallRun = true;
+		_canWallRun = true;
 	}
 	// Wall run cool-down
 	IEnumerator WallJump (float sec)
 	{
 		Jump ();
 		//Debug.Log ("WALLJUMP");
-		canWallRun = false;
+		_canWallRun = false;
 		characterState = CharacterState.Jumping;
 		yield return new WaitForSeconds (sec);
-		canWallRun = true;
+		_canWallRun = true;
 	}
 
 	void OnCollisionStay(Collision collisionInfo) {
@@ -1212,8 +1214,10 @@ public class Pawn : DamagebleObject {
 			if(characterState!=CharacterState.DoubleJump){
 				animator.FreeFall();
 			}
-			animator.ApllyJump(true);						
-			animator.WallAnimation(false,false,false);
+			animator.ApllyJump(true);	
+			if(canWallRun){
+				animator.WallAnimation(false,false,false);
+			}
 			
 			if(WallRun (nextMovement,nextState)){
 				SendMessage ("WallLand", SendMessageOptions.DontRequireReceiver);

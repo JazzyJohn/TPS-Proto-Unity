@@ -22,16 +22,19 @@ public class RobotPawn : Pawn {
 		base.Activate();
 	}
 	//Player have left robot
-	public new void  Deactivate(){
+	public new void  DeActivate(){
 		characterState=CharacterState.DeActivate;
+		isActive = false;
 		((RobotAnimationManager)animator).DeActivation();
 		GetComponent<ThirdPersonController>().enabled = false;
 		GetComponent<ThirdPersonCamera>().enabled = false;
 		ivnMan.TakeWeaponAway();
 		StopMachine ();
+		//Debug.Log ("ROBOT");
 	}
-	public override AfterSpawnAction(){
-		nextState = CharacterState.Jumping;
+	public override void  AfterSpawnAction(){
+		characterState = CharacterState.Jumping;
+		//nextState = CharacterState.DeActivate;
 	}
 	public new void DidLand(){
 		if(!isActive){
@@ -41,24 +44,29 @@ public class RobotPawn : Pawn {
 		lastTimeOnWall = -10.0f;
 		//photonView.RPC("JumpChange",PhotonTargets.OthersBuffered,false);
 	}
-	protected override UpdateAnimator(){
+	protected override void UpdateAnimator(){
 		if (animator != null && animator.gameObject.activeSelf) {
-		if (photonView.isMine) {
-			switch(nextState){
-				case CharacterState.DeActivate:
-					if(characterState!=nextState){
-						((RobotAnimationManager)animator).DeActivation();
-					}
-				break;
-				case CharacterState.Activate:
-					if(characterState!=nextState){
-						((RobotAnimationManager)animator).Activation();
-					}
-				break;
+			if(!photonView.isMine){
+				switch(nextState){
+					case CharacterState.DeActivate:
+				
+							animator.ApllyJump(false);
+							if(characterState!=nextState){
+								//nextState=characterState;
+								((RobotAnimationManager)animator).DeActivation();
+							}
+
+					break;
+					case CharacterState.Activate:
+						if(characterState!=nextState){
+							((RobotAnimationManager)animator).Activation();
+						}
+					break;
+				}
 			}
 					
 		
-		}
+		
 		}
 		base.UpdateAnimator();
 	}

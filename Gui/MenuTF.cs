@@ -407,12 +407,12 @@ public class MenuTF : MonoBehaviour {
 				teamCount[player.team-1]++;
 			}
 		}
-		bool teamAblock=false,TeamBblock=false;
+		bool teamAblock=false,teamBblock=false;
 		if(teamCount[0]>teamCount[1]+1){
 			teamAblock=true;
 		}
 		if(teamCount[1]>teamCount[0]+1){
-			TeamBblock=true;
+			teamBblock=true;
 		}
 		if(GUI.Button(new Rect(Screen.width/_TeamButtonPosX, Screen.height/_TeamButtonPosY, Screen.width/_TeamButtonSizeX, Screen.height/_TeamButtonSizeY), PlayerMainGui.FormTeamName(1)+" ("+teamCount[0]+")", _TeamGSbutton[0])&&!teamAblock)
 		{

@@ -363,6 +363,7 @@ public class PlayerMainGui : MonoBehaviour {
 			}
 			
 			Pawn target = seenablePawn [i];
+		
 			Vector3 Position = MainCamera.WorldToScreenPoint (target.myTransform.position + target.headOffset);
 			if(Position.z<0){
 				continue;

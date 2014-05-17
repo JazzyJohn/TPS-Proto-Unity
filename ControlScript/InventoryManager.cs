@@ -52,28 +52,29 @@ public class InventoryManager : MonoBehaviour {
 	private AmmoBag[] allAmmo;
 	 	
 
-	void Awake(){
-		owner = GetComponent<Pawn>();
-		if (owner.photonView.isMine) {
-		
-			GenerateBag ();
-			GenerateInfo ();
-		
+	public void Init(){
+		if (owner == null) {
+			owner = GetComponent<Pawn> ();
+			if (owner.photonView.isMine) {
+				
+				GenerateBag ();
+				GenerateInfo ();
+				
+			}
 		}
 	}
 	//Start Weapon generation
 	public void GenerateWeaponStart(){
-			_ChangeWeapon (0);
+	
+		_ChangeWeapon (0);
 	}
 	//Destroy weapon and make pawn empty handed
 	public void TakeWeaponAway(){
 		if(currentWeapon!=null){
-			if(indexWeapon!=newWeapon){
-				SaveOldInfo(indexWeapon,currentWeapon);
-			}
+
 			currentWeapon.RequestKillMe();
 		}
-		owner.setWeapon(null)
+		owner.setWeapon(null);
 	}
 	
 	//AMMO BAG SECTION
@@ -247,7 +248,14 @@ public class InventoryManager : MonoBehaviour {
 		firstWeapon =PhotonNetwork.Instantiate(prefabWeapon[newWeapon].name,transform.position,Quaternion.identity,0).GetComponent<BaseWeapon>();
 	
 		owner.setWeapon(firstWeapon);
-		TakeWeaponAway()
+		if(currentWeapon!=null){
+			if(indexWeapon!=newWeapon){
+				SaveOldInfo(indexWeapon,currentWeapon);
+			}
+			currentWeapon.RequestKillMe();
+		}
+
+		//TakeWeaponAway ();
 		indexWeapon=newWeapon;
 		currentWeapon=firstWeapon;
 		owner.setWeapon(firstWeapon);

@@ -171,7 +171,7 @@ public class Player : MonoBehaviour {
 					if(Input.GetButtonUp("SpawnBot")){
 						if(ghostBot!=null&&canSpawnBot){
 							Vector3 spamPoint =ghostBot.transform.position;
-							spamPoint.y+= 10;
+							spamPoint.y+= 30;
 							robotPawn =(RobotPawn)PlayerManager.instance.SpawmPlayer(prefabBot,spamPoint,ghostBot.transform.rotation);
 							//Debug.Log("robot spawn"+robotPawn);
 							AfterSpawnSetting(robotPawn,PawnType.BOT,team);
@@ -372,12 +372,15 @@ public class Player : MonoBehaviour {
 		}
 		if (curPawn != null) {
 			stats.health = curPawn.health;
-			stats.ammoInGun = curPawn.CurWeapon.curAmmo;
-			stats.ammoInGunMax = curPawn.CurWeapon.clipSize;
-			stats.ammoInBag = curPawn.GetAmmoInBag ();
-			stats.reloadTime = curPawn.CurWeapon.ReloadTimer();
+			if(curPawn.CurWeapon!=null){
+				stats.ammoInGun = curPawn.CurWeapon.curAmmo;
+				stats.ammoInGunMax = curPawn.CurWeapon.clipSize;
+				stats.ammoInBag = curPawn.GetAmmoInBag ();
+				stats.reloadTime = curPawn.CurWeapon.ReloadTimer();
+			
+				stats.gunName = curPawn.CurWeapon.weaponName;
+			}
 			stats.jetPackCharge  = curPawn.GetJetPackCharges();
-			stats.gunName = curPawn.CurWeapon.weaponName;
 		}
 
 		

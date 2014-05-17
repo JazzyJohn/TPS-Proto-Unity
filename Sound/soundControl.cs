@@ -23,16 +23,19 @@ public class soundControl
 				source.Play ();
 			} 
 			else {
-				Debug.LogError("soundControl:playClip: Clip not defined!!");
+				//Debug.LogError("soundControl:playClip: Clip not defined!!");
 			}
 		}
 		else {
-			Debug.LogError("soundControl:playClip: Source not defined!!");
+			//Debug.LogError("soundControl:playClip: Source not defined!!");
 		}
 	}
 //--------------------------------------------------------------------------------------------------------------
 	//проигрывает один клип из массива, выбирая случайным образом. Если клип уже звучит, то не прерывает
 	public void playClipsRandom(Array array){
+		if (array.Length == 0) {
+			return;
+		}
 		AudioClip tmpClip =(AudioClip) array.GetValue(UnityEngine.Random.Range (0, array.GetLength (0)));
 		if (tmpClip != null) {
 			if(!source.isPlaying){//если клип уже играет, то пусть играет
