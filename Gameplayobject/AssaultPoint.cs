@@ -3,6 +3,8 @@ using System.Collections;
 using System.Collections.Generic;
 
 [RequireComponent (typeof(Player))]
+[RequireComponent (typeof(PointControll_GameRule))]
+
 public class AssaultPoint : MonoBehaviour {
 	private List<Player> invaders = new List<Player> ();
 	public int[] points = new int[2];
@@ -167,7 +169,7 @@ public class AssaultPoint : MonoBehaviour {
 		Debug.Log ("Team " + team + " Invaded this point");
 		setCurrentOwner(team + 1);
 
-		PointControll_GameRule gameRules = FindObjectOfType<PointControll_GameRule> as PointControll_GameRule;
+		PointControll_GameRule gameRules = FindObjectOfType<PointControll_GameRule>();
 		if (!gameRules)
 		{	
 			Debug.LogError("No PointControll_GameRule");

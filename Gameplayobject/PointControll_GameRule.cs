@@ -2,6 +2,8 @@
 using System.Collections;
 using System.Collections.Generic;
 
+[RequireComponent (typeof(AssaultPoint))]
+
 public class PointControll_GameRule : PVPGameRule {
 	public int pointsToGoal;//How much points team should invade to win.
 	private AssaultPoint[] cPoints;
@@ -56,7 +58,7 @@ public class PointControll_GameRule : PVPGameRule {
 
 	// Use this for initialization
 	void Start () {
-		cPoints = FindObjectsOfType(AssaultPoint) as AssaultPoint[];
+		cPoints = FindObjectsOfType(typeof(AssaultPoint)) as AssaultPoint[];
 	}
 	
 	// Update is called once per frame
