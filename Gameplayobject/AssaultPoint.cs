@@ -22,7 +22,7 @@ public class AssaultPoint : MonoBehaviour {
 		for (int i=0; i<2; i++)
 			points[i] = 0;
 
-		currentOwner = owner;
+		setCurrentOwner (owner);
 		nextTick = Time.time;
 		timeToCountdownRed = timeToCountdownBlue = Time.time;
 	}
@@ -86,6 +86,12 @@ public class AssaultPoint : MonoBehaviour {
 		return iRet;
 	}
 
+	public void clearScores()
+	{
+		points [0] = points [1] = 0;
+		setCurrentOwner (owner);
+	}
+
 	public int getPoints(int team)
 	{
 		return points [team-1];
@@ -111,7 +117,7 @@ public class AssaultPoint : MonoBehaviour {
 				addPointRed+=1;
 				//TODO: get player class and add extra points
 			}
-			else
+			else if(invaders[i].team == 2)
 			{
 				addPointBlue+=1;
 				//TODO: get player class and add extra points
@@ -140,13 +146,17 @@ public class AssaultPoint : MonoBehaviour {
 			teamInvadePoint (2);//blue
 
 	}
-
+	
 	void teamInvadePoint(int team)
 	{
 		if (getCurrentOwner () == team)
 			return;
 
 		team--;
+
+		if (team < 0 || team > 1)
+			return;
+
 		points [1 - team] = 0;//clear enemy points
 
 		if (team == 0)
@@ -156,5 +166,14 @@ public class AssaultPoint : MonoBehaviour {
 
 		Debug.Log ("Team " + team + " Invaded this point");
 		setCurrentOwner(team + 1);
+
+		PointControll_GameRule gameRules = FindObjectOfType<PointControll_GameRule> as PointControll_GameRule;
+		if (!gameRules)
+		{	
+			Debug.LogError("No PointControll_GameRule");
+			return;
+		}
+
+		gameRules.pointHasBeenTaken (this, team + 1);
 	}
 }
