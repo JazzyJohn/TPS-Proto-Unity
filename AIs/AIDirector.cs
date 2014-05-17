@@ -1,5 +1,6 @@
 ﻿using UnityEngine;
 using System.Collections;
+using ExitGames.Client.Photon;
 
 public class AIDirector : MonoBehaviour {
 
@@ -15,17 +16,16 @@ public class AIDirector : MonoBehaviour {
 		respawns = FindObjectsOfType<AISpawnPoint> ();
 		selfRespawns = FindObjectsOfType<SelfSpawnPoint> ();
 		StartCoroutine("Tick");
-
-	}
+        	}
 	// Use this for initialization
 	void Start () {
-	
-	}
+    }
 	
 	// Update is called once per frame
 	void Update () {
 
 	}
+
 	private IEnumerator Tick()
 	{
 		while (true)
@@ -39,7 +39,6 @@ public class AIDirector : MonoBehaviour {
 			}
 			foreach (SelfSpawnPoint go in selfRespawns) {
 				if(go.isAvalable){
-					
 					go.SpawObject();
 				}
 			}

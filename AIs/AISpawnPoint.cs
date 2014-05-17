@@ -5,8 +5,7 @@ public class AISpawnPoint : ObjectSpawnPoint {
 
 	
 	public void Spawned(Pawn newPawn){
-		isAvalable = false;
+        isAvalable = false;
 		spawnedObject = newPawn.gameObject;
-			
-	}
+				}
 }

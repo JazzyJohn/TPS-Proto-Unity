@@ -61,9 +61,9 @@ public class ServerHolder : MonoBehaviour {
 		}
 		void OnMasterClientSwitched( PhotonPlayer newMaster )
 		{
-			//TODO: director fix
+			//TODO: director fix *** Complete ***
 			if (PhotonNetwork.isMasterClient) {
-				//FindObjectOfType<PVPGameRule> ().StartGame ();	
+				FindObjectOfType<PVPGameRule> ().StartGame ();	
 			}
 		}
 }
