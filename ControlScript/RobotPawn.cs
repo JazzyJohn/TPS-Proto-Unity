@@ -9,6 +9,7 @@ public class RobotPawn : Pawn {
 	//Player get in robot
 	public new void  Activate(){
 		((RobotAnimationManager)animator).Activation();
+		_rb.constraints = RigidbodyConstraints.FreezeRotation;
 		characterState=CharacterState.Activate;
 		GetComponent<ThirdPersonCamera>().enabled = true;
 		GetComponent<ThirdPersonCamera>().Reset ();
@@ -16,6 +17,7 @@ public class RobotPawn : Pawn {
 	}
 	
 	public IEnumerator WaitBeforeActive(float waitTime) {
+
         yield return new WaitForSeconds(waitTime);
 		GetComponent<ThirdPersonController>().enabled = true;
 		ivnMan.GenerateWeaponStart();
@@ -30,6 +32,8 @@ public class RobotPawn : Pawn {
 		GetComponent<ThirdPersonCamera>().enabled = false;
 		ivnMan.TakeWeaponAway();
 		StopMachine ();
+		_rb.constraints = RigidbodyConstraints.FreezeAll;
+		_rb.velocity = Vector3.zero;
 		//Debug.Log ("ROBOT");
 	}
 	public override void  AfterSpawnAction(){

@@ -64,14 +64,15 @@ public class AchievementManager : MonoBehaviour, LocalPlayerListener{
 				WWW w = null;
 				if (String.Compare(Application.absoluteURL, 0, "https", 0,5) != 0) {
 					
-					Debug.Log ("STATS HTTP SEND");
+					Debug.Log ("STATS HTTP SEND" + StatisticHandler.STATISTIC_PHP_HTTPS + StatisticHandler.LOAD_ACHIVE);
 					w = new WWW (StatisticHandler.STATISTIC_PHP + StatisticHandler.LOAD_ACHIVE, form);
 				}
 				else{
-					Debug.Log ("STATS HTTPS SEND");
+					Debug.Log ("STATS HTTPS SEND"+StatisticHandler.STATISTIC_PHP_HTTPS + StatisticHandler.LOAD_ACHIVE);
 					w = new WWW (StatisticHandler.STATISTIC_PHP_HTTPS + StatisticHandler.LOAD_ACHIVE, form);
 				}
 				yield return w;
+				//Debug.Log (w.text);
 				ParseList (w.text);
 	}
 	//parse XML string to normal Achivment Pattern

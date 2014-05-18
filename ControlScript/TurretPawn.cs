@@ -19,7 +19,7 @@ public class TurretPawn : Pawn {
 		if (!isActive) {
 			return;		
 		}
-
+//		Debug.Log (characterState);
 		if (photonView.isMine||(isAi &&PhotonNetwork.isMasterClient)) {
 
 				UpdateSeenList();

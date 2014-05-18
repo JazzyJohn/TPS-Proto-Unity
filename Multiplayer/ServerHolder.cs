@@ -33,7 +33,7 @@ public class ServerHolder : MonoBehaviour
 
 		} else {
 			PhotonNetwork.autoJoinLobby = true;
-			PhotonNetwork.ConnectUsingSettings("0.1");
+			PhotonNetwork.ConnectUsingSettings(PlayerManager.instance.version);
 			
 			allRooms = PhotonNetwork.GetRoomList();
 			newRoomMaxPlayers = 10;
@@ -233,7 +233,7 @@ public class ServerHolder : MonoBehaviour
 		PhotonNetwork.Instantiate ("Player",Vector3.zero,Quaternion.identity,0);
 		if (PhotonNetwork.isMasterClient) {
 			FindObjectOfType<PVPGameRule> ().StartGame ();
-		}
+		} 
 		}
 	public static Vector3 ReadVectorFromShort(PhotonStream stream){
 		Vector3 newPosition = Vector3.zero;

@@ -11,7 +11,7 @@ public class soundControl
 			source = s;
 		} 
 		else {
-			Debug.LogError("soundControl:soundControl: Source not defined!!");
+		//	Debug.LogError("soundControl:soundControl: Source not defined!!");
 		}
 	}
 //--------------------------------------------------------------------------------------------------------------
@@ -32,7 +32,7 @@ public class soundControl
 	}
 //--------------------------------------------------------------------------------------------------------------
 	//проигрывает один клип из массива, выбирая случайным образом. Если клип уже звучит, то не прерывает
-	public void playClipsRandom(Array array){
+	public void playClipsRandomFull(Array array){
 		if (array.Length == 0) {
 			return;
 		}
@@ -44,7 +44,23 @@ public class soundControl
 			}
 		} 
 		else {
-			Debug.LogError("soundControl:playClipsRandom: Clip not defined!!");
+			//Debug.LogError("soundControl:playClipsRandom: Clip not defined!!");
+		}
+	}
+	//проигрывает один клип из массива, выбирая случайным образом. Если клип уже звучит, то  прерывает
+	public void playClipsRandom(Array array){
+		if (array.Length == 0) {
+			return;
+		}
+		AudioClip tmpClip =(AudioClip) array.GetValue(UnityEngine.Random.Range (0, array.GetLength (0)));
+		if (tmpClip != null) {
+
+				source.clip = tmpClip;
+				source.Play ();
+
+		} 
+		else {
+			//Debug.LogError("soundControl:playClipsRandom: Clip not defined!!");
 		}
 	}
 //--------------------------------------------------------------------------------------------------------------
@@ -64,12 +80,12 @@ public class soundControl
 					source.Play ();
 				} 
 				else {
-					Debug.LogError("soundControl:playFullClip: Clip not defined!!");
+					//Debug.LogError("soundControl:playFullClip: Clip not defined!!");
 				}
 			}
 		}
 		else {
-			Debug.LogError("soundControl:playFullClip: Source not defined!!");
+			//Debug.LogError("soundControl:playFullClip: Source not defined!!");
 		}
 	}
 }

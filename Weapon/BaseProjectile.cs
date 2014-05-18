@@ -32,7 +32,7 @@ public class BaseProjectile : MonoBehaviour {
 	public float splashRadius;
 
 	//звуки
-	public AudioSource aSource;//источник звука задается в редакторе
+	private AudioSource aSource;//источник звука задается в редакторе
 	public AudioClip reactiveEngineSound;
 	public AudioClip exploseSound;
 	private soundControl sControl;//контроллер звука
@@ -40,9 +40,11 @@ public class BaseProjectile : MonoBehaviour {
 	protected Transform mTransform;
 	private Rigidbody mRigidBody;
 	protected bool used=false;
+
+	protected DamagebleObject shootTarget;
 	
 	void Start () {
-		
+		aSource = GetComponent<AudioSource> ();
 		sControl = new soundControl (aSource);//создаем обьект контроллера звука и передаем указатель на источник
 		sControl.playClip (reactiveEngineSound);
 
@@ -85,6 +87,7 @@ public class BaseProjectile : MonoBehaviour {
 		DamagebleObject obj = hit.transform.gameObject.GetComponent <DamagebleObject>();
 		if (obj != null) {
 			obj.Damage(damage,owner);
+			shootTarget= obj;
 			//Debug.Log ("HADISH INTO SOME PLAYER! " + hit.transform.gameObject.name);
 			Destroy (gameObject, 0.1f);
 		}
@@ -112,6 +115,7 @@ public class BaseProjectile : MonoBehaviour {
 		Vector3 Position = transform.position;
 		RaycastHit[] hits;
 		for(int i=0;i < hitColliders.Length;i++) {
+
 			//Debug.Log(hitColliders[i]);
 			bool isHit = false;
 			hits = Physics.RaycastAll(Position, hitColliders[i].transform.position);
@@ -124,8 +128,11 @@ public class BaseProjectile : MonoBehaviour {
 			}
 			if (isHit) {
 				DamagebleObject obj = hitColliders[i].GetComponent <DamagebleObject>();
-				if (obj != null) {
-					obj.Damage(damage,owner);
+				BaseDamage lDamage  = new BaseDamage(damage);
+				lDamage.pushDirection = mTransform.forward;
+				lDamage.hitPosition = mTransform.position;
+				if (obj != null&&obj!=shootTarget) {
+					obj.Damage(lDamage,owner);
 				}	
 			}
 		}

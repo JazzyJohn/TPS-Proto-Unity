@@ -299,6 +299,7 @@ public class Player : MonoBehaviour {
 		if(!inBot){
 			Score.Kill++;
 		}else{
+			Score.Kill++;
 			Score.RobotKill++;
 		}
 

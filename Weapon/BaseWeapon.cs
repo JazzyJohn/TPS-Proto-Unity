@@ -90,21 +90,21 @@ public class BaseWeapon : DestroyableNetworkObject {
 
 	//звуки
 	private soundControl sControl;//глобальный обьект контроллера звука
-	public AudioSource aSource;//источник звука. добавляется в редакторе
+	private AudioSource aSource;//источник звука. добавляется в редакторе
 	public AudioClip fireSound;
 	public AudioClip reloadSound;
 
 
 	// Use this for initialization
 	void Start () {
-
+		aSource = GetComponent<AudioSource> ();
 		sControl = new soundControl (aSource);//создаем обьект контроллера звука
 
 		//проверяем длительности звуков стрельбы и перезарядки
-		if (fireSound.length >= fireInterval) {
-			Debug.LogError("fireSound clip length is greater than fireIntrval value");
+		if (fireSound!=null&&fireSound.length >= fireInterval) {
+			//Debug.LogWarning("fireSound clip length is greater than fireIntrval value");
 		}
-		if (reloadSound.length >= reloadTime) {
+		if (reloadSound!=null&reloadSound.length >= reloadTime) {
 			Debug.LogError("reloadSound clip length is greater than reloadTime value");
 		}
 		
@@ -189,6 +189,8 @@ public class BaseWeapon : DestroyableNetworkObject {
 				StopFire();
 				shootAfterReload = true;
 			}
+			//играем звук перезарядки
+			sControl.playClip (reloadSound);
 		}else{
 			StopFire();
 			return;
@@ -196,8 +198,7 @@ public class BaseWeapon : DestroyableNetworkObject {
 		
 	}
 	public void Reload(){
-		//играем звук перезарядки
-		sControl.playClip (reloadSound);
+
 		isReload = false;
 
 		int oldClip = curAmmo;

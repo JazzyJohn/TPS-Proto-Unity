@@ -110,7 +110,7 @@ public class Pawn : DamagebleObject {
 
 	public Pawn enemy;
 
-	private Rigidbody _rb;
+	protected Rigidbody _rb;
 
 	private Vector3 pushingForce;
 
@@ -234,12 +234,12 @@ public class Pawn : DamagebleObject {
 
 	//звуки
 
-	public AudioSource aSource;
+	private AudioSource aSource;
 	public AudioClip stepSound;
 	public AudioClip jumpSound;
 	public AudioClip spawnSound;
 	public AudioClip[] painSoundsArray;//массив звуков воплей при попадании
-
+	private float lastPainSound =-10.0f;
 	private soundControl sControl;//глобальный обьект контроллера звука
 
 	private bool isSpawn=false;//флаг респавна
@@ -256,6 +256,7 @@ public class Pawn : DamagebleObject {
 	}
 	// Use this for initialization
 	protected void Start () {
+		aSource = GetComponent<AudioSource> ();
 
 		sControl = new soundControl (aSource);//создаем обьект контроллера звука
 		_canWallRun = canWallRun;
@@ -311,7 +312,10 @@ public class Pawn : DamagebleObject {
 		}
 		//вопли при попадании
 		//выбираются случайно из массива. Звучат не прерываясь при следующем вызове
-		sControl.playClipsRandom (painSoundsArray);
+		if (lastPainSound + 1.0f<Time.time) {
+			lastPainSound =Time.time;
+						sControl.playClipsRandom (painSoundsArray);
+		}
 		
 
 		Pawn killerPawn =killer.GetComponent<Pawn> ();
@@ -419,13 +423,13 @@ public class Pawn : DamagebleObject {
 			if(distance.sqrMagnitude<seenDistance){
 				RaycastHit hitInfo;
 				Vector3 normalDist = distance.normalized;
-				Vector3 startpoint = myTransform.position +normalDist*capsule.radius;
-
-					
+				Vector3 startpoint = myTransform.position +normalDist*Mathf.Max(capsule.radius,capsule.height);
+			
 				if (allPawn[i].team!=team&&Physics.Raycast(startpoint,normalDist,out hitInfo)) {
 
 					
 					if(allPawn[i].myCollider!=hitInfo.collider){
+						//Debug.Log ("WALL"+hitInfo.collider);
 						continue;
 					}
 				}
@@ -452,22 +456,30 @@ public class Pawn : DamagebleObject {
 					animator.ApllyJump(true);
 					break;
 				case CharacterState.Idle:
-					animator.ApllyJump(false);
+					if(isGrounded){
+						animator.ApllyJump(false);
+					}
+					//проигрываем звук шагов
+
 					animator.ApllyMotion (0.0f, speed, strafe);
 					break;
 				case CharacterState.Running:
 					animator.ApllyJump(false);
+					sControl.playFullClip (stepSound);
 					animator.ApllyMotion (2.0f, speed, strafe);
 					break;
 				case CharacterState.Sprinting:
 					animator.Sprint();
+					sControl.playFullClip (stepSound);
 					animator.ApllyMotion (2.0f, speed, strafe);	
 					break;
 				case CharacterState.Walking:
 					animator.ApllyJump(false);
+					sControl.playFullClip (stepSound);
 					animator.ApllyMotion (1.0f, speed, strafe);	
 					break;
 				case CharacterState.WallRunning:
+					sControl.playFullClip (stepSound);
 						//Debug.Log ("INSWITCH");
 						switch (wallState) {
 						case WallState.WallF:
@@ -495,12 +507,14 @@ public class Pawn : DamagebleObject {
 						animator.ApllyJump(false);
 
 					}
+
 					animator.ApllyMotion (0.0f, speed, strafe);
 					break;
 				case CharacterState.Running:
 					if(characterState == CharacterState.Jumping||characterState == CharacterState.DoubleJump){
 						animator.ApllyJump(false);
 					}
+					sControl.playFullClip (stepSound);
 					animator.ApllyMotion (2.0f, speed, strafe);
 					break;
 				case CharacterState.Sprinting:
@@ -508,15 +522,18 @@ public class Pawn : DamagebleObject {
 						animator.ApllyJump(false);
 						animator.Sprint();
 					}
+					sControl.playFullClip (stepSound);
 					animator.ApllyMotion (2.0f, speed, strafe);
 					break;
 				case CharacterState.Walking:
 					if(characterState == CharacterState.Jumping||characterState == CharacterState.DoubleJump){
 						animator.ApllyJump(false);
 					}
+					sControl.playFullClip (stepSound);
 					animator.ApllyMotion (1.0f, speed, strafe);
 					break;
 				case CharacterState.WallRunning:
+					sControl.playFullClip (stepSound);
 					switch (wallState) {
 					case WallState.WallF:
 						animator.WallAnimation (false, false, true);
@@ -820,6 +837,7 @@ public class Pawn : DamagebleObject {
 
 	public void ToggleAim(){
 		isAiming = !isAiming;
+		animator.ToggleAim (isAiming);
 		if (cameraController != null) {
 			cameraController.ToggleAim();
 		}
@@ -938,8 +956,7 @@ public class Pawn : DamagebleObject {
 			return;
 		}
 
-		//проигрываем звук шагов
-		sControl.playClip (stepSound);
+	
 
 		nextState = state;
 

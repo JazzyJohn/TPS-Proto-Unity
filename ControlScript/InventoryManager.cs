@@ -65,8 +65,9 @@ public class InventoryManager : MonoBehaviour {
 	}
 	//Start Weapon generation
 	public void GenerateWeaponStart(){
-	
-		_ChangeWeapon (0);
+		if (owner.photonView.isMine) {
+						_ChangeWeapon (0);
+		}
 	}
 	//Destroy weapon and make pawn empty handed
 	public void TakeWeaponAway(){

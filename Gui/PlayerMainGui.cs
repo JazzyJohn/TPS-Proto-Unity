@@ -353,16 +353,26 @@ public class PlayerMainGui : MonoBehaviour {
 				
 			}
 		}
-		List<Pawn> seenablePawn = LocalPlayer.GetCurrentPawn ().getAllSeenPawn ();
-		//Debug.Log (seenablePawn);
-		float maxsize = LocalPlayer.GetCurrentPawn ().seenDistance;
 		Pawn robot = LocalPlayer.GetRobot ();
+		List<Pawn> seenablePawn = LocalPlayer.GetCurrentPawn ().getAllSeenPawn ();
+		if (LocalPlayer.inBot) {
+			//Debug.Log("ROBOT");
+			seenablePawn = robot.getAllSeenPawn ();
+		}
+	
+		//Debug.Log (seenablePawn[0]);
+		float maxsize = LocalPlayer.GetCurrentPawn ().seenDistance;
+		if (LocalPlayer.inBot) {
+			maxsize= robot.seenDistance;
+		}
 		for (int i=0; i<seenablePawn.Count; i++) {
-			if (robot == seenablePawn [i]||!seenablePawn [i].isActive) {
-				continue;
-			}
 			
 			Pawn target = seenablePawn [i];
+			if (robot == target||!target.isActive||target.myTransform==null) {
+				//Debug.Log ("it'sROBOIT");
+				continue;
+			}
+
 		
 			Vector3 Position = MainCamera.WorldToScreenPoint (target.myTransform.position + target.headOffset);
 			if(Position.z<0){
