@@ -8,11 +8,14 @@ public class AnimationManager : MonoBehaviour
         directionAxisX;
 
     public Animator animator;
-
+	public IKcontroller aimPos;
 	public Rigidbody rb;
     private void Start()
     {
         animator = GetComponent<Animator>();
+		if (aimPos == null) {
+			aimPos = gameObject.GetComponentInChildren<IKcontroller> ();
+		}
         if (animator == null)
             Debug.LogError("Animator not find!", this);
     }
@@ -201,5 +204,9 @@ public class AnimationManager : MonoBehaviour
 	//Check if weapon look forward or in air because of near wall
 	public bool isWeaponAimable(){
 		return !animator.GetBool("wall_stop");
+	}
+	//COntol aim behavieor of object
+	public void SetLookAtPosition(Vector3 position){
+		aimPos.aimPosition = laimRotation;
 	}
 }
