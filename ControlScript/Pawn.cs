@@ -30,6 +30,8 @@ public struct singleDPS
 
 public class Pawn : DamagebleObject {
 
+
+
 	public List<singleDPS> activeDPS = new List<singleDPS> ();
 
 	public const int SYNC_MULTUPLIER = 5;
@@ -265,6 +267,7 @@ public class Pawn : DamagebleObject {
 			jetPackCharge = charMan.GetIntChar(CharacteristicList.JETPACKCHARGE);
 		}
 		//Debug.Log (distToGround);
+
 	}
 	
 	public override void Damage(BaseDamage damage,GameObject killer){
@@ -521,7 +524,8 @@ public class Pawn : DamagebleObject {
 				
 					laimRotation =(diference *direction.normalized)*direction.magnitude +myTransform.position;
 				}*/
-				animator.animator.SetLookAtPosition (laimRotation);
+		
+				animator.SetLookAtPosition (laimRotation);
 				animator.animator.SetLookAtWeight (1, 0.5f, 0.7f, 0.0f, 0.5f);
 
 			}
