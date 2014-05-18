@@ -240,6 +240,7 @@ public class AchievementManager : MonoBehaviour, LocalPlayerListener{
 	public void EventStartWallRun(Player target,Vector3 position){
 		if (target == myPlayer) {
 			wallRunningStartPosition=position;
+			//Debug.Log (position);
 		}
 	}
 	public void EventStartSprintRun(Player target, Vector3 position){
@@ -250,8 +251,13 @@ public class AchievementManager : MonoBehaviour, LocalPlayerListener{
 	}
 	public void EventEndWallRun(Player target, Vector3 position){
 		if (target == myPlayer) {
+			if(wallRunningStartPosition.sqrMagnitude==0){
+				return;
+			}
 			IncomingMessage mess = new IncomingMessage();
 			mess.delta=(wallRunningStartPosition -position).magnitude;
+			//Debug.Log (mess.delta);
+			wallRunningStartPosition = Vector3.zero;
 			mess.param =PARAM_WALL_RUN;
 			incomeQueue.Enqueue(mess);
 			

@@ -8,14 +8,9 @@ public class ContiniusGun : BaseWeapon
 	private Vector3 colliderDisableSize = new Vector3(0,0,0);
 
 	private BoxCollider AOECollider; 
-	void Start () {
-		base.curTransform = transform;
-		photonView = GetComponent<PhotonView>();
-		base.rifleParticleController = GetComponentInChildren<RifleParticleController>();
-		
-		if (base.rifleParticleController != null) {
-			base.rifleParticleController.SetOwner (base.owner.collider);
-		}
+	new void Start () {
+		base.Start ();
+	
 		AOECollider = muzzlePoint.GetComponent<BoxCollider> ();
 		AOECollider.size = colliderDisableSize;
 	}

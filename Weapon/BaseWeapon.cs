@@ -96,7 +96,7 @@ public class BaseWeapon : DestroyableNetworkObject {
 
 
 	// Use this for initialization
-	void Start () {
+	protected void Start () {
 		aSource = GetComponent<AudioSource> ();
 		sControl = new soundControl (aSource);//создаем обьект контроллера звука
 
@@ -104,8 +104,8 @@ public class BaseWeapon : DestroyableNetworkObject {
 		if (fireSound!=null&&fireSound.length >= fireInterval) {
 			//Debug.LogWarning("fireSound clip length is greater than fireIntrval value");
 		}
-		if (reloadSound!=null&reloadSound.length >= reloadTime) {
-			Debug.LogError("reloadSound clip length is greater than reloadTime value");
+		if (reloadSound!=null&&reloadSound.length >= reloadTime) {
+			//Debug.LogError("reloadSound clip length is greater than reloadTime value");
 		}
 		
 		curTransform = transform;
@@ -211,7 +211,7 @@ public class BaseWeapon : DestroyableNetworkObject {
 			EventHolder.instance.FireEvent (typeof(LocalPlayerListener), "EventPawnReload", owner.player);
 		}
 
-		curAmmo =owner.GetComponent<InventoryManager>().GiveAmmo(ammoType,clipSize);
+		//curAmmo =owner.GetComponent<InventoryManager>().GiveAmmo(ammoType,clipSize);
 
 	}
 	public bool IsReloading(){

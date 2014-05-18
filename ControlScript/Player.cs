@@ -287,7 +287,11 @@ public class Player : MonoBehaviour {
 		
 	}
 	public void PawnKill(Player Victim,Vector3 position){
-		photonView.RPC("RPCPawnKill",photonView.owner,position);
+		if (Victim != null){
+			photonView.RPC("RPCPawnKill",photonView.owner,position);
+
+	 	 }
+
 
 	}
 	[RPC]
@@ -295,7 +299,7 @@ public class Player : MonoBehaviour {
 
 		//TODO: move text to config
 		PlayerMainGui.instance.AddMessage("NAILED IT",position,PlayerMainGui.MessageType.KILL_TEXT);
-
+		EventHolder.instance.FireEvent(typeof(LocalPlayerListener),"EventPawnKillPlayer",this);
 		if(!inBot){
 			Score.Kill++;
 		}else{

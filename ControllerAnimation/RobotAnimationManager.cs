@@ -24,5 +24,8 @@ public class RobotAnimationManager : AnimationManager
 		}	
 
 	}
+	public bool isActive(){
+		return animator.GetBool ("TakeToIdle");
+	}
 
 }

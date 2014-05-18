@@ -54,7 +54,7 @@ public class ServerHolder : MonoBehaviour
 			
 			while (nextUpdateTime < Time.time)
 			{
-				PhotonNetwork.ConnectUsingSettings("0.1");
+				PhotonNetwork.ConnectUsingSettings(PlayerManager.instance.version);
 				nextUpdateTime += updateRate;
 			}
 		}

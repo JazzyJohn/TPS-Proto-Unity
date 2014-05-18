@@ -9,6 +9,7 @@ public class AnimationManager : MonoBehaviour
 
     public Animator animator;
 	public IKcontroller aimPos;
+	private bool shouldAim= true;
 	public Rigidbody rb;
     private void Start()
     {
@@ -165,6 +166,18 @@ public class AnimationManager : MonoBehaviour
 	}
 	//Pulling weapon up near wall;
 	public void WeaponDown(bool value){
+		if (aimPos != null) {
+						if (value && shouldAim) {
+								shouldAim = false;
+
+								aimPos.SetWeight(0.0f);
+
+						}
+						if (!value && !shouldAim) {
+								shouldAim = true;
+								aimPos.EvalToWeight(1.0f);
+						}
+		}
 		animator.SetBool("wall_stop", value);	
 	}
 	//HTH attack anim switch
@@ -178,10 +191,22 @@ public class AnimationManager : MonoBehaviour
 		
 	}
 	public void StartPullingUp(){
+		if (aimPos != null) {
+
+				aimPos.SetWeight(0.0f);
+				
+			
+		}
 		animator.SetBool("PullUp", true);	
 		SetNotMainLayer (0.0f);
 	}
 	public void FinishPullingUp(){
+		if (aimPos != null) {
+			
+			aimPos.EvalToWeight(1.0f);
+			
+			
+		}
 		animator.SetBool("PullUp", false);	
 		SetNotMainLayer (1.0f);
 	}
@@ -207,6 +232,8 @@ public class AnimationManager : MonoBehaviour
 	}
 	//COntol aim behavieor of object
 	public void SetLookAtPosition(Vector3 position){
-		aimPos.aimPosition = laimRotation;
+		if (aimPos != null) {
+						aimPos.aimPosition = position;
+		}
 	}
 }
