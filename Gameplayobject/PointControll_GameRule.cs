@@ -3,6 +3,7 @@ using System.Collections;
 using System.Collections.Generic;
 
 [RequireComponent (typeof(AssaultPoint))]
+[RequireComponent (typeof(TFAssaultPoint))]
 
 public class PointControll_GameRule : PVPGameRule {
 	public int pointsToGoal;//How much points team should invade to win.
@@ -35,6 +36,11 @@ public class PointControll_GameRule : PVPGameRule {
 	}
 
 	public void pointHasBeenTaken(AssaultPoint pnt,int team)
+	{
+		//TODO: event for point invasion.
+	}
+
+	public void pointHasBeenTaken(TFAssaultPoint pnt,int team)
 	{
 		//TODO: event for point invasion.
 	}
