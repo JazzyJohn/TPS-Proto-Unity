@@ -9,20 +9,19 @@ public class TFAssaultPoint : MonoBehaviour {
 	private List<Player> invaders = new List<Player> ();
 
 	public bool canBeReinvaded = false;//can this point be invaded by another team.
-	public int[] points = new int[2];
 	public int pointsForOnePlayer = 1;//how much points bring one player
 	public int maxPointsAdded = 3;//maximum 3 points can be added 
-	public bool canBeInvadedWithEnemy = false;
+	public bool InvadableWithEnemy = false;
 
 	private int currentOwner;
 	private float nextTick;
 	private bool invaded;
-
-	//times when points will be disappear
-	private float timeToCountdownRed;
-	private float timeToCountdownBlue;
 	
-	public float timeToCountdown;
+	//make private
+	public int[] points = new int[2];
+
+	public GameObject prevPoint;
+	
 	public int pointsToGoal;//how much points team should earn for own this point.
 	public int owner = 1;//team who owning this point at start
 	
@@ -34,7 +33,6 @@ public class TFAssaultPoint : MonoBehaviour {
 		invaded = false;
 		setCurrentOwner (owner);
 		nextTick = Time.time;
-		timeToCountdownRed = timeToCountdownBlue = Time.time;
 	}
 	
 	public int getCurrentOwner()//team witch own this point
@@ -107,7 +105,15 @@ public class TFAssaultPoint : MonoBehaviour {
 	{
 		return points [team-1];
 	}
-	
+
+	public TFAssaultPoint getPointFromObject(GameObject obj)
+	{
+		if (!obj)
+			return null;
+
+		return obj.GetComponent<TFAssaultPoint> ();
+	}
+
 	// Update is called once per frame
 	void Update () 
 	{
@@ -139,7 +145,10 @@ public class TFAssaultPoint : MonoBehaviour {
 			}
 		}
 
-		if (!invadable && !canBeInvadedWithEnemy)
+		if (getPointFromObject(prevPoint) != null && !getPointFromObject(prevPoint).invaded)
+				return;
+
+		if (!invadable && !InvadableWithEnemy)
 			return;
 
 		addPointBlue = Mathf.Min (addPointBlue, maxPointsAdded);//maximum $maxPointsAdded points per 0.5s
@@ -147,8 +156,6 @@ public class TFAssaultPoint : MonoBehaviour {
 		
 		points [0] += addPointRed;
 		points [1] += addPointBlue;
-
-		Debug.Log ("Times: " + timeToCountdownRed + " .. " + timeToCountdownBlue);
 
 		if (!canBeReinvaded && invaded)
 				return;
@@ -178,7 +185,8 @@ public class TFAssaultPoint : MonoBehaviour {
 		
 		if (team < 0 || team > 1)
 			return;
-		
+
+		invaded = true;
 		points [1 - team] = 0;//clear enemy points
 
 		Debug.Log ("Team " + team + " Invaded TF point");
