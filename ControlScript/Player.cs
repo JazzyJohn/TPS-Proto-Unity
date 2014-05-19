@@ -80,7 +80,7 @@ public class Player : MonoBehaviour {
 						this.name = "Player";		
 						PlayerName = "Player" + PhotonNetwork.playerList.Length;
 						//	photonView.RPC ("ASKTeam", PhotonTargets.MasterClient);
-						globalPlayer =  FindObjectOfType(typeof(GlobalPlayer));
+						globalPlayer =  FindObjectOfType<GlobalPlayer>();
 						UID = globalPlayer.GetUID();
 						PlayerName = globalPlayer.GetPlayerName();
 						photonView.RPC("RPCSetNameUID",PhotonTargets.AllBuffered,UID,PlayerName);
@@ -257,6 +257,8 @@ public class Player : MonoBehaviour {
 	public void RobotDead(Player Killer){
 		robotTimer=robotTime;
 		inBot= false;
+		currentPawn.myTransform.position = robotPawn.playerExitPositon.position;
+		currentPawn.myTransform.rotation = robotPawn.playerExitPositon.rotation;
 		currentPawn.transform.parent = null;
 		currentPawn.Activate ();
 	}
@@ -292,10 +294,12 @@ public class Player : MonoBehaviour {
 		
 	}
 	public void PawnKill(Player Victim,Vector3 position){
-		if (Victim != null){
-			photonView.RPC("RPCPawnKill",photonView.owner,position);
+		if (Victim != null) {
+			photonView.RPC ("RPCPawnKill", photonView.owner, position);
 
-	 	 }
+		} else {
+			photonView.RPC ("RPCAIKill", photonView.owner, position);
+		}
 
 
 	}
@@ -315,11 +319,21 @@ public class Player : MonoBehaviour {
 
 
 	}
+	[RPC]
+	public void RPCAIKill(Vector3 position){
+		
+		//TODO: move text to config
+		PlayerMainGui.instance.AddMessage("NAILED IT",position,PlayerMainGui.MessageType.KILL_TEXT);
+		EventHolder.instance.FireEvent(typeof(LocalPlayerListener),"EventPawnKillAI",this);
 
+		
+		
+		
+	}
 	//Delayed external for that function that can destrupt user like VK wallpost
 	public void SendDelayedExternal(){
 		if(delayedExternalCallName!=""){
-			Application.ExternalCall(delayedExternalCallName,delayedExternalCallName);
+			Application.ExternalCall(delayedExternalCallName,delayedExternalCallData);
 			delayedExternalCallName="";
 		}
 	}
@@ -327,7 +341,7 @@ public class Player : MonoBehaviour {
 	public void AchivmenUnlock(Achievement achv){
 		PlayerMainGui.instance.AddMessage(achv.name+"\n"+achv.description,Vector3.zero,PlayerMainGui.MessageType.ACHIVEMENT);
 		delayedExternalCallName ="AchivmenUnlock";
-		delayedExternalCallName = achv.name + " " + achv.description;
+		delayedExternalCallData = achv.name + " " + achv.description;
 		
 	}
 	

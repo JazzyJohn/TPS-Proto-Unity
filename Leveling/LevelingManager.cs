@@ -1,10 +1,13 @@
 using UnityEngine;
 using System;
-
+using System.Xml;
+using System.Collections;
+using System.Collections.Generic;
 
 public class LevelingManager : MonoBehaviour, LocalPlayerListener,GameListener{ 
 	
 	public const string PARAM_KILL = "Kill";
+	public const string PARAM_WIN = "Win";
 	public const string PARAM_KILL_AI= "KillAI"; 
 		
 	public int playerLvl = 0;
@@ -19,7 +22,7 @@ public class LevelingManager : MonoBehaviour, LocalPlayerListener,GameListener{
 	
 	public int[] classNeededExp;
 	
-	public int UID;
+	public string UID;
 	
 	public Dictionary<string,int> expDictionary = new Dictionary<string, int>();
 	
@@ -48,6 +51,7 @@ public class LevelingManager : MonoBehaviour, LocalPlayerListener,GameListener{
 			Debug.Log ("STATS HTTPS SEND"+StatisticHandler.STATISTIC_PHP_HTTPS + StatisticHandler.LOAD_LVL);
 			w = new WWW (StatisticHandler.STATISTIC_PHP_HTTPS + StatisticHandler.LOAD_LVL, form);
 		}
+
 		yield return w;
 		//Debug.Log (w.text);
 		ParseList (w.text);
@@ -63,23 +67,23 @@ public class LevelingManager : MonoBehaviour, LocalPlayerListener,GameListener{
 		playerNeededExp= new int[int.Parse(xmlDoc.SelectSingleNode("leveling/player/levelcount").InnerText)];
 		int i = 0;
 		foreach (XmlNode node in xmlDoc.SelectNodes("leveling/player/level")) {
-			playerNeededExp[i++]=node.InnerText;
+			playerNeededExp[i++]=int.Parse (node.InnerText);
 		}
-		int classAmount = int.Parse(xmlDoc.SelectSingleNode("leveling/classes/classcount").InnerText)
+		int classAmount = int.Parse (xmlDoc.SelectSingleNode ("leveling/classes/classcount").InnerText);
 		classExp = new int[classAmount];
 		classLvl = new int[classAmount];
-		classNeededExp = new int[int.Parse(xmlDoc.SelectSingleNode("leveling/classes/levelcount").InnerText)]];
+		classNeededExp = new int[int.Parse(xmlDoc.SelectSingleNode("leveling/classes/levelcount").InnerText)];
 		i = 0;
 		foreach (XmlNode node in xmlDoc.SelectNodes("leveling/classes/level")) {
-					classNeededExp[i++]=node.InnerText;
+			classNeededExp[i++]=int.Parse (node.InnerText);
 		}
 		foreach (XmlNode node in xmlDoc.SelectNodes("leveling/expdictionary/slots")) {
-			expDictionary.Add(node.SelectSingleNode("name"),int.Parse(inode.SelectSingleNode("value").InnerText));
+			expDictionary.Add(node.SelectSingleNode("name").InnerText,int.Parse(node.SelectSingleNode("value").InnerText));
 		}
 		//Parse  Data
-		playerLvl = int.Parse(xmlDoc.SelectSingleNode("leveling/player/currentlvl").InnerText));
-		playerExp = int.Parse(xmlDoc.SelectSingleNode("leveling/player/currentexp").InnerText));
-		int i =0;
+		playerLvl = int.Parse(xmlDoc.SelectSingleNode("leveling/player/currentlvl").InnerText);
+		playerExp = int.Parse(xmlDoc.SelectSingleNode("leveling/player/currentexp").InnerText);
+		 i =0;
 		foreach (XmlNode node in xmlDoc.SelectNodes("leveling/classes/current")) {
 					classLvl[i]= int.Parse(node.SelectSingleNode("lvl").InnerText);
 					classExp[i++]= int.Parse(node.SelectSingleNode("exp").InnerText);
@@ -101,15 +105,15 @@ public class LevelingManager : MonoBehaviour, LocalPlayerListener,GameListener{
 		}
 		if(selected!=-1&&classLvl[selected]<=classNeededExp.Length){
 			classExp[selected]+=exp;
-			if(classExp[selected]>=playerNeededExp[classLvl[selected]]){
+			if(classExp[selected]>=classNeededExp[classLvl[selected]]){
 				sendByLvl= true;
 				classLvl[selected]++;
 			}
 		}
-		if(sendBylvl){
+		if(sendByLvl){
 			SyncLvl();
 		}
-		return sendBylvl;
+		return sendByLvl;
 	}
 	
 	public void SyncLvl(){
@@ -119,13 +123,14 @@ public class LevelingManager : MonoBehaviour, LocalPlayerListener,GameListener{
 		form.AddField ("playerExp", playerExp);
 		form.AddField ("playerLvl", playerLvl);
 		for(int i=0; i <classLvl.Length;i++){
-			form.AddField ("classExp", classExp[i]);
-			form.AddField ("classLvl", classLvl[i]);
+			form.AddField ("classExp[]", classExp[i]);
+			form.AddField ("classLvl[]", classLvl[i]);
 		}
-		StatisticHandler.instance.StartCoroutine(StatisticHandler.instance.SendForm (form,StatisticHandler.SAVE_LVL));
+		StatisticHandler.instance.StartCoroutine(StatisticHandler.SendForm (form,StatisticHandler.SAVE_LVL));
 	}
 	
 	//Event Section
+	private Player myPlayer;
 	public void EventAppear(Player target){
 		if (target.GetView ().isMine) {
 			myPlayer = target;
@@ -145,7 +150,7 @@ public class LevelingManager : MonoBehaviour, LocalPlayerListener,GameListener{
 	}
 	public void EventTeamWin(int teamNumber){
 		//if we not winner so no change in exp, or we a winner but no send were initiate we sync data 
-		if (target.team == teamNumber||(target.team == teamNumber&&!UpExp(expDictionary[PARAM_WIN])) {
+		if (myPlayer.team	!= teamNumber||(myPlayer.team == teamNumber&&!UpExp(expDictionary[PARAM_WIN]))) {
 			SyncLvl();
 		}
 		
@@ -160,6 +165,6 @@ public class LevelingManager : MonoBehaviour, LocalPlayerListener,GameListener{
 	public void EventEndWallRun(Player target, Vector3 position){}
 	public void EventPawnReload(Player target){}
 	public void EventStart(){}
-	public void EventRestart();{}
+	public void EventRestart(){}
 
 }

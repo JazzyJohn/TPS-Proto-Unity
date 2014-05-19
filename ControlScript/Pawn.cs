@@ -23,14 +23,12 @@ public enum WallState{
 	WallF
 }
 
-public struct singleDPS
+public class singleDPS
 {
 	public BaseDamage damage;
 	public GameObject killer;
-	public float lastTime;
-	public void SetTime(float time){
-		lastTime = time;
-	}
+	public float lastTime=0.0f;
+
 }	
 
 public class Pawn : DamagebleObject {
@@ -328,7 +326,7 @@ public class Pawn : DamagebleObject {
 		if (killerPawn != null){
 			Player killerPlayer =  killerPawn.player;
 			if(killerPlayer!=null){
-				Debug.Log ("DAMAGE" +damage.sendMessage);
+				//Debug.Log ("DAMAGE" +damage.sendMessage);
 				killerPlayer.DamagePawn(damage);
 			}
 		}
@@ -899,10 +897,12 @@ public class Pawn : DamagebleObject {
 			foreach (singleDPS key in activeDPS) {
 				if(newDPS.killer == key.killer){
 					activeDPS.Remove(key);
+					//Debug.Log ("REMOVE DPS");
 					break;
 				}	
 			}
 		}
+	
 	}
 
 	//TODO: MOVE THAT to PAwn and turn on replication of aiming

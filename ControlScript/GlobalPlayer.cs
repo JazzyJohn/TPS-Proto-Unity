@@ -6,6 +6,9 @@ using System;
 public class GlobalPlayer : MonoBehaviour {
 	void Awake(){
 			Application.ExternalCall ("SayMyName");
+			if (Application.platform == RuntimePlatform.WindowsEditor) {
+			SetUid("VKTEST");
+			}
 			DontDestroyOnLoad(transform.gameObject);
 	}
 	public string PlayerName="VK NAME";
@@ -24,13 +27,13 @@ public class GlobalPlayer : MonoBehaviour {
 		UID = uid;
 		
 		StatisticHandler.StartStats(UID,PlayerName);
-		FindObjectOfType(typeof(AchievementManager)).Init(UID);
-		FindObjectOfType(typeof(LevelingManager)).Init(UID);
+		FindObjectOfType<AchievementManager>().Init(UID);
+		FindObjectOfType<LevelingManager>().Init(UID);
 	}
-	public String GetName(){
+	public String GetPlayerName(){
 		return PlayerName;
 	}	
-	public String GetUid(){
+	public String GetUID(){
 		return UID;
 	}
 	

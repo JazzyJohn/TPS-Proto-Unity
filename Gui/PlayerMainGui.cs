@@ -189,7 +189,7 @@ public class PlayerMainGui : MonoBehaviour {
 				while (guiMessages.Count>0&&guiMessages.Peek().destroyTime<Time.time) {
 						guiMessages.Dequeue ();
 				}
-		Debug.Log (guiMessages.Count);
+		//		Debug.Log (guiMessages.Count);
 				foreach (GUIMessage guiMessage in guiMessages) {
 					
 						float size=0;

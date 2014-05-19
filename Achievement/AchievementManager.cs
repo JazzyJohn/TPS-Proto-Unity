@@ -102,8 +102,9 @@ public class AchievementManager : MonoBehaviour, LocalPlayerListener{
 				achivment.achivParams.Add(paramNode.SelectSingleNode("name").InnerText,param);
 			}
 //			Debug.Log("ACHIVMENT " +achivment);
-			bool open = node.SelectSingleNode("open").InnerText;
-			if(open){
+			bool open = bool.Parse(node.SelectSingleNode("open").InnerText);
+			Debug.Log(open);
+			if(!open){
 				ongoingAchivment.Add(achivment);
 			}else{
 				finishedAchivment.Add(achivment);
@@ -140,12 +141,12 @@ public class AchievementManager : MonoBehaviour, LocalPlayerListener{
 										
 								}
 						});
-						List<int> syncAchivment = new List<int>();
+					
 						ongoingAchivment.RemoveAll (delegate(Achievement achv) {
-								syncAchivment.Add(achv.achievementId);
+								
 								return achv.isDone;
 						});
-							SyncAchievement (syncAchivment);
+						//	
 					
 						Thread.Sleep (1000);
 				}
@@ -157,19 +158,26 @@ public class AchievementManager : MonoBehaviour, LocalPlayerListener{
 		foreach(int id in syncAchivment){
 			form.AddField ("ids[]", id);
 		}
-		StatisticHandler.instance.StartCoroutine(StatisticHandler.instance.SendForm (form,StatisticHandler.SAVE_ACHIVE));
+		StatisticHandler.instance.StartCoroutine(StatisticHandler.SendForm (form,StatisticHandler.SAVE_ACHIVE));
 		
 	}
 	
 	void OnDestroy(){
-		myThread.Abort ();
+		if (myThread != null) {
+			myThread.Abort ();
+		}
 		
 	}
 	void Update(){
+		List<int> syncAchivment = new List<int>();
 		while (outcomeQueue.Count>0) {
 			Achievement finished = outcomeQueue.Dequeue();
 			myPlayer.AchivmenUnlock(finished);
 			finishedAchivment.Add(finished);
+			syncAchivment.Add(finished.achievementId);
+		}
+		if (syncAchivment.Count > 0) {
+			SyncAchievement (syncAchivment);		
 		}
 		//Debug.Log (onFinishedAchivment.Count);
 	}
@@ -202,7 +210,7 @@ public class AchievementManager : MonoBehaviour, LocalPlayerListener{
 	//event handle and logic to generate message for achivment
 
 	public Player myPlayer;
-	public int UID;
+	public string UID;
 	public Vector3 wallRunningStartPosition;
 
 	public void EventAppear(Player target){
