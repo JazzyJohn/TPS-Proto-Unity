@@ -9,6 +9,10 @@ public class StatisticHandler : MonoBehaviour {
 	public static string ADD_USER ="addUser";
 
 	public static string LOAD_ACHIVE = "loadachive";
+	
+	public static string SAVE_ACHIVE = "saveachive";
+	
+	public static string LOAD_LVL = "loadlvl";
 
 	public static string STATISTIC_PHP="http://vk.rakgames.ru/kaspi/";
 
@@ -36,7 +40,7 @@ public class StatisticHandler : MonoBehaviour {
 
 	public static void SendPlayerKillbyPlayer(string Uid,string Name, string KillerUid,string KillerName)
 	{
-		var form = new WWWForm();
+		WWWForm form = new WWWForm();
 
 		form.AddField("uid",Uid);
 		form.AddField("name",Name);
@@ -45,20 +49,20 @@ public class StatisticHandler : MonoBehaviour {
 		StatisticHandler.instance.StartCoroutine(SendForm (form,KILLED_BY));
 	}
 	public static void SendPlayerKillbyNPC(string Uid,string Name){
-		var form = new WWWForm ();
+		WWWForm form = new WWWForm ();
 	
 		form.AddField ("uid", Uid);
 		form.AddField ("name", Name);
 		StatisticHandler.instance.StartCoroutine(SendForm (form,KILLED_BY));
 	}
 	public static void StartStats(string Uid,string Name){
-		var form = new WWWForm ();
+		WWWForm form = new WWWForm ();
 		
 		form.AddField ("uid", Uid);
 		form.AddField ("name", Name);
 		StatisticHandler.instance.StartCoroutine(SendForm (form,ADD_USER));
 	}
-	protected static IEnumerator SendForm(WWWForm form,string url){
+	public static IEnumerator SendForm(WWWForm form,string url){
 		Debug.Log (form + url);
 		WWW w = null;
 		if (String.Compare(Application.absoluteURL, 0, "https", 0,5) != 0) {

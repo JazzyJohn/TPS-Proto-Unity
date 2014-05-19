@@ -471,7 +471,7 @@ public class MenuTF : MonoBehaviour {
 		{
 			_TimerSpawnView = "В БОЙ";
 		}
-		return GUI.Button (new Rect (Screen.width / 2 - (Screen.width / 5) / 2, Screen.height / 4 * 3.5f, Screen.width / 5, Screen.height / 15), _TimerSpawnView, _StartGS);
+		return GUI.Button (new Rect (Screen.width / 2 - (Screen.width / 5) / 2, Screen.height / 4 * 3.5f, Screen.width / 5, Screen.height / 15), _TimerSpawnView, _StartGS)&&timer<=0;
 	}
 	//StartButton-------------------
 }

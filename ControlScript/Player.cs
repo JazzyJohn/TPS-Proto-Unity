@@ -65,6 +65,8 @@ public class Player : MonoBehaviour {
 	public string delayedExternalCallData;
 	
 	public const float SQUERED_RADIUS_OF_ACTION = 16.0f;
+	
+	public GlobalPlayer globalPlayer;
 
 	void Start(){
 		photonView = GetComponent<PhotonView> ();
@@ -78,7 +80,10 @@ public class Player : MonoBehaviour {
 						this.name = "Player";		
 						PlayerName = "Player" + PhotonNetwork.playerList.Length;
 						//	photonView.RPC ("ASKTeam", PhotonTargets.MasterClient);
-						Application.ExternalCall ("SayMyName");
+						globalPlayer =  FindObjectOfType(typeof(GlobalPlayer));
+						UID = globalPlayer.GetUID();
+						PlayerName = globalPlayer.GetPlayerName();
+						photonView.RPC("RPCSetNameUID",PhotonTargets.AllBuffered,UID,PlayerName);
 						EventHolder.instance.FireEvent(typeof(LocalPlayerListener),"EventAppear",this);
 						//StatisticHandler.StartStats(UID,PlayerName);
 		} else {
@@ -429,22 +434,7 @@ public class Player : MonoBehaviour {
 			team = (int) stream.ReceiveNext();
 		}*/
 	}
-	public void  SetName(String newname)
-	{
-		PlayerName = newname;
 	
-		Application.ExternalCall( "SayMyUid");
-		
-	}
-	public void  SetUid(string uid)
-	{
-
-		UID = uid;
-		
-		StatisticHandler.StartStats(UID,PlayerName);
-		photonView.RPC("RPCSetNameUID",PhotonTargets.AllBuffered,UID,PlayerName);
-	}
-
 	
 	public String GetName(){
 		return PlayerName;
