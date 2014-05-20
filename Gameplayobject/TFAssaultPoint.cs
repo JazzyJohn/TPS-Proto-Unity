@@ -20,7 +20,7 @@ public class TFAssaultPoint : MonoBehaviour {
 	//make private
 	public int[] points = new int[2];
 
-	public GameObject prevPoint;
+	public GameObject[] prevPoint;
 	
 	public int pointsToGoal;//how much points team should earn for own this point.
 	public int owner = 1;//team who owning this point at start
@@ -145,15 +145,18 @@ public class TFAssaultPoint : MonoBehaviour {
 			}
 		}
 
-		if (getPointFromObject(prevPoint) != null && !getPointFromObject(prevPoint).invaded)
-				return;
-
 		if (!invadable && !InvadableWithEnemy)
 			return;
 
 		addPointBlue = Mathf.Min (addPointBlue, maxPointsAdded);//maximum $maxPointsAdded points per 0.5s
 		addPointRed = Mathf.Min (addPointRed, maxPointsAdded);//maximum $maxPointsAdded points per 0.5s
+	
+		if (getPointFromObject (prevPoint [0]) != null && !getPointFromObject (prevPoint [0]).invaded)
+			addPointRed = 0;
 		
+		if (getPointFromObject (prevPoint [1]) != null && !getPointFromObject (prevPoint [1]).invaded)
+			addPointBlue = 0;
+
 		points [0] += addPointRed;
 		points [1] += addPointBlue;
 
