@@ -88,6 +88,12 @@ public class PlayerMainGui : MonoBehaviour {
 		public string gunName="";
 			
 	}
+	public class LevelStats{
+		public int[]  classLvl;	
+		public int[]  classProcent;
+		public int  playerLvl;
+		public int  playerProcent;
+	}
 	public class GameStats{
 		public float gameTime;
 		public int[] score;
@@ -474,7 +480,15 @@ public class PlayerMainGui : MonoBehaviour {
 			
 			
 		}
+		LevelStats lvl = LevelingManager.instance.GetPlayerStats(){
+	
+		Rect statsRect = new Rect (2*screenX/3+size, Screen.height-size , screenX/3,size);
+		GUI.Label (statsRect, "Player LVL: " + lvl.playerLvl+ "  Next :"  +lvl. playerProcent +"%");
+		for(int i =0; i<lvl.classLvl.Length;i++){
+			statsRect = new Rect (2*screenX/3+size, Screen.height-(i+1)*size , screenX/3,size);
+			GUI.Label (statsRect, "Class "+i+":" + lvl.classLvl[i]+ "  Next :"  +lvl. classProcent[i] +"%");
 
+		}
 	}
 	
 	public void AddMessage(string text,Vector3 worldPoint, MessageType type ){

@@ -24,6 +24,29 @@ public class LevelingManager : MonoBehaviour, LocalPlayerListener,GameListener{
 	
 	public string UID;
 	
+	public PlayerMainGui.LevelStats GetPlayerStats(){
+		PlayerMainGui.LevelStats stats  = new LevelStats();
+		stats.playerLvl = playerLvl;
+		if(playerLvl==0){
+			stats.playerProcent  =playerExp/playerNeededExp[playerLvl]*100;
+		}else{
+			stats.playerProcent =playerExp-playerNeededExp[playerLvl-1]/(playerNeededExp[playerLvl]-playerNeededExp[playerLvl-1])*100;
+		}
+		stats.playerProcent = playerExp;
+		stats.classLvl = new int[classLvl.Length];
+		stats.classProcent = new int[classLvl.Length];
+		for(int i = 0;i<classLvl.Length;i++){
+			int classLvl = classLvl[i];
+			stats.classLvl[i] classLvl;
+			if(classLvl==0){
+				stats.classProcent  =classExp[i]/classNeededExp[classLvl]*100;
+			}else{
+				stats.classProcent =classExp[i]-classNeededExp[classLvl-1]/(classNeededExp[classLvl]-classNeededExp[classLvl-1])*100;
+			}
+		}
+		return stats;
+	
+	}
 	public Dictionary<string,int> expDictionary = new Dictionary<string, int>();
 	
 	void Awake(){
@@ -166,5 +189,26 @@ public class LevelingManager : MonoBehaviour, LocalPlayerListener,GameListener{
 	public void EventPawnReload(Player target){}
 	public void EventStart(){}
 	public void EventRestart(){}
+	
+	private static LevelingManager s_Instance = null;
+	
+	public static LevelingManager instance {
+		get {
+			if (s_Instance == null) {
+				// This is where the magic happens.
+				//  FindObjectOfType(...) returns the first AManager object in the scene.
+				s_Instance =  FindObjectOfType(typeof (LevelingManager)) as LevelingManager;
+			}
+			
+			// If it is still null, create a new instance
+			if (s_Instance == null) {
+				GameObject obj = new GameObject("LevelingManager");
+				s_Instance = obj.AddComponent(typeof (LevelingManager)) as LevelingManager;
+				
+			}
+			
+			return s_Instance;
+		}
+	}
 
 }
