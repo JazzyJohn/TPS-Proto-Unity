@@ -1,11 +1,13 @@
 using UnityEngine;
 using System;
+using System.Collections.Generic;
 
 public enum PawnType{PAWN,BOT};
 
-
 public class Player : MonoBehaviour {
-	
+	public string playerId;//this player id from vk.com
+	public List<string> friendsInfo = new List<string>();
+
 	public float respawnTime = 10.0f;
 	
 	public float robotTime = 2.0f;
@@ -94,6 +96,27 @@ public class Player : MonoBehaviour {
 	public void RPCSetTeam(int intTeam){
 		//Debug.Log ("setTeam" + intTeam);
 		team = intTeam;	
+	}
+
+	public void addFriendInfo(string vkId)
+	{
+		friendsInfo.Add (vkId);
+	}
+
+	public void setMyId(string vkId)
+	{
+		playerId = vkId;
+	}
+
+	public bool isPlayerFriend(string playerId)
+	{
+	 	foreach (string id in friendsInfo) 
+		{
+			if(id.Equals(playerId))
+				return true;
+		}
+
+		return false;
 	}
 
 	public PhotonView GetView(){
@@ -251,6 +274,12 @@ public class Player : MonoBehaviour {
 		int viewID = 0;
 		if(Killer!=null){
 			viewID = Killer.photonView.viewID;
+
+			if(isPlayerFriend(Killer.playerId))
+			{
+				//TODO: killed by friend
+			}
+
 			PVPGameRule.instance.Kill(Killer.team);
 		}
 		photonView.RPC("RPCPawnDead",photonView.owner,viewID);
@@ -276,6 +305,10 @@ public class Player : MonoBehaviour {
 	public void PawnKill(Player Victim,Vector3 position){
 		photonView.RPC("RPCPawnKill",photonView.owner,position);
 
+		if(isPlayerFriend(Victim.playerId))
+		{
+			//TODO: killed a friend.
+		}
 	}
 	[RPC]
 	public void RPCPawnKill(Vector3 position){
