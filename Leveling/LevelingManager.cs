@@ -25,23 +25,24 @@ public class LevelingManager : MonoBehaviour, LocalPlayerListener,GameListener{
 	public string UID;
 	
 	public PlayerMainGui.LevelStats GetPlayerStats(){
-		PlayerMainGui.LevelStats stats  = new LevelStats();
+		PlayerMainGui.LevelStats stats  = new PlayerMainGui.LevelStats();
 		stats.playerLvl = playerLvl;
 		if(playerLvl==0){
-			stats.playerProcent  =playerExp/playerNeededExp[playerLvl]*100;
+			stats.playerProcent  =(int)(playerExp/(float)playerNeededExp[playerLvl]*100.0f);
 		}else{
-			stats.playerProcent =playerExp-playerNeededExp[playerLvl-1]/(playerNeededExp[playerLvl]-playerNeededExp[playerLvl-1])*100;
+			Debug.Log ((playerExp-playerNeededExp[playerLvl-1])+ "/" +((float)playerNeededExp[playerLvl]-playerNeededExp[playerLvl-1])+(playerExp-playerNeededExp[playerLvl-1])/((float)playerNeededExp[playerLvl]-playerNeededExp[playerLvl-1]));
+			stats.playerProcent =(int)((playerExp-playerNeededExp[playerLvl-1])/((float)playerNeededExp[playerLvl]-playerNeededExp[playerLvl-1])*100.0f);
 		}
-		stats.playerProcent = playerExp;
+
 		stats.classLvl = new int[classLvl.Length];
 		stats.classProcent = new int[classLvl.Length];
 		for(int i = 0;i<classLvl.Length;i++){
-			int classLvl = classLvl[i];
-			stats.classLvl[i] classLvl;
-			if(classLvl==0){
-				stats.classProcent  =classExp[i]/classNeededExp[classLvl]*100;
+			int oneClassLvl = classLvl[i];
+			stats.classLvl[i] =  oneClassLvl;
+			if(oneClassLvl==0){
+				stats.classProcent[i]  =(int)(classExp[i]/(float)classNeededExp[oneClassLvl]*100.0f);
 			}else{
-				stats.classProcent =classExp[i]-classNeededExp[classLvl-1]/(classNeededExp[classLvl]-classNeededExp[classLvl-1])*100;
+				stats.classProcent[i] =(int)((classExp[i]-classNeededExp[oneClassLvl-1])/((float)classNeededExp[oneClassLvl]-classNeededExp[oneClassLvl-1])*100.0f);
 			}
 		}
 		return stats;
@@ -61,7 +62,9 @@ public class LevelingManager : MonoBehaviour, LocalPlayerListener,GameListener{
 		StartCoroutine(LoadLvling (form));
 	
 	}
-
+	void  OnApplicationQuit() {
+		SyncLvl();
+	}
 	protected IEnumerator LoadLvling(WWWForm form){
 		Debug.Log (form );
 		WWW w = null;

@@ -77,7 +77,7 @@ public class Player : MonoBehaviour {
 						//TODO: UNCOMMENT
 						robotTimer = robotTime;
 		
-						this.name = "Player";		
+						//this.name = "Player";		
 						PlayerName = "Player" + PhotonNetwork.playerList.Length;
 						//	photonView.RPC ("ASKTeam", PhotonTargets.MasterClient);
 						globalPlayer =  FindObjectOfType<GlobalPlayer>();

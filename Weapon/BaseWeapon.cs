@@ -83,6 +83,7 @@ public class BaseWeapon : DestroyableNetworkObject {
 
 	public float recoilMod;
 
+	public bool init = false;
 
 	public const float MAXDIFFERENCEINANGLE=0.7f;
 
@@ -141,12 +142,15 @@ public class BaseWeapon : DestroyableNetworkObject {
 		}
 		owner =PhotonView.Find (viewid).GetComponent<Pawn>();
 		owner.setWeapon (this);
-
+		init = true;
 	}
 
 	// Update is called once per frame
 	void Update () {
+		if(init&&owner==null) {
+			RequestKillMe();
 
+		}
 		AimFix ();
 		if (!photonView.isMine) {
 			ReplicationGenerate ();
