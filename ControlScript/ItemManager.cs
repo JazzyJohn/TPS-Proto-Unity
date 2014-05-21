@@ -15,7 +15,7 @@ public class FromDBWeapon{
 	public BaseWeapon.SLOTTYPE gameSlot;
 
 }
-public class ItemManager{
+public class ItemManager : MonoBehaviour {
 	public BaseWeapon[] weaponPrefabsListbyId;
 	
 	private GameClassEnum lastGameClass;
@@ -68,7 +68,7 @@ public class ItemManager{
 			FromDBWeapon entry = new FromDBWeapon();
 			entry.weaponId = int.Parse (node.SelectSingleNode ("weaponId").InnerText);
 			entry.gameClass = (GameClassEnum) int.Parse (node.SelectSingleNode ("gameClass").InnerText));
-			entry.gameSlot = (BaseWeapon.SLOTTYPE) int.Parse (node.SelectSingleNode ("gameSlot").InnerText));
+			entry.gameSlot =weaponPrefabsListbyId[entry.weaponId].slotType;
 			weaponIndexTable.Add(entry);	
 		}
 	}
@@ -87,5 +87,26 @@ public class ItemManager{
 		}
 		return weaponList;
 	}
+	
+		
+	private static ItemManager s_Instance = null;
+	
+	public static ItemManager instance {
+		get {
+			if (s_Instance == null) {
+			
+				s_Instance =  FindObjectOfType(typeof (ItemManager)) as ItemManager;
+			}
+			
+			if (s_Instance == null) {
+				GameObject obj = new GameObject("ItemManager");
+				s_Instance = obj.AddComponent(typeof (ItemManager)) as ItemManager;
+			
+			}
+			
+			return s_Instance;
+		}
+	}
+
 	
 }

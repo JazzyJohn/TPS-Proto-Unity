@@ -5,11 +5,16 @@ using System;
 
 public class GlobalPlayer : MonoBehaviour {
 	void Awake(){
-			Application.ExternalCall ("SayMyName");
-			if (Application.platform == RuntimePlatform.WindowsEditor) {
-				SetUid("VKTEST");
+			if(FindObjectsOfType<GlobalPlayer>().Length>1){
+				Destroy(gameObject);
+			}else{
+				Application.ExternalCall ("SayMyName");
+				if (Application.platform == RuntimePlatform.WindowsEditor) {
+					SetUid("VKTEST");
+				}
+				DontDestroyOnLoad(transform.gameObject);
 			}
-			DontDestroyOnLoad(transform.gameObject);
+		
 	}
 	public string PlayerName="VK NAME";
 
@@ -32,8 +37,9 @@ public class GlobalPlayer : MonoBehaviour {
 		UID = uid;
 		
 		StartCoroutine(StartStats(UID,PlayerName));
-		FindObjectOfType<AchievementManager>().Init(UID);
-		FindObjectOfType<LevelingManager>().Init(UID);
+		LevelingManager.instance.Init(UID);
+		AchievementManager.instance.Init(UID);
+		ItemManager.instance.Init(UID);
 	}
 	public String GetPlayerName(){
 		return PlayerName;
