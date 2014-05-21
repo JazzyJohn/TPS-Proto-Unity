@@ -1,11 +1,13 @@
 using UnityEngine;
 using System;
+using System.Collections.Generic;
 
 public enum PawnType{PAWN,BOT};
 public enum GameClassEnum{ENGINEER,ASSAULT,SCOUT,MEDIC,ANY};
 
 public class Player : MonoBehaviour {
-	
+	public List<string> friendsInfo = new List<string>();
+
 	public float respawnTime = 10.0f;
 	
 	public float robotTime = 2.0f;
@@ -68,6 +70,29 @@ public class Player : MonoBehaviour {
 	
 	public GlobalPlayer globalPlayer;
 
+	public void addFriendInfo(string vkId)
+	{
+		friendsInfo.Add (vkId);
+	}
+
+	public void addFriendInfoList(string vkIds)
+	{
+		string[] ids = vkIds.Split (',');
+		foreach (string id in ids)
+			friendsInfo.Add (id);
+	}
+
+	public bool isPlayerFriend(string playerId)
+	{
+	 	foreach (string id in friendsInfo) 
+		{
+			if(id.Equals(playerId))
+				return true;
+		}
+
+		return false;
+	}
+	
 	void Start(){
 		photonView = GetComponent<PhotonView> ();
 
@@ -268,6 +293,7 @@ public class Player : MonoBehaviour {
 		int viewID = 0;
 		if (Killer != null) {
 			viewID = Killer.photonView.viewID;
+			
 			PVPGameRule.instance.Kill (Killer.team);
 			EventHolder.instance.FireEvent(typeof(LocalPlayerListener),"EventPawnDeadByPlayer",this);
 		} else {
@@ -284,7 +310,12 @@ public class Player : MonoBehaviour {
 		isStarted = false;
 		if (viewId != 0) {
 			Player killer = PhotonView.Find (viewId).GetComponent<Player> ();
-			
+
+			if(isPlayerFriend(killer.UID))
+			{
+				EventHolder.instance.FireEvent(typeof(LocalPlayerListener),"EventKilledByFriend",this,killer);
+			}
+
 			StatisticHandler.SendPlayerKillbyPlayer(UID, PlayerName, killer.UID, killer.PlayerName);
 		} else {
 			StatisticHandler.SendPlayerKillbyNPC(UID, PlayerName);
@@ -294,8 +325,9 @@ public class Player : MonoBehaviour {
 		
 	}
 	public void PawnKill(Player Victim,Vector3 position){
+
 		if (Victim != null) {
-			photonView.RPC ("RPCPawnKill", photonView.owner, position);
+			photonView.RPC ("RPCPawnKill", photonView.owner, position,Victim.photonView.viewID);
 
 		} else {
 			photonView.RPC ("RPCAIKill", photonView.owner, position);
@@ -304,11 +336,18 @@ public class Player : MonoBehaviour {
 
 	}
 	[RPC]
-	public void RPCPawnKill(Vector3 position){
+	public void RPCPawnKill(Vector3 position,int viewId){
 
 		//TODO: move text to config
 		PlayerMainGui.instance.AddMessage("NAILED IT",position,PlayerMainGui.MessageType.KILL_TEXT);
 		EventHolder.instance.FireEvent(typeof(LocalPlayerListener),"EventPawnKillPlayer",this);
+		Player victim = PhotonView.Find (viewId).GetComponent<Player> ();
+
+		if(isPlayerFriend(victim.UID))
+		{
+			EventHolder.instance.FireEvent(typeof(LocalPlayerListener),"EventKilledAFriend",this,victim);
+		}
+
 		if(!inBot){
 			Score.Kill++;
 		}else{

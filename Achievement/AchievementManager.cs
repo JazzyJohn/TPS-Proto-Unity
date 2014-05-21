@@ -249,6 +249,25 @@ public class AchievementManager : MonoBehaviour, LocalPlayerListener{
 			incomeQueue.Enqueue(mess);
 		}
 	}
+
+	//hawk
+	public void EventKilledByFriend(Player target,Player friend){
+		if (target == myPlayer) {
+			IncomingMessage mess = new IncomingMessage();
+			mess.delta=1.0f;
+			mess.param ="Be killed by friend";//TODO: make define for it
+			incomeQueue.Enqueue(mess);
+		}
+	}
+	public void EventKilledAFriend(Player target,Player friend){
+		if (target == myPlayer) {
+			IncomingMessage mess = new IncomingMessage();
+			mess.delta=1.0f;
+			mess.param ="Kill your friend";//TODO: make define for it
+			incomeQueue.Enqueue(mess);
+		}
+	}
+
 	public void EventPawnKillAI(Player target){
 		if (target == myPlayer) {
 			IncomingMessage mess = new IncomingMessage();
