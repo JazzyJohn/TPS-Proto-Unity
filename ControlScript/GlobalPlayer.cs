@@ -2,8 +2,10 @@ using UnityEngine;
 using System;
 using System.Xml;
 using System.Collections;
+using System.Collections.Generic;
 
 public class GlobalPlayer : MonoBehaviour {
+
 	void Awake(){
 			if(FindObjectsOfType<GlobalPlayer>().Length>1){
 				Destroy(gameObject);
@@ -16,6 +18,8 @@ public class GlobalPlayer : MonoBehaviour {
 			}
 		
 	}
+	public List<string> friendsInfo = new List<string>();
+
 	public string PlayerName="VK NAME";
 
 	public string UID;
@@ -46,6 +50,17 @@ public class GlobalPlayer : MonoBehaviour {
 	}	
 	public String GetUID(){
 		return UID;
+	}
+	public void addFriendInfo(string vkId)
+	{
+		friendsInfo.Add (vkId);
+	}
+	
+	public void addFriendInfoList(string vkIds)
+	{
+		string[] ids = vkIds.Split (',');
+		foreach (string id in ids)
+			friendsInfo.Add (id);
 	}
 	public void ReloadProfile(){
 		StartCoroutine(ReloadStats(UID));

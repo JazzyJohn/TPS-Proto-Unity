@@ -42,7 +42,8 @@ public class AchievementManager : MonoBehaviour, LocalPlayerListener{
 	public const string PARAM_DOUBLE_JUMP= "DoubeJump";
 	public const string PARAM_WALL_RUN= "WallRun";
 	public const string PARAM_RELOAD="Reload";
-
+	public const string PARAM_KILL_FRIEND = "KillFriend";
+	public const string PARAM_KILL_BY_FRIEND= "KilledByFriend"; 
 	struct IncomingMessage{
 		public string param;
 		public float delta;
@@ -255,7 +256,7 @@ public class AchievementManager : MonoBehaviour, LocalPlayerListener{
 		if (target == myPlayer) {
 			IncomingMessage mess = new IncomingMessage();
 			mess.delta=1.0f;
-			mess.param ="Be killed by friend";//TODO: make define for it
+			mess.param =PARAM_KILL_BY_FRIEND;
 			incomeQueue.Enqueue(mess);
 		}
 	}
@@ -263,7 +264,7 @@ public class AchievementManager : MonoBehaviour, LocalPlayerListener{
 		if (target == myPlayer) {
 			IncomingMessage mess = new IncomingMessage();
 			mess.delta=1.0f;
-			mess.param ="Kill your friend";//TODO: make define for it
+			mess.param =PARAM_KILL_FRIEND;
 			incomeQueue.Enqueue(mess);
 		}
 	}

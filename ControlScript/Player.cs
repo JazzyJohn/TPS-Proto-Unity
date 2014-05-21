@@ -70,17 +70,7 @@ public class Player : MonoBehaviour {
 	
 	public GlobalPlayer globalPlayer;
 
-	public void addFriendInfo(string vkId)
-	{
-		friendsInfo.Add (vkId);
-	}
 
-	public void addFriendInfoList(string vkIds)
-	{
-		string[] ids = vkIds.Split (',');
-		foreach (string id in ids)
-			friendsInfo.Add (id);
-	}
 
 	public bool isPlayerFriend(string playerId)
 	{
@@ -108,6 +98,7 @@ public class Player : MonoBehaviour {
 						globalPlayer =  FindObjectOfType<GlobalPlayer>();
 						UID = globalPlayer.GetUID();
 						PlayerName = globalPlayer.GetPlayerName();
+						friendsInfo = globalPlayer.friendsInfo;
 						photonView.RPC("RPCSetNameUID",PhotonTargets.AllBuffered,UID,PlayerName);
 						EventHolder.instance.FireEvent(typeof(LocalPlayerListener),"EventAppear",this);
 						//StatisticHandler.StartStats(UID,PlayerName);

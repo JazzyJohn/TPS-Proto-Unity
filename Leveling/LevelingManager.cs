@@ -9,6 +9,9 @@ public class LevelingManager : MonoBehaviour, LocalPlayerListener,GameListener{
 	public const string PARAM_KILL = "Kill";
 	public const string PARAM_WIN = "Win";
 	public const string PARAM_KILL_AI= "KillAI"; 
+	public const string PARAM_KILL_FRIEND = "KillFriend";
+	public const string PARAM_KILL_BY_FRIEND= "KilledByFriend"; 
+
 		
 	public int playerLvl = 0;
 	
@@ -180,6 +183,16 @@ public class LevelingManager : MonoBehaviour, LocalPlayerListener,GameListener{
 			SyncLvl();
 		}
 		
+	}
+	public void EventKilledByFriend(Player target,Player friend){
+		if (target == myPlayer) {
+			UpExp(expDictionary[PARAM_KILL_BY_FRIEND],target.selected);	
+		}
+	}
+	public void EventKilledAFriend(Player target,Player friend){
+		if (target == myPlayer) {
+			UpExp(expDictionary[PARAM_KILL_FRIEND],target.selected);	
+		}
 	}
 	public void EventPawnDeadByPlayer(Player target){}
 	public void EventPawnDeadByAI(Player target){}
