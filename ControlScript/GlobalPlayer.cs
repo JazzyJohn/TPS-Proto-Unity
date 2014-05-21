@@ -1,7 +1,7 @@
 using UnityEngine;
 using System;
-
-
+using System.Xml;
+using System.Collections;
 
 public class GlobalPlayer : MonoBehaviour {
 	void Awake(){
@@ -48,7 +48,7 @@ public class GlobalPlayer : MonoBehaviour {
 		return UID;
 	}
 	public void ReloadProfile(){
-		StartCoroutine(ReloadProfile(UID));
+		StartCoroutine(ReloadStats(UID));
 	}
 	
 	protected void parseProfile(string XML){
@@ -78,7 +78,7 @@ public class GlobalPlayer : MonoBehaviour {
 		yield return w;
 		parseProfile(w.text);
 	}	
-	protected IEnumerator  StartStats(string Uid){
+	protected IEnumerator  ReloadStats(string Uid){
 		WWWForm form = new WWWForm ();
 	
 		form.AddField ("uid", Uid);

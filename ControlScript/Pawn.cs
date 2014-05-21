@@ -297,6 +297,7 @@ public class Pawn : DamagebleObject {
 			jetPackCharge = charMan.GetIntChar(CharacteristicList.JETPACKCHARGE);
 		}
 		ivnMan.Init ();
+		AfterSpawnAction ();
 		//Debug.Log (distToGround);
 
 	}

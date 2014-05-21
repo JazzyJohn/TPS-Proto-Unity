@@ -20,13 +20,13 @@ public class ItemManager : MonoBehaviour {
 	
 	private GameClassEnum lastGameClass;
 	
-	private BaseWeapon.SLOTTYPE LastGameSlot;
+	private BaseWeapon.SLOTTYPE lastGameSlot;
 	
 	public List<BaseWeapon>  weaponList= new List<BaseWeapon>();
 
 	public List<FromDBWeapon>  weaponIndexTable= new List<FromDBWeapon>();
 	
-	private int UID ;
+	private string UID ;
 	
 	public void Init(string uid){
 			UID = uid;
@@ -36,11 +36,11 @@ public class ItemManager : MonoBehaviour {
 	
 		var form = new WWWForm ();
 			
-		form.AddField ("uid", uid);
+		form.AddField ("uid", UID);
 		
 		StartCoroutine(LoadItems (form));
 	}
-	protected IEnumerator LoadLvling(WWWForm form){
+	protected IEnumerator LoadItems(WWWForm form){
 		Debug.Log (form );
 		WWW w = null;
 		if (String.Compare(Application.absoluteURL, 0, "https", 0,5) != 0) {
@@ -67,7 +67,7 @@ public class ItemManager : MonoBehaviour {
 		foreach (XmlNode node in xmlDoc.SelectNodes("items/weapon")) {
 			FromDBWeapon entry = new FromDBWeapon();
 			entry.weaponId = int.Parse (node.SelectSingleNode ("weaponId").InnerText);
-			entry.gameClass = (GameClassEnum) int.Parse (node.SelectSingleNode ("gameClass").InnerText));
+			entry.gameClass = (GameClassEnum) int.Parse (node.SelectSingleNode ("gameClass").InnerText);
 			entry.gameSlot =weaponPrefabsListbyId[entry.weaponId].slotType;
 			weaponIndexTable.Add(entry);	
 		}
@@ -80,8 +80,8 @@ public class ItemManager : MonoBehaviour {
 		lastGameClass=gameClass;
 		lastGameSlot=gameSlot;
 		foreach(FromDBWeapon entry  in weaponIndexTable){
-			if(entry.gameSlot==lastGameSlot&&(entry.gameClass ==GameClassEnum.Any||entry.gameClass==gameClass)){
-				weaponList.add(weaponList[entry.weaponId]);
+			if(entry.gameSlot==lastGameSlot&&(entry.gameClass ==GameClassEnum.ANY||entry.gameClass==gameClass)){
+				weaponList.Add(weaponList[entry.weaponId]);
 			
 			}
 		}
