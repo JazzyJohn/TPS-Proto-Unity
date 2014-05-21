@@ -1,5 +1,6 @@
 using UnityEngine;
 using System;
+using System.Collections.Generic;
 
 public enum PawnType{PAWN,BOT};
 
@@ -71,7 +72,14 @@ public class Player : MonoBehaviour {
 	{
 		friendsInfo.Add (vkId);
 	}
-		
+
+	public void addFriendInfoList(string vkIds)
+	{
+		string[] ids = vkIds.Split (',');
+		foreach (string id in ids)
+			friendsInfo.Add (id);
+	}
+
 	public bool isPlayerFriend(string playerId)
 	{
 	 	foreach (string id in friendsInfo) 
@@ -279,11 +287,6 @@ public class Player : MonoBehaviour {
 		if (Killer != null) {
 			viewID = Killer.photonView.viewID;
 			
-			if(isPlayerFriend(Killer.playerId))
-			{
-				//TODO: killed by friend
-			}
-			
 			PVPGameRule.instance.Kill (Killer.team);
 			EventHolder.instance.FireEvent(typeof(LocalPlayerListener),"EventPawnDeadByPlayer",this);
 		} else {
@@ -300,7 +303,12 @@ public class Player : MonoBehaviour {
 		isStarted = false;
 		if (viewId != 0) {
 			Player killer = PhotonView.Find (viewId).GetComponent<Player> ();
-			
+
+			if(isPlayerFriend(killer.UID))
+			{
+				EventHolder.instance.FireEvent(typeof(LocalPlayerListener),"EventKilledByFriend",this,killer);
+			}
+
 			StatisticHandler.SendPlayerKillbyPlayer(UID, PlayerName, killer.UID, killer.PlayerName);
 		} else {
 			StatisticHandler.SendPlayerKillbyNPC(UID, PlayerName);
@@ -311,24 +319,23 @@ public class Player : MonoBehaviour {
 	}
 	public void PawnKill(Player Victim,Vector3 position){
 		if (Victim != null){
-		
-			if(isPlayerFriend(Victim.playerId))
-			{
-				//TODO: killed a friend.
-			}
-		
-			photonView.RPC("RPCPawnKill",photonView.owner,position);
-
+			photonView.RPC("RPCPawnKill",photonView.owner,position,Victim);
 	 	 }
 
 
 	}
 	[RPC]
-	public void RPCPawnKill(Vector3 position){
+	public void RPCPawnKill(Vector3 position,Player Victim){
 
 		//TODO: move text to config
 		PlayerMainGui.instance.AddMessage("NAILED IT",position,PlayerMainGui.MessageType.KILL_TEXT);
 		EventHolder.instance.FireEvent(typeof(LocalPlayerListener),"EventPawnKillPlayer",this);
+
+		if(isPlayerFriend(Victim.UID))
+		{
+			EventHolder.instance.FireEvent(typeof(LocalPlayerListener),"EventKilledAFriend",this,Victim);
+		}
+
 		if(!inBot){
 			Score.Kill++;
 		}else{
