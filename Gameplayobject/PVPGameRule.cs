@@ -7,14 +7,21 @@ public class PVPGameRule : GameRule {
 		
 		protected int[] teamScore;
 		
-		protected float timer;
+		protected float timer=0.0f;
+
+		protected float restartTimer=0.0f;
 		
 		protected int maxScore;
 		
 		public float gameTime;
 
+		public float restartTime;
+
+		public static bool isGameEnded = false;
+
 		public PhotonView photonView;
 		
+		public int curStage=0;
 		 // s_Instance is used to cache the instance found in the scene so we don't have to look it up every time.
 		private static PVPGameRule s_Instance = null;
 	 
@@ -35,19 +42,31 @@ public class PVPGameRule : GameRule {
 
 		
 		protected void Awake(){
+			isGameEnded = false;
+			PhotonNetwork.isMessageQueueRunning = true;
 			photonView = GetComponent<PhotonView>();
 			teamScore= new int[PlayerManager.instance.MaxTeam];
 			teamKill= new int[PlayerManager.instance.MaxTeam];
 		}
 
 		void Update(){
-			if (!PhotonNetwork.isMasterClient) {
-				return;
+			if (FinalStage ()&&curStage==0) {
+				curStage=1;
 			}
-			if(IsGameEnded()){
-			IsLvlChanging= true;
-				PhotonNetwork.automaticallySyncScene = true;
-				PhotonNetwork.LoadLevel(NextMap());
+			if (isGameEnded) {
+				restartTimer+= Time.deltaTime;				
+				if(restartTimer>restartTime){
+					PhotonNetwork.isMessageQueueRunning =false;
+					PhotonNetwork.LoadLevel(NextMap());
+				}
+			}else	if (!PhotonNetwork.isMasterClient) {
+				return;
+			}else if(IsGameEnded()){
+				IsLvlChanging= true;
+				isGameEnded=true;
+				photonView.RPC("GameEnded",PhotonTargets.All);
+					//PhotonNetwork.automaticallySyncScene = true;
+					//PhotonNetwork.LoadLevel(NextMap());
 			
 			}	
 			timer+= Time.deltaTime;			
@@ -93,7 +112,10 @@ public class PVPGameRule : GameRule {
 			
 
 		}
+		public float GetRestartTimer(){
+			return restartTime- restartTimer;
 
+		}
 		public void OnPhotonSerializeView(PhotonStream stream, PhotonMessageInfo info)
 		{
 				if (stream.isWriting) {
@@ -109,10 +131,37 @@ public class PVPGameRule : GameRule {
 				}
 
 		}
+		public int Winner(){
+			int maxScore = 0;
+			int winner = 0;
+			for(int i=0;i<teamScore.Length;i++){
+				if(maxScore<teamScore[i]){
+					maxScore=teamScore[i];
+					winner = i;
+				}
+			}
+			return (winner+1);
+		}
 		public void StartGame(){
 			IsLvlChanging = false;
 			FindObjectOfType<AIDirector> ().StartDirector ();
 		}
 		
-		
+		[RPC]
+		public void GameEnded(){
+			PhotonNetwork.automaticallySyncScene = true;
+			
+			isGameEnded=true;
+			Player player = GameObject.Find ("Player").GetComponent<Player> ();
+			player.GameEnd ();
+		}
+
+		public bool FinalStage (){
+			for(int i=0;i<teamScore.Length;i++){
+				if(maxScore<teamScore[i]+5){
+					return true;
+				}
+			}
+			return false;
+		}
 }

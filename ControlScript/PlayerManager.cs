@@ -7,7 +7,7 @@ public class PlayerManager : MonoBehaviour {
 
 	public Pawn[] avaiblePawn;
 
-	public Pawn[] avaibleBots;
+	public RobotPawn[] avaibleBots;
 
 	public GameObject[] ghostsBots;
 

@@ -8,6 +8,8 @@ public class StatisticHandler : MonoBehaviour {
 
 	public static string ADD_USER ="addUser";
 
+	public static string LOAD_ACHIVE = "loadachive";
+
 	public static string STATISTIC_PHP="http://vk.rakgames.ru/kaspi/";
 
 	public static string STATISTIC_PHP_HTTPS="https://vk.rakgames.ru/kaspi/";
@@ -48,7 +50,7 @@ public class StatisticHandler : MonoBehaviour {
 		form.AddField ("uid", Uid);
 		form.AddField ("name", Name);
 		StatisticHandler.instance.StartCoroutine(SendForm (form,KILLED_BY));
-}
+	}
 	public static void StartStats(string Uid,string Name){
 		var form = new WWWForm ();
 		

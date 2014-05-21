@@ -28,7 +28,6 @@ public class JetPackController : MonoBehaviour {
 		//StopAll();
 		leftExhaust.Stop ();
 		rightExhaust.Stop ();
-
 		if(!middleExhaust.isPlaying){
 			middleExhaust.Play();
 		}

@@ -8,11 +8,15 @@ public class AnimationManager : MonoBehaviour
         directionAxisX;
 
     public Animator animator;
-
+	public IKcontroller aimPos;
+	private bool shouldAim= true;
 	public Rigidbody rb;
     private void Start()
     {
         animator = GetComponent<Animator>();
+		if (aimPos == null) {
+			aimPos = gameObject.GetComponentInChildren<IKcontroller> ();
+		}
         if (animator == null)
             Debug.LogError("Animator not find!", this);
     }
@@ -152,12 +156,31 @@ public class AnimationManager : MonoBehaviour
 		
 		animator.SetBool("WallRunUp", frontW);
 	}
+	//for Sprint Additional animation like jetpack in subclass
+	public virtual void Sprint(){
+
+	}
+	//for freefall no DoubleJump Additional animation like jetpack in subclass
 	public virtual void FreeFall(){
 		
 	}
+	//Pulling weapon up near wall;
 	public void WeaponDown(bool value){
+		if (aimPos != null) {
+						if (value && shouldAim) {
+								shouldAim = false;
+
+								aimPos.SetWeight(0.0f);
+
+						}
+						if (!value && !shouldAim) {
+								shouldAim = true;
+								aimPos.EvalToWeight(1.0f);
+						}
+		}
 		animator.SetBool("wall_stop", value);	
 	}
+	//HTH attack anim switch
 	public void StartAttackAnim(string name){
 		//Debug.Log (name);
 		animator.SetBool(name, true);	
@@ -168,10 +191,22 @@ public class AnimationManager : MonoBehaviour
 		
 	}
 	public void StartPullingUp(){
+		if (aimPos != null) {
+
+				aimPos.SetWeight(0.0f);
+				
+			
+		}
 		animator.SetBool("PullUp", true);	
 		SetNotMainLayer (0.0f);
 	}
 	public void FinishPullingUp(){
+		if (aimPos != null) {
+			
+			aimPos.EvalToWeight(1.0f);
+			
+			
+		}
 		animator.SetBool("PullUp", false);	
 		SetNotMainLayer (1.0f);
 	}
@@ -183,10 +218,22 @@ public class AnimationManager : MonoBehaviour
 		}
 
 	}
+	//toogle aiming state
+	public void ToggleAim(bool aim){
+		animator.SetBool("AIM", aim);
+	}
+	//Setting is that pull long or short
 	public void SetLong(bool longPull){
 		animator.SetBool("LongPull", longPull);
 	}
+	//Check if weapon look forward or in air because of near wall
 	public bool isWeaponAimable(){
 		return !animator.GetBool("wall_stop");
+	}
+	//COntol aim behavieor of object
+	public void SetLookAtPosition(Vector3 position){
+		if (aimPos != null) {
+						aimPos.aimPosition = position;
+		}
 	}
 }

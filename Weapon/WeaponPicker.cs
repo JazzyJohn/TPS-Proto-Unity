@@ -34,6 +34,6 @@ public class WeaponPicker : UseObject {
 		info = new InventoryManager.WeaponBackUp (amount,(AMMOTYPE)type);
 
 	}
-
+		
 
 }

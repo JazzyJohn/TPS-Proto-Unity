@@ -198,29 +198,34 @@ void  UpdateSmoothedMovementDirection ()
 		
 		// Pick speed modifier
 		//Debug.Log (!Input.GetKey (KeyCode.LeftShift) &&! Input.GetKey (KeyCode.RightShift));
-		if (!Input.GetKey (KeyCode.LeftShift) &&! Input.GetKey (KeyCode.RightShift))
-		{
-			targetSpeed *= pawn.groundRunSpeed;
+		if (pawn.isAiming ) {
+			targetSpeed *= pawn.groundWalkSpeed;
+			if(isMoving){
+				characterState = CharacterState.Walking;
+			}else{
+				characterState = CharacterState.Idle;
+			}
 		
-				if(isMoving){
-					characterState = CharacterState.Running;
-				}else{
-					characterState = CharacterState.Idle;
-				}
-		}
-		else if (Time.time - trotAfterSeconds > walkTimeStart)
+		} else if ((Input.GetKey (KeyCode.LeftShift) || Input.GetKey (KeyCode.RightShift)) &&pawn.CanSprint())
 		{
-			targetSpeed *= pawn.groundTrotSpeed;
-			characterState = CharacterState.Trotting;
+			targetSpeed *= pawn.groundSprintSpeed;
+			if(isMoving){
+				characterState = CharacterState.Sprinting;
+			}else{
+				characterState = CharacterState.Idle;
+			}
+		
+
 		}
 		else
 		{
-			targetSpeed *= pawn.groundWalkSpeed;
-				if(isMoving){
-					characterState = CharacterState.Walking;
-				}else{
-					characterState = CharacterState.Idle;
-				}
+
+			targetSpeed *= pawn.groundRunSpeed;
+			if(isMoving){
+				characterState = CharacterState.Running;
+			}else{
+				characterState = CharacterState.Idle;
+			}
 		}
 		
 		moveSpeed = Mathf.Lerp(moveSpeed, targetSpeed, curSmooth);
@@ -272,7 +277,7 @@ public float CalculateJumpVerticalSpeed ( float targetJumpHeight  )
 
 		lastJumpStartHeight = transform.position.y;
 		lastJumpButtonTime = -10;
-		if (jumping == true && !doubleJump) {
+		if (jumping == true ) {
 				doubleJump= true;
 				characterState = CharacterState.DoubleJump;
 		} else {

@@ -64,5 +64,8 @@ public class UseObject : DestroyableNetworkObject {
 		
 		}
 	}
-
+	//NetworkSection
+	public void OnPhotonSerializeView(PhotonStream stream, PhotonMessageInfo info)
+	{
+	}
 }

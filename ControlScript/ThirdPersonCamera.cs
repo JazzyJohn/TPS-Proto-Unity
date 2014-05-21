@@ -4,7 +4,7 @@
 using UnityEngine;
 using System.Collections;
 
-public class ThirdPersonCamera : MonoBehaviour 
+public class ThirdPersonCamera : MonoBehaviour
 {
 	public Transform cameraTransform;
 
@@ -58,6 +58,10 @@ public class ThirdPersonCamera : MonoBehaviour
 	public float xAngle = 0.0f;
 
 	public const float RECOIL_GLOBAL_MOD = 3.0f;
+
+	private bool closeFOV= false;
+	private float startFov =60.0f;
+	public float sprintFov =60.0f;
 	void  Awake (){
 		
 		if(!cameraTransform && Camera.main)
@@ -67,7 +71,7 @@ public class ThirdPersonCamera : MonoBehaviour
 			//Debug.Log("Please assign a camera to the ThirdPersonCamera script.");
 			enabled = false;	
 		}
-				
+		startFov = Camera.main.fieldOfView;
 		minimapTransform = GameObject.FindGameObjectWithTag ("MinimapCamera").GetComponent<Transform> ();
 		minimapCamera = minimapTransform.camera;
 		_target = transform;
@@ -87,6 +91,8 @@ public class ThirdPersonCamera : MonoBehaviour
 	
 		}
 		Cut(_target, centerOffset);
+		EventHolder.instance.Bind (this);
+
 	}
 
 
@@ -264,6 +270,16 @@ public class ThirdPersonCamera : MonoBehaviour
 	}
 
 	void  LateUpdate (){
+		if (_pawn.IsSprinting ()&&!closeFOV) {
+			closeFOV=true;
+			Camera.main.fieldOfView =sprintFov;
+
+		} 
+		if (!_pawn.IsSprinting ()&&closeFOV) {
+			closeFOV=false;
+			Camera.main.fieldOfView =startFov;
+			
+		}
 		Apply (transform, Vector3.zero);
 	}
 	

@@ -9,9 +9,9 @@ public class AIBase : MonoBehaviour
 
     public float
         //DetectionRadius,
-        AngleRange,
-        TickPause;
-
+				AngleRange;
+        
+	public static float TickPause = 0.3f;
    // private SphereCollider _SC;
 
     private List<GameObject> _arrayPlayerInRadius = new List<GameObject>();

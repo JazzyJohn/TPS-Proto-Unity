@@ -45,6 +45,8 @@ public class BaseWeapon : DestroyableNetworkObject {
 
 	public BaseDamage damageAmount;
 
+	public float normalRandCoef;
+
 	public float aimRandCoef;
 
 	public GameObject projectilePrefab;
@@ -81,10 +83,31 @@ public class BaseWeapon : DestroyableNetworkObject {
 
 	public float recoilMod;
 
+
 	public const float MAXDIFFERENCEINANGLE=0.7f;
 
+	private bool shootAfterReload;
+
+	//звуки
+	private soundControl sControl;//глобальный обьект контроллера звука
+	private AudioSource aSource;//источник звука. добавляется в редакторе
+	public AudioClip fireSound;
+	public AudioClip reloadSound;
+
+
 	// Use this for initialization
-	void Start () {
+	protected void Start () {
+		aSource = GetComponent<AudioSource> ();
+		sControl = new soundControl (aSource);//создаем обьект контроллера звука
+
+		//проверяем длительности звуков стрельбы и перезарядки
+		if (fireSound!=null&&fireSound.length >= fireInterval) {
+			//Debug.LogWarning("fireSound clip length is greater than fireIntrval value");
+		}
+		if (reloadSound!=null&&reloadSound.length >= reloadTime) {
+			//Debug.LogError("reloadSound clip length is greater than reloadTime value");
+		}
+		
 		curTransform = transform;
 		photonView = GetComponent<PhotonView>();
 		rifleParticleController = GetComponentInChildren<RifleParticleController>();
@@ -123,11 +146,13 @@ public class BaseWeapon : DestroyableNetworkObject {
 
 	// Update is called once per frame
 	void Update () {
+
 		AimFix ();
 		if (!photonView.isMine) {
 			ReplicationGenerate ();
 			return;
 		}
+
 		if(isReload){
 			if(reloadTimer<0){
 				Reload();
@@ -151,6 +176,7 @@ public class BaseWeapon : DestroyableNetworkObject {
 	}
 	public virtual void StopFire(){
 		isShooting = false;
+		shootAfterReload = false;
 		ReleaseFire ();
 	}
 	
@@ -159,16 +185,34 @@ public class BaseWeapon : DestroyableNetworkObject {
 		if(owner.GetComponent<InventoryManager>().HasAmmo(ammoType)){
 			isReload= true;
 			reloadTimer=reloadTime;
+			if(isShooting){
+				StopFire();
+				shootAfterReload = true;
+			}
+			//играем звук перезарядки
+			sControl.playClip (reloadSound);
 		}else{
-			isShooting = false;
+			StopFire();
 			return;
 		}
 		
 	}
 	public void Reload(){
+
 		isReload = false;
+
 		int oldClip = curAmmo;
 		curAmmo =owner.GetComponent<InventoryManager>().GiveAmmo(ammoType,clipSize-curAmmo)+oldClip;	
+		if (shootAfterReload) {
+			shootAfterReload=false;
+			StartFire();
+		}
+		if (owner.player != null) {
+			EventHolder.instance.FireEvent (typeof(LocalPlayerListener), "EventPawnReload", owner.player);
+		}
+
+		//curAmmo =owner.GetComponent<InventoryManager>().GiveAmmo(ammoType,clipSize);
+
 	}
 	public bool IsReloading(){
 		return isReload;
@@ -190,6 +234,9 @@ public class BaseWeapon : DestroyableNetworkObject {
 		if (!CanShoot ()) {
 			return;		
 		}
+		//играем звук стрельбы
+		sControl.playClip (fireSound);
+
 		if(curAmmo>0){
 			curAmmo--;
 		}else{
@@ -201,13 +248,15 @@ public class BaseWeapon : DestroyableNetworkObject {
 		if (rifleParticleController != null) {
 			rifleParticleController.CreateShootFlame ();
 		}
-		owner.statistic.shootCnt++;
+			
+
+				
 		switch (amunitionType) {
 		case AMUNITONTYPE.SIMPLEHIT:
 			DoSimpleDamage();
 			break;
 		case AMUNITONTYPE.PROJECTILE:
-			
+	
 			GenerateProjectile();
 			break;
 		case AMUNITONTYPE.RAY:
@@ -224,6 +273,7 @@ public class BaseWeapon : DestroyableNetworkObject {
 		//photonView.RPC("FireEffect",PhotonTargets.Others);
 	}
 	public virtual bool CanShoot (){
+
 		Vector3 aimDir = (owner.getCachedAimRotation() -muzzlePoint.position).normalized;
 		Vector3 realDir = muzzlePoint.forward;
 		float angle = Vector3.Dot (aimDir, realDir);
@@ -231,6 +281,15 @@ public class BaseWeapon : DestroyableNetworkObject {
 		if (angle < MAXDIFFERENCEINANGLE) {
 			return false;		
 		}
+
+//		Vector3 aimDir = (owner.getCachedAimRotation() -muzzlePoint.position).normalized;
+//		Vector3 realDir = muzzlePoint.forward;
+//		float angle = Vector3.Dot (aimDir, realDir);
+//
+//		if (angle < 0.8) {
+//			return false;		
+//		}
+
 		return true;
 	}
 
@@ -265,7 +324,14 @@ public class BaseWeapon : DestroyableNetworkObject {
 		Vector3 startPoint  = muzzlePoint.position+muzzleOffset;
 		Quaternion startRotation = getAimRotation();
 		GameObject proj;
-		float effAimRandCoef = aimRandCoef + owner.AimingCoef ();
+		float effAimRandCoef = 0.0f;
+		if (owner.isAiming) {
+			effAimRandCoef=aimRandCoef;
+		}else{
+			effAimRandCoef=normalRandCoef;
+		}
+
+		effAimRandCoef+= owner.AimingCoef ();
 		if (effAimRandCoef > 0) {
 			startRotation = Quaternion.Euler (startRotation.eulerAngles + new Vector3 (Random.Range (-1 * effAimRandCoef, 1 * effAimRandCoef), Random.Range (-1 * effAimRandCoef, 1 * effAimRandCoef), Random.Range (-1 * effAimRandCoef, 1 * effAimRandCoef)));
 		}

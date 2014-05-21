@@ -1,4 +1,4 @@
-﻿	using UnityEngine;
+﻿using UnityEngine;
 using System.Collections;
 using System.Collections.Generic;
 
@@ -16,7 +16,7 @@ public class PlayerMainGui : MonoBehaviour {
 
 	public float MarkSize;
 
-	public Texture EnemyMark;
+	public GUIStyle EnemyMark;
 	public GUIStyle AliaMark;
 
 	public float VersionSize;
@@ -26,9 +26,11 @@ public class PlayerMainGui : MonoBehaviour {
 	public enum MessageType{
 			STD_MESSAGE=0,
 			DMG_TEXT=1,
-			KILL_TEXT = 2
+			KILL_TEXT = 2,
+			ACHIVEMENT = 3
 	}
 	public Texture[] messageTexture;
+	public GUIStyle[] messageStyle;
 	public float[] messageSize;
 	public float messageDelay=1.0f;
 	public class GUIMessage{
@@ -42,11 +44,11 @@ public class PlayerMainGui : MonoBehaviour {
 			}
 			return outer.messageSize[(int)type];
 		}
-		public Texture getTexture(PlayerMainGui outer){
-			if(outer.messageTexture.Length<=(int)type){
-				return outer.messageTexture[0];
+		public GUIStyle getStyle(PlayerMainGui outer){
+			if(outer.messageStyle.Length<=(int)type){
+				return outer.messageStyle[0];
 			}
-			return outer.messageTexture[(int)type];
+			return outer.messageStyle[(int)type];
 		}
 		
 	}
@@ -95,6 +97,7 @@ public class PlayerMainGui : MonoBehaviour {
 		Normal,
 		Playerlist,
 		Dedicated,
+		GameResult,
 			
 	}
 	private GUIState guiState;
@@ -132,6 +135,9 @@ public class PlayerMainGui : MonoBehaviour {
 		}
 		if (Input.GetButtonDown ("Debug")) {
 			showDebug= !showDebug;
+		}
+		if (PVPGameRule.isGameEnded) {
+			guiState =GUIState.GameResult;
 		}
 	}
 
@@ -171,26 +177,43 @@ public class PlayerMainGui : MonoBehaviour {
 					PlayerList();
 				
 					break;
+				case GUIState.GameResult:
+					GameResult();
+					
+					break;
 
-
+				
 				}
 				//Message Section
-				GUI.skin = messageSkin;
+				//GUI.skin = messageSkin;
 				while (guiMessages.Count>0&&guiMessages.Peek().destroyTime<Time.time) {
 						guiMessages.Dequeue ();
 				}
-		
+		Debug.Log (guiMessages.Count);
 				foreach (GUIMessage guiMessage in guiMessages) {
-						Vector3 Position = MainCamera.WorldToScreenPoint (guiMessage.worldPoint);
-						float size = guiMessage.getMessageSize (this);
-						Rect messRect = new Rect (Position.x - size / 2, Screen.height - Position.y, size, size);
-			
-						Texture messTexture = guiMessage.getTexture (this);
-						if (messTexture != null) {
-								GUI.Label (messRect, messTexture);
-						}
-						if (guiMessage.text != "") {
-								GUI.Label (messRect, guiMessage.text);
+					
+						float size=0;
+						GUIStyle messStyle = guiMessage.getStyle (this);
+						switch(guiMessage.type){
+						case MessageType.ACHIVEMENT:
+						size = guiMessage.getMessageSize (this);
+						Rect achvmessRect = new Rect (screenX - size ,screenY - size/1.5f, size, size);
+
+							GUI.Label (achvmessRect,"ACHIVMENT UNLOCK: \n " +guiMessage.text,messStyle);
+						
+						break;
+						default:
+									Vector3 Position = MainCamera.WorldToScreenPoint (guiMessage.worldPoint);
+									if(Position.z<0){
+										continue;
+									}
+									size = guiMessage.getMessageSize (this);
+									Rect messRect = new Rect (Position.x - size / 2, screenY - Position.y, size, size);
+						
+								
+								GUI.Label (messRect, guiMessage.text,messStyle);
+								
+						break;
 						}
 				}
 				while (logMessages.Count>50) {
@@ -270,7 +293,14 @@ public class PlayerMainGui : MonoBehaviour {
 		}
 		
 	}
-
+	void GameResult(){
+		float screenX = Screen.width, screenY = Screen.height;
+		float TimerLabel = screenX / 4;
+		Rect crosrect = new Rect ((screenX - TimerLabel) / 2, (screenY - TimerLabel) / 2, TimerLabel, TimerLabel);	
+		GUI.Label (crosrect, "WINNER: " + FormTeamName(PVPGameRule.instance.Winner())+"");
+		crosrect = new Rect ((screenX - TimerLabel) / 2, (screenY - TimerLabel) / 2 +TimerLabel, TimerLabel, TimerLabel);	
+		GUI.Label (crosrect, "NEXT ROUND IN  " + PVPGameRule.instance.GetRestartTimer().ToString("0.0") +" sec.");
+	}
 	void MainHud(){
 		float screenX = Screen.width, screenY = Screen.height;
 		//Screen.lockCursor = true;
@@ -323,27 +353,45 @@ public class PlayerMainGui : MonoBehaviour {
 				
 			}
 		}
-		List<Pawn> seenablePawn = LocalPlayer.GetCurrentPawn ().getAllSeenPawn ();
-		//Debug.Log (seenablePawn);
-		float maxsize = LocalPlayer.GetCurrentPawn ().seenDistance;
 		Pawn robot = LocalPlayer.GetRobot ();
+		List<Pawn> seenablePawn = LocalPlayer.GetCurrentPawn ().getAllSeenPawn ();
+		if (LocalPlayer.inBot) {
+			//Debug.Log("ROBOT");
+			seenablePawn = robot.getAllSeenPawn ();
+		}
+	
+		//Debug.Log (seenablePawn[0]);
+		float maxsize = LocalPlayer.GetCurrentPawn ().seenDistance;
+		if (LocalPlayer.inBot) {
+			maxsize= robot.seenDistance;
+		}
 		for (int i=0; i<seenablePawn.Count; i++) {
-			if (robot == seenablePawn [i]) {
-				continue;
-			}
 			
 			Pawn target = seenablePawn [i];
+			if (robot == target||!target.isActive||target.myTransform==null) {
+				//Debug.Log ("it'sROBOIT");
+				continue;
+			}
+
+		
 			Vector3 Position = MainCamera.WorldToScreenPoint (target.myTransform.position + target.headOffset);
-			
+			if(Position.z<0){
+				continue;
+			}
 			float size = MarkSize * maxsize / Position.z;
 			
 			Rect mark = new Rect (Position.x - size / 2, Screen.height - Position.y, size, size);
-
+			string publicName = "";
+			if(target.player!=null){
+				publicName	=target.player.GetName();
+			}else{
+				publicName	=target.publicName;
+			}
 			if (seenablePawn [i].team == LocalPlayer.team) {
-				AliaMark.fontSize  = Mathf.RoundToInt(size/2.5f);
-				GUI.Label (mark,target.health.ToString(), AliaMark);
+			
+				GUI.Label (mark, publicName+"\n"+target.health.ToString(), AliaMark);
 			} else {
-				GUI.Label (mark, EnemyMark);
+				GUI.Label (mark, publicName , EnemyMark);
 			}
 		}
 		Rect statsRect = new Rect (screenX - crosshairWidth * 4, Screen.height - crosshairHeight * 5, crosshairWidth * 4, crosshairHeight);
@@ -396,14 +444,36 @@ public class PlayerMainGui : MonoBehaviour {
 	void PlayerList(){
 		float screenX = Screen.width, screenY = Screen.height;
 		Player[] players = PlayerManager.instance.FindAllPlayer ();
+		int teamA =0 , teamB =0; 
+		float size = crosshairWidth / 2;
 		for (int i =0; i<players.Length; i++) {
-			float size = crosshairWidth / 2;
-			Rect messRect = new Rect (size, size * (6 + i), screenX, size);
+			float yPos=0.0f,xPos = 0.0f;
+			if(players [i].team<=1){
+				yPos= size * (6 + teamA);
+				xPos= size;
+				teamA ++;
+			}else{
+				xPos=  1*screenX/3+size;
+				yPos= size * (6 + teamB);
+				teamB ++;
+			}
+			Rect messRect = new Rect (xPos,yPos, screenX/3, size);
 			GUI.Label (messRect, players [i].GetName ()+" "+players [i].IsMaster());
 			
 			
 		}
+		Rect totalRect = new Rect (size,size*5,screenX, screenY);
+		GUI.Label (totalRect, "Всего Игроков" +players.Length.ToString());
+		size = crosshairWidth / 2;
+		List<Achievement> achivments = AchievementManager.instance.GetAchivment ();
+		for (int i =0; i<achivments.Count; i++) {
 		
+			Rect messRect = new Rect ( 2*screenX/3+size, size * (6 + i), screenX/3, size);
+			GUI.Label (messRect, achivments [i].name+" "+achivments [i].description);
+			
+			
+		}
+
 	}
 	
 	public void AddMessage(string text,Vector3 worldPoint, MessageType type ){
@@ -425,10 +495,10 @@ public class PlayerMainGui : MonoBehaviour {
 	public static string FormTeamName(int team){
 		switch (team) {
 			case 1:
-			return "A TEAM"	;
+			return "Команда А"	;
 				break;
 		case 2:
-			return"POWER RANGERS";
+			return"Команда B";
 				break;
 		}
 		return "";

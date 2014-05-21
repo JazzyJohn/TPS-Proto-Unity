@@ -1,16 +1,21 @@
 ﻿using UnityEngine;
+using System;
 using System.Collections;
 using System.Collections.Generic;
+
 
 public enum CharacterState {
 	Idle = 0,
 	Walking = 1,
-	Trotting = 2,
-	Running = 3,
+	Running = 2,
+	Sprinting = 3,
+
 	Jumping = 4,
 	WallRunning = 5,
 	PullingUp=6,
-	DoubleJump= 7
+	DoubleJump= 7,
+	DeActivate = 8,
+	Activate = 9,
 }
 public enum WallState{
 	WallL,
@@ -30,13 +35,15 @@ public struct singleDPS
 
 public class Pawn : DamagebleObject {
 
+
+
 	public List<singleDPS> activeDPS = new List<singleDPS> ();
 
 	public const int SYNC_MULTUPLIER = 5;
 
-	public LayerMask groundLayers = -1;
-	public LayerMask wallRunLayers = -1;
-	public LayerMask climbLayers = 1 << 9; // Layer 9
+	private LayerMask groundLayers =  1;
+	private LayerMask wallRunLayers = 1;
+	private LayerMask climbLayers = 1 << 9; // Layer 9
 
 	public bool isActive =true;
 
@@ -87,7 +94,7 @@ public class Pawn : DamagebleObject {
 
 	private WallState wallState;
 
-	private CharacterState nextState;
+	protected CharacterState nextState;
 
 	private int jetPackCharge;
 
@@ -105,7 +112,7 @@ public class Pawn : DamagebleObject {
 
 	public Pawn enemy;
 
-	private Rigidbody _rb;
+	protected Rigidbody _rb;
 
 	private Vector3 pushingForce;
 
@@ -117,6 +124,8 @@ public class Pawn : DamagebleObject {
 
 	public bool canWallRun;
 
+	protected bool _canWallRun;
+
 	public bool canPullUp;
 
 	public bool canJump;
@@ -127,9 +136,9 @@ public class Pawn : DamagebleObject {
 
 	public const float  WALL_TIME_SIDE=3.0f;
 
-	public float groundRunSpeed;
+	public float groundSprintSpeed;
 
-	public float groundTrotSpeed;
+	public float groundRunSpeed;
 
 	public float groundWalkSpeed;
 
@@ -146,7 +155,11 @@ public class Pawn : DamagebleObject {
 	public float PullUpStartTimer= 0.0f;
 	
 	public float PullUpTime=2.0f;
-	
+
+	private float sprintTimer=0.0f;
+
+	public float sprintTime = 3.0f;
+
 	private float v;
 
 	public Transform curLookTarget= null;
@@ -183,7 +196,7 @@ public class Pawn : DamagebleObject {
 		}
 		
 	}
-	private float lastTimeOnWall;
+	protected float lastTimeOnWall;
 
 	private float lastJumpTime;
 
@@ -221,7 +234,20 @@ public class Pawn : DamagebleObject {
 
 	public ParticleEmitter emitter;
 
+	//звуки
+
+	private AudioSource aSource;
+	public AudioClip stepSound;
+	public AudioClip jumpSound;
+	public AudioClip spawnSound;
+	public AudioClip[] painSoundsArray;//массив звуков воплей при попадании
+	private float lastPainSound =-10.0f;
+	private soundControl sControl;//глобальный обьект контроллера звука
+
 	private bool isSpawn=false;//флаг респавна
+
+
+
 
 	protected void Awake(){
 		myTransform = transform;
@@ -232,11 +258,18 @@ public class Pawn : DamagebleObject {
 	}
 	// Use this for initialization
 	protected void Start () {
+		aSource = GetComponent<AudioSource> ();
+
+		sControl = new soundControl (aSource);//создаем обьект контроллера звука
+		_canWallRun = canWallRun;
+		//проигрываем звук респавна
+		sControl.playClip (spawnSound);
 
 		if (emitter != null) {
 				emitter.Emit ();//запускаем эмиттер
 				isSpawn = true;//отключаем движения и повреждения
 		}
+
 		if (!photonView.isMine) {
 
 						Destroy (GetComponent<ThirdPersonController> ());
@@ -252,7 +285,7 @@ public class Pawn : DamagebleObject {
 
 		correctPlayerPos = transform.position;
 		myCollider = collider;
-
+		ivnMan.Init ();
 		centerOffset = capsule.bounds.center - myTransform.position;
 		headOffset = centerOffset;
 		headOffset.y = capsule.bounds.max.y - myTransform.position.y;
@@ -264,17 +297,29 @@ public class Pawn : DamagebleObject {
 		if (canJump) {
 			jetPackCharge = charMan.GetIntChar(CharacteristicList.JETPACKCHARGE);
 		}
+		AfterSpawnAction();
 		//Debug.Log (distToGround);
+
 	}
+	public virtual void AfterSpawnAction(){
+		 ivnMan.GenerateWeaponStart();
 	
+	}
 	public override void Damage(BaseDamage damage,GameObject killer){
-		if (isSpawn||killer==null) {//если только респавнились, то повреждений не получаем
+		if (isSpawn||killer==null||!isActive) {//если только респавнились, то повреждений не получаем
 			return;
 		}
 		bool isVs =( damage.isVsArmor && charMan.GetBoolChar (CharacteristicList.ARMOR))||( !damage.isVsArmor && !charMan.GetBoolChar (CharacteristicList.ARMOR));
 		if (!isVs) {
 			damage.Damage*=0.5f;		
 		}
+		//вопли при попадании
+		//выбираются случайно из массива. Звучат не прерываясь при следующем вызове
+		if (lastPainSound + 1.0f<Time.time) {
+			lastPainSound =Time.time;
+						sControl.playClipsRandom (painSoundsArray);
+		}
+		
 
 		Pawn killerPawn =killer.GetComponent<Pawn> ();
 		if (killerPawn != null && killerPawn.team == team &&! PlayerManager.instance.frendlyFire) {
@@ -283,11 +328,13 @@ public class Pawn : DamagebleObject {
 		if (killerPawn != null){
 			Player killerPlayer =  killerPawn.player;
 			if(killerPlayer!=null){
+				Debug.Log ("DAMAGE" +damage.sendMessage);
 				killerPlayer.DamagePawn(damage);
 			}
 		}
+		AddEffect(damage.hitPosition);
 		if (photonView.isMine) {
-			AddEffect(damage.hitPosition);
+		
 			float forcePush =  charMan.GetFloatChar(CharacteristicList.STANDFORCE);
 			///Debug.Log(forcePush +" "+damage.pushForce);
 			forcePush =damage.pushForce-forcePush;
@@ -300,7 +347,7 @@ public class Pawn : DamagebleObject {
 			}	
 		
 		}
-		if (!PhotonNetwork.isMasterClient){
+		if (!photonView.isMine){
 			return;
 		}
 		if (isAi) {
@@ -322,15 +369,7 @@ public class Pawn : DamagebleObject {
 
 	}
 
-	public void HPChange(){
-		if (PhotonNetwork.isMasterClient) {
-			if(photonView.owner!=null){
-				photonView.RPC ("RPCSetHealth", photonView.owner, health);
-			}else{
-				photonView.RPC ("RPCSetHealth", PhotonTargets.MasterClient, health);
-			}
-		}
-	}
+
 	public override void KillIt(GameObject killer){
 		if (isDead) {
 			return;		
@@ -388,13 +427,13 @@ public class Pawn : DamagebleObject {
 			if(distance.sqrMagnitude<seenDistance){
 				RaycastHit hitInfo;
 				Vector3 normalDist = distance.normalized;
-				Vector3 startpoint = myTransform.position +normalDist*capsule.radius;
-
-					
+				Vector3 startpoint = myTransform.position +normalDist*Mathf.Max(capsule.radius,capsule.height);
+			
 				if (allPawn[i].team!=team&&Physics.Raycast(startpoint,normalDist,out hitInfo)) {
 
 					
 					if(allPawn[i].myCollider!=hitInfo.collider){
+						//Debug.Log ("WALL"+hitInfo.collider);
 						continue;
 					}
 				}
@@ -404,7 +443,7 @@ public class Pawn : DamagebleObject {
 		}
 
 	}
-	protected void UpdateAnimator(){
+	protected virtual void UpdateAnimator(){
 		float strafe = 0;
 		//Debug.Log (strafe);	
 		float speed =0 ;
@@ -414,18 +453,37 @@ public class Pawn : DamagebleObject {
 				
 				
 				strafe = CalculateStarfe();
-				//Debug.Log (strafe);	
+				//Debug.Log(characterState);
 				speed =CalculateSpeed();
-				if (characterState == CharacterState.Idle) {
+				switch(characterState){
+				case CharacterState.Jumping:
+					animator.ApllyJump(true);
+					break;
+				case CharacterState.Idle:
+					if(isGrounded){
+						animator.ApllyJump(false);
+					}
+					//проигрываем звук шагов
+
 					animator.ApllyMotion (0.0f, speed, strafe);
-				} else {
-					if (characterState == CharacterState.Running) {
-						animator.ApllyMotion (2.0f, speed, strafe);
-					} else if (characterState == CharacterState.Trotting) {
-						animator.ApllyMotion (1.0f, speed, strafe);	
-					} else if (characterState == CharacterState.Walking) {
-						animator.ApllyMotion (1.0f, speed, strafe);	
-					} else if (characterState == CharacterState.WallRunning) {
+					break;
+				case CharacterState.Running:
+					animator.ApllyJump(false);
+					sControl.playFullClip (stepSound);
+					animator.ApllyMotion (2.0f, speed, strafe);
+					break;
+				case CharacterState.Sprinting:
+					animator.Sprint();
+					sControl.playFullClip (stepSound);
+					animator.ApllyMotion (2.0f, speed, strafe);	
+					break;
+				case CharacterState.Walking:
+					animator.ApllyJump(false);
+					sControl.playFullClip (stepSound);
+					animator.ApllyMotion (1.0f, speed, strafe);	
+					break;
+				case CharacterState.WallRunning:
+					sControl.playFullClip (stepSound);
 						//Debug.Log ("INSWITCH");
 						switch (wallState) {
 						case WallState.WallF:
@@ -439,7 +497,7 @@ public class Pawn : DamagebleObject {
 							break;
 						}
 						
-					}
+					break;
 				}
 				
 				//
@@ -453,27 +511,33 @@ public class Pawn : DamagebleObject {
 						animator.ApllyJump(false);
 
 					}
+
 					animator.ApllyMotion (0.0f, speed, strafe);
 					break;
 				case CharacterState.Running:
 					if(characterState == CharacterState.Jumping||characterState == CharacterState.DoubleJump){
 						animator.ApllyJump(false);
 					}
+					sControl.playFullClip (stepSound);
 					animator.ApllyMotion (2.0f, speed, strafe);
 					break;
-				case CharacterState.Trotting:
+				case CharacterState.Sprinting:
 					if(characterState == CharacterState.Jumping||characterState == CharacterState.DoubleJump){
 						animator.ApllyJump(false);
+						animator.Sprint();
 					}
-					animator.ApllyMotion (1.0f, speed, strafe);
+					sControl.playFullClip (stepSound);
+					animator.ApllyMotion (2.0f, speed, strafe);
 					break;
 				case CharacterState.Walking:
 					if(characterState == CharacterState.Jumping||characterState == CharacterState.DoubleJump){
 						animator.ApllyJump(false);
 					}
+					sControl.playFullClip (stepSound);
 					animator.ApllyMotion (1.0f, speed, strafe);
 					break;
 				case CharacterState.WallRunning:
+					sControl.playFullClip (stepSound);
 					switch (wallState) {
 					case WallState.WallF:
 						animator.WallAnimation (false, false, true);
@@ -521,15 +585,18 @@ public class Pawn : DamagebleObject {
 				
 					laimRotation =(diference *direction.normalized)*direction.magnitude +myTransform.position;
 				}*/
-				animator.animator.SetLookAtPosition (laimRotation);
-				animator.animator.SetLookAtWeight (1, 0.5f, 0.7f, 0.0f, 0.5f);
+		
+				animator.SetLookAtPosition (laimRotation);
+				//animator.animator.SetLookAtWeight (1, 0.5f, 0.7f, 0.0f, 0.5f);
 
 			}
 		}
 
 	}
+
 	void Update () {
 		//Debug.Log (photonView.isSceneView);
+
 		if (!isActive) {
 			return;		
 		}
@@ -625,14 +692,18 @@ public class Pawn : DamagebleObject {
 		//Debug.Log ("dps"+this+activeDPS.Count );
 		if (activeDPS.Count > 0) {
 
-			foreach (singleDPS key in activeDPS) {
+			for(int i=0; i<activeDPS.Count;i++){
+				singleDPS key  = activeDPS[i];
 				BaseDamage ldamage = new BaseDamage(key.damage);
-				ldamage.hitPosition =myTransform.position;
+				ldamage.hitPosition =myTransform.position + UnityEngine.Random.onUnitSphere;
 				ldamage.isContinius = true;
 				ldamage.Damage *= Time.deltaTime;
-				if(key.lastTime+0.1f<Time.time){
+				key.lastTime=key.lastTime+Time.deltaTime;
+				//Debug.Log (key.lastTime);
+				if(key.lastTime>1.0f){
+				
 					ldamage.sendMessage = true;
-					key.SetTime(Time.time);
+					key.lastTime=0;
 				}else{
 					ldamage.sendMessage = false;
 				}
@@ -641,6 +712,7 @@ public class Pawn : DamagebleObject {
 			}
 		} 
 	}
+	//Net replication of position 
 	public void ReplicatePosition(){
 		if (initialReplication) {
 			myTransform.position = correctPlayerPos;
@@ -668,10 +740,13 @@ public class Pawn : DamagebleObject {
 			CurWeapon.StopFire ();
 		}
 	}
+	//Setting new weapon if not null try to attach it
 	public void setWeapon(BaseWeapon newWeapon){
 		CurWeapon = newWeapon;
 		//Debug.Log (newWeapon);
-		CurWeapon.AttachWeapon(weaponSlot,weaponOffset,Quaternion.Euler (weaponRotatorOffset),this);
+		if(CurWeapon!=null){
+			CurWeapon.AttachWeapon(weaponSlot,weaponOffset,Quaternion.Euler (weaponRotatorOffset),this);
+		}
 	}
 	public void ChangeWeapon(int weaponIndex){
 		ivnMan.ChangeWeapon (weaponIndex);
@@ -772,6 +847,7 @@ public class Pawn : DamagebleObject {
 
 	public void ToggleAim(){
 		isAiming = !isAiming;
+		animator.ToggleAim (isAiming);
 		if (cameraController != null) {
 			cameraController.ToggleAim();
 		}
@@ -845,13 +921,17 @@ public class Pawn : DamagebleObject {
 	}
 	float CalculateSpeed(){
 		float result =Vector3.Project (_rb.velocity,myTransform.forward).magnitude;
-		if (result < groundWalkSpeed) {
-			return 0.0f;		
+		//Debug.Log (result);
+		if (result < groundWalkSpeed*0.5f) {
+			return 0.0f;	
 		}
-		if (result > groundWalkSpeed && result < groundTrotSpeed) {
+		if (result>groundWalkSpeed*0.5f&&result < groundWalkSpeed) {
 			return 1.0f*Mathf.Sign(Vector3.Dot(_rb.velocity.normalized,myTransform.forward));	
 		}
-		if (result > groundTrotSpeed) {
+		if (result > groundWalkSpeed && result < groundRunSpeed) {
+			return 2.0f*Mathf.Sign(Vector3.Dot(_rb.velocity.normalized,myTransform.forward));	
+		}
+		if (result > groundRunSpeed) {
 			return 2.0f*Mathf.Sign(Vector3.Dot(_rb.velocity.normalized,myTransform.forward));	
 		}
 		return 0.0f;		
@@ -866,13 +946,16 @@ public class Pawn : DamagebleObject {
 		Vector3 velocity =  correctPlayerPos-myTransform.position;
 		velocity = velocity/(Time.deltaTime * SYNC_MULTUPLIER);
 		float result =Vector3.Project (velocity,myTransform.forward).magnitude;
-		if (result < groundWalkSpeed) {
+		if (result <  groundWalkSpeed*0.5f) {
 			return 0.0f;		
 		}
-		if (result > groundWalkSpeed && result < groundTrotSpeed) {
-			return 1.0f*Mathf.Sign(Vector3.Dot(velocity.normalized,myTransform.forward));	
+		if (result>groundWalkSpeed*0.5f&&result < groundWalkSpeed) {
+			return 1.0f*Mathf.Sign(Vector3.Dot(velocity.normalized,myTransform.forward));			
 		}
-		if (result > groundTrotSpeed) {
+		if (result > groundWalkSpeed && result < groundRunSpeed) {
+			return 2.0f*Mathf.Sign(Vector3.Dot(velocity.normalized,myTransform.forward));	
+		}
+		if (result > groundRunSpeed) {
 			return 2.0f*Mathf.Sign(Vector3.Dot(velocity,myTransform.forward));	
 		}
 		return 0.0f;		
@@ -883,6 +966,8 @@ public class Pawn : DamagebleObject {
 		if (isSpawn) {//если только респавнились, то не шевелимся
 			return;
 		}
+
+	
 
 		nextState = state;
 
@@ -896,10 +981,16 @@ public class Pawn : DamagebleObject {
 			}
 
 	}
-
+	public bool IsSprinting (){
+		return characterState == CharacterState.Sprinting;
+	
+	}
+	public bool CanSprint(){
+		return jetPackCharge > 0||characterState==CharacterState.Sprinting;
+	}
 	bool WallRun (Vector3 movement,CharacterState state)
 	{
-		if (!canWallRun&&photonView.isMine) return false;
+		if ((!canWallRun||!_canWallRun)&&photonView.isMine) return false;
 
 		//if (isGrounded) return false;
 		if (lastTimeOnWall + 1.0f > Time.time) {
@@ -920,7 +1011,7 @@ public class Pawn : DamagebleObject {
 
 			return false;
 		}
-		if (characterState != CharacterState.DoubleJump&&characterState != CharacterState.WallRunning) {
+		if (characterState != CharacterState.DoubleJump&&characterState != CharacterState.Sprinting&&characterState != CharacterState.WallRunning) {
 			return false;
 		}
 		//Debug.Log (characterState);
@@ -928,20 +1019,20 @@ public class Pawn : DamagebleObject {
 		
 		
 		bool leftW = Physics.Raycast (myTransform.position ,
-		                              myTransform.right * -1 ,out leftH, capsule.radius + 0.2f,wallRunLayers);
+		                              (-1*myTransform.right).normalized ,out leftH, capsule.radius + 0.3f,wallRunLayers);
 		bool rightW = Physics.Raycast (myTransform.position,
-		                               myTransform.right ,out rightH, capsule.radius + 0.2f, wallRunLayers);
+		                               (myTransform.right).normalized,out rightH, capsule.radius + 0.3f, wallRunLayers);
 		bool frontW = Physics.Raycast (myTransform.position,
 		                               myTransform.forward,out frontH, capsule.radius + 0.2f, wallRunLayers);
 
-		/*Debug.DrawRay (myTransform.position ,
-		               myTransform.right * -1 );
+		Debug.DrawLine (myTransform.position ,
+		                myTransform.position +(0.5f*myTransform.forward-myTransform.right).normalized *(capsule.radius + 0.2f));
 		
-		Debug.DrawRay (myTransform.position,
-		               myTransform.right );
+		Debug.DrawLine (myTransform.position,
+		                myTransform.position +(0.5f*myTransform.forward+myTransform.right).normalized *(capsule.radius + 0.2f));
 		
-		Debug.DrawRay (myTransform.position,
-		               myTransform.forward);*/
+		//Debug.DrawLine (myTransform.position,
+		              // myTransform.forward);
 	
 	
 
@@ -1029,22 +1120,28 @@ public class Pawn : DamagebleObject {
 	// Wall run cool-down
 	IEnumerator WallRunCoolDown (float sec)
 	{
-		canWallRun = true;
+		_canWallRun = true;
+		if (player != null) {
+			EventHolder.instance.FireEvent(typeof(LocalPlayerListener),"EventStartWallRun",player,myTransform.position);
+
+		}
 		yield return new WaitForSeconds (sec);
-		canWallRun = false;
+
+		_canWallRun = false;
 		characterState = CharacterState.Jumping;
 		yield return new WaitForSeconds (sec);
-		canWallRun = true;
+		_canWallRun = true;
 	}
 	// Wall run cool-down
 	IEnumerator WallJump (float sec)
 	{
 		Jump ();
+
 		//Debug.Log ("WALLJUMP");
-		canWallRun = false;
+		_canWallRun = false;
 		characterState = CharacterState.Jumping;
 		yield return new WaitForSeconds (sec);
-		canWallRun = true;
+		_canWallRun = true;
 	}
 
 	void OnCollisionStay(Collision collisionInfo) {
@@ -1074,6 +1171,17 @@ public class Pawn : DamagebleObject {
 		}
 
 	}
+
+
+	public void StartSprint(){
+	
+		sprintTimer = 0.0f;
+		jetPackCharge--;
+
+
+	}
+
+
 	public void FixedUpdate () {
 
 		if (!isActive) {
@@ -1082,16 +1190,135 @@ public class Pawn : DamagebleObject {
 		if (!photonView.isMine) {
 			return;
 		}
+		Vector3 velocity = _rb.velocity;
+		Vector3 velocityChange = (nextMovement - velocity);
+		switch (characterState) {
+			case CharacterState.Idle:
+			case CharacterState.Running:
+			case CharacterState.Walking:
+				if (isGrounded) {
+					if (_rb.isKinematic) _rb.isKinematic= false;
+					
+					//Debug.Log (velocityChange);
+					rigidbody.AddForce(velocityChange, ForceMode.VelocityChange);
+					characterState = nextState;
+					if(nextState==CharacterState.Sprinting){
+						StartSprint();
+					}
+					if(nextState==CharacterState.Jumping){
+						Jump ();
+						
+					}
+				}else{
+					characterState=CharacterState.Jumping;
+				}
+			break;
+		case CharacterState.Sprinting:
+
+				if (_rb.isKinematic) _rb.isKinematic= false;
+				if(nextState!=CharacterState.Jumping){
+					velocityChange=nextMovement.normalized*groundSprintSpeed-velocity;
+				}
+				//Debug.Log (velocityChange);
+				if (isGrounded) {
+					rigidbody.AddForce(velocityChange, ForceMode.VelocityChange);
+
+					if(nextState==CharacterState.Jumping){
+						Jump ();
+						
+					}
+				}
+				sprintTimer+=Time.fixedDeltaTime;
+				if(sprintTimer>=sprintTime){
+					if (isGrounded) {
+						characterState = nextState;
+					}else{
+						characterState=CharacterState.Jumping;
+					}
+				}
+				if(WallRun (nextMovement,nextState)){
+					SendMessage ("WallLand", SendMessageOptions.DontRequireReceiver);
+				}
+
+				
+				
+			
+			break;
+		case CharacterState.Jumping:
+			if(characterState!=CharacterState.DoubleJump){
+				animator.FreeFall();
+			}
+			animator.ApllyJump(true);	
+			if(canWallRun){
+				animator.WallAnimation(false,false,false);
+			}
+			
+			if(WallRun (nextMovement,nextState)){
+				SendMessage ("WallLand", SendMessageOptions.DontRequireReceiver);
+			}
+			PullUp();
+			if(nextState==CharacterState.DoubleJump){
+				DoubleJump();
+				
+			}
+			if (isGrounded) {
+				characterState = nextState;
+			}
+			break;
+		case CharacterState.DoubleJump:
+
+			animator.ApllyJump(true);						
+			animator.WallAnimation(false,false,false);
+
+			if(WallRun (nextMovement,nextState)){
+				SendMessage ("WallLand", SendMessageOptions.DontRequireReceiver);
+			}
+			PullUp();
+			if(nextState==CharacterState.DoubleJump){
+				DoubleJump();
+				
+			}
+			if (isGrounded) {
+				characterState = nextState;
+			}
+
+			break;
+		case CharacterState.WallRunning:
+			if(!WallRun (nextMovement,nextState)){
+				characterState=CharacterState.Jumping;
+				animator.ApllyJump(true);						
+				animator.WallAnimation(false,false,false);
+				if(characterState!=CharacterState.DoubleJump){
+					animator.FreeFall();
+				}
+			}
+
+			PullUp();
+			if(characterState!=CharacterState.WallRunning){
+				if (player != null) {
+					EventHolder.instance.FireEvent(typeof(LocalPlayerListener),"EventEndWallRun",player,myTransform.position);
+					
+				}
+				
+			}
+			break;
+		case CharacterState.PullingUp:
+			PullUp();
+			break;
+		default:
+			characterState = nextState;
+			break;
+			
+		}
+		/*
 		//Debug.Log (_rb.velocity.magnitude);
 		if (isGrounded) {
 			//Debug.Log ("Ground"+characterState);
 
-			if (_rb.isKinematic) _rb.isKinematic= false;
-			Vector3 velocity = _rb.velocity;
-			Vector3 velocityChange = (nextMovement - velocity);
-			//Debug.Log (velocityChange);
-			rigidbody.AddForce(velocityChange, ForceMode.VelocityChange);
 
+			if(nextState==CharacterState.Sprinting&&characterState!=CharacterState.Sprinting){
+				StartSprint();
+			}
 			characterState = nextState;
 			if(nextState==CharacterState.Jumping){
 				Jump ();
@@ -1107,22 +1334,19 @@ public class Pawn : DamagebleObject {
 			case CharacterState.DoubleJump:
 				if(characterState!=CharacterState.WallRunning
 				   &&characterState!=CharacterState.PullingUp){
-					if(jetPackCharge>0){
-						Vector3 velocity = _rb.velocity;
-						Vector3 velocityChange = (nextMovement - velocity);
-						jetPackCharge--;
-						animator.DoubleJump();
-						rigidbody.AddForce(velocityChange, ForceMode.VelocityChange);
 
-						characterState = nextState;
-					}
 
 				}
 				break;
 			default:
 
 				if(!WallRun (nextMovement,nextState)){
-
+					if(characterState==CharacterState.Idle
+					   ||characterState==CharacterState.Walking 
+					   ||characterState==CharacterState.Running 
+					   ||characterState==CharacterState.Sprinting){
+						characterState=CharacterState.Jumping;
+					}
 					animator.ApllyJump(true);						
 					animator.WallAnimation(false,false,false);
 					if(characterState!=CharacterState.DoubleJump){
@@ -1141,7 +1365,7 @@ public class Pawn : DamagebleObject {
 			
 		}
 		//Debug.Log(_rb.isKinematic);
-
+		*/
 		if (!_rb.isKinematic) {
 			
 			_rb.AddForce(new Vector3(0,-gravity * rigidbody.mass,0)+pushingForce);
@@ -1159,6 +1383,8 @@ public class Pawn : DamagebleObject {
 	public void Jump(){
 		if (animator != null) {
 						animator.ApllyJump (true);	
+			//звук прыжка
+			sControl.playClip(jumpSound);
 		}
 		lastJumpTime = Time.time;
 		//photonView.RPC("JumpChange",PhotonTargets.OthersBuffered,true);
@@ -1168,9 +1394,7 @@ public class Pawn : DamagebleObject {
 	
 	}
 	public void DidLand(){
-		if (animator != null) {
-						animator.ApllyJump (false);
-		}
+
 		//Debug.Log ("LAND");
 		lastTimeOnWall = -10.0f;
 		//photonView.RPC("JumpChange",PhotonTargets.OthersBuffered,false);
@@ -1235,7 +1459,11 @@ public class Pawn : DamagebleObject {
 
 	void PullUp ()
 	{
-			//Debug.Log (characterState);
+
+			if (!PullUpCheck ()) {
+				return;
+			}
+		   //Debug.Log (characterState);
 			if(	characterState != CharacterState.PullingUp){
 				characterState = CharacterState.PullingUp;
 				_rb.isKinematic = true;
@@ -1261,7 +1489,22 @@ public class Pawn : DamagebleObject {
 						
 				
 	}
-
+	void DoubleJump(){
+		if(jetPackCharge>0){
+			Vector3 velocity = _rb.velocity;
+			Vector3 velocityChange = (nextMovement - velocity);
+			jetPackCharge--;
+			animator.DoubleJump();
+			rigidbody.AddForce(velocityChange, ForceMode.VelocityChange);
+			if (player != null) {
+				EventHolder.instance.FireEvent(typeof(LocalPlayerListener),"EventPawnDoubleJump",player);
+				
+			}
+			characterState = CharacterState.DoubleJump;
+		}
+		
+		
+	}
 	public void StopMachine(){
 		characterState = CharacterState.Idle;
 		nextMovement = Vector3.zero;
@@ -1295,6 +1538,7 @@ public class Pawn : DamagebleObject {
 			//stream.SendNext(health);
 			stream.SendNext(wallState);
 			stream.SendNext(health);
+			//stream.SendNext(isActive);
 			//stream.SendNext(netIsGround);
 			//stream.SendNext(animator.GetJump());
 
@@ -1316,6 +1560,7 @@ public class Pawn : DamagebleObject {
 			if(!PhotonNetwork.isMasterClient){
 				health =newHealth;
 			}
+			//bool isActive =(bool)stream.ReceiveNext();
 			//isGrounded =(bool) stream.ReceiveNext();
 			//animator.ApllyJump((bool)stream.ReceiveNext());
 			//Debug.Log (wallState);
@@ -1341,10 +1586,11 @@ public class Pawn : DamagebleObject {
 		//Debug.Log ("RPCActivate");
 		if(cameraController!=null){
 			cameraController.enabled = true;
-			isActive = true;
+
 			GetComponent<ThirdPersonController> ().enabled= true;
 
 		}
+		isActive = true;
 		for (int i =0; i<myTransform.childCount; i++) {
 			myTransform.GetChild(i).gameObject.SetActive(true);
 		}
@@ -1369,9 +1615,10 @@ public class Pawn : DamagebleObject {
 		//Debug.Log ("RPCDeActivate");
 		if(cameraController!=null){
 			cameraController.enabled = false;
-			isActive = false;
+		
 			GetComponent<ThirdPersonController> ().enabled= false;
 		}
+		isActive = false;
 		for (int i =0; i<myTransform.childCount; i++) {
 			myTransform.GetChild(i).gameObject.SetActive(false);
 		}
