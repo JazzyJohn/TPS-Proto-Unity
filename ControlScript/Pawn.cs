@@ -274,6 +274,7 @@ public class Pawn : DamagebleObject {
 						Destroy (GetComponent<ThirdPersonCamera> ());
 						Destroy (GetComponent<MouseLook> ());
 						GetComponent<Rigidbody> ().isKinematic = true;
+						//ivnMan.Init ();
 		} else {
 			cameraController=GetComponent<ThirdPersonCamera> ();
 			isAi = cameraController==null;
@@ -295,7 +296,7 @@ public class Pawn : DamagebleObject {
 		if (canJump) {
 			jetPackCharge = charMan.GetIntChar(CharacteristicList.JETPACKCHARGE);
 		}
-		AfterSpawnAction();
+		ivnMan.Init ();
 		//Debug.Log (distToGround);
 
 	}
@@ -1157,7 +1158,7 @@ public class Pawn : DamagebleObject {
 				/*if(contact.otherCollider.CompareTag("decoration")){
 					continue;
 				}*/
-				Vector3 Direction = contact.point - myTransform.position;
+				Vector3 Direction = contact.point - myTransform.position -((CapsuleCollider)myCollider).center;
 				//Debug.Log (this.ToString()+collisionInfo.collider+Vector3.Dot(Direction.normalized ,Vector3.down) );
 				if (Vector3.Dot (Direction.normalized, Vector3.down) > 0.75) {
 					isGrounded = true;

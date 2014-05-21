@@ -220,7 +220,7 @@ public class MenuTF : MonoBehaviour {
 				_GSbutton[0].normal.background = _ButtonPlayerTexPress[0];
 
 
-				Choice._Player = 0;
+				Choice._Player = GameClassEnum.ENGINEER;
 
 				_Pl_Ro = 0;
 	
@@ -238,7 +238,7 @@ public class MenuTF : MonoBehaviour {
 				_GSbutton[1].normal.background = _ButtonPlayerTexPress[1];
 
 
-				Choice._Player = 1;
+				Choice._Player = GameClassEnum.ASSAULT;
 			
 				_Pl_Ro = 0;
 
@@ -256,7 +256,7 @@ public class MenuTF : MonoBehaviour {
 				_GSbutton[2].normal.background = _ButtonPlayerTexPress[2];
 
 
-				Choice._Player = 2;
+				Choice._Player =  GameClassEnum.SCOUT;
 
 				_Pl_Ro = 0;
 
@@ -274,7 +274,7 @@ public class MenuTF : MonoBehaviour {
 
 
 
-				Choice._Player = 3;
+				Choice._Player =   GameClassEnum.MEDIC;
 
 				_Pl_Ro = 0;
 

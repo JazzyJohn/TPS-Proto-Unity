@@ -2,7 +2,7 @@ using UnityEngine;
 using System;
 
 public enum PawnType{PAWN,BOT};
-
+public enum GameClassEnum{ENGINEER,ASSAULT,SCOUT,MEDIC,ANY};
 
 public class Player : MonoBehaviour {
 	

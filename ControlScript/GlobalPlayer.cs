@@ -7,13 +7,18 @@ public class GlobalPlayer : MonoBehaviour {
 	void Awake(){
 			Application.ExternalCall ("SayMyName");
 			if (Application.platform == RuntimePlatform.WindowsEditor) {
-			SetUid("VKTEST");
+				SetUid("VKTEST");
 			}
 			DontDestroyOnLoad(transform.gameObject);
 	}
 	public string PlayerName="VK NAME";
 
 	public string UID;
+	
+	public int gold;
+	
+	public int cash;
+	
 	public void  SetName(String newname)
 	{
 		PlayerName = newname;
@@ -26,7 +31,7 @@ public class GlobalPlayer : MonoBehaviour {
 
 		UID = uid;
 		
-		StatisticHandler.StartStats(UID,PlayerName);
+		StartCoroutine(StartStats(UID,PlayerName));
 		FindObjectOfType<AchievementManager>().Init(UID);
 		FindObjectOfType<LevelingManager>().Init(UID);
 	}
@@ -36,5 +41,53 @@ public class GlobalPlayer : MonoBehaviour {
 	public String GetUID(){
 		return UID;
 	}
+	public void ReloadProfile(){
+		StartCoroutine(ReloadProfile(UID));
+	}
 	
+	protected void parseProfile(string XML){
+		XmlDocument xmlDoc = new XmlDocument();
+		xmlDoc.LoadXml(XML);
+		gold = int.Parse (xmlDoc.SelectSingleNode ("gold").InnerText);
+		cash = int.Parse (xmlDoc.SelectSingleNode ("cash").InnerText);
+	}
+	
+	
+	protected IEnumerator  StartStats(string Uid,string Name){
+		WWWForm form = new WWWForm ();
+		
+		form.AddField ("uid", Uid);
+		form.AddField ("name", Name);
+		WWW w = null;
+		if (String.Compare(Application.absoluteURL, 0, "https", 0,5) != 0) {
+			
+			Debug.Log ("STATS HTTP SEND" + StatisticHandler.STATISTIC_PHP_HTTPS + StatisticHandler.ADD_USER);
+			w = new WWW (StatisticHandler.STATISTIC_PHP + StatisticHandler.ADD_USER, form);
+		}
+		else{
+			Debug.Log ("STATS HTTPS SEND"+StatisticHandler.STATISTIC_PHP_HTTPS + StatisticHandler.ADD_USER);
+			w = new WWW (StatisticHandler.STATISTIC_PHP_HTTPS + StatisticHandler.ADD_USER, form);
+		}
+
+		yield return w;
+		parseProfile(w.text);
+	}	
+	protected IEnumerator  StartStats(string Uid){
+		WWWForm form = new WWWForm ();
+	
+		form.AddField ("uid", Uid);
+		WWW w = null;
+		if (String.Compare(Application.absoluteURL, 0, "https", 0,5) != 0) {
+			
+			Debug.Log ("STATS HTTP SEND" + StatisticHandler.STATISTIC_PHP_HTTPS + StatisticHandler.RELOAD_STATS);
+			w = new WWW (StatisticHandler.STATISTIC_PHP + StatisticHandler.RELOAD_STATS, form);
+		}
+		else{
+			Debug.Log ("STATS HTTPS SEND"+StatisticHandler.STATISTIC_PHP_HTTPS + StatisticHandler.RELOAD_STATS);
+			w = new WWW (StatisticHandler.STATISTIC_PHP_HTTPS + StatisticHandler.RELOAD_STATS, form);
+		}
+
+		yield return w;
+		parseProfile(w.text);
+	}	
 }

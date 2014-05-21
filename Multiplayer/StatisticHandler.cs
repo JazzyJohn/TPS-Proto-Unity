@@ -15,6 +15,10 @@ public class StatisticHandler : MonoBehaviour {
 	public static string LOAD_LVL = "loadlvl";
 
 	public static string SAVE_LVL = "savelvl";
+	
+	public static string RELOAD_STATS="returnAllStats";
+	
+	public static string LOAD_ITEMS = "loaditems";
 
 	public static string STATISTIC_PHP="http://vk.rakgames.ru/kaspi/";
 
