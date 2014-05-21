@@ -319,21 +319,22 @@ public class Player : MonoBehaviour {
 	}
 	public void PawnKill(Player Victim,Vector3 position){
 		if (Victim != null){
-			photonView.RPC("RPCPawnKill",photonView.owner,position,Victim);
+			photonView.RPC("RPCPawnKill",photonView.owner,position,Victim.photonView.viewID);
 	 	 }
 
 
 	}
 	[RPC]
-	public void RPCPawnKill(Vector3 position,Player Victim){
+	public void RPCPawnKill(Vector3 position,int viewId){
 
 		//TODO: move text to config
 		PlayerMainGui.instance.AddMessage("NAILED IT",position,PlayerMainGui.MessageType.KILL_TEXT);
 		EventHolder.instance.FireEvent(typeof(LocalPlayerListener),"EventPawnKillPlayer",this);
+		Player victim = PhotonView.Find (viewId).GetComponent<Player> ();
 
-		if(isPlayerFriend(Victim.UID))
+		if(isPlayerFriend(victim.UID))
 		{
-			EventHolder.instance.FireEvent(typeof(LocalPlayerListener),"EventKilledAFriend",this,Victim);
+			EventHolder.instance.FireEvent(typeof(LocalPlayerListener),"EventKilledAFriend",this,victim);
 		}
 
 		if(!inBot){
