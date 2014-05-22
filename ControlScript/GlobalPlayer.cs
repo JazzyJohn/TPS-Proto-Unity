@@ -70,8 +70,8 @@ public class GlobalPlayer : MonoBehaviour {
 	protected void parseProfile(string XML){
 		XmlDocument xmlDoc = new XmlDocument();
 		xmlDoc.LoadXml(XML);
-		gold = int.Parse (xmlDoc.SelectSingleNode ("gold").InnerText);
-		cash = int.Parse (xmlDoc.SelectSingleNode ("cash").InnerText);
+		gold = int.Parse (xmlDoc.SelectSingleNode ("player/gold").InnerText);
+		cash = int.Parse (xmlDoc.SelectSingleNode ("player/cash").InnerText);
 	}
 	
 	
@@ -92,6 +92,7 @@ public class GlobalPlayer : MonoBehaviour {
 		}
 
 		yield return w;
+		//Debug.Log (w.text);
 		parseProfile(w.text);
 	}	
 	protected IEnumerator  ReloadStats(string Uid){

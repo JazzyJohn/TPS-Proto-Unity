@@ -80,13 +80,14 @@ public class PlayerMainGui : MonoBehaviour {
 	public class PlayerStats{
 		public float robotTime=0;
 		public float health=0;
+        public float maxHealth = 200;
 		public float ammoInGun=0;
 		public float ammoInGunMax=0;
 		public float ammoInBag=0;
 		public float reloadTime=0;
 		public int jetPackCharge= 0;
 		public string gunName="";
-			
+        
 	}
 	public class LevelStats{
 		public int[]  classLvl;	
@@ -94,7 +95,7 @@ public class PlayerMainGui : MonoBehaviour {
 		public int  playerLvl;
 		public int  playerProcent;
 	}
-	public class GameStats{
+	public class GameStats{ 
 		public float gameTime;
 		public int[] score;
 		public int maxScore;
@@ -114,6 +115,8 @@ public class PlayerMainGui : MonoBehaviour {
 
 	private MenuTF respawnMenu;
 
+	private PlayerHudNgui hud;
+
 	private ChatHolder[] chats;
 
 	public static bool IsMouseAV;
@@ -129,21 +132,34 @@ public class PlayerMainGui : MonoBehaviour {
 		foreach (ChatHolder holder in chats) {
 			holder.SetPlayer(newPlayer);	
 		}
+		hud = GetComponentInChildren<PlayerHudNgui> ();
+		hud.SetLocalPlayer(LocalPlayer);
 	}
 
 	void Update(){
 		if (guiState == GUIState.Dedicated) {
 			return;
 		}
-		guiState = GUIState.Normal;
+
 		if (Input.GetButton ("ScoreBtn")) {
+			hud.DeActivate();
 			guiState =GUIState.Playerlist;
+			return;
 		}
 		if (Input.GetButtonDown ("Debug")) {
+			hud.DeActivate();
 			showDebug= !showDebug;
+			return;
 		}
 		if (PVPGameRule.isGameEnded) {
+			hud.DeActivate();
 			guiState =GUIState.GameResult;
+			return;
+		}
+		if (guiState != GUIState.Normal) {
+
+			guiState = GUIState.Normal;
+
 		}
 	}
 
@@ -312,8 +328,9 @@ public class PlayerMainGui : MonoBehaviour {
 		float screenX = Screen.width, screenY = Screen.height;
 		//Screen.lockCursor = true;
 		Rect crosrect = new Rect ((screenX - crosshairWidth) / 2, (screenY - crosshairHeight) / 2, crosshairWidth, crosshairHeight);
-		
-		Pawn myPawn = LocalPlayer.GetCurrentPawn ();
+		GUI.Label (crosrect, crosshair);
+		hud.Activate();
+		/*Pawn myPawn = LocalPlayer.GetCurrentPawn ();
 
 		GUI.Label (crosrect, crosshair);
 		if (myPawn!=null&&LocalPlayer.useTarget != null&&(myPawn.myTransform.position-LocalPlayer.useTarget.myTransform.position).sqrMagnitude<Player.SQUERED_RADIUS_OF_ACTION) {
@@ -418,8 +435,9 @@ public class PlayerMainGui : MonoBehaviour {
 		statsRect = new Rect (screenX - crosshairWidth * 4, Screen.height - crosshairHeight, crosshairWidth * 4, crosshairHeight);
 		GUI.Label (statsRect, "Ammo in Bag: " + localstats.ammoInBag);
 
-		
+	
 		//game stats section
+		
 		GameStats gamestats = PVPGameRule.instance.GetStats ();
 		Rect rectforName = new Rect ((screenX - crosshairWidth * 10) / 2, 0, crosshairWidth * 10, crosshairHeight);
 		GUI.Label (rectforName, LocalPlayer.GetName () + " Team:" + FormTeamName (LocalPlayer.team));
@@ -427,8 +445,8 @@ public class PlayerMainGui : MonoBehaviour {
 		GUI.Label (rectforName, "K/D/A " + LocalPlayer.Score.Kill + "/" + LocalPlayer.Score.Death + "/" + LocalPlayer.Score.Assist);
 		rectforName = new Rect ((screenX - crosshairWidth * 10) / 2, crosshairHeight, crosshairWidth * 10, crosshairHeight);
 		GUI.Label (rectforName, FormTeamName (1) + gamestats.score [0] + "|" + gamestats.maxScore + " |" + FormTeamName (2) + gamestats.score [1]);
-		
-
+		*/
+			
 	}
 
 	void DedicatedDraw(){
@@ -481,7 +499,7 @@ public class PlayerMainGui : MonoBehaviour {
 			
 		}
 		LevelStats lvl = LevelingManager.instance.GetPlayerStats ();
-	
+
 		Rect statsRect = new Rect (2*screenX/3+size, Screen.height-size , screenX/3,size);
 		GUI.Label (statsRect, "Player LVL: " + lvl.playerLvl+ "  Next :"  +lvl. playerProcent +"%");
 		for(int i =0; i<lvl.classLvl.Length;i++){

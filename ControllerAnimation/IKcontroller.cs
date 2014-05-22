@@ -5,7 +5,7 @@ using RootMotion.FinalIK;
 public class IKcontroller : MonoBehaviour {
 	
 	public AimIK aim;
-	protected float targetWeight;
+	protected float targetWeight=1.0f;
 	private float vel = 0.0f;
 	void Start(){
 		aim = gameObject.GetComponent<AimIK>();
@@ -16,7 +16,7 @@ public class IKcontroller : MonoBehaviour {
 		set{aim.solver.IKPosition = value;}
 	}
 	public void SetWeight(float weight){
-			//aim.solver.IKPositionWeight = weight;
+			aim.solver.IKPositionWeight = weight;
 			targetWeight = weight;
 	}
 	public void EvalToWeight(float weight){
@@ -26,7 +26,7 @@ public class IKcontroller : MonoBehaviour {
 	void Update(){
 		if (Mathf.Abs (targetWeight - aim.solver.IKPositionWeight) > 0.01f) {
 			
-			aim.solver.IKPositionWeight= Mathf.SmoothDamp(aim.solver.IKPositionWeight,targetWeight,vel,0.5f); 
+			aim.solver.IKPositionWeight= Mathf.SmoothDamp(aim.solver.IKPositionWeight,targetWeight,ref vel,0.5f); 
 		}
 		
 	}

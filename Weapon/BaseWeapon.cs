@@ -94,6 +94,8 @@ public class BaseWeapon : DestroyableNetworkObject {
 	private AudioSource aSource;//источник звука. добавляется в редакторе
 	public AudioClip fireSound;
 	public AudioClip reloadSound;
+	//use for switch
+	public int animType;
 
 
 	// Use this for initialization
@@ -195,6 +197,8 @@ public class BaseWeapon : DestroyableNetworkObject {
 			}
 			//играем звук перезарядки
 			sControl.playClip (reloadSound);
+			owner.animator.ReloadStart();
+
 		}else{
 			StopFire();
 			return;

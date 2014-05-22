@@ -214,42 +214,64 @@ public class ThirdPersonCamera : MonoBehaviour
 		float distance = -targetOffset.z;
 		Vector3 FlatOffset = targetOffset;
 		FlatOffset.z = 0;
-		Quaternion pitchRotation= Quaternion.Euler (yAngle, xAngle, 0);
-		Vector3 localCamOffset = pitchRotation* Vector3.back * distance;
-		Vector3 localTargetOffset = pitchRotation* FlatOffset;
+		//Quaternion pitchRotation= Quaternion.Euler (yAngle, xAngle, 0);
+		Vector3 localCamOffset =  Quaternion.Euler (yAngle, xAngle, 0)* Vector3.back * distance;
+		Vector3 localTargetOffset =  Quaternion.Euler (0, xAngle, 0)* FlatOffset;
 		Vector3 resultcameraPos = targetCenter ;
-		
+		Vector3 targetforCamera = targetCenter;
 		//Debug.Log(pitchRotation* Vector3.back );
 		resultcameraPos.y=targetHeight;
 		localCamOffset += localTargetOffset;
 		//localCamOffset =  localCamOffset;
 		resultcameraPos +=localCamOffset;
-		Vector3 direction =  (resultcameraPos - targetCenter -localTargetOffset);
-		Ray wallRay = new Ray (targetCenter+localTargetOffset, direction.normalized);
+		Vector3 direction =  (resultcameraPos - targetforCamera -localTargetOffset);
+		Ray wallRay = new Ray (targetforCamera+localTargetOffset, direction.normalized);
 		//Debug.DrawLine (targetCenter+ localTargetOffset, targetCenter+ localTargetOffset + direction.normalized*distance);
 
-
-		float magnitude = distance*distance;
-		foreach (RaycastHit target  in Physics.SphereCastAll (wallRay, 0.5f,distance)) {
-
-			float range =(target.point-targetCenter+localTargetOffset).sqrMagnitude;
-			if(range<magnitude){
-				magnitude=range;
+		//Debug.DrawRay (wallRay.origin, wallRay.direction);
+		float magnitude = distance*distance+10.0f;
+		//Debug.DrawLine (wallRay.origin,wallRay.origin+ wallRay.direction*distance);
+	
+		foreach (RaycastHit target  in Physics.RaycastAll (wallRay, distance)) {
+			
+			
+			if(target.distance<magnitude){
+				magnitude=target.distance;
 			}else{
+			//	Debug.Log(magnitude+ " " +target.distance);
 				continue;
 			}
 			if(target.transform!= _target){
 				//Debug.Log(target.collider);
 				//Vector3 newPostion  = 	target.point-direction.normalized*1.0f;
-				Vector3 offsetDirection =  (target.point - targetCenter -localTargetOffset);
+				Vector3 offsetDirection =  (target.point - wallRay.origin);
+				
+				resultcameraPos = 	target.point-offsetDirection.normalized*1.0f;
+			} 
+			
+		}
+		foreach (RaycastHit target  in Physics.SphereCastAll (wallRay, 0.5f,distance)) {
+
+
+			if(target.distance<magnitude){
+				magnitude=target.distance;
+			}else{
+				//Debug.Log(magnitude+ " " +target.distance);
+				continue;
+			}
+			if(target.transform!= _target){
+				//Debug.Log(target.collider);
+				//Vector3 newPostion  = 	target.point-direction.normalized*1.0f;
+				Vector3 offsetDirection =  (target.point - wallRay.origin);
 
 				resultcameraPos = 	target.point-offsetDirection.normalized*1.0f;
 			} 
 
 		}
+	
 		cameraTransform.position = resultcameraPos + GetShaker ();
 		// Always look at the target	
-		Vector3 relativePos=(targetCenter + localTargetOffset)-cameraTransform.position;
+		Vector3 relativePos=(targetforCamera + localTargetOffset)-cameraTransform.position;
 
 			cameraTransform.rotation = Quaternion.LookRotation (-direction);
 

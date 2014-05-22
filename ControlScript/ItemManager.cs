@@ -40,7 +40,7 @@ public class ItemManager : MonoBehaviour {
 	
 	private BaseWeapon.SLOTTYPE lastGameSlot;
 	
-	public List<BaseWeapon>  weaponList= new List<BaseWeapon>();
+	private List<BaseWeapon>  weaponList= new List<BaseWeapon>();
 
 	public List<FromDBWeapon>  weaponIndexTable= new List<FromDBWeapon>();
 	
@@ -114,13 +114,14 @@ public class ItemManager : MonoBehaviour {
 
 	public List<ShopSlot> shopItems = new List<ShopSlot> ();
 
-	public void LoadShop(int type=-1){
+	public IEnumerator  LoadShop(int type=-1){
+
 		isShopLoading = true;
 		WWWForm form = new WWWForm ();
 			
 		form.AddField ("uid", UID);
 		if(type==-1){
-			form.AddField ("main", true);
+			form.AddField ("main", "true");
 		}else{
 			form.AddField ("type", type);
 		}
@@ -135,13 +136,13 @@ public class ItemManager : MonoBehaviour {
 			w = new WWW (StatisticHandler.STATISTIC_PHP_HTTPS + StatisticHandler.LOAD_SHOP, form);
 		}
 
-		yield w;
+		yield return w;
 		ParseShop(w.text);
 		
 		
 		isShopLoading = false;
 	}
-	public void ParseShop(w.text){
+	public IEnumerator  ParseShop(string XML){
 		XmlDocument xmlDoc = new XmlDocument();
 		xmlDoc.LoadXml(XML);
 		shopItems.Clear();
@@ -151,7 +152,7 @@ public class ItemManager : MonoBehaviour {
 			slot.id = int.Parse(node.SelectSingleNode ("id").InnerText);
 			slot.cashcost = int.Parse(node.SelectSingleNode ("cashcost").InnerText);
 			slot.goldcost = int.Parse(node.SelectSingleNode ("goldcost").InnerText);
-			slot.gameClasses = new GameClassEnum[node.SelectNodes("items/weapon").Count]
+			slot.gameClasses = new GameClassEnum[node.SelectNodes("items/weapon").Count];
 			int i=0;
 			foreach (XmlNode gameClass in node.SelectNodes("class")) {
 					slot.gameClasses[i++]=	(GameClassEnum)int.Parse(gameClass.InnerText);			
@@ -159,20 +160,20 @@ public class ItemManager : MonoBehaviour {
 			WWW www = new WWW( node.SelectSingleNode ("imageurl").InnerText);
 
 			// wait until the download is done
-			yield www;
+			yield return www;
 
 			// assign the downloaded image to the texture of the slot
 			www.LoadImageIntoTexture(slot.texture);
-			shopItems.Add(slots);
+			shopItems.Add(slot);
 		}		
 	}
 	
-	public void BuyItem(int itemId,bool forGold){
+	public IEnumerator  BuyItem(int itemId,bool forGold){
 		WWWForm form = new WWWForm ();
 			
 		form.AddField ("uid", UID);
 		form.AddField ("game_item", itemId);
-		form.AddField ("forGold", forGold);
+		form.AddField ("forGold", forGold.ToString());
 		WWW w = null;
 		if (String.Compare(Application.absoluteURL, 0, "https", 0,5) != 0) {
 			
@@ -184,7 +185,7 @@ public class ItemManager : MonoBehaviour {
 			w = new WWW (StatisticHandler.STATISTIC_PHP_HTTPS + StatisticHandler.BUY_ITEM, form);
 		}
 
-		yield w;
+		yield return w;
 		
 		
 	}

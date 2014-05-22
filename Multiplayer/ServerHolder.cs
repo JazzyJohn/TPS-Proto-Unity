@@ -113,7 +113,7 @@ public class ServerHolder : MonoBehaviour
 		}
 		*/
 		
-		GUILayout.Label(PhotonNetwork.connectionStateDetailed.ToString());
+		//GUILayout.Label(PhotonNetwork.connectionStateDetailed.ToString());
 		
 	}
 	

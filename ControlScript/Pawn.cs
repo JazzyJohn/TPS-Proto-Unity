@@ -746,6 +746,9 @@ public class Pawn : DamagebleObject {
 		//Debug.Log (newWeapon);
 		if(CurWeapon!=null){
 			CurWeapon.AttachWeapon(weaponSlot,weaponOffset,Quaternion.Euler (weaponRotatorOffset),this);
+			if(animator!=null){
+				animator.SetWeaponType(CurWeapon.animType);
+			}
 		}
 	}
 	public void ChangeWeapon(int weaponIndex){

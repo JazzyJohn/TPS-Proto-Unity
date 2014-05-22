@@ -236,4 +236,14 @@ public class AnimationManager : MonoBehaviour
 						aimPos.aimPosition = position;
 		}
 	}
+	public void SetWeaponType(int State){
+		if (State == 0) {
+			return;
+		}
+		animator.SetInteger ("GunType",State);
+	}
+	public void ReloadStart(){
+	
+		animator.SetTrigger ("Reload");
+	}
 }
