@@ -224,7 +224,16 @@ public class InventoryManager : MonoBehaviour {
 			return;
 		}
 		BaseWeapon firstWeapon;
-		firstWeapon =PhotonNetwork.Instantiate(prefabWeapon[newWeapon].name,transform.position,Quaternion.identity,0).GetComponent<BaseWeapon>();
+        if (owner.photonView.isSceneView)
+        {
+            firstWeapon = PhotonNetwork.InstantiateSceneObject(prefabWeapon[newWeapon].name, transform.position, Quaternion.identity, 0, null).GetComponent<BaseWeapon>();
+            Debug.Log("Turret weapon spawn");
+        }
+        else
+        {
+            firstWeapon = PhotonNetwork.Instantiate(prefabWeapon[newWeapon].name, transform.position, Quaternion.identity, 0).GetComponent<BaseWeapon>();
+        }
+
 	
 		owner.setWeapon(firstWeapon);
 		if(currentWeapon!=null){

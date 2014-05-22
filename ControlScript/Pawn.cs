@@ -30,7 +30,7 @@ public struct singleDPS
 
 public class Pawn : DamagebleObject {
 
-	public List<singleDPS> activeDPS = new List<singleDPS> ();
+   	public List<singleDPS> activeDPS = new List<singleDPS> ();
 
 	public const int SYNC_MULTUPLIER = 5;
 
