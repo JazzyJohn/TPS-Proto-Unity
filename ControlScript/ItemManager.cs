@@ -15,7 +15,25 @@ public class FromDBWeapon{
 	public BaseWeapon.SLOTTYPE gameSlot;
 
 }
+
+public class ShopSlot{
+	public string name;
+	
+	public int id;
+	
+	public string description;
+	
+	public Texture2D texture;
+	
+	public int cashcost;
+	
+	public int goldcost;
+	
+	public GameClassEnum[] gameClasses;
+}
 public class ItemManager : MonoBehaviour {
+
+	//PLAYER ITEM SECTION
 	public BaseWeapon[] weaponPrefabsListbyId;
 	
 	private GameClassEnum lastGameClass;
@@ -34,7 +52,7 @@ public class ItemManager : MonoBehaviour {
 	}
 	public void ReoadItems(){
 	
-		var form = new WWWForm ();
+		WWWForm form = new WWWForm ();
 			
 		form.AddField ("uid", UID);
 		
@@ -88,7 +106,89 @@ public class ItemManager : MonoBehaviour {
 		return weaponList;
 	}
 	
+	//ENDPLAYER ITEM SECTION
+	
+	
+	//SHOPING SECTION 
+	public bool isShopLoading;
+
+	public List<ShopSlot> shopItems = new List<ShopSlot> ();
+
+	public void LoadShop(int type=-1){
+		isShopLoading = true;
+		WWWForm form = new WWWForm ();
+			
+		form.AddField ("uid", UID);
+		if(type==-1){
+			form.AddField ("main", true);
+		}else{
+			form.AddField ("type", type);
+		}
+		WWW w = null;
+		if (String.Compare(Application.absoluteURL, 0, "https", 0,5) != 0) {
+			
+			Debug.Log ("STATS HTTP SEND" + StatisticHandler.STATISTIC_PHP_HTTPS + StatisticHandler.LOAD_SHOP);
+			w = new WWW (StatisticHandler.STATISTIC_PHP + StatisticHandler.LOAD_SHOP, form);
+		}
+		else{
+			Debug.Log ("STATS HTTPS SEND"+StatisticHandler.STATISTIC_PHP_HTTPS + StatisticHandler.LOAD_ITEMS);
+			w = new WWW (StatisticHandler.STATISTIC_PHP_HTTPS + StatisticHandler.LOAD_SHOP, form);
+		}
+
+		yield w;
+		ParseShop(w.text);
 		
+		
+		isShopLoading = false;
+	}
+	public void ParseShop(w.text){
+		XmlDocument xmlDoc = new XmlDocument();
+		xmlDoc.LoadXml(XML);
+		shopItems.Clear();
+		foreach (XmlNode node in xmlDoc.SelectNodes("items/item")) {
+			ShopSlot slot = new ShopSlot();
+			slot.name = node.SelectSingleNode ("name").InnerText;
+			slot.id = int.Parse(node.SelectSingleNode ("id").InnerText);
+			slot.cashcost = int.Parse(node.SelectSingleNode ("cashcost").InnerText);
+			slot.goldcost = int.Parse(node.SelectSingleNode ("goldcost").InnerText);
+			slot.gameClasses = new GameClassEnum[node.SelectNodes("items/weapon").Count]
+			int i=0;
+			foreach (XmlNode gameClass in node.SelectNodes("class")) {
+					slot.gameClasses[i++]=	(GameClassEnum)int.Parse(gameClass.InnerText);			
+			}
+			WWW www = new WWW( node.SelectSingleNode ("imageurl").InnerText);
+
+			// wait until the download is done
+			yield www;
+
+			// assign the downloaded image to the texture of the slot
+			www.LoadImageIntoTexture(slot.texture);
+			shopItems.Add(slots);
+		}		
+	}
+	
+	public void BuyItem(int itemId,bool forGold){
+		WWWForm form = new WWWForm ();
+			
+		form.AddField ("uid", UID);
+		form.AddField ("game_item", itemId);
+		form.AddField ("forGold", forGold);
+		WWW w = null;
+		if (String.Compare(Application.absoluteURL, 0, "https", 0,5) != 0) {
+			
+			Debug.Log ("STATS HTTP SEND" + StatisticHandler.STATISTIC_PHP_HTTPS + StatisticHandler.BUY_ITEM);
+			w = new WWW (StatisticHandler.STATISTIC_PHP + StatisticHandler.BUY_ITEM, form);
+		}
+		else{
+			Debug.Log ("STATS HTTPS SEND"+StatisticHandler.STATISTIC_PHP_HTTPS + StatisticHandler.BUY_ITEM);
+			w = new WWW (StatisticHandler.STATISTIC_PHP_HTTPS + StatisticHandler.BUY_ITEM, form);
+		}
+
+		yield w;
+		
+		
+	}
+	//END SHOPING SECTION 
 	private static ItemManager s_Instance = null;
 	
 	public static ItemManager instance {

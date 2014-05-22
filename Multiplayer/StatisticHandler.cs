@@ -19,6 +19,10 @@ public class StatisticHandler : MonoBehaviour {
 	public static string RELOAD_STATS="returnAllStats";
 	
 	public static string LOAD_ITEMS = "loaditems";
+	
+	public static string LOAD_SHOP = "loadshop";
+	
+	public static string BUY_ITEM = "buyItem";
 
 	public static string STATISTIC_PHP="http://vk.rakgames.ru/kaspi/";
 

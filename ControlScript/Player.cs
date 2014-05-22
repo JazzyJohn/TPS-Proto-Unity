@@ -3,6 +3,8 @@ using System;
 using System.Collections.Generic;
 
 public enum PawnType{PAWN,BOT};
+
+//BIT MASK 
 public enum GameClassEnum{ENGINEER,ASSAULT,SCOUT,MEDIC,ANY};
 
 public class Player : MonoBehaviour {
