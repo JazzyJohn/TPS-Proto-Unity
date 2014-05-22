@@ -151,7 +151,7 @@ public class BaseWeapon : DestroyableNetworkObject {
 			RequestKillMe();
 
 		}
-		AimFix ();
+		//AimFix ();
 		if (!photonView.isMine) {
 			ReplicationGenerate ();
 			return;

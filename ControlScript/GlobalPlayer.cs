@@ -58,6 +58,7 @@ public class GlobalPlayer : MonoBehaviour {
 	
 	public void addFriendInfoList(string vkIds)
 	{
+		//Debug.Log (vkIds);
 		string[] ids = vkIds.Split (',');
 		foreach (string id in ids)
 			friendsInfo.Add (id);
