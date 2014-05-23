@@ -26,11 +26,11 @@ public float landAnimationSpeed = 1.0f;
 
 private Animation _animation;
 
-private Pawn pawn;
+protected Pawn pawn;
 
 private Transform myTransform;
 
-private CharacterState characterState;
+protected CharacterState characterState;
 
 
 // when pressing "Fire3" button (cmd) we start running
@@ -53,14 +53,14 @@ private float jumpTimeout= 0.05f;
 private float groundedTimeout= 0.25f;
 
 // The camera doesnt start following the target immediately but waits for a split second to avoid too much waving around.
-private float lockCameraTimer= 0.0f;
+protected float lockCameraTimer= 0.0f;
 
 // The current move direction in x-z
-private Vector3 moveDirection= Vector3.zero;
+protected Vector3 moveDirection= Vector3.zero;
 // The current vertical speed
 private float verticalSpeed= 0.0f;
 // The current x-z move speed
-private float moveSpeed= 0.0f;
+protected float moveSpeed= 0.0f;
 	
 // Are we jumping? (Initiated with jump button and not grounded yet)
 private bool jumping= false;
@@ -68,11 +68,11 @@ private bool doubleJump= false;
 private bool jumpingReachedApex= false;
 
 // Are we moving backwards (This locks the camera to not do a 180 degree spin)
-private bool movingBack= false;
+protected bool movingBack= false;
 // Is the user pressing any keys?
-private bool isMoving= false;
+protected bool isMoving= false;
 // When did the user start walking (Used for going into trot after a while)
-private float walkTimeStart= 0.0f;
+protected float walkTimeStart= 0.0f;
 // Last time the jump button was clicked down
 private float lastJumpButtonTime= -10.0f;
 // Last time we performed a jump
@@ -129,7 +129,7 @@ public AnimationClip jumpPoseAnimation;
 }
 
 
-void  UpdateSmoothedMovementDirection ()
+public virtual void UpdateSmoothedMovementDirection ()
 {
 	Transform cameraTransform= Camera.main.transform;
 	
