@@ -170,7 +170,7 @@ public class Pawn : DamagebleObject {
 
 	public float seenDistance;
 
-	private Collider myCollider;
+	protected Collider myCollider;
 
 	private bool _isGrounded;
 
@@ -240,7 +240,7 @@ public class Pawn : DamagebleObject {
 	public AudioClip spawnSound;
 	public AudioClip[] painSoundsArray;//массив звуков воплей при попадании
 	private float lastPainSound =-10.0f;
-	private soundControl sControl;//глобальный обьект контроллера звука
+	protected soundControl sControl;//глобальный обьект контроллера звука
 
 	private bool isSpawn=false;//флаг респавна
 
@@ -730,7 +730,7 @@ public class Pawn : DamagebleObject {
 		nextState =(CharacterState) nextrpcState;
 	}
 	//Weapon Section
-	public void StartFire(){
+	public virtual void StartFire(){
 		if (CurWeapon != null) {
 			CurWeapon.StartFire ();
 		} 
@@ -764,7 +764,7 @@ public class Pawn : DamagebleObject {
 			return (Vector3.Dot (currentDirection.normalized,desireDirection.normalized)>0.9f);
 		}
 	}
-	public Vector3 getAimRotation(float weaponRange){
+	public virtual Vector3 getAimRotation(float weaponRange){
 		
 		if(photonView.isMine){
 			if(isAi){
@@ -848,7 +848,7 @@ public class Pawn : DamagebleObject {
 		return 0.0f;
 	}
 
-	public void ToggleAim(){
+	public virtual void ToggleAim(){
 		isAiming = !isAiming;
 		animator.ToggleAim (isAiming);
 		if (cameraController != null) {
@@ -919,12 +919,12 @@ public class Pawn : DamagebleObject {
 
 	//Movement section
 
-	float CalculateStarfe(){
+	protected float CalculateStarfe(){
 		return Vector3.Dot (myTransform.right, _rb.velocity.normalized);
 				
 	
 	}
-	float CalculateSpeed(){
+	protected float CalculateSpeed(){
 		float result =Vector3.Project (_rb.velocity,myTransform.forward).magnitude;
 		//Debug.Log (result);
 		if (result < groundWalkSpeed*0.5f) {
@@ -941,13 +941,13 @@ public class Pawn : DamagebleObject {
 		}
 		return 0.0f;		
 	}
-	float CalculateRepStarfe(){
+	protected float CalculateRepStarfe(){
 		Vector3 velocity =  correctPlayerPos-myTransform.position;
 		return Vector3.Dot (myTransform.right, velocity.normalized);
 				
 	
 	}
-	float CalculateRepSpeed(){
+	protected float CalculateRepSpeed(){
 		Vector3 velocity =  correctPlayerPos-myTransform.position;
 		velocity = velocity/(Time.deltaTime * SYNC_MULTUPLIER);
 		float result =Vector3.Project (velocity,myTransform.forward).magnitude;

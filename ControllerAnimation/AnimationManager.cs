@@ -181,10 +181,10 @@ public class AnimationManager : MonoBehaviour
 		animator.SetBool("wall_stop", value);	
 	}
 	//HTH attack anim switch
-	public void StartAttackAnim(string name){
+	public virtual void StartAttackAnim(string name){
 		//Debug.Log (name);
-		animator.SetBool(name, true);	
 
+		animator.SetTrigger(name.ToString());	 //Заменил с була на тригер
 	}
 	public void StopAttackAnim(string name){
 		animator.SetBool(name, false);	
