@@ -303,12 +303,12 @@ public class Player : MonoBehaviour {
 		isStarted = false;
 		if (viewId != 0) {
 			Player killer = PhotonView.Find (viewId).GetComponent<Player> ();
-
+			PlayerMainGui.instance.InitKillCam(killer);
 			if(isPlayerFriend(killer.UID))
 			{
 				EventHolder.instance.FireEvent(typeof(LocalPlayerListener),"EventKilledByFriend",this,killer);
 			}
-
+		
 			StatisticHandler.SendPlayerKillbyPlayer(UID, PlayerName, killer.UID, killer.PlayerName);
 		} else {
 			StatisticHandler.SendPlayerKillbyNPC(UID, PlayerName);
@@ -429,12 +429,12 @@ public class Player : MonoBehaviour {
 		if (curPawn != null) {
 			stats.health = curPawn.health;
 			if(curPawn.CurWeapon!=null){
-				stats.ammoInGun = curPawn.CurWeapon.curAmmo;
-				stats.ammoInGunMax = curPawn.CurWeapon.clipSize;
+			
+				stats.gun  = curPawn.CurWeapon;
 				stats.ammoInBag = curPawn.GetAmmoInBag ();
 				stats.reloadTime = curPawn.CurWeapon.ReloadTimer();
 			
-				stats.gunName = curPawn.CurWeapon.weaponName;
+				
 			}
 			stats.jetPackCharge  = curPawn.GetJetPackCharges();
 		}
@@ -464,20 +464,18 @@ public class Player : MonoBehaviour {
 	//NetworkSection
 	public void OnPhotonSerializeView(PhotonStream stream, PhotonMessageInfo info)
 	{
-		/*if (stream.isWriting)
+	/*	if (stream.isWriting)
 		{
 			// We own this player: send the others our data
-			stream.SendNext(PlayerName);
-			stream.SendNext(UID);
-			stream.SendNext(team);
+			stream.SendNext(inBot);
+		
 
 		}
 		else
 		{
 			// Network player, receive data
-			PlayerName= (String) stream.ReceiveNext();
-			UID= (String) stream.ReceiveNext();
-			team = (int) stream.ReceiveNext();
+			inBot= (bool) stream.ReceiveNext();
+			
 		}*/
 	}
 	
@@ -495,6 +493,14 @@ public class Player : MonoBehaviour {
 		return robotPawn;
 	}
 
+	public Pawn GetActivePawn(){
+		if(robotPawn!=null &&!currentPawn.isActive){
+			return robotPawn;
+		}else{
+			return currentPawn;
+		}
+		return null;
+	}
 	public void AfterSpawnSetting(Pawn pawn,PawnType type,int rTeam){
 	
 		if (photonView.isMine) {

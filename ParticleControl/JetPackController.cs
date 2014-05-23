@@ -6,11 +6,20 @@ public class JetPackController : MonoBehaviour {
 	public 	ParticleSystem leftExhaust,
 						   middleExhaust,
 						   rightExhaust;
-						   
+	public AudioClip oneJetSound;
+	public AudioClip fullPowerSound;
+	public void Awake(){
+		aSource = GetComponent<AudioSource> ();
+
+		sControl = new soundControl (aSource);//создаем обьект контроллера звука
+		sControl. stopSound();
+	}
+	
 	public void StartLeft(){
 		//StopAll();
 		rightExhaust.Stop ();
 		middleExhaust.Stop ();
+		sControl.playFullAnotherClip(oneJetSound);
 		if(!leftExhaust.isPlaying){
 			leftExhaust.Play();
 		}
@@ -19,7 +28,7 @@ public class JetPackController : MonoBehaviour {
 		//StopAll();
 		leftExhaust.Stop ();
 		middleExhaust.Stop ();
-
+		sControl.playFullAnotherClip(oneJetSound);
 		if(!rightExhaust.isPlaying){
 			rightExhaust.Play();
 		}
@@ -28,11 +37,13 @@ public class JetPackController : MonoBehaviour {
 		//StopAll();
 		leftExhaust.Stop ();
 		rightExhaust.Stop ();
+		sControl.playFullAnotherClip(oneJetSound);
 		if(!middleExhaust.isPlaying){
 			middleExhaust.Play();
 		}
 	}
 	public void StartAll(){
+		sControl.playFullAnotherClip(fullPowerSound);
 		if(!leftExhaust.isPlaying){
 			leftExhaust.Play();
 		}
@@ -44,6 +55,7 @@ public class JetPackController : MonoBehaviour {
 		}
 	}
 	public void StopAll(){
+		sControl. stopSound();
 		leftExhaust.Stop();
 		middleExhaust.Stop();
 		rightExhaust.Stop();

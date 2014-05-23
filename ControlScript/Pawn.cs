@@ -27,7 +27,7 @@ public class singleDPS
 {
 	public BaseDamage damage;
 	public GameObject killer;
-	public float lastTime=0.0f;
+	public float lastTime=1.0f;
 
 }	
 

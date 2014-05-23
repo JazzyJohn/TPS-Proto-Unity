@@ -52,7 +52,7 @@ public class InventoryManager : MonoBehaviour {
 	private AmmoBag[] allAmmo;
 	 	
 
-	public void Init(){
+	public virtual void Init(){
 		if (owner == null) {
 			owner = GetComponent<Pawn> ();
 			if (owner.photonView.isMine) {
@@ -91,7 +91,7 @@ public class InventoryManager : MonoBehaviour {
 		}
 	}
 	//Check is there ammo in bag
-	public bool HasAmmo(AMMOTYPE ammo){
+	public virtual bool HasAmmo(AMMOTYPE ammo){
 		for(int i=0;i<allAmmo.Length;i++){
 			if(allAmmo[i].type ==ammo){
 				return allAmmo[i].amount>0;
@@ -100,7 +100,7 @@ public class InventoryManager : MonoBehaviour {
 		return false;
 	}
 	//Get amount ammo for current ammotype
-	public int GetAmmo(AMMOTYPE ammo){
+	public virtual int GetAmmo(AMMOTYPE ammo){
 		for(int i=0;i<allAmmo.Length;i++){
 			if(allAmmo[i].type ==ammo){
 				return allAmmo[i].amount;
@@ -109,7 +109,7 @@ public class InventoryManager : MonoBehaviour {
 		return 0;
 	}
 	//Return ammo from bag
-	public int GiveAmmo(AMMOTYPE ammo,int amount){
+	public virtual int GiveAmmo(AMMOTYPE ammo,int amount){
 		for(int i=0;i<allAmmo.Length;i++){
 			if(allAmmo[i].type ==ammo){
 				if(allAmmo[i].amount>amount){
@@ -124,7 +124,7 @@ public class InventoryManager : MonoBehaviour {
 		return 0;
 	}
 	//Add Ammo to bag
-	public void AddAmmo(AMMOTYPE ammo,int amount){
+	public virtual void AddAmmo(AMMOTYPE ammo,int amount){
 		for(int i=0;i<allAmmo.Length;i++){
 			if(allAmmo[i].type ==ammo){
 				allAmmo[i].amount+=amount;

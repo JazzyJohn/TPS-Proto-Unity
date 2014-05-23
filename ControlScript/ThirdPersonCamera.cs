@@ -62,6 +62,9 @@ public class ThirdPersonCamera : MonoBehaviour
 	private bool closeFOV= false;
 	private float startFov =60.0f;
 	public float sprintFov =60.0f;
+	
+	Vector3 curAddShake= Vector3.zero;
+	
 	void  Awake (){
 		
 		if(!cameraTransform && Camera.main)
@@ -76,26 +79,22 @@ public class ThirdPersonCamera : MonoBehaviour
 		minimapCamera = minimapTransform.camera;
 		_target = transform;
 		_pawn = GetComponent<Pawn> ();
-		if (_target)
-		{
-			controller = _target.GetComponent<ThirdPersonController>();
-		}
+		InitOffsets();
 		
-		if (controller) {
-						CapsuleCollider characterController = _target.GetComponent<CapsuleCollider> ();
-						centerOffset = characterController.bounds.center - _target.position;
-						headOffset = centerOffset;
-						headOffset.y = characterController.bounds.max.y - _target.position.y;
-		} else {
-						//Debug.Log("Please assign a target to the camera that has a ThirdPersonController script attached.");
-	
-		}
-		Cut(_target, centerOffset);
-		EventHolder.instance.Bind (this);
+		//TODO: Learn about wtf this do here
+		//EventHolder.instance.Bind (this);
 
 	}
 
-
+	protected void InitOffsets(){
+		
+		CapsuleCollider characterController = _target.GetComponent<CapsuleCollider> ();
+		centerOffset = characterController.bounds.center - _target.position;
+		headOffset = centerOffset;
+		headOffset.y = characterController.bounds.max.y - _target.position.y;
+		
+		Cut(_target, centerOffset);
+	}
 	public void ToggleAim(){
 		aiming = !aiming;
 
@@ -277,7 +276,7 @@ public class ThirdPersonCamera : MonoBehaviour
 
 		///SetUpRotation(targetCenter+ localTargetOffset, targetHead);
 	}
-	Vector3 curAddShake= Vector3.zero;
+	
 	Vector3 GetShaker(){
 
 	
@@ -325,51 +324,7 @@ public class ThirdPersonCamera : MonoBehaviour
 		yAngle = 0;
 
 		xAngle = 0;
-	}
-	/*void  SetUpRotation ( Vector3 centerPos ,   Vector3 headPos  ){
-		// Now it's getting hairy. The devil is in the details here, the big issue is jumping of course.
-		// * When jumping up and down we don't want to center the guy in screen space.
-		//  This is important to give a feel for how high you jump and avoiding large camera movements.
-		//   
-		// * At the same time we dont want him to ever go out of screen and we want all rotations to be totally smooth.
-		//
-		// So here is what we will do:
-		//
-		// 1. We first find the rotation around the y axis. Thus he is always centered on the y-axis
-		// 2. When grounded we make him be centered
-		// 3. When jumping we keep the camera rotation but rotate the camera to get him back into view if his head is above some threshold
-		// 4. When landing we smoothly interpolate towards centering him on screen
-		Vector3 cameraPos= cameraTransform.position;
-		Vector3 offsetToCenter= centerPos - cameraPos;
-		
-		// Generate base rotation only around y-axis
-		Quaternion yRotation= Quaternion.LookRotation(new Vector3(offsetToCenter.x, 0, offsetToCenter.z));
 	
-		Vector3 relativeOffset= Vector3.forward * distance + Vector3.down * height;
-		cameraTransform.rotation = yRotation * Quaternion.LookRotation(relativeOffset);
-	
-		// Calculate the projected center position and top position in world space
-		Ray centerRay= cameraTransform.camera.ViewportPointToRay(new Vector3(.5f, 0.5f, 1f));
-		Ray topRay= cameraTransform.camera.ViewportPointToRay(new Vector3(.5f, clampHeadPositionScreenSpace, 1f));
-	
-		Vector3 centerRayPos= centerRay.GetPoint(distance);
-		Vector3 topRayPos= topRay.GetPoint(distance);
-		
-		float centerToTopAngle= Vector3.Angle(centerRay.direction, topRay.direction);
-		
-		float heightToAngle= centerToTopAngle / (centerRayPos.y - topRayPos.y);
-	
-		float extraLookAngle= heightToAngle * (centerRayPos.y - centerPos.y);
-		if (extraLookAngle < centerToTopAngle)
-		{
-			extraLookAngle = 0;
-		}
-		else
-		{
-			extraLookAngle = extraLookAngle - centerToTopAngle;
-			cameraTransform.rotation *= Quaternion.Euler(-extraLookAngle, 0, 0);
-		}
-	}*/
 	
 	public Vector3 GetCenterOffset (){
 		return centerOffset;
