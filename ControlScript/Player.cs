@@ -309,6 +309,7 @@ public class Player : MonoBehaviour {
 		
 		Score.Death++;
 		isStarted = false;
+		isDead = true;
 		if (viewId != 0) {
 			Player killer = PhotonView.Find (viewId).GetComponent<Player> ();
 			PlayerMainGui.instance.InitKillCam(killer);
@@ -319,6 +320,7 @@ public class Player : MonoBehaviour {
 		
 			StatisticHandler.SendPlayerKillbyPlayer(UID, PlayerName, killer.UID, killer.PlayerName);
 		} else {
+			PlayerMainGui.instance.InitKillCam(null);
 			StatisticHandler.SendPlayerKillbyNPC(UID, PlayerName);
 		}
 		

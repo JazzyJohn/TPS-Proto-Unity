@@ -126,9 +126,9 @@ public class ThirdPersonCamera : MonoBehaviour
 		centerPoint.x = 0.5f;
 		centerPoint.y = 0.5f;
 	
-
-		minimapTransform.position = targetCenter + minimapTransform.position -minimapCamera.ViewportToWorldPoint (centerPoint);
-	
+		if (minimapTransform != null) {
+						minimapTransform.position = targetCenter + minimapTransform.position - minimapCamera.ViewportToWorldPoint (centerPoint);
+				}
 	//	DebugDrawStuff();
 	
 		// Calculate the current & target rotation angles

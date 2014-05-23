@@ -143,7 +143,7 @@ public class HTHHitter : MonoBehaviour {
 				sControl.playClip (HitSound);
 				Damage = true;
 				obj.Damage(damage,owner.gameObject);
-				//Debug.Log ("HADISH INTO SOME PLAYER! " + hit.transform.gameObject.name);
+				Debug.Log ("HADISH INTO SOME PLAYER! " + hit.transform.gameObject.name);
 			}
 		}
 	}

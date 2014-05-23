@@ -4,7 +4,9 @@ using System.Collections;
 
 public class KillCamera : ThirdPersonCamera
 {
-	private float killCamTime = 3.0f;
+	public float killCamTime = 3.0f;
+
+	private float killCamTimer = 0.0f;
 	
 	private Player killpalyer; 
 	
@@ -33,8 +35,8 @@ public class KillCamera : ThirdPersonCamera
 			FinishKillCam();
 			return;
 		}
-		killCamTime-= Time.deltaTime;
-		if(killCamTime<0){
+		killCamTimer+= Time.deltaTime;
+		if(killCamTime<killCamTimer){
 			FinishKillCam();
 		}
 		
@@ -42,7 +44,7 @@ public class KillCamera : ThirdPersonCamera
 	void FinishKillCam(){
 	
 		PlayerMainGui.instance.StopKillCam();	
-		Destroy(this);
+		this.enabled = false;
 	}
 	public bool Init(Player Killer){
 		
@@ -54,14 +56,15 @@ public class KillCamera : ThirdPersonCamera
 	public bool Init(Pawn Killer){
 		
 		_pawn  =Killer;
-		
+		killCamTimer = 0.0f;
 		if(_pawn !=null){
 			_target =_pawn.myTransform;
-			return false;
+			InitOffsets();
+			return true;
 		}
 	
-		InitOffsets();
-		return   true;
+
+		return   false;
 	}
 	
 	

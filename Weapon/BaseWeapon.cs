@@ -197,7 +197,9 @@ public class BaseWeapon : DestroyableNetworkObject {
 			}
 			//играем звук перезарядки
 			sControl.playClip (reloadSound);
-			owner.animator.ReloadStart();
+			if(owner.animator!=null){
+				owner.animator.ReloadStart();
+			}
 
 		}else{
 			StopFire();

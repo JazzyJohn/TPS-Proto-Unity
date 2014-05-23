@@ -209,6 +209,10 @@ public class PlayerMainGui : MonoBehaviour {
 				
 					break;
 				case GUIState.KillCam:
+					Screen.lockCursor = true;
+					GameResult();
+					
+					break;
 				case GUIState.GameResult:
 					GameResult();
 					
@@ -570,12 +574,17 @@ public class PlayerMainGui : MonoBehaviour {
 		Application.RegisterLogCallback(HandleLog);
 	}
 	public void InitKillCam(Player killer){
-		
-		KillCamera s_Instance = MainCamera.gameObject.AddComponent(typeof (KillCamera)) as KillCamera;
-		if(s_Instance.Init(killer)){
-			ChageState(GUIState.KillCam);
-		}else{
-			ChageState(GUIState.Respawn);
+		if (killer != null) {
+				KillCamera s_Instance =FindObjectOfType<KillCamera>();
+				s_Instance.enabled = true;
+				if (s_Instance.Init (killer)) {
+						Debug.Log("killcam");
+						ChageState (GUIState.KillCam);
+				} else {
+						ChageState (GUIState.Respawn);
+				}
+		} else {
+			ChageState (GUIState.Respawn);
 		}
 	}
 	public void StopKillCam(){

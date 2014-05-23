@@ -7,7 +7,7 @@ public class Mutagen :  UseObject {
 	
 	override public bool ActualUse(Pawn target){
 		if (target.player != null) {
-			//target.player.Respawn(prefab);
+			target.player.Respawn(prefab);
 			return base.ActualUse(target);
 		}
 		return false;
