@@ -177,6 +177,7 @@ public class Pawn : DamagebleObject {
 	private bool _isGrounded;
 
 	private bool netIsGround;
+	private float TimerNotGround = 0;
 
 	public bool isGrounded
 	{
@@ -517,6 +518,7 @@ public class Pawn : DamagebleObject {
 				case CharacterState.Running:
 					if(characterState == CharacterState.Jumping||characterState == CharacterState.DoubleJump){
 						animator.ApllyJump(false);
+						TimerNotGround = 0f;
 					}
 					sControl.playFullClip (stepSound);
 					animator.ApllyMotion (2.0f, speed, strafe);
@@ -597,6 +599,8 @@ public class Pawn : DamagebleObject {
 	void Update () {
 		//Debug.Log (photonView.isSceneView);
 
+		TimerNotGround += Time.deltaTime;
+		animator.animator.SetFloat("TimerFree", TimerNotGround);
 		if (!isActive) {
 			return;		
 		}
@@ -1161,6 +1165,7 @@ public class Pawn : DamagebleObject {
 				//Debug.Log (this.ToString()+collisionInfo.collider+Vector3.Dot(Direction.normalized ,Vector3.down) );
 				if (Vector3.Dot (Direction.normalized, Vector3.down) > 0.75) {
 					isGrounded = true;
+					TimerNotGround=0;
 					floorNormal = 	contact.normal;
 				}
 			
@@ -1453,6 +1458,7 @@ public class Pawn : DamagebleObject {
 		animator.FinishPullingUp();
 		characterState = CharacterState.Idle;
 		isGrounded = true;
+		TimerNotGround=0;
 		SendMessage ("DidLand", SendMessageOptions.DontRequireReceiver);
 
 	}
