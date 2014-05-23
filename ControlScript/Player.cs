@@ -135,7 +135,15 @@ public class Player : MonoBehaviour {
 			robotPawn.RequestKillMe ();
 		}
 	}
+	public void Respawn(Pawn newPawn){
+		if (!inBot) {
+			currentPawn.RequestKillMe();
+			currentPawn  =PlayerManager.instance.SpawmPlayer(newPawn,currentPawn.myTransform.position,currentPawn.myTransform.rotation);
+		
+			AfterSpawnSetting(currentPawn,PawnType.PAWN,team);
+		}
 
+	}
 	void Update(){
 		if (!photonView.isMine) {
 			return;

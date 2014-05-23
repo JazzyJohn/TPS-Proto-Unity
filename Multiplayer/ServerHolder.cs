@@ -119,75 +119,68 @@ public class ServerHolder : MonoBehaviour
 	
 	void ShowConnectMenu()
 	{
-		GUILayout.Space(10);
+				GUILayout.Space (10);
 		
-		if (!PhotonNetwork.inRoom)
-		{
+				if (!PhotonNetwork.inRoom) {
 
-			if (!createRoom)
-			{
-				scroll = GUILayout.BeginScrollView(scroll, GUILayout.Width(480), GUILayout.Height(225));
+						if (!createRoom) {
+								scroll = GUILayout.BeginScrollView (scroll, GUILayout.Width (480), GUILayout.Height (225));
 				
-				if (allRooms.Length > 0)
-				{
-					foreach (RoomInfo room in allRooms)
-					{
-						GUILayout.BeginHorizontal("box");
-						GUILayout.Label (room.name, GUILayout.Width(150));
-						GUILayout.FlexibleSpace();
-						if (GUILayout.Button("Войти", GUILayout.Width (100)))
-						{
-							PhotonNetwork.JoinRoom(room.name);
-							connectingToRoom = true;
-						}
-						GUILayout.EndHorizontal();
-					}
-				}
+								if (allRooms.Length > 0) {
+										foreach (RoomInfo room in allRooms) {
+												GUILayout.BeginHorizontal ("box");
+												GUILayout.Label (room.name, GUILayout.Width (150));
+												GUILayout.FlexibleSpace ();
+												if (GUILayout.Button ("Войти", GUILayout.Width (100))) {
+														PhotonNetwork.JoinRoom (room.name);
+														connectingToRoom = true;
+												}
+												GUILayout.EndHorizontal ();
+										}
+								}
 				
-				if (allRooms.Length == 0)
-					GUILayout.Label("Нет доступных комнат.");
+								if (allRooms.Length == 0)
+										GUILayout.Label ("Нет доступных комнат.");
 				
-				GUILayout.EndScrollView();
-				GUILayout.Space(5);
+								GUILayout.EndScrollView ();
+								GUILayout.Space (5);
 				
-				GUILayout.FlexibleSpace();
-				GUILayout.BeginHorizontal();
-				GUILayout.FlexibleSpace();
+								GUILayout.FlexibleSpace ();
+								GUILayout.BeginHorizontal ();
+								GUILayout.FlexibleSpace ();
 				
-				if (GUILayout.Button("Создать комнату", GUILayout.Width(150), GUILayout.Height(25)))
-					createRoom = true;
+								if (GUILayout.Button ("Создать комнату", GUILayout.Width (150), GUILayout.Height (25)))
+										createRoom = true;
 				
-				GUILayout.EndHorizontal();
-			}
+								GUILayout.EndHorizontal ();
+						} else {
+								GUILayout.BeginHorizontal ();
+								GUILayout.Label ("Создание новой комнаты.", GUILayout.Width (130));
+								GUILayout.EndHorizontal ();
+				
+								GUILayout.BeginHorizontal ();
+								GUILayout.Label ("Название комнаты: ", GUILayout.Width (130));
+								newRoomName = GUILayout.TextField (newRoomName, 30, GUILayout.Height (25));
+								GUILayout.EndHorizontal ();
+				
+								GUILayout.FlexibleSpace ();
+				
+								GUILayout.BeginHorizontal ();
+				
+								if (GUILayout.Button ("Отмена", GUILayout.Width (150), GUILayout.Height (25)))
+										createRoom = false;
+								GUILayout.FlexibleSpace ();
+								if (GUILayout.Button ("Создать", GUILayout.Width (150), GUILayout.Height (25))) {
+										PhotonNetwork.CreateRoom (newRoomName, true, true, newRoomMaxPlayers);
+								}
+				
+								GUILayout.EndHorizontal ();
+				
+
 			
-			else
-			{
-				GUILayout.BeginHorizontal();
-				GUILayout.Label("Создание новой комнаты.", GUILayout.Width(130));
-				GUILayout.EndHorizontal();
-				
-				GUILayout.BeginHorizontal();
-				GUILayout.Label("Название комнаты: ", GUILayout.Width(130));
-				newRoomName = GUILayout.TextField(newRoomName, 30, GUILayout.Height(25));
-				GUILayout.EndHorizontal();
-				
-				GUILayout.FlexibleSpace();
-				
-				GUILayout.BeginHorizontal();
-				
-				if (GUILayout.Button("Отмена", GUILayout.Width (150), GUILayout.Height (25)))
-					createRoom = false;
-				GUILayout.FlexibleSpace ();
-				if (GUILayout.Button("Создать", GUILayout.Width (150), GUILayout.Height (25)))
-				{
-					PhotonNetwork.CreateRoom(newRoomName, true, true, newRoomMaxPlayers);
+						}
 				}
-				
-				GUILayout.EndHorizontal();
-				
-			}
 		}
-	}
 	
 	void OnJoinedLobby()
 	{

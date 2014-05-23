@@ -6,7 +6,7 @@ public class AlphaDogPawn : Pawn {
 
 
 	private Animator Anim;
-	public WeaponOfExtremities CurWeapons;
+	public WeaponOfExtremities naturalWeapon;
 
 	public List<HTHHitter> AttackType = new List<HTHHitter>();
 
@@ -14,7 +14,7 @@ public class AlphaDogPawn : Pawn {
 	void Start () 
 	{
 		base.Start();
-		CurWeapons = GetComponent<WeaponOfExtremities>();
+		naturalWeapon = GetComponent<WeaponOfExtremities>();
 		Anim = transform.GetComponentInChildren<Animator>(); // Привязка аниматора
 		animator = transform.GetComponentInChildren<DogAnimationManager>();
 	}
@@ -170,13 +170,15 @@ public class AlphaDogPawn : Pawn {
 
 	public void Kick(int i)
 	{
-		CurWeapons.StartKick(AttackType[i]); 
+		naturalWeapon.StartKick(AttackType[i]); 
 		((DogAnimationManager) animator).AnyDo();
 	}
 
 	public override void ToggleAim(bool value)
 	{
-		Kick(0);
+		if (value) {
+						Kick (0);
+		}
 	}
 	
 }
