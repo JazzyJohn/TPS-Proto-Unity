@@ -12,7 +12,7 @@ public class InventoryManager : MonoBehaviour {
 	
 	private int indexWeapon;
 	
-	private Pawn owner;
+	protected Pawn owner;
 	
 	[Serializable]
 	public class AmmoBag {
@@ -145,7 +145,7 @@ public class InventoryManager : MonoBehaviour {
 	/*Generate cahche info for bag
 		We don't store all weapon just important info about it when player put  weapon down
 	*/
-	void 	GenerateInfo(){
+	protected void 	GenerateInfo(){
 		weaponInfo = new WeaponBackUp[prefabWeapon.Length];
 		for(int i=0;i<prefabWeapon.Length;i++){
 			weaponInfo[i]=new WeaponBackUp(prefabWeapon[i].clipSize,prefabWeapon[i].ammoType);

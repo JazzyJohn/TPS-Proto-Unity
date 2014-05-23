@@ -98,7 +98,7 @@ public class PlayerMainGui : MonoBehaviour {
 		public int[] score;
 		public int maxScore;
 	}
-	enum GUIState{
+	public enum GUIState{
 		Normal,
 		Playerlist,
 		Dedicated,
@@ -107,7 +107,7 @@ public class PlayerMainGui : MonoBehaviour {
 		Respawn
 			
 	}
-	private GUIState guiState;
+	public GUIState guiState;
 
 	public GUISkin guiSkin;
 
@@ -157,7 +157,11 @@ public class PlayerMainGui : MonoBehaviour {
 			ChageState(GUIState.GameResult);
 			return;
 		}
-		guiState = GUIState.Normal;
+		if (!LocalPlayer.IsDead()) {
+
+			guiState = GUIState.Normal;
+		
+		}
 
 	}
 	
@@ -169,7 +173,7 @@ public class PlayerMainGui : MonoBehaviour {
 				hud.DeActivate();
 			}
 		}
-		guiState = GUIState.Normal;
+		guiState =nextState;
 	}
 
 	// Update is called once per frame
@@ -187,6 +191,7 @@ public class PlayerMainGui : MonoBehaviour {
 				case GUIState.Respawn:
 						Screen.lockCursor = false;
 						RespawnGui();
+					break;
 				case GUIState.Normal:
 			
 						//MAIN HUD
@@ -391,14 +396,14 @@ public class PlayerMainGui : MonoBehaviour {
 				}
 				
 			}
-		}
+		}	*/
 		Pawn robot = LocalPlayer.GetRobot ();
 		List<Pawn> seenablePawn = LocalPlayer.GetCurrentPawn ().getAllSeenPawn ();
 		if (LocalPlayer.inBot) {
 			//Debug.Log("ROBOT");
 			seenablePawn = robot.getAllSeenPawn ();
 		}
-	*/
+
 		//Debug.Log (seenablePawn[0]);
 		float maxsize = LocalPlayer.GetCurrentPawn ().seenDistance;
 		if (LocalPlayer.inBot) {
@@ -566,7 +571,7 @@ public class PlayerMainGui : MonoBehaviour {
 	}
 	public void InitKillCam(Player killer){
 		
-		KillCamera s_Instance = MainCamera.AddComponent(typeof (KillCamera)) as KillCamera;
+		KillCamera s_Instance = MainCamera.gameObject.AddComponent(typeof (KillCamera)) as KillCamera;
 		if(s_Instance.Init(killer)){
 			ChageState(GUIState.KillCam);
 		}else{

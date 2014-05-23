@@ -2,7 +2,7 @@
 using System.Collections;
 using System.Collections.Generic;
 
-public class WeaponOfExtremities : DestroyableNetworkObject {
+public class WeaponOfExtremities : MonoBehaviour {
 
 	class ShootData{
 		public double timeShoot;
@@ -36,7 +36,7 @@ public class WeaponOfExtremities : DestroyableNetworkObject {
 	// Use this for initialization
 	void Start () 
 	{
-		photonView = GetComponent<PhotonView>();
+
 
 		owner = GetComponent<AlphaDogPawn>();
 

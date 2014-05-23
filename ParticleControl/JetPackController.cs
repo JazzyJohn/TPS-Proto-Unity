@@ -8,6 +8,9 @@ public class JetPackController : MonoBehaviour {
 						   rightExhaust;
 	public AudioClip oneJetSound;
 	public AudioClip fullPowerSound;
+	private AudioSource aSource;
+	protected soundControl sControl;//глобальный обьект контроллера звука
+
 	public void Awake(){
 		aSource = GetComponent<AudioSource> ();
 

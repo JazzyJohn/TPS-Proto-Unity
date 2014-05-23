@@ -69,10 +69,11 @@ public class PlayerHudNgui : MonoBehaviour {
 
             if (juggernautDropTime) juggernautDropTime.text = Stats.robotTime.ToString("0.0") ;
 
-            if (ammoInGun) ammoInGun.text = Stats.ammoInGun + "/" + Stats.ammoInGunMax + " (" + Stats.ammoInBag + ")";
+			if ( Stats.gun){
+				if (ammoInGun) ammoInGun.text = Stats.gun.curAmmo+ "/" + Stats.gun.clipSize + " (" + Stats.ammoInBag + ")";
 
-            if (gunName) gunName.text = "Cant show rus";//Stats.gunName;
-
+	            if (gunName) gunName.text = "Cant show rus";//Stats.gunName;
+			}
             if (reloadingSprite) reloadingSprite.fillAmount = 1 - Stats.reloadTime;
 
             if (jetPackCharge) jetPackCharge.text = Stats.jetPackCharge.ToString();

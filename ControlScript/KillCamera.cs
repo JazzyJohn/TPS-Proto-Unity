@@ -22,17 +22,18 @@ public class KillCamera : ThirdPersonCamera
 
 	}
 	void Update(){
+			
 		if(killpalyer!=null){
-			Pawn pawn  =Killer.GetActivePawn();
+			Pawn pawn  =killpalyer.GetActivePawn();
 			if(pawn!=_pawn){
 				Init(pawn);
 			}
 		}
-		if(pawn==null){
+		if(_pawn==null){
 			FinishKillCam();
 			return;
 		}
-		killCamTime-= Time.DeltaTime;
+		killCamTime-= Time.deltaTime;
 		if(killCamTime<0){
 			FinishKillCam();
 		}
@@ -47,7 +48,7 @@ public class KillCamera : ThirdPersonCamera
 		
 		_pawn  =Killer.GetActivePawn();
 		killpalyer = Killer;
-		return Init(_pawn)
+		return Init (_pawn);
 		
 	}
 	public bool Init(Pawn Killer){

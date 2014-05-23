@@ -56,8 +56,8 @@ public class AIState : MonoBehaviour {
 		controlledPawn.enemy = null;
 
 	}
-	public virtual void IsEnemy(Pawn target){
-		return true
+	public virtual bool IsEnemy(Pawn target){
+		return true;
 	}
 
 }

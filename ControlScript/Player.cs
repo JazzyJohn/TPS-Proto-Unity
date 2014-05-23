@@ -147,6 +147,7 @@ public class Player : MonoBehaviour {
 			Pawn[] prefabClass=	PlayerManager.instance.avaiblePawn;
 			SendDelayedExternal();
 			respawnTimer-=Time.deltaTime;
+//			Debug.Log ("Dead");
 			if(respawnTimer<=0&&isStarted){
 				respawnTimer=respawnTime;
 				currentPawn =PlayerManager.instance.SpawmPlayer(prefabClass[selected],team);
@@ -238,16 +239,15 @@ public class Player : MonoBehaviour {
 					//Debug.Log (currentPawn.curLookTarget);
 
 				}
-			if(Input.GetButtonDown("Fire2")){
-				currentPawn.ToggleAim();
+			if(Input.GetButton("Fire2")){
+				currentPawn.ToggleAim(true);
 				if(robotPawn!=null){
-					robotPawn.ToggleAim();
+					robotPawn.ToggleAim(true);
 				}
-			}
-			if(Input.GetButtonUp("Fire2")){
-				currentPawn.ToggleAim();
+			}else{
+				currentPawn.ToggleAim(false);
 				if(robotPawn!=null){
-					robotPawn.ToggleAim();
+					robotPawn.ToggleAim(false);
 				}
 			}
 			if(Input.GetButtonDown("Weapon1")){

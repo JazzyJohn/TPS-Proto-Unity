@@ -92,7 +92,7 @@ public class soundControl
 	public void playFullAnotherClip(AudioClip clip){
 		if (source != null) {
 			if(!source.isPlaying){
-				if (clip != null&&source.clip !=clip[) {
+				if (clip != null&&source.clip !=clip) {
 					source.clip = clip;
 					source.Play ();
 				} 

@@ -8,10 +8,10 @@ public class ThirdPersonCamera : MonoBehaviour
 {
 	public Transform cameraTransform;
 
-	private Transform minimapTransform;
-	private Camera minimapCamera;
-	private Transform _target;
-	private Pawn _pawn;
+	protected Transform minimapTransform;
+	protected Camera minimapCamera;
+	protected Transform _target;
+	protected Pawn _pawn;
 	
 	// The distance in the x-z plane to the target
 	
@@ -95,11 +95,11 @@ public class ThirdPersonCamera : MonoBehaviour
 		
 		Cut(_target, centerOffset);
 	}
-	public void ToggleAim(){
-		aiming = !aiming;
 
+	public void ToggleAim(bool value){
+		aiming = value;
+		
 	}
-
 	void  DebugDrawStuff (){
 		//Debug.DrawLine(_target.position, _target.position + headOffset);
 	
@@ -216,6 +216,8 @@ public class ThirdPersonCamera : MonoBehaviour
 		//Quaternion pitchRotation= Quaternion.Euler (yAngle, xAngle, 0);
 		Vector3 localCamOffset =  Quaternion.Euler (yAngle, xAngle, 0)* Vector3.back * distance;
 		Vector3 localTargetOffset =  Quaternion.Euler (0, xAngle, 0)* FlatOffset;
+		FlatOffset.x = 0;
+		Vector3 localFlatOffset =  Quaternion.Euler (0, xAngle, 0)* FlatOffset;
 		Vector3 resultcameraPos = targetCenter ;
 		Vector3 targetforCamera = targetCenter;
 		//Debug.Log(pitchRotation* Vector3.back );
@@ -223,11 +225,12 @@ public class ThirdPersonCamera : MonoBehaviour
 		localCamOffset += localTargetOffset;
 		//localCamOffset =  localCamOffset;
 		resultcameraPos +=localCamOffset;
-		Vector3 direction =  (resultcameraPos - targetforCamera -localTargetOffset);
-		Ray wallRay = new Ray (targetforCamera+localTargetOffset, direction.normalized);
+//		Debug.Log (localTargetOffset);
+		Vector3 direction =  (resultcameraPos - targetforCamera -localFlatOffset);
+		Ray wallRay = new Ray (targetforCamera+FlatOffset, direction.normalized);
 		//Debug.DrawLine (targetCenter+ localTargetOffset, targetCenter+ localTargetOffset + direction.normalized*distance);
-
-		//Debug.DrawRay (wallRay.origin, wallRay.direction);
+		direction =  (resultcameraPos - targetforCamera -localTargetOffset);
+	//	Debug.DrawRay (wallRay.origin, wallRay.direction);
 		float magnitude = distance*distance+10.0f;
 		//Debug.DrawLine (wallRay.origin,wallRay.origin+ wallRay.direction*distance);
 	
@@ -284,6 +287,9 @@ public class ThirdPersonCamera : MonoBehaviour
 		return curAddShake;
 
 	}
+	public Vector3 CurrrentOffset(){
+		return (cameraTransform.position - _target.position + centerOffset);
+	}
 	public void AddShake(float mod){
 		if (_pawn != null) {
 			curAddShake = UnityEngine.Random.onUnitSphere/RECOIL_GLOBAL_MOD*mod;
@@ -321,11 +327,11 @@ public class ThirdPersonCamera : MonoBehaviour
 		snapSmoothLag = oldSnapSmooth;
 	}
 	public void Reset (){
-		yAngle = 0;
+				yAngle = 0;
 
-		xAngle = 0;
+				xAngle = 0;
 	
-	
+		}
 	public Vector3 GetCenterOffset (){
 		return centerOffset;
 	}

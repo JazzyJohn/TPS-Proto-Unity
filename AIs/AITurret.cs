@@ -107,11 +107,11 @@ public class AITurret : AIState
             return false;
 
     }
-	public virtual void IsEnemy(Pawn target){
+	public override bool IsEnemy(Pawn target){
 		if(target.team==controlledPawn.team){
 			return false;
 		}
-		return true
+		return true;
 	}
 
 }

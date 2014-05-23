@@ -174,7 +174,7 @@ public class AlphaDogPawn : Pawn {
 		((DogAnimationManager) animator).AnyDo();
 	}
 
-	public override void ToggleAim()
+	public override void ToggleAim(bool value)
 	{
 		Kick(0);
 	}

@@ -816,7 +816,7 @@ public class Pawn : DamagebleObject {
 					targetpoint =maincam.transform.forward*weaponRange +maincam.ViewportToWorldPoint(new Vector3(.5f, 0.5f, 1f));
 				}else{
 					//Debug.Log(range.ToString()+(cameraController.normalOffset.magnitude+5));
-					if(magnitude<cameraController.normalOffset.magnitude+1){
+					if(magnitude<cameraController.CurrrentOffset().magnitude+1){
 						targetpoint =maincam.transform.forward*weaponRange +maincam.ViewportToWorldPoint(new Vector3(.5f, 0.5f, 1f));
 						animator.WeaponDown(true);
 					}else{
@@ -848,14 +848,17 @@ public class Pawn : DamagebleObject {
 		return 0.0f;
 	}
 
-	public virtual void ToggleAim(){
-		isAiming = !isAiming;
-		animator.ToggleAim (isAiming);
+
+	public virtual void ToggleAim(bool value){
+		if (value&&(characterState == CharacterState.WallRunning || characterState == CharacterState.Sprinting)) {
+			return;
+		}
+		isAiming = value;
+		animator.ToggleAim (value);
 		if (cameraController != null) {
-			cameraController.ToggleAim();
+			cameraController.ToggleAim(value);
 		}
 	}
-
 	public int 	GetAmmoInBag (){
 		return ivnMan.GetAmmo (CurWeapon.ammoType);
 
@@ -1244,7 +1247,7 @@ public class Pawn : DamagebleObject {
 				if(WallRun (nextMovement,nextState)){
 					SendMessage ("WallLand", SendMessageOptions.DontRequireReceiver);
 				}
-
+				ToggleAim(false);
 				
 				
 			
@@ -1306,6 +1309,7 @@ public class Pawn : DamagebleObject {
 				}
 				
 			}
+			ToggleAim(false);
 			break;
 		case CharacterState.PullingUp:
 			PullUp();
