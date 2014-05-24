@@ -60,6 +60,8 @@ public class Player : MonoBehaviour {
 
 	private bool isDead=true;
 
+	private bool canSpamBot = true;
+
 	private PhotonView photonView;
 
 	public UseObject useTarget;
@@ -139,7 +141,7 @@ public class Player : MonoBehaviour {
 		if (!inBot) {
 			currentPawn.RequestKillMe();
 			currentPawn  =PlayerManager.instance.SpawmPlayer(newPawn,currentPawn.myTransform.position,currentPawn.myTransform.rotation);
-		
+			canSpamBot=false;
 			AfterSpawnSetting(currentPawn,PawnType.PAWN,team);
 		}
 
@@ -165,13 +167,14 @@ public class Player : MonoBehaviour {
 				prefabGhostBot =PlayerManager.instance.ghostsBots[selectedBot];
 
 			}
+			canSpamBot=true;
 		}else{
 			Ray centerofScreen =Camera.main.ViewportPointToRay(new Vector3(0.5f, 0.5f, 0f));
 			RaycastHit hitinfo;			
 			if(robotPawn==null){
 				robotTimer-=Time.deltaTime;
 				
-				if(robotTimer<=0){
+				if(robotTimer<=0&&canSpamBot){
 					if(Input.GetButton("SpawnBot")){
 						
 						if(Physics.Raycast(centerofScreen, out hitinfo,50.0f)){

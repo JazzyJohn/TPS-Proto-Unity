@@ -94,7 +94,7 @@ public class AlphaDogPawn : Pawn {
 		float strafe = 0;
 		//Debug.Log (strafe);	
 		float speed =0 ;
-		//Debug.Log (speed);
+		//
 
 		if (animator != null && animator.gameObject.activeSelf) {
 			if (photonView.isMine) {
@@ -103,7 +103,7 @@ public class AlphaDogPawn : Pawn {
 				strafe = CalculateStarfe();
 				//Debug.Log(characterState);
 				speed =CalculateSpeed();
-
+				//Debug.Log (speed);
 				switch(characterState){
 				case CharacterState.Idle:
 					Anim.SetBool("Any", false);
@@ -171,6 +171,17 @@ public class AlphaDogPawn : Pawn {
 	public void Kick(int i)
 	{
 		naturalWeapon.StartKick(AttackType[i]); 
+//		Debug.Log ("ATtack");
+		((DogAnimationManager) animator).AnyDo();
+		if (photonView.isMine) {
+			photonView.RPC("RPCKick",PhotonTargets.OthersBuffered,i);
+		}
+	}
+	[RPC]
+	public void RPCKick(int i){
+
+		naturalWeapon.StartKick(AttackType[i]); 
+		
 		((DogAnimationManager) animator).AnyDo();
 	}
 
@@ -180,5 +191,9 @@ public class AlphaDogPawn : Pawn {
 						Kick (0);
 		}
 	}
+	public override void StartFire(){
+		Kick (1);
+	}
+
 	
 }

@@ -739,7 +739,7 @@ public class Pawn : DamagebleObject {
 			CurWeapon.StartFire ();
 		} 
 	}
-	public void StopFire(){
+	public virtual void StopFire(){
 		if (CurWeapon != null) {
 			CurWeapon.StopFire ();
 		}

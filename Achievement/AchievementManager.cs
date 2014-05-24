@@ -104,7 +104,7 @@ public class AchievementManager : MonoBehaviour, LocalPlayerListener{
 			}
 //			Debug.Log("ACHIVMENT " +achivment);
 			bool open = bool.Parse(node.SelectSingleNode("open").InnerText);
-			Debug.Log(open);
+			//Debug.Log(open);
 			if(!open){
 				ongoingAchivment.Add(achivment);
 			}else{

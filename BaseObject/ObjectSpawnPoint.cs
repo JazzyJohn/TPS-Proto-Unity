@@ -13,7 +13,7 @@ public class ObjectSpawnPoint : MonoBehaviour {
 
 	protected GameObject spawnedObject;
 	// Use this for initialization
-    void Awake() { isAvalable = false; myView = GetComponent<PhotonView>(); }
+	void Awake() { isAvalable = false; myView = GetComponent<PhotonView>(); respawnTimer = respawnTime;;}
 
     void OnMasterClientSwitched()
     {
