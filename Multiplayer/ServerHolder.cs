@@ -1,6 +1,8 @@
 ﻿using UnityEngine;
 using System.Collections;
 
+
+	
 public class ServerHolder : MonoBehaviour 
 {
 	int number = 0;
@@ -14,19 +16,29 @@ public class ServerHolder : MonoBehaviour
 	string playerName;
 	string newRoomName;
 	int newRoomMaxPlayers;
-	
+	private const float FLOAT_COEF =100.0f;
 	RoomInfo[] allRooms;
 	
 	// Use this for initialization
 	void Start()
 	{
-		PhotonNetwork.autoJoinLobby = true;
-		PhotonNetwork.ConnectUsingSettings("0.1");
-		
-		allRooms = PhotonNetwork.GetRoomList();
-		newRoomMaxPlayers = 64;
-		newRoomName = "Test chamber " + Random.Range(100, 999);
-		
+		if (PhotonNetwork.inRoom) {
+			if(PhotonNetwork.isMasterClient){
+				FindObjectOfType<PVPGameRule> ().StartGame ();
+
+			}
+			Camera.main.GetComponent<PlayerMainGui> ().enabled = true;
+
+			PhotonNetwork.Instantiate ("Player", Vector3.zero, Quaternion.identity, 0);
+
+		} else {
+			PhotonNetwork.autoJoinLobby = true;
+			PhotonNetwork.ConnectUsingSettings(PlayerManager.instance.version);
+			
+			allRooms = PhotonNetwork.GetRoomList();
+			newRoomMaxPlayers = 10;
+			newRoomName = "Test chamber " + Random.Range(100, 999);
+		}
 	}
 	
 	void Update()
@@ -35,13 +47,14 @@ public class ServerHolder : MonoBehaviour
 		float nextUpdateTime = 0;
 		
 		if (!PhotonNetwork.connected)
+
 		{
 			if (Time.time - updateRate > nextUpdateTime)
 				nextUpdateTime = Time.time - Time.deltaTime;
 			
 			while (nextUpdateTime < Time.time)
 			{
-				PhotonNetwork.ConnectUsingSettings("0.1");
+				PhotonNetwork.ConnectUsingSettings(PlayerManager.instance.version);
 				nextUpdateTime += updateRate;
 			}
 		}
@@ -77,6 +90,15 @@ public class ServerHolder : MonoBehaviour
 		/*
 		else if (PhotonNetwork.connected)
 		{
+<<<<<<< HEAD
+			RoomOptions options = new RoomOptions ();
+			options.maxPlayers = 10;
+			PhotonNetwork.CreateRoom("My Room",options,null);
+		}
+		void OnCreatedRoom()
+		{
+			FindObjectOfType<PVPGameRule> ().StartGame ();
+=======
 			GUILayout.FlexibleSpace();
 			GUILayout.BeginHorizontal();
 			
@@ -87,10 +109,16 @@ public class ServerHolder : MonoBehaviour
 			}
 			
 			GUILayout.EndHorizontal();
+>>>>>>> pr/6
 		}
 		*/
 		
 		GUILayout.Label(PhotonNetwork.connectionStateDetailed.ToString());
+
+		if(connectingToRoom)
+		{
+			GUI.Box(new Rect(Screen.width / 2 - 100, Screen.height / 2 - 20, 200, 40), "Загрузка карты...");
+		}
 		
 	}
 	
@@ -100,6 +128,7 @@ public class ServerHolder : MonoBehaviour
 		
 		if (!PhotonNetwork.inRoom)
 		{
+
 			if (!createRoom)
 			{
 				scroll = GUILayout.BeginScrollView(scroll, GUILayout.Width(480), GUILayout.Height(225));
@@ -156,7 +185,12 @@ public class ServerHolder : MonoBehaviour
 				GUILayout.FlexibleSpace ();
 				if (GUILayout.Button("Создать", GUILayout.Width (150), GUILayout.Height (25)))
 				{
-					PhotonNetwork.CreateRoom(newRoomName, true, true, newRoomMaxPlayers);
+					ExitGames.Client.Photon.Hashtable customProps = new ExitGames.Client.Photon.Hashtable();
+					customProps["MapName"] = "4cubemaptest";
+					string[] exposedProps = new string[customProps.Count];
+					exposedProps[0] = "MapName";
+
+					PhotonNetwork.CreateRoom(newRoomName, true, true, newRoomMaxPlayers, customProps, exposedProps);
 				}
 				
 				GUILayout.EndHorizontal();
@@ -204,8 +238,71 @@ public class ServerHolder : MonoBehaviour
 	{
 		print("Удалось подключиться к комнате " + PhotonNetwork.room.name);
 		connectingToRoom = true;
-		
+
+		StartCoroutine(LoadMap((string)PhotonNetwork.room.customProperties["MapName"]));
+
+
 		Camera.main.GetComponent<PlayerMainGui> ().enabled = true;
 		PhotonNetwork.Instantiate ("Player",Vector3.zero,Quaternion.identity,0);
+		if (PhotonNetwork.isMasterClient) {
+			FindObjectOfType<PVPGameRule> ().StartGame ();
+		}
+
+
+
 	}
+
+	IEnumerator LoadMap (string mapName)
+	{
+		AsyncOperation async;
+
+		connectingToRoom = true;
+
+		PhotonNetwork.isMessageQueueRunning = false;
+
+		yield return new WaitForSeconds(1);
+
+		Application.backgroundLoadingPriority = ThreadPriority.High;
+		Debug.Log("Загружаем карту " + mapName);
+		async = Application.LoadLevelAsync(mapName);
+		yield return async;
+		Debug.Log ("Загрузка завершена.");
+		PhotonNetwork.isMessageQueueRunning = true;
+
+		/*
+		Camera.main.GetComponent<PlayerMainGui> ().enabled = true;
+		PhotonNetwork.Instantiate ("Player",Vector3.zero,Quaternion.identity,0);
+		if (PhotonNetwork.isMasterClient) 
+		{
+			FindObjectOfType<PVPGameRule> ().StartGame ();
+		}
+		*/
+
+	}
+
+	public static Vector3 ReadVectorFromShort(PhotonStream stream){
+		Vector3 newPosition = Vector3.zero;
+	//Debug.Log (stream.ReceiveNext ());
+	newPosition.x = ((short)stream.ReceiveNext())/FLOAT_COEF;
+	//Debug.Log (newPosition.x);
+		newPosition.y = ((short)stream.ReceiveNext())/FLOAT_COEF;
+		newPosition.z = ((short)stream.ReceiveNext())/FLOAT_COEF;
+		return newPosition;
+	}
+	public static void WriteVectorToShort(PhotonStream stream,Vector3 vect){
+		
+		stream.SendNext((short)(vect.x*FLOAT_COEF));
+		stream.SendNext((short)(vect.y*FLOAT_COEF));
+		stream.SendNext((short)(vect.z*FLOAT_COEF));
+		
+	}
+	void OnMasterClientSwitched( PhotonPlayer newMaster )
+	{
+		//TODO: director fix
+		if (PhotonNetwork.isMasterClient) {
+			FindObjectOfType<PVPGameRule> ().StartGame ();	
+		}
+	}
+
+
 }
