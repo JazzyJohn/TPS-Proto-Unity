@@ -145,19 +145,19 @@ public class dog_ThirdPersonController : ThirdPersonController {
 	{
 			if (Input.GetKeyDown(key[0]))
 			{
-			((AlphaDogPawn)Pawn).Kick(0);
+			((AlphaDogPawn)pawn).Kick(0);
 			}
 			else if (Input.GetKeyDown(key[1]))
 			{
-			((AlphaDogPawn)Pawn).Kick(1);
+			((AlphaDogPawn)pawn).Kick(1);
 			}
 			else if (Input.GetKeyDown(key[2]))
 			{
-			((AlphaDogPawn)Pawn).Kick(2);
+			((AlphaDogPawn)pawn).Kick(2);
 			}
 			else if (Input.GetKeyDown(key[3]))
 			{
-			((AlphaDogPawn)Pawn).Kick(3);
+			((AlphaDogPawn)pawn).Kick(3);
 			}
 	}
 
