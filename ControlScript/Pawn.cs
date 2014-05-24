@@ -1653,7 +1653,7 @@ public class Pawn : DamagebleObject {
 	}
 	public void SetTeam(int newTeam){
 		team = newTeam;
-		photonView.RPC("RPCDeActivate",PhotonTargets.OthersBuffered,team);
+		photonView.RPC("RPCSetTeam",PhotonTargets.OthersBuffered,team);
 	}
 	[RPC]
 	public void RPCSetTeam(int newTeam){

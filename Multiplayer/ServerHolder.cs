@@ -19,7 +19,8 @@ public class ServerHolder : MonoBehaviour
 	int newRoomMaxPlayers;
 	private const float FLOAT_COEF =100.0f;
 	RoomInfo[] allRooms;
-	
+
+
 	// Use this for initialization
 	void Start()
 	{
@@ -140,11 +141,15 @@ public class ServerHolder : MonoBehaviour
 								if (allRooms.Length > 0) {
 										foreach (RoomInfo room in allRooms) {
 												GUILayout.BeginHorizontal ("box");
-												GUILayout.Label (room.name, GUILayout.Width (150));
+												GUILayout.Label (room.name +"  "+  room.playerCount + " / " +room.maxPlayers, GUILayout.Width (150));
 												GUILayout.FlexibleSpace ();
-												if (GUILayout.Button ("Войти", GUILayout.Width (100))) {
-														PhotonNetwork.JoinRoom (room.name);
-														connectingToRoom = true;
+					
+												if( room.playerCount<newRoomMaxPlayers){
+													if (GUILayout.Button ("Войти", GUILayout.Width (100))) {
+																					
+															PhotonNetwork.JoinRoom (room.name);
+															connectingToRoom = true;
+													}
 												}
 												GUILayout.EndHorizontal ();
 										}
@@ -266,6 +271,7 @@ public class ServerHolder : MonoBehaviour
 		connectingToRoom = true;
 
 		PhotonNetwork.isMessageQueueRunning = false;
+
 
 		yield return new WaitForSeconds(1);
 

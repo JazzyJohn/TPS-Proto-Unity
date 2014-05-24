@@ -11,7 +11,7 @@ public class AnimationManager : MonoBehaviour
 	public IKcontroller aimPos;
 	private bool shouldAim= true;
 	public Rigidbody rb;
-    private void Start()
+    private void Awake()
     {
         animator = GetComponent<Animator>();
 		if (aimPos == null) {

@@ -210,7 +210,7 @@ public class PlayerMainGui : MonoBehaviour {
 					break;
 				case GUIState.KillCam:
 					Screen.lockCursor = true;
-					GameResult();
+					PlayerList();
 					
 					break;
 				case GUIState.GameResult:
