@@ -108,15 +108,20 @@ public class AnimationManager : MonoBehaviour
     {	
 		//if (animator.layerCount >= 3) {
 						//AnimatorStateInfo state = animator.GetCurrentAnimatorStateInfo ();
-						if (!jump) {
-								animator.SetBool ("Jump", false);
-								animator.SetBool ("Grounded", true);
-								animator.SetBool ("StandUp", true);
-						}else{
-								animator.SetBool ("StandUp", false);
-								animator.SetBool ("Jump", true);
-								animator.SetBool ("Grounded", false);
-						}
+		switch(jump)
+		{
+		case true:
+			animator.SetBool ("StandUp", false);
+			animator.SetBool ("Jump", true);
+			animator.SetBool ("Grounded", false);
+			break;
+		case false:
+			animator.SetBool ("Jump", false);
+			animator.SetBool ("Grounded", true);
+			animator.SetBool ("StandUp", true);
+			animator.SetFloat ("TimerFree", 0);
+			break;
+		}
 			//	}
 				
     }
