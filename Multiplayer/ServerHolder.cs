@@ -5,6 +5,7 @@ using System.Collections;
 	
 public class ServerHolder : MonoBehaviour 
 {
+	public bool shouldLoad = true;
 	int number = 0;
 	
 	Vector2 scroll;
@@ -113,18 +114,28 @@ public class ServerHolder : MonoBehaviour
 		}
 		*/
 		
-		//GUILayout.Label(PhotonNetwork.connectionStateDetailed.ToString());
+
+		GUILayout.Label(PhotonNetwork.connectionStateDetailed.ToString());
+
+		if(connectingToRoom)
+		{
+			GUI.Box(new Rect(Screen.width / 2 - 100, Screen.height / 2 - 20, 200, 40), "Загрузка карты...");
+		}
+
 		
 	}
 	
 	void ShowConnectMenu()
 	{
 				GUILayout.Space (10);
-		
-				if (!PhotonNetwork.inRoom) {
 
-						if (!createRoom) {
-								scroll = GUILayout.BeginScrollView (scroll, GUILayout.Width (480), GUILayout.Height (225));
+		if (!PhotonNetwork.inRoom)
+		{
+
+			if (!createRoom)
+			{
+				scroll = GUILayout.BeginScrollView(scroll, GUILayout.Width(480), GUILayout.Height(225));
+
 				
 								if (allRooms.Length > 0) {
 										foreach (RoomInfo room in allRooms) {
@@ -167,12 +178,20 @@ public class ServerHolder : MonoBehaviour
 				
 								GUILayout.BeginHorizontal ();
 				
-								if (GUILayout.Button ("Отмена", GUILayout.Width (150), GUILayout.Height (25)))
-										createRoom = false;
-								GUILayout.FlexibleSpace ();
-								if (GUILayout.Button ("Создать", GUILayout.Width (150), GUILayout.Height (25))) {
-										PhotonNetwork.CreateRoom (newRoomName, true, true, newRoomMaxPlayers);
-								}
+
+						if (GUILayout.Button("Отмена", GUILayout.Width (150), GUILayout.Height (25)))
+							createRoom = false;
+						GUILayout.FlexibleSpace ();
+						if (GUILayout.Button("Создать", GUILayout.Width (150), GUILayout.Height (25)))
+						{
+							ExitGames.Client.Photon.Hashtable customProps = new ExitGames.Client.Photon.Hashtable();
+							customProps["MapName"] = "kaspi_map_c_2_test";
+							string[] exposedProps = new string[customProps.Count];
+							exposedProps[0] = "MapName";
+
+							PhotonNetwork.CreateRoom(newRoomName, true, true, newRoomMaxPlayers, customProps, exposedProps);
+						}
+
 				
 								GUILayout.EndHorizontal ();
 				
@@ -181,7 +200,10 @@ public class ServerHolder : MonoBehaviour
 						}
 				}
 		}
-	
+	public void LoadNextMap(){
+		connectingToRoom = true;
+		StartCoroutine (LoadMap ((string)PhotonNetwork.room.customProperties ["MapName"]));
+	}
 	void OnJoinedLobby()
 	{
 		print ("Мы в лобби.");
@@ -221,12 +243,52 @@ public class ServerHolder : MonoBehaviour
 	{
 		print("Удалось подключиться к комнате " + PhotonNetwork.room.name);
 		connectingToRoom = true;
-		
-		Camera.main.GetComponent<PlayerMainGui> ().enabled = true;
+		if (shouldLoad) {
+			StartCoroutine (LoadMap ((string)PhotonNetwork.room.customProperties ["MapName"]));
+		} else {
+			FinishLoad ();
+		}
+
+		/*Camera.main.GetComponent<PlayerMainGui> ().enabled = true;
 		PhotonNetwork.Instantiate ("Player",Vector3.zero,Quaternion.identity,0);
 		if (PhotonNetwork.isMasterClient) {
 			FindObjectOfType<PVPGameRule> ().StartGame ();
-		} 
+		}*/
+
+
+
+	}
+
+	IEnumerator LoadMap (string mapName)
+	{
+		AsyncOperation async;
+
+		connectingToRoom = true;
+
+		PhotonNetwork.isMessageQueueRunning = false;
+
+		yield return new WaitForSeconds(1);
+
+		Application.backgroundLoadingPriority = ThreadPriority.High;
+		Debug.Log("Загружаем карту " + mapName);
+		async = Application.LoadLevelAsync(mapName);
+		yield return async;
+		Debug.Log ("Загрузка завершена.");
+		PhotonNetwork.isMessageQueueRunning = true;
+
+
+		FinishLoad ();
+
+
+	}
+	public void FinishLoad(){
+		Camera.main.GetComponent<PlayerMainGui> ().enabled = true;
+		PhotonNetwork.Instantiate ("Player",Vector3.zero,Quaternion.identity,0);
+		connectingToRoom = false;
+		if (PhotonNetwork.isMasterClient) 
+		{
+			FindObjectOfType<PVPGameRule> ().StartGame ();
+		}
 	}
 
 	public static Vector3 ReadVectorFromShort(PhotonStream stream){

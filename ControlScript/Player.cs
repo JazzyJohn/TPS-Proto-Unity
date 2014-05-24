@@ -138,7 +138,7 @@ public class Player : MonoBehaviour {
 		}
 	}
 	public void Respawn(Pawn newPawn){
-		if (!inBot) {
+		if (!inBot&&photonView.isMine) {
 			currentPawn.RequestKillMe();
 			currentPawn  =PlayerManager.instance.SpawmPlayer(newPawn,currentPawn.myTransform.position,currentPawn.myTransform.rotation);
 			canSpamBot=false;

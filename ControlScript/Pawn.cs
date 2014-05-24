@@ -1651,7 +1651,14 @@ public class Pawn : DamagebleObject {
 	public List<Pawn> getAllSeenPawn(){
 		return seenPawns;
 	}
-
+	public void SetTeam(int newTeam){
+		team = newTeam;
+		photonView.RPC("RPCDeActivate",PhotonTargets.OthersBuffered,team);
+	}
+	[RPC]
+	public void RPCSetTeam(int newTeam){
+		team = newTeam;
+	}
 
 	//end seen hear work
 

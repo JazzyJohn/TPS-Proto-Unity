@@ -56,8 +56,7 @@ public class PVPGameRule : GameRule {
 			if (isGameEnded) {
 				restartTimer+= Time.deltaTime;				
 				if(restartTimer>restartTime){
-					PhotonNetwork.isMessageQueueRunning =false;
-					PhotonNetwork.LoadLevel(NextMap());
+				FindObjectOfType<ServerHolder>().LoadNextMap();
 				}
 			}else	if (!PhotonNetwork.isMasterClient) {
 				return;

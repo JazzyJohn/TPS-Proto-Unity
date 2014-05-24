@@ -157,7 +157,7 @@ public class PlayerMainGui : MonoBehaviour {
 			ChageState(GUIState.GameResult);
 			return;
 		}
-		if (!LocalPlayer.IsDead()) {
+		if (LocalPlayer!=null&&!LocalPlayer.IsDead()) {
 
 			guiState = GUIState.Normal;
 		

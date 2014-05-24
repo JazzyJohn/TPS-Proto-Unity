@@ -6,7 +6,7 @@ public class AISpawnPoint : ObjectSpawnPoint {
 	public int  team;
 	public void Spawned(Pawn newPawn){
 		isAvalable = false;
-		newPawn.team = team;
+		newPawn.SetTeam(team);
 		spawnedObject = newPawn.gameObject;
 			
 	}

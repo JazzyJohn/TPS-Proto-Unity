@@ -2,8 +2,7 @@
 using System.Collections;
 using System.Collections.Generic;
 
-[RequireComponent (typeof(Player))]
-[RequireComponent (typeof(PointControll_GameRule))]
+
 
 public class TFAssaultPoint : MonoBehaviour {
 	private List<Player> invaders = new List<Player> ();

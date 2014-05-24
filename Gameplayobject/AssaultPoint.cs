@@ -2,9 +2,6 @@
 using System.Collections;
 using System.Collections.Generic;
 
-[RequireComponent (typeof(Player))]
-[RequireComponent (typeof(PointControll_GameRule))]
-
 public class AssaultPoint : MonoBehaviour {
 	private List<Player> invaders = new List<Player> ();
 	public int[] points = new int[2];
@@ -134,6 +131,7 @@ public class AssaultPoint : MonoBehaviour {
 	
 		Debug.Log ("Times: " + timeToCountdownRed + " .. " + timeToCountdownBlue);
 		//If nobody staying on the point in red/blue command, the process of invade will be decreasing every 0.5s by 2 points.
+
 		if (countRedInvaders () == 0 && (timeToCountdownRed < Time.time))
 			points [0] -= 2;
 		if (countBlueInvaders () == 0 && (timeToCountdownBlue < Time.time))
