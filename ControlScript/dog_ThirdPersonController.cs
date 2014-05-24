@@ -1,4 +1,4 @@
-﻿using UnityEngine;
+using UnityEngine;
 using System.Collections;
 
 public class dog_ThirdPersonController : ThirdPersonController {
@@ -137,27 +137,21 @@ public class dog_ThirdPersonController : ThirdPersonController {
 		if (moveSpeed < pawn.groundWalkSpeed * 0.3f)
 			walkTimeStart = Time.time;
 
-		
+		//Debug.Log (moveSpeed);
 	}
 
 	// Update is called once per frame
 	void Update () 
 	{
-			if (Input.GetKeyDown(key[0]))
-			{
-			((AlphaDogPawn)pawn).Kick(0);
+
+			if (Input.GetButtonDown ("Fire1")) {
+				pawn.StartFire();
 			}
-			else if (Input.GetKeyDown(key[1]))
-			{
-			((AlphaDogPawn)pawn).Kick(1);
+			if(Input.GetButton("SpawnBot")){
+				((AlphaDogPawn)pawn).Kick(2);
 			}
-			else if (Input.GetKeyDown(key[2]))
-			{
-			((AlphaDogPawn)pawn).Kick(2);
-			}
-			else if (Input.GetKeyDown(key[3]))
-			{
-			((AlphaDogPawn)pawn).Kick(3);
+			if(Input.GetButton("Jump")){
+				((AlphaDogPawn)pawn).Kick(3	);
 			}
 	}
 

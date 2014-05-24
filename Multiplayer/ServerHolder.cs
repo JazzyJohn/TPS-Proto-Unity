@@ -227,7 +227,8 @@ public class ServerHolder : MonoBehaviour
 		if (PhotonNetwork.isMasterClient) {
 			FindObjectOfType<PVPGameRule> ().StartGame ();
 		} 
-		}
+	}
+
 	public static Vector3 ReadVectorFromShort(PhotonStream stream){
 		Vector3 newPosition = Vector3.zero;
 	//Debug.Log (stream.ReceiveNext ());
