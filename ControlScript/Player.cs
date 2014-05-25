@@ -161,6 +161,7 @@ public class Player : MonoBehaviour {
 			if(respawnTimer<=0&&isStarted){
 				respawnTimer=respawnTime;
 				currentPawn =PlayerManager.instance.SpawmPlayer(prefabClass[selected],team);
+				currentPawn.ChangeDefaultWeapon(Choice._Personal,Choice._Main,Choice._Extra);
 				PVPGameRule.instance.Spawn(team);
 				AfterSpawnSetting(currentPawn,PawnType.PAWN,team);
 				prefabBot =PlayerManager.instance.avaibleBots[selectedBot];
@@ -208,6 +209,7 @@ public class Player : MonoBehaviour {
 							Vector3 spamPoint =ghostBot.transform.position;
 							spamPoint.y+= 30;
 							robotPawn =(RobotPawn)PlayerManager.instance.SpawmPlayer(prefabBot,spamPoint,ghostBot.transform.rotation);
+							robotPawn.ChangeDefaultWeapon(Choice._MainRobo,Choice._MeleeRobo,Choice._HeavyRobo);
 							//Debug.Log("robot spawn"+robotPawn);
 							AfterSpawnSetting(robotPawn,PawnType.BOT,team);
 

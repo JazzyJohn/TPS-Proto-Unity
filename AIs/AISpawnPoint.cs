@@ -8,6 +8,6 @@ public class AISpawnPoint : ObjectSpawnPoint {
 		isAvalable = false;
 		newPawn.SetTeam(team);
 		spawnedObject = newPawn.gameObject;
-			
+	//	newPawn.AfterSpawnAction ();
 	}
 }

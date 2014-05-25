@@ -4,7 +4,7 @@ using System.Collections;
 
 public class MenuTF : MonoBehaviour {
 
-	private int _Pl_Ro; //0 - player, 1 -robot
+	public static int _Pl_Ro; //0 - player, 1 -robot
 
 	private int _PlayerNum;
 	private int _RobotNum;
@@ -72,9 +72,6 @@ public class MenuTF : MonoBehaviour {
 	public Texture2D[] _ButtonTeamTex;
 	public Texture2D[] _ButtonTeamTexPress;
 
-	public Color[] _ButtonTeamFontColor;
-	public Color[] _ButtonTeamFontColorPress;
-
 	public GUIStyle[] _TeamGSbutton = new GUIStyle[2];
 //---------------------------------
 
@@ -97,21 +94,26 @@ public class MenuTF : MonoBehaviour {
 	public float _SizePrevImg = 1.4f;
 	public float _PosPrevImgX = 3f;
 	public float _PosPrevImgY = 3.9f;
-
 	
 
 	//TimerSpawn
 	private float _TimerSpawn;
 	private string _TimerSpawnView;
 
+	//GUNprev
+	float[] _GUNprevSize = new float[4];
+	bool [] _ActivGUNprevSize = new bool[4];
+	public GUIStyle _GUNprev;
+	public static Texture2D[] _GUNprevTexPlayer;
+	public static Texture2D[] _GUNprevTexRobo;
+
 //-----------------------------------------------------------------------------------------------------------
 	void Start () 
 	{
 		_Pl_Ro = -1;
-		int fontSize= Mathf.RoundToInt(Screen.width * _TextSize);
-		_StartGS.fontSize = fontSize;
-		_TeamGSbutton[0].fontSize = fontSize;
-		_TeamGSbutton[1].fontSize = fontSize;
+
+		_StartGS.fontSize = Mathf.RoundToInt(Screen.height * _TextSize);
+
 		_BackgroundWidth = Mathf.RoundToInt(Screen.width/_BGWidthСoefficient);
 		_BackgroundHeight = Mathf.RoundToInt(Screen.height/_BGHeightСoefficient);
 
@@ -149,14 +151,28 @@ public class MenuTF : MonoBehaviour {
 		_TimerSpawn = 5;
 
 
+		for(int i = 0; i < _GSbutton.Length; i++)
+		_GSbutton[i].fontSize = Mathf.RoundToInt(Screen.height * _TextSize);
 
-		//_OpenAnimate = true;
+		for(int i = 0; i < _robGSbutton.Length; i++)
+		_robGSbutton[i].fontSize = Mathf.RoundToInt(Screen.height * _TextSize/1.5f);
+
+		for(int i = 0; i < _TeamGSbutton.Length; i++)
+		_TeamGSbutton[i].fontSize = Mathf.RoundToInt(Screen.height * _TextSize);
+
+		for(int i = 0; i < _GunsGS.Length; i++)
+		_GunsGS[i].fontSize = Mathf.RoundToInt(Screen.height * _TextSize/1.5f);
+
+
+		_GUNprevTexPlayer = new Texture2D[4];
+		_GUNprevTexRobo = new Texture2D[3];
+
+		_GUNprev.alignment = TextAnchor.MiddleCenter;
 	}
 	
 //---------------------------------------------------------------------------------------------------------------
 	void FixedUpdate () 
 	{
-		//Debug.Log(Choice._Robot + "lol" + Choice._Player);
 
 		/*//MouseMenuLol
 		if(_OpenAnimate == false && _CloseAnimate == false)
@@ -197,8 +213,7 @@ public class MenuTF : MonoBehaviour {
 		else
 		{
 			_TimerSpawnView = "В БОЙ";
-		}
-		*/
+		}*/
 	}
 	
 //-----------------------------------------------------------------------------------------------------------------------------------
@@ -210,73 +225,85 @@ public class MenuTF : MonoBehaviour {
 //PlayerMenu-----------------------------------------------------------------
 
 			//Buttons----------------------------------------------------------------------------
-			if(GUI.Button(new Rect(Screen.width/_ButtonPosX, Screen.height/_ButtonPosY, Screen.width/_ButtonSizeX, Screen.height/_ButtonSizeY), "", _GSbutton[0]))
+			if(GUI.Button(new Rect(Screen.width/_ButtonPosX, Screen.height/_ButtonPosY, Screen.width/_ButtonSizeX, Screen.height/_ButtonSizeY), "ИНЖЕНЕР", _GSbutton[0]))
 			{
 
 			    for(int i = 0; i < _GSbutton.Length; i ++)
 				{
 					_GSbutton[i].normal.background = _ButtonPlayerTex[i];
+				    _GSbutton[i].normal.textColor = Color.black;
 				}
 				_GSbutton[0].normal.background = _ButtonPlayerTexPress[0];
+			    _GSbutton[0].normal.textColor = Color.white;
 
-
-				Choice._Player = (int)GameClassEnum.ENGINEER;
+				Choice._Player =(int) GameClassEnum.ENGINEER;
 
 				_Pl_Ro = 0;
-	
+
+			    ResetPrevWind();
+
 			}
 
 
 			//-----------------------------
-			if(GUI.Button(new Rect(Screen.width/_ButtonPosX + Screen.width/_ButtonSizeX, Screen.height/_ButtonPosY, Screen.width/_ButtonSizeX, Screen.height/_ButtonSizeY), "", _GSbutton[1]))
+			if(GUI.Button(new Rect(Screen.width/_ButtonPosX + Screen.width/_ButtonSizeX, Screen.height/_ButtonPosY, Screen.width/_ButtonSizeX, Screen.height/_ButtonSizeY), "МЕДИК", _GSbutton[1]))
 			{
 
 				for(int i = 0; i < _GSbutton.Length; i ++)
 				{
 					_GSbutton[i].normal.background = _ButtonPlayerTex[i];
+				    _GSbutton[i].normal.textColor = Color.black;
 				}
 				_GSbutton[1].normal.background = _ButtonPlayerTexPress[1];
-
+			    _GSbutton[1].normal.textColor = Color.white;
 
 				Choice._Player = (int)GameClassEnum.MEDIC;
 			
-				_Pl_Ro = 0;
+				_Pl_Ro =0;
+
+			    ResetPrevWind();
 
 			}
 		    
 
 			//-------------------------------
-			if(GUI.Button(new Rect(Screen.width/_ButtonPosX + Screen.width/_ButtonSizeX * 2, Screen.height/_ButtonPosY, Screen.width/_ButtonSizeX, Screen.height/_ButtonSizeY), "", _GSbutton[2]))
+			if(GUI.Button(new Rect(Screen.width/_ButtonPosX + Screen.width/_ButtonSizeX * 2, Screen.height/_ButtonPosY, Screen.width/_ButtonSizeX, Screen.height/_ButtonSizeY), "ШТУРМОВИК", _GSbutton[2]))
 			{
 
 				for(int i = 0; i < _GSbutton.Length; i ++)
 				{
 					_GSbutton[i].normal.background = _ButtonPlayerTex[i];
+				    _GSbutton[i].normal.textColor = Color.black;
 				}
 				_GSbutton[2].normal.background = _ButtonPlayerTexPress[2];
+			    _GSbutton[2].normal.textColor = Color.white;
 
+				Choice._Player = (int)GameClassEnum.ASSAULT;
 
-				Choice._Player =  (int)GameClassEnum.ASSAULT;
+				_Pl_Ro =0;
 
-				_Pl_Ro = 0;
+			    ResetPrevWind();
 
 			}
 
 		    //--------------------------------
-			if(GUI.Button(new Rect(Screen.width/_ButtonPosX + Screen.width/_ButtonSizeX * 3, Screen.height/_ButtonPosY, Screen.width/_ButtonSizeX, Screen.height/_ButtonSizeY), "", _GSbutton[3]))
+			if(GUI.Button(new Rect(Screen.width/_ButtonPosX + Screen.width/_ButtonSizeX * 3, Screen.height/_ButtonPosY, Screen.width/_ButtonSizeX, Screen.height/_ButtonSizeY), "СНАЙПЕР", _GSbutton[3]))
 			{
 
 				for(int i = 0; i < _GSbutton.Length; i ++)
 				{
 					_GSbutton[i].normal.background = _ButtonPlayerTex[i];
+				    _GSbutton[i].normal.textColor = Color.black;
 				}
 				_GSbutton[3].normal.background = _ButtonPlayerTexPress[3];
+			    _GSbutton[3].normal.textColor = Color.white;
 
 
-
-				Choice._Player =   (int)GameClassEnum.SCOUT;
+				Choice._Player = (int)GameClassEnum.SCOUT;
 
 				_Pl_Ro = 0;
+
+			    ResetPrevWind();
 
 			}
 		//--------------------------------------------------------------------------
@@ -284,82 +311,157 @@ public class MenuTF : MonoBehaviour {
 
 //RobotMenu-----------------------------------------------------------------
 			//Buttons----------------------------------------------------------------------------
-			if(GUI.Button(new Rect(Screen.width/_robButtonPosX, Screen.height/_robButtonPosY, Screen.width/_robButtonSizeX, Screen.height/_robButtonSizeY), "", _robGSbutton[0]))
+			if(GUI.Button(new Rect(Screen.width/_robButtonPosX, Screen.height/_robButtonPosY, Screen.width/_robButtonSizeX, Screen.height/_robButtonSizeY), "ТЯЖЁЛЫЙ РОБОТ", _robGSbutton[0]))
 		    {		
 				for(int i = 0; i < _robGSbutton.Length; i ++)
 				{
 					_robGSbutton[i].normal.background = _ButtonRobotTex[i];
+				    _robGSbutton[i].normal.textColor = Color.black;
 				}
 				_robGSbutton[0].normal.background = _ButtonRobotTexPress[0];
-
-
+			    _robGSbutton[0].normal.textColor = Color.white;
+			 
 				Choice._Robot = 0;
 
 				_Pl_Ro = 1;
 				
+			    ResetPrevWind();
+
 			}
 
-			if(GUI.Button(new Rect(Screen.width/_robButtonPosX + Screen.width/_robButtonSizeX, Screen.height/_robButtonPosY, Screen.width/_robButtonSizeX, Screen.height/_robButtonSizeY), "", _robGSbutton[1]))
+			if(GUI.Button(new Rect(Screen.width/_robButtonPosX + Screen.width/_robButtonSizeX, Screen.height/_robButtonPosY, Screen.width/_robButtonSizeX, Screen.height/_robButtonSizeY), "СРЕДНИЙ РОБОТ", _robGSbutton[1]))
 			{	
 				for(int i = 0; i < _robGSbutton.Length; i ++)
 				{
 					_robGSbutton[i].normal.background = _ButtonRobotTex[i];
+				    _robGSbutton[i].normal.textColor = Color.black;
 				}
 				_robGSbutton[1].normal.background = _ButtonRobotTexPress[1];
-
+			    _robGSbutton[1].normal.textColor = Color.white;
 
 				Choice._Robot = 1;
 
 				_Pl_Ro = 1;
+
+			    ResetPrevWind();
 				
 			}
 
-			if(GUI.Button(new Rect(Screen.width/_robButtonPosX + Screen.width/_robButtonSizeX * 2, Screen.height/_robButtonPosY, Screen.width/_robButtonSizeX, Screen.height/_robButtonSizeY), "", _robGSbutton[2]))
+			if(GUI.Button(new Rect(Screen.width/_robButtonPosX + Screen.width/_robButtonSizeX * 2, Screen.height/_robButtonPosY, Screen.width/_robButtonSizeX, Screen.height/_robButtonSizeY), "ЛЁГКИЙ РОБОТ", _robGSbutton[2]))
 			{	
 				for(int i = 0; i < _robGSbutton.Length; i ++)
 				{
 					_robGSbutton[i].normal.background = _ButtonRobotTex[i];
+				    _robGSbutton[i].normal.textColor = Color.black;
 				}
 				_robGSbutton[2].normal.background = _ButtonRobotTexPress[2];
-
+			    _robGSbutton[2].normal.textColor = Color.white;
 
 				Choice._Robot = 2;
 
 				_Pl_Ro = 1;
+
+			    ResetPrevWind();
 				
 			}	
 			
 //--------------------------------------------------------------------------
 	//GunsMenu
-		GUI.Box(new Rect(Screen.width/16, Screen.height/4.2f, Screen.width/6, Screen.height/24), "", _GunsGS[0]);
+		GUI.Box(new Rect(Screen.width/16, Screen.height/4.2f, Screen.width/6, Screen.height/24), "СНАРЯЖЕНИЕ", _GunsGS[0]);
 	
 		//Player
 		if(_Pl_Ro == 0)
 		{
-		
-			if(GUI.Button(new Rect(Screen.width/16, Screen.height/4.2f + (Screen.height/24 * 2), Screen.width/6, Screen.height/24), "", _GunsGS[1]))
+			float _lol = _GUNprevSize[0] + _GUNprevSize[1] + _GUNprevSize[2];
+
+			if(GUI.Button(new Rect(Screen.width/16, Screen.height/4.2f + (Screen.height/24 * 2), Screen.width/6, Screen.height/24), "ЛИЧНОЕ", _GunsGS[1]))
 			{	
+				WeaponPlayer._IntActive = 1;
 
-
+				for(int i = 0; i < _ActivGUNprevSize.Length; i++)
+				{
+					_ActivGUNprevSize[i] = false;
+				}
+				_ActivGUNprevSize[0] = true;
 			}
 
-			if(GUI.Button(new Rect(Screen.width/16, Screen.height/4.2f + (Screen.height/24 * 3), Screen.width/6, Screen.height/24), "", _GunsGS[2]))
-			{	
-				
-				
+			if(_ActivGUNprevSize[0] == true && _GUNprevSize[0] < Screen.width/12)
+			{
+				_GUNprevSize[0] = Mathf.Lerp(_GUNprevSize[0], Screen.width/12, Time.deltaTime * 4);
+				GUI.Box(new Rect(Screen.width/16, Screen.height/4.2f + (Screen.height/24 * 3), Screen.width/6, _GUNprevSize[0]), _GUNprevTexPlayer[0],  _GUNprev);
 			}
 
-			if(GUI.Button(new Rect(Screen.width/16, Screen.height/4.2f + (Screen.height/24 * 4), Screen.width/6, Screen.height/24), "", _GunsGS[3]))
+			if(_ActivGUNprevSize[0]  == false)
+			_GUNprevSize[0] = Mathf.Lerp(_GUNprevSize[0], 0, Time.deltaTime * 4);
+
+			//----------------------------------------------------------------------------------------------------------------------------------------
+
+
+
+			if(GUI.Button(new Rect(Screen.width/16, Screen.height/4.2f + (Screen.height/24 * 3) + _GUNprevSize[0], Screen.width/6, Screen.height/24), "ОСНОВНОЕ", _GunsGS[2]))
 			{	
+				WeaponPlayer._IntActive = 2;
+
+				for(int i = 0; i < _ActivGUNprevSize.Length; i++)
+				{
+					_ActivGUNprevSize[i] = false;
+				}
+				_ActivGUNprevSize[1] = true;
+			}
+
+			if(_ActivGUNprevSize[1] == true && _GUNprevSize[1] < Screen.width/12 && _GUNprevSize[0] < 5)
+			{
+				_GUNprevSize[1] = Mathf.Lerp(_GUNprevSize[1], Screen.width/12, Time.deltaTime * 4);
+				GUI.Box(new Rect(Screen.width/16, Screen.height/4.2f + (Screen.height/24 * 4), Screen.width/6, _GUNprevSize[1]), _GUNprevTexPlayer[1], _GUNprev);
+			}
+			
+			if(_ActivGUNprevSize[1]  == false)
+			_GUNprevSize[1] = Mathf.Lerp(_GUNprevSize[1], 0, Time.deltaTime * 4);
+			//---------------------------------------------------------------------------------------------------------------------------------------
 
 			
-			}
 
-			if(GUI.Button(new Rect(Screen.width/16, Screen.height/4.2f + (Screen.height/24 * 5), Screen.width/6, Screen.height/24), "", _GunsGS[4]))
+			if(GUI.Button(new Rect(Screen.width/16, Screen.height/4.2f + (Screen.height/24 * 4) + _GUNprevSize[0] + _GUNprevSize[1], Screen.width/6, Screen.height/24), "ДОПОЛНИТЕЛЬНОЕ", _GunsGS[3]))
 			{	
-				
-				
+				WeaponPlayer._IntActive = 3;
+
+				for(int i = 0; i < _ActivGUNprevSize.Length; i++)
+				{
+					_ActivGUNprevSize[i] = false;
+				}
+				_ActivGUNprevSize[2] = true;
 			}
+			if(_ActivGUNprevSize[2] == true && _GUNprevSize[2] < Screen.width/12 && _GUNprevSize[0] + _GUNprevSize[1] < 5)
+			{
+				_GUNprevSize[2] = Mathf.Lerp(_GUNprevSize[2], Screen.width/12, Time.deltaTime * 4);
+				GUI.Box(new Rect(Screen.width/16, Screen.height/4.2f + (Screen.height/24 * 5), Screen.width/6, _GUNprevSize[2]), _GUNprevTexPlayer[2],  _GUNprev);
+			}
+			
+			if(_ActivGUNprevSize[2]  == false)
+				_GUNprevSize[2] = Mathf.Lerp(_GUNprevSize[2], 0, Time.deltaTime * 4);
+			//---------------------------------------------------------------------------------------------------------------------------------------
+
+
+
+			if(GUI.Button(new Rect(Screen.width/16, Screen.height/4.2f + (Screen.height/24 * 5) + _lol, Screen.width/6, Screen.height/24), "ГРАНАТЫ", _GunsGS[4]))
+			{	
+				WeaponPlayer._IntActive = 4;
+
+				for(int i = 0; i < _ActivGUNprevSize.Length; i++)
+				{
+					_ActivGUNprevSize[i] = false;
+				}
+				_ActivGUNprevSize[3] = true;
+			}
+			if(_ActivGUNprevSize[3] == true && _GUNprevSize[3] < Screen.width/12 && _lol < 5)
+			{
+				_GUNprevSize[3] = Mathf.Lerp(_GUNprevSize[3], Screen.width/12, Time.deltaTime * 4);
+				GUI.Box(new Rect(Screen.width/16, Screen.height/4.2f + (Screen.height/24 * 6), Screen.width/6, _GUNprevSize[3]), _GUNprevTexPlayer[3], _GUNprev);
+			}
+			
+			if(_ActivGUNprevSize[3]  == false)
+				_GUNprevSize[3] = Mathf.Lerp(_GUNprevSize[3], 0, Time.deltaTime * 4);
+
 
 		}
 		//Player------------------
@@ -368,23 +470,69 @@ public class MenuTF : MonoBehaviour {
 		if(_Pl_Ro == 1)
 		{
 			
-			if(GUI.Button(new Rect(Screen.width/16, Screen.height/4.2f + (Screen.height/24 * 2), Screen.width/6, Screen.height/24), "", _GunsGS[5]))
+			if(GUI.Button(new Rect(Screen.width/16, Screen.height/4.2f + (Screen.height/24 * 2), Screen.width/6, Screen.height/24), "БЛИЖНИЙ БОЙ", _GunsGS[5]))
 			{	
-				
-				
+				WeaponPlayer._IntActiveRobo = 1;
+
+				for(int i = 0; i < _ActivGUNprevSize.Length; i++)
+				{
+					_ActivGUNprevSize[i] = false;
+				}
+				_ActivGUNprevSize[0] = true;
 			}
 			
-			if(GUI.Button(new Rect(Screen.width/16, Screen.height/4.2f + (Screen.height/24 * 3), Screen.width/6, Screen.height/24), "", _GunsGS[6]))
-			{	
-				
-				
+			if(_ActivGUNprevSize[0] == true && _GUNprevSize[0] < Screen.width/12)
+			{
+				_GUNprevSize[0] = Mathf.Lerp(_GUNprevSize[0], Screen.width/12, Time.deltaTime * 4);
+				GUI.Box(new Rect(Screen.width/16, Screen.height/4.2f + (Screen.height/24 * 3), Screen.width/6, _GUNprevSize[0]), _GUNprevTexRobo[0],  _GUNprev);
 			}
 			
-			if(GUI.Button(new Rect(Screen.width/16, Screen.height/4.2f + (Screen.height/24 * 4), Screen.width/6, Screen.height/24), "", _GunsGS[7]))
+			if(_ActivGUNprevSize[0]  == false)
+				_GUNprevSize[0] = Mathf.Lerp(_GUNprevSize[0], 0, Time.deltaTime * 4);
+			//-----------------------------------------------------------------------------------------------------------------------------------------
+
+			if(GUI.Button(new Rect(Screen.width/16, Screen.height/4.2f + (Screen.height/24 * 3) + _GUNprevSize[0], Screen.width/6, Screen.height/24), "ОСНОВНОЕ", _GunsGS[6]))
 			{	
-				
-				
+				WeaponPlayer._IntActiveRobo = 2;
+
+				for(int i = 0; i < _ActivGUNprevSize.Length; i++)
+				{
+					_ActivGUNprevSize[i] = false;
+				}
+				_ActivGUNprevSize[1] = true;
 			}
+			
+			if(_ActivGUNprevSize[1] == true && _GUNprevSize[1] < Screen.width/12 && _GUNprevSize[0] < 5)
+			{
+				_GUNprevSize[1] = Mathf.Lerp(_GUNprevSize[1], Screen.width/12, Time.deltaTime * 4);
+				GUI.Box(new Rect(Screen.width/16, Screen.height/4.2f + (Screen.height/24 * 4), Screen.width/6, _GUNprevSize[1]), _GUNprevTexRobo[1], _GUNprev);
+			}
+			
+			if(_ActivGUNprevSize[1]  == false)
+				_GUNprevSize[1] = Mathf.Lerp(_GUNprevSize[1], 0, Time.deltaTime * 4);
+			//-----------------------------------------------------------------------------------------------------------------------------------------
+
+
+
+			if(GUI.Button(new Rect(Screen.width/16, Screen.height/4.2f + (Screen.height/24 * 4) + _GUNprevSize[0] + _GUNprevSize[1], Screen.width/6, Screen.height/24), "ТЯЖЁЛОЕ", _GunsGS[7]))
+			{	
+				WeaponPlayer._IntActiveRobo = 3;
+
+				for(int i = 0; i < _ActivGUNprevSize.Length; i++)
+				{
+					_ActivGUNprevSize[i] = false;
+				}
+				_ActivGUNprevSize[2] = true;
+			}
+			if(_ActivGUNprevSize[2] == true && _GUNprevSize[2] < Screen.width/12 && _GUNprevSize[0] + _GUNprevSize[1] < 5)
+			{
+				_GUNprevSize[2] = Mathf.Lerp(_GUNprevSize[2], Screen.width/12, Time.deltaTime * 4);
+				GUI.Box(new Rect(Screen.width/16, Screen.height/4.2f + (Screen.height/24 * 5), Screen.width/6, _GUNprevSize[2]), _GUNprevTexRobo[2],  _GUNprev);
+			}
+			
+			if(_ActivGUNprevSize[2]  == false)
+				_GUNprevSize[2] = Mathf.Lerp(_GUNprevSize[2], 0, Time.deltaTime * 4);
+			//-----------------------------------------------------------------------------------------------------------------------------------------
 
 		}
 		//Robot--------------------
@@ -420,10 +568,10 @@ public class MenuTF : MonoBehaviour {
 			for(int i = 0; i <  _TeamGSbutton.Length; i ++)
 			{
 				_TeamGSbutton[i].normal.background = _ButtonTeamTex[i];
-				_TeamGSbutton[i].normal.textColor =_ButtonTeamFontColor[i];
+				_TeamGSbutton[i].normal.textColor = Color.black;
 			}
 			_TeamGSbutton[0].normal.background = _ButtonTeamTexPress[0];
-			_TeamGSbutton[0].normal.textColor =_ButtonTeamFontColorPress[0];
+			_TeamGSbutton[0].normal.textColor = Color.white;
 			
 			
 			Choice._Team = 1;
@@ -435,32 +583,33 @@ public class MenuTF : MonoBehaviour {
 			for(int i = 0; i < _TeamGSbutton.Length; i ++)
 			{
 				_TeamGSbutton[i].normal.background = _ButtonTeamTex[i];
-				_TeamGSbutton[i].normal.textColor =_ButtonTeamFontColor[i];
+				_TeamGSbutton[i].normal.textColor = Color.black;
 			}
 			_TeamGSbutton[1].normal.background = _ButtonTeamTexPress[1];
-			_TeamGSbutton[1].normal.textColor =_ButtonTeamFontColorPress[1];
-			
+			_TeamGSbutton[1].normal.textColor = Color.white;
 			
 			Choice._Team = 2;
 		}
 	//Team-------------------------
+/*
 
-
-	
-		/*if(Choice._Player != -1 && Choice._Robot != -1 && Choice._Team != -1)
+	//StartButton
+		if(Choice._Player != -1 && Choice._Robot != -1 && Choice._Team != -1)
 		{
-			if(GUI.Button(new Rect(Screen.width/2 - (Screen.width/5)/2 , Screen.height/4 * 3.5f, Screen.width/5, Screen.height/15), _TimerSpawnView, _StartGS))
+			if(GUI.Button(new Rect(Screen.width/2 - (Screen.width/5)/2 , Screen.height/4 * 3.5f, Screen.width/5, Screen.height/15), "В БОЙ", _StartGS))
 			{
 				if(_TimerSpawn < 0)
 				{
 
 				}
 			}
-		}*/
+		}
+	//StartButton-------------------
 
-
-	
+	*/
 	}//GUI
+
+
 	//StartButton
 	public bool SetTimer(int timer){
 		if(timer > 0)
@@ -474,6 +623,20 @@ public class MenuTF : MonoBehaviour {
 		return GUI.Button (new Rect (Screen.width / 2 - (Screen.width / 5) / 2, Screen.height / 4 * 3.5f, Screen.width / 5, Screen.height / 15), _TimerSpawnView, _StartGS)&&timer<=0;
 	}
 	//StartButton-------------------
+	void ResetPrevWind()
+	{
+		for(int i = 0; i < _ActivGUNprevSize.Length; i++)
+		{
+			_ActivGUNprevSize[i]  = false;
+
+		}
+		_ActivGUNprevSize[1]  = true;
+		WeaponPlayer._IntActive = 2;
+		WeaponPlayer._IntActiveRobo = 1;
+	//	ItemManager.instance.defSettings[Choice._Player];
+
+	}
+
 }
 
 
@@ -482,4 +645,15 @@ public static class Choice
 	public static int _Player;
 	public static int _Robot;
 	public static int _Team;
+
+	//PlayerWeapons
+	public static int _Personal = -1;
+	public static int _Main= -1;
+	public static int _Extra= -1;
+	public static int _Grenade= -1;
+
+	//RoboWeapons
+	public static int _MeleeRobo;
+	public static int _MainRobo;
+	public static int _HeavyRobo;
 }

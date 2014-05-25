@@ -297,14 +297,30 @@ public class Pawn : DamagebleObject {
 		if (canJump) {
 			jetPackCharge = charMan.GetIntChar(CharacteristicList.JETPACKCHARGE);
 		}
-		ivnMan.Init ();
-		AfterSpawnAction ();
+
+		if (isAi) {
+			ivnMan.Init ();
+			AfterSpawnAction ();
+		}
 		//Debug.Log (distToGround);
 
 	}
 	public virtual void AfterSpawnAction(){
 		 ivnMan.GenerateWeaponStart();
 	
+	}
+	public virtual void ChangeDefaultWeapon(int idPersonal,int idMain,int idExtra){
+		ivnMan.Init ();
+		if (idPersonal != -1) {
+			ivnMan.SetSlot(ItemManager.instance.weaponPrefabsListbyId[idPersonal]);
+		}
+		if (idMain != -1) {
+			ivnMan.SetSlot(ItemManager.instance.weaponPrefabsListbyId[idMain]);
+		}
+		if (idExtra != -1) {
+			ivnMan.SetSlot(ItemManager.instance.weaponPrefabsListbyId[idExtra]);
+		}
+		ivnMan.GenerateWeaponStart();
 	}
 	public override void Damage(BaseDamage damage,GameObject killer){
 		if (isSpawn||killer==null||!isActive) {//если только респавнились, то повреждений не получаем

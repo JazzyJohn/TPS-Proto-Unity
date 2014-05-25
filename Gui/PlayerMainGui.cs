@@ -115,6 +115,8 @@ public class PlayerMainGui : MonoBehaviour {
 
 	private MenuTF respawnMenu;
 
+	private WeaponPlayer weaponMenu;
+
 	private PlayerHudNgui hud;
 
 	private ChatHolder[] chats;
@@ -124,6 +126,7 @@ public class PlayerMainGui : MonoBehaviour {
 	void Start () {
 		MainCamera = Camera.main;
 		respawnMenu = GetComponent<MenuTF>();
+		weaponMenu = GetComponent<WeaponPlayer>();
 	}
 
 	public void SetLocalPlayer(Player newPlayer){
@@ -157,10 +160,14 @@ public class PlayerMainGui : MonoBehaviour {
 			ChageState(GUIState.GameResult);
 			return;
 		}
-		if (LocalPlayer!=null&&!LocalPlayer.IsDead()) {
+		if (LocalPlayer != null && !LocalPlayer.IsDead ()) {
 
-			guiState = GUIState.Normal;
+			ChageState(GUIState.Normal);
 		
+		} else {
+			if(	guiState != GUIState.KillCam){
+				guiState = GUIState.Respawn;
+			}
 		}
 
 	}
@@ -319,6 +326,7 @@ public class PlayerMainGui : MonoBehaviour {
 		}*/
 
 		respawnMenu.DrawMenu ();
+		weaponMenu.DrawMenu ();
 		if (Choice._Player != -1 && Choice._Robot != -1&&Choice._Team!= -1) {
 			LocalPlayer.SetTeam (Choice._Team);
 			

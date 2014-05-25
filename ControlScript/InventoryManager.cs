@@ -145,6 +145,8 @@ public class InventoryManager : MonoBehaviour {
 	/*Generate cahche info for bag
 		We don't store all weapon just important info about it when player put  weapon down
 	*/
+
+
 	protected void 	GenerateInfo(){
 		weaponInfo = new WeaponBackUp[prefabWeapon.Length];
 		for(int i=0;i<prefabWeapon.Length;i++){
@@ -175,7 +177,16 @@ public class InventoryManager : MonoBehaviour {
 	
 	//WEAPON CHANGE SECTION
 	
+	public void SetSlot( BaseWeapon prefab){
+		for(int i=0;i<prefabWeapon.Length;i++){
+			if(prefabWeapon[i].slotType==prefab.slotType){
+				prefabWeapon[i]=prefab;
+				weaponInfo[i]=new WeaponBackUp(prefabWeapon[i].clipSize, prefabWeapon[i].ammoType);
+			
+			}
+		}
 
+	}
 	
 	
 	//Change weapon in inventory 
