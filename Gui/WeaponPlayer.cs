@@ -2,7 +2,7 @@
 using System.Collections;
 using System.Collections.Generic;
 
-public class GUIWeapon{
+public class GUIItem{
 	public int index;
 	public Texture2D texture;
 	public string name;
@@ -64,7 +64,7 @@ public class WeaponPlayer : MonoBehaviour {
 //Player--------------------------------------------------------------------------------------------------------------------------------------------------
 
 		if (MenuTF._Pl_Ro == 0) {
-						List<GUIWeapon> listOfItems = ItemManager.instance.GetWeaponForSlot ((GameClassEnum)Choice._Player, (BaseWeapon.SLOTTYPE)(_IntActive-1));
+						List<GUIItem> listOfItems = ItemManager.instance.GetItemForSlot ((GameClassEnum)Choice._Player, (_IntActive-1));
 						switch (_IntActive) {
 
 						//Main

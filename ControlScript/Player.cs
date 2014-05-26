@@ -5,7 +5,7 @@ using System.Collections.Generic;
 public enum PawnType{PAWN,BOT};
 
 //BIT MASK 
-public enum GameClassEnum{ENGINEER,ASSAULT,SCOUT,MEDIC,ANY};
+public enum GameClassEnum{ENGINEER,ASSAULT,SCOUT,MEDIC,ANY,ROBOTHEAVY,ROBOTMEDIUM,ROBOTLIGHT,ANYROBOT};
 
 public class Player : MonoBehaviour {
 	public List<string> friendsInfo = new List<string>();
@@ -161,7 +161,7 @@ public class Player : MonoBehaviour {
 			if(respawnTimer<=0&&isStarted){
 				respawnTimer=respawnTime;
 				currentPawn =PlayerManager.instance.SpawmPlayer(prefabClass[selected],team);
-				currentPawn.ChangeDefaultWeapon(Choice._Personal,Choice._Main,Choice._Extra);
+				currentPawn.ChangeDefaultWeapon(Choice._Player);
 				PVPGameRule.instance.Spawn(team);
 				AfterSpawnSetting(currentPawn,PawnType.PAWN,team);
 				prefabBot =PlayerManager.instance.avaibleBots[selectedBot];

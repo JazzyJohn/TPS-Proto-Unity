@@ -5,7 +5,11 @@ using System.Collections;
 public class KillCamera : ThirdPersonCamera
 {
 	public float killCamTime = 3.0f;
-
+	
+	public Vector3 mediumTargetOffset  = Vector3.zero;
+	
+	public Vector3 bigTargetOffset  = Vector3.zero;
+	
 	private float killCamTimer = 0.0f;
 	
 	private Player killpalyer; 
@@ -30,6 +34,7 @@ public class KillCamera : ThirdPersonCamera
 			if(pawn!=_pawn){
 				Init(pawn);
 			}
+			
 		}
 		if(_pawn==null){
 			FinishKillCam();
@@ -59,6 +64,13 @@ public class KillCamera : ThirdPersonCamera
 		killCamTimer = 0.0f;
 		if(_pawn !=null){
 			_target =_pawn.myTransform;
+			if(_pawn.bigTarget){
+				normalOffset =bigTargetOffset;
+			}else{
+				normalOffset =mediumTargetOffset;
+				
+			}
+			
 			InitOffsets();
 			return true;
 		}

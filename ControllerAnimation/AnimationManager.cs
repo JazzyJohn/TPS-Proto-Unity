@@ -1,6 +1,7 @@
 ﻿using UnityEngine;
 using System.Collections;
 
+public enum AnimType {TAUNT};
 public class AnimationManager : MonoBehaviour
 {
     private float
@@ -250,5 +251,9 @@ public class AnimationManager : MonoBehaviour
 	public void ReloadStart(){
 	
 		animator.SetTrigger ("Reload");
+	}
+	public void PlayTaunt(string tauntName){
+		
+		animator.Play(tauntName);
 	}
 }

@@ -23,6 +23,8 @@ public class StatisticHandler : MonoBehaviour {
 	public static string LOAD_SHOP = "loadshop";
 	
 	public static string BUY_ITEM = "buyItem";
+	
+	public static string SAVE_ITEM = "saveitem";
 
 	public static string STATISTIC_PHP="http://vk.rakgames.ru/kaspi/";
 
@@ -90,5 +92,21 @@ public class StatisticHandler : MonoBehaviour {
 
 
 
+	}
+	
+	public static WWW GetMeRightWWW(string URL){
+		WWW www = null;
+		if (String.Compare(Application.absoluteURL, 0, "https", 0,5) != 0) {
+			
+			//Debug.Log ("STATS HTTP SEND" + StatisticHandler.STATISTIC_PHP_HTTPS +  node.SelectSingleNode ("textureGUIName").InnerText);
+			www = new WWW (StatisticHandler.STATISTIC_PHP + URL);
+		}
+		else{
+			//Debug.Log ("STATS HTTPS SEND"+StatisticHandler.STATISTIC_PHP_HTTPS +  node.SelectSingleNode ("textureGUIName").InnerText);
+			www = new WWW (StatisticHandler.STATISTIC_PHP_HTTPS +  URL);
+		}
+	
+		return www;
+	
 	}
 }

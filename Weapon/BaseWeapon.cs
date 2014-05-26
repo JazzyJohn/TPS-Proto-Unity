@@ -31,7 +31,7 @@ public class BaseWeapon : DestroyableNetworkObject {
 
 	public AMUNITONTYPE amunitionType;
 	
-	public enum SLOTTYPE{PERSONAL, MAIN, ANTITANK};
+	public enum SLOTTYPE{PERSONAL, MAIN, ANTITANK,GRENADE};
 
 	public SLOTTYPE slotType;
 	

@@ -18,22 +18,18 @@ public class FromDBWeapon{
 
 	public string name;
 }
-public struct DefaultItemSettings{
-
-	public int mainIndex;
-	 
-	public Texture2D mainTexture;
-
-	public int personalIndex;
+public class FromDBAnims{
+	public GameClassEnum  gameClass;
 	
-	public Texture2D personalTexture;
+	public AnimType animationType;
+	
+	public string animationId;
+	
+	public Texture2D textureGUI;
 
-	public int extraIndex;
-
-	public Texture2D extraTexture;
+	public string name;
 
 }
-
 public class ShopSlot{
 	public string name;
 	
@@ -57,14 +53,13 @@ public class ItemManager : MonoBehaviour {
 	
 	private GameClassEnum lastGameClass;
 	
-	private BaseWeapon.SLOTTYPE lastGameSlot;
+	private int lastGameSlot;
 	
-	private List<GUIWeapon>  weaponList= new List<GUIWeapon>();
+	private List<GUIItem>  weaponList= new List<GUIItem>();
 
 	public FromDBWeapon[]  weaponIndexTable;
 
-	public DefaultItemSettings[] defSettings= new DefaultItemSettings[4];
-	
+	public FromDBAnims[] animsIndexTable;
 	private string UID ;
 	
 	public void Init(string uid){
@@ -83,16 +78,9 @@ public class ItemManager : MonoBehaviour {
 	}
 	protected IEnumerator LoadItems(WWWForm form){
 		Debug.Log (form );
-		WWW w = null;
-		if (String.Compare(Application.absoluteURL, 0, "https", 0,5) != 0) {
-			
-			Debug.Log ("STATS HTTP SEND" + StatisticHandler.STATISTIC_PHP_HTTPS + StatisticHandler.LOAD_ITEMS);
-			w = new WWW (StatisticHandler.STATISTIC_PHP + StatisticHandler.LOAD_ITEMS, form);
-		}
-		else{
-			Debug.Log ("STATS HTTPS SEND"+StatisticHandler.STATISTIC_PHP_HTTPS + StatisticHandler.LOAD_ITEMS);
-			w = new WWW (StatisticHandler.STATISTIC_PHP_HTTPS + StatisticHandler.LOAD_ITEMS, form);
-		}
+	
+		WWW w = StatisticHandler.GetMeRightWWW(StatisticHandler.LOAD_ITEMS);
+		
 
 		yield return w;
 
@@ -113,17 +101,9 @@ public class ItemManager : MonoBehaviour {
 			entry.gameSlot =weaponPrefabsListbyId[entry.weaponId].slotType;
 			entry.name =weaponPrefabsListbyId[entry.weaponId].weaponName;
 
-			WWW www = null;
-			if (String.Compare(Application.absoluteURL, 0, "https", 0,5) != 0) {
-				
-				//Debug.Log ("STATS HTTP SEND" + StatisticHandler.STATISTIC_PHP_HTTPS +  node.SelectSingleNode ("textureGUIName").InnerText);
-				www = new WWW (StatisticHandler.STATISTIC_PHP + node.SelectSingleNode ("textureGUIName").InnerText);
-			}
-			else{
-				//Debug.Log ("STATS HTTPS SEND"+StatisticHandler.STATISTIC_PHP_HTTPS +  node.SelectSingleNode ("textureGUIName").InnerText);
-				www = new WWW (StatisticHandler.STATISTIC_PHP_HTTPS +  node.SelectSingleNode ("textureGUIName").InnerText);
-			}
 			
+			WWW www = StatisticHandler.GetMeRightWWW( node.SelectSingleNode ("textureGUIName").InnerText);
+		
 			yield return www;
 			entry.textureGUI = new Texture2D(150,80);
 			www.LoadImageIntoTexture(entry.textureGUI);
@@ -131,29 +111,52 @@ public class ItemManager : MonoBehaviour {
 			weaponIndexTable[entry.weaponId]=entry;	
 
 			if(bool.Parse(node.SelectSingleNode ("default").InnerText)){
-				switch(entry.gameSlot){
-					case BaseWeapon.SLOTTYPE.ANTITANK:
-					for(int j=0;j<defSettings.Length;j++){
-						defSettings[j].extraTexture = entry.textureGUI;
-						defSettings[j].extraIndex = entry.weaponId;
-					}
+				switch(entry.gameClass){
+					case GameClassEnum.ANY:
+			
+						for(int j=0;j<Choice._Personal.Length;j++){
+							Choice.SetChoice((int)entry.gameSlot, j, entry.weaponId);
+						}
 					break;
-					case BaseWeapon.SLOTTYPE.PERSONAL:
-					for(int j=0;j<defSettings.Length;j++){
-						defSettings[j].personalTexture = entry.textureGUI;
-						defSettings[j].personalIndex = entry.weaponId;
-					}
-					break;
-					case BaseWeapon.SLOTTYPE.MAIN:
-				
-						defSettings[(int)entry.gameClass].mainTexture = entry.textureGUI;
-						defSettings[(int)entry.gameClass].mainIndex = entry.weaponId;
-
+					default:
+						Choice.SetChoice((int)entry.gameSlot,(int)	entry.gameClass, entry.weaponId);
 					break;
 
 				}
 			}
 		}
+	
+		int i = 0;
+		animsIndexTable = new FromDBAnims[xmlDoc.SelectNodes ("items/anims").Count];
+		foreach (XmlNode node in xmlDoc.SelectNodes("items/anims")) {
+			FromDBAnims entry = new FromDBAnims();
+			entry.animationId = node.SelectSingleNode ("animationId").InnerText;
+			entry.gameClass =  gameClassPase(node.SelectSingleNode ("gameClass").InnerText);
+			entry.animationType =AnimType.Parse(node.SelectSingleNode ("animType").InnerText);
+			entry.name =weaponPrefabsListbyId[entry.weaponId].weaponName;
+
+			WWW www = StatisticHandler.GetMeRightWWW(node.SelectSingleNode ("textureGUIName").InnerText)
+			
+			yield return www;
+			entry.textureGUI = new Texture2D(150,80);
+			www.LoadImageIntoTexture(entry.textureGUI);
+			//Debug.Log (entry.name + " " +entry.textureGUI + " " +entry.weaponId );
+			weaponIndexTable[entry.weaponId]=entry;	
+
+		
+		}
+		
+		foreach (XmlNode node in xmlDoc.SelectNodes("items/default")) {
+			int index = int.Parse (node.SelectSingleNode ("weaponId").InnerText);
+			int gameSlot =(int)weaponPrefabsListbyId[index].slotType;
+			int gameClass = int.Parse (node.SelectSingleNode ("gameClass").InnerText);
+			if(gameClass<=(int) GameClassEnum.ANY){
+				Choice.SetChoice(gameSlot,entry.gameClass,index);
+			}else{
+				Choice.SetChoiceRobot(gameSlot,entry.gameClass,index);
+			}
+		}
+		
 	}	
 
 	protected static GameClassEnum gameClassPase(string text){
@@ -173,22 +176,103 @@ public class ItemManager : MonoBehaviour {
 			case "ANY":
 				return  GameClassEnum.ANY;
 				break;
+			case "ROBOTHEAVY":
+				return  GameClassEnum.ROBOTHEAVY;
+				break;
+			case "ROBOTMEDIUM":
+				return  GameClassEnum.ROBOTMEDIUM;
+				break;
+			case "ROBOTLIGHT":
+				return  GameClassEnum.ROBOTLIGHT;
+				break;
+			case "ANYROBOT":
+				return  GameClassEnum.ANYROBOT;
+				break;
+				
 				
 		}
 		return GameClassEnum.ANY;
 	
 	}
-	public List<GUIWeapon> GetWeaponForSlot(GameClassEnum gameClass, BaseWeapon.SLOTTYPE gameSlot){
-		if(lastGameClass==gameClass&&lastGameSlot==gameSlot){	
-			return weaponList;
+	public void SaveItemForSlot(){
+		WWWForm form = new WWWForm ();
+			
+		form.AddField ("uid", UID);
+		form.AddField ("class", Choice._Player);
+		form.AddField ("robotclass", Choice._Robot);
+		for(int i = 0;i<4;i++){
+		
+				form.AddField ("default[]", Choice. ForGuiSlot(i));
 		}
+	
+		for(int i = 0;i<4;i++){
+		
+			form.AddField ("defaultrobot[]", Choice. ForGuiSlotRobot(i));
+			
+		}
+
+		StatisticHandler.instance.StartCoroutine(StatisticHandler.SendForm (form,StatisticHandler.SAVE_ITEM));
+	
+	}
+	
+	public List<GUIItem> GetItemForSlot(GameClassEnum gameClass, int gameSlot){
+			if(lastGameClass==gameClass&&lastGameSlot==gameSlot){	
+				return weaponList;
+			}
+			switch(gameSlot){
+				//Taunt section look WeaponPlayer.cs for details
+				case 5:
+					return  GetAnimationForSlot(GameClassEnum gameClass);
+				break;
+				default:
+					return  GetWeaponForSlot(GameClassEnum gameClass, (BaseWeapon.SLOTTYPE) gameSlot);
+				break;
+				
+			
+			
+			}
+					
+		
+	
+	}
+	public List<GUIItem> GetAnimationForSlot(GameClassEnum gameClass){
+		
 		weaponList.Clear();
 		lastGameClass=gameClass;
 		lastGameSlot=gameSlot;
+		GameClassEnum MyANY = GameClassEnum.ANY
+		if(gameClass>(int) GameClassEnum.ANY){
+			MyANY = GameClassEnum.ANYROBOT
+		}
+		foreach(FromDBAnims entry  in animsIndexTable){
+
+			if(entry.animationType==AnimType.TAUNT&&(entry.gameClass ==MyANY||entry.gameClass==gameClass)){
+				GUIItem gui = new GUIItem();
+				gui.index = entry.animationId;
+				gui.name= entry.name;
+				gui.texture = entry.textureGUI;
+
+				weaponList.Add(gui);
+			
+			}
+		}
+		return weaponList;
+	}
+	
+	
+	public List<GUIItem> GetWeaponForSlot(GameClassEnum gameClass, BaseWeapon.SLOTTYPE gameSlot){
+		
+		weaponList.Clear();
+		lastGameClass=gameClass;
+		lastGameSlot=gameSlot;
+		GameClassEnum MyANY = GameClassEnum.ANY
+		if(gameClass>(int) GameClassEnum.ANY){
+			MyANY = GameClassEnum.ANYROBOT
+		}
 		foreach(FromDBWeapon entry  in weaponIndexTable){
 
-			if(entry.gameSlot==lastGameSlot&&(entry.gameClass ==GameClassEnum.ANY||entry.gameClass==gameClass)){
-				GUIWeapon gui = new GUIWeapon();
+			if(entry.gameSlot==lastGameSlot&&(entry.gameClass ==MyANY||entry.gameClass==gameClass)){
+				GUIItem gui = new GUIItem();
 				gui.index = entry.weaponId;
 				gui.name= entry.name;
 				gui.texture = entry.textureGUI;
@@ -231,10 +315,9 @@ public class ItemManager : MonoBehaviour {
 		}
 
 		yield return w;
-		ParseShop(w.text);
+		StartCoroutine(ParseShop(w.text));
 		
 		
-		isShopLoading = false;
 	}
 	public IEnumerator  ParseShop(string XML){
 		XmlDocument xmlDoc = new XmlDocument();
@@ -271,7 +354,9 @@ public class ItemManager : MonoBehaviour {
 			// assign the downloaded image to the texture of the slot
 			www.LoadImageIntoTexture(slot.texture);
 			shopItems.Add(slot);
-		}		
+		}
+
+		isShopLoading = false;		
 	}
 	
 	public IEnumerator  BuyItem(int itemId,bool forGold){

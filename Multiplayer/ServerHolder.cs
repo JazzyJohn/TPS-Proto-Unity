@@ -269,7 +269,11 @@ public class ServerHolder : MonoBehaviour
 		AsyncOperation async;
 
 		connectingToRoom = true;
-
+		PhotonNetwork.DestroyPlayerObjects 	( PhotonNetwork.player);
+		
+		
+		yield return new WaitForSeconds(1);
+		
 		PhotonNetwork.isMessageQueueRunning = false;
 
 
@@ -281,7 +285,7 @@ public class ServerHolder : MonoBehaviour
 		yield return async;
 		Debug.Log ("Загрузка завершена.");
 		PhotonNetwork.isMessageQueueRunning = true;
-
+		
 
 		FinishLoad ();
 

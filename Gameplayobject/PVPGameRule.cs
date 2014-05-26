@@ -153,6 +153,7 @@ public class PVPGameRule : GameRule {
 			isGameEnded=true;
 			Player player = GameObject.Find ("Player").GetComponent<Player> ();
 			player.GameEnd ();
+			EventHolder.instance.FireEvent(typeof(GameListener),"EventTeamWin",Winner());
 		}
 
 		public bool FinalStage (){

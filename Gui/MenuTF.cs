@@ -634,7 +634,14 @@ public class MenuTF : MonoBehaviour {
 		WeaponPlayer._IntActive = 2;
 		WeaponPlayer._IntActiveRobo = 1;
 	//	ItemManager.instance.defSettings[Choice._Player];
-
+		for(int i = 0; i<4;i++){
+			int index = Choice.ForGuiSlot(i);
+			if(index!=-1){
+				_GUNprevTexPlayer[i] =ItemManager.instance.FromDBWeapon [index];
+			}
+		}
+	
+		
 	}
 
 }
@@ -647,13 +654,90 @@ public static class Choice
 	public static int _Team;
 
 	//PlayerWeapons
-	public static int _Personal = -1;
-	public static int _Main= -1;
-	public static int _Extra= -1;
-	public static int _Grenade= -1;
-
+	public static int[] _Personal = new int{-1,-1,-1,-1};
+	public static int[] _Main = new int{-1,-1,-1,-1};
+	public static int[] _Extra = new int{-1,-1,-1,-1};
+	public static int[] _Grenad = new int{-1,-1,-1,-1};
+	public static int[] _Taunt = new int{-1,-1,-1,-1};
+	
+	public static int ForGuiSlot(int slot){
+		switch(slot){
+			case 0:
+				return _Personal[_Player];
+				break;
+			case 1:
+				return _Main[_Player];
+				break;
+			case 2:
+				return _Extra[_Player];
+				break;
+			case 3:
+				return _Grenad[_Player];
+				break;
+			case 4:
+				return _Taunt[_Player];
+				break;	
+				
+		}
+		return -1;
+	}
+	public static void SetChoice(int slot, int gameClass, int index){
+		switch(slot){
+			case 0:
+				return _Personal[gameClass]=index;
+				break;
+			case 1:
+				return _Main[gameClass]=index;
+				break;
+			case 2:
+				return _Extra[gameClass]=index;
+				break;
+			case 3:
+				return _Grenad[gameClass]=index;
+				break;
+			case 4:
+				return _Taunt[gameClass]=index;
+				break;
+		}
+	}
+	
 	//RoboWeapons
-	public static int _MeleeRobo;
-	public static int _MainRobo;
-	public static int _HeavyRobo;
+	public static int _MeleeRobo = new int{-1,-1,-1};
+	public static int _MainRobo = new int{-1,-1,-1};
+	public static int _HeavyRobo = new int{-1,-1,-1};
+	public static int _TauntRobo = new int{-1,-1,-1};
+	public static void SetChoice(int slot, int gameClass, int index){
+		switch(slot){
+			case 0:
+				return _MeleeRobo[gameClass]=index;
+				break;
+			case 1:
+				return _MainRobo[gameClass]=index;
+				break;
+			case 2:
+				return _HeavyRobo[gameClass]=index;
+				break;
+			case 3:
+				return _TauntRobo[gameClass]=index;
+				break;
+		
+		}
+	}
+	public static int ForGuiSlotRobot(int slot){
+		switch(slot){
+			case 0:
+				return _MeleeRobo[_Robot];
+				break;
+			case 1:
+				return _MainRobo[_Robot];
+				break;
+			case 2:
+				return _HeavyRobo[_Robot];
+				break;
+			case 3:
+				return _TauntRobo[gameClass]=index;
+				break;
+		}
+		return -1;
+	}
 }

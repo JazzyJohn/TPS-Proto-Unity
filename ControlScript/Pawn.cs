@@ -245,9 +245,15 @@ public class Pawn : DamagebleObject {
 
 	private bool isSpawn=false;//флаг респавна
 
-
-
-
+	//FOR killcamera size offset; Like robot always big;
+	
+	public bool bigTarget = false;
+	
+	//Visual Components
+	
+	
+	public string tauntAnimation = "";
+	
 	protected void Awake(){
 		myTransform = transform;
 		ivnMan =GetComponent<InventoryManager> ();
@@ -309,7 +315,11 @@ public class Pawn : DamagebleObject {
 		 ivnMan.GenerateWeaponStart();
 	
 	}
-	public virtual void ChangeDefaultWeapon(int idPersonal,int idMain,int idExtra){
+	public virtual void ChangeDefaultWeapon(int myId){
+		int idPersonal = Choise._Personal[myId], 
+		idMain= Choise._Main[myId], 
+		idExtra = Choise._Extra[myId],
+		idTaunt = Choise._Taunt[myId];
 		ivnMan.Init ();
 		if (idPersonal != -1) {
 			ivnMan.SetSlot(ItemManager.instance.weaponPrefabsListbyId[idPersonal]);
@@ -321,6 +331,9 @@ public class Pawn : DamagebleObject {
 			ivnMan.SetSlot(ItemManager.instance.weaponPrefabsListbyId[idExtra]);
 		}
 		ivnMan.GenerateWeaponStart();
+		if(idTaunt!=-1){
+			tauntAnimation = ItemManager.instance.FromDBAnims[idTaunt].animationId;
+		}
 	}
 	public override void Damage(BaseDamage damage,GameObject killer){
 		if (isSpawn||killer==null||!isActive) {//если только респавнились, то повреждений не получаем
@@ -1685,5 +1698,19 @@ public class Pawn : DamagebleObject {
 		newDPS.killer = killer;
 		
 		activeDPS.Add (newDPS);
+	}
+	
+	
+	//VISUAL EFFECT SECTION 
+	
+	public void PlayTaunt(){
+	
+		animator.PlayTaunt( tauntAnimation){
+		
+		photonView.RPC("RPCPlayTaunt",PhotonTargets.Others,tauntAnimation);
+	}
+	[RPC]
+	public void RPCPlayTaunt(string taunt){
+		animator.PlayTaunt( taunt){
 	}
 }
