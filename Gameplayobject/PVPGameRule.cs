@@ -15,9 +15,11 @@ public class PVPGameRule : GameRule {
 		
 		public float gameTime;
 
-		public float restartTime;
+		public float restartTime  = 10.0f;
 
-		public static bool isGameEnded = false;
+		public bool isGameEnded = false;
+		
+		public  bool lvlChanging = false;
 
 		public PhotonView photonView;
 		
@@ -43,6 +45,7 @@ public class PVPGameRule : GameRule {
 		
 		protected void Awake(){
 			isGameEnded = false;
+			lvlChanging = false;
 			PhotonNetwork.isMessageQueueRunning = true;
 			photonView = GetComponent<PhotonView>();
 			teamScore= new int[PlayerManager.instance.MaxTeam];
@@ -54,8 +57,10 @@ public class PVPGameRule : GameRule {
 				curStage=1;
 			}
 			if (isGameEnded) {
+
 				restartTimer+= Time.deltaTime;				
-				if(restartTimer>restartTime){
+				if(restartTimer>restartTime&&!lvlChanging){
+					lvlChanging= true;
 					FindObjectOfType<ServerHolder>().LoadNextMap();
 				}
 			}else	if (!PhotonNetwork.isMasterClient) {
@@ -148,11 +153,11 @@ public class PVPGameRule : GameRule {
 		
 		[RPC]
 		public void GameEnded(){
-			PhotonNetwork.automaticallySyncScene = true;
+			//PhotonNetwork.automaticallySyncScene = true;
 			
 			isGameEnded=true;
-			Player player = GameObject.Find ("Player").GetComponent<Player> ();
-			player.GameEnd ();
+			//Player player = GameObject.Find ("Player").GetComponent<Player> ();
+			//player.GameEnd ();
 			EventHolder.instance.FireEvent(typeof(GameListener),"EventTeamWin",Winner());
 		}
 

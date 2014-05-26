@@ -321,6 +321,10 @@ public float CalculateJumpVerticalSpeed ( float targetJumpHeight  )
 						if (wheel > 0) {
 								pawn.GetComponent<InventoryManager> ().NextWeapon ();
 						}
+						if (Input.GetButtonUp ("Taunt")) {
+								
+							pawn.PlayTaunt();
+						}
 		}
 
 }

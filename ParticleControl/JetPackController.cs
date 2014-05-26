@@ -16,6 +16,7 @@ public class JetPackController : MonoBehaviour {
 
 		sControl = new soundControl (aSource);//создаем обьект контроллера звука
 		sControl. stopSound();
+		sControl.setLooped (true);
 	}
 	
 	public void StartLeft(){

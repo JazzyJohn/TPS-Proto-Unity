@@ -72,7 +72,7 @@ public class WeaponPlayer : MonoBehaviour {
 								for (int i = 0; i < listOfItems.Count; i++) {
 										_PersonalGS.normal.background = listOfItems[i].texture;
 										if (GUI.Button (new Rect (Screen.width / 4, Screen.height / 3.1f + (Screen.height / _ButtSizeY) * i, Screen.width / _ButtSizeX, Screen.height / _ButtSizeY), listOfItems [i].name, _PersonalGS )) {	
-												Choice._Personal = listOfItems[i].index;
+												Choice._Personal[Choice._Player] = listOfItems[i].index;
 												MenuTF._GUNprevTexPlayer [0] = listOfItems[i].texture;
 										}
 								}
@@ -82,7 +82,7 @@ public class WeaponPlayer : MonoBehaviour {
 								for (int i = 0; i < listOfItems.Count; i++) {
 										_PersonalGS.normal.background = listOfItems[i].texture;
 										if (GUI.Button (new Rect (Screen.width / 4, Screen.height / 3.1f + (Screen.height / _ButtSizeY) * i, Screen.width / _ButtSizeX, Screen.height / _ButtSizeY),listOfItems [i].name, _PersonalGS )) {	
-												Choice._Main = listOfItems[i].index;
+												Choice._Main[Choice._Player] = listOfItems[i].index;
 												MenuTF._GUNprevTexPlayer [1] = listOfItems[i].texture;
 										}
 								}
@@ -94,7 +94,7 @@ public class WeaponPlayer : MonoBehaviour {
 								for (int i = 0; i < listOfItems.Count; i++) {
 										_PersonalGS.normal.background = listOfItems[i].texture;
 										if (GUI.Button (new Rect (Screen.width / 4, Screen.height / 3.1f + (Screen.height / _ButtSizeY) * i, Screen.width / _ButtSizeX, Screen.height / _ButtSizeY),listOfItems [i].name, _PersonalGS )) {	
-												Choice._Extra = listOfItems[i].index;
+												Choice._Extra[Choice._Player] = listOfItems[i].index;
 												MenuTF._GUNprevTexPlayer [2] = listOfItems[i].texture;
 										}
 								}
@@ -104,7 +104,7 @@ public class WeaponPlayer : MonoBehaviour {
 								for (int i = 0; i < listOfItems.Count; i++) {
 										_PersonalGS.normal.background = listOfItems[i].texture;
 										if (GUI.Button (new Rect (Screen.width / 4, Screen.height / 3.1f + (Screen.height / _ButtSizeY) * i, Screen.width / _ButtSizeX, Screen.height / _ButtSizeY),listOfItems [i].name, _PersonalGS )) {	
-												Choice._Grenade = listOfItems[i].index;
+												Choice._Grenad[Choice._Player] = listOfItems[i].index;
 												MenuTF._GUNprevTexPlayer [3] = listOfItems[i].texture;
 										}
 								}

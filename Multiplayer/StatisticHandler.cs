@@ -1,6 +1,8 @@
 ﻿using UnityEngine;
 using System;
 using System.Collections;
+using System.Net.Sockets;
+using System.Threading;
 
 public class StatisticHandler : MonoBehaviour {
 
@@ -94,6 +96,21 @@ public class StatisticHandler : MonoBehaviour {
 
 	}
 	
+	public static WWW GetMeRightWWW(WWWForm form,string URL){
+		WWW www = null;
+		if (String.Compare(Application.absoluteURL, 0, "https", 0,5) != 0) {
+			
+			//Debug.Log ("STATS HTTP SEND" + StatisticHandler.STATISTIC_PHP_HTTPS +  node.SelectSingleNode ("textureGUIName").InnerText);
+			www = new WWW (StatisticHandler.STATISTIC_PHP + URL,form);
+		}
+		else{
+			//Debug.Log ("STATS HTTPS SEND"+StatisticHandler.STATISTIC_PHP_HTTPS +  node.SelectSingleNode ("textureGUIName").InnerText);
+			www = new WWW (StatisticHandler.STATISTIC_PHP_HTTPS +  URL,form);
+		}
+	
+		return www;
+	
+	}
 	public static WWW GetMeRightWWW(string URL){
 		WWW www = null;
 		if (String.Compare(Application.absoluteURL, 0, "https", 0,5) != 0) {
@@ -105,8 +122,57 @@ public class StatisticHandler : MonoBehaviour {
 			//Debug.Log ("STATS HTTPS SEND"+StatisticHandler.STATISTIC_PHP_HTTPS +  node.SelectSingleNode ("textureGUIName").InnerText);
 			www = new WWW (StatisticHandler.STATISTIC_PHP_HTTPS +  URL);
 		}
-	
+		
 		return www;
-	
+		
+	}
+	public static void  SendTCP(string URL,WWWForm form){
+		WWW www = null;
+		if (String.Compare(Application.absoluteURL, 0, "https", 0,5) != 0) {
+			
+			//Debug.Log ("STATS HTTP SEND" + StatisticHandler.STATISTIC_PHP_HTTPS +  node.SelectSingleNode ("textureGUIName").InnerText);
+			www = new WWW (StatisticHandler.STATISTIC_PHP + URL,form);
+		}
+		else{
+			//Debug.Log ("STATS HTTPS SEND"+StatisticHandler.STATISTIC_PHP_HTTPS +  node.SelectSingleNode ("textureGUIName").InnerText);
+			www = new WWW (StatisticHandler.STATISTIC_PHP_HTTPS +  URL,form);
+		}
+		int i = 0;
+		while(true){
+
+			if(www.isDone){
+				return;
+			}
+			i++;
+			//YES that nor best sync www that can exists but it's work!!!!
+			if(i>1000000){
+				return;
+			}
+		}
+
+		
+
+	/*	string url = "";
+		if (String.Compare (Application.absoluteURL, 0, "https", 0, 5) != 0) {
+			url = StatisticHandler.STATISTIC_PHP + URL;
+		}else{
+			url = StatisticHandler.STATISTIC_PHP_HTTPS + URL;
+		}
+		string result = System.Text.Encoding.UTF8.GetString (form.data);
+
+		byte[] buf = new byte[1024];
+		string header = "POST "+url+" HTTP/1.1\r\n" +
+			"Host: localhost:2006\r\n" +
+				"Connection: keep-alive\r\n" +
+				"User-Agent: Mozilla/5.0\r\n" +
+				result+"\r\n";
+				
+		
+		TcpClient client = new TcpClient("vk.rakgames.ru", 80);            
+
+		// send request
+		client.Client.Send(System.Text.Encoding.ASCII.GetBytes(header));*/
+
+
 	}
 }

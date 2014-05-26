@@ -3,6 +3,7 @@ using System;
 using System.Xml;
 using System.Collections;
 using System.Collections.Generic;
+using System.Threading;
 
 public class LevelingManager : MonoBehaviour, LocalPlayerListener,GameListener{ 
 	
@@ -33,7 +34,7 @@ public class LevelingManager : MonoBehaviour, LocalPlayerListener,GameListener{
 		if(playerLvl==0){
 			stats.playerProcent  =(int)(playerExp/(float)playerNeededExp[playerLvl]*100.0f);
 		}else{
-			Debug.Log ((playerExp-playerNeededExp[playerLvl-1])+ "/" +((float)playerNeededExp[playerLvl]-playerNeededExp[playerLvl-1])+(playerExp-playerNeededExp[playerLvl-1])/((float)playerNeededExp[playerLvl]-playerNeededExp[playerLvl-1]));
+			//Debug.Log ((playerExp-playerNeededExp[playerLvl-1])+ "/" +((float)playerNeededExp[playerLvl]-playerNeededExp[playerLvl-1])+(playerExp-playerNeededExp[playerLvl-1])/((float)playerNeededExp[playerLvl]-playerNeededExp[playerLvl-1]));
 			stats.playerProcent =(int)((playerExp-playerNeededExp[playerLvl-1])/((float)playerNeededExp[playerLvl]-playerNeededExp[playerLvl-1])*100.0f);
 		}
 
@@ -66,7 +67,8 @@ public class LevelingManager : MonoBehaviour, LocalPlayerListener,GameListener{
 	
 	}
 	void  OnApplicationQuit() {
-		SyncLvl();
+		QuitSyncLvl();
+
 	}
 	protected IEnumerator LoadLvling(WWWForm form){
 		Debug.Log (form );
@@ -144,8 +146,21 @@ public class LevelingManager : MonoBehaviour, LocalPlayerListener,GameListener{
 		}
 		return sendByLvl;
 	}
-	
 	public void SyncLvl(){
+		WWWForm form = new WWWForm ();
+		
+		form.AddField ("uid", UID);
+		form.AddField ("playerExp", playerExp);
+		form.AddField ("playerLvl", playerLvl);
+		for(int i=0; i <classLvl.Length;i++){
+			form.AddField ("classExp[]", classExp[i]);
+			form.AddField ("classLvl[]", classLvl[i]);
+		}
+		StatisticHandler.instance.StartCoroutine(StatisticHandler.SendForm (form,StatisticHandler.SAVE_LVL));
+		
+	}
+
+	public void QuitSyncLvl(){
 		WWWForm form = new WWWForm ();
 			
 		form.AddField ("uid", UID);
@@ -155,7 +170,8 @@ public class LevelingManager : MonoBehaviour, LocalPlayerListener,GameListener{
 			form.AddField ("classExp[]", classExp[i]);
 			form.AddField ("classLvl[]", classLvl[i]);
 		}
-		StatisticHandler.instance.StartCoroutine(StatisticHandler.SendForm (form,StatisticHandler.SAVE_LVL));
+		StatisticHandler.SendTCP(StatisticHandler.SAVE_LVL,form);
+
 	}
 	
 	//Event Section

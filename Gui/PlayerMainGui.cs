@@ -155,7 +155,7 @@ public class PlayerMainGui : MonoBehaviour {
 			showDebug= !showDebug;
 			return;
 		}
-		if (PVPGameRule.isGameEnded) {
+		if (PVPGameRule.instance.isGameEnded) {
 		
 			ChageState(GUIState.GameResult);
 			return;

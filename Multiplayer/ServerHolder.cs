@@ -19,11 +19,12 @@ public class ServerHolder : MonoBehaviour
 	int newRoomMaxPlayers;
 	private const float FLOAT_COEF =100.0f;
 	RoomInfo[] allRooms;
-
+	public string version;
 
 	// Use this for initialization
 	void Start()
 	{
+
 		if (PhotonNetwork.inRoom) {
 			if(PhotonNetwork.isMasterClient){
 				FindObjectOfType<PVPGameRule> ().StartGame ();
@@ -35,7 +36,7 @@ public class ServerHolder : MonoBehaviour
 
 		} else {
 			PhotonNetwork.autoJoinLobby = true;
-			PhotonNetwork.ConnectUsingSettings(PlayerManager.instance.version);
+			PhotonNetwork.ConnectUsingSettings(version);
 			
 			allRooms = PhotonNetwork.GetRoomList();
 			newRoomMaxPlayers = 10;
@@ -56,7 +57,7 @@ public class ServerHolder : MonoBehaviour
 			
 			while (nextUpdateTime < Time.time)
 			{
-				PhotonNetwork.ConnectUsingSettings(PlayerManager.instance.version);
+				PhotonNetwork.ConnectUsingSettings(version);
 				nextUpdateTime += updateRate;
 			}
 		}
@@ -76,14 +77,16 @@ public class ServerHolder : MonoBehaviour
 	
 	void OnGUI()
 	{
-		float screenX = Screen.width, screenY = Screen.height;
-		RoomInfo[] availableRooms = allRooms;
-		
-		float slotsizeX = screenX / 5;
-		float slotsizeY = screenY / (availableRooms.Length + 1);
+
 		
 		if (!PhotonNetwork.inRoom && PhotonNetwork.connected)
 		{
+			float screenX = Screen.width, screenY = Screen.height;
+			RoomInfo[] availableRooms = allRooms;
+			
+			float slotsizeX = screenX / 5;
+			float slotsizeY = screenY / (availableRooms.Length + 1);
+
 			GUILayout.BeginArea(new Rect (Screen.width / 2 - 250, Screen.height/2 - 150, 500, 330), "Соединение", GUI.skin.GetStyle("window"));
 			ShowConnectMenu ();
 			GUILayout.EndArea();
@@ -204,6 +207,8 @@ public class ServerHolder : MonoBehaviour
 			
 						}
 				}
+
+
 		}
 	public void LoadNextMap(){
 		connectingToRoom = true;
@@ -271,10 +276,10 @@ public class ServerHolder : MonoBehaviour
 		connectingToRoom = true;
 		PhotonNetwork.DestroyPlayerObjects 	( PhotonNetwork.player);
 		
+		PhotonNetwork.isMessageQueueRunning = false;
 		
 		yield return new WaitForSeconds(1);
-		
-		PhotonNetwork.isMessageQueueRunning = false;
+	
 
 
 		yield return new WaitForSeconds(1);
@@ -285,7 +290,6 @@ public class ServerHolder : MonoBehaviour
 		yield return async;
 		Debug.Log ("Загрузка завершена.");
 		PhotonNetwork.isMessageQueueRunning = true;
-		
 
 		FinishLoad ();
 
@@ -320,6 +324,7 @@ public class ServerHolder : MonoBehaviour
 	void OnMasterClientSwitched( PhotonPlayer newMaster )
 	{
 		//TODO: director fix
+	
 		if (PhotonNetwork.isMasterClient) {
 			FindObjectOfType<PVPGameRule> ().StartGame ();	
 		}

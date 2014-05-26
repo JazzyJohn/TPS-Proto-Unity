@@ -57,10 +57,10 @@ public class ItemManager : MonoBehaviour {
 	
 	private List<GUIItem>  weaponList= new List<GUIItem>();
 
-	public FromDBWeapon[]  weaponIndexTable;
+	public Dictionary<int,FromDBWeapon>  weaponIndexTable = new Dictionary<int,FromDBWeapon>();
 
-	public FromDBAnims[] animsIndexTable;
-	private string UID ;
+	public  Dictionary<int,FromDBAnims> animsIndexTable= new Dictionary<int,FromDBAnims>();
+	private string UID ="";
 	
 	public void Init(string uid){
 			UID = uid;
@@ -79,7 +79,7 @@ public class ItemManager : MonoBehaviour {
 	protected IEnumerator LoadItems(WWWForm form){
 		Debug.Log (form );
 	
-		WWW w = StatisticHandler.GetMeRightWWW(StatisticHandler.LOAD_ITEMS);
+		WWW w = StatisticHandler.GetMeRightWWW(form,StatisticHandler.LOAD_ITEMS);
 		
 
 		yield return w;
@@ -89,11 +89,12 @@ public class ItemManager : MonoBehaviour {
 	}
 	//parse XML string to normal Achivment Pattern
 	protected IEnumerator ParseList(string XML){
+		//Debug.Log (XML);
 	  	XmlDocument xmlDoc = new XmlDocument();
 		xmlDoc.LoadXml(XML);
-		//Debug.Log (XML);
+
 		int i = 0;
-		weaponIndexTable = new FromDBWeapon[xmlDoc.SelectNodes ("items/weapon").Count];
+	
 		foreach (XmlNode node in xmlDoc.SelectNodes("items/weapon")) {
 			FromDBWeapon entry = new FromDBWeapon();
 			entry.weaponId = int.Parse (node.SelectSingleNode ("weaponId").InnerText);
@@ -126,34 +127,35 @@ public class ItemManager : MonoBehaviour {
 			}
 		}
 	
-		int i = 0;
-		animsIndexTable = new FromDBAnims[xmlDoc.SelectNodes ("items/anims").Count];
+	    i = 0;
+
 		foreach (XmlNode node in xmlDoc.SelectNodes("items/anims")) {
 			FromDBAnims entry = new FromDBAnims();
 			entry.animationId = node.SelectSingleNode ("animationId").InnerText;
 			entry.gameClass =  gameClassPase(node.SelectSingleNode ("gameClass").InnerText);
-			entry.animationType =AnimType.Parse(node.SelectSingleNode ("animType").InnerText);
-			entry.name =weaponPrefabsListbyId[entry.weaponId].weaponName;
-
-			WWW www = StatisticHandler.GetMeRightWWW(node.SelectSingleNode ("textureGUIName").InnerText)
+			entry.animationType =(AnimType)int.Parse(node.SelectSingleNode ("animType").InnerText);
+			entry.name =node.SelectSingleNode ("name").InnerText;
+			
+			WWW www = StatisticHandler.GetMeRightWWW(node.SelectSingleNode ("textureGUIName").InnerText);
 			
 			yield return www;
 			entry.textureGUI = new Texture2D(150,80);
 			www.LoadImageIntoTexture(entry.textureGUI);
 			//Debug.Log (entry.name + " " +entry.textureGUI + " " +entry.weaponId );
-			weaponIndexTable[entry.weaponId]=entry;	
+			animsIndexTable[i++]=entry;	
 
 		
 		}
-		
+
 		foreach (XmlNode node in xmlDoc.SelectNodes("items/default")) {
 			int index = int.Parse (node.SelectSingleNode ("weaponId").InnerText);
 			int gameSlot =(int)weaponPrefabsListbyId[index].slotType;
 			int gameClass = int.Parse (node.SelectSingleNode ("gameClass").InnerText);
 			if(gameClass<=(int) GameClassEnum.ANY){
-				Choice.SetChoice(gameSlot,entry.gameClass,index);
+				//Debug.Log (gameSlot +" "+ gameClass +" "+index);
+				Choice.SetChoice(gameSlot,gameClass,index);
 			}else{
-				Choice.SetChoiceRobot(gameSlot,entry.gameClass,index);
+				Choice.SetChoiceRobot(gameSlot,gameClass,index);
 			}
 		}
 		
@@ -222,10 +224,10 @@ public class ItemManager : MonoBehaviour {
 			switch(gameSlot){
 				//Taunt section look WeaponPlayer.cs for details
 				case 5:
-					return  GetAnimationForSlot(GameClassEnum gameClass);
+					return  GetAnimationForSlot( gameClass);
 				break;
 				default:
-					return  GetWeaponForSlot(GameClassEnum gameClass, (BaseWeapon.SLOTTYPE) gameSlot);
+					return  GetWeaponForSlot( gameClass, (BaseWeapon.SLOTTYPE) gameSlot);
 				break;
 				
 			
@@ -239,16 +241,17 @@ public class ItemManager : MonoBehaviour {
 		
 		weaponList.Clear();
 		lastGameClass=gameClass;
-		lastGameSlot=gameSlot;
-		GameClassEnum MyANY = GameClassEnum.ANY
-		if(gameClass>(int) GameClassEnum.ANY){
-			MyANY = GameClassEnum.ANYROBOT
+		lastGameSlot=5;
+		GameClassEnum MyANY = GameClassEnum.ANY;
+		if((int)gameClass>(int) GameClassEnum.ANY){
+			MyANY = GameClassEnum.ANYROBOT;
 		}
-		foreach(FromDBAnims entry  in animsIndexTable){
+		int i = 0;
+		foreach(FromDBAnims entry  in animsIndexTable.Values){
 
 			if(entry.animationType==AnimType.TAUNT&&(entry.gameClass ==MyANY||entry.gameClass==gameClass)){
 				GUIItem gui = new GUIItem();
-				gui.index = entry.animationId;
+				gui.index = i++;
 				gui.name= entry.name;
 				gui.texture = entry.textureGUI;
 
@@ -264,14 +267,14 @@ public class ItemManager : MonoBehaviour {
 		
 		weaponList.Clear();
 		lastGameClass=gameClass;
-		lastGameSlot=gameSlot;
-		GameClassEnum MyANY = GameClassEnum.ANY
-		if(gameClass>(int) GameClassEnum.ANY){
-			MyANY = GameClassEnum.ANYROBOT
+		lastGameSlot=(int)gameSlot;
+		GameClassEnum MyANY = GameClassEnum.ANY;
+		if((int)gameClass>(int) GameClassEnum.ANY){
+			MyANY = GameClassEnum.ANYROBOT;
 		}
-		foreach(FromDBWeapon entry  in weaponIndexTable){
+		foreach(FromDBWeapon entry  in weaponIndexTable.Values){
 
-			if(entry.gameSlot==lastGameSlot&&(entry.gameClass ==MyANY||entry.gameClass==gameClass)){
+			if(entry.gameSlot==(BaseWeapon.SLOTTYPE)lastGameSlot&&(entry.gameClass ==MyANY||entry.gameClass==gameClass)){
 				GUIItem gui = new GUIItem();
 				gui.index = entry.weaponId;
 				gui.name= entry.name;

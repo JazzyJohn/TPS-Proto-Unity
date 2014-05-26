@@ -103,4 +103,7 @@ public class RobotPawn : Pawn {
 			//Debug.Log (wallState);
 		}
 	}
+	public override void ChangeDefaultWeapon(int myId){
+
+	}
 }

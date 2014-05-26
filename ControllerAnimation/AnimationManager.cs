@@ -253,7 +253,12 @@ public class AnimationManager : MonoBehaviour
 		animator.SetTrigger ("Reload");
 	}
 	public void PlayTaunt(string tauntName){
-		
+		SetNotMainLayer (0.0f);
 		animator.Play(tauntName);
+	}
+	public void StopTaunt(){
+		SetNotMainLayer (1.0f);
+		transform.parent.SendMessage ("StopTaunt");
+		
 	}
 }

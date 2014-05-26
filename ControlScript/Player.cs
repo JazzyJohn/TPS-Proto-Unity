@@ -162,6 +162,7 @@ public class Player : MonoBehaviour {
 				respawnTimer=respawnTime;
 				currentPawn =PlayerManager.instance.SpawmPlayer(prefabClass[selected],team);
 				currentPawn.ChangeDefaultWeapon(Choice._Player);
+				ItemManager.instance.SaveItemForSlot();
 				PVPGameRule.instance.Spawn(team);
 				AfterSpawnSetting(currentPawn,PawnType.PAWN,team);
 				prefabBot =PlayerManager.instance.avaibleBots[selectedBot];
@@ -184,7 +185,7 @@ public class Player : MonoBehaviour {
 								ghostBot =ghostGameObj.GetComponent<GhostObject>();
 							}
 							ghostBot.myTransform.position = hitinfo.point;
-							ghostBot.myTransform.rotation = currentPawn.transform.rotation;
+							ghostBot.myTransform.rotation= Quaternion.LookRotation(-currentPawn.transform.forward);
 							
 							if(Physics.SphereCast(hitinfo.point+Vector3.up*ghostBot.size,ghostBot.size,Vector3.up,out hitinfo,100.0f)){
 								//Debug.Log (hitinfo.collider);
@@ -209,7 +210,7 @@ public class Player : MonoBehaviour {
 							Vector3 spamPoint =ghostBot.transform.position;
 							spamPoint.y+= 30;
 							robotPawn =(RobotPawn)PlayerManager.instance.SpawmPlayer(prefabBot,spamPoint,ghostBot.transform.rotation);
-							robotPawn.ChangeDefaultWeapon(Choice._MainRobo,Choice._MeleeRobo,Choice._HeavyRobo);
+							robotPawn.ChangeDefaultWeapon(selectedBot);
 							//Debug.Log("robot spawn"+robotPawn);
 							AfterSpawnSetting(robotPawn,PawnType.BOT,team);
 
@@ -519,6 +520,7 @@ public class Player : MonoBehaviour {
 	public void AfterSpawnSetting(Pawn pawn,PawnType type,int rTeam){
 	
 		if (photonView.isMine) {
+			//Debug.Log ("SEND");
 			photonView.RPC("RPCAfterSpawnSetting",PhotonTargets.AllBuffered,pawn.GetComponent<PhotonView>().viewID,(int)type,rTeam);
 		}
 	}

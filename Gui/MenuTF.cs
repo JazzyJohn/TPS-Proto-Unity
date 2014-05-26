@@ -637,7 +637,7 @@ public class MenuTF : MonoBehaviour {
 		for(int i = 0; i<4;i++){
 			int index = Choice.ForGuiSlot(i);
 			if(index!=-1){
-				_GUNprevTexPlayer[i] =ItemManager.instance.FromDBWeapon [index];
+				_GUNprevTexPlayer[i] =ItemManager.instance.weaponIndexTable [index].textureGUI;
 			}
 		}
 	
@@ -654,11 +654,11 @@ public static class Choice
 	public static int _Team;
 
 	//PlayerWeapons
-	public static int[] _Personal = new int{-1,-1,-1,-1};
-	public static int[] _Main = new int{-1,-1,-1,-1};
-	public static int[] _Extra = new int{-1,-1,-1,-1};
-	public static int[] _Grenad = new int{-1,-1,-1,-1};
-	public static int[] _Taunt = new int{-1,-1,-1,-1};
+	public static int[] _Personal = new int[4]{-1,-1,-1,-1};
+	public static int[] _Main = new int[4]{-1,-1,-1,-1};
+	public static int[] _Extra = new int[4]{-1,-1,-1,-1};
+	public static int[] _Grenad = new int[4]{-1,-1,-1,-1};
+	public static int[] _Taunt = new int[4]{-1,-1,-1,-1};
 	
 	public static int ForGuiSlot(int slot){
 		switch(slot){
@@ -684,41 +684,41 @@ public static class Choice
 	public static void SetChoice(int slot, int gameClass, int index){
 		switch(slot){
 			case 0:
-				return _Personal[gameClass]=index;
+			 	_Personal[gameClass]=index;
 				break;
 			case 1:
-				return _Main[gameClass]=index;
+				 _Main[gameClass]=index;
 				break;
 			case 2:
-				return _Extra[gameClass]=index;
+				 _Extra[gameClass]=index;
 				break;
 			case 3:
-				return _Grenad[gameClass]=index;
+				 _Grenad[gameClass]=index;
 				break;
 			case 4:
-				return _Taunt[gameClass]=index;
+				 _Taunt[gameClass]=index;
 				break;
 		}
 	}
 	
 	//RoboWeapons
-	public static int _MeleeRobo = new int{-1,-1,-1};
-	public static int _MainRobo = new int{-1,-1,-1};
-	public static int _HeavyRobo = new int{-1,-1,-1};
-	public static int _TauntRobo = new int{-1,-1,-1};
-	public static void SetChoice(int slot, int gameClass, int index){
+	public static int[] _MeleeRobo = new int[3]{-1,-1,-1};
+	public static int[] _MainRobo = new int[3]{-1,-1,-1};
+	public static int[] _HeavyRobo = new int[3]{-1,-1,-1};
+	public static int[] _TauntRobo = new int[3]{-1,-1,-1};
+	public static void SetChoiceRobot(int slot, int gameClass, int index){
 		switch(slot){
 			case 0:
-				return _MeleeRobo[gameClass]=index;
+				 _MeleeRobo[gameClass]=index;
 				break;
 			case 1:
-				return _MainRobo[gameClass]=index;
+				 _MainRobo[gameClass]=index;
 				break;
 			case 2:
-				return _HeavyRobo[gameClass]=index;
+				 _HeavyRobo[gameClass]=index;
 				break;
 			case 3:
-				return _TauntRobo[gameClass]=index;
+				 _TauntRobo[gameClass]=index;
 				break;
 		
 		}
@@ -735,7 +735,7 @@ public static class Choice
 				return _HeavyRobo[_Robot];
 				break;
 			case 3:
-				return _TauntRobo[gameClass]=index;
+				return _TauntRobo[_Robot];
 				break;
 		}
 		return -1;

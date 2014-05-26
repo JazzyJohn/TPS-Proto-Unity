@@ -68,6 +68,7 @@ public class soundControl
 	public void stopSound(){
 		if(source!=null){
 			source.Stop();
+			source.clip= null;
 		}
 	}
 //--------------------------------------------------------------------------------------------------------------
@@ -94,7 +95,7 @@ public class soundControl
 			if(!source.isPlaying){
 				if (clip != null&&source.clip !=clip) {
 					source.clip = clip;
-					source.Play ();
+					source.Play();
 				} 
 				else {
 					//Debug.LogError("soundControl:playFullClip: Clip not defined!!");
@@ -104,6 +105,10 @@ public class soundControl
 		else {
 			//Debug.LogError("soundControl:playFullClip: Source not defined!!");
 		}
+	}
+	public void setLooped(bool loop){
+		source.loop= loop;
+
 	}
 }
 //---------------------------------------------------------------------------------------------------------------

@@ -124,6 +124,8 @@ public class Pawn : DamagebleObject {
 
 	protected bool _canWallRun;
 
+	private bool canMove=true;
+
 	public bool canPullUp;
 
 	public bool canJump;
@@ -316,10 +318,10 @@ public class Pawn : DamagebleObject {
 	
 	}
 	public virtual void ChangeDefaultWeapon(int myId){
-		int idPersonal = Choise._Personal[myId], 
-		idMain= Choise._Main[myId], 
-		idExtra = Choise._Extra[myId],
-		idTaunt = Choise._Taunt[myId];
+		int idPersonal = Choice._Personal[myId], 
+		idMain= Choice._Main[myId], 
+		idExtra = Choice._Extra[myId],
+		idTaunt = Choice._Taunt[myId];
 		ivnMan.Init ();
 		if (idPersonal != -1) {
 			ivnMan.SetSlot(ItemManager.instance.weaponPrefabsListbyId[idPersonal]);
@@ -332,7 +334,7 @@ public class Pawn : DamagebleObject {
 		}
 		ivnMan.GenerateWeaponStart();
 		if(idTaunt!=-1){
-			tauntAnimation = ItemManager.instance.FromDBAnims[idTaunt].animationId;
+			tauntAnimation = ItemManager.instance.animsIndexTable[idTaunt].animationId;
 		}
 	}
 	public override void Damage(BaseDamage damage,GameObject killer){
@@ -580,9 +582,13 @@ public class Pawn : DamagebleObject {
 						animator.WallAnimation (true, false, false);
 						break;
 					}
+
 					break;
 				case CharacterState.Jumping:
 					animator.ApllyJump(true);
+					if(characterState!=CharacterState.Jumping){
+						TimerNotGround = 0f;
+					}
 					if(characterState==CharacterState.WallRunning){					
 						animator.WallAnimation(false,false,false);
 						animator.FreeFall();
@@ -598,6 +604,8 @@ public class Pawn : DamagebleObject {
 					break;
 				case CharacterState.PullingUp:
 					if(characterState!=CharacterState.PullingUp){
+						animator.WallAnimation(false,false,false);
+						animator.FreeFall();
 						StartCoroutine("PullUpEnd",PullUpTime);
 						animator.StartPullingUp();
 					}
@@ -651,55 +659,56 @@ public class Pawn : DamagebleObject {
 				}
 			}
 
-
-			if(CurWeapon!=null){
-				//if(aimRotation.sqrMagnitude==0){
-				getAimRotation(CurWeapon.weaponRange);
-				/*}else{
-					aimRotation = Vector3.Lerp(aimRotation,getAimRotation(CurWeapon.weaponRange), Time.deltaTime*10);
-				}*/
-				Vector3 eurler = Quaternion.LookRotation(aimRotation-myTransform.position).eulerAngles;
-				eurler.z =0;
-				eurler.x =0;
-				if(characterState == CharacterState.WallRunning||characterState ==CharacterState.PullingUp){
-					if(forwardRotation.sqrMagnitude>0){
-						myTransform.rotation= Quaternion.LookRotation(forwardRotation);
+			if(canMove){
+				if(CurWeapon!=null){
+					//if(aimRotation.sqrMagnitude==0){
+					getAimRotation(CurWeapon.weaponRange);
+					/*}else{
+						aimRotation = Vector3.Lerp(aimRotation,getAimRotation(CurWeapon.weaponRange), Time.deltaTime*10);
+					}*/
+					Vector3 eurler = Quaternion.LookRotation(aimRotation-myTransform.position).eulerAngles;
+					eurler.z =0;
+					eurler.x =0;
+					if(characterState == CharacterState.WallRunning||characterState ==CharacterState.PullingUp){
+						if(forwardRotation.sqrMagnitude>0){
+							myTransform.rotation= Quaternion.LookRotation(forwardRotation);
+						}
+					}else{
+						myTransform.rotation= Quaternion.Euler(eurler);
 					}
-				}else{
-					myTransform.rotation= Quaternion.Euler(eurler);
-				}
-				//animator.animator.SetLookAtPosition (aimRotation);
-				//animator.animator.SetLookAtWeight (1, 0.5f, 0.7f, 0.0f, 0.5f);
-				//CurWeapon.curTransform.rotation =  Quaternion.LookRotation(aimRotation-CurWeapon.curTransform.position);
-				/*Quaternion diff = Quaternion.identity;
-				Vector3 target = (aimRotation-CurWeapon.transform.position).normalized;
-				if(!CurWeapon.IsReloading()){
-					diff= Quaternion.FromToRotation(CurWeapon.transform.forward,target);
-				}
-
-				Debug.DrawLine(CurWeapon.transform.position,aimRotation);
-				Vector3 aimRotationWeapon = diff*target*CurWeapon.weaponRange+CurWeapon.transform.position; 
-				Debug.DrawLine(CurWeapon.transform.position,aimRotationWeapon);*/
-
-			}else{
-				//if(aimRotation.sqrMagnitude==0){
-					getAimRotation(50);
-				/*}else{
-					aimRotation = Vector3.Lerp(aimRotation,getAimRotation(50), Time.deltaTime*10);
-				}*/
-				Vector3 eurler = Quaternion.LookRotation(aimRotation-myTransform.position).eulerAngles;
-				eurler.z =0;
-				eurler.x =0;
-				if(characterState == CharacterState.WallRunning||characterState ==CharacterState.PullingUp){
-					if(forwardRotation.sqrMagnitude>0){
-						myTransform.rotation= Quaternion.LookRotation(forwardRotation);
+					//animator.animator.SetLookAtPosition (aimRotation);
+					//animator.animator.SetLookAtWeight (1, 0.5f, 0.7f, 0.0f, 0.5f);
+					//CurWeapon.curTransform.rotation =  Quaternion.LookRotation(aimRotation-CurWeapon.curTransform.position);
+					/*Quaternion diff = Quaternion.identity;
+					Vector3 target = (aimRotation-CurWeapon.transform.position).normalized;
+					if(!CurWeapon.IsReloading()){
+						diff= Quaternion.FromToRotation(CurWeapon.transform.forward,target);
 					}
-				}else{
-					myTransform.rotation= Quaternion.Euler(eurler);
-				}
-				
 
-				
+					Debug.DrawLine(CurWeapon.transform.position,aimRotation);
+					Vector3 aimRotationWeapon = diff*target*CurWeapon.weaponRange+CurWeapon.transform.position; 
+					Debug.DrawLine(CurWeapon.transform.position,aimRotationWeapon);*/
+
+				}else{
+					//if(aimRotation.sqrMagnitude==0){
+						getAimRotation(50);
+					/*}else{
+						aimRotation = Vector3.Lerp(aimRotation,getAimRotation(50), Time.deltaTime*10);
+					}*/
+					Vector3 eurler = Quaternion.LookRotation(aimRotation-myTransform.position).eulerAngles;
+					eurler.z =0;
+					eurler.x =0;
+					if(characterState == CharacterState.WallRunning||characterState ==CharacterState.PullingUp){
+						if(forwardRotation.sqrMagnitude>0){
+							myTransform.rotation= Quaternion.LookRotation(forwardRotation);
+						}
+					}else{
+						myTransform.rotation= Quaternion.Euler(eurler);
+					}
+					
+
+					
+				}
 			}
 			//TODO: TEMP SOLUTION BEFORE NORMAL BONE ORIENTATION
 			
@@ -1232,8 +1241,16 @@ public class Pawn : DamagebleObject {
 		if (!photonView.isMine) {
 			return;
 		}
+		if (!_rb.isKinematic) {
+			
+			_rb.AddForce(new Vector3(0,-gravity * rigidbody.mass,0)+pushingForce);
+		}
+		if (!canMove) {
+			return;	
+		}
 		Vector3 velocity = _rb.velocity;
 		Vector3 velocityChange = (nextMovement - velocity);
+	
 		switch (characterState) {
 			case CharacterState.Idle:
 			case CharacterState.Running:
@@ -1409,10 +1426,7 @@ public class Pawn : DamagebleObject {
 		}
 		//Debug.Log(_rb.isKinematic);
 		*/
-		if (!_rb.isKinematic) {
 			
-			_rb.AddForce(new Vector3(0,-gravity * rigidbody.mass,0)+pushingForce);
-		}	
 		netIsGround = isGrounded;
 		if (photonView.isMine) {
 						isGrounded = false;
@@ -1704,13 +1718,20 @@ public class Pawn : DamagebleObject {
 	//VISUAL EFFECT SECTION 
 	
 	public void PlayTaunt(){
-	
-		animator.PlayTaunt( tauntAnimation){
+		if (tauntAnimation == "") {
+			return;		
+		}
+		canMove = false;
+		animator.PlayTaunt (tauntAnimation);
 		
 		photonView.RPC("RPCPlayTaunt",PhotonTargets.Others,tauntAnimation);
 	}
+	public void  StopTaunt(){
+		canMove = true;
+
+	}
 	[RPC]
 	public void RPCPlayTaunt(string taunt){
-		animator.PlayTaunt( taunt){
+		animator.PlayTaunt (taunt);
 	}
 }
