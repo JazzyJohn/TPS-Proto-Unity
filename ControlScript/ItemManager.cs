@@ -109,7 +109,7 @@ public class ItemManager : MonoBehaviour {
 			www.LoadImageIntoTexture(entry.textureGUI);
 			//Debug.Log (entry.name + " " +entry.textureGUI + " " +entry.weaponId );
 			weaponIndexTable[entry.weaponId]=entry;	
-
+			weaponPrefabsListbyId[entry.weaponId].HUDIcon = entry.textureGUI;
 			if(bool.Parse(node.SelectSingleNode ("default").InnerText)){
 				switch(entry.gameClass){
 					case GameClassEnum.ANY:

@@ -80,7 +80,9 @@ public class BaseWeapon : DestroyableNetworkObject {
 	public string attackAnim;
 
 	public string weaponName;
-
+	
+	public Texture2D HUDIcon;
+	
 	public float recoilMod;
 
 	public bool init = false;
