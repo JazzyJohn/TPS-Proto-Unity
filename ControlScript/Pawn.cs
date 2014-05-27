@@ -23,14 +23,12 @@ public enum WallState{
 	WallF
 }
 
-public struct singleDPS
+public class singleDPS
 {
 	public BaseDamage damage;
 	public GameObject killer;
-	public float lastTime;
-	public void SetTime(float time){
-		lastTime = time;
-	}
+	public float lastTime=1.0f;
+
 }	
 
 public class Pawn : DamagebleObject {
@@ -179,6 +177,8 @@ public class Pawn : DamagebleObject {
 	private bool netIsGround;
 	private float TimerNotGround = 0;
 
+	public float distanceToGround; // Проверка дистанции до земли (+)
+
 	public bool isGrounded
 	{
 		
@@ -192,9 +192,30 @@ public class Pawn : DamagebleObject {
 				SendMessage ("DidLand", SendMessageOptions.DontRequireReceiver);
 
 			}
+
 			_isGrounded = value;
 
+			RaycastHit hitGround; // Луч (+)
+
+			switch(characterState) // Если прыжок проверить растояние (+)
+			{
+			case CharacterState.Jumping:
+				if (Physics.Raycast(transform.position, -Vector3.up, out hitGround)) 
+				{
+					distanceToGround = hitGround.distance;
+					if(distanceToGround < 0.35+GetComponent<CapsuleCollider>().height/2)
+					{
+						animator.animator.SetBool("DistanceJump", false);
+					}
+					else
+					{
+						animator.animator.SetBool("DistanceJump", true);
+					}
+				}
+				break;
+			}
 		}
+		
 		
 	}
 	protected float lastTimeOnWall;
@@ -277,6 +298,7 @@ public class Pawn : DamagebleObject {
 						Destroy (GetComponent<ThirdPersonCamera> ());
 						Destroy (GetComponent<MouseLook> ());
 						GetComponent<Rigidbody> ().isKinematic = true;
+						//ivnMan.Init ();
 		} else {
 			cameraController=GetComponent<ThirdPersonCamera> ();
 			isAi = cameraController==null;
@@ -298,7 +320,8 @@ public class Pawn : DamagebleObject {
 		if (canJump) {
 			jetPackCharge = charMan.GetIntChar(CharacteristicList.JETPACKCHARGE);
 		}
-		AfterSpawnAction();
+		ivnMan.Init ();
+		AfterSpawnAction ();
 		//Debug.Log (distToGround);
 
 	}
@@ -329,7 +352,7 @@ public class Pawn : DamagebleObject {
 		if (killerPawn != null){
 			Player killerPlayer =  killerPawn.player;
 			if(killerPlayer!=null){
-				Debug.Log ("DAMAGE" +damage.sendMessage);
+				//Debug.Log ("DAMAGE" +damage.sendMessage);
 				killerPlayer.DamagePawn(damage);
 			}
 		}
@@ -739,7 +762,7 @@ public class Pawn : DamagebleObject {
 			CurWeapon.StartFire ();
 		} 
 	}
-	public void StopFire(){
+	public virtual void StopFire(){
 		if (CurWeapon != null) {
 			CurWeapon.StopFire ();
 		}
@@ -750,6 +773,9 @@ public class Pawn : DamagebleObject {
 		//Debug.Log (newWeapon);
 		if(CurWeapon!=null){
 			CurWeapon.AttachWeapon(weaponSlot,weaponOffset,Quaternion.Euler (weaponRotatorOffset),this);
+			if(animator!=null){
+				animator.SetWeaponType(CurWeapon.animType);
+			}
 		}
 	}
 	public void ChangeWeapon(int weaponIndex){
@@ -817,7 +843,7 @@ public class Pawn : DamagebleObject {
 					targetpoint =maincam.transform.forward*weaponRange +maincam.ViewportToWorldPoint(new Vector3(.5f, 0.5f, 1f));
 				}else{
 					//Debug.Log(range.ToString()+(cameraController.normalOffset.magnitude+5));
-					if(magnitude<cameraController.normalOffset.magnitude+1){
+					if(magnitude<cameraController.CurrrentOffset().magnitude+1){
 						targetpoint =maincam.transform.forward*weaponRange +maincam.ViewportToWorldPoint(new Vector3(.5f, 0.5f, 1f));
 						animator.WeaponDown(true);
 					}else{
@@ -849,14 +875,17 @@ public class Pawn : DamagebleObject {
 		return 0.0f;
 	}
 
-	public virtual void ToggleAim(){
-		isAiming = !isAiming;
-		animator.ToggleAim (isAiming);
+
+	public virtual void ToggleAim(bool value){
+		if (value&&(characterState == CharacterState.WallRunning || characterState == CharacterState.Sprinting)) {
+			return;
+		}
+		isAiming = value;
+		animator.ToggleAim (value);
 		if (cameraController != null) {
-			cameraController.ToggleAim();
+			cameraController.ToggleAim(value);
 		}
 	}
-
 	public int 	GetAmmoInBag (){
 		return ivnMan.GetAmmo (CurWeapon.ammoType);
 
@@ -903,10 +932,12 @@ public class Pawn : DamagebleObject {
 			foreach (singleDPS key in activeDPS) {
 				if(newDPS.killer == key.killer){
 					activeDPS.Remove(key);
+					//Debug.Log ("REMOVE DPS");
 					break;
 				}	
 			}
 		}
+	
 	}
 
 	//TODO: MOVE THAT to PAwn and turn on replication of aiming
@@ -1244,7 +1275,7 @@ public class Pawn : DamagebleObject {
 				if(WallRun (nextMovement,nextState)){
 					SendMessage ("WallLand", SendMessageOptions.DontRequireReceiver);
 				}
-
+				ToggleAim(false);
 				
 				
 			
@@ -1306,6 +1337,7 @@ public class Pawn : DamagebleObject {
 				}
 				
 			}
+			ToggleAim(false);
 			break;
 		case CharacterState.PullingUp:
 			PullUp();
@@ -1642,7 +1674,14 @@ public class Pawn : DamagebleObject {
 	public List<Pawn> getAllSeenPawn(){
 		return seenPawns;
 	}
-
+	public void SetTeam(int newTeam){
+		team = newTeam;
+		photonView.RPC("RPCSetTeam",PhotonTargets.OthersBuffered,team);
+	}
+	[RPC]
+	public void RPCSetTeam(int newTeam){
+		team = newTeam;
+	}
 
 	//end seen hear work
 
