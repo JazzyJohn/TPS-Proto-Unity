@@ -255,6 +255,8 @@ public class Pawn : DamagebleObject {
 	
 	
 	public string tauntAnimation = "";
+
+	public static float aimRange = 1000.0f;
 	
 	protected void Awake(){
 		myTransform = transform;
@@ -662,7 +664,7 @@ public class Pawn : DamagebleObject {
 			if(canMove){
 				if(CurWeapon!=null){
 					//if(aimRotation.sqrMagnitude==0){
-					getAimRotation(CurWeapon.weaponRange);
+					getAimRotation();
 					/*}else{
 						aimRotation = Vector3.Lerp(aimRotation,getAimRotation(CurWeapon.weaponRange), Time.deltaTime*10);
 					}*/
@@ -691,7 +693,7 @@ public class Pawn : DamagebleObject {
 
 				}else{
 					//if(aimRotation.sqrMagnitude==0){
-						getAimRotation(50);
+						getAimRotation();
 					/*}else{
 						aimRotation = Vector3.Lerp(aimRotation,getAimRotation(50), Time.deltaTime*10);
 					}*/
@@ -806,7 +808,7 @@ public class Pawn : DamagebleObject {
 			return (Vector3.Dot (currentDirection.normalized,desireDirection.normalized)>0.9f);
 		}
 	}
-	public virtual Vector3 getAimRotation(float weaponRange){
+	public virtual Vector3 getAimRotation(){
 		
 		if(photonView.isMine){
 			if(isAi){
@@ -825,9 +827,9 @@ public class Pawn : DamagebleObject {
 
 				Vector3 targetpoint = Vector3.zero;
 				bool wasHit = false;
-				float magnitude = weaponRange;
-				float range=weaponRange;
-				foreach( RaycastHit hitInfo  in Physics.RaycastAll(centerRay, weaponRange))				
+				float magnitude = aimRange;
+				float range=aimRange;
+				foreach( RaycastHit hitInfo  in Physics.RaycastAll(centerRay, aimRange))				
 				{
 					if(hitInfo.collider==myCollider)
 					{
@@ -855,11 +857,11 @@ public class Pawn : DamagebleObject {
 					//Debug.Log("NO HIT");
 					curLookTarget= null;
 					animator.WeaponDown(false);
-					targetpoint =maincam.transform.forward*weaponRange +maincam.ViewportToWorldPoint(new Vector3(.5f, 0.5f, 1f));
+					targetpoint =maincam.transform.forward*aimRange +maincam.ViewportToWorldPoint(new Vector3(.5f, 0.5f, 1f));
 				}else{
 					//Debug.Log(range.ToString()+(cameraController.normalOffset.magnitude+5));
 					if(magnitude<cameraController.CurrrentOffset().magnitude+1){
-						targetpoint =maincam.transform.forward*weaponRange +maincam.ViewportToWorldPoint(new Vector3(.5f, 0.5f, 1f));
+						targetpoint =maincam.transform.forward*aimRange +maincam.ViewportToWorldPoint(new Vector3(.5f, 0.5f, 1f));
 						animator.WeaponDown(true);
 					}else{
 						animator.WeaponDown(false);

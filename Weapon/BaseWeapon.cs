@@ -117,7 +117,7 @@ public class BaseWeapon : DestroyableNetworkObject {
 		photonView = GetComponent<PhotonView>();
 		rifleParticleController = GetComponentInChildren<RifleParticleController>();
 	
-		if (rifleParticleController != null) {
+		if (rifleParticleController != null&&photonView.isMine) {
 			rifleParticleController.SetOwner (owner.collider);
 		}
 	}
@@ -145,7 +145,15 @@ public class BaseWeapon : DestroyableNetworkObject {
 			curTransform = transform;		
 		}
 		owner =PhotonView.Find (viewid).GetComponent<Pawn>();
+		if (owner == null) {
+			//Destroy(photonView);
+			Debug.Log ("DestoroyATTACHEs");
+			Destroy(gameObject);
+		}
 		owner.setWeapon (this);
+		if (rifleParticleController != null) {
+			rifleParticleController.SetOwner (owner.collider);
+		}
 		init = true;
 	}
 
@@ -189,7 +197,9 @@ public class BaseWeapon : DestroyableNetworkObject {
 	}
 	
 	public void ReloadStart(){
-		
+		if (isReload) {
+			return;
+		}
 		if(owner.GetComponent<InventoryManager>().HasAmmo(ammoType)){
 			isReload= true;
 			reloadTimer=reloadTime;
@@ -385,7 +395,7 @@ public class BaseWeapon : DestroyableNetworkObject {
 		Vector3 normalDirection  = owner.getAimRotation(weaponRange)-muzzlePoint.position;
 		normalDirection =normalDirection + randVec.normalized * normalDirection.magnitude * aimRandCoef / 100;*/
 
-		return Quaternion.LookRotation(owner.getAimRotation(weaponRange) -muzzlePoint.position);
+		return Quaternion.LookRotation(owner.getAimRotation() -muzzlePoint.position);
 		
 
 	}

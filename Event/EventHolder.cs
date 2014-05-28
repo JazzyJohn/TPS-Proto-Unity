@@ -65,6 +65,7 @@ public class EventHolder : MonoBehaviour
 			if(list==null){
 				InitList();
 			}
+
 			foreach(HolderBase holder  in list){
 
 				if(holder.isValid(listener. GetType())){

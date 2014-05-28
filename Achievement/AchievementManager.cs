@@ -56,11 +56,9 @@ public class AchievementManager : MonoBehaviour, LocalPlayerListener{
 	ConcurrentQueue<Achievement> outcomeQueue = new ConcurrentQueue<Achievement>();
 	//initilization
 
-	void Awake(){
+	public void Init(string uid){
 		EventHolder.instance.Bind (this);
 		DontDestroyOnLoad(transform.gameObject);
-	}
-	public void Init(string uid){
 		WWWForm form = new WWWForm ();
 			
 		form.AddField ("uid", uid);

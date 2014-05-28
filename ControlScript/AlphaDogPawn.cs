@@ -19,7 +19,7 @@ public class AlphaDogPawn : Pawn {
 		animator = transform.GetComponentInChildren<DogAnimationManager>();
 	}
 
-	public override Vector3 getAimRotation(float weaponRange)
+	public override Vector3 getAimRotation()
 	{
 
 		if(photonView.isMine){
@@ -39,9 +39,9 @@ public class AlphaDogPawn : Pawn {
 				
 				Vector3 targetpoint = Vector3.zero;
 				bool wasHit = false;
-				float magnitude = weaponRange;
-				float range=weaponRange;
-				foreach( RaycastHit hitInfo  in Physics.RaycastAll(centerRay, weaponRange))				
+				float magnitude = aimRange;
+				float range=aimRange;
+				foreach( RaycastHit hitInfo  in Physics.RaycastAll(centerRay, aimRange))				
 				{
 					if(hitInfo.collider==myCollider)
 					{
@@ -65,11 +65,11 @@ public class AlphaDogPawn : Pawn {
 				if(!wasHit){
 					//Debug.Log("NO HIT");
 					curLookTarget= null;
-					targetpoint = maincam.transform.forward*weaponRange +maincam.ViewportToWorldPoint(new Vector3(.5f, 0.5f, 1f));
+					targetpoint = maincam.transform.forward*aimRange +maincam.ViewportToWorldPoint(new Vector3(.5f, 0.5f, 1f));
 				}else{
 					//Debug.Log(range.ToString()+(cameraController.normalOffset.magnitude+5));
 					if(magnitude<cameraController.normalOffset.magnitude+1){
-						targetpoint =maincam.transform.forward*weaponRange +maincam.ViewportToWorldPoint(new Vector3(.5f, 0.5f, 1f));
+						targetpoint =maincam.transform.forward*aimRange +maincam.ViewportToWorldPoint(new Vector3(.5f, 0.5f, 1f));
 					}
 				}
 				aimRotation=targetpoint; 

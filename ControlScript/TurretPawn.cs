@@ -26,7 +26,7 @@ public class TurretPawn : Pawn {
 
 
 				//if(aimRotation.sqrMagnitude==0){
-				getAimRotation(CurWeapon.weaponRange);
+				getAimRotation();
 				/*}else{
 					aimRotation = Vector3.Lerp(aimRotation,getAimRotation(CurWeapon.weaponRange), Time.deltaTime*10);
 				}*/

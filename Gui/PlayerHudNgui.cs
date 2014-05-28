@@ -26,6 +26,7 @@ public class PlayerHudNgui : MonoBehaviour {
 
     //sprites
     public UISprite reloadingSprite;
+	public UITexture weaponTexture;
 
     //Teams score labels
     public UILabel RedTeamScore;
@@ -65,13 +66,19 @@ public class PlayerHudNgui : MonoBehaviour {
             }
             //float val = (LocalPlayer.GetPlayerStats().health / (LocalPlayer.GetPlayerStats().maxHealth / 100f)) / 100f; для прогресс бара кусок
             
-            if (healthLabel) healthLabel.text = LocalPlayer.GetPlayerStats().health.ToString();
+            if (healthLabel) healthLabel.text = LocalPlayer.GetPlayerStats().health.ToString("0");
 
             if (juggernautDropTime) juggernautDropTime.text = Stats.robotTime.ToString("0.0") ;
 
 			if ( Stats.gun){
-				if (ammoInGun) ammoInGun.text = Stats.gun.curAmmo+ "/" + Stats.gun.clipSize + " (" + Stats.ammoInBag + ")";
 
+				if(Stats.gun.IsReloading()){
+					if (ammoInGun) ammoInGun.text = Stats.gun.ReloadTimer().ToString("0.0") + " (" + Stats.ammoInBag + ")";
+				}else{
+
+					if (ammoInGun) ammoInGun.text = Stats.gun.curAmmo+ "/" + Stats.gun.clipSize + " (" + Stats.ammoInBag + ")";
+				}
+				weaponTexture.mainTexture = Stats.gun.HUDIcon;
 	            if (gunName) gunName.text = "Cant show rus";//Stats.gunName;
 			}
             if (reloadingSprite) reloadingSprite.fillAmount = 1 - Stats.reloadTime;

@@ -12,7 +12,7 @@ public class Player : MonoBehaviour {
 
 	public float respawnTime = 10.0f;
 	
-	public float robotTime = 2.0f;
+	public float robotTime = 60.0f;
 
 	public bool isStarted = false;
 
@@ -531,7 +531,12 @@ public class Player : MonoBehaviour {
 	
 		PawnType pType = (PawnType)type;
 		//Debug.Log (viewid);
+		PhotonView view = PhotonView.Find (viewid);
+		if (view == null) {
+			return;
+		}
 		Pawn pawn =PhotonView.Find (viewid).GetComponent<Pawn>();
+
 		team = iteam;	
 		pawn.player = this;
 		pawn.team = this.team;

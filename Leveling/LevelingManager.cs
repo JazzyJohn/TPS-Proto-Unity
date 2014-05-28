@@ -54,11 +54,10 @@ public class LevelingManager : MonoBehaviour, LocalPlayerListener,GameListener{
 	}
 	public Dictionary<string,int> expDictionary = new Dictionary<string, int>();
 	
-	void Awake(){
+
+	public void Init(string uid){
 		EventHolder.instance.Bind (this);
 		DontDestroyOnLoad(transform.gameObject);
-	}
-	public void Init(string uid){
 		var form = new WWWForm ();
 			
 		form.AddField ("uid", uid);
@@ -75,7 +74,7 @@ public class LevelingManager : MonoBehaviour, LocalPlayerListener,GameListener{
 		WWW w = null;
 		if (String.Compare(Application.absoluteURL, 0, "https", 0,5) != 0) {
 			
-			Debug.Log ("STATS HTTP SEND" + StatisticHandler.STATISTIC_PHP_HTTPS + StatisticHandler.LOAD_LVL);
+			Debug.Log ("STATS HTTP SEND" + StatisticHandler.STATISTIC_PHP + StatisticHandler.LOAD_LVL);
 			w = new WWW (StatisticHandler.STATISTIC_PHP + StatisticHandler.LOAD_LVL, form);
 		}
 		else{
@@ -109,6 +108,7 @@ public class LevelingManager : MonoBehaviour, LocalPlayerListener,GameListener{
 			classNeededExp[i++]=int.Parse (node.InnerText);
 		}
 		foreach (XmlNode node in xmlDoc.SelectNodes("leveling/expdictionary/slots")) {
+			//Debug.Log ("LEVELING" +node.SelectSingleNode("name").InnerText+" "+node.SelectSingleNode("value").InnerText);
 			expDictionary.Add(node.SelectSingleNode("name").InnerText,int.Parse(node.SelectSingleNode("value").InnerText));
 		}
 		//Parse  Data
@@ -188,6 +188,8 @@ public class LevelingManager : MonoBehaviour, LocalPlayerListener,GameListener{
 		}
 	}
 	public void EventPawnKillAI(Player target){
+	
+
 		if (target == myPlayer) {
 			UpExp(expDictionary[PARAM_KILL_AI],target.selected);	
 		}
@@ -227,13 +229,16 @@ public class LevelingManager : MonoBehaviour, LocalPlayerListener,GameListener{
 	public static LevelingManager instance {
 		get {
 			if (s_Instance == null) {
+				//Debug.Log ("FIND");
 				// This is where the magic happens.
 				//  FindObjectOfType(...) returns the first AManager object in the scene.
 				s_Instance =  FindObjectOfType(typeof (LevelingManager)) as LevelingManager;
 			}
-			
+
+		
 			// If it is still null, create a new instance
 			if (s_Instance == null) {
+			//	Debug.Log ("CREATE");
 				GameObject obj = new GameObject("LevelingManager");
 				s_Instance = obj.AddComponent(typeof (LevelingManager)) as LevelingManager;
 				
