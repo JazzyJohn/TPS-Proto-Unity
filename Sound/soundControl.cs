@@ -88,6 +88,23 @@ public class soundControl
 			//Debug.LogError("soundControl:playFullClip: Source not defined!!");
 		}
 	}
+	//проигрывает заданный клип целиком, не прерывая, подменяет клиппы если они разные
+	public void playFullAnotherClip(AudioClip clip){
+		if (source != null) {
+			if(!source.isPlaying){
+				if (clip != null&&source.clip !=clip) {
+					source.clip = clip;
+					source.Play ();
+				} 
+				else {
+					//Debug.LogError("soundControl:playFullClip: Clip not defined!!");
+				}
+			}
+		}
+		else {
+			//Debug.LogError("soundControl:playFullClip: Source not defined!!");
+		}
+	}
 }
 //---------------------------------------------------------------------------------------------------------------
 

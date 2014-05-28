@@ -83,6 +83,7 @@ public class BaseWeapon : DestroyableNetworkObject {
 
 	public float recoilMod;
 
+	public bool init = false;
 
 	public const float MAXDIFFERENCEINANGLE=0.7f;
 
@@ -93,6 +94,8 @@ public class BaseWeapon : DestroyableNetworkObject {
 	private AudioSource aSource;//источник звука. добавляется в редакторе
 	public AudioClip fireSound;
 	public AudioClip reloadSound;
+	//use for switch
+	public int animType;
 
 
 	// Use this for initialization
@@ -141,13 +144,16 @@ public class BaseWeapon : DestroyableNetworkObject {
 		}
 		owner =PhotonView.Find (viewid).GetComponent<Pawn>();
 		owner.setWeapon (this);
-
+		init = true;
 	}
 
 	// Update is called once per frame
 	void Update () {
+		if(init&&owner==null) {
+			RequestKillMe();
 
-		AimFix ();
+		}
+		//AimFix ();
 		if (!photonView.isMine) {
 			ReplicationGenerate ();
 			return;
@@ -191,6 +197,10 @@ public class BaseWeapon : DestroyableNetworkObject {
 			}
 			//играем звук перезарядки
 			sControl.playClip (reloadSound);
+			if(owner.animator!=null){
+				owner.animator.ReloadStart();
+			}
+
 		}else{
 			StopFire();
 			return;

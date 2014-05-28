@@ -220,7 +220,7 @@ public class MenuTF : MonoBehaviour {
 				_GSbutton[0].normal.background = _ButtonPlayerTexPress[0];
 
 
-				Choice._Player = 0;
+				Choice._Player = (int)GameClassEnum.ENGINEER;
 
 				_Pl_Ro = 0;
 	
@@ -238,7 +238,7 @@ public class MenuTF : MonoBehaviour {
 				_GSbutton[1].normal.background = _ButtonPlayerTexPress[1];
 
 
-				Choice._Player = 1;
+				Choice._Player = (int)GameClassEnum.MEDIC;
 			
 				_Pl_Ro = 0;
 
@@ -256,7 +256,7 @@ public class MenuTF : MonoBehaviour {
 				_GSbutton[2].normal.background = _ButtonPlayerTexPress[2];
 
 
-				Choice._Player = 2;
+				Choice._Player =  (int)GameClassEnum.ASSAULT;
 
 				_Pl_Ro = 0;
 
@@ -274,7 +274,7 @@ public class MenuTF : MonoBehaviour {
 
 
 
-				Choice._Player = 3;
+				Choice._Player =   (int)GameClassEnum.SCOUT;
 
 				_Pl_Ro = 0;
 
@@ -471,7 +471,7 @@ public class MenuTF : MonoBehaviour {
 		{
 			_TimerSpawnView = "В БОЙ";
 		}
-		return GUI.Button (new Rect (Screen.width / 2 - (Screen.width / 5) / 2, Screen.height / 4 * 3.5f, Screen.width / 5, Screen.height / 15), _TimerSpawnView, _StartGS);
+		return GUI.Button (new Rect (Screen.width / 2 - (Screen.width / 5) / 2, Screen.height / 4 * 3.5f, Screen.width / 5, Screen.height / 15), _TimerSpawnView, _StartGS)&&timer<=0;
 	}
 	//StartButton-------------------
 }

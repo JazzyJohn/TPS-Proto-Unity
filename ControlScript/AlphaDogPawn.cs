@@ -6,7 +6,7 @@ public class AlphaDogPawn : Pawn {
 
 
 	private Animator Anim;
-	public WeaponOfExtremities CurWeapons;
+	public WeaponOfExtremities naturalWeapon;
 
 	public List<HTHHitter> AttackType = new List<HTHHitter>();
 
@@ -14,7 +14,7 @@ public class AlphaDogPawn : Pawn {
 	void Start () 
 	{
 		base.Start();
-		CurWeapons = GetComponent<WeaponOfExtremities>();
+		naturalWeapon = GetComponent<WeaponOfExtremities>();
 		Anim = transform.GetComponentInChildren<Animator>(); // Привязка аниматора
 		animator = transform.GetComponentInChildren<DogAnimationManager>();
 	}
@@ -94,7 +94,7 @@ public class AlphaDogPawn : Pawn {
 		float strafe = 0;
 		//Debug.Log (strafe);	
 		float speed =0 ;
-		//Debug.Log (speed);
+		//
 
 		if (animator != null && animator.gameObject.activeSelf) {
 			if (photonView.isMine) {
@@ -103,7 +103,7 @@ public class AlphaDogPawn : Pawn {
 				strafe = CalculateStarfe();
 				//Debug.Log(characterState);
 				speed =CalculateSpeed();
-
+				//Debug.Log (speed);
 				switch(characterState){
 				case CharacterState.Idle:
 					Anim.SetBool("Any", false);
@@ -170,13 +170,30 @@ public class AlphaDogPawn : Pawn {
 
 	public void Kick(int i)
 	{
-		CurWeapons.StartKick(AttackType[i]); 
+		naturalWeapon.StartKick(AttackType[i]); 
+//		Debug.Log ("ATtack");
+		((DogAnimationManager) animator).AnyDo();
+		if (photonView.isMine) {
+			photonView.RPC("RPCKick",PhotonTargets.OthersBuffered,i);
+		}
+	}
+	[RPC]
+	public void RPCKick(int i){
+
+		naturalWeapon.StartKick(AttackType[i]); 
+		
 		((DogAnimationManager) animator).AnyDo();
 	}
 
-	public override void ToggleAim()
+	public override void ToggleAim(bool value)
 	{
-		Kick(0);
+		if (value) {
+						Kick (0);
+		}
 	}
+	public override void StartFire(){
+		Kick (1);
+	}
+
 	
 }

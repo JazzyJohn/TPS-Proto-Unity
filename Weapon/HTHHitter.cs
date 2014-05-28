@@ -21,6 +21,8 @@ public class HTHHitter : MonoBehaviour {
 	public KickType AttakType;
 
 	public float KDTime;
+
+	public Transform myTransform;
 	
 	protected bool KickPlay;
 
@@ -36,7 +38,7 @@ public class HTHHitter : MonoBehaviour {
 	[HideInInspector]
 	public float timer;
 
-	private bool Damage = false;
+	private bool wasDamage = false;
 
 	public bool CanShoot ()
 	{
@@ -58,7 +60,7 @@ public class HTHHitter : MonoBehaviour {
 
 		aSource = GetComponent<AudioSource> ();
 		sControl = new soundControl (aSource);//создаем обьект контроллера звука
-
+		myTransform = transform;
 	}
 
 	public void Luke_I_am_your_father(WeaponOfExtremities Darth_Vader,Pawn  owner1)
@@ -103,19 +105,30 @@ public class HTHHitter : MonoBehaviour {
 			if (!ok)
 			{
 				KickPlay = false;
-				Damage = false;
+				wasDamage = false;
 			}
 		}
 
 		RaycastHit[] hits;
-		
 		if (KickPlay)
 		{
-			hits = Physics.SphereCastAll(transform.position,radiusOfImpact, transform.position+owner.gameObject.transform.forward, 1f);
-			Debug.DrawLine(transform.position,transform.position+owner.gameObject.transform.forward*1.0f);
-			foreach(RaycastHit hit in hits)
-			{
-				onBulletHit(hit);
+			if(!wasDamage){
+				hits = Physics.RaycastAll(myTransform.position, 	myTransform.forward, 2.0f);
+				Debug.DrawRay(myTransform.position,myTransform.forward*2.0f,Color.red,5.0f);
+				foreach(RaycastHit hit in hits)
+				{
+					onBulletHit(hit);
+				}
+				if(wasDamage){
+					return;
+				}
+
+				hits = Physics.SphereCastAll(myTransform.position,radiusOfImpact, myTransform.forward, 2.0f);
+				//Debug.DrawLine(transform.position,transform.position+owner.gameObject.transform.forward*1.0f,Color.red,5.0f);
+				foreach(RaycastHit hit in hits)
+				{
+					onBulletHit(hit);
+				}
 			}
 		}
 	}
@@ -128,28 +141,32 @@ public class HTHHitter : MonoBehaviour {
 
 	public virtual  void onBulletHit(RaycastHit hit)
 	{
-		if (!Damage)
+		//Debug.Log ("HADISH INTO " + hit.transform);
+		if (!wasDamage)
 		{
 			if (owner == hit.transform.gameObject) {
 				return;
 			}
 			if (hit.transform.gameObject.CompareTag ("decoration")) {
 				sControl.playClip (HitSound);
-				Damage = true;
+				wasDamage = true;
 				//Debug.Log ("HADISH INTO " + hit.transform.gameObject.name);
 			}
 			DamagebleObject obj = hit.transform.gameObject.GetComponent <DamagebleObject>();
 			if (obj != null) {
 				sControl.playClip (HitSound);
-				Damage = true;
-				obj.Damage(damage,owner.gameObject);
+				wasDamage = true;
+				BaseDamage lDamage  = new BaseDamage(damage);
+				//lDamage.pushDirection = hit.point;
+				lDamage.hitPosition = hit.point;
+				obj.Damage(lDamage,owner.gameObject);
 				//Debug.Log ("HADISH INTO SOME PLAYER! " + hit.transform.gameObject.name);
 			}
 		}
 	}
 
 	void OnDrawGizmos() {
-		Gizmos.color = Color.yellow;
-		Gizmos.DrawSphere(transform.position, radiusOfImpact);
+		//Gizmos.color = Color.yellow;
+		//Gizmos.DrawSphere(transform.position, radiusOfImpact);
 	}
 }

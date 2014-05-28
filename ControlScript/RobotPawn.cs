@@ -61,7 +61,7 @@ public class RobotPawn : Pawn {
 		//photonView.RPC("JumpChange",PhotonTargets.OthersBuffered,false);
 	}
 	protected override void UpdateAnimator(){
-		Debug.Log (isGrounded);
+		//Debug.Log (isGrounded);
 		if (animator != null && animator.gameObject.activeSelf) {
 			if(!photonView.isMine){
 
@@ -84,7 +84,7 @@ public class RobotPawn : Pawn {
 	{
 
 		base.OnPhotonSerializeView (stream,info);
-		Debug.Log (this);
+		//Debug.Log (this);
 		if (stream.isWriting)
 		{
 

@@ -55,7 +55,9 @@ public class AITurret : AIState
 //		Debug.Log (_pawnArray);
 		foreach (Pawn pawn in _pawnArray)
 		{
-
+			if(!IsEnemy(pawn)){
+				continue;
+			}
 			Vector3 myPos = transform.position; // моя позиция
 			Vector3 targetPos = pawn.transform.position; // позиция цели
 			Vector3 myFacingNormal = transform.forward; //направление взгляда нашей турели
@@ -105,4 +107,11 @@ public class AITurret : AIState
             return false;
 
     }
+	public override bool IsEnemy(Pawn target){
+		if(target.team==controlledPawn.team){
+			return false;
+		}
+		return true;
+	}
+
 }

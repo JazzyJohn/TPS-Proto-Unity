@@ -8,10 +8,10 @@ public class ThirdPersonCamera : MonoBehaviour
 {
 	public Transform cameraTransform;
 
-	private Transform minimapTransform;
-	private Camera minimapCamera;
-	private Transform _target;
-	private Pawn _pawn;
+	protected Transform minimapTransform;
+	protected Camera minimapCamera;
+	protected Transform _target;
+	protected Pawn _pawn;
 	
 	// The distance in the x-z plane to the target
 	
@@ -62,6 +62,9 @@ public class ThirdPersonCamera : MonoBehaviour
 	private bool closeFOV= false;
 	private float startFov =60.0f;
 	public float sprintFov =60.0f;
+	
+	Vector3 curAddShake= Vector3.zero;
+	
 	void  Awake (){
 		
 		if(!cameraTransform && Camera.main)
@@ -76,31 +79,27 @@ public class ThirdPersonCamera : MonoBehaviour
 		minimapCamera = minimapTransform.camera;
 		_target = transform;
 		_pawn = GetComponent<Pawn> ();
-		if (_target)
-		{
-			controller = _target.GetComponent<ThirdPersonController>();
-		}
+		InitOffsets();
 		
-		if (controller) {
-						CapsuleCollider characterController = _target.GetComponent<CapsuleCollider> ();
-						centerOffset = characterController.bounds.center - _target.position;
-						headOffset = centerOffset;
-						headOffset.y = characterController.bounds.max.y - _target.position.y;
-		} else {
-						//Debug.Log("Please assign a target to the camera that has a ThirdPersonController script attached.");
-	
-		}
+		//TODO: Learn about wtf this do here
+		//EventHolder.instance.Bind (this);
+
+	}
+
+	protected void InitOffsets(){
+		
+		CapsuleCollider characterController = _target.GetComponent<CapsuleCollider> ();
+		centerOffset = characterController.bounds.center - _target.position;
+		headOffset = centerOffset;
+		headOffset.y = characterController.bounds.max.y - _target.position.y;
+		
 		Cut(_target, centerOffset);
-		EventHolder.instance.Bind (this);
-
 	}
 
-
-	public void ToggleAim(){
-		aiming = !aiming;
-
+	public void ToggleAim(bool value){
+		aiming = value;
+		
 	}
-
 	void  DebugDrawStuff (){
 		//Debug.DrawLine(_target.position, _target.position + headOffset);
 	
@@ -127,9 +126,9 @@ public class ThirdPersonCamera : MonoBehaviour
 		centerPoint.x = 0.5f;
 		centerPoint.y = 0.5f;
 	
-
-		minimapTransform.position = targetCenter + minimapTransform.position -minimapCamera.ViewportToWorldPoint (centerPoint);
-	
+		if (minimapTransform != null) {
+						minimapTransform.position = targetCenter + minimapTransform.position - minimapCamera.ViewportToWorldPoint (centerPoint);
+				}
 	//	DebugDrawStuff();
 	
 		// Calculate the current & target rotation angles
@@ -214,54 +213,82 @@ public class ThirdPersonCamera : MonoBehaviour
 		float distance = -targetOffset.z;
 		Vector3 FlatOffset = targetOffset;
 		FlatOffset.z = 0;
-		Quaternion pitchRotation= Quaternion.Euler (yAngle, xAngle, 0);
-		Vector3 localCamOffset = pitchRotation* Vector3.back * distance;
-		Vector3 localTargetOffset = pitchRotation* FlatOffset;
+		//Quaternion pitchRotation= Quaternion.Euler (yAngle, xAngle, 0);
+		Vector3 localCamOffset =  Quaternion.Euler (yAngle, xAngle, 0)* Vector3.back * distance;
+		Vector3 localTargetOffset =  Quaternion.Euler (0, xAngle, 0)* FlatOffset;
+		FlatOffset.x = 0;
+		Vector3 localFlatOffset =  Quaternion.Euler (0, xAngle, 0)* FlatOffset;
 		Vector3 resultcameraPos = targetCenter ;
-		
+		Vector3 targetforCamera = targetCenter;
 		//Debug.Log(pitchRotation* Vector3.back );
 		resultcameraPos.y=targetHeight;
 		localCamOffset += localTargetOffset;
 		//localCamOffset =  localCamOffset;
 		resultcameraPos +=localCamOffset;
-		Vector3 direction =  (resultcameraPos - targetCenter -localTargetOffset);
-		Ray wallRay = new Ray (targetCenter+localTargetOffset, direction.normalized);
+//		Debug.Log (localTargetOffset);
+		Vector3 direction =  (resultcameraPos - targetforCamera -localFlatOffset);
+		Ray wallRay = new Ray (targetforCamera+FlatOffset, direction.normalized);
 		//Debug.DrawLine (targetCenter+ localTargetOffset, targetCenter+ localTargetOffset + direction.normalized*distance);
-
-
-		float magnitude = distance*distance;
-		foreach (RaycastHit target  in Physics.SphereCastAll (wallRay, 0.5f,distance)) {
-
-			float range =(target.point-targetCenter+localTargetOffset).sqrMagnitude;
-			if(range<magnitude){
-				magnitude=range;
+		direction =  (resultcameraPos - targetforCamera -localTargetOffset);
+	//	Debug.DrawRay (wallRay.origin, wallRay.direction);
+		float magnitude = distance*distance+10.0f;
+		//Debug.DrawLine (wallRay.origin,wallRay.origin+ wallRay.direction*distance);
+	
+		foreach (RaycastHit target  in Physics.RaycastAll (wallRay, distance)) {
+			
+			
+			if(target.distance<magnitude){
+				magnitude=target.distance;
 			}else{
+			//	Debug.Log(magnitude+ " " +target.distance);
 				continue;
 			}
 			if(target.transform!= _target){
 				//Debug.Log(target.collider);
 				//Vector3 newPostion  = 	target.point-direction.normalized*1.0f;
-				Vector3 offsetDirection =  (target.point - targetCenter -localTargetOffset);
+				Vector3 offsetDirection =  (target.point - wallRay.origin);
+				
+				resultcameraPos = 	target.point-offsetDirection.normalized*1.0f;
+			} 
+			
+		}
+		foreach (RaycastHit target  in Physics.SphereCastAll (wallRay, 0.5f,distance)) {
+
+
+			if(target.distance<magnitude){
+				magnitude=target.distance;
+			}else{
+				//Debug.Log(magnitude+ " " +target.distance);
+				continue;
+			}
+			if(target.transform!= _target){
+				//Debug.Log(target.collider);
+				//Vector3 newPostion  = 	target.point-direction.normalized*1.0f;
+				Vector3 offsetDirection =  (target.point - wallRay.origin);
 
 				resultcameraPos = 	target.point-offsetDirection.normalized*1.0f;
 			} 
 
 		}
+	
 		cameraTransform.position = resultcameraPos + GetShaker ();
 		// Always look at the target	
-		Vector3 relativePos=(targetCenter + localTargetOffset)-cameraTransform.position;
+		Vector3 relativePos=(targetforCamera + localTargetOffset)-cameraTransform.position;
 
 			cameraTransform.rotation = Quaternion.LookRotation (-direction);
 
 		///SetUpRotation(targetCenter+ localTargetOffset, targetHead);
 	}
-	Vector3 curAddShake= Vector3.zero;
+	
 	Vector3 GetShaker(){
 
 	
 		curAddShake= Vector3.Lerp (curAddShake,Vector3.zero,Time.deltaTime*10);
 		return curAddShake;
 
+	}
+	public Vector3 CurrrentOffset(){
+		return (cameraTransform.position - _target.position + centerOffset);
 	}
 	public void AddShake(float mod){
 		if (_pawn != null) {
@@ -300,55 +327,11 @@ public class ThirdPersonCamera : MonoBehaviour
 		snapSmoothLag = oldSnapSmooth;
 	}
 	public void Reset (){
-		yAngle = 0;
+				yAngle = 0;
 
-		xAngle = 0;
-	}
-	/*void  SetUpRotation ( Vector3 centerPos ,   Vector3 headPos  ){
-		// Now it's getting hairy. The devil is in the details here, the big issue is jumping of course.
-		// * When jumping up and down we don't want to center the guy in screen space.
-		//  This is important to give a feel for how high you jump and avoiding large camera movements.
-		//   
-		// * At the same time we dont want him to ever go out of screen and we want all rotations to be totally smooth.
-		//
-		// So here is what we will do:
-		//
-		// 1. We first find the rotation around the y axis. Thus he is always centered on the y-axis
-		// 2. When grounded we make him be centered
-		// 3. When jumping we keep the camera rotation but rotate the camera to get him back into view if his head is above some threshold
-		// 4. When landing we smoothly interpolate towards centering him on screen
-		Vector3 cameraPos= cameraTransform.position;
-		Vector3 offsetToCenter= centerPos - cameraPos;
-		
-		// Generate base rotation only around y-axis
-		Quaternion yRotation= Quaternion.LookRotation(new Vector3(offsetToCenter.x, 0, offsetToCenter.z));
+				xAngle = 0;
 	
-		Vector3 relativeOffset= Vector3.forward * distance + Vector3.down * height;
-		cameraTransform.rotation = yRotation * Quaternion.LookRotation(relativeOffset);
-	
-		// Calculate the projected center position and top position in world space
-		Ray centerRay= cameraTransform.camera.ViewportPointToRay(new Vector3(.5f, 0.5f, 1f));
-		Ray topRay= cameraTransform.camera.ViewportPointToRay(new Vector3(.5f, clampHeadPositionScreenSpace, 1f));
-	
-		Vector3 centerRayPos= centerRay.GetPoint(distance);
-		Vector3 topRayPos= topRay.GetPoint(distance);
-		
-		float centerToTopAngle= Vector3.Angle(centerRay.direction, topRay.direction);
-		
-		float heightToAngle= centerToTopAngle / (centerRayPos.y - topRayPos.y);
-	
-		float extraLookAngle= heightToAngle * (centerRayPos.y - centerPos.y);
-		if (extraLookAngle < centerToTopAngle)
-		{
-			extraLookAngle = 0;
 		}
-		else
-		{
-			extraLookAngle = extraLookAngle - centerToTopAngle;
-			cameraTransform.rotation *= Quaternion.Euler(-extraLookAngle, 0, 0);
-		}
-	}*/
-	
 	public Vector3 GetCenterOffset (){
 		return centerOffset;
 	}

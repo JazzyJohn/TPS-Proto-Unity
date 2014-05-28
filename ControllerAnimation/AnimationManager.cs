@@ -11,7 +11,7 @@ public class AnimationManager : MonoBehaviour
 	public IKcontroller aimPos;
 	private bool shouldAim= true;
 	public Rigidbody rb;
-    private void Start()
+    private void Awake()
     {
         animator = GetComponent<Animator>();
 		if (aimPos == null) {
@@ -240,5 +240,15 @@ public class AnimationManager : MonoBehaviour
 		if (aimPos != null) {
 						aimPos.aimPosition = position;
 		}
+	}
+	public void SetWeaponType(int State){
+		if (State == 0) {
+			return;
+		}
+		animator.SetInteger ("GunType",State);
+	}
+	public void ReloadStart(){
+	
+		animator.SetTrigger ("Reload");
 	}
 }

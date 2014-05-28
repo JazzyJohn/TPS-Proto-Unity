@@ -80,33 +80,42 @@ public class PlayerMainGui : MonoBehaviour {
 	public class PlayerStats{
 		public float robotTime=0;
 		public float health=0;
-		public float ammoInGun=0;
-		public float ammoInGunMax=0;
+        public float maxHealth = 200;
+		public BaseWeapon gun;
 		public float ammoInBag=0;
 		public float reloadTime=0;
 		public int jetPackCharge= 0;
-		public string gunName="";
-			
+	       
 	}
-	public class GameStats{
+	public class LevelStats{
+		public int[]  classLvl;	
+		public int[]  classProcent;
+		public int  playerLvl;
+		public int  playerProcent;
+	}
+	public class GameStats{ 
 		public float gameTime;
 		public int[] score;
 		public int maxScore;
 	}
-	enum GUIState{
+	public enum GUIState{
 		Normal,
 		Playerlist,
 		Dedicated,
 		GameResult,
+		KillCam,
+		Respawn
 			
 	}
-	private GUIState guiState;
+	public GUIState guiState;
 
 	public GUISkin guiSkin;
 
 	public GUISkin messageSkin;
 
 	private MenuTF respawnMenu;
+
+	private PlayerHudNgui hud;
 
 	private ChatHolder[] chats;
 
@@ -123,22 +132,48 @@ public class PlayerMainGui : MonoBehaviour {
 		foreach (ChatHolder holder in chats) {
 			holder.SetPlayer(newPlayer);	
 		}
+		hud = GetComponentInChildren<PlayerHudNgui> ();
+		hud.SetLocalPlayer(LocalPlayer);
+		ChageState(GUIState.Respawn);
 	}
 
 	void Update(){
 		if (guiState == GUIState.Dedicated) {
 			return;
 		}
-		guiState = GUIState.Normal;
+
 		if (Input.GetButton ("ScoreBtn")) {
-			guiState =GUIState.Playerlist;
+			
+			ChageState(GUIState.Playerlist);
+			return;
 		}
 		if (Input.GetButtonDown ("Debug")) {
+		
 			showDebug= !showDebug;
+			return;
 		}
 		if (PVPGameRule.isGameEnded) {
-			guiState =GUIState.GameResult;
+		
+			ChageState(GUIState.GameResult);
+			return;
 		}
+		if (LocalPlayer!=null&&!LocalPlayer.IsDead()) {
+
+			guiState = GUIState.Normal;
+		
+		}
+
+	}
+	
+	public void ChageState(GUIState nextState ){
+		if (nextState == GUIState.Normal&&guiState != GUIState.Normal) {
+			hud.Activate();
+		}else{
+			if(nextState != GUIState.Normal){
+				hud.DeActivate();
+			}
+		}
+		guiState =nextState;
 	}
 
 	// Update is called once per frame
@@ -153,29 +188,30 @@ public class PlayerMainGui : MonoBehaviour {
 				float screenX = Screen.width, screenY = Screen.height;
 				GUI.skin = guiSkin;
 				switch (guiState) {
+				case GUIState.Respawn:
+						Screen.lockCursor = false;
+						RespawnGui();
+					break;
 				case GUIState.Normal:
 			
-				//MAIN HUD
-						if (LocalPlayer.IsDead ()) {
-							Screen.lockCursor = false;
-							RespawnGui();
-								
-					
-						} else {
-							
-							MainHud();	
+						//MAIN HUD
+						MainHud();	
 							if (GUI.GetNameOfFocusedControl () != "") {
 									Screen.lockCursor = false;
 							}else{
 								Screen.lockCursor = true;
 							}
-						}
 
 						break;
 
 				case GUIState.Playerlist:
 					PlayerList();
 				
+					break;
+				case GUIState.KillCam:
+					Screen.lockCursor = true;
+					PlayerList();
+					
 					break;
 				case GUIState.GameResult:
 					GameResult();
@@ -184,59 +220,70 @@ public class PlayerMainGui : MonoBehaviour {
 
 				
 				}
-				//Message Section
-				//GUI.skin = messageSkin;
-				while (guiMessages.Count>0&&guiMessages.Peek().destroyTime<Time.time) {
-						guiMessages.Dequeue ();
-				}
-		Debug.Log (guiMessages.Count);
-				foreach (GUIMessage guiMessage in guiMessages) {
-					
-						float size=0;
-						GUIStyle messStyle = guiMessage.getStyle (this);
-						switch(guiMessage.type){
-						case MessageType.ACHIVEMENT:
-						size = guiMessage.getMessageSize (this);
-						Rect achvmessRect = new Rect (screenX - size ,screenY - size/1.5f, size, size);
+				
+			 Messagess();
+			 
+			LabelSection();
+		
 
-							GUI.Label (achvmessRect,"ACHIVMENT UNLOCK: \n " +guiMessage.text,messStyle);
+	}
+	void Messagess(){
+		float screenX = Screen.width, screenY = Screen.height;
+		//Message Section
+		//GUI.skin = messageSkin;
+		while (guiMessages.Count>0&&guiMessages.Peek().destroyTime<Time.time) {
+				guiMessages.Dequeue ();
+		}
+		//		Debug.Log (guiMessages.Count);
+		foreach (GUIMessage guiMessage in guiMessages) {
+			
+				float size=0;
+				GUIStyle messStyle = guiMessage.getStyle (this);
+				switch(guiMessage.type){
+				case MessageType.ACHIVEMENT:
+				size = guiMessage.getMessageSize (this);
+				Rect achvmessRect = new Rect (screenX - size ,screenY - size/1.5f, size, size);
+
+					GUI.Label (achvmessRect,"ACHIVMENT UNLOCK: \n " +guiMessage.text,messStyle);
+				
+				break;
+				default:
+							Vector3 Position = MainCamera.WorldToScreenPoint (guiMessage.worldPoint);
+							if(Position.z<0){
+								continue;
+							}
+							size = guiMessage.getMessageSize (this);
+							Rect messRect = new Rect (Position.x - size / 2, screenY - Position.y, size, size);
+				
 						
-						break;
-						default:
-									Vector3 Position = MainCamera.WorldToScreenPoint (guiMessage.worldPoint);
-									if(Position.z<0){
-										continue;
-									}
-									size = guiMessage.getMessageSize (this);
-									Rect messRect = new Rect (Position.x - size / 2, screenY - Position.y, size, size);
+						GUI.Label (messRect, guiMessage.text,messStyle);
 						
-								
-								GUI.Label (messRect, guiMessage.text,messStyle);
-								
-						break;
-						}
+				break;
 				}
-				while (logMessages.Count>50) {
-						logMessages.Dequeue ();
+		}
+		while (logMessages.Count>50) {
+				logMessages.Dequeue ();
 
+		}
+		if (showDebug) {
+				GUI.BeginGroup (new Rect (0, Screen.height - 300, 400, 300));
+				int j = 0;
+				foreach (LogMess logMessage in logMessages) {
+						j++;
+						Rect messRect = new Rect (0, 40 * (logMessages.Count - j), 300, 40);
+						GUI.Label (messRect, logMessage.mess);
+						//messRect = new Rect (0,50*(j*2+1),300,50);
+						//GUI.Label(messRect,logMessage.trace);
 				}
-				if (showDebug) {
-						GUI.BeginGroup (new Rect (0, Screen.height - 300, 400, 300));
-						int j = 0;
-						foreach (LogMess logMessage in logMessages) {
-								j++;
-								Rect messRect = new Rect (0, 40 * (logMessages.Count - j), 300, 40);
-								GUI.Label (messRect, logMessage.mess);
-								//messRect = new Rect (0,50*(j*2+1),300,50);
-								//GUI.Label(messRect,logMessage.trace);
-						}
-						GUI.EndGroup ();
-				} else {
+				GUI.EndGroup ();
+		} else {
 
-					chats[0].DrawChatBox();
+			chats[0].DrawChatBox();
 
-				}
-
+		}
+	}
+	void LabelSection(){
+		float screenX = Screen.width, screenY = Screen.height;
 		//LABEL SECTION
 		GUI.skin = guiSkin;
 
@@ -249,8 +296,7 @@ public class PlayerMainGui : MonoBehaviour {
 		versionrect = new Rect (screenX  - VersionSize,VersionSize/2.5f, VersionSize*10, VersionSize);
 		GUI.Label(versionrect , "Version:" +PlayerManager.instance.version + " Date: "+ System.DateTime.Now.ToShortDateString());
 		
-		
-
+	
 	}
 
 	void RespawnGui(){
@@ -275,10 +321,11 @@ public class PlayerMainGui : MonoBehaviour {
 		respawnMenu.DrawMenu ();
 		if (Choice._Player != -1 && Choice._Robot != -1&&Choice._Team!= -1) {
 			LocalPlayer.SetTeam (Choice._Team);
-			LocalPlayer.selected = Choice._Player;
-			LocalPlayer.selectedBot = Choice._Robot;		
+			
 			int timer = (int)LocalPlayer.GetRespawnTimer ();
 			if(respawnMenu.SetTimer(timer)){
+				LocalPlayer.selectedBot = Choice._Robot;		
+				LocalPlayer.selected = Choice._Player;
 				LocalPlayer.isStarted  =true;
 
 			}
@@ -305,8 +352,9 @@ public class PlayerMainGui : MonoBehaviour {
 		float screenX = Screen.width, screenY = Screen.height;
 		//Screen.lockCursor = true;
 		Rect crosrect = new Rect ((screenX - crosshairWidth) / 2, (screenY - crosshairHeight) / 2, crosshairWidth, crosshairHeight);
-		
-		Pawn myPawn = LocalPlayer.GetCurrentPawn ();
+		GUI.Label (crosrect, crosshair);
+		hud.Activate();
+		/*Pawn myPawn = LocalPlayer.GetCurrentPawn ();
 
 		GUI.Label (crosrect, crosshair);
 		if (myPawn!=null&&LocalPlayer.useTarget != null&&(myPawn.myTransform.position-LocalPlayer.useTarget.myTransform.position).sqrMagnitude<Player.SQUERED_RADIUS_OF_ACTION) {
@@ -352,14 +400,14 @@ public class PlayerMainGui : MonoBehaviour {
 				}
 				
 			}
-		}
+		}	*/
 		Pawn robot = LocalPlayer.GetRobot ();
 		List<Pawn> seenablePawn = LocalPlayer.GetCurrentPawn ().getAllSeenPawn ();
 		if (LocalPlayer.inBot) {
 			//Debug.Log("ROBOT");
 			seenablePawn = robot.getAllSeenPawn ();
 		}
-	
+
 		//Debug.Log (seenablePawn[0]);
 		float maxsize = LocalPlayer.GetCurrentPawn ().seenDistance;
 		if (LocalPlayer.inBot) {
@@ -393,7 +441,7 @@ public class PlayerMainGui : MonoBehaviour {
 			} else {
 				GUI.Label (mark, publicName , EnemyMark);
 			}
-		}
+		}/*
 		Rect statsRect = new Rect (screenX - crosshairWidth * 4, Screen.height - crosshairHeight * 5, crosshairWidth * 4, crosshairHeight);
 
 		GUI.Label (statsRect, "JetPack Charges: " + localstats.jetPackCharge);
@@ -411,8 +459,9 @@ public class PlayerMainGui : MonoBehaviour {
 		statsRect = new Rect (screenX - crosshairWidth * 4, Screen.height - crosshairHeight, crosshairWidth * 4, crosshairHeight);
 		GUI.Label (statsRect, "Ammo in Bag: " + localstats.ammoInBag);
 
-		
+	
 		//game stats section
+		
 		GameStats gamestats = PVPGameRule.instance.GetStats ();
 		Rect rectforName = new Rect ((screenX - crosshairWidth * 10) / 2, 0, crosshairWidth * 10, crosshairHeight);
 		GUI.Label (rectforName, LocalPlayer.GetName () + " Team:" + FormTeamName (LocalPlayer.team));
@@ -420,8 +469,8 @@ public class PlayerMainGui : MonoBehaviour {
 		GUI.Label (rectforName, "K/D/A " + LocalPlayer.Score.Kill + "/" + LocalPlayer.Score.Death + "/" + LocalPlayer.Score.Assist);
 		rectforName = new Rect ((screenX - crosshairWidth * 10) / 2, crosshairHeight, crosshairWidth * 10, crosshairHeight);
 		GUI.Label (rectforName, FormTeamName (1) + gamestats.score [0] + "|" + gamestats.maxScore + " |" + FormTeamName (2) + gamestats.score [1]);
-		
-
+		*/
+			
 	}
 
 	void DedicatedDraw(){
@@ -473,7 +522,15 @@ public class PlayerMainGui : MonoBehaviour {
 			
 			
 		}
+		LevelStats lvl = LevelingManager.instance.GetPlayerStats ();
 
+		Rect statsRect = new Rect (2*screenX/3+size, Screen.height-size , screenX/3,size);
+		GUI.Label (statsRect, "Player LVL: " + lvl.playerLvl+ "  Next :"  +lvl. playerProcent +"%");
+		for(int i =0; i<lvl.classLvl.Length;i++){
+			statsRect = new Rect (2*screenX/3+size, Screen.height-(i+2)*size , screenX/3,size);
+			GUI.Label (statsRect, "Class "+i+":" + lvl.classLvl[i]+ "  Next :"  +lvl. classProcent[i] +"%");
+
+		}
 	}
 	
 	public void AddMessage(string text,Vector3 worldPoint, MessageType type ){
@@ -515,5 +572,22 @@ public class PlayerMainGui : MonoBehaviour {
 	}
 	void OnEnable() {
 		Application.RegisterLogCallback(HandleLog);
+	}
+	public void InitKillCam(Player killer){
+		if (killer != null) {
+				KillCamera s_Instance =FindObjectOfType<KillCamera>();
+				s_Instance.enabled = true;
+				if (s_Instance.Init (killer)) {
+						Debug.Log("killcam");
+						ChageState (GUIState.KillCam);
+				} else {
+						ChageState (GUIState.Respawn);
+				}
+		} else {
+			ChageState (GUIState.Respawn);
+		}
+	}
+	public void StopKillCam(){
+		ChageState(GUIState.Respawn);
 	}
 }

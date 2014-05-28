@@ -12,7 +12,7 @@ public class InventoryManager : MonoBehaviour {
 	
 	private int indexWeapon;
 	
-	private Pawn owner;
+	protected Pawn owner;
 	
 	[Serializable]
 	public class AmmoBag {
@@ -52,7 +52,7 @@ public class InventoryManager : MonoBehaviour {
 	private AmmoBag[] allAmmo;
 	 	
 
-	public void Init(){
+	public virtual void Init(){
 		if (owner == null) {
 			owner = GetComponent<Pawn> ();
 			if (owner.photonView.isMine) {
@@ -91,7 +91,7 @@ public class InventoryManager : MonoBehaviour {
 		}
 	}
 	//Check is there ammo in bag
-	public bool HasAmmo(AMMOTYPE ammo){
+	public virtual bool HasAmmo(AMMOTYPE ammo){
 		for(int i=0;i<allAmmo.Length;i++){
 			if(allAmmo[i].type ==ammo){
 				return allAmmo[i].amount>0;
@@ -100,7 +100,7 @@ public class InventoryManager : MonoBehaviour {
 		return false;
 	}
 	//Get amount ammo for current ammotype
-	public int GetAmmo(AMMOTYPE ammo){
+	public virtual int GetAmmo(AMMOTYPE ammo){
 		for(int i=0;i<allAmmo.Length;i++){
 			if(allAmmo[i].type ==ammo){
 				return allAmmo[i].amount;
@@ -109,7 +109,7 @@ public class InventoryManager : MonoBehaviour {
 		return 0;
 	}
 	//Return ammo from bag
-	public int GiveAmmo(AMMOTYPE ammo,int amount){
+	public virtual int GiveAmmo(AMMOTYPE ammo,int amount){
 		for(int i=0;i<allAmmo.Length;i++){
 			if(allAmmo[i].type ==ammo){
 				if(allAmmo[i].amount>amount){
@@ -124,7 +124,7 @@ public class InventoryManager : MonoBehaviour {
 		return 0;
 	}
 	//Add Ammo to bag
-	public void AddAmmo(AMMOTYPE ammo,int amount){
+	public virtual void AddAmmo(AMMOTYPE ammo,int amount){
 		for(int i=0;i<allAmmo.Length;i++){
 			if(allAmmo[i].type ==ammo){
 				allAmmo[i].amount+=amount;
@@ -145,7 +145,7 @@ public class InventoryManager : MonoBehaviour {
 	/*Generate cahche info for bag
 		We don't store all weapon just important info about it when player put  weapon down
 	*/
-	void 	GenerateInfo(){
+	protected void 	GenerateInfo(){
 		weaponInfo = new WeaponBackUp[prefabWeapon.Length];
 		for(int i=0;i<prefabWeapon.Length;i++){
 			weaponInfo[i]=new WeaponBackUp(prefabWeapon[i].clipSize,prefabWeapon[i].ammoType);
@@ -246,7 +246,16 @@ public class InventoryManager : MonoBehaviour {
 			return;
 		}
 		BaseWeapon firstWeapon;
-		firstWeapon =PhotonNetwork.Instantiate(prefabWeapon[newWeapon].name,transform.position,Quaternion.identity,0).GetComponent<BaseWeapon>();
+        if (owner.photonView.isSceneView)
+        {
+            firstWeapon = PhotonNetwork.InstantiateSceneObject(prefabWeapon[newWeapon].name, transform.position, Quaternion.identity, 0, null).GetComponent<BaseWeapon>();
+            Debug.Log("Turret weapon spawn");
+        }
+        else
+        {
+            firstWeapon = PhotonNetwork.Instantiate(prefabWeapon[newWeapon].name, transform.position, Quaternion.identity, 0).GetComponent<BaseWeapon>();
+        }
+
 	
 		owner.setWeapon(firstWeapon);
 		if(currentWeapon!=null){

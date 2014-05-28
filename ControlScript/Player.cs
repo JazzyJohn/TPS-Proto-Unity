@@ -1,11 +1,15 @@
 using UnityEngine;
 using System;
+using System.Collections.Generic;
 
 public enum PawnType{PAWN,BOT};
 
+//BIT MASK 
+public enum GameClassEnum{ENGINEER,ASSAULT,SCOUT,MEDIC,ANY};
 
 public class Player : MonoBehaviour {
-	
+	public List<string> friendsInfo = new List<string>();
+
 	public float respawnTime = 10.0f;
 	
 	public float robotTime = 2.0f;
@@ -56,6 +60,8 @@ public class Player : MonoBehaviour {
 
 	private bool isDead=true;
 
+	private bool canSpamBot = true;
+
 	private PhotonView photonView;
 
 	public UseObject useTarget;
@@ -65,7 +71,22 @@ public class Player : MonoBehaviour {
 	public string delayedExternalCallData;
 	
 	public const float SQUERED_RADIUS_OF_ACTION = 16.0f;
+	
+	public GlobalPlayer globalPlayer;
 
+
+
+	public bool isPlayerFriend(string playerId)
+	{
+	 	foreach (string id in friendsInfo) 
+		{
+			if(id.Equals(playerId))
+				return true;
+		}
+
+		return false;
+	}
+	
 	void Start(){
 		photonView = GetComponent<PhotonView> ();
 
@@ -75,10 +96,14 @@ public class Player : MonoBehaviour {
 						//TODO: UNCOMMENT
 						robotTimer = robotTime;
 		
-						this.name = "Player";		
+						//this.name = "Player";		
 						PlayerName = "Player" + PhotonNetwork.playerList.Length;
 						//	photonView.RPC ("ASKTeam", PhotonTargets.MasterClient);
-						Application.ExternalCall ("SayMyName");
+						globalPlayer =  FindObjectOfType<GlobalPlayer>();
+						UID = globalPlayer.GetUID();
+						PlayerName = globalPlayer.GetPlayerName();
+						friendsInfo = globalPlayer.friendsInfo;
+						photonView.RPC("RPCSetNameUID",PhotonTargets.AllBuffered,UID,PlayerName);
 						EventHolder.instance.FireEvent(typeof(LocalPlayerListener),"EventAppear",this);
 						//StatisticHandler.StartStats(UID,PlayerName);
 		} else {
@@ -112,7 +137,15 @@ public class Player : MonoBehaviour {
 			robotPawn.RequestKillMe ();
 		}
 	}
+	public void Respawn(Pawn newPawn){
+		if (!inBot&&photonView.isMine) {
+			currentPawn.RequestKillMe();
+			currentPawn  =PlayerManager.instance.SpawmPlayer(newPawn,currentPawn.myTransform.position,currentPawn.myTransform.rotation);
+			canSpamBot=false;
+			AfterSpawnSetting(currentPawn,PawnType.PAWN,team);
+		}
 
+	}
 	void Update(){
 		if (!photonView.isMine) {
 			return;
@@ -124,6 +157,7 @@ public class Player : MonoBehaviour {
 			Pawn[] prefabClass=	PlayerManager.instance.avaiblePawn;
 			SendDelayedExternal();
 			respawnTimer-=Time.deltaTime;
+//			Debug.Log ("Dead");
 			if(respawnTimer<=0&&isStarted){
 				respawnTimer=respawnTime;
 				currentPawn =PlayerManager.instance.SpawmPlayer(prefabClass[selected],team);
@@ -133,13 +167,14 @@ public class Player : MonoBehaviour {
 				prefabGhostBot =PlayerManager.instance.ghostsBots[selectedBot];
 
 			}
+			canSpamBot=true;
 		}else{
 			Ray centerofScreen =Camera.main.ViewportPointToRay(new Vector3(0.5f, 0.5f, 0f));
 			RaycastHit hitinfo;			
 			if(robotPawn==null){
 				robotTimer-=Time.deltaTime;
 				
-				if(robotTimer<=0){
+				if(robotTimer<=0&&canSpamBot){
 					if(Input.GetButton("SpawnBot")){
 						
 						if(Physics.Raycast(centerofScreen, out hitinfo,50.0f)){
@@ -215,16 +250,15 @@ public class Player : MonoBehaviour {
 					//Debug.Log (currentPawn.curLookTarget);
 
 				}
-			if(Input.GetButtonDown("Fire2")){
-				currentPawn.ToggleAim();
+			if(Input.GetButton("Fire2")){
+				currentPawn.ToggleAim(true);
 				if(robotPawn!=null){
-					robotPawn.ToggleAim();
+					robotPawn.ToggleAim(true);
 				}
-			}
-			if(Input.GetButtonUp("Fire2")){
-				currentPawn.ToggleAim();
+			}else{
+				currentPawn.ToggleAim(false);
 				if(robotPawn!=null){
-					robotPawn.ToggleAim();
+					robotPawn.ToggleAim(false);
 				}
 			}
 			if(Input.GetButtonDown("Weapon1")){
@@ -252,6 +286,8 @@ public class Player : MonoBehaviour {
 	public void RobotDead(Player Killer){
 		robotTimer=robotTime;
 		inBot= false;
+		currentPawn.myTransform.position = robotPawn.playerExitPositon.position;
+		currentPawn.myTransform.rotation = robotPawn.playerExitPositon.rotation;
 		currentPawn.transform.parent = null;
 		currentPawn.Activate ();
 	}
@@ -261,6 +297,7 @@ public class Player : MonoBehaviour {
 		int viewID = 0;
 		if (Killer != null) {
 			viewID = Killer.photonView.viewID;
+			
 			PVPGameRule.instance.Kill (Killer.team);
 			EventHolder.instance.FireEvent(typeof(LocalPlayerListener),"EventPawnDeadByPlayer",this);
 		} else {
@@ -275,11 +312,18 @@ public class Player : MonoBehaviour {
 		
 		Score.Death++;
 		isStarted = false;
+		isDead = true;
 		if (viewId != 0) {
 			Player killer = PhotonView.Find (viewId).GetComponent<Player> ();
-			
+			PlayerMainGui.instance.InitKillCam(killer);
+			if(isPlayerFriend(killer.UID))
+			{
+				EventHolder.instance.FireEvent(typeof(LocalPlayerListener),"EventKilledByFriend",this,killer);
+			}
+		
 			StatisticHandler.SendPlayerKillbyPlayer(UID, PlayerName, killer.UID, killer.PlayerName);
 		} else {
+			PlayerMainGui.instance.InitKillCam(null);
 			StatisticHandler.SendPlayerKillbyNPC(UID, PlayerName);
 		}
 		
@@ -287,19 +331,29 @@ public class Player : MonoBehaviour {
 		
 	}
 	public void PawnKill(Player Victim,Vector3 position){
-		if (Victim != null){
-			photonView.RPC("RPCPawnKill",photonView.owner,position);
 
-	 	 }
+		if (Victim != null) {
+			photonView.RPC ("RPCPawnKill", photonView.owner, position,Victim.photonView.viewID);
+
+		} else {
+			photonView.RPC ("RPCAIKill", photonView.owner, position);
+		}
 
 
 	}
 	[RPC]
-	public void RPCPawnKill(Vector3 position){
+	public void RPCPawnKill(Vector3 position,int viewId){
 
 		//TODO: move text to config
 		PlayerMainGui.instance.AddMessage("NAILED IT",position,PlayerMainGui.MessageType.KILL_TEXT);
 		EventHolder.instance.FireEvent(typeof(LocalPlayerListener),"EventPawnKillPlayer",this);
+		Player victim = PhotonView.Find (viewId).GetComponent<Player> ();
+
+		if(isPlayerFriend(victim.UID))
+		{
+			EventHolder.instance.FireEvent(typeof(LocalPlayerListener),"EventKilledAFriend",this,victim);
+		}
+
 		if(!inBot){
 			Score.Kill++;
 		}else{
@@ -310,11 +364,21 @@ public class Player : MonoBehaviour {
 
 
 	}
+	[RPC]
+	public void RPCAIKill(Vector3 position){
+		
+		//TODO: move text to config
+		PlayerMainGui.instance.AddMessage("NAILED IT",position,PlayerMainGui.MessageType.KILL_TEXT);
+		EventHolder.instance.FireEvent(typeof(LocalPlayerListener),"EventPawnKillAI",this);
 
+		
+		
+		
+	}
 	//Delayed external for that function that can destrupt user like VK wallpost
 	public void SendDelayedExternal(){
 		if(delayedExternalCallName!=""){
-			Application.ExternalCall(delayedExternalCallName,delayedExternalCallName);
+			Application.ExternalCall(delayedExternalCallName,delayedExternalCallData);
 			delayedExternalCallName="";
 		}
 	}
@@ -322,7 +386,7 @@ public class Player : MonoBehaviour {
 	public void AchivmenUnlock(Achievement achv){
 		PlayerMainGui.instance.AddMessage(achv.name+"\n"+achv.description,Vector3.zero,PlayerMainGui.MessageType.ACHIVEMENT);
 		delayedExternalCallName ="AchivmenUnlock";
-		delayedExternalCallName = achv.name + " " + achv.description;
+		delayedExternalCallData = achv.name + " " + achv.description;
 		
 	}
 	
@@ -378,12 +442,12 @@ public class Player : MonoBehaviour {
 		if (curPawn != null) {
 			stats.health = curPawn.health;
 			if(curPawn.CurWeapon!=null){
-				stats.ammoInGun = curPawn.CurWeapon.curAmmo;
-				stats.ammoInGunMax = curPawn.CurWeapon.clipSize;
+			
+				stats.gun  = curPawn.CurWeapon;
 				stats.ammoInBag = curPawn.GetAmmoInBag ();
 				stats.reloadTime = curPawn.CurWeapon.ReloadTimer();
 			
-				stats.gunName = curPawn.CurWeapon.weaponName;
+				
 			}
 			stats.jetPackCharge  = curPawn.GetJetPackCharges();
 		}
@@ -413,38 +477,21 @@ public class Player : MonoBehaviour {
 	//NetworkSection
 	public void OnPhotonSerializeView(PhotonStream stream, PhotonMessageInfo info)
 	{
-		/*if (stream.isWriting)
+	/*	if (stream.isWriting)
 		{
 			// We own this player: send the others our data
-			stream.SendNext(PlayerName);
-			stream.SendNext(UID);
-			stream.SendNext(team);
+			stream.SendNext(inBot);
+		
 
 		}
 		else
 		{
 			// Network player, receive data
-			PlayerName= (String) stream.ReceiveNext();
-			UID= (String) stream.ReceiveNext();
-			team = (int) stream.ReceiveNext();
+			inBot= (bool) stream.ReceiveNext();
+			
 		}*/
 	}
-	public void  SetName(String newname)
-	{
-		PlayerName = newname;
 	
-		Application.ExternalCall( "SayMyUid");
-		
-	}
-	public void  SetUid(string uid)
-	{
-
-		UID = uid;
-		
-		StatisticHandler.StartStats(UID,PlayerName);
-		photonView.RPC("RPCSetNameUID",PhotonTargets.AllBuffered,UID,PlayerName);
-	}
-
 	
 	public String GetName(){
 		return PlayerName;
@@ -459,6 +506,14 @@ public class Player : MonoBehaviour {
 		return robotPawn;
 	}
 
+	public Pawn GetActivePawn(){
+		if(robotPawn!=null &&!currentPawn.isActive){
+			return robotPawn;
+		}else{
+			return currentPawn;
+		}
+		return null;
+	}
 	public void AfterSpawnSetting(Pawn pawn,PawnType type,int rTeam){
 	
 		if (photonView.isMine) {

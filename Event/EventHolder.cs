@@ -17,6 +17,8 @@ public interface  LocalPlayerListener{
 	void EventStartWallRun(Player target,Vector3 Position);
 	void EventEndWallRun(Player target, Vector3 Position);
 	void EventPawnReload(Player target);
+	void EventKilledByFriend(Player target,Player friend);
+	void EventKilledAFriend(Player target,Player friend);
 } 
 public interface  GameListener{
 	void EventStart();

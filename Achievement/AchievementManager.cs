@@ -42,7 +42,8 @@ public class AchievementManager : MonoBehaviour, LocalPlayerListener{
 	public const string PARAM_DOUBLE_JUMP= "DoubeJump";
 	public const string PARAM_WALL_RUN= "WallRun";
 	public const string PARAM_RELOAD="Reload";
-
+	public const string PARAM_KILL_FRIEND = "KillFriend";
+	public const string PARAM_KILL_BY_FRIEND= "KilledByFriend"; 
 	struct IncomingMessage{
 		public string param;
 		public float delta;
@@ -57,30 +58,38 @@ public class AchievementManager : MonoBehaviour, LocalPlayerListener{
 
 	void Awake(){
 		EventHolder.instance.Bind (this);
-
+		DontDestroyOnLoad(transform.gameObject);
+	}
+	public void Init(string uid){
+		WWWForm form = new WWWForm ();
+			
+		form.AddField ("uid", uid);
+		UID = uid;
+		StartCoroutine(LoadAchivment (form));
+	
 	}
 	protected IEnumerator LoadAchivment(WWWForm form){
-				Debug.Log (form );
-				WWW w = null;
-				if (String.Compare(Application.absoluteURL, 0, "https", 0,5) != 0) {
-					
-					Debug.Log ("STATS HTTP SEND" + StatisticHandler.STATISTIC_PHP_HTTPS + StatisticHandler.LOAD_ACHIVE);
-					w = new WWW (StatisticHandler.STATISTIC_PHP + StatisticHandler.LOAD_ACHIVE, form);
-				}
-				else{
-					Debug.Log ("STATS HTTPS SEND"+StatisticHandler.STATISTIC_PHP_HTTPS + StatisticHandler.LOAD_ACHIVE);
-					w = new WWW (StatisticHandler.STATISTIC_PHP_HTTPS + StatisticHandler.LOAD_ACHIVE, form);
-				}
-				yield return w;
-				//Debug.Log (w.text);
-				ParseList (w.text);
+		Debug.Log (form );
+		WWW w = null;
+		if (String.Compare(Application.absoluteURL, 0, "https", 0,5) != 0) {
+			
+			Debug.Log ("STATS HTTP SEND" + StatisticHandler.STATISTIC_PHP_HTTPS + StatisticHandler.LOAD_ACHIVE);
+			w = new WWW (StatisticHandler.STATISTIC_PHP + StatisticHandler.LOAD_ACHIVE, form);
+		}
+		else{
+			Debug.Log ("STATS HTTPS SEND"+StatisticHandler.STATISTIC_PHP_HTTPS + StatisticHandler.LOAD_ACHIVE);
+			w = new WWW (StatisticHandler.STATISTIC_PHP_HTTPS + StatisticHandler.LOAD_ACHIVE, form);
+		}
+		yield return w;
+		//Debug.Log (w.text);
+		ParseList (w.text);
 	}
 	//parse XML string to normal Achivment Pattern
 	protected void ParseList(string XML){
 		XmlDocument xmlDoc = new XmlDocument();
 		xmlDoc.LoadXml(XML);
 		ongoingAchivment= new List<Achievement>();
-		onFinishedAchivment= new List<Achievement>();
+		finishedAchivment= new List<Achievement>();
 		foreach (XmlNode node in xmlDoc.SelectNodes("achivements/achivement")) {
 			Achievement achivment = new Achievement();
 			achivment.name = node.SelectSingleNode("name").InnerText;
@@ -94,8 +103,13 @@ public class AchievementManager : MonoBehaviour, LocalPlayerListener{
 				achivment.achivParams.Add(paramNode.SelectSingleNode("name").InnerText,param);
 			}
 //			Debug.Log("ACHIVMENT " +achivment);
-		
-			ongoingAchivment.Add(achivment);
+			bool open = bool.Parse(node.SelectSingleNode("open").InnerText);
+			//Debug.Log(open);
+			if(!open){
+				ongoingAchivment.Add(achivment);
+			}else{
+				finishedAchivment.Add(achivment);
+			}
 
 		}
 		//loots of counting arrays, dictionary, logic don't want to drop fps by this)
@@ -106,7 +120,7 @@ public class AchievementManager : MonoBehaviour, LocalPlayerListener{
 	//Achivment Hondler
 	private List<Achievement> ongoingAchivment;
 
-	private List<Achievement> onFinishedAchivment;
+	private List<Achievement> finishedAchivment;
 
 	private Thread myThread;
 
@@ -125,31 +139,52 @@ public class AchievementManager : MonoBehaviour, LocalPlayerListener{
 						ongoingAchivment.ForEach (delegate(Achievement obj) {
 								if (obj.CheckDone ()) {
 										outcomeQueue.Enqueue (obj);
+										
 								}
 						});
+					
 						ongoingAchivment.RemoveAll (delegate(Achievement achv) {
+								
 								return achv.isDone;
 						});
-
+						//	
+					
 						Thread.Sleep (1000);
 				}
 	}
+	protected void SyncAchievement(List<int> syncAchivment){
+		WWWForm form = new WWWForm ();
+			
+		form.AddField ("uid", UID);
+		foreach(int id in syncAchivment){
+			form.AddField ("ids[]", id);
+		}
+		StatisticHandler.instance.StartCoroutine(StatisticHandler.SendForm (form,StatisticHandler.SAVE_ACHIVE));
+		
+	}
 	
 	void OnDestroy(){
-		myThread.Abort ();
+		if (myThread != null) {
+			myThread.Abort ();
+		}
 		
 	}
 	void Update(){
+		List<int> syncAchivment = new List<int>();
 		while (outcomeQueue.Count>0) {
 			Achievement finished = outcomeQueue.Dequeue();
 			myPlayer.AchivmenUnlock(finished);
-			onFinishedAchivment.Add(finished);
+			finishedAchivment.Add(finished);
+			syncAchivment.Add(finished.achievementId);
+		}
+		if (syncAchivment.Count > 0) {
+			SyncAchievement (syncAchivment);		
 		}
 		//Debug.Log (onFinishedAchivment.Count);
 	}
 	public List<Achievement> GetAchivment (){
 	
-		return onFinishedAchivment;
+		return finishedAchivment;
 	}
 
 	private static AchievementManager s_Instance = null;
@@ -176,16 +211,13 @@ public class AchievementManager : MonoBehaviour, LocalPlayerListener{
 	//event handle and logic to generate message for achivment
 
 	public Player myPlayer;
+	public string UID;
 	public Vector3 wallRunningStartPosition;
 
 	public void EventAppear(Player target){
 		if (target.GetView ().isMine) {
 			myPlayer = target;
-			var form = new WWWForm ();
 			
-			form.AddField ("uid", myPlayer.UID);
-		
-			StartCoroutine(LoadAchivment (form));
 
 		}
 	}
@@ -218,6 +250,25 @@ public class AchievementManager : MonoBehaviour, LocalPlayerListener{
 			incomeQueue.Enqueue(mess);
 		}
 	}
+
+	//hawk
+	public void EventKilledByFriend(Player target,Player friend){
+		if (target == myPlayer) {
+			IncomingMessage mess = new IncomingMessage();
+			mess.delta=1.0f;
+			mess.param =PARAM_KILL_BY_FRIEND;
+			incomeQueue.Enqueue(mess);
+		}
+	}
+	public void EventKilledAFriend(Player target,Player friend){
+		if (target == myPlayer) {
+			IncomingMessage mess = new IncomingMessage();
+			mess.delta=1.0f;
+			mess.param =PARAM_KILL_FRIEND;
+			incomeQueue.Enqueue(mess);
+		}
+	}
+
 	public void EventPawnKillAI(Player target){
 		if (target == myPlayer) {
 			IncomingMessage mess = new IncomingMessage();
