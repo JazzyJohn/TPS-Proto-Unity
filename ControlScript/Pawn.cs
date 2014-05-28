@@ -179,6 +179,8 @@ public class Pawn : DamagebleObject {
 	private bool netIsGround;
 	private float TimerNotGround = 0;
 
+	public float distanceToGround; // Проверка дистанции до земли (+)
+
 	public bool isGrounded
 	{
 		
@@ -192,9 +194,30 @@ public class Pawn : DamagebleObject {
 				SendMessage ("DidLand", SendMessageOptions.DontRequireReceiver);
 
 			}
+
 			_isGrounded = value;
 
+			RaycastHit hitGround; // Луч (+)
+
+			switch(characterState) // Если прыжок проверить растояние (+)
+			{
+			case CharacterState.Jumping:
+				if (Physics.Raycast(transform.position, -Vector3.up, out hitGround)) 
+				{
+					distanceToGround = hitGround.distance;
+					if(distanceToGround < 0.35+GetComponent<CapsuleCollider>().height/2)
+					{
+						animator.animator.SetBool("DistanceJump", false);
+					}
+					else
+					{
+						animator.animator.SetBool("DistanceJump", true);
+					}
+				}
+				break;
+			}
 		}
+		
 		
 	}
 	protected float lastTimeOnWall;
