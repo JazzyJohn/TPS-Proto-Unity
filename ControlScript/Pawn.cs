@@ -658,7 +658,7 @@ public class Pawn : DamagebleObject {
 
 	}
 
-	void Update () {
+	protected void Update () {
 		//Debug.Log (photonView.isSceneView);
 
 		TimerNotGround += Time.deltaTime;

@@ -1,29 +1,28 @@
-﻿using UnityEngine;
+using UnityEngine;
 using System.Collections;
 
-public class AITurret : AIState
+public class AIWalk : AIState
 {
 	private float _lostTimer;
 
 	public float lostTime=5.0f;
+	
+	protected  AIAgentComponent agent;
 
     public override void Tick()
     {
         if (DirectVisibility(out _distanceToTarget))
         {
             //code to animation attack
-			if(controlledPawn.isAimimngAtEnemy()){
-				controlledPawn.StartFire();
-			}else{
-				controlledPawn.StopFire();
-
-			}
+			
            // Debug.Log("Shot");
+		   
+		   agent.SetTarget(enemy.myTransform.position);
         }
         else
         {
 			if(_enemy!= null){
-				controlledPawn.StopFire();
+			
 				//Debug.Log(Time.deltaTime+" "+_lostTimer+" "+lostTime);
 				_lostTimer+=AIBase.TickPause;
 				if(_lostTimer>lostTime){
@@ -33,17 +32,32 @@ public class AITurret : AIState
 
 				}
 
-			}else{
-				controlledPawn.StopFire();
 			}
         }
     }
-	
+	public virtual void StartState(){
+		agent = getComponent<AIAgentComponent>();
+		agent.SetSpeed(controlledPawn.groundRunSpeed);
+	 
+	}
+	public void Update(){
+		agent.WalkUpdate();
+		pawn.Movement (agent.GetTranslate(),CharacterState.Running);
+		controlledPawn.myTransform.rotation =agent.GetRotation();
+		
+		
+	}
 	public override bool IsEnemy(Pawn target){
 		if(target.team==controlledPawn.team){
 			return false;
 		}
 		return true;
+	}
+	public virtual void SetEnemy(Pawn enemy){
+		controlledPawn. PlayTaunt();
+		
+		base.SetEnemy(enemy);
+
 	}
 
 }

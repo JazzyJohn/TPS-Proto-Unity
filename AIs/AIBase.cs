@@ -2,6 +2,14 @@
 using System.Collections;
 using System.Collections.Generic;
 
+public enum AIType
+{
+    Turret,
+	Walk,
+    Patrol,
+    Holder,
+    Rusher
+}
 
 public class AIBase : MonoBehaviour
 {
@@ -46,11 +54,12 @@ public class AIBase : MonoBehaviour
 				_currentState.AngleRange = AngleRange;		
                 }
                 break;
-            //case AIType.Patrol:
-            //    {
-            //        _patrol = gameObject.AddComponent<AIPatrol>();
-            //        _patrol.DistanceXRay = XRayDistance;
-            //    }
+            case AIType.Walk:
+                {
+                _currentState = gameObject.AddComponent<AIWalk>();
+                _currentState.controlledPawn = controlledPawn;
+				_currentState.AngleRange = AngleRange;	
+                }
             //    break;
             //case AIType.Holder:
             //    {
@@ -66,6 +75,7 @@ public class AIBase : MonoBehaviour
             //    break;
 
         }
+		_currentState.StartState();
 		StartCoroutine("Tick");
     }
     private IEnumerator Tick()
@@ -84,10 +94,3 @@ public class AIBase : MonoBehaviour
 
 }
 
-public enum AIType
-{
-    Turret,
-    Patrol,
-    Holder,
-    Rusher
-}
