@@ -42,6 +42,7 @@ public class ServerHolder : MonoBehaviour
 			newRoomMaxPlayers = 10;
 			newRoomName = "Test chamber " + Random.Range(100, 999);
 		}
+		
 	}
 	
 	void Update()
@@ -289,6 +290,24 @@ public class ServerHolder : MonoBehaviour
 		async = Application.LoadLevelAsync(mapName);
 		yield return async;
 		Debug.Log ("Загрузка завершена.");
+		
+		MapDownloader = FindObjectsOfType<PrefabManager();
+		foreach (IEnumerator x in  MapDownloader.DownloadAndCache ())
+		{
+			yield x;
+				
+		}
+		
+		/*PrefabManager[] managers = FindObjectsOfType<PrefabManager();
+		foreach(PrefabManager manger in managers){
+			foreach (IEnumerator x in  manger.DownloadAndCache ())
+			{
+				yield x;
+				
+			}
+		}
+		*/
+	
 		PhotonNetwork.isMessageQueueRunning = true;
 
 		FinishLoad ();

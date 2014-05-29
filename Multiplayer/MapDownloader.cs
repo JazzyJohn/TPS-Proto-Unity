@@ -8,7 +8,7 @@ public class MapDownloader : MonoBehaviour {
 	public static MapDownloader instance;
 	private bool instantiated;
 	
-	public string MapURL = "http://vk.rakgames.ru/kaspi/unityTest/map_kaspi_c.unity3d";
+	public string MapURL = "gameRes/Maps/map_kaspi_c.unity3d";
 	public string MapNAME = "MapObject";
 	public int version;
 
@@ -17,10 +17,13 @@ public class MapDownloader : MonoBehaviour {
 		return instantiated;
 	}
 	
-	void Start() 
+	void Awake() 
 	{	
 		instance = this;
 		instantiated = false;
+		//StartCoroutine (DownloadAndCache());
+	}
+	void Start(){
 		StartCoroutine (DownloadAndCache());
 	}
 
@@ -29,13 +32,13 @@ public class MapDownloader : MonoBehaviour {
 		StartCoroutine (DownloadAndCache());
 	}
 	
-	IEnumerator DownloadAndCache (){
+	public IEnumerator DownloadAndCache (){
 		// Wait for the Caching system to be ready
 		while (!Caching.ready)
 			yield return null;
-		
+		string crossDomainesafeURL =StatisticHandler.GetNormalURL()+BundleURL;
 		// Load the AssetBundle file from Cache if it exists with the same version or download and store it in the cache
-		using(WWW www = WWW.LoadFromCacheOrDownload (MapURL, version))
+		using(WWW www = WWW.LoadFromCacheOrDownload (crossDomainesafeURL, version))
 		{
 			yield return www;
 			
@@ -78,7 +81,7 @@ public class MapDownloader : MonoBehaviour {
 					Debug.Log (prefabObjects[i].name.ToString());
 					GameObject obj = Instantiate(prefabObjects[i]) as GameObject;
 
-					if(!obj)
+					/*if(!obj)
 						continue;
 
 					string path = "Assets/Photon Unity Networking/Resources/";
@@ -86,7 +89,7 @@ public class MapDownloader : MonoBehaviour {
 					path = path + ".prefab";
 
 					PrefabUtility.CreatePrefab(path,obj,ReplacePrefabOptions.ReplaceNameBased);
-					DestroyImmediate(obj);
+					DestroyImmediate(obj);*/
 				}
 			}
 			

@@ -126,6 +126,20 @@ public class StatisticHandler : MonoBehaviour {
 		return www;
 		
 	}
+	public static String GetNormalURL(){
+	
+		if (String.Compare(Application.absoluteURL, 0, "https", 0,5) != 0) {
+			
+			//Debug.Log ("STATS HTTP SEND" + StatisticHandler.STATISTIC_PHP_HTTPS +  node.SelectSingleNode ("textureGUIName").InnerText);
+			return StatisticHandler.STATISTIC_PHP;
+		}
+		else{
+			//Debug.Log ("STATS HTTPS SEND"+StatisticHandler.STATISTIC_PHP_HTTPS +  node.SelectSingleNode ("textureGUIName").InnerText);
+			returnStatisticHandler.STATISTIC_PHP_HTTPS;
+		}
+	}
+	
+	
 	public static void  SendTCP(string URL,WWWForm form){
 		WWW www = null;
 		if (String.Compare(Application.absoluteURL, 0, "https", 0,5) != 0) {

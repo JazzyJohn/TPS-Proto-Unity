@@ -4,28 +4,34 @@ using System.Collections;
 using System.Collections.Generic;
 using UnityEditor;
 
-public class PrefabManagerPickable : MonoBehaviour {
+public class PrefabManager : MonoBehaviour {
 	public static PrefabManagerPickable instance;
-	private bool instantiated;
+	//private bool instantiated;
 
-	public string BundleURL = "http://vk.rakgames.ru/kaspi/unityTest/pickable.unity3d";
+	public string BundleURL = "gameRes/Assets/pickable.unity3d";
 	public int version;
 	
 	public UnityEngine.Object[] prefabObjects;
 	public List<GameObject> objects = new List<GameObject>();
 	
-	public bool isReady()
+	public string namePrefix  = "PickUp_";
+	
+	/*public bool isReady()
 	{
 		return instantiated;
 	}
 
-	void Start() 
+	void Awake() 
 	{	
-		instance = this;
-		instantiated = false;
+		if(instance==null){
+			instance = this;
+			instantiated = false;
+		}else{
+			Destroy(this);
+		}
 		
 		//StartCoroutine (DownloadAndCache());
-	}
+	}*/
 	
 	public GameObject[] getObjects()
 	{
@@ -36,15 +42,18 @@ public class PrefabManagerPickable : MonoBehaviour {
 	{
 		StartCoroutine (DownloadAndCache());
 	}
+	
 
-	IEnumerator DownloadAndCache (){
+
+
+	public IEnumerator DownloadAndCache (){
 		// Wait for the Caching system to be ready
 		while (!Caching.ready)
 			yield return null;
 
-
+		string crossDomainesafeURL =StatisticHandler.GetNormalURL()+BundleURL;
 		// Load the AssetBundle file from Cache if it exists with the same version or download and store it in the cache
-		using(WWW www = WWW.LoadFromCacheOrDownload (BundleURL, version))
+		using(WWW www = WWW.LoadFromCacheOrDownload (crossDomainesafeURL, version))
 		{
 			yield return www;
 			
@@ -64,7 +73,7 @@ public class PrefabManagerPickable : MonoBehaviour {
 				if(!prefabObjects[i]){
 					Debug.Log("No prefabObj");continue;}
 			
-				if(prefabObjects[i].name.ToString().StartsWith("PickUp_"))
+				if(prefabObjects[i].name.ToString().StartsWith(namePrefix))
 				{
 					Debug.Log (prefabObjects[i].name.ToString());
 					GameObject obj = null;// = Instantiate(prefabObjects[i]) as GameObject;
@@ -85,7 +94,7 @@ public class PrefabManagerPickable : MonoBehaviour {
 
 //			Debug.Log (sp.transform.position);
 
-			Debug.Log("PrefabManagerPickable has been instantiated.");
+			Debug.Log("PrefabManager " + namePrefix+" has been instantiated.");
 			instantiated = true;
 			bundle.Unload(false);
 		}
