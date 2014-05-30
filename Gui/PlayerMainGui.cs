@@ -120,10 +120,15 @@ public class PlayerMainGui : MonoBehaviour {
 	private ChatHolder[] chats;
 
 	public static bool IsMouseAV;
+
+
+	UIPanel Statistic; // Панель со статистикой (+)
+
 	// Use this for initialization
 	void Start () {
 		MainCamera = Camera.main;
 		respawnMenu = GetComponent<MenuTF>();
+		Statistic = GameObject.Find("Statistic").GetComponent<UIPanel>(); // Поиск статистики (+)
 	}
 
 	public void SetLocalPlayer(Player newPlayer){
@@ -137,6 +142,9 @@ public class PlayerMainGui : MonoBehaviour {
 		ChageState(GUIState.Respawn);
 	}
 
+
+
+
 	void Update(){
 		if (guiState == GUIState.Dedicated) {
 			return;
@@ -145,6 +153,7 @@ public class PlayerMainGui : MonoBehaviour {
 		if (Input.GetButton ("ScoreBtn")) {
 			
 			ChageState(GUIState.Playerlist);
+			Statistic.alpha = 1f; // Вывод статистики (+)
 			return;
 		}
 		if (Input.GetButtonDown ("Debug")) {
@@ -160,8 +169,11 @@ public class PlayerMainGui : MonoBehaviour {
 		if (LocalPlayer!=null&&!LocalPlayer.IsDead()) {
 
 			guiState = GUIState.Normal;
+			Statistic.alpha = 0f; // Скрыть статистику (+)
 		
 		}
+		if (LocalPlayer.IsDead()) //Если мертв не показывать статистику (+)
+			Statistic.alpha = 0f; // Скрыть статистику (+)
 
 	}
 	
@@ -326,8 +338,22 @@ public class PlayerMainGui : MonoBehaviour {
 			if(respawnMenu.SetTimer(timer)){
 				LocalPlayer.selectedBot = Choice._Robot;		
 				LocalPlayer.selected = Choice._Player;
-				LocalPlayer.isStarted  =true;
+				LocalPlayer.isStarted  = true;
 
+				Statistic stat = Statistic.gameObject.GetComponent<Statistic>(); //Статистика (+)
+
+				try
+				{
+					stat.LocalPlayerStat(LocalPlayer.GetName(), Choice._Player); // Внесения базовой инфы в статистику (+)
+					stat.ClassExpPlayer(); //Внесение базовой инфы по классам (+)
+					stat.AvatarPlayer(); //Установка аватара (+)
+				}
+				catch(UnityException ex)
+				{
+					Debug.Log(ex.ToString());
+				}
+				
+				stat.RefreshStatisticPlayers(); //Обновление списока статистики игроков (+)
 			}
 		}
 		if (PhotonNetwork.isMasterClient&&(Application.platform==RuntimePlatform.WindowsPlayer||Application.platform==RuntimePlatform.WindowsEditor)) {
