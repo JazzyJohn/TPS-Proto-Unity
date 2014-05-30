@@ -292,21 +292,21 @@ public class ServerHolder : MonoBehaviour
 		Debug.Log ("Загрузка завершена.");
 		
 		MapDownloader loader = FindObjectOfType<MapDownloader>();
-	
-		IEnumerator innerCoroutineEnumerator = loader.DownloadAndCache ();
-		while(innerCoroutineEnumerator.MoveNext())
-			yield return innerCoroutineEnumerator.Current;
-		
-		PrefabManager[] managers = FindObjectsOfType<PrefabManager>();
-		foreach(PrefabManager manger in managers){
-			IEnumerator innerPrefabEnum=manger.DownloadAndCache () ;
-			while(innerPrefabEnum.MoveNext())
-				yield return innerPrefabEnum.Current;
-		}
+		if (loader != null) {
+				IEnumerator innerCoroutineEnumerator = loader.DownloadAndCache ();
+				while (innerCoroutineEnumerator.MoveNext())
+						yield return innerCoroutineEnumerator.Current;
 
-		innerCoroutineEnumerator =ItemManager.instance.ReoadItemsSync();
-		while(innerCoroutineEnumerator.MoveNext())
-			yield return innerCoroutineEnumerator.Current;
+				PrefabManager[] managers = FindObjectsOfType<PrefabManager> ();
+				foreach (PrefabManager manger in managers) {
+						IEnumerator innerPrefabEnum = manger.DownloadAndCache ();
+						while (innerPrefabEnum.MoveNext())
+								yield return innerPrefabEnum.Current;
+				}
+		}
+		IEnumerator itemCoroutineEnumerator =ItemManager.instance.ReoadItemsSync();
+		while(itemCoroutineEnumerator.MoveNext())
+			yield return itemCoroutineEnumerator.Current;
 
 		PhotonNetwork.isMessageQueueRunning = true;
 
