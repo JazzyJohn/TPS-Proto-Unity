@@ -98,7 +98,9 @@ public class PrefabManager : MonoBehaviour {
 
 						
 						GameObject prefab =((MonoBehaviour)prefabObjects[i]).gameObject;
-						PhotonResourceWrapper.allobject[prefab.name] =prefab;	
+						if(!	PhotonResourceWrapper.ContainsKey[prefab.name]){
+							PhotonResourceWrapper.allobject[prefab.name] =prefab;	
+						}
 						switch(typeOfObject){
 						case "BaseWeapon":
 						//Debug.Log(prefab);

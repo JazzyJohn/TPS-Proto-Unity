@@ -19,6 +19,7 @@ public class Achievement{
 	public String name;
 	public String description;
 	public int achievementId;
+	public Texture2D textureIcon;
 	public bool isDone = false;
 	public override string ToString(){
 		return name + " " + description + " " + achievementId + " " + achivParams.ToStringFull ();
@@ -80,10 +81,14 @@ public class AchievementManager : MonoBehaviour, LocalPlayerListener{
 		}
 		yield return w;
 		//Debug.Log (w.text);
-		ParseList (w.text);
+		IEnumerator numenator = ParseList (w.text);
+
+		while(numenator.MoveNext()){
+			yield return numenator.Current;
+		}
 	}
 	//parse XML string to normal Achivment Pattern
-	protected void ParseList(string XML){
+	protected IEnumerator ParseList(string XML){
 		XmlDocument xmlDoc = new XmlDocument();
 		xmlDoc.LoadXml(XML);
 		ongoingAchivment= new List<Achievement>();
@@ -94,6 +99,12 @@ public class AchievementManager : MonoBehaviour, LocalPlayerListener{
 			achivment.description = node.SelectSingleNode("description").InnerText;
 
 			achivment.achievementId = int.Parse(node.SelectSingleNode("id").InnerText);
+			WWW www = StatisticHandler.GetMeRightWWW( node.SelectSingleNode ("textureGUIName").InnerText);
+		
+			yield return www;
+			achivment.textureIcon = new Texture2D(www.texture.width, www.texture.height);
+			www.LoadImageIntoTexture(achivment.textureIcon);
+			
 			foreach (XmlNode paramNode in node.SelectNodes("param")) {
 				AchievementParam param = new AchievementParam();
 				param.current =0.0f;

@@ -123,7 +123,7 @@ public class ItemManager : MonoBehaviour {
 			WWW www = StatisticHandler.GetMeRightWWW( node.SelectSingleNode ("textureGUIName").InnerText);
 		
 			yield return www;
-			entry.textureGUI = new Texture2D(150,80);
+			entry.textureGUI = new Texture2D(www.texture.width, www.texture.height);
 			www.LoadImageIntoTexture(entry.textureGUI);
 			//Debug.Log (entry.name + " " +entry.textureGUI + " " +entry.weaponId );
 			weaponIndexTable[entry.weaponId]=entry;	

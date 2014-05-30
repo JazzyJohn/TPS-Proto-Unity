@@ -150,7 +150,8 @@ public class ServerHolder : MonoBehaviour
 					
 												if( room.playerCount<newRoomMaxPlayers){
 													if (GUILayout.Button ("Войти", GUILayout.Width (100))) {
-																					
+																
+																				
 															PhotonNetwork.JoinRoom (room.name);
 															connectingToRoom = true;
 													}
@@ -255,6 +256,7 @@ public class ServerHolder : MonoBehaviour
 		print("Удалось подключиться к комнате " + PhotonNetwork.room.name);
 		connectingToRoom = true;
 		if (shouldLoad) {
+		
 			StartCoroutine (LoadMap ((string)PhotonNetwork.room.customProperties ["MapName"]));
 		} else {
 			FinishLoad ();
@@ -283,7 +285,7 @@ public class ServerHolder : MonoBehaviour
 	
 
 
-		yield return new WaitForSeconds(1);
+	
 
 		Application.backgroundLoadingPriority = ThreadPriority.High;
 		Debug.Log("Загружаем карту " + mapName);
@@ -308,6 +310,8 @@ public class ServerHolder : MonoBehaviour
 		while(itemCoroutineEnumerator.MoveNext())
 			yield return itemCoroutineEnumerator.Current;
 
+			
+		PhotonResourceWrapper.TryToReload();
 		PhotonNetwork.isMessageQueueRunning = true;
 
 		FinishLoad ();
