@@ -5,7 +5,9 @@ using System.Collections.Generic;
 
 public class PlayerManager : MonoBehaviour {
 
-	public Pawn[] avaiblePawn;
+	public String[] pawnName;
+
+
 
 	public RobotPawn[] avaibleBots;
 
@@ -50,12 +52,12 @@ public class PlayerManager : MonoBehaviour {
     }
  
     // Add the rest of the code here...
-    public Pawn SpawmPlayer(Pawn newPalyerClass,int team) {
+    public Pawn SpawmPlayer(String newPalyerClass,int team) {
 		Pawn localPlayer;
 		Transform targetPos = GetSpamPosition (team);
 
 
-		localPlayer =(Pawn) PhotonNetwork.Instantiate (newPalyerClass.name, targetPos.position, targetPos.rotation, 0).GetComponent<Pawn>();
+		localPlayer =(Pawn) PhotonNetwork.Instantiate (newPalyerClass, targetPos.position, targetPos.rotation, 0).GetComponent<Pawn>();
 
 		return localPlayer;
     }

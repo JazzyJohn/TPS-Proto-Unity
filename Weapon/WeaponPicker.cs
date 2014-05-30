@@ -6,10 +6,12 @@ public class WeaponPicker : UseObject {
 	
 	public BaseWeapon prefabWeapon;
 
+	public int WeaponId;
+
 	public InventoryManager.WeaponBackUp info;
 
 	protected void Start(){
-
+		prefabWeapon = ItemManager.instance.weaponPrefabsListbyId [WeaponId];
 		tooltip = prefabWeapon.weaponName;
 		base.Start ();
 	}

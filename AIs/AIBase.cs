@@ -60,6 +60,7 @@ public class AIBase : MonoBehaviour
                 _currentState.controlledPawn = controlledPawn;
 				_currentState.AngleRange = AngleRange;	
                 }
+				break;
             //    break;
             //case AIType.Holder:
             //    {

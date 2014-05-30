@@ -99,6 +99,9 @@ public class BaseWeapon : DestroyableNetworkObject {
 	//use for switch
 	public int animType;
 
+	//ID for MySqlBAse
+	public int SQLId;
+
 
 	// Use this for initialization
 	protected void Start () {

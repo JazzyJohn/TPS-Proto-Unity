@@ -2,7 +2,7 @@
 using UnityEngine;
 using System.Collections;
 using System.Collections.Generic;
-using UnityEditor;
+
 
 public class MapDownloader : MonoBehaviour {
 	public static MapDownloader instance;
@@ -24,37 +24,42 @@ public class MapDownloader : MonoBehaviour {
 		//StartCoroutine (DownloadAndCache());
 	}
 	void Start(){
-		StartCoroutine (DownloadAndCache());
+		//StartCoroutine (DownloadAndCache());
 	}
 
 	public void DownLoad()
 	{
-		StartCoroutine (DownloadAndCache());
+		//StartCoroutine (DownloadAndCache());
 	}
 	
 	public IEnumerator DownloadAndCache (){
 		// Wait for the Caching system to be ready
 		while (!Caching.ready)
 			yield return null;
-		string crossDomainesafeURL =StatisticHandler.GetNormalURL()+BundleURL;
+		string crossDomainesafeURL =StatisticHandler.GetNormalURL()+MapURL;
 		// Load the AssetBundle file from Cache if it exists with the same version or download and store it in the cache
 		using(WWW www = WWW.LoadFromCacheOrDownload (crossDomainesafeURL, version))
 		{
 			yield return www;
-			
+
+
+			//Debug.Log("STartDownloadl");
 			if (www.error != null)
 				throw new Exception("WWW map download had an error:" + www.error);
 			
 			AssetBundle bundle = www.assetBundle;
-			UnityEngine.Object[] prefabObjects = bundle.LoadAll();
+			GameObject obj = Instantiate(bundle.mainAsset) as GameObject;
+			/*UnityEngine.Object[] prefabObjects = bundle.LoadAll();
 			
 			//GameObject sp = GameObject.Find("SpawnPoint");
 			//if(!sp) Debug.Log ("No sp");
 			
-			Debug.Log (prefabObjects.GetLength(0));
-			
-			for(int i=0;i<prefabObjects.GetLength(0);i++)
+
+			Debug.Log(prefabObjects.Length);
+			for(int i=0;i<prefabObjects.Length;i++)
 			{
+
+				Debug.Log (prefabObjects[i].name);
 				if(!prefabObjects[i]){
 					Debug.Log("No prefabObj");continue;}
 				
@@ -75,10 +80,10 @@ public class MapDownloader : MonoBehaviour {
 					
 					//GameObject photonObj = PhotonNetwork.Instantiate(obj.name,sp.transform.position,sp.transform.rotation,0,null) as GameObject;
 				}*/
-
+/*
 				if(prefabObjects[i].name.Equals(MapNAME))
 				{
-					Debug.Log (prefabObjects[i].name.ToString());
+					//Debug.Log (prefabObjects[i].name.ToString());
 					GameObject obj = Instantiate(prefabObjects[i]) as GameObject;
 
 					/*if(!obj)
@@ -90,9 +95,9 @@ public class MapDownloader : MonoBehaviour {
 
 					PrefabUtility.CreatePrefab(path,obj,ReplacePrefabOptions.ReplaceNameBased);
 					DestroyImmediate(obj);*/
-				}
+			/*	}
 			}
-			
+			*/
 			//			Debug.Log (sp.transform.position);
 			
 			Debug.Log("MapDownloader has been instantiated.");

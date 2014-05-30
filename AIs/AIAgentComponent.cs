@@ -41,7 +41,7 @@ public class AIAgentComponent : MonoBehaviour {
 		return resultTranslate;
 	}
 	public Quaternion GetRotation(){
-		return resultTranslate;
+		return resultRotation;
 	}
 	public void SetTarget(Vector3 newTarget){
 		if((newTarget -target).sqrMagnitude>4.0f){
@@ -50,7 +50,7 @@ public class AIAgentComponent : MonoBehaviour {
 		}
 	}
 	
-	void WalkUpdate () {
+	public void WalkUpdate () {
 		if(agent.path.Count>0){
 			bool walkable = true;
 			//Check if exist some dynamic obstacle in our path.

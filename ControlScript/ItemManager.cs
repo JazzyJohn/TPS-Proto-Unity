@@ -64,7 +64,7 @@ public class ItemManager : MonoBehaviour {
 	
 	public void Init(string uid){
 			UID = uid;
-			ReoadItems();
+			//ReoadItems();
 	}
 
 
@@ -76,6 +76,19 @@ public class ItemManager : MonoBehaviour {
 		
 		StartCoroutine(LoadItems (form));
 	}
+	public IEnumerator ReoadItemsSync(){
+		
+		WWWForm form = new WWWForm ();
+		
+		form.AddField ("uid", UID);
+		
+		IEnumerator numenator = LoadItems (form);
+		
+		while(numenator.MoveNext()){
+			yield return numenator.Current;
+		}
+
+	}
 	protected IEnumerator LoadItems(WWWForm form){
 		Debug.Log (form );
 	
@@ -84,7 +97,11 @@ public class ItemManager : MonoBehaviour {
 
 		yield return w;
 
-		StartCoroutine(ParseList (w.text));
+		IEnumerator numenator = ParseList (w.text);
+
+		while(numenator.MoveNext()){
+			yield return numenator.Current;
+		}
 	
 	}
 	//parse XML string to normal Achivment Pattern
@@ -160,7 +177,11 @@ public class ItemManager : MonoBehaviour {
 		}
 		
 	}	
-
+	public void SetNewWeapon(BaseWeapon prefab){
+		//Debug.Log (prefab);
+		weaponPrefabsListbyId [prefab.SQLId] = prefab;
+		//weaponPrefabsListbyId[prefab.SQLId].HUDIcon = weaponIndexTable[prefab.SQLId].textureGUI;
+	}
 	protected static GameClassEnum gameClassPase(string text){
 		switch (text) {
 			case "ENGINEER":

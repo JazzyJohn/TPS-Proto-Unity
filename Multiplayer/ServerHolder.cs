@@ -194,7 +194,7 @@ public class ServerHolder : MonoBehaviour
 						if (GUILayout.Button("Создать", GUILayout.Width (150), GUILayout.Height (25)))
 						{
 							ExitGames.Client.Photon.Hashtable customProps = new ExitGames.Client.Photon.Hashtable();
-							customProps["MapName"] = "kaspi_map_c_2_test";
+							customProps["MapName"] = "kaspi_map_c_2_test_strim";
 							string[] exposedProps = new string[customProps.Count];
 							exposedProps[0] = "MapName";
 
@@ -291,23 +291,23 @@ public class ServerHolder : MonoBehaviour
 		yield return async;
 		Debug.Log ("Загрузка завершена.");
 		
-		MapDownloader = FindObjectsOfType<PrefabManager();
-		foreach (IEnumerator x in  MapDownloader.DownloadAndCache ())
-		{
-			yield x;
-				
-		}
-		
-		/*PrefabManager[] managers = FindObjectsOfType<PrefabManager();
-		foreach(PrefabManager manger in managers){
-			foreach (IEnumerator x in  manger.DownloadAndCache ())
-			{
-				yield x;
-				
-			}
-		}
-		*/
+		MapDownloader loader = FindObjectOfType<MapDownloader>();
 	
+		IEnumerator innerCoroutineEnumerator = loader.DownloadAndCache ();
+		while(innerCoroutineEnumerator.MoveNext())
+			yield return innerCoroutineEnumerator.Current;
+		
+		PrefabManager[] managers = FindObjectsOfType<PrefabManager>();
+		foreach(PrefabManager manger in managers){
+			IEnumerator innerPrefabEnum=manger.DownloadAndCache () ;
+			while(innerPrefabEnum.MoveNext())
+				yield return innerPrefabEnum.Current;
+		}
+
+		innerCoroutineEnumerator =ItemManager.instance.ReoadItemsSync();
+		while(innerCoroutineEnumerator.MoveNext())
+			yield return innerCoroutineEnumerator.Current;
+
 		PhotonNetwork.isMessageQueueRunning = true;
 
 		FinishLoad ();

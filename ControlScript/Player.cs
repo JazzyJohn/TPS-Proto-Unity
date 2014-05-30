@@ -154,13 +154,12 @@ public class Player : MonoBehaviour {
 		
 		if(isDead){
 		
-			Pawn[] prefabClass=	PlayerManager.instance.avaiblePawn;
 			SendDelayedExternal();
 			respawnTimer-=Time.deltaTime;
 //			Debug.Log ("Dead");
 			if(respawnTimer<=0&&isStarted){
 				respawnTimer=respawnTime;
-				currentPawn =PlayerManager.instance.SpawmPlayer(prefabClass[selected],team);
+				currentPawn =PlayerManager.instance.SpawmPlayer(PlayerManager.instance.pawnName[selected],team);
 				currentPawn.ChangeDefaultWeapon(Choice._Player);
 				ItemManager.instance.SaveItemForSlot();
 				PVPGameRule.instance.Spawn(team);

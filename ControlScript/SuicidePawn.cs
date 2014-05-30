@@ -5,7 +5,7 @@ using System.Collections.Generic;
 
 
 
-public class SuicidePawn : DamagebleObject {
+public class SuicidePawn : Pawn {
 	public float detonateRadius;
 	
 	public BaseDamage damage;
@@ -40,7 +40,7 @@ public class SuicidePawn : DamagebleObject {
 	}
 	
 	void Detonate(){
-		Instantiate(hitParticle, hit.point, Quaternion.LookRotation(hit.normal));
+		Instantiate(hitParticle, myTransform.position, myTransform.rotation);
 		
 		sControl.playClip (exploseSound);//звук взрыва
 
@@ -62,10 +62,10 @@ public class SuicidePawn : DamagebleObject {
 			if (isHit) {
 				DamagebleObject obj = hitColliders[i].GetComponent <DamagebleObject>();
 				BaseDamage lDamage  = new BaseDamage(damage);
-				lDamage.pushDirection = mTransform.forward;
-				lDamage.hitPosition = mTransform.position;
-				if (obj != null&&obj!=shootTarget) {
-					obj.Damage(lDamage,owner);
+				lDamage.pushDirection = myTransform.forward;
+				lDamage.hitPosition = myTransform.position;
+				if (obj != null) {
+					obj.Damage(lDamage,this.gameObject);
 				}	
 			}
 		}

@@ -17,7 +17,7 @@ public class AIWalk : AIState
 			
            // Debug.Log("Shot");
 		   
-		   agent.SetTarget(enemy.myTransform.position);
+			agent.SetTarget(_enemy.myTransform.position);
         }
         else
         {
@@ -36,13 +36,13 @@ public class AIWalk : AIState
         }
     }
 	public virtual void StartState(){
-		agent = getComponent<AIAgentComponent>();
+		agent = GetComponent<AIAgentComponent>();
 		agent.SetSpeed(controlledPawn.groundRunSpeed);
 	 
 	}
 	public void Update(){
 		agent.WalkUpdate();
-		pawn.Movement (agent.GetTranslate(),CharacterState.Running);
+		controlledPawn.Movement (agent.GetTranslate(),CharacterState.Running);
 		controlledPawn.myTransform.rotation =agent.GetRotation();
 		
 		

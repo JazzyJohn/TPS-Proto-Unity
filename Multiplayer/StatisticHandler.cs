@@ -135,7 +135,7 @@ public class StatisticHandler : MonoBehaviour {
 		}
 		else{
 			//Debug.Log ("STATS HTTPS SEND"+StatisticHandler.STATISTIC_PHP_HTTPS +  node.SelectSingleNode ("textureGUIName").InnerText);
-			returnStatisticHandler.STATISTIC_PHP_HTTPS;
+			return StatisticHandler.STATISTIC_PHP_HTTPS;
 		}
 	}
 	

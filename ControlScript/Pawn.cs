@@ -352,6 +352,7 @@ public class Pawn : DamagebleObject {
 			ivnMan.SetSlot(ItemManager.instance.weaponPrefabsListbyId[idPersonal]);
 		}
 		if (idMain != -1) {
+			Debug.Log (ItemManager.instance.weaponPrefabsListbyId[idMain]);
 			ivnMan.SetSlot(ItemManager.instance.weaponPrefabsListbyId[idMain]);
 		}
 		if (idExtra != -1) {

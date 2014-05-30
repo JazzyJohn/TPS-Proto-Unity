@@ -182,10 +182,20 @@ public class InventoryManager : MonoBehaviour {
 			if(prefabWeapon[i].slotType==prefab.slotType){
 				prefabWeapon[i]=prefab;
 				weaponInfo[i]=new WeaponBackUp(prefabWeapon[i].clipSize, prefabWeapon[i].ammoType);
-			
+				return;
 			}
 		}
-
+		BaseWeapon[] oldprefabWeapon = prefabWeapon;
+		WeaponBackUp[] oldweaponInfo = weaponInfo;
+		prefabWeapon = new BaseWeapon[oldprefabWeapon.Length+1];
+		weaponInfo = new WeaponBackUp[prefabWeapon.Length];
+		for(int i=0;i<oldprefabWeapon.Length;i++){
+			prefabWeapon[i]= oldprefabWeapon[i];
+			weaponInfo[i]=new WeaponBackUp(oldweaponInfo[i]);
+			
+		}
+		prefabWeapon[prefabWeapon.Length-1] = prefab;
+		weaponInfo[prefabWeapon.Length-1]=new WeaponBackUp(prefabWeapon[prefabWeapon.Length-1].clipSize, prefabWeapon[prefabWeapon.Length-1].ammoType);
 	}
 	
 	
