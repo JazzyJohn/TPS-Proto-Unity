@@ -27,6 +27,8 @@ public class LevelingManager : MonoBehaviour, LocalPlayerListener,GameListener{
 	public int[] classNeededExp;
 	
 	public string UID;
+
+	private Statistic Stat; // Статистика (+)
 	
 	public PlayerMainGui.LevelStats GetPlayerStats(){
 		PlayerMainGui.LevelStats stats  = new PlayerMainGui.LevelStats();
@@ -144,6 +146,7 @@ public class LevelingManager : MonoBehaviour, LocalPlayerListener,GameListener{
 		if(sendByLvl){
 			SyncLvl();
 		}
+	
 		return sendByLvl;
 	}
 	public void SyncLvl(){

@@ -50,6 +50,8 @@ public class ItemManager : MonoBehaviour {
 
 	//PLAYER ITEM SECTION
 	public BaseWeapon[] weaponPrefabsListbyId;
+
+
 	
 	private GameClassEnum lastGameClass;
 	
@@ -64,7 +66,7 @@ public class ItemManager : MonoBehaviour {
 	
 	public void Init(string uid){
 			UID = uid;
-			//ReoadItems();
+			
 	}
 
 

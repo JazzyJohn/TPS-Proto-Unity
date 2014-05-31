@@ -338,6 +338,13 @@ public class Pawn : DamagebleObject {
 		//Debug.Log (distToGround);
 
 	}
+
+	public float GetSize ()
+	{
+
+		return Mathf.Sqrt(capsule.height *capsule.height  +capsule.radius*capsule.radius);
+	}
+
 	public virtual void AfterSpawnAction(){
 		 ivnMan.GenerateWeaponStart();
 	
@@ -862,14 +869,15 @@ public class Pawn : DamagebleObject {
 
 					//
 					//Debug.DrawRay(centerRay.origin,centerRay.direction);
-					targetpoint =hitInfo.point;
-					range =(targetpoint-centerRay.origin).magnitude;
-					if(range<magnitude){
-						magnitude=range;
+
+
+					if(hitInfo.distance<magnitude){
+						magnitude=hitInfo.distance;
 					}else{
 						continue;
 					}
 					wasHit= true;
+					targetpoint =hitInfo.point;
 					curLookTarget= hitInfo.transform;
 					//Debug.Log (curLookTarget);
 				
@@ -884,7 +892,7 @@ public class Pawn : DamagebleObject {
 					targetpoint =maincam.transform.forward*aimRange +maincam.ViewportToWorldPoint(new Vector3(.5f, 0.5f, 1f));
 				}else{
 					//Debug.Log(range.ToString()+(cameraController.normalOffset.magnitude+5));
-					if(magnitude<cameraController.CurrrentOffset().magnitude+1){
+					if(CurWeapon!=null&&CurWeapon.IsBadSpot(targetpoint)){
 						targetpoint =maincam.transform.forward*aimRange +maincam.ViewportToWorldPoint(new Vector3(.5f, 0.5f, 1f));
 						animator.WeaponDown(true);
 					}else{

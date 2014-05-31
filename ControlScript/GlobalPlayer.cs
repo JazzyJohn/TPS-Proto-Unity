@@ -45,6 +45,8 @@ public class GlobalPlayer : MonoBehaviour {
 		AchievementManager.instance.Init(UID);
 		ItemManager.instance.Init(UID);
 	}
+
+
 	public String GetPlayerName(){
 		return PlayerName;
 	}	

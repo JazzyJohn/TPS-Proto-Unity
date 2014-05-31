@@ -1,12 +1,77 @@
 ﻿using UnityEngine;
 using System.Collections;
+using System.Collections.Generic;
+using UnityEditor;	
+
+public enum AITriggerType {SeeEnemy,LostEnemy};
+public interface AITrigger
+{
+	bool isTriggered (AIState owner, Params[] parametrs);
+}
+
+[System.Serializable]
+public class Params{
+	public string name;
+	public float value;
+
+}
+
+
 
 public class AIState : MonoBehaviour {
+	[System.Serializable]
+	public class AITransition{
+		public AITriggerType triggerType;
+		public AIState target;
+		public Params[] parameters;
+		public AITrigger trigger; 
+		private AIState owner;
+		public void Start(AIState sOwner){
+			switch (triggerType) {
+			case AITriggerType.SeeEnemy:
+				trigger = new SeeEnemy();
+				break;
+			case AITriggerType.LostEnemy:
+				trigger = new LostEnemyTrigger();
+				break;
+
+			}
+			owner = sOwner;
+		}
+		public bool Trasite(){
+			return trigger.isTriggered (owner,parameters);
+		}
+			
+	}
+
+
+	public class SeeEnemy:AITrigger{
+		public bool isTriggered(AIState owner, Params[] parametrs){
+			if (owner._enemy != null) {
+								return true;
+			} else {
+				return false;
+			}		
+				
+		}
+		
+	}	
+	public class LostEnemyTrigger:AITrigger{
+		public bool isTriggered(AIState owner, Params[] parametrs){
+			if (owner._enemy == null) {
+				return true;
+			} else {
+				return false;
+			}		
+			
+		}
+		
+	}	
 	public  Pawn controlledPawn;
 
 	protected Pawn _enemy;
 
-
+	public AITransition[] Transition;
 
 	protected Pawn[] _pawnArray;
 	
@@ -66,7 +131,12 @@ public class AIState : MonoBehaviour {
 	}
 	
 	public virtual void StartState(){
-	
+		foreach (AITransition trans in Transition) {
+			trans.Start(this);
+		}
+		if (controlledPawn.enemy != _enemy) {
+			_enemy = controlledPawn.enemy;
+		}
 	}
 	public virtual void EndState(){
 	

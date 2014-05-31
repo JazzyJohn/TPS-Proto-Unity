@@ -21,7 +21,7 @@ public class SuicidePawn : Pawn {
 				if(enemy!=null){
 					if((enemy.myTransform.position-myTransform.position).sqrMagnitude<detonateRadius*detonateRadius/4){
 						Detonate();
-						
+						RequestKillMe();
 					}
 				}
 		}
@@ -32,14 +32,16 @@ public class SuicidePawn : Pawn {
 		if (isDead) {
 			return;		
 		}
-		if(!isDetonate){
-			Detonate();
-		}
+		Detonate();
 		base.KillIt(killer);
 		
 	}
 	
 	void Detonate(){
+		if(isDetonate){
+			return;
+		}
+		isDetonate = true;
 		Instantiate(hitParticle, myTransform.position, myTransform.rotation);
 		
 		sControl.playClip (exploseSound);//звук взрыва

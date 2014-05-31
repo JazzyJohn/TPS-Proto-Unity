@@ -99,7 +99,7 @@ public class AchievementManager : MonoBehaviour, LocalPlayerListener{
 			achivment.description = node.SelectSingleNode("description").InnerText;
 
 			achivment.achievementId = int.Parse(node.SelectSingleNode("id").InnerText);
-			WWW www = StatisticHandler.GetMeRightWWW( node.SelectSingleNode ("textureGUIName").InnerText);
+			WWW www = StatisticHandler.GetMeRightWWW( node.SelectSingleNode ("icon").InnerText);
 		
 			yield return www;
 			achivment.textureIcon = new Texture2D(www.texture.width, www.texture.height);

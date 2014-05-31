@@ -254,6 +254,7 @@ public class ServerHolder : MonoBehaviour
 	void OnJoinedRoom()
 	{
 		print("Удалось подключиться к комнате " + PhotonNetwork.room.name);
+		PhotonNetwork.isMessageQueueRunning = false;
 		connectingToRoom = true;
 		if (shouldLoad) {
 		
@@ -279,7 +280,7 @@ public class ServerHolder : MonoBehaviour
 		connectingToRoom = true;
 		PhotonNetwork.DestroyPlayerObjects 	( PhotonNetwork.player);
 		
-		PhotonNetwork.isMessageQueueRunning = false;
+
 		
 		yield return new WaitForSeconds(1);
 	

@@ -39,6 +39,8 @@ public class Player : MonoBehaviour {
 	public string PlayerName="VK NAME";
 
 	public string UID;
+
+	public Texture2D vkAvavtar;
 	
 	 // Declare your serializable data.
 	[System.Serializable]
@@ -102,6 +104,7 @@ public class Player : MonoBehaviour {
 						globalPlayer =  FindObjectOfType<GlobalPlayer>();
 						UID = globalPlayer.GetUID();
 						PlayerName = globalPlayer.GetPlayerName();
+						//vkAvavtar= globalPlayer.GetPlayerAvatar();
 						friendsInfo = globalPlayer.friendsInfo;
 						photonView.RPC("RPCSetNameUID",PhotonTargets.AllBuffered,UID,PlayerName);
 						EventHolder.instance.FireEvent(typeof(LocalPlayerListener),"EventAppear",this);

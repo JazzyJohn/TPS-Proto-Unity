@@ -13,11 +13,13 @@ public enum AIType
 
 public class AIBase : MonoBehaviour
 {
-    public AIType TypeofBehavior;
+    public AIState defaultAIState;
 
     public float
         //DetectionRadius,
 				AngleRange;
+
+	public int PatrolPointCount;
         
 	public static float TickPause = 0.3f;
    // private SphereCollider _SC;
@@ -31,6 +33,8 @@ public class AIBase : MonoBehaviour
     //private AIHolder _holder;
     //private AIRusher _rusher;
 
+	public Transform[] patrolPoints;
+
 	public void WasHitBy(GameObject killer){
 		Pawn killerPawn = killer.GetComponent<Pawn> ();
 		if (killerPawn != null) {
@@ -38,45 +42,56 @@ public class AIBase : MonoBehaviour
 		}
 
 	}
+	void InitState(){
+		//Debug.Log (_currentState.GetType ().Name);
+		switch (_currentState.GetType().Name){
+		case "AITurret":
+		{
 
-    private void Awake()
-    {
-        /*_SC = GetComponent<SphereCollider>();
+			_currentState.controlledPawn = controlledPawn;
+			_currentState.AngleRange = AngleRange;		
+		}
+			break;
+		case "AIWalk":
+		{
+
+			_currentState.controlledPawn = controlledPawn;
+			_currentState.AngleRange = AngleRange;	
+		}
+			break;
+			//    break;
+		case "AIPatrol":
+		{
+
+			_currentState.controlledPawn = controlledPawn;
+			
+			if(patrolPoints.Length==0){
+				patrolPoints = FindObjectOfType<AIDirector>().GetPointOfInterest(PatrolPointCount);
+			}
+			_currentState.AngleRange = AngleRange;	
+			((AIPatrol)_currentState).patrolPoints = patrolPoints;
+		}
+			break;
+			//case AIType.Rusher:
+			//    {
+			//        _rusher = gameObject.AddComponent<AIRusher>();
+			//        _rusher.DistanceXRay = XRayDistance;
+			//    }
+			//    break;
+			
+		}
+		_currentState.StartState();
+	}
+	
+	private void Awake()
+	{
+		/*_SC = GetComponent<SphereCollider>();
         _SC.isTrigger = true;
         _SC.radius = DetectionRadius;*/
+		_currentState = defaultAIState;
 		controlledPawn = GetComponent<Pawn> ();
-        switch (TypeofBehavior)
-        {
-            case AIType.Turret:
-                {
-				_currentState = gameObject.AddComponent<AITurret>();
-				_currentState.controlledPawn = controlledPawn;
-				_currentState.AngleRange = AngleRange;		
-                }
-                break;
-            case AIType.Walk:
-                {
-                _currentState = gameObject.AddComponent<AIWalk>();
-                _currentState.controlledPawn = controlledPawn;
-				_currentState.AngleRange = AngleRange;	
-                }
-				break;
-            //    break;
-            //case AIType.Holder:
-            //    {
-            //        _holder = gameObject.AddComponent<AIHolder>();
-            //        _holder.DistanceXRay = XRayDistance;
-            //    }
-            //    break;
-            //case AIType.Rusher:
-            //    {
-            //        _rusher = gameObject.AddComponent<AIRusher>();
-            //        _rusher.DistanceXRay = XRayDistance;
-            //    }
-            //    break;
-
-        }
-		_currentState.StartState();
+		
+		InitState ();
 		StartCoroutine("Tick");
     }
     private IEnumerator Tick()
@@ -86,8 +101,21 @@ public class AIBase : MonoBehaviour
           
 			_currentState.PawnList = controlledPawn.getAllSeenPawn().ToArray();
 			_currentState.Tick();                  
-      
-            yield return new WaitForSeconds(TickPause);
+			foreach(AIState.AITransition trans in _currentState.Transition){
+				if(trans.Trasite()){
+					_currentState.EndState();
+					_currentState.enabled = false;
+
+					_currentState= trans.target;
+					_currentState.enabled = true;
+					defaultAIState= _currentState;
+					InitState();
+					break;
+				}
+
+			}
+
+			 yield return new WaitForSeconds(TickPause);
             //Debug.Log("Work");
         }
     }

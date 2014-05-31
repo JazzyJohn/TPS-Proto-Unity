@@ -122,11 +122,21 @@ public class PlayerMainGui : MonoBehaviour {
 	private ChatHolder[] chats;
 
 	public static bool IsMouseAV;
+
+
+	
+
+	Statistic stat;
 	// Use this for initialization
 	void Start () {
 		MainCamera = Camera.main;
 		respawnMenu = GetComponent<MenuTF>();
+	
 		weaponMenu = GetComponent<WeaponPlayer>();
+
+
+		stat = GameObject.Find("Statistic").gameObject.GetComponent<Statistic>(); //Статистика (+)
+
 	}
 
 	public void SetLocalPlayer(Player newPlayer){
@@ -140,6 +150,9 @@ public class PlayerMainGui : MonoBehaviour {
 		ChageState(GUIState.Respawn);
 	}
 
+
+
+
 	void Update(){
 		if (guiState == GUIState.Dedicated) {
 			return;
@@ -147,8 +160,13 @@ public class PlayerMainGui : MonoBehaviour {
 
 		if (Input.GetButton ("ScoreBtn")) {
 			
-			ChageState(GUIState.Playerlist);
-			return;
+						ChageState (GUIState.Playerlist);
+						stat.Activate();
+						return;
+		} else {
+			if(	guiState != GUIState.KillCam){
+				stat.DeActivate();
+			}
 		}
 		if (Input.GetButtonDown ("Debug")) {
 		
@@ -162,13 +180,18 @@ public class PlayerMainGui : MonoBehaviour {
 		}
 		if (LocalPlayer != null && !LocalPlayer.IsDead ()) {
 
+
 			ChageState(GUIState.Normal);
+
+		
 		
 		} else {
 			if(	guiState != GUIState.KillCam){
 				guiState = GUIState.Respawn;
 			}
 		}
+	
+	
 
 	}
 	
@@ -334,7 +357,8 @@ public class PlayerMainGui : MonoBehaviour {
 			if(respawnMenu.SetTimer(timer)){
 				LocalPlayer.selectedBot = Choice._Robot;		
 				LocalPlayer.selected = Choice._Player;
-				LocalPlayer.isStarted  =true;
+				LocalPlayer.isStarted  = true;
+
 
 			}
 		}
@@ -499,46 +523,20 @@ public class PlayerMainGui : MonoBehaviour {
 	}
 	
 	void PlayerList(){
-		float screenX = Screen.width, screenY = Screen.height;
-		Player[] players = PlayerManager.instance.FindAllPlayer ();
-		int teamA =0 , teamB =0; 
-		float size = crosshairWidth / 2;
-		for (int i =0; i<players.Length; i++) {
-			float yPos=0.0f,xPos = 0.0f;
-			if(players [i].team<=1){
-				yPos= size * (6 + teamA);
-				xPos= size;
-				teamA ++;
-			}else{
-				xPos=  1*screenX/3+size;
-				yPos= size * (6 + teamB);
-				teamB ++;
-			}
-			Rect messRect = new Rect (xPos,yPos, screenX/3, size);
-			GUI.Label (messRect, players [i].GetName ()+" "+players [i].IsMaster());
-			
-			
-		}
-		Rect totalRect = new Rect (size,size*5,screenX, screenY);
-		GUI.Label (totalRect, "Всего Игроков" +players.Length.ToString());
-		size = crosshairWidth / 2;
-		List<Achievement> achivments = AchievementManager.instance.GetAchivment ();
-		for (int i =0; i<achivments.Count; i++) {
 		
-			Rect messRect = new Rect ( 2*screenX/3+size, size * (6 + i), screenX/3, size);
-			GUI.Label (messRect, achivments [i].name+" "+achivments [i].description);
-			
-			
-		}
-		LevelStats lvl = LevelingManager.instance.GetPlayerStats ();
+		
+		try
+		{
+			stat.LocalPlayerStat(LocalPlayer.GetName(), Choice._Player); // Внесения базовой инфы в статистику (+)
 
-		Rect statsRect = new Rect (2*screenX/3+size, Screen.height-size , screenX/3,size);
-		GUI.Label (statsRect, "Player LVL: " + lvl.playerLvl+ "  Next :"  +lvl. playerProcent +"%");
-		for(int i =0; i<lvl.classLvl.Length;i++){
-			statsRect = new Rect (2*screenX/3+size, Screen.height-(i+2)*size , screenX/3,size);
-			GUI.Label (statsRect, "Class "+i+":" + lvl.classLvl[i]+ "  Next :"  +lvl. classProcent[i] +"%");
-
+			stat.AvatarPlayer(); //Установка аватара (+)
 		}
+		catch(UnityException ex)
+		{
+			Debug.Log(ex.ToString());
+		}
+		
+		stat.RefreshStatisticPlayers(); //Обновление списока статистики игроков (+)
 	}
 	
 	public void AddMessage(string text,Vector3 worldPoint, MessageType type ){

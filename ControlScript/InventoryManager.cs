@@ -66,7 +66,11 @@ public class InventoryManager : MonoBehaviour {
 	//Start Weapon generation
 	public void GenerateWeaponStart(){
 		if (owner.photonView.isMine) {
-						_ChangeWeapon (0);
+			for(int i=0;i<prefabWeapon.Length;i++){
+				if(prefabWeapon[i].slotType==BaseWeapon.SLOTTYPE.MAIN){
+						_ChangeWeapon (i);
+				}
+			}
 		}
 	}
 	//Destroy weapon and make pawn empty handed

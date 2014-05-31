@@ -35,16 +35,21 @@ public class AIWalk : AIState
 			}
         }
     }
-	public virtual void StartState(){
+	public override void StartState(){
 		agent = GetComponent<AIAgentComponent>();
+		//Debug.Log (agent);
 		agent.SetSpeed(controlledPawn.groundRunSpeed);
-	 
+		agent.size = controlledPawn.GetSize ();
+
+		base.StartState ();
 	}
 	public void Update(){
-		agent.WalkUpdate();
-		controlledPawn.Movement (agent.GetTranslate(),CharacterState.Running);
-		controlledPawn.myTransform.rotation =agent.GetRotation();
-		
+		if (_enemy != null) {
+			agent.WalkUpdate ();
+			//Debug.Log(agent.GetTranslate());
+			controlledPawn.Movement (agent.GetTranslate(),CharacterState.Running);
+
+		}
 		
 	}
 	public override bool IsEnemy(Pawn target){
@@ -53,8 +58,10 @@ public class AIWalk : AIState
 		}
 		return true;
 	}
-	public virtual void SetEnemy(Pawn enemy){
-		controlledPawn. PlayTaunt();
+	public override void SetEnemy(Pawn enemy){
+		if (_enemy != enemy) {
+						controlledPawn.PlayTaunt ();
+		}
 		
 		base.SetEnemy(enemy);
 

@@ -81,7 +81,7 @@ public class PrefabManager : MonoBehaviour {
 		
 				//if(!sp) Debug.Log ("No sp");
 
-				Debug.Log (prefabObjects.Length);
+				//Debug.Log (prefabObjects.Length);
 
 				for(int i=0;i<prefabObjects.Length;i++)
 				{
@@ -91,14 +91,14 @@ public class PrefabManager : MonoBehaviour {
 						Debug.Log("No prefabObj");continue;}
 				
 				
-						Debug.Log (prefabObjects[i]);
+						//Debug.Log (prefabObjects[i]);
 						//AssetDatabase.AddObjectToAsset(prefabObjects[i], "Assets/Resources/"+prefabObjects[i].name+".prefab");
 						//Debug.Log(AssetDatabase.GetAssetPath(prefabObjects[i]));
 					
 
 						
 						GameObject prefab =((MonoBehaviour)prefabObjects[i]).gameObject;
-						if(!	PhotonResourceWrapper.ContainsKey[prefab.name]){
+						if(!	PhotonResourceWrapper.allobject.ContainsKey(prefab.name)){
 							PhotonResourceWrapper.allobject[prefab.name] =prefab;	
 						}
 						switch(typeOfObject){
@@ -115,7 +115,13 @@ public class PrefabManager : MonoBehaviour {
 				}
 		
 //			Debug.Log (sp.transform.position);
-
+			if (onStart) {
+				switch(typeOfObject){
+				case "BaseWeapon":
+					ItemManager.instance.ReoadItems();
+						break;
+				}
+			}
 			Debug.Log("PrefabManager " + BundleURL+" has been instantiated.");
 			instantiated = true;
 			//sbundle.Unload(false);

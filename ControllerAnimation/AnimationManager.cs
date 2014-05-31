@@ -20,6 +20,8 @@ public class AnimationManager : MonoBehaviour
 		}
         if (animator == null)
             Debug.LogError("Animator not find!", this);
+
+		animator.logWarnings = false;
     }
 
     //debug
@@ -226,7 +228,7 @@ public class AnimationManager : MonoBehaviour
 	}
 	//toogle aiming state
 	public void ToggleAim(bool aim){
-		animator.SetBool("AIM", aim);
+//		animator.SetBool("AIM", aim);
 	}
 	//Setting is that pull long or short
 	public void SetLong(bool longPull){

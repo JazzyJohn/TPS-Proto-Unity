@@ -11,6 +11,7 @@ public class AIAgentComponent : MonoBehaviour {
 	private int stepsToSmooth = 4;
 	private int stepsToCheck = 6;
 	public bool smoothPath = true; 
+	public float size;
 	private LayerMask dynamicObstacleLayer;
 	private LayerMask agentLayer;
 	private float height = 1;
@@ -145,20 +146,19 @@ public class AIAgentComponent : MonoBehaviour {
 				//Move towards the waypoint.
 				Vector3 direction=(point-agent.pivot.transform.position).normalized;
 				float speed = agent.speed;
-				if( aceleration ) { 
-					speed = 3*agent.speed;
-					aceleration = false;
-				}
-				resultTranslate  =direction * Mathf.Min(dist, speed * Time.deltaTime);
+			
+			
+				resultTranslate  =direction * Mathf.Min(dist, speed * Time.deltaTime)/Time.deltaTime;
 				//Assign transform position with height and pivot position.
 				//transform.parent = agent.pivot.transform;
 				//transform.position = agent.pivot.transform.position + new Vector3(0,agent.yOffset,0);
 				if(dir!=Vector3.zero){
-					transform.rotation = Quaternion.Slerp(transform.rotation, Quaternion.LookRotation(dir),Time.deltaTime*15);
+					resultRotation= Quaternion.Slerp(transform.rotation, Quaternion.LookRotation(dir),Time.deltaTime*15);
 				}
-				resultRotation = transform.rotation;
+				//resultRotation = transform.rotation;
 				//If the agent arrive to waypoint position, delete waypoint from the path.
-				if(Vector3.Distance(agent.pivot.transform.position, point)<0.1f){
+
+				if(Vector3.Distance(agent.pivot.transform.position, point)<size){
 					agent.path.RemoveAt(0);
 				}
 			}

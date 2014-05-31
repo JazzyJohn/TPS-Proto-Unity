@@ -297,6 +297,12 @@ public class BaseWeapon : DestroyableNetworkObject {
 		owner.HasShoot ();
 		//photonView.RPC("FireEffect",PhotonTargets.Others);
 	}
+	public bool IsBadSpot(Vector3 spot){
+		Vector3 charDirection = (spot - owner.myTransform.position).normalized,
+				weaponDirection = (spot - muzzlePoint.position).normalized;
+		return Vector3.Dot (charDirection, weaponDirection) < 0;
+	}
+
 	public virtual bool CanShoot (){
 
 		Vector3 aimDir = (owner.getCachedAimRotation() -muzzlePoint.position).normalized;

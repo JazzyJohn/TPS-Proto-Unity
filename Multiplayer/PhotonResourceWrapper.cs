@@ -7,14 +7,14 @@ public static class PhotonResourceWrapper {
 	public static Dictionary<string,GameObject> allobject = new Dictionary<string,GameObject>();
 	
 	class InstantiateQueue{
-		public Hashtable evData;
+		public  ExitGames.Client.Photon.Hashtable evData;
 		public PhotonPlayer photonPlayer;
 		public GameObject resourceGameObject;
 		public int count;
 		
 	}
 	private static Dictionary<int,InstantiateQueue> lateInst = new Dictionary<int,InstantiateQueue>();
-	public static void  AddToLaterInstantiate(Hashtable evData, PhotonPlayer photonPlayer, GameObject resourceGameObject, int  instantiationId){
+	public static void  AddToLaterInstantiate(ExitGames.Client.Photon.Hashtable evData, PhotonPlayer photonPlayer, GameObject resourceGameObject, int  instantiationId){
 			if(lateInst.ContainsKey(instantiationId)){
 			
 				lateInst[instantiationId].count++;
@@ -30,7 +30,7 @@ public static class PhotonResourceWrapper {
 			}
 	}
 	
-	public static void RemoveLateObject(instantiationId){
+	public static void RemoveLateObject(int instantiationId){
 		lateInst.Remove(instantiationId);
 	}
 	public static void TryToReload(){
@@ -41,7 +41,7 @@ public static class PhotonResourceWrapper {
 				if(PhotonNetwork.networkingPeer.DoInstantiate(obj.evData, obj.photonPlayer, obj.resourceGameObject)!=null){
 					lateInst.Remove(key);
 				}else{
-					if(	lateInst[instantiationId].count>3){
+					if(	lateInst[key].count>3){
 						Debug.LogError("PhotonNetwork error: Could not Instantiate the prefab [" + (string)obj.evData[(byte)0] + "]. Please verify you have this gameobject in a Resources folder.");
 						lateInst.Remove(key);
 					}
