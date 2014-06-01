@@ -387,7 +387,7 @@ public class Pawn : DamagebleObject {
 		
 
 		Pawn killerPawn =killer.GetComponent<Pawn> ();
-		if (killerPawn != null && killerPawn.team == team &&! PlayerManager.instance.frendlyFire) {
+		if (killerPawn != null &&killerPawn.team!=0&& killerPawn.team == team &&! PlayerManager.instance.frendlyFire) {
 			return;
 		}
 		if (killerPawn != null){

@@ -33,6 +33,7 @@ public class AIPatrol : AIState
 		agent = GetComponent<AIAgentComponent>();
 		//Debug.Log (agent);
 		agent.SetTarget (patrolPoints[0].position);
+		agent.SetSpeed(controlledPawn.groundWalkSpeed);
 		agent.size = controlledPawn.GetSize ();
 		base.StartState ();
 		
@@ -41,9 +42,9 @@ public class AIPatrol : AIState
 
 			agent.WalkUpdate ();
 			//Debug.Log(agent.GetTranslate());
-			controlledPawn.Movement (agent.GetTranslate(),CharacterState.Running);
+			controlledPawn.Movement (agent.GetTranslate(),CharacterState.Walking);
 			
-	
+			controlledPawn.myTransform.rotation = agent.GetRotation ();
 		
 	}
 	public override bool IsEnemy(Pawn target){

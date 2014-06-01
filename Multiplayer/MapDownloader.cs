@@ -8,7 +8,7 @@ public class MapDownloader : MonoBehaviour {
 	public static MapDownloader instance;
 	private bool instantiated;
 	
-	public string MapURL = "gameRes/Maps/map_kaspi_c.unity3d";
+	public string MapURL = "gameRes/Maps/map_kaspi_corcas.unity3d";
 	public string MapNAME = "MapObject";
 	public int version;
 

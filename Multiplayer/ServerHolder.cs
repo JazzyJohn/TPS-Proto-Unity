@@ -195,7 +195,7 @@ public class ServerHolder : MonoBehaviour
 						if (GUILayout.Button("Создать", GUILayout.Width (150), GUILayout.Height (25)))
 						{
 							ExitGames.Client.Photon.Hashtable customProps = new ExitGames.Client.Photon.Hashtable();
-							customProps["MapName"] = "kaspi_map_c_2_test_strim";
+							customProps["MapName"] = "kaspi_map_c_2_test";
 							string[] exposedProps = new string[customProps.Count];
 							exposedProps[0] = "MapName";
 

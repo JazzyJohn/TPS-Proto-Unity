@@ -40,7 +40,7 @@ public class DamagebleObject : DestroyableNetworkObject {
 	public virtual void Damage(BaseDamage damage,GameObject killer){
 		if (destructableObject){
 			health-= damage.Damage;
-			if(health<0){
+			if(health<=0){
 				KillIt(killer);
 
 			}
