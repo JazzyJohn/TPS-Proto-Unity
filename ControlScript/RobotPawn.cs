@@ -74,7 +74,7 @@ public class RobotPawn : Pawn {
 				}
 			}
 					
-		
+			animator.SetLookAtPosition (getAimRotation(50));
 		
 		}
 		base.UpdateAnimator();

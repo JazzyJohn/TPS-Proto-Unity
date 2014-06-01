@@ -637,7 +637,16 @@ public class Pawn : DamagebleObject {
 						myTransform.rotation= Quaternion.LookRotation(forwardRotation);
 					}
 				}else{
-					myTransform.rotation= Quaternion.Euler(eurler);
+					if(
+						(eurler.y < (myTransform.rotation.eulerAngles.y - 90f) || 
+					 	eurler.y > (myTransform.rotation.eulerAngles.y + 90f))
+					){
+						myTransform.rotation= Quaternion.Euler(eurler);
+					}
+
+					if ( characterState == CharacterState.Running || characterState == CharacterState.Walking  )
+						myTransform.rotation= Quaternion.Euler(eurler);
+
 				}
 				//animator.animator.SetLookAtPosition (aimRotation);
 				//animator.animator.SetLookAtWeight (1, 0.5f, 0.7f, 0.0f, 0.5f);
@@ -666,7 +675,14 @@ public class Pawn : DamagebleObject {
 						myTransform.rotation= Quaternion.LookRotation(forwardRotation);
 					}
 				}else{
-					myTransform.rotation= Quaternion.Euler(eurler);
+					if(
+						(eurler.y < (myTransform.rotation.eulerAngles.y - 90f) || 
+					 	eurler.y > (myTransform.rotation.eulerAngles.y + 90f))
+						){
+						myTransform.rotation= Quaternion.Euler(eurler);
+					}
+					if ( characterState == CharacterState.Running || characterState == CharacterState.Walking  )
+						myTransform.rotation= Quaternion.Euler(eurler);
 				}
 				
 
