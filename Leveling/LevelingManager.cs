@@ -68,7 +68,7 @@ public class LevelingManager : MonoBehaviour, LocalPlayerListener,GameListener{
 	
 	}
 	void  OnApplicationQuit() {
-		QuitSyncLvl();
+		//QuitSyncLvl();
 
 	}
 	protected IEnumerator LoadLvling(WWWForm form){
@@ -194,6 +194,7 @@ public class LevelingManager : MonoBehaviour, LocalPlayerListener,GameListener{
 	
 
 		if (target == myPlayer) {
+
 			UpExp(expDictionary[PARAM_KILL_AI],target.selected);	
 		}
 	

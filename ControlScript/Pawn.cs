@@ -28,6 +28,7 @@ public class singleDPS
 	public BaseDamage damage;
 	public GameObject killer;
 	public float lastTime=1.0f;
+	public bool noOnwer = false;
 
 }	
 
@@ -55,7 +56,7 @@ public class Pawn : DamagebleObject {
 
 	protected Quaternion correctPlayerRot = Quaternion.identity; //We lerp towards this
 
-	public Vector3 weaponOffset;
+	protected float weaponOffset;
 
 	public Vector3 weaponRotatorOffset;
 
@@ -64,6 +65,8 @@ public class Pawn : DamagebleObject {
 	public string publicName;
 
 	protected Vector3 aimRotation;
+
+	public Vector3 aiAimRotation;
 	//rotation for moment when rotation of camera and pawn can be different e.t.c wall run	
 	protected Vector3 forwardRotation;
 
@@ -365,7 +368,7 @@ public class Pawn : DamagebleObject {
 			ivnMan.SetSlot(ItemManager.instance.weaponPrefabsListbyId[idPersonal]);
 		}
 		if (idMain != -1) {
-			Debug.Log (ItemManager.instance.weaponPrefabsListbyId[idMain]);
+		//	Debug.Log (ItemManager.instance.weaponPrefabsListbyId[idMain]);
 			ivnMan.SetSlot(ItemManager.instance.weaponPrefabsListbyId[idMain]);
 		}
 		if (idExtra != -1) {
@@ -459,7 +462,7 @@ public class Pawn : DamagebleObject {
 				killerPlayer.PawnKill(player,myTransform.position);
 			}
 		}
-		//Debug.Log ("KILLL IT" + player);
+
 		if (player != null) {
 			if(player.inBot){
 				player.RobotDead(killerPlayer);
@@ -775,11 +778,19 @@ public class Pawn : DamagebleObject {
 
 			for(int i=0; i<activeDPS.Count;i++){
 				singleDPS key  = activeDPS[i];
+				key.lastTime=key.lastTime+Time.deltaTime;
+				if(key.noOnwer){
+					if(key.lastTime>1.0f){
+						activeDPS.RemoveAt(i);
+						i--;
+					}
+					continue;
+				}
 				BaseDamage ldamage = new BaseDamage(key.damage);
 				ldamage.hitPosition =myTransform.position + UnityEngine.Random.onUnitSphere;
 				ldamage.isContinius = true;
 				ldamage.Damage *= Time.deltaTime;
-				key.lastTime=key.lastTime+Time.deltaTime;
+			
 				//Debug.Log (key.lastTime);
 				if(key.lastTime>1.0f){
 				
@@ -826,10 +837,11 @@ public class Pawn : DamagebleObject {
 		CurWeapon = newWeapon;
 		//Debug.Log (newWeapon);
 		if(CurWeapon!=null){
-			CurWeapon.AttachWeapon(weaponSlot,weaponOffset,Quaternion.Euler (weaponRotatorOffset),this);
+			CurWeapon.AttachWeapon(weaponSlot,Vector3.zero,Quaternion.Euler (weaponRotatorOffset),this);
 			if(animator!=null){
 				animator.SetWeaponType(CurWeapon.animType);
 			}
+			weaponOffset = CurWeapon.MuzzleOffset();
 		}
 	}
 	public void ChangeWeapon(int weaponIndex){
@@ -846,7 +858,7 @@ public class Pawn : DamagebleObject {
 		}
 	}
 	public void SetAiRotation(Vector3 Target){
-		aimRotation = Target;
+		aiAimRotation = Target;
 	}
 	
 	public virtual Vector3 getAimRotation(){
@@ -906,8 +918,8 @@ public class Pawn : DamagebleObject {
 					targetpoint =maincam.transform.forward*aimRange +maincam.ViewportToWorldPoint(new Vector3(.5f, 0.5f, 1f));
 				}else{
 					//Debug.Log(range.ToString()+(cameraController.normalOffset.magnitude+5));
-					if(CurWeapon!=null&&CurWeapon.IsBadSpot(targetpoint)){
-						targetpoint =maincam.transform.forward*aimRange +maincam.ViewportToWorldPoint(new Vector3(.5f, 0.5f, 1f));
+					if(CurWeapon!=null&&IsBadSpot(targetpoint)){
+						//targetpoint =maincam.transform.forward*aimRange +maincam.ViewportToWorldPoint(new Vector3(.5f, 0.5f, 1f));
 						animator.WeaponDown(true);
 					}else{
 						animator.WeaponDown(false);
@@ -921,6 +933,11 @@ public class Pawn : DamagebleObject {
 		}else{
 			return aimRotation;
 		}
+	}
+	public bool IsBadSpot(Vector3 spot){
+		Vector3 charDirection = (spot - myTransform.position).normalized,
+		weaponDirection = (spot - (weaponSlot.position+myTransform.forward * weaponOffset)).normalized;
+		return Vector3.Dot (charDirection, weaponDirection) < 0;
 	}
 	void OnDrawGizmos() {
 		//Gizmos.color = Color.yellow;
@@ -992,22 +1009,37 @@ public class Pawn : DamagebleObject {
 	{
 		if (other.tag == "damageArea") {
 			MuzzlePoint muzzlePoint = other.GetComponent<MuzzlePoint>();
-			if(Point !=null){
-				singleDPS newDPS = Point.gun.GetComponent<ContiniusGun> ().getId ();
+			singleDPS newDPS= null;
+			if(muzzlePoint !=null){
+				 newDPS = muzzlePoint.gun.GetComponent<ContiniusGun> ().getId ();
 			}
 			DamageArea area = other.GetComponent<DamageArea>();
-			if(Point !=null){
-				singleDPS newDPS = area.getId ();
+			if(area !=null){
+				 newDPS = area.getId ();
 			}
 			foreach (singleDPS key in activeDPS) {
 				if(newDPS.killer == key.killer){
-					activeDPS.Remove(key);
-					//Debug.Log ("REMOVE DPS");
+					key.noOnwer= true;
 					break;
 				}	
 			}
 		}
 	
+	}
+	
+	public void addDPS (BaseDamage damage, GameObject killer)
+	{
+		foreach (singleDPS key in activeDPS) {
+			if(killer == key.killer){
+				key.noOnwer= false;
+				return;
+			}	
+		}
+		singleDPS newDPS = new singleDPS ();
+		newDPS.damage = damage;
+		newDPS.killer = killer;
+		
+		activeDPS.Add (newDPS);
 	}
 
 	//TODO: MOVE THAT to PAwn and turn on replication of aiming
@@ -1760,15 +1792,6 @@ public class Pawn : DamagebleObject {
 
 	//end seen hear work
 
-	public void addDPS (BaseDamage damage, GameObject killer)
-	{
-		singleDPS newDPS = new singleDPS ();
-		newDPS.damage = damage;
-		newDPS.killer = killer;
-		
-		activeDPS.Add (newDPS);
-	}
-	
 	
 	//VISUAL EFFECT SECTION 
 	
@@ -1792,7 +1815,7 @@ public class Pawn : DamagebleObject {
 	
 	 void OnMasterClientSwitched()
     {
-        if (PhotonNetwork.isMasterClient&&isAI) {
+        if (PhotonNetwork.isMasterClient&&isAi) {
 			mainAi.StartAI();
 		}
     }

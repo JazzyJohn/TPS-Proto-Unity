@@ -20,7 +20,13 @@ public class ServerHolder : MonoBehaviour
 	private const float FLOAT_COEF =100.0f;
 	RoomInfo[] allRooms;
 	public string version;
-
+	public struct LoadProgress{
+		public int allLoader;
+		public int finishedLoader;
+		public float curLoader;
+		
+	}
+	public static LoadProgress progress= new LoadProgress();
 	// Use this for initialization
 	void Start()
 	{
@@ -276,23 +282,17 @@ public class ServerHolder : MonoBehaviour
 
 
 	}
-	struct LoadProgress{
-		public int allLoader;
-		public int finishedLoader;
-		public float curLoader;
-	
-	}
-	public static LoadProgress progress= new LoadProgress();
-	void float LoadProcent() {
+
+	public float LoadProcent() {
 		if(progress.allLoader==0){
 			return 0f;
 		}
-		return ((float)progress.finishedLoader)/progress.allLoader*100f +curLoader;
+		return ((float)progress.finishedLoader)/progress.allLoader*100f +progress.curLoader/progress.allLoader;
 	}
 	IEnumerator LoadMap (string mapName)
 	{
 		AsyncOperation async;
-		progress
+
 		connectingToRoom = true;
 		PhotonNetwork.DestroyPlayerObjects 	( PhotonNetwork.player);
 		
@@ -317,7 +317,7 @@ public class ServerHolder : MonoBehaviour
 				
 				progress.allLoader = 2+managers.Length;
 				progress.finishedLoader=1;
-				
+				progress.curLoader=0;
 				IEnumerator innerCoroutineEnumerator = loader.DownloadAndCache ();
 				while (innerCoroutineEnumerator.MoveNext())
 						yield return innerCoroutineEnumerator.Current;

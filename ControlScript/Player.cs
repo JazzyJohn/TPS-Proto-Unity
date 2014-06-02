@@ -287,9 +287,9 @@ public class Player : MonoBehaviour {
 				}
 			}
 			if(Input.GetButtonDown("Suicide")){
-				currentPawn.KillMeRequest();
+				currentPawn.RequestKillMe();
 				if(robotPawn!=null){
-					robotPawn.KillMeRequest();
+					robotPawn.RequestKillMe();
 				}
 				Score.Death++;
 				isStarted = false;
@@ -304,7 +304,7 @@ public class Player : MonoBehaviour {
 		robotTimer=robotTime;
 		inBot= false;
 		currentPawn.Activate ();
-		currentPawn.rigidbody.MovePosition(playerExitPositon.position);
+		currentPawn.rigidbody.MovePosition(robotPawn.playerExitPositon.position);
 		currentPawn.myTransform.rotation = robotPawn.playerExitPositon.rotation;
 		currentPawn.transform.parent = null;
 	
@@ -494,13 +494,7 @@ public class Player : MonoBehaviour {
 		return respawnTimer;
 	}
 	
-	public class PlayerScore
-		{
-		public int Kill =0;
-		public int Death=0;
-		public int Assist=0;
-		public int RobotKill=0;
-	}
+
  
 	//NetworkSection
 	public void OnPhotonSerializeView(PhotonStream stream, PhotonMessageInfo info)

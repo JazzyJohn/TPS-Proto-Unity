@@ -68,7 +68,7 @@ public class AchievementManager : MonoBehaviour, LocalPlayerListener{
 	
 	}
 	protected IEnumerator LoadAchivment(WWWForm form){
-		Debug.Log (form );
+		//Debug.Log (form );
 		WWW w = null;
 		if (String.Compare(Application.absoluteURL, 0, "https", 0,5) != 0) {
 			

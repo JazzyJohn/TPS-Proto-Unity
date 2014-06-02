@@ -92,7 +92,7 @@ public class BaseWeapon : DestroyableNetworkObject {
 	private bool shootAfterReload;
 
 	//звуки
-	private soundControl sControl;//глобальный обьект контроллера звука
+	protected soundControl sControl;//глобальный обьект контроллера звука
 	private AudioSource aSource;//источник звука. добавляется в редакторе
 	public AudioClip fireSound;
 	public AudioClip reloadSound;
@@ -300,11 +300,7 @@ public class BaseWeapon : DestroyableNetworkObject {
 		owner.HasShoot ();
 		//photonView.RPC("FireEffect",PhotonTargets.Others);
 	}
-	public bool IsBadSpot(Vector3 spot){
-		Vector3 charDirection = (spot - owner.myTransform.position).normalized,
-				weaponDirection = (spot - muzzlePoint.position).normalized;
-		return Vector3.Dot (charDirection, weaponDirection) < 0;
-	}
+
 
 	public virtual bool CanShoot (){
 
@@ -441,6 +437,9 @@ public class BaseWeapon : DestroyableNetworkObject {
 
 		}
 	}
-	
+	public float MuzzleOffset(){
+
+		return (muzzlePoint.position + muzzleOffset - curTransform.position).sqrMagnitude;
+	}
 
 }

@@ -20,8 +20,8 @@ public class SuicidePawn : Pawn {
 		if(isAi){
 				if(enemy!=null){
 					if((enemy.myTransform.position-myTransform.position).sqrMagnitude<detonateRadius*detonateRadius/4){
-					
-						RequestKillMe();
+						Detonate();
+						StartCoroutine (CoroutineRequestKillMe ());
 					}
 				}
 		}
@@ -32,14 +32,19 @@ public class SuicidePawn : Pawn {
 		if (isDead) {
 			return;		
 		}
-		Detonate();
+
+		Detonate ();
 		base.KillIt(killer);
 		
 	}
-	public OnDestroy(){
-		Detonate();
-	}
 	void Detonate(){
+		if(!isDetonate){
+			photonView.RPC("RPCDetonate",PhotonTargets.All);
+		}
+
+	}
+	[RPC]
+	void RPCDetonate(){
 		if(isDetonate){
 			return;
 		}
@@ -53,7 +58,9 @@ public class SuicidePawn : Pawn {
 		RaycastHit[] hits;
 		for(int i=0;i < hitColliders.Length;i++) {
 
-			//Debug.Log(hitColliders[i]);
+			if(hitColliders[i]==collider){
+				continue;
+			}
 			bool isHit = false;
 			hits = Physics.RaycastAll(Position, hitColliders[i].transform.position);
 			for (int j = 0; j < hits.Length; j++) {

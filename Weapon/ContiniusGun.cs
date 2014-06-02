@@ -40,7 +40,7 @@ public class ContiniusGun : BaseWeapon
 	}
 	public override void StopFire(){
 		base.isShooting = false;
-		sControl.StopAll();
+		sControl.stopSound ();
 		rifleParticleController.StopFlame ();
 		AOECollider.GetComponent<BoxCollider>().size = colliderDisableSize;
 		base.ReleaseFire();

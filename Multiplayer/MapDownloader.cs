@@ -120,8 +120,5 @@ public class MapDownloader : MonoBehaviour {
 		//Destroy(this);
 	}
 	
-	// Update is called once per frame
-	void Update () {
-		
-	}
+
 }

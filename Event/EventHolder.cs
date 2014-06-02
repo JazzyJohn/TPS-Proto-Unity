@@ -36,13 +36,16 @@ public class ListnerHolder<T>:HolderBase{
 		listenerList.Add(listener);
 	}
 	public void Bind(object listener){
+		Debug.Log (listener);
 		listenerList.Add((T)listener);
 	}
 	public bool isValid(Type type){
 		return type.GetInterface(typeof(T).Name)!=null||object.ReferenceEquals(type,typeof(T));
 	}
 	public void FireEvent(MethodInfo theMethod,params object[] values){
+
 		foreach(T t in listenerList){
+
 			if(t!=null){
 				theMethod.Invoke(t, values);
 			}
@@ -53,9 +56,7 @@ public class ListnerHolder<T>:HolderBase{
 public class EventHolder : MonoBehaviour
 {
 		protected List<HolderBase> list=  null;
-		public void  Awake(){
-				InitList();
-		}
+		
 		public void InitList(){
 			list = new List<HolderBase>(); 
 			list.Add(new ListnerHolder<LocalPlayerListener>());
@@ -67,7 +68,7 @@ public class EventHolder : MonoBehaviour
 			}
 
 			foreach(HolderBase holder  in list){
-
+		
 				if(holder.isValid(listener. GetType())){
 					holder. Bind(listener);
 				}
@@ -80,12 +81,13 @@ public class EventHolder : MonoBehaviour
 
 			MethodInfo theMethod = type.GetMethod (methodName);
 			if (theMethod == null) {
-				Debug.Log ("NO SUCH EVENET");
+				
 				return;
 			}
 			foreach(HolderBase holder  in list){
 		
 				if(holder.isValid(type)){
+
 					holder. FireEvent(theMethod,values);
 				}
 			}

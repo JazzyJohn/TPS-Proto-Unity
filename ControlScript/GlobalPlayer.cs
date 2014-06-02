@@ -48,10 +48,10 @@ public class GlobalPlayer : MonoBehaviour {
 
 	void Update(){
 		if(Input.GetButtonDown("FullScreen")){
-			if(Screen.FullScreen){
+			if(Screen.fullScreen){
 				Screen.SetResolution(960, 600, false);
 			}else{
-			    Screen.SetResolution(resolutions[resolutions.Length-1].width, resolutions[resolutions.Length-1].height, true);
+				Screen.SetResolution( Screen.resolutions[ Screen.resolutions.Length-1].width,  Screen.resolutions[ Screen.resolutions.Length-1].height, true);
 			}
 		}
 	}

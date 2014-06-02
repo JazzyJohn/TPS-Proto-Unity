@@ -67,7 +67,7 @@ public class PrefabManager : MonoBehaviour {
 		// Wait for the Caching system to be ready
 		while (!Caching.ready)
 			yield return null;
-
+		inProgress = true;
 		string crossDomainesafeURL =StatisticHandler.GetNormalURL()+BundleURL;
 		// Load the AssetBundle file from Cache if it exists with the same version or download and store it in the cache
 		using(www = WWW.LoadFromCacheOrDownload (crossDomainesafeURL, version))
@@ -130,14 +130,11 @@ public class PrefabManager : MonoBehaviour {
 						break;
 				}
 			}
+			inProgress =false;
 			Debug.Log("PrefabManager " + BundleURL+" has been instantiated.");
 			instantiated = true;
 			//sbundle.Unload(false);
 		}
 	}
 
-	// Update is called once per frame
-	void Update () {
-		
-	}
 }

@@ -45,8 +45,9 @@ public class AIAgentComponent : MonoBehaviour {
 		return resultRotation;
 	}
 	public Vector3 GetTarget(){
-		if(agent.path.Lenght>0){
-			agent.path[0]
+		if(agent.path.Count>0){
+			//Debug.Log (agent.path[0]);
+			return agent.path[0];
 		}
 		return Vector3.zero;
 	}
