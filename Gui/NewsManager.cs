@@ -16,81 +16,21 @@ public class NewsManager : MonoBehaviour {
 	string XMLPath = "http://vk.rakgames.ru/kaspi/unityTest/XMLExample.xml";
 	List <NewUpdate> news = new List<NewUpdate> ();
 	public static NewsManager instance;//singletone?
-	private int currentPage;
-	private NewUpdate currentNew;
 
-	public void SetPage(int p)
+	public List<NewUpdate> getNewsList()
 	{
-		currentPage = p;
-		
-		if (news.Count <= 0)
-			return;
-		
-		currentNew = news[p];
+		return news;
 	}
-	
-	public void NextPage()
-	{
-		if (currentPage + 1 >= news.Count)
-			return;
-		
-		int np = currentPage + 1;
-		SetPage (np);
-	}
-	
-	public void PrevPage()
-	{
-		if (currentPage <= 0)
-			return;
-		
-		int np = currentPage - 1;
-		SetPage (np);
-	}
-	
+
 	void Awake()
 	{
 		instance = this;
 	}
-	
-	// Use this for initialization
-	void Start () 
-	{
-		currentNew = null;
-		currentPage = 0;
 
-		//TODO: move it to another step;
+	public void getUpdate()
+	{
+		news.Clear ();
 		StartCoroutine(LoadNews ());
-	}
-	
-	void OnGUI()
-	{
-		//TODO: draw control panel
-		if (GUI.Button (new Rect (0, 0, 32, 32), "<")) 
-		{
-			PrevPage();
-		}
-		if (GUI.Button (new Rect (32, 0, 32, 32), ">")) 
-		{
-			NextPage();
-		}
-		if (GUI.Button (new Rect (64, 0, 128, 32), "Update")) 
-		{
-			StartCoroutine(LoadNews());
-		}
-
-		//TODO: draw selected new.
-		if (currentNew == null || !currentNew.img_tex) 
-		{
-			return;
-		}
-
-		Rect newRect = new Rect (0, 32, 256,256);
-		float text_x,text_y;
-		text_x = newRect.x + currentNew.title_x;
-		text_y = newRect.y + currentNew.title_y;
-
-		GUI.DrawTexture(newRect, currentNew.img_tex, ScaleMode.ScaleToFit, true);
-		GUI.Label (new Rect (text_x, text_y, newRect.width, newRect.height), currentNew.title);
 	}
 	
 	protected IEnumerator LoadNews(){
@@ -136,12 +76,5 @@ public class NewsManager : MonoBehaviour {
 			StartCoroutine(LoadImage(n.img,n));
 			news.Add(n);
 		}
-		
-		SetPage(0);
-	}
-	
-	// Update is called once per frame
-	void Update () {
-		
 	}
 }
