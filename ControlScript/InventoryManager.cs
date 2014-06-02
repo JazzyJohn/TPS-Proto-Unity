@@ -118,11 +118,13 @@ public class InventoryManager : MonoBehaviour {
 			if(allAmmo[i].type ==ammo){
 				if(allAmmo[i].amount>amount){
 					allAmmo[i].amount-=amount;
-					return amount;
+				
 				}else{
+					amount =allAmmo[i].amount;
 					allAmmo[i].amount=0;
-					return allAmmo[i].amount;
+				
 				}
+				return amount;
 			}
 		}
 		return 0;

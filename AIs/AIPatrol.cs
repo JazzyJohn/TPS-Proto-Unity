@@ -44,7 +44,7 @@ public class AIPatrol : AIState
 			//Debug.Log(agent.GetTranslate());
 			controlledPawn.Movement (agent.GetTranslate(),CharacterState.Walking);
 			
-			controlledPawn.myTransform.rotation = agent.GetRotation ();
+			controlledPawn.SetAiRotation( agent.GetTarget());
 		
 	}
 	public override bool IsEnemy(Pawn target){

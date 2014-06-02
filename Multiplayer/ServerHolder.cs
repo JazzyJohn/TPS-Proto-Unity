@@ -124,7 +124,8 @@ public class ServerHolder : MonoBehaviour
 
 		if(connectingToRoom)
 		{
-			GUI.Box(new Rect(Screen.width / 2 - 100, Screen.height / 2 - 20, 200, 40), "Загрузка карты...");
+			
+			GUI.Box(new Rect(Screen.width / 2 - 100, Screen.height / 2 - 20, 200, 40), "Загрузка карты... " + LoadProcent().ToString("0.0") +"%");
 		}
 
 		
@@ -255,6 +256,9 @@ public class ServerHolder : MonoBehaviour
 	{
 		print("Удалось подключиться к комнате " + PhotonNetwork.room.name);
 		PhotonNetwork.isMessageQueueRunning = false;
+		progress.allLoader=0;
+		progress.finishedLoader=0;
+		progress.curLoader=0;
 		connectingToRoom = true;
 		if (shouldLoad) {
 		
@@ -272,11 +276,23 @@ public class ServerHolder : MonoBehaviour
 
 
 	}
-
+	struct LoadProgress{
+		public int allLoader;
+		public int finishedLoader;
+		public float curLoader;
+	
+	}
+	public static LoadProgress progress= new LoadProgress();
+	void float LoadProcent() {
+		if(progress.allLoader==0){
+			return 0f;
+		}
+		return ((float)progress.finishedLoader)/progress.allLoader*100f +curLoader;
+	}
 	IEnumerator LoadMap (string mapName)
 	{
 		AsyncOperation async;
-
+		progress
 		connectingToRoom = true;
 		PhotonNetwork.DestroyPlayerObjects 	( PhotonNetwork.player);
 		
@@ -289,22 +305,31 @@ public class ServerHolder : MonoBehaviour
 	
 
 		Application.backgroundLoadingPriority = ThreadPriority.High;
-		Debug.Log("Загружаем карту " + mapName);
+		Debug.Log("Загружаем карту " + mapName );
 		async = Application.LoadLevelAsync(mapName);
 		yield return async;
 		Debug.Log ("Загрузка завершена.");
 		
 		MapDownloader loader = FindObjectOfType<MapDownloader>();
 		if (loader != null) {
+				PrefabManager[] managers = FindObjectsOfType<PrefabManager> ();
+				//MapLoader + MApUnity load = 2;
+				
+				progress.allLoader = 2+managers.Length;
+				progress.finishedLoader=1;
+				
 				IEnumerator innerCoroutineEnumerator = loader.DownloadAndCache ();
 				while (innerCoroutineEnumerator.MoveNext())
 						yield return innerCoroutineEnumerator.Current;
 
-				PrefabManager[] managers = FindObjectsOfType<PrefabManager> ();
+				progress.finishedLoader++;
+				progress.curLoader=0;
 				foreach (PrefabManager manger in managers) {
 						IEnumerator innerPrefabEnum = manger.DownloadAndCache ();
 						while (innerPrefabEnum.MoveNext())
 								yield return innerPrefabEnum.Current;
+						progress.finishedLoader++;
+						progress.curLoader=0;
 				}
 		}
 		IEnumerator itemCoroutineEnumerator =ItemManager.instance.ReoadItemsSync();

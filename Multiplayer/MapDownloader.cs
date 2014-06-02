@@ -8,9 +8,15 @@ public class MapDownloader : MonoBehaviour {
 	public static MapDownloader instance;
 	private bool instantiated;
 	
+	
 	public string MapURL = "gameRes/Maps/map_kaspi_corcas.unity3d";
 	public string MapNAME = "MapObject";
 	public int version;
+	
+	private bool inProgress;
+	private WWW www;
+	
+	
 
 	public bool isReady()
 	{
@@ -31,6 +37,11 @@ public class MapDownloader : MonoBehaviour {
 	{
 		//StartCoroutine (DownloadAndCache());
 	}
+	void Update(){
+		if(inProgress){
+			ServerHolder.progress.curLoader= www.progress*100f;
+		}
+	}
 	
 	public IEnumerator DownloadAndCache (){
 		// Wait for the Caching system to be ready
@@ -38,8 +49,9 @@ public class MapDownloader : MonoBehaviour {
 			yield return null;
 		string crossDomainesafeURL =StatisticHandler.GetNormalURL()+MapURL;
 		// Load the AssetBundle file from Cache if it exists with the same version or download and store it in the cache
-		using(WWW www = WWW.LoadFromCacheOrDownload (crossDomainesafeURL, version))
+		using(www = WWW.LoadFromCacheOrDownload (crossDomainesafeURL, version))
 		{
+			inProgress = true;
 			yield return www;
 
 
@@ -102,8 +114,10 @@ public class MapDownloader : MonoBehaviour {
 			
 			Debug.Log("MapDownloader has been instantiated.");
 			instantiated = true;
+			inProgress=false;
 			bundle.Unload(false);
 		}
+		//Destroy(this);
 	}
 	
 	// Update is called once per frame

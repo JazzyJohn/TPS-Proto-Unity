@@ -83,7 +83,7 @@ public class AIBase : MonoBehaviour
 		_currentState.StartState();
 	}
 	
-	private void Awake()
+	public void StartAI()
 	{
 		/*_SC = GetComponent<SphereCollider>();
         _SC.isTrigger = true;

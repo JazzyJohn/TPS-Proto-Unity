@@ -314,7 +314,13 @@ public class Pawn : DamagebleObject {
 			isAi = cameraController==null;
 		}
 		mainAi =  GetComponent<AIBase> ();
+		
 		isAi = mainAi!=null;
+		if(isAi){
+			if(photonView.isMine){
+				mainAi.StartAI();
+			}
+		}
 
 		correctPlayerPos = transform.position;
 		myCollider = collider;
@@ -839,12 +845,20 @@ public class Pawn : DamagebleObject {
 			return (Vector3.Dot (currentDirection.normalized,desireDirection.normalized)>0.9f);
 		}
 	}
+	public void SetAiRotation(Vector3 Target){
+		aimRotation = Target;
+	}
+	
 	public virtual Vector3 getAimRotation(){
 		
 		if(photonView.isMine){
 			if(isAi){
 				if(enemy==null){
-					aimRotation =myTransform.position+myTransform.forward*10;
+					if(aiAimRotation.sqrMagnitude>0){
+							aimRotation =aiAimRotation;
+					}else{
+						aimRotation =myTransform.position+myTransform.forward*10;
+					}
 				}else{
 					aimRotation =Vector3.Lerp( aimRotation,enemy.myTransform.position,Time.deltaTime*10);
 				}
@@ -977,7 +991,14 @@ public class Pawn : DamagebleObject {
 	void OnTriggerExit (Collider other)
 	{
 		if (other.tag == "damageArea") {
-			singleDPS newDPS = other.GetComponent<MuzzlePoint>().gun.GetComponent<ContiniusGun> ().getId ();
+			MuzzlePoint muzzlePoint = other.GetComponent<MuzzlePoint>();
+			if(Point !=null){
+				singleDPS newDPS = Point.gun.GetComponent<ContiniusGun> ().getId ();
+			}
+			DamageArea area = other.GetComponent<DamageArea>();
+			if(Point !=null){
+				singleDPS newDPS = area.getId ();
+			}
 			foreach (singleDPS key in activeDPS) {
 				if(newDPS.killer == key.killer){
 					activeDPS.Remove(key);
@@ -1768,4 +1789,11 @@ public class Pawn : DamagebleObject {
 	public void RPCPlayTaunt(string taunt){
 		animator.PlayTaunt (taunt);
 	}
+	
+	 void OnMasterClientSwitched()
+    {
+        if (PhotonNetwork.isMasterClient&&isAI) {
+			mainAi.StartAI();
+		}
+    }
 }

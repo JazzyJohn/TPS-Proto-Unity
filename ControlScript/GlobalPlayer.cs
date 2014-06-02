@@ -46,7 +46,15 @@ public class GlobalPlayer : MonoBehaviour {
 		ItemManager.instance.Init(UID);
 	}
 
-
+	void Update(){
+		if(Input.GetButtonDown("FullScreen")){
+			if(Screen.FullScreen){
+				Screen.SetResolution(960, 600, false);
+			}else{
+			    Screen.SetResolution(resolutions[resolutions.Length-1].width, resolutions[resolutions.Length-1].height, true);
+			}
+		}
+	}
 	public String GetPlayerName(){
 		return PlayerName;
 	}	

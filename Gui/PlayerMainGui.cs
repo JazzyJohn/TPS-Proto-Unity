@@ -448,7 +448,7 @@ public class PlayerMainGui : MonoBehaviour {
 		for (int i=0; i<seenablePawn.Count; i++) {
 			
 			Pawn target = seenablePawn [i];
-			if (robot == target||!target.isActive||target.myTransform==null) {
+			if (!target.isActive||target.myTransform==null) {
 				//Debug.Log ("it'sROBOIT");
 				continue;
 			}
@@ -462,10 +462,14 @@ public class PlayerMainGui : MonoBehaviour {
 			
 			Rect mark = new Rect (Position.x - size / 2, Screen.height - Position.y, size, size);
 			string publicName = "";
-			if(target.player!=null){
-				publicName	=target.player.GetName();
+			if(robot == target){
+				publicName = "MY JUGGER (Press E)";
 			}else{
-				publicName	=target.publicName;
+				if(target.player!=null){
+					publicName	=target.player.GetName();
+				}else{
+					publicName	=target.publicName;
+				}
 			}
 			if (seenablePawn [i].team == LocalPlayer.team) {
 			

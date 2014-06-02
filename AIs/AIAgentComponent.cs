@@ -44,6 +44,12 @@ public class AIAgentComponent : MonoBehaviour {
 	public Quaternion GetRotation(){
 		return resultRotation;
 	}
+	public Vector3 GetTarget(){
+		if(agent.path.Lenght>0){
+			agent.path[0]
+		}
+		return Vector3.zero;
+	}
 	public void SetTarget(Vector3 newTarget){
 		if((newTarget -target).sqrMagnitude>4.0f){
 			agent.GoTo(newTarget);

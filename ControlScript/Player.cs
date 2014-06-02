@@ -13,6 +13,8 @@ public class Player : MonoBehaviour {
 	public float respawnTime = 10.0f;
 	
 	public float robotTime = 60.0f;
+	
+	public float robotKillReduce  =5.0f;
 
 	public bool isStarted = false;
 
@@ -235,7 +237,7 @@ public class Player : MonoBehaviour {
 				}else {
 					
 						if(!inBot&&robotPawn!=null){
-							if(currentPawn.curLookTarget!=null&&currentPawn.curLookTarget.gameObject==robotPawn.gameObject){
+							if(currentPawn.curLookTarget!=null&&currentPawn.curLookTarget.gameObject==robotPawn.gameObject&&(currentPawn.myTransform.position-robotPawn.myTransform.position).sqrMagnitude<SQUERED_RADIUS_OF_ACTION){
 								if(Input.GetButtonDown("Use")){
 									EnterBot();
 								}
@@ -284,6 +286,16 @@ public class Player : MonoBehaviour {
 					robotPawn.ChangeWeapon (2);
 				}
 			}
+			if(Input.GetButtonDown("Suicide")){
+				currentPawn.KillMeRequest();
+				if(robotPawn!=null){
+					robotPawn.KillMeRequest();
+				}
+				Score.Death++;
+				isStarted = false;
+				isDead = true;
+				StatisticHandler.SendPlayerKillbyNPC(UID, PlayerName);
+			}
 		}
 	
 	}
@@ -291,10 +303,11 @@ public class Player : MonoBehaviour {
 	public void RobotDead(Player Killer){
 		robotTimer=robotTime;
 		inBot= false;
-		currentPawn.myTransform.position = robotPawn.playerExitPositon.position;
+		currentPawn.Activate ();
+		currentPawn.rigidbody.MovePosition(playerExitPositon.position);
 		currentPawn.myTransform.rotation = robotPawn.playerExitPositon.rotation;
 		currentPawn.transform.parent = null;
-		currentPawn.Activate ();
+	
 	}
 	public void PawnDead(Player Killer){
 	
@@ -361,6 +374,7 @@ public class Player : MonoBehaviour {
 
 		if(!inBot){
 			Score.Kill++;
+			robotTimer-=robotKillReduce;
 		}else{
 			Score.Kill++;
 			Score.RobotKill++;
@@ -479,22 +493,36 @@ public class Player : MonoBehaviour {
 		}
 		return respawnTimer;
 	}
+	
+	public class PlayerScore
+		{
+		public int Kill =0;
+		public int Death=0;
+		public int Assist=0;
+		public int RobotKill=0;
+	}
+ 
 	//NetworkSection
 	public void OnPhotonSerializeView(PhotonStream stream, PhotonMessageInfo info)
 	{
-	/*	if (stream.isWriting)
+		if (stream.isWriting)
 		{
 			// We own this player: send the others our data
 			stream.SendNext(inBot);
-		
-
+			stream.SendNext(Score.Kill);
+			stream.SendNext(Score.Death);
+			stream.SendNext(Score.Assist);
+			stream.SendNext(Score.RobotKill);
 		}
 		else
 		{
 			// Network player, receive data
 			inBot= (bool) stream.ReceiveNext();
-			
-		}*/
+			Score.Kill = (int)  stream.ReceiveNext();
+			Score.Death = (int)  stream.ReceiveNext();
+			Score.Assist = (int)  stream.ReceiveNext();
+			Score.RobotKill = (int)  stream.ReceiveNext();
+		}
 	}
 	
 	

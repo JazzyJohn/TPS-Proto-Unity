@@ -117,16 +117,18 @@ public class BaseProjectile : MonoBehaviour {
 		for(int i=0;i < hitColliders.Length;i++) {
 
 			//Debug.Log(hitColliders[i]);
-			bool isHit = false;
+			Collider isHit = null;
+			float distance = splashRadius*splashRadius;
 			hits = Physics.RaycastAll(Position, hitColliders[i].transform.position);
 			for (int j = 0; j < hits.Length; j++) {
-				if(hits[j].collider.tag != "Player")
+				float localDistance =Vector3.Distance(hitColliders[i].transform.position,Position);
+				if(hitColliders[i]!=collider &&localDistance<=distance)
 				{
-					isHit = true;
-					break;
+					distance =localDistance;
+					isHit=hitColliders[i];
 				}
 			}
-			if (isHit) {
+			if (isHit==hitColliders[i]) {
 				DamagebleObject obj = hitColliders[i].GetComponent <DamagebleObject>();
 				BaseDamage lDamage  = new BaseDamage(damage);
 				lDamage.pushDirection = mTransform.forward;

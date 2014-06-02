@@ -20,7 +20,7 @@ public class SuicidePawn : Pawn {
 		if(isAi){
 				if(enemy!=null){
 					if((enemy.myTransform.position-myTransform.position).sqrMagnitude<detonateRadius*detonateRadius/4){
-						Detonate();
+					
 						RequestKillMe();
 					}
 				}
@@ -36,7 +36,9 @@ public class SuicidePawn : Pawn {
 		base.KillIt(killer);
 		
 	}
-	
+	public OnDestroy(){
+		Detonate();
+	}
 	void Detonate(){
 		if(isDetonate){
 			return;

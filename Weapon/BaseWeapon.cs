@@ -259,8 +259,7 @@ public class BaseWeapon : DestroyableNetworkObject {
 		if (!CanShoot ()) {
 			return;		
 		}
-		//играем звук стрельбы
-		sControl.playClip (fireSound);
+	
 
 		if(curAmmo>0){
 			curAmmo--;
@@ -270,6 +269,8 @@ public class BaseWeapon : DestroyableNetworkObject {
 				return;
 			}
 		}
+			//играем звук стрельбы
+		
 		if (rifleParticleController != null) {
 			rifleParticleController.CreateShootFlame ();
 		}
@@ -278,16 +279,18 @@ public class BaseWeapon : DestroyableNetworkObject {
 				
 		switch (amunitionType) {
 		case AMUNITONTYPE.SIMPLEHIT:
+			sControl.playClip (fireSound);
 			DoSimpleDamage();
 			break;
 		case AMUNITONTYPE.PROJECTILE:
-	
+			sControl.playClip (fireSound);
 			GenerateProjectile();
 			break;
 		case AMUNITONTYPE.RAY:
 			
 			break;
 		case AMUNITONTYPE.HTHWEAPON:
+			sControl.playClip (fireSound);
 			owner.animator.StartAttackAnim(attackAnim);
 			ChangeWeaponStatus(true);
 			break;
@@ -375,8 +378,12 @@ public class BaseWeapon : DestroyableNetworkObject {
 		projScript.owner = owner.gameObject;
 	}
 	protected void ReplicationGenerate (){
+		if(shootsToSpawn.Count>0){
+				sControl.playClip (fireSound);
+		}
 		while(shootsToSpawn.Count>0){
 			ShootData spawnShoot = shootsToSpawn.Dequeue();
+			
 			GenerateProjectileRep(spawnShoot.position,spawnShoot.direction,spawnShoot.timeShoot);
 		}
 	}

@@ -13,6 +13,7 @@ public class ContiniusGun : BaseWeapon
 	
 		AOECollider = muzzlePoint.GetComponent<BoxCollider> ();
 		AOECollider.size = colliderDisableSize;
+		sControl.setLooped(true);
 	}
 
 	public void fireDamage (Pawn target)
@@ -33,11 +34,13 @@ public class ContiniusGun : BaseWeapon
 
 	public override void StartFire(){
 		base.isShooting = true;
+		sControl.playFullClip (fireSound);
 		rifleParticleController.StartFlame ();
 		AOECollider.GetComponent<BoxCollider>().size = colliderUnableSize;
 	}
 	public override void StopFire(){
 		base.isShooting = false;
+		sControl.StopAll();
 		rifleParticleController.StopFlame ();
 		AOECollider.GetComponent<BoxCollider>().size = colliderDisableSize;
 		base.ReleaseFire();

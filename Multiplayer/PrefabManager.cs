@@ -20,6 +20,10 @@ public class PrefabManager : MonoBehaviour {
 	
 	public String typeOfObject =  "Pawn" ;
 	
+	private bool inProgress;
+	private WWW www;
+	
+	
 	/*public bool isReady()
 	{
 		return instantiated;
@@ -46,7 +50,11 @@ public class PrefabManager : MonoBehaviour {
 	{
 		return objects.ToArray();
 	}
-
+	void Update(){
+		if(inProgress){
+			ServerHolder.progress.curLoader= www.progress*100f;
+		}
+	}
 	public void DownLoad()
 	{
 		//StartCoroutine (DownloadAndCache());
@@ -62,7 +70,7 @@ public class PrefabManager : MonoBehaviour {
 
 		string crossDomainesafeURL =StatisticHandler.GetNormalURL()+BundleURL;
 		// Load the AssetBundle file from Cache if it exists with the same version or download and store it in the cache
-		using(WWW www = WWW.LoadFromCacheOrDownload (crossDomainesafeURL, version))
+		using(www = WWW.LoadFromCacheOrDownload (crossDomainesafeURL, version))
 		{
 			yield return www;
 			
