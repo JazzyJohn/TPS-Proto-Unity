@@ -12,7 +12,7 @@ public class AnimationManager : MonoBehaviour
 	public IKcontroller aimPos;
 	private bool shouldAim= true;
 	public Rigidbody rb;
-    private void Awake()
+	protected void Awake()
     {
         animator = GetComponent<Animator>();
 		if (aimPos == null) {
@@ -239,7 +239,7 @@ public class AnimationManager : MonoBehaviour
 		return !animator.GetBool("wall_stop");
 	}
 	//COntol aim behavieor of object
-	public void SetLookAtPosition(Vector3 position){
+	public virtual void SetLookAtPosition(Vector3 position){
 		if (aimPos != null) {
 						aimPos.aimPosition = position;
 		}

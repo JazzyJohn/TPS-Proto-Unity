@@ -2,11 +2,13 @@
 using System.Collections;
 using System.Xml;
 using System.Collections.Generic;
-
+[System.Serializable]
 public class NewUpdate
 {
 	public string title;
-	public int title_x,title_y;
+	public float title_x,title_y;
+	public int fontSize;
+	public string color;
 	public string img;//for?
 	public Texture2D img_tex;
 }
@@ -14,7 +16,7 @@ public class NewUpdate
 public class NewsManager : MonoBehaviour {
 	string ImagesPath = "http://vk.rakgames.ru/kaspi/";
 	string XMLPath = "http://vk.rakgames.ru/kaspi/unityTest/XMLExample.xml";
-	List <NewUpdate> news = new List<NewUpdate> ();
+	public List <NewUpdate> news = new List<NewUpdate> ();
 	public static NewsManager instance;//singletone?
 
 	public List<NewUpdate> getNewsList()
@@ -25,6 +27,7 @@ public class NewsManager : MonoBehaviour {
 	void Awake()
 	{
 		instance = this;
+		getUpdate ();
 	}
 
 	public void getUpdate()
@@ -34,46 +37,48 @@ public class NewsManager : MonoBehaviour {
 	}
 	
 	protected IEnumerator LoadNews(){
-		WWW w = null;
+		WWW w = StatisticHandler.GetMeRightWWW (StatisticHandler.NEWS_ALL);
 
 		//FIXME: As I know WWWForm is analog for <form> in html
-		if (string.Compare(Application.absoluteURL, 0, "https", 0,5) != 0) {
+		/*if (string.Compare(Application.absoluteURL, 0, "https", 0,5) != 0) {
 			
 			Debug.Log ("NEWS HTTP SEND" + XMLPath);
-			w = new WWW (XMLPath);
+			w = new WWW ();
 		}
 		else{
 			Debug.Log ("NEWS HTTPS SEND"+ XMLPath);
 			w = new WWW (XMLPath);
-		}
+		}*/
 		yield return w;
 
-		ParseList (w.text);
+		IEnumerator numenator = ParseList (w.text);
+		
+		while(numenator.MoveNext()){
+			yield return numenator.Current;
+		}
 	}
 	
-	protected IEnumerator LoadImage(string img,NewUpdate New)
-	{
-		string imagePath = ImagesPath + img;
-		
-		WWW w = new WWW (imagePath);
-		yield return w;
-		
-		New.img = imagePath;
-		New.img_tex = w.texture;
-	}
+
 	
 	//parse XML string to normal Achivment Pattern
-	protected void ParseList(string XML){
+	protected IEnumerator ParseList(string XML){
 		XmlDocument xmlDoc = new XmlDocument();
 		xmlDoc.LoadXml(XML);
 		
 		foreach (XmlNode node in xmlDoc.SelectNodes("allnews/new")) {
 			NewUpdate n = new NewUpdate();
 			n.title = node.SelectSingleNode("title").InnerText;
-			n.title_x = int.Parse(node.SelectSingleNode("titleX").InnerText);
-			n.title_y = int.Parse(node.SelectSingleNode("titleY").InnerText);
+			n.title_x = float.Parse(node.SelectSingleNode("titleX").InnerText);
+			n.title_y = float.Parse(node.SelectSingleNode("titleY").InnerText);
+			n.fontSize = int.Parse(node.SelectSingleNode("fontsize").InnerText);
+			n.color = node.SelectSingleNode("color").InnerText;
 			n.img = node.SelectSingleNode("img").InnerText;
-			StartCoroutine(LoadImage(n.img,n));
+		
+			WWW w = StatisticHandler.GetMeRightWWW (n.img);
+			yield return w;
+			
+
+			n.img_tex = w.texture;
 			news.Add(n);
 		}
 	}

@@ -94,7 +94,7 @@ public class ServerHolder : MonoBehaviour
 			float slotsizeX = screenX / 5;
 			float slotsizeY = screenY / (availableRooms.Length + 1);
 
-			GUILayout.BeginArea(new Rect (Screen.width / 2 - 250, Screen.height/2 - 150, 500, 330), "Соединение", GUI.skin.GetStyle("window"));
+			GUILayout.BeginArea(new Rect (Screen.width  - 400, Screen.height - 230, 400, 230), "Соединение", GUI.skin.GetStyle("window"));
 			ShowConnectMenu ();
 			GUILayout.EndArea();
 		}

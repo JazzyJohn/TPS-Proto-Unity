@@ -716,7 +716,15 @@ public class Pawn : DamagebleObject {
 							myTransform.rotation= Quaternion.LookRotation(forwardRotation);
 						}
 					}else{
-						myTransform.rotation= Quaternion.Euler(eurler);
+						if ( characterState == CharacterState.Idle){
+							if((Math.Abs (eurler.y -myTransform.rotation.eulerAngles.y)> 90f)){
+								myTransform.rotation= Quaternion.Lerp(myTransform.rotation,Quaternion.Euler(eurler),Time.deltaTime);			
+							}
+						}else{
+							myTransform.rotation= Quaternion.Euler(eurler);
+						}
+
+
 					}
 					//animator.animator.SetLookAtPosition (aimRotation);
 					//animator.animator.SetLookAtWeight (1, 0.5f, 0.7f, 0.0f, 0.5f);
@@ -726,12 +734,10 @@ public class Pawn : DamagebleObject {
 					if(!CurWeapon.IsReloading()){
 						diff= Quaternion.FromToRotation(CurWeapon.transform.forward,target);
 					}
-
-					Debug.DrawLine(CurWeapon.transform.position,aimRotation);
-					Vector3 aimRotationWeapon = diff*target*CurWeapon.weaponRange+CurWeapon.transform.position; 
-					Debug.DrawLine(CurWeapon.transform.position,aimRotationWeapon);*/
+*/
 
 				}else{
+
 					//if(aimRotation.sqrMagnitude==0){
 						getAimRotation();
 					/*}else{
@@ -745,9 +751,17 @@ public class Pawn : DamagebleObject {
 							myTransform.rotation= Quaternion.LookRotation(forwardRotation);
 						}
 					}else{
-						myTransform.rotation= Quaternion.Euler(eurler);
+						if ( characterState == CharacterState.Idle){
+							if((Math.Abs (eurler.y -myTransform.rotation.eulerAngles.y)> 90f)){
+								myTransform.rotation= Quaternion.Lerp(myTransform.rotation,Quaternion.Euler(eurler),Time.deltaTime);			
+							}
+						}else{
+							myTransform.rotation= Quaternion.Euler(eurler);
+						}
+
 					}
 					
+
 
 					
 				}

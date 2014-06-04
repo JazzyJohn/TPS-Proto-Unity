@@ -28,6 +28,8 @@ public class StatisticHandler : MonoBehaviour {
 	
 	public static string SAVE_ITEM = "saveitem";
 
+	public static string NEWS_ALL = "allnews";
+
 	public static string STATISTIC_PHP="http://vk.rakgames.ru/kaspi/";
 
 	public static string STATISTIC_PHP_HTTPS="https://vk.rakgames.ru/kaspi/";
