@@ -10,15 +10,15 @@ public class ServerHolder : MonoBehaviour
 	
 	Vector2 scroll;
 	Vector2 mapScroll;
-	
-	bool createRoom = false;
-	bool connectingToRoom = false;
+
+	public bool createRoom = false;
+	public bool connectingToRoom = false;
 	
 	string playerName;
-	string newRoomName;
-	int newRoomMaxPlayers;
+	public string newRoomName;
+	public int newRoomMaxPlayers;
 	private const float FLOAT_COEF =100.0f;
-	RoomInfo[] allRooms;
+	public RoomInfo[] allRooms;
 
 
 	// Use this for initialization
@@ -65,15 +65,15 @@ public class ServerHolder : MonoBehaviour
 	void OnReceivedRoomList()
 	{
 		allRooms = PhotonNetwork.GetRoomList();
-		print ("Обновлен список комнат. Сейчас их " + allRooms.Length + ".");
+		//print ("Обновлен список комнат. Сейчас их " + allRooms.Length + ".");
 	}
 	
 	void OnReceivedRoomListUpdate()
 	{
 		allRooms = PhotonNetwork.GetRoomList();
-		print ("Обновлен список комнат. Сейчас их " + allRooms.Length + ".");
+		//print ("Обновлен список комнат. Сейчас их " + allRooms.Length + ".");
 	}
-	
+	/*
 	void OnGUI()
 	{
 		float screenX = Screen.width, screenY = Screen.height;
@@ -88,8 +88,7 @@ public class ServerHolder : MonoBehaviour
 			ShowConnectMenu ();
 			GUILayout.EndArea();
 		}
-		
-		/*
+
 		else if (PhotonNetwork.connected)
 		{
 <<<<<<< HEAD
@@ -113,7 +112,7 @@ public class ServerHolder : MonoBehaviour
 			GUILayout.EndHorizontal();
 >>>>>>> pr/6
 		}
-		*/
+
 		
 
 		GUILayout.Label(PhotonNetwork.connectionStateDetailed.ToString());
@@ -125,7 +124,9 @@ public class ServerHolder : MonoBehaviour
 
 		
 	}
-	
+	*/
+
+	/*
 	void ShowConnectMenu()
 	{
 				GUILayout.Space (10);
@@ -205,6 +206,18 @@ public class ServerHolder : MonoBehaviour
 						}
 				}
 		}
+		*/
+
+	public void CreateNewRoom() //Создание комноты (+)
+	{
+		ExitGames.Client.Photon.Hashtable customProps = new ExitGames.Client.Photon.Hashtable();
+		customProps["MapName"] = "kaspi_map_c_2_test";
+		string[] exposedProps = new string[customProps.Count];
+		exposedProps[0] = "MapName";
+		
+		PhotonNetwork.CreateRoom(newRoomName, true, true, newRoomMaxPlayers, customProps, exposedProps);
+	}
+
 	public void LoadNextMap(){
 		connectingToRoom = true;
 		StartCoroutine (LoadMap ((string)PhotonNetwork.room.customProperties ["MapName"]));
