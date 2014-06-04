@@ -8,16 +8,28 @@ public class AIWalk : AIState
 	public float lostTime=5.0f;
 	
 	protected  AIAgentComponent agent;
+	
+	protected bool isMoving = true;
 
     public override void Tick()
     {
         if (DirectVisibility(out _distanceToTarget))
         {
             //code to animation attack
-			
+			DecideTacktick();
            // Debug.Log("Shot");
-		   
+		   float weaponDistance = WeaponDistance(isMelee);
+		   if((_enemy.myTransform.position-controlledPawn.myTransform.position).sqrMagnitude<weaponDistance*weaponDistance){
+				Attack();	
+				isMoving = false;
+		   }else{
+				StopAttack();
+				isMoving =true;
+		   }
 			agent.SetTarget(_enemy.myTransform.position);
+			
+			
+			
         }
         else
         {
@@ -44,11 +56,13 @@ public class AIWalk : AIState
 		base.StartState ();
 	}
 	public void Update(){
-		if (_enemy != null) {
+		if (_enemy != null&&isMoving) {
 			agent.WalkUpdate ();
 			//Debug.Log(agent.GetTranslate());
 			controlledPawn.Movement (agent.GetTranslate(),CharacterState.Running);
 
+		}else{
+			controlledPawn.Movement (Vector3.zero,CharacterState.Idle);
 		}
 		
 	}

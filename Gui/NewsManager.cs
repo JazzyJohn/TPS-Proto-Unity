@@ -16,7 +16,7 @@ public class NewUpdate
 public class NewsManager : MonoBehaviour {
 	string ImagesPath = "http://vk.rakgames.ru/kaspi/";
 	string XMLPath = "http://vk.rakgames.ru/kaspi/unityTest/XMLExample.xml";
-	public List <NewUpdate> news = new List<NewUpdate> ();
+	private List <NewUpdate> news = new List<NewUpdate> ();
 	public static NewsManager instance;//singletone?
 
 	public List<NewUpdate> getNewsList()
@@ -77,8 +77,9 @@ public class NewsManager : MonoBehaviour {
 			WWW w = StatisticHandler.GetMeRightWWW (n.img);
 			yield return w;
 			
-
-			n.img_tex = w.texture;
+			n.img_tex = new Texture2D(w.texture.width, w.texture.height);
+			w.LoadImageIntoTexture(n.img_tex);
+			
 			news.Add(n);
 		}
 	}

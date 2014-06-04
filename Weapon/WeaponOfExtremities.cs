@@ -25,20 +25,22 @@ public class WeaponOfExtremities : MonoBehaviour {
 	
 	private Queue<ShootData> shootsToSpawn = new Queue<ShootData>();
 
-	public AlphaDogPawn owner;
+	public Pawn owner;
 	
 	public Transform curTransform;
 
 	private bool shootAfterReload;
 
 	public List<HTHHitter> Weapon = new List<HTHHitter>();
+	
+	public float WeaponDistance;
 
 	// Use this for initialization
 	void Start () 
 	{
 
 
-		owner = GetComponent<AlphaDogPawn>();
+		owner = GetComponent<Pawn>();
 
 		for (int i = 0; i < this.GetComponentsInChildren<HTHHitter>().Length; i++)
 		{
@@ -55,7 +57,7 @@ public class WeaponOfExtremities : MonoBehaviour {
 		{
 			if (Attack.isKick) 
 			{
-				Attack.isKick=false;
+				//Attack.isKick=false;
 				if(Attack.timer<=0)
 				{
 					Kick(Attack);
@@ -72,7 +74,11 @@ public class WeaponOfExtremities : MonoBehaviour {
 
 	public virtual void StopKick(HTHHitter Attack)
 	{
-		Attack.isKick = false;
+		foreach(HTHHitter Attack in Weapon)
+		{
+			Attack.StopKick();
+					
+		}
 	}
 
 	void Kick(HTHHitter Attack)

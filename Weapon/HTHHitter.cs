@@ -68,15 +68,15 @@ public class HTHHitter : MonoBehaviour {
 		WeaponControl=Darth_Vader;
 		owner = owner1;
 
-		StartCoroutine(GetAnim());
-
-	}
-
-	IEnumerator GetAnim()
-	{
-		yield return new WaitForSeconds (0.1f);
 		anim = owner.animator.animator;
+
 	}
+	public StopKick(){
+		isKick= false;
+		wasDamage = false;
+	
+	}
+	
 
 	// Update is called once per frame
 	void Update () 
@@ -85,7 +85,7 @@ public class HTHHitter : MonoBehaviour {
 			timer-=Time.deltaTime;
 		}
 
-		if (anim != null)
+		if (isKick&&anim != null)
 		{
 			bool ok = false;
 			

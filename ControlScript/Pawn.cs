@@ -46,10 +46,17 @@ public class Pawn : DamagebleObject {
 
 	public bool isActive =true;
 
+	//Weapon that in hand
 	public BaseWeapon CurWeapon;
 
 	public Transform weaponSlot;
 
+	//Nautaral weapons like hand or claws
+		
+	public WeaponOfExtremities naturalWeapon;
+
+	public List<HTHHitter> AttackType = new List<HTHHitter>();
+	
 	public Transform myTransform;
 
 	protected Vector3 correctPlayerPos = Vector3.zero; //We lerp towards this
@@ -290,6 +297,7 @@ public class Pawn : DamagebleObject {
 		_rb  = GetComponent<Rigidbody>();
 		capsule = GetComponent<CapsuleCollider> ();
 		photonView = GetComponent<PhotonView>();
+		animator = transform.GetComponentInChildren<AnimationManager>();
 	}
 	// Use this for initialization
 	protected void Start () {
@@ -324,7 +332,8 @@ public class Pawn : DamagebleObject {
 				mainAi.StartAI();
 			}
 		}
-
+		
+		naturalWeapon = GetComponent<WeaponOfExtremities>();
 		correctPlayerPos = transform.position;
 		myCollider = collider;
 		ivnMan.Init ();
@@ -1007,6 +1016,52 @@ public class Pawn : DamagebleObject {
 		}
 
 	}
+	
+	//Natural weapon
+	
+	public void Kick(int i)
+	{
+		naturalWeapon.StartKick(AttackType[i]); 
+//		Debug.Log ("ATtack");
+		//animator.SetSome("Any",true);
+		//((DogAnimationManager) animator).AnyDo();
+		if (photonView.isMine) {
+			photonView.RPC("RPCKick",PhotonTargets.OthersBuffered,i);
+		}
+	}
+	
+	public void RandomKick(){
+		int i = (int)(UnityEngine.Random.value*AttackType[i].Count)
+		naturalWeapon.StartKick(i); 
+		//		Debug.Log ("ATtack");
+		//animator.SetSome("Any",true);
+		//((DogAnimationManager) animator).AnyDo();
+		if (photonView.isMine) {
+			photonView.RPC("RPCKick",PhotonTargets.OthersBuffered,i);
+		}
+	
+	}
+	[RPC]
+	public void RPCKick(int i){
+
+		naturalWeapon.StartKick(AttackType[i]); 
+		
+		//animator.SetSome("Any",true);
+		//((DogAnimationManager) animator).AnyDo();
+	}
+
+	
+	
+	public float OptimalDistance(bool isMelee){
+		if(CurWeapon!=null&&!isMelee){
+			return CurWeapon.weaponRange/2;
+		}
+		if(naturalWeapon!=null){
+			return naturalWeapon.WeaponDistance;
+		}
+	
+	}
+	
 	//END WEAPON SECTION
 	void OnCollisionEnter(Collision collision) {
 		//Debug.Log ("COLLISION ENTER PAWN " + this + collision);
@@ -1015,7 +1070,16 @@ public class Pawn : DamagebleObject {
 	{
 		if (other.tag == "damageArea") {
 			//Debug.Log (other.GetComponent<ContiniusGun> ());
-			other.GetComponent<MuzzlePoint>().gun.GetComponent<ContiniusGun> ().fireDamage (this);
+			MuzzlePoint muzzlePoint = other.GetComponent<MuzzlePoint>();
+			singleDPS newDPS= null;
+			if(muzzlePoint !=null){
+				 newDPS = muzzlePoint.gun.GetComponent<ContiniusGun> ().fireDamage (this);
+			}
+			DamageArea area = other.GetComponent<DamageArea>();
+			if(area !=null){
+				 newDPS = area.fireDamage (this);
+			}
+		
 		}
 	}
 	

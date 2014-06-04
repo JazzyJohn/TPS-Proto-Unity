@@ -263,4 +263,9 @@ public class AnimationManager : MonoBehaviour
 		transform.parent.SendMessage ("StopTaunt");
 		
 	}
+	//I'm not sure in necessity of this function maybe we should change logic of some script to get rid of it . JazzyJohn.
+	public void SetSome(string some, bool value){
+		animator.SetBool(some, value);
+	}
+	
 }

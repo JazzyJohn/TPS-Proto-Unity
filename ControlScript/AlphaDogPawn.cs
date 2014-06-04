@@ -5,19 +5,8 @@ using System.Collections.Generic;
 public class AlphaDogPawn : Pawn {
 
 
-	private Animator Anim;
-	public WeaponOfExtremities naturalWeapon;
+	
 
-	public List<HTHHitter> AttackType = new List<HTHHitter>();
-
-	// Use this for initialization
-	void Start () 
-	{
-		base.Start();
-		naturalWeapon = GetComponent<WeaponOfExtremities>();
-		Anim = transform.GetComponentInChildren<Animator>(); // Привязка аниматора
-		animator = transform.GetComponentInChildren<DogAnimationManager>();
-	}
 
 	public override Vector3 getAimRotation()
 	{
@@ -106,7 +95,7 @@ public class AlphaDogPawn : Pawn {
 				//Debug.Log (speed);
 				switch(characterState){
 				case CharacterState.Idle:
-					Anim.SetBool("Any", false);
+					animator.SetSome("Any", false);
 					animator.ApllyMotion (0.0f, speed, strafe);
 					break;
 				case CharacterState.Running:
@@ -132,7 +121,7 @@ public class AlphaDogPawn : Pawn {
 				switch(nextState)
 				{
 				case CharacterState.Idle:
-					Anim.SetBool("Any", false);
+					animator.SetSome("Any", false);
 					animator.ApllyMotion (0.0f, speed, strafe);
 					break;
 				case CharacterState.Running:
@@ -168,23 +157,8 @@ public class AlphaDogPawn : Pawn {
 		}
 	}
 
-	public void Kick(int i)
-	{
-		naturalWeapon.StartKick(AttackType[i]); 
-//		Debug.Log ("ATtack");
-		((DogAnimationManager) animator).AnyDo();
-		if (photonView.isMine) {
-			photonView.RPC("RPCKick",PhotonTargets.OthersBuffered,i);
-		}
-	}
-	[RPC]
-	public void RPCKick(int i){
-
-		naturalWeapon.StartKick(AttackType[i]); 
-		
-		((DogAnimationManager) animator).AnyDo();
-	}
-
+	
+	//For Players
 	public override void ToggleAim(bool value)
 	{
 		if (value) {

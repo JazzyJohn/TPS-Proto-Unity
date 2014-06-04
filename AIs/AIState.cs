@@ -78,6 +78,8 @@ public class AIState : MonoBehaviour {
 	protected float
 				_distanceToTarget,
 				_angleRange;
+				
+	protected bool isMelee= false;
 
 	
 	public Pawn[] PawnList
@@ -191,7 +193,7 @@ public class AIState : MonoBehaviour {
 
 		if (Physics.Linecast (transform.position, target.myTransform.position, out hit))
 			if (hit.collider == target.collider) {
-
+				distance = hit.distance;
 				SetEnemy(target);
 				return true;
 			}
@@ -204,5 +206,35 @@ public class AIState : MonoBehaviour {
             return false;
 
     }
+	protected virtual void DecideTacktick(){
+	
+			if(controlledPawn.naturalWeapon!=null){
+				if(controlledPawn.CurWeapon==null){
+					isMelee= true;
+					return;
+				}
+				if(controlledPawn.CurWeapon.weaponRange>_distanceToTarget*2){
+					isMelee= true;
+				}
 
+			
+			}
+			isMelee = false;
+			isMelee = false;
+	
+	}
+	protected virtual void Attack(bool isMelee){
+		if(controlledPawn.CurWeapon!=null&&!isMelee){
+			controlledPawn.StartFire();
+			return;
+		}
+		controlledPawn.RandomKick();
+	}
+	protected virtual void StopAttack(bool isMelee){
+		if(controlledPawn.CurWeapon!=null&&!isMelee){
+			controlledPawn.StopFire();
+		}
+		controlledPawn.naturalWeapon.StopKick();
+	}
+	
 }
