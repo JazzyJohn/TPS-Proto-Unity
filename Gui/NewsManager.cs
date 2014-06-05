@@ -18,7 +18,7 @@ public class NewsManager : MonoBehaviour {
 	string XMLPath = "http://vk.rakgames.ru/kaspi/unityTest/XMLExample.xml";
 	private List <NewUpdate> news = new List<NewUpdate> ();
 	public static NewsManager instance;//singletone?
-
+	public bool finished = false;
 	public List<NewUpdate> getNewsList()
 	{
 		return news;
@@ -82,5 +82,6 @@ public class NewsManager : MonoBehaviour {
 			
 			news.Add(n);
 		}
+		finished = true;
 	}
 }

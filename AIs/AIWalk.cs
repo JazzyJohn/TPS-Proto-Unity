@@ -18,7 +18,7 @@ public class AIWalk : AIState
             //code to animation attack
 			DecideTacktick();
            // Debug.Log("Shot");
-		   float weaponDistance = WeaponDistance(isMelee);
+		   float weaponDistance = controlledPawn.OptimalDistance(isMelee);
 		   if((_enemy.myTransform.position-controlledPawn.myTransform.position).sqrMagnitude<weaponDistance*weaponDistance){
 				Attack();	
 				isMoving = false;

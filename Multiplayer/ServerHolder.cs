@@ -10,15 +10,16 @@ public class ServerHolder : MonoBehaviour
 	
 	Vector2 scroll;
 	Vector2 mapScroll;
-	
-	bool createRoom = false;
-	bool connectingToRoom = false;
+
+	public bool createRoom = false;
+	public bool connectingToRoom = false;
 	
 	string playerName;
-	string newRoomName;
-	int newRoomMaxPlayers;
+	public string newRoomName;
+	public int newRoomMaxPlayers;
 	private const float FLOAT_COEF =100.0f;
-	RoomInfo[] allRooms;
+
+	public RoomInfo[] allRooms;
 	public string version;
 	public struct LoadProgress{
 		public int allLoader;
@@ -27,6 +28,8 @@ public class ServerHolder : MonoBehaviour
 		
 	}
 	public static LoadProgress progress= new LoadProgress();
+
+
 	// Use this for initialization
 	void Start()
 	{
@@ -73,15 +76,15 @@ public class ServerHolder : MonoBehaviour
 	void OnReceivedRoomList()
 	{
 		allRooms = PhotonNetwork.GetRoomList();
-		print ("Обновлен список комнат. Сейчас их " + allRooms.Length + ".");
+		//print ("Обновлен список комнат. Сейчас их " + allRooms.Length + ".");
 	}
 	
 	void OnReceivedRoomListUpdate()
 	{
 		allRooms = PhotonNetwork.GetRoomList();
-		print ("Обновлен список комнат. Сейчас их " + allRooms.Length + ".");
+		//print ("Обновлен список комнат. Сейчас их " + allRooms.Length + ".");
 	}
-	
+	/*
 	void OnGUI()
 	{
 
@@ -98,8 +101,7 @@ public class ServerHolder : MonoBehaviour
 			ShowConnectMenu ();
 			GUILayout.EndArea();
 		}
-		
-		/*
+
 		else if (PhotonNetwork.connected)
 		{
 <<<<<<< HEAD
@@ -123,7 +125,7 @@ public class ServerHolder : MonoBehaviour
 			GUILayout.EndHorizontal();
 >>>>>>> pr/6
 		}
-		*/
+
 		
 
 		GUILayout.Label(PhotonNetwork.connectionStateDetailed.ToString());
@@ -136,7 +138,9 @@ public class ServerHolder : MonoBehaviour
 
 		
 	}
-	
+	*/
+
+	/*
 	void ShowConnectMenu()
 	{
 				GUILayout.Space (10);
@@ -219,6 +223,18 @@ public class ServerHolder : MonoBehaviour
 
 
 		}
+		*/
+
+	public void CreateNewRoom() //Создание комноты (+)
+	{
+		ExitGames.Client.Photon.Hashtable customProps = new ExitGames.Client.Photon.Hashtable();
+		customProps["MapName"] = "kaspi_map_c_2_test";
+		string[] exposedProps = new string[customProps.Count];
+		exposedProps[0] = "MapName";
+		
+		PhotonNetwork.CreateRoom(newRoomName, true, true, newRoomMaxPlayers, customProps, exposedProps);
+	}
+
 	public void LoadNextMap(){
 		connectingToRoom = true;
 		StartCoroutine (LoadMap ((string)PhotonNetwork.room.customProperties ["MapName"]));
@@ -243,6 +259,7 @@ public class ServerHolder : MonoBehaviour
 	void OnPhotonJoinRoomFailed()
 	{
 		connectingToRoom = false;
+		FindObjectOfType<MainMenuGUI> ().CreateRoom ();
 		print ("Не удалось подключиться к комнате.");
 	}
 	
@@ -351,6 +368,10 @@ public class ServerHolder : MonoBehaviour
 		if (PhotonNetwork.isMasterClient) 
 		{
 			FindObjectOfType<PVPGameRule> ().StartGame ();
+		}
+		MainMenuGUI mainMenu = FindObjectOfType<MainMenuGUI> ();
+		if (mainMenu != null) {
+				Destroy (mainMenu.gameObject);
 		}
 	}
 

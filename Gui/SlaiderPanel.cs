@@ -1,12 +1,14 @@
 using UnityEngine;
 using System.Collections;
-
+using System.Collections.Generic;
 public class SlaiderPanel : MonoBehaviour {
 
 
 	public GameObject oneNewPrefab;
 	
 	public UIPanel allNewsPanel;
+
+	public UIWidget newsContainer;
 	
 	public Transform allNewsPivot;
 		
@@ -18,8 +20,10 @@ public class SlaiderPanel : MonoBehaviour {
 	
 	private bool IsSliding;
 	
-	private float slideTimer =0.0f
-	
+	private float slideTimer =0.0f;
+
+	private float offset;
+
 	public void ShowNews(){
 		allNewsPanel.alpha = 1.0f;
 	}
@@ -30,22 +34,23 @@ public class SlaiderPanel : MonoBehaviour {
 	
 	
 	void Update(){
-		if(newsCount==0&& NewsManager.instance. getNewsList().Count!=0){
+		if(newsCount==0&& NewsManager.instance. finished){
 				GenerateNewsBoxes();
 		}	
-		
+
 		if(newsCount!=0){
 			if(IsSliding){
-				Vector3 target = new Vector3(curItem, 0, 0);
+				Vector3 target = new Vector3(-curItem*offset, 0, 0);
 				allNewsPivot.localPosition = Vector3.Lerp(	allNewsPivot.localPosition, target,Time.deltaTime);
-				if(Vecto3.Distance(allNewsPivot.localPosition-target)<0.1f){
+				if((allNewsPivot.localPosition-target).sqrMagnitude<10f){
 					allNewsPivot.localPosition=target;
 					IsSliding =false;
 				}
 				
 			}else{
-				slideTimer+=Tuime.deltaTime;
+				slideTimer+=Time.deltaTime;
 				if(slideTimer>slideTime){
+					slideTimer=0;
 					NextNews();
 				}
 			}
@@ -58,22 +63,38 @@ public class SlaiderPanel : MonoBehaviour {
 			curItem = 0;
 		}
 	}
+	public void ReSize(){
+		for(int i=0; i<allNewsPivot.childCount;i++){
+			allNewsPivot.GetChild(i).GetComponent<UIWidget>().SetDimensions((int)allNewsPanel.baseClipRegion.w, (int)allNewsPanel.baseClipRegion.z);
+
+
+		}
+	}
 	void GenerateNewsBoxes(){
-		float offset = oneNewPrefab.GetComponent<UITexture>().width;
-		List <NewUpdate> news = NewsManager.instance. getNewsList();
-		newCount = news.Count;
-		for(i=0;i<news.Count;i++){
+
+		offset = allNewsPanel.baseClipRegion.w;
+		List<NewUpdate> news = NewsManager.instance. getNewsList();
+		newsCount = news.Count;
+		for(int i=0;i<news.Count;i++){
 			NewUpdate oneNew= news[i];
 			GameObject  objectnews =Instantiate(oneNewPrefab)as GameObject;
+
 			objectnews.transform.parent = allNewsPivot;
+			objectnews.transform.localScale = new Vector3(1f,1f,1f);
+
 			objectnews.transform.localPosition   = new Vector3(offset*i, 0, 0);
-			objectnews.GetComponent<UITexture>().mainTexture = oneNew.img_tex;
+			objectnews.GetComponent<UIWidget>().SetDimensions((int)allNewsPanel.baseClipRegion.w, (int)allNewsPanel.baseClipRegion.z);
+			objectnews.GetComponent<UIWidget>().alpha = 1.0f;
+
+			//SERVER DATA SET
+			objectnews.GetComponentInChildren<UITexture>().mainTexture = oneNew.img_tex;
 			UILabel textData  =objectnews.GetComponentInChildren<UILabel>();
 			textData.text  = "["+oneNew.color+"]"+oneNew.title;
 			textData.fontSize  = oneNew.fontSize;
-			float x = oneNew.title_x*objectnews.GetComponent<UITexture>().width,
-					y= oneNew.title_y*objectnews.GetComponent<UITexture>().height,
-			textData.localPosition   = new Vector3(x, y, 0);
+			float x = oneNew.title_x*allNewsPanel.baseClipRegion.w/100f,
+			y= oneNew.title_y*allNewsPanel.baseClipRegion.z/100f;
+			textData.transform.localPosition   = new Vector3(x, y, 0);
+			allNewsPanel.AddWidget(objectnews.GetComponent<UIWidget>());
 		}
 	
 	}

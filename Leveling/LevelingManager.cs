@@ -29,7 +29,9 @@ public class LevelingManager : MonoBehaviour, LocalPlayerListener,GameListener{
 	public string UID;
 
 	private Statistic Stat; // Статистика (+)
-	
+
+	public bool isLoaded = false;
+
 	public PlayerMainGui.LevelStats GetPlayerStats(){
 		PlayerMainGui.LevelStats stats  = new PlayerMainGui.LevelStats();
 		stats.playerLvl = playerLvl;
@@ -121,7 +123,7 @@ public class LevelingManager : MonoBehaviour, LocalPlayerListener,GameListener{
 					classLvl[i]= int.Parse(node.SelectSingleNode("lvl").InnerText);
 					classExp[i++]= int.Parse(node.SelectSingleNode("exp").InnerText);
 		}
-		
+		isLoaded = true;
 	}
 	//adding exp to current
 	public bool UpExp(int exp,int selected=-1){

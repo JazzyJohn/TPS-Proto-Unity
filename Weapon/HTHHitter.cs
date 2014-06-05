@@ -71,7 +71,7 @@ public class HTHHitter : MonoBehaviour {
 		anim = owner.animator.animator;
 
 	}
-	public StopKick(){
+	public void StopKick(){
 		isKick= false;
 		wasDamage = false;
 	

@@ -1031,8 +1031,8 @@ public class Pawn : DamagebleObject {
 	}
 	
 	public void RandomKick(){
-		int i = (int)(UnityEngine.Random.value*AttackType[i].Count)
-		naturalWeapon.StartKick(i); 
+		int i = (int)(UnityEngine.Random.value * AttackType.Count);
+		naturalWeapon.StartKick(AttackType[i]); 
 		//		Debug.Log ("ATtack");
 		//animator.SetSome("Any",true);
 		//((DogAnimationManager) animator).AnyDo();
@@ -1059,6 +1059,7 @@ public class Pawn : DamagebleObject {
 		if(naturalWeapon!=null){
 			return naturalWeapon.WeaponDistance;
 		}
+		return 0.0f;
 	
 	}
 	
@@ -1073,11 +1074,11 @@ public class Pawn : DamagebleObject {
 			MuzzlePoint muzzlePoint = other.GetComponent<MuzzlePoint>();
 			singleDPS newDPS= null;
 			if(muzzlePoint !=null){
-				 newDPS = muzzlePoint.gun.GetComponent<ContiniusGun> ().fireDamage (this);
+				 muzzlePoint.gun.GetComponent<ContiniusGun> ().fireDamage (this);
 			}
 			DamageArea area = other.GetComponent<DamageArea>();
 			if(area !=null){
-				 newDPS = area.fireDamage (this);
+				  area.fireDamage (this);
 			}
 		
 		}

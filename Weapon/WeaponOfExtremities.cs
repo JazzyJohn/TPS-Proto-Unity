@@ -72,7 +72,7 @@ public class WeaponOfExtremities : MonoBehaviour {
 		Attack.isKick = true;
 	}
 
-	public virtual void StopKick(HTHHitter Attack)
+	public virtual void StopKick()
 	{
 		foreach(HTHHitter Attack in Weapon)
 		{

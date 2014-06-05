@@ -223,14 +223,14 @@ public class AIState : MonoBehaviour {
 			isMelee = false;
 	
 	}
-	protected virtual void Attack(bool isMelee){
+	protected virtual void Attack(){
 		if(controlledPawn.CurWeapon!=null&&!isMelee){
 			controlledPawn.StartFire();
 			return;
 		}
 		controlledPawn.RandomKick();
 	}
-	protected virtual void StopAttack(bool isMelee){
+	protected virtual void StopAttack(){
 		if(controlledPawn.CurWeapon!=null&&!isMelee){
 			controlledPawn.StopFire();
 		}
