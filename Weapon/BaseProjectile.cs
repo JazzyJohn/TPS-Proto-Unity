@@ -7,9 +7,13 @@ public class BaseDamage{
 	public float Damage;
 	public bool isVsArmor;
 	public float pushForce;
+	[HideInInspector] 
 	public Vector3 pushDirection;
+	[HideInInspector] 
 	public Vector3 hitPosition;
+	[HideInInspector] 
 	public bool sendMessage= true;
+	[HideInInspector] 
 	public bool isContinius =false;
 	public BaseDamage(BaseDamage old){
 		Damage = old.Damage;

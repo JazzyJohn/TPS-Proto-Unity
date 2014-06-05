@@ -84,63 +84,63 @@ public class ServerHolder : MonoBehaviour
 		allRooms = PhotonNetwork.GetRoomList();
 		//print ("Обновлен список комнат. Сейчас их " + allRooms.Length + ".");
 	}
-	/*
+	
 	void OnGUI()
 	{
 
-		
-		if (!PhotonNetwork.inRoom && PhotonNetwork.connected)
-		{
-			float screenX = Screen.width, screenY = Screen.height;
-			RoomInfo[] availableRooms = allRooms;
-			
-			float slotsizeX = screenX / 5;
-			float slotsizeY = screenY / (availableRooms.Length + 1);
-
-			GUILayout.BeginArea(new Rect (Screen.width  - 400, Screen.height - 230, 400, 230), "Соединение", GUI.skin.GetStyle("window"));
-			ShowConnectMenu ();
-			GUILayout.EndArea();
-		}
-
-		else if (PhotonNetwork.connected)
-		{
-<<<<<<< HEAD
-			RoomOptions options = new RoomOptions ();
-			options.maxPlayers = 10;
-			PhotonNetwork.CreateRoom("My Room",options,null);
-		}
-		void OnCreatedRoom()
-		{
-			FindObjectOfType<PVPGameRule> ().StartGame ();
-=======
-			GUILayout.FlexibleSpace();
-			GUILayout.BeginHorizontal();
-			
-			if (GUILayout.Button("Покинуть комнату", GUILayout.Width (130), GUILayout.Height (25)))
+		if(!shouldLoad){
+			if (!PhotonNetwork.inRoom && PhotonNetwork.connected)
 			{
-				PhotonNetwork.LeaveRoom();
-				createRoom = false;
+				float screenX = Screen.width, screenY = Screen.height;
+				RoomInfo[] availableRooms = allRooms;
+				
+				float slotsizeX = screenX / 5;
+				float slotsizeY = screenY / (availableRooms.Length + 1);
+
+				GUILayout.BeginArea(new Rect (Screen.width  - 400, Screen.height - 230, 400, 230), "Соединение", GUI.skin.GetStyle("window"));
+				ShowConnectMenu ();
+				GUILayout.EndArea();
 			}
+
+		/*	else if (PhotonNetwork.connected)
+			{
+		<<<<<<< HEAD
+				RoomOptions options = new RoomOptions ();
+				options.maxPlayers = 10;
+				PhotonNetwork.CreateRoom("My Room",options,null);
+			}
+			void OnCreatedRoom()
+			{
+				FindObjectOfType<PVPGameRule> ().StartGame ();
+		=======
+				GUILayout.FlexibleSpace();
+				GUILayout.BeginHorizontal();
+				
+				if (GUILayout.Button("Покинуть комнату", GUILayout.Width (130), GUILayout.Height (25)))
+				{
+					PhotonNetwork.LeaveRoom();
+					createRoom = false;
+				}
+				
+				GUILayout.EndHorizontal();
+		>>>>>>> pr/6
+			}
+
 			
-			GUILayout.EndHorizontal();
->>>>>>> pr/6
+		*/
+			GUILayout.Label(PhotonNetwork.connectionStateDetailed.ToString());
+
+			if(connectingToRoom)
+			{
+				
+				GUI.Box(new Rect(Screen.width / 2 - 100, Screen.height / 2 - 20, 200, 40), "Загрузка карты... " + LoadProcent().ToString("0.0") +"%");
+			}
+
 		}
-
-		
-
-		GUILayout.Label(PhotonNetwork.connectionStateDetailed.ToString());
-
-		if(connectingToRoom)
-		{
-			
-			GUI.Box(new Rect(Screen.width / 2 - 100, Screen.height / 2 - 20, 200, 40), "Загрузка карты... " + LoadProcent().ToString("0.0") +"%");
-		}
-
-		
 	}
-	*/
+	
 
-	/*
+	
 	void ShowConnectMenu()
 	{
 				GUILayout.Space (10);
@@ -150,7 +150,7 @@ public class ServerHolder : MonoBehaviour
 
 			if (!createRoom)
 			{
-				scroll = GUILayout.BeginScrollView(scroll, GUILayout.Width(480), GUILayout.Height(225));
+				scroll = GUILayout.BeginScrollView(scroll, GUILayout.Width(200), GUILayout.Height(150));
 
 				
 								if (allRooms.Length > 0) {
@@ -223,7 +223,7 @@ public class ServerHolder : MonoBehaviour
 
 
 		}
-		*/
+		
 
 	public void CreateNewRoom() //Создание комноты (+)
 	{

@@ -178,7 +178,7 @@ public class MainMenuGUI : MonoBehaviour {
 	{
 
 		PlayerMainGui.LevelStats lvl = LevelingManager.instance.GetPlayerStats ();
-		_playerInfo.playerName = _playerInfo.Player.GetComponent<GlobalPlayer>().PlayerName;
+		_playerInfo.playerName = _playerInfo.Player.PlayerName;
 		_playerInfo.playerLvl = lvl.playerLvl;
 		_playerInfo.playerExp = _playerInfo.Player.GetComponent<LevelingManager>().playerExp;
 		_playerInfo.playerExpNeed = _playerInfo.Player.GetComponent<LevelingManager>().playerNeededExp[_playerInfo.playerLvl];
@@ -285,6 +285,12 @@ public class MainMenuGUI : MonoBehaviour {
 
 
 	}
+	public void AddCoins(){
+		 _playerInfo.Player.AskJsForMagazine("gitp_5");
+	
+	
+	}
+	
 
 
 }
@@ -350,7 +356,7 @@ public class PlayerInfo
 	public bool Premium_have;
 	
 
-	public GameObject Player;
+	public GlobalPlayer Player;
 }
 
 [System.Serializable]

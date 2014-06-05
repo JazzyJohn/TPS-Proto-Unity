@@ -5,12 +5,16 @@ public class SlaiderPanel : MonoBehaviour {
 
 
 	public GameObject oneNewPrefab;
-	
+
+	public GameObject onewNewButton;
+
 	public UIPanel allNewsPanel;
 
 	public UIWidget newsContainer;
 	
 	public Transform allNewsPivot;
+	
+	public Transform allBtnPivot;
 		
 	private int newsCount = 0;
 	
@@ -63,6 +67,13 @@ public class SlaiderPanel : MonoBehaviour {
 			curItem = 0;
 		}
 	}
+	public void SetNews(int i){
+		curItem=i;
+		IsSliding= true;
+		if(curItem>=newsCount){
+			curItem = 0;
+		}
+	}
 	public void ReSize(){
 		for(int i=0; i<allNewsPivot.childCount;i++){
 			allNewsPivot.GetChild(i).GetComponent<UIWidget>().SetDimensions((int)allNewsPanel.baseClipRegion.w, (int)allNewsPanel.baseClipRegion.z);
@@ -73,6 +84,7 @@ public class SlaiderPanel : MonoBehaviour {
 	void GenerateNewsBoxes(){
 
 		offset = allNewsPanel.baseClipRegion.w;
+		float btnoffset= 
 		List<NewUpdate> news = NewsManager.instance. getNewsList();
 		newsCount = news.Count;
 		for(int i=0;i<news.Count;i++){
@@ -95,7 +107,20 @@ public class SlaiderPanel : MonoBehaviour {
 			y= oneNew.title_y*allNewsPanel.baseClipRegion.z/100f;
 			textData.transform.localPosition   = new Vector3(x, y, 0);
 			allNewsPanel.AddWidget(objectnews.GetComponent<UIWidget>());
+			
+			
+			
+			//Button creation 
+			GameObject  objectbtn=Instantiate(onewNewButton)as GameObject;
+				
+			objectbtn.transform.parent = allBtnPivot;
+			objectbtn.transform.localScale = new Vector3(1f,1f,1f);
+			objectbtn.transform.localPosition   = new Vector3(btnoffset*i, 0, 0);
+			objectbtn.GetComponent<SliderBtn>().Init(i,this);
+			
 		}
+		
+		
 	
 	}
 	

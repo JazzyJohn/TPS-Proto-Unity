@@ -28,23 +28,7 @@ public class GlobalPlayer : MonoBehaviour {
 	
 	public int cash;
 	
-	public void  SetName(String newname)
-	{
-		PlayerName = newname;
 	
-		Application.ExternalCall( "SayMyUid");
-		
-	}
-	public void  SetUid(string uid)
-	{
-
-		UID = uid;
-		
-		StartCoroutine(StartStats(UID,PlayerName));
-		LevelingManager.instance.Init(UID);
-		AchievementManager.instance.Init(UID);
-		ItemManager.instance.Init(UID);
-	}
 
 	void Update(){
 		if(Input.GetButtonDown("FullScreen")){
@@ -123,4 +107,32 @@ public class GlobalPlayer : MonoBehaviour {
 		yield return w;
 		parseProfile(w.text);
 	}	
+	
+	//EXTERNAL SECTION 
+	
+	public void AskJsForMagazine(string item){
+		Application.ExternalCall ("ItemBuy",item);
+	
+	}
+	public void ReloadProfile(){
+		StartCoroutine(ReloadStats(UID));
+	}
+	
+	public void  SetName(String newname)
+	{
+		PlayerName = newname;
+	
+		Application.ExternalCall( "SayMyUid");
+		
+	}
+	public void  SetUid(string uid)
+	{
+
+		UID = uid;
+		
+		StartCoroutine(StartStats(UID,PlayerName));
+		LevelingManager.instance.Init(UID);
+		AchievementManager.instance.Init(UID);
+		ItemManager.instance.Init(UID);
+	}
 }

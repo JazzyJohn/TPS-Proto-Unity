@@ -1,7 +1,10 @@
 ﻿using UnityEngine;
 using System.Collections;
 
-
+public class TeamSlot{
+	public UIPanel panel;
+	public StatisticMessage message;
+}
 
 public class Statistic : MonoBehaviour {
 
@@ -31,8 +34,8 @@ public class Statistic : MonoBehaviour {
 
 	private float timer;
 
-	UIPanel[] RedTeamlPlayer = new UIPanel[12];
-	UIPanel[] BlueTeamlPlayer = new UIPanel[12];
+	TeamSlot[] RedTeamlPlayer = new TeamSlot[12];
+	TeamSlot[] BlueTeamlPlayer = new TeamSlot[12];
 
 	// Use this for initialization
 	void Start () 
@@ -41,13 +44,18 @@ public class Statistic : MonoBehaviour {
 
 		for (int i=0; i<TeamBlue.transform.childCount;i++)
 		{
-			BlueTeamlPlayer[i] = TeamBlue.transform.GetChild(i).GetComponent<UIPanel>();
-			BlueTeamlPlayer[i].alpha = 0f;
+			BlueTeamlPlayer[i] = new TeamSlot();
+
+			BlueTeamlPlayer[i].panel  =TeamBlue.transform.GetChild(i).GetComponent<UIPanel>();
+			BlueTeamlPlayer[i].panel.alpha = 0f;
+			BlueTeamlPlayer[i].message=BlueTeamlPlayer[i].panel.GetComponent<StatisticMessage>();
 		}
 		for (int i=0; i<TeamRed.transform.childCount;i++)
 		{
-			RedTeamlPlayer[i] = TeamRed.transform.GetChild(i).GetComponent<UIPanel>();
-			RedTeamlPlayer[i].alpha = 0f;
+			RedTeamlPlayer[i]  = new TeamSlot(); 
+			RedTeamlPlayer[i].panel  = TeamRed.transform.GetChild(i).GetComponent<UIPanel>();
+			RedTeamlPlayer[i].panel .alpha = 0f;
+			RedTeamlPlayer[i].message=RedTeamlPlayer[i].panel.GetComponent<StatisticMessage>();
 		}
 	}
 	
@@ -134,13 +142,11 @@ public class Statistic : MonoBehaviour {
 		{
 			for (int i=0; i<TeamBlue.transform.childCount;i++)
 			{
-				BlueTeamlPlayer[i] = TeamBlue.transform.GetChild(i).GetComponent<UIPanel>();
-				BlueTeamlPlayer[i].alpha = 0f;
+				BlueTeamlPlayer[i].panel.alpha = 0f;
 			}
 			for (int i=0; i<TeamRed.transform.childCount;i++)
 			{
-				RedTeamlPlayer[i] = TeamRed.transform.GetChild(i).GetComponent<UIPanel>();
-				RedTeamlPlayer[i].alpha = 0f;
+				RedTeamlPlayer[i].panel.alpha = 0f;
 			}
 			
 			Player[] players = PlayerManager.instance.FindAllPlayer ();
@@ -154,15 +160,15 @@ public class Statistic : MonoBehaviour {
 				switch(Gamer.team)
 				{
 				case 1:
-					RedTeamlPlayer[countRed].alpha = 1f;
-					RedTeamlPlayer[countRed].GetComponent<StatisticMessage>().UID = Gamer.GetUid();
-					RedTeamlPlayer[countRed].GetComponent<StatisticMessage>().SetStartInfo(Gamer.GetName(), Gamer.Score.Kill, Gamer.Score.Death, Gamer.Score.Assist, Gamer);
+					RedTeamlPlayer[countRed].panel.alpha = 1f;
+					RedTeamlPlayer[countRed].message.UID = Gamer.GetUid();
+					RedTeamlPlayer[countRed].message.SetStartInfo(Gamer.GetName(), Gamer.Score.Kill, Gamer.Score.Death, Gamer.Score.Assist, Gamer);
 					countRed++;
 					break;
 				case 2:
-					BlueTeamlPlayer[countBlue]	.alpha = 1f;
-					BlueTeamlPlayer[countBlue].GetComponent<StatisticMessage>().UID = Gamer.GetUid();
-					BlueTeamlPlayer[countBlue].GetComponent<StatisticMessage>().SetStartInfo(Gamer.GetName(), Gamer.Score.Kill, Gamer.Score.Death, Gamer.Score.Assist, Gamer);
+					BlueTeamlPlayer[countBlue].panel.alpha = 1f;
+					BlueTeamlPlayer[countBlue].message.UID = Gamer.GetUid();
+					BlueTeamlPlayer[countBlue].message.SetStartInfo(Gamer.GetName(), Gamer.Score.Kill, Gamer.Score.Death, Gamer.Score.Assist, Gamer);
 					countBlue++;
 					break;
 				}
