@@ -7,7 +7,7 @@ public class PlayerManager : MonoBehaviour {
 
 	public String[] pawnName;
 
-
+	public List<Pawn> chachedPawns;
 
 	public RobotPawn[] avaibleBots;
 
@@ -91,8 +91,17 @@ public class PlayerManager : MonoBehaviour {
 		}
 		return curTeam;
 	}
-	public Pawn[] FindAllPawn(){
-		return GameObject.FindObjectsOfType<Pawn>();
+
+	public void addPawn(Pawn target){
+		chachedPawns.Add (target);
+	}
+	public void FixedUpdate(){
+		chachedPawns.RemoveAll (delegate(Pawn v) {
+			return v==null;
+		});
+	}
+	public List<Pawn> FindAllPawn(){
+		return chachedPawns;
 	}
 	public Player[] FindAllPlayer(){
 		return GameObject.FindObjectsOfType<Player>();

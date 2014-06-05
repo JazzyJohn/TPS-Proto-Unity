@@ -28,6 +28,8 @@ public class SlaiderPanel : MonoBehaviour {
 
 	private float offset;
 
+	private List<UIToggle> newsbtns = new List<UIToggle> ();
+
 	public void ShowNews(){
 		allNewsPanel.alpha = 1.0f;
 	}
@@ -66,6 +68,7 @@ public class SlaiderPanel : MonoBehaviour {
 		if(curItem>=newsCount){
 			curItem = 0;
 		}
+		SetButtons ();
 	}
 	public void SetNews(int i){
 		curItem=i;
@@ -73,6 +76,11 @@ public class SlaiderPanel : MonoBehaviour {
 		if(curItem>=newsCount){
 			curItem = 0;
 		}
+		SetButtons ();
+	}
+	public void SetButtons(){
+
+		newsbtns [curItem].value = true;
 	}
 	public void ReSize(){
 		for(int i=0; i<allNewsPivot.childCount;i++){
@@ -84,7 +92,7 @@ public class SlaiderPanel : MonoBehaviour {
 	void GenerateNewsBoxes(){
 
 		offset = allNewsPanel.baseClipRegion.w;
-		float btnoffset= 
+		float btnoffset = onewNewButton.GetComponent<UISprite> ().width;
 		List<NewUpdate> news = NewsManager.instance. getNewsList();
 		newsCount = news.Count;
 		for(int i=0;i<news.Count;i++){
@@ -115,9 +123,9 @@ public class SlaiderPanel : MonoBehaviour {
 				
 			objectbtn.transform.parent = allBtnPivot;
 			objectbtn.transform.localScale = new Vector3(1f,1f,1f);
-			objectbtn.transform.localPosition   = new Vector3(btnoffset*i, 0, 0);
+			objectbtn.transform.localPosition   = new Vector3(btnoffset*(i-newsCount/2), 0, 0);
 			objectbtn.GetComponent<SliderBtn>().Init(i,this);
-			
+			newsbtns.Add(objectbtn.GetComponent<UIToggle>());
 		}
 		
 		

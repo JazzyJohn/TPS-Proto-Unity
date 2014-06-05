@@ -108,9 +108,9 @@ public class ItemManager : MonoBehaviour {
 	}
 	//parse XML string to normal Achivment Pattern
 	protected IEnumerator ParseList(string XML){
-		//Debug.Log (XML);
+		Debug.Log (XML);
 	  	XmlDocument xmlDoc = new XmlDocument();
-		xmlDoc.LoadXml(XML);
+		//xmlDoc.LoadXml(XML);
 
 		int i = 0;
 	

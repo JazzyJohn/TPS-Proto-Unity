@@ -19,14 +19,17 @@ public class AIWalk : AIState
 			DecideTacktick();
            // Debug.Log("Shot");
 		   float weaponDistance = controlledPawn.OptimalDistance(isMelee);
+			//Debug.Log(weaponDistance +" " +(_enemy.myTransform.position-controlledPawn.myTransform.position).sqrMagnitude);
 		   if((_enemy.myTransform.position-controlledPawn.myTransform.position).sqrMagnitude<weaponDistance*weaponDistance){
 				Attack();	
-				isMoving = false;
+				//isMoving = false;
+				agent.SetTarget(_enemy.myTransform.position,true);
 		   }else{
 				StopAttack();
-				isMoving =true;
+				//isMoving =true;
+				agent.SetTarget(_enemy.myTransform.position);
 		   }
-			agent.SetTarget(_enemy.myTransform.position);
+		
 			
 			
 			
@@ -51,15 +54,19 @@ public class AIWalk : AIState
 		agent = GetComponent<AIAgentComponent>();
 		//Debug.Log (agent);
 		agent.SetSpeed(controlledPawn.groundRunSpeed);
-		agent.size = controlledPawn.GetSize ();
+		agent.size = controlledPawn.GetSize ()/2;
 
 		base.StartState ();
 	}
-	public void Update(){
+	public void FixedUpdate(){
 		if (_enemy != null&&isMoving) {
 			agent.WalkUpdate ();
 			//Debug.Log(agent.GetTranslate());
-			controlledPawn.Movement (agent.GetTranslate(),CharacterState.Running);
+			if(agent.GetTranslate().sqrMagnitude<0.1f){
+				controlledPawn.Movement (Vector3.zero,CharacterState.Idle);
+			}else{
+				controlledPawn.Movement (agent.GetTranslate(),CharacterState.Running);
+			}
 
 		}else{
 			controlledPawn.Movement (Vector3.zero,CharacterState.Idle);

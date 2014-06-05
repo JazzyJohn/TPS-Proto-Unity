@@ -34,11 +34,11 @@ public class AIPatrol : AIState
 		//Debug.Log (agent);
 		agent.SetTarget (patrolPoints[0].position);
 		agent.SetSpeed(controlledPawn.groundWalkSpeed);
-		agent.size = controlledPawn.GetSize ();
+		agent.size = controlledPawn.GetSize ()/2;
 		base.StartState ();
 		
 	}
-	public void Update(){
+	public void FixedUpdate(){
 
 			agent.WalkUpdate ();
 			//Debug.Log(agent.GetTranslate());

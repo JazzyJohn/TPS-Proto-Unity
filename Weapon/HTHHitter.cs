@@ -84,7 +84,7 @@ public class HTHHitter : MonoBehaviour {
 		if (timer >= 0) {
 			timer-=Time.deltaTime;
 		}
-
+	//	Debug.Log (this + "  " + isKick);
 		if (isKick&&anim != null)
 		{
 			bool ok = false;
@@ -92,7 +92,7 @@ public class HTHHitter : MonoBehaviour {
 			for(int i = 0; i< anim.layerCount; i++)
 			{
 				int CurAnim = anim.GetCurrentAnimatorStateInfo(i).nameHash;
-				
+				///Debug.Log (CurAnim + "  " + attackId);
 				if (CurAnim==attackId)
 				{
 					//Debug.Log(anim.GetCurrentAnimatorStateInfo(i).length);
@@ -108,13 +108,13 @@ public class HTHHitter : MonoBehaviour {
 				wasDamage = false;
 			}
 		}
-
+		//Debug.Log (this + "  " + KickPlay);
 		RaycastHit[] hits;
 		if (KickPlay)
 		{
 			if(!wasDamage){
 				hits = Physics.RaycastAll(myTransform.position, 	myTransform.forward, 2.0f);
-				Debug.DrawRay(myTransform.position,myTransform.forward*2.0f,Color.red,5.0f);
+				//Debug.DrawRay(myTransform.position,myTransform.forward*2.0f,Color.red,5.0f);
 				foreach(RaycastHit hit in hits)
 				{
 					onBulletHit(hit);

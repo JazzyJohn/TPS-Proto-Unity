@@ -102,11 +102,11 @@ public class StatisticHandler : MonoBehaviour {
 		WWW www = null;
 		if (String.Compare(Application.absoluteURL, 0, "https", 0,5) != 0) {
 			
-			//Debug.Log ("STATS HTTP SEND" + StatisticHandler.STATISTIC_PHP_HTTPS +  node.SelectSingleNode ("textureGUIName").InnerText);
+			Debug.Log ("STATS HTTP SEND" + StatisticHandler.STATISTIC_PHP_HTTPS + URL);
 			www = new WWW (StatisticHandler.STATISTIC_PHP + URL,form);
 		}
 		else{
-			//Debug.Log ("STATS HTTPS SEND"+StatisticHandler.STATISTIC_PHP_HTTPS +  node.SelectSingleNode ("textureGUIName").InnerText);
+			Debug.Log ("STATS HTTPS SEND"+StatisticHandler.STATISTIC_PHP_HTTPS +  URL);
 			www = new WWW (StatisticHandler.STATISTIC_PHP_HTTPS +  URL,form);
 		}
 	

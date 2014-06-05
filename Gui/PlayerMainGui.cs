@@ -1,4 +1,4 @@
-﻿using UnityEngine;
+using UnityEngine;
 using System.Collections;
 using System.Collections.Generic;
 
@@ -135,7 +135,7 @@ public class PlayerMainGui : MonoBehaviour {
 		weaponMenu = GetComponent<WeaponPlayer>();
 
 
-		stat = GameObject.Find("Statistic").gameObject.GetComponent<Statistic>(); //Статистика (+)
+		stat =  GetComponentInChildren<Statistic>(); //Статистика (+)
 
 	}
 
@@ -529,16 +529,10 @@ public class PlayerMainGui : MonoBehaviour {
 	void PlayerList(){
 		
 		
-		try
-		{
-			stat.LocalPlayerStat(LocalPlayer.GetName(), Choice._Player); // Внесения базовой инфы в статистику (+)
+	
+		stat.LocalPlayerStat(LocalPlayer.GetName(), Choice._Player); // Внесения базовой инфы в статистику (+)
 
-			stat.AvatarPlayer(); //Установка аватара (+)
-		}
-		catch(UnityException ex)
-		{
-			Debug.Log(ex.ToString());
-		}
+		stat.AvatarPlayer(); //Установка аватара (+)
 		
 		stat.RefreshStatisticPlayers(); //Обновление списока статистики игроков (+)
 	}

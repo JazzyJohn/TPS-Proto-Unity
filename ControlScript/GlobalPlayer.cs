@@ -12,7 +12,7 @@ public class GlobalPlayer : MonoBehaviour {
 			}else{
 				Application.ExternalCall ("SayMyName");
 				if (Application.platform == RuntimePlatform.WindowsEditor) {
-					SetUid("VKTEST");
+					SetUid(UID);
 				}
 				DontDestroyOnLoad(transform.gameObject);
 			}
@@ -57,9 +57,7 @@ public class GlobalPlayer : MonoBehaviour {
 		foreach (string id in ids)
 			friendsInfo.Add (id);
 	}
-	public void ReloadProfile(){
-		StartCoroutine(ReloadStats(UID));
-	}
+
 	
 	protected void parseProfile(string XML){
 		XmlDocument xmlDoc = new XmlDocument();

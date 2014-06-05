@@ -51,14 +51,21 @@ public class AIAgentComponent : MonoBehaviour {
 		}
 		return Vector3.zero;
 	}
-	public void SetTarget(Vector3 newTarget){
-		if((newTarget -target).sqrMagnitude>4.0f){
+	public void SetTarget(Vector3 newTarget,bool forced = false){
+
+		if (forced) {
 			agent.GoTo(newTarget);
 			target= newTarget;
+		} else {
+			if((newTarget -target).sqrMagnitude>4.0f){
+				agent.GoTo(newTarget);
+				target= newTarget;
+			}
 		}
 	}
 	
 	public void WalkUpdate () {
+		resultTranslate  =Vector3.zero;
 		if(agent.path.Count>0){
 			bool walkable = true;
 			//Check if exist some dynamic obstacle in our path.
@@ -115,7 +122,7 @@ public class AIAgentComponent : MonoBehaviour {
 			}
 		}
 	}
-	
+
 	
 	
 	public void GotoNextStep(){
@@ -165,14 +172,29 @@ public class AIAgentComponent : MonoBehaviour {
 				//resultRotation = transform.rotation;
 				//If the agent arrive to waypoint position, delete waypoint from the path.
 
-				if(Vector3.Distance(agent.pivot.transform.position, point)<size){
+				if(IsRiched(point)){
 					agent.path.RemoveAt(0);
 				}
+			}else{
+				resultTranslate  =Vector3.zero;
 			}
 		}
 	}
-	
-	
+	public bool IsRiched(Vector3 point){
+		//Debug.Log(Mathf.Abs (agent.pivot.transform.position.y - point.y) +"   " +"   "+size);
+
+		if (PathfindingEngine.Instance.oneLevelHeight > Mathf.Abs (agent.pivot.transform.position.y - point.y)) {
+			Vector3 flatPoint= point,flatPostion  =  agent.pivot.transform.position;
+			flatPostion.y =0;
+			flatPoint.y=0;
+			//Debug.Log(Mathf.Abs (agent.pivot.transform.position.y - point.y) +"   "+ (flatPoint-flatPostion).sqrMagnitude +"   "+size);
+			if((flatPoint-flatPostion).sqrMagnitude<size*size){
+				return true;
+
+			}
+		}
+		return false;
+	}
 	
 	
 	public float HorizontalAngle(float X1, float Y1, float X2, float Y2) {

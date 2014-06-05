@@ -137,9 +137,8 @@ public class Statistic : MonoBehaviour {
 	}
 
 	public void RefreshStatisticPlayers()
-	{
-		try
-		{
+	{ 
+
 			for (int i=0; i<TeamBlue.transform.childCount;i++)
 			{
 				BlueTeamlPlayer[i].panel.alpha = 0f;
@@ -156,7 +155,7 @@ public class Statistic : MonoBehaviour {
 
 			foreach(Player Gamer in players)
 			{
-				Debug.Log(Gamer.team);
+				
 				switch(Gamer.team)
 				{
 				case 1:
@@ -173,11 +172,9 @@ public class Statistic : MonoBehaviour {
 					break;
 				}
 			}
-		}
+
 		
-		catch
-		{
-		}
+		
 	}
 	public void Activate(){
 		MainPanel.alpha = 1.0f;

@@ -128,6 +128,14 @@ public class Pawn : DamagebleObject {
 
 	private float distToGround;
 
+	public float stepHeight;
+
+	public bool isCheckSteps=false;
+
+	public LayerMask floorLayer;
+
+	protected float size;
+
 	private CapsuleCollider capsule;
 
 	public bool canWallRun;
@@ -298,7 +306,10 @@ public class Pawn : DamagebleObject {
 		capsule = GetComponent<CapsuleCollider> ();
 		photonView = GetComponent<PhotonView>();
 		animator = transform.GetComponentInChildren<AnimationManager>();
+		PlayerManager.instance.addPawn (this);
 	}
+
+
 	// Use this for initialization
 	protected void Start () {
 		aSource = GetComponent<AudioSource> ();
@@ -332,7 +343,7 @@ public class Pawn : DamagebleObject {
 				mainAi.StartAI();
 			}
 		}
-		
+		size = Mathf.Sqrt (capsule.height * capsule.height + capsule.radius * capsule.radius);
 		naturalWeapon = GetComponent<WeaponOfExtremities>();
 		correctPlayerPos = transform.position;
 		myCollider = collider;
@@ -360,7 +371,7 @@ public class Pawn : DamagebleObject {
 	public float GetSize ()
 	{
 
-		return Mathf.Sqrt(capsule.height *capsule.height  +capsule.radius*capsule.radius);
+		return Mathf.Sqrt (capsule.height * capsule.height + capsule.radius * capsule.radius);
 	}
 
 	public virtual void AfterSpawnAction(){
@@ -498,10 +509,13 @@ public class Pawn : DamagebleObject {
 	// Update is called once per frame
 
 	protected void UpdateSeenList(){
-		Pawn[] allPawn =PlayerManager.instance.FindAllPawn();
+		List<Pawn> allPawn =PlayerManager.instance.FindAllPawn();
 		seenPawns.Clear();
 
-		for(int i=0;i<allPawn.Length;i++){
+		for(int i=0;i<allPawn.Count;i++){
+			if(allPawn[i]==null){
+				continue;
+			}
 			if(allPawn[i]==this){
 				continue;
 			}
@@ -1033,7 +1047,7 @@ public class Pawn : DamagebleObject {
 	public void RandomKick(){
 		int i = (int)(UnityEngine.Random.value * AttackType.Count);
 		naturalWeapon.StartKick(AttackType[i]); 
-		//		Debug.Log ("ATtack");
+
 		//animator.SetSome("Any",true);
 		//((DogAnimationManager) animator).AnyDo();
 		if (photonView.isMine) {
@@ -1397,7 +1411,34 @@ public class Pawn : DamagebleObject {
 
 
 	}
+	//
+	public void CheckSteps(){
+		if (isCheckSteps) {
 
+			Vector3 startFloor =myTransform.position+((CapsuleCollider)myCollider).center + ((CapsuleCollider)myCollider).radius*0.9f*Vector3.down;
+			bool isFloor=false,isWall=false;
+			Vector3 moveDirection  = myTransform.forward;
+			moveDirection.y=0;
+			///Debug.DrawLine(startFloor,startFloor+ moveDirection.normalized*size/2,Color.red,5.0f);
+			isFloor= Physics.Raycast(startFloor, moveDirection.normalized,size/2,floorLayer);			
+			
+			Vector3 startWall = startFloor +Vector3.up*stepHeight;
+			//Debug.DrawLine(startWall,startWall+ moveDirection.normalized*size/2,Color.red,5.0f);
+			isWall= Physics.Raycast(startWall, moveDirection.normalized,size/2,floorLayer);							
+
+			if(isFloor&&!isWall){
+				rigidbody.AddForce(CalculateJumpVerticalSpeed(jumpHeight)*(Vector3.up+myTransform.forward/2f).normalized, ForceMode.VelocityChange);
+				Jump();
+			}
+		}
+
+	}
+	public float CalculateJumpVerticalSpeed ( float targetJumpHeight  )
+	{
+		// From the jump height and gravity we deduce the upwards speed 
+		// for the character to reach at the apex.
+		return Mathf.Sqrt(2 * targetJumpHeight * Pawn.gravity);
+	}
 
 	public void FixedUpdate () {
 
@@ -1424,7 +1465,7 @@ public class Pawn : DamagebleObject {
 				if (isGrounded) {
 					if (_rb.isKinematic) _rb.isKinematic= false;
 					
-					//Debug.Log (velocityChange);
+					//Debug.Log (this+ " " +velocityChange);
 					rigidbody.AddForce(velocityChange, ForceMode.VelocityChange);
 					characterState = nextState;
 					if(nextState==CharacterState.Sprinting){
@@ -1437,6 +1478,7 @@ public class Pawn : DamagebleObject {
 				}else{
 					characterState=CharacterState.Jumping;
 				}
+				CheckSteps();
 			break;
 		case CharacterState.Sprinting:
 
@@ -1466,7 +1508,7 @@ public class Pawn : DamagebleObject {
 				}
 				ToggleAim(false);
 				
-				
+				CheckSteps();
 			
 			break;
 		case CharacterState.Jumping:
