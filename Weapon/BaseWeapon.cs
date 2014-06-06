@@ -255,7 +255,7 @@ public class BaseWeapon : DestroyableNetworkObject {
 	public virtual void AimFix(){
 
 	}
-	void Fire(){
+	protected void Fire(){
 		if (!CanShoot ()) {
 			return;		
 		}

@@ -97,7 +97,6 @@ public class Player : MonoBehaviour {
 		if (photonView.isMine) {
 						myCamera = Camera.main;
 						((PlayerMainGui)myCamera.GetComponent (typeof(PlayerMainGui))).SetLocalPlayer(this);
-						//TODO: UNCOMMENT
 						robotTimer = robotTime;
 		
 						//this.name = "Player";		

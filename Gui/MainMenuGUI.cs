@@ -88,8 +88,8 @@ public class MainMenuGUI : MonoBehaviour {
 						case AnyRoom.TypeRoom.JoinRoom:
 								foreach (RoomInfo room in Server.allRooms) {
 										if (room.name == ActivBut.name && room.playerCount < Server.newRoomMaxPlayers) {
-												PhotonNetwork.JoinRoom (room.name);
-												Server.connectingToRoom = true;
+												//PhotonNetwork.JoinRoom (room.name);
+												Server.JoinRoom(room.name);
 												HideAllPanel();
 												_RoomsNgui.Loading.alpha = 1f;
 
@@ -100,7 +100,9 @@ public class MainMenuGUI : MonoBehaviour {
 
 		} else {
 			if(Server.allRooms.Length>0){
-				PhotonNetwork.JoinRandomRoom();
+				Server.JoinRoom();
+				HideAllPanel();
+				_RoomsNgui.Loading.alpha = 1f;
 			}else{
 			
 				if (_RoomsNgui.CreateRoom.alpha >0f) {
@@ -179,9 +181,11 @@ public class MainMenuGUI : MonoBehaviour {
 
 		PlayerMainGui.LevelStats lvl = LevelingManager.instance.GetPlayerStats ();
 		_playerInfo.playerName = _playerInfo.Player.PlayerName;
+		_playerInfo.KP = _playerInfo.Player.cash;
+		_playerInfo.GITP = _playerInfo.Player.gold;
 		_playerInfo.playerLvl = lvl.playerLvl;
-		_playerInfo.playerExp = _playerInfo.Player.GetComponent<LevelingManager>().playerExp;
-		_playerInfo.playerExpNeed = _playerInfo.Player.GetComponent<LevelingManager>().playerNeededExp[_playerInfo.playerLvl];
+		_playerInfo.playerExp =  LevelingManager.instance.playerExp;
+		_playerInfo.playerExpNeed =  LevelingManager.instanceplayerNeededExp[_playerInfo.playerLvl];
 		_playerInfo.playerProcent = lvl.playerProcent;
 	}
 
@@ -191,6 +195,8 @@ public class MainMenuGUI : MonoBehaviour {
 		_PlayerComponent.Lvl.text = "Lvl " + _playerInfo.playerLvl;
 		_PlayerComponent.Exp.text = _playerInfo.playerExp + " / " + _playerInfo.playerExpNeed;
 		_PlayerComponent.ExpBar.value = _playerInfo.playerProcent /100f;
+		_PlayerComponent.KP.text = _playerInfo.KP;
+		_PlayerComponent.GITP.text = _playerInfo.GITP;
 	}
 
 	public void ReSize() //Правка позиции компонентов

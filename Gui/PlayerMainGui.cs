@@ -135,7 +135,7 @@ public class PlayerMainGui : MonoBehaviour {
 		weaponMenu = GetComponent<WeaponPlayer>();
 
 
-		stat =  GetComponentInChildren<Statistic>(); //Статистика (+)
+	
 
 	}
 
@@ -145,6 +145,7 @@ public class PlayerMainGui : MonoBehaviour {
 		foreach (ChatHolder holder in chats) {
 			holder.SetPlayer(newPlayer);	
 		}
+		stat =  GetComponentInChildren<Statistic>(); //Статистика (+)
 		hud = GetComponentInChildren<PlayerHudNgui> ();
 		hud.SetLocalPlayer(LocalPlayer);
 		ChageState(GUIState.Respawn);

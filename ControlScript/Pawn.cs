@@ -1030,6 +1030,39 @@ public class Pawn : DamagebleObject {
 		}
 
 	}
+	//For weapon that have shoot animation like  bug tail
+	public void  StartShootAnimation(string animName){
+		aniamtor.StartShootAniamtion(animName);
+		if (photonView.isMine) {
+			photonView.RPC("RPCStartShootAnimation",PhotonTargets.Others, animName);
+		}
+	}
+	[RPC]
+	public void  RPCStartShootAnimation(string animName){
+		aniamtor.StartShootAniamtion(animName);
+		
+	}
+	
+	
+	public void  StopShootAnimation(string animName){
+		aniamtor.StopShootAniamtion(animName);
+		if (photonView.isMine) {
+			photonView.RPC("RPCStopShootAnimation",PhotonTargets.Others, animName);
+		}
+	}
+	[RPC]
+	public void  RPCStopShootAnimation(string animName){
+		aniamtor.StopShootAniamtion(animName);
+		
+	}
+	
+	//We must tell our gun it's time to spit some projectiles cause of animation 
+	public void WeaponShoot(){
+		AnimationRelatedWeapon myWeapon = CurWeapon as AnimationRelatedWeapon;
+		if (myWeapon != null) {
+			myWeapon.WeaponShoot();
+		}
+	}
 	
 	//Natural weapon
 	
@@ -1040,7 +1073,7 @@ public class Pawn : DamagebleObject {
 		//animator.SetSome("Any",true);
 		//((DogAnimationManager) animator).AnyDo();
 		if (photonView.isMine) {
-			photonView.RPC("RPCKick",PhotonTargets.OthersBuffered,i);
+			photonView.RPC("RPCKick",PhotonTargets.Others,i);
 		}
 	}
 	
@@ -1051,7 +1084,7 @@ public class Pawn : DamagebleObject {
 		//animator.SetSome("Any",true);
 		//((DogAnimationManager) animator).AnyDo();
 		if (photonView.isMine) {
-			photonView.RPC("RPCKick",PhotonTargets.OthersBuffered,i);
+			photonView.RPC("RPCKick",PhotonTargets.Others,i);
 		}
 	
 	}
@@ -1063,8 +1096,19 @@ public class Pawn : DamagebleObject {
 		//animator.SetSome("Any",true);
 		//((DogAnimationManager) animator).AnyDo();
 	}
-
 	
+	public void StopKick(){
+		naturalWeapon.StopKick();
+		if (photonView.isMine) {
+			photonView.RPC("RPCStopKick",PhotonTargets.Others,i);
+		}
+	}
+	
+	[RPC]
+	public void RPCStopKick(){
+		naturalWeapon.StopKick();
+		
+	}
 	
 	public float OptimalDistance(bool isMelee){
 		if(CurWeapon!=null&&!isMelee){

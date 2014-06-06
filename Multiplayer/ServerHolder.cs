@@ -224,7 +224,17 @@ public class ServerHolder : MonoBehaviour
 
 		}
 		
-
+	public void JoinRoom(string room = ""){
+			if(room==""){
+				PhotonNetwork.JoinRandomRoom();
+			}else{
+									
+				PhotonNetwork.JoinRoom (room);
+			}
+			Server.connectingToRoom = true;
+	}
+		
+		
 	public void CreateNewRoom() //Создание комноты (+)
 	{
 		ExitGames.Client.Photon.Hashtable customProps = new ExitGames.Client.Photon.Hashtable();
@@ -358,12 +368,18 @@ public class ServerHolder : MonoBehaviour
 		PhotonNetwork.isMessageQueueRunning = true;
 
 		FinishLoad ();
-
-
+		yield return new WaitForEndOfFrame();
+		GameObject menu =Instantiate (loader.playerHud, Vector3.zero, Quaternion.identity) as GameObject;
+		Camera.main.GetComponent<PlayerMainGui> ().enabled = true;
+		menu.tarnsform.parent = Camera.main.transfrom;
+		PhotonNetwork.Instantiate ("Player",Vector3.zero,Quaternion.identity,0);
+	
 	}
 	public void FinishLoad(){
-		Camera.main.GetComponent<PlayerMainGui> ().enabled = true;
-		PhotonNetwork.Instantiate ("Player",Vector3.zero,Quaternion.identity,0);
+		if(!shouldLoad){
+			Camera.main.GetComponent<PlayerMainGui> ().enabled = true;
+			PhotonNetwork.Instantiate ("Player",Vector3.zero,Quaternion.identity,0);
+		}
 		connectingToRoom = false;
 		if (PhotonNetwork.isMasterClient) 
 		{
@@ -373,6 +389,8 @@ public class ServerHolder : MonoBehaviour
 		if (mainMenu != null) {
 				Destroy (mainMenu.gameObject);
 		}
+		
+	
 	}
 
 	public static Vector3 ReadVectorFromShort(PhotonStream stream){

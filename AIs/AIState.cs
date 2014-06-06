@@ -234,7 +234,7 @@ public class AIState : MonoBehaviour {
 		if(controlledPawn.CurWeapon!=null&&!isMelee){
 			controlledPawn.StopFire();
 		}
-		controlledPawn.naturalWeapon.StopKick();
+		controlledPawn.StopKick();
 	}
 	
 }

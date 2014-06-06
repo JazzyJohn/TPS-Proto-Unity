@@ -260,12 +260,22 @@ public class AnimationManager : MonoBehaviour
 	}
 	public void StopTaunt(){
 		SetNotMainLayer (1.0f);
-		transform.parent.SendMessage ("StopTaunt");
+		transform.parent.SendMessage ("StopTaunt", SendMessageOptions.DontRequireReceiver);
 		
 	}
 	//I'm not sure in necessity of this function maybe we should change logic of some script to get rid of it . JazzyJohn.
 	public void SetSome(string some, bool value){
 		animator.SetBool(some, value);
 	}
-	
+	//This for natural shooting weapons like bug tail, we know about shot only from animation
+	public void WeaponShoot(){
+		transform.parent.SendMessage ("WeaponShoot", SendMessageOptions.DontRequireReceiver);
+	}
+	public void StartShootAniamtion(string animName){
+		animator.SetTrigger (animName);
+	}
+	public void StopShootAniamtion(string animName){
+		animator.SetTrigger (animName+"_end");
+	}
+
 }

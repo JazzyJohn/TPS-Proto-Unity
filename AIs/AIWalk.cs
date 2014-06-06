@@ -23,10 +23,13 @@ public class AIWalk : AIState
 		   if((_enemy.myTransform.position-controlledPawn.myTransform.position).sqrMagnitude<weaponDistance*weaponDistance){
 				Attack();	
 				//isMoving = false;
+				if(!isMelee){
+					isMoving = false;
+				}
 				agent.SetTarget(_enemy.myTransform.position,true);
 		   }else{
 				StopAttack();
-				//isMoving =true;
+				isMoving =true;
 				agent.SetTarget(_enemy.myTransform.position);
 		   }
 		
