@@ -528,14 +528,9 @@ public class PlayerMainGui : MonoBehaviour {
 	}
 	
 	void PlayerList(){
-		
-		
+			
 	
-		stat.LocalPlayerStat(LocalPlayer.GetName(), Choice._Player); // Внесения базовой инфы в статистику (+)
-
-		stat.AvatarPlayer(); //Установка аватара (+)
 		
-		stat.RefreshStatisticPlayers(); //Обновление списока статистики игроков (+)
 	}
 	
 	public void AddMessage(string text,Vector3 worldPoint, MessageType type ){

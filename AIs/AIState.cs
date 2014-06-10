@@ -136,9 +136,9 @@ public class AIState : MonoBehaviour {
 		foreach (AITransition trans in Transition) {
 			trans.Start(this);
 		}
-		if (controlledPawn.enemy != _enemy) {
-			_enemy = controlledPawn.enemy;
-		}
+		
+		_enemy = controlledPawn.enemy;
+		
 	}
 	public virtual void EndState(){
 	
@@ -235,6 +235,10 @@ public class AIState : MonoBehaviour {
 			controlledPawn.StopFire();
 		}
 		controlledPawn.StopKick();
+	}
+	protected virtual bool IsInWeaponRange(){
+	   float weaponDistance = WeaponDistance(); controlledPawn.OptimalDistance(isMelee);
+		return (_enemy.myTransform.position-controlledPawn.myTransform.position).sqrMagnitude-_enemy.GetSize() -controlledPawn.GetSize()<weaponDistance*weaponDistance
 	}
 	
 }

@@ -67,7 +67,13 @@ public class Statistic : MonoBehaviour {
 
 	void FixedUpdate()
 	{
+		if(active){
+			LocalPlayerStat(LocalPlayer.GetName(), Choice._Player); // Внесения базовой инфы в статистику (+)
 
+			AvatarPlayer(); //Установка аватара (+)
+		
+			RefreshStatisticPlayers(); //Обновление списока статистики игроков (+)
+		}
 	}
 
 	public void ClassExpPlayer(PlayerMainGui.LevelStats stats)
@@ -148,7 +154,7 @@ public class Statistic : MonoBehaviour {
 				RedTeamlPlayer[i].panel.alpha = 0f;
 			}
 			
-			Player[] players = PlayerManager.instance.FindAllPlayer ();
+			List<Player> players = PlayerManager.instance.FindAllPlayer ();
 
 			int countRed=0;
 			int countBlue=0;

@@ -19,17 +19,18 @@ public class RobotPawn : Pawn {
 	}
 	
 	public IEnumerator WaitBeforeActive(float waitTime) {
-
-        yield return new WaitForSeconds(waitTime);
-		GetComponent<ThirdPersonController>().enabled = true;
-		ivnMan.GenerateWeaponStart();
-		_rb.isKinematic = false;
-		isActive = true;
-		_rb.detectCollisions = true;
-		for (int i =0; i<myTransform.childCount; i++) {
-			myTransform.GetChild(i).gameObject.SetActive(true);
+		if(inPilotIn){
+			yield return new WaitForSeconds(waitTime);
+			GetComponent<ThirdPersonController>().enabled = true;
+			ivnMan.GenerateWeaponStart();
+			_rb.isKinematic = false;
+			isActive = true;
+			_rb.detectCollisions = true;
+			for (int i =0; i<myTransform.childCount; i++) {
+				myTransform.GetChild(i).gameObject.SetActive(true);
+			}
+			photonView.RPC("RPCActivate",PhotonTargets.OthersBuffered);
 		}
-		photonView.RPC("RPCActivate",PhotonTargets.OthersBuffered);
 		//base.Activate();
 	}
 	//Player have left robot

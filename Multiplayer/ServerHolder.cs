@@ -276,12 +276,14 @@ public class ServerHolder : MonoBehaviour
 	void OnPhotonCreateRoomFailed()
 	{
 		connectingToRoom = false;
+		FindObjectOfType<MainMenuGUI> ().ShowRoomList ();
 		print ("Не удалось создать комнату.");
 	}
 	
 	void OnPhotonJoinRandomJoinFailed()
 	{
 		connectingToRoom = false;
+		FindObjectOfType<MainMenuGUI> ().ShowRoomList ();
 		print ("Не удалось подключиться к случайной комнате.");
 	}
 	

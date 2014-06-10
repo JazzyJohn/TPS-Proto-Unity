@@ -274,7 +274,8 @@ public class BaseWeapon : DestroyableNetworkObject {
 		if (rifleParticleController != null) {
 			rifleParticleController.CreateShootFlame ();
 		}
-			
+		
+		owner.shootEffect();
 
 				
 		switch (amunitionType) {
@@ -376,6 +377,7 @@ public class BaseWeapon : DestroyableNetworkObject {
 	protected virtual void ReplicationGenerate (){
 		if(shootsToSpawn.Count>0){
 				sControl.playClip (fireSound);
+				owner.shootEffect();
 		}
 		while(shootsToSpawn.Count>0){
 			ShootData spawnShoot = shootsToSpawn.Dequeue();

@@ -110,7 +110,7 @@ public class AIBase : MonoBehaviour
 					_currentState= trans.target;
 					_currentState.enabled = true;
 					defaultAIState= _currentState;
-					InitState();
+					_currentState.StartState();
 					break;
 				}
 

@@ -74,6 +74,9 @@ public class Pawn : DamagebleObject {
 	protected Vector3 aimRotation;
 
 	public Vector3 aiAimRotation;
+	
+	public static float aimRange = 1000.0f;
+		
 	//rotation for moment when rotation of camera and pawn can be different e.t.c wall run	
 	protected Vector3 forwardRotation;
 
@@ -295,8 +298,9 @@ public class Pawn : DamagebleObject {
 	
 	
 	public string tauntAnimation = "";
-
-	public static float aimRange = 1000.0f;
+	
+	public float maxStandRotate  = 60.0f;
+	
 	
 	protected void Awake(){
 		myTransform = transform;
@@ -342,7 +346,7 @@ public class Pawn : DamagebleObject {
 				mainAi.StartAI();
 			}
 		}
-		size = Mathf.Sqrt (capsule.height * capsule.height + capsule.radius * capsule.radius);
+		GetSize ();
 		naturalWeapon = GetComponent<WeaponOfExtremities>();
 		correctPlayerPos = transform.position;
 		myCollider = collider;
@@ -369,8 +373,10 @@ public class Pawn : DamagebleObject {
 
 	public float GetSize ()
 	{
-
-		return Mathf.Sqrt (capsule.height * capsule.height + capsule.radius * capsule.radius);
+		if(size==0){
+			size =Mathf.Sqrt (capsule.height * capsule.height + capsule.radius * capsule.radius);
+		}
+		return size;
 	}
 
 	public virtual void AfterSpawnAction(){
@@ -700,6 +706,8 @@ public class Pawn : DamagebleObject {
 
 	
 		if (!isActive) {
+			//replicate position to get rid off teleportation after bot is dead			
+			ReplicatePosition();		
 			return;		
 		}
 		if (isSpawn) {//если респавн
@@ -736,8 +744,10 @@ public class Pawn : DamagebleObject {
 						}
 					}else{
 						if ( characterState == CharacterState.Idle){
-							if((Math.Abs (eurler.y -myTransform.rotation.eulerAngles.y)> 90f)){
-							myTransform.rotation=Quaternion.Slerp(myTransform.rotation, Quaternion.Euler(eurler),Time.deltaTime);
+
+							if((Math.Abs (eurler.y -myTransform.rotation.eulerAngles.y)> maxStandRotate)){
+								myTransform.rotation= Quaternion.Lerp(myTransform.rotation,Quaternion.Euler(eurler),Time.deltaTime);			
+
 							}
 						}else{
 							myTransform.rotation= Quaternion.Euler(eurler);
@@ -755,7 +765,6 @@ public class Pawn : DamagebleObject {
 					}
 */
 
-			
 
 			}
 			//TODO: TEMP SOLUTION BEFORE NORMAL BONE ORIENTATION
@@ -1031,6 +1040,9 @@ public class Pawn : DamagebleObject {
 		if (myWeapon != null) {
 			myWeapon.WeaponShoot();
 		}
+	}
+	public void shootEffect(){
+		animator.ShootAnim();
 	}
 	
 	//Natural weapon

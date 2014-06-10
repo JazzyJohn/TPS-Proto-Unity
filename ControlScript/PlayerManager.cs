@@ -7,7 +7,9 @@ public class PlayerManager : MonoBehaviour {
 
 	public String[] pawnName;
 
-	public List<Pawn> chachedPawns;
+	public List<Pawn> cachedPawns;
+	
+	public List<Player> cachedPlayers;
 
 	public RobotPawn[] avaibleBots;
 
@@ -93,18 +95,24 @@ public class PlayerManager : MonoBehaviour {
 	}
 
 	public void addPawn(Pawn target){
-		chachedPawns.Add (target);
+		cachedPawns.Add (target);
 	}
 	public void FixedUpdate(){
-		chachedPawns.RemoveAll (delegate(Pawn v) {
+		cachedPawns.RemoveAll (delegate(Pawn v) {
+			return v==null;
+		});
+		cachedPlayers.RemoveAll (delegate(Player v) {
 			return v==null;
 		});
 	}
 	public List<Pawn> FindAllPawn(){
-		return chachedPawns;
+		return cachedPawns;
 	}
-	public Player[] FindAllPlayer(){
-		return GameObject.FindObjectsOfType<Player>();
+	public void addPlayer(Player target){
+		cachedPlayers.Add (target);
+	}
+	public List<Player> FindAllPlayer(){
+		return cachedPlayers;
 
 	}
  

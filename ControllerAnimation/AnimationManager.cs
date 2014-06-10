@@ -137,6 +137,8 @@ public class AnimationManager : MonoBehaviour
 	public bool GetJump(){
 		return animator.GetBool("Jump");
 	} 
+	
+	
     /// <summary>
     /// Reset all animation to default
     /// </summary>
@@ -253,6 +255,10 @@ public class AnimationManager : MonoBehaviour
 	public void ReloadStart(){
 	
 		animator.SetTrigger ("Reload");
+	}
+	
+	public void ShootAnim(){
+		animator.SetTrigger ("Shoot");
 	}
 	public void PlayTaunt(string tauntName){
 		SetNotMainLayer (0.0f);

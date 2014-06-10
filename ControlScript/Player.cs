@@ -93,7 +93,7 @@ public class Player : MonoBehaviour {
 	
 	void Start(){
 		photonView = GetComponent<PhotonView> ();
-
+		PlayerManager.instance.addPlayer(this);
 		if (photonView.isMine) {
 						myCamera = Camera.main;
 						((PlayerMainGui)myCamera.GetComponent (typeof(PlayerMainGui))).SetLocalPlayer(this);
@@ -268,21 +268,27 @@ public class Player : MonoBehaviour {
 				}
 			}
 			if(Input.GetButtonDown("Weapon1")){
-				currentPawn.ChangeWeapon (0);
-				if(robotPawn!=null){
+			
+				if(inBot&&robotPawn!=null){
 					robotPawn.ChangeWeapon (0);
+				}else{
+					currentPawn.ChangeWeapon (0);
 				}
 			}
 			if(Input.GetButtonDown("Weapon2")){
-				currentPawn.ChangeWeapon (1);
-				if(robotPawn!=null){
+				
+				if(inBot&&robotPawn!=null){
 					robotPawn.ChangeWeapon (1);
+				}else{
+					currentPawn.ChangeWeapon (1);
 				}
 			}
 			if(Input.GetButtonDown("Weapon3")){
-				currentPawn.ChangeWeapon (2);
-				if(robotPawn!=null){
+				
+				if(inBot&&robotPawn!=null){
 					robotPawn.ChangeWeapon (2);
+				}else{
+					currentPawn.ChangeWeapon (2);
 				}
 			}
 			if(Input.GetButtonDown("Suicide")){
