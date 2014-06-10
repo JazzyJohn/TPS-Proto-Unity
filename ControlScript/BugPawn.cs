@@ -10,7 +10,7 @@ public class BugPawn : Pawn {
 	public override void ToggleAim(bool value){
 		isAiming = value;
 		if (isAiming) {
-			animator.aimPos.EvalWeight(1);
+			animator.aimPos.EvalToWeight(1);
 		}else{
 			animator.aimPos.SetWeight(0);
 		}

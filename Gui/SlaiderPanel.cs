@@ -76,6 +76,7 @@ public class SlaiderPanel : MonoBehaviour {
 		if(curItem>=newsCount){
 			curItem = 0;
 		}
+		slideTimer=0;
 		SetButtons ();
 	}
 	public void SetButtons(){
@@ -83,15 +84,16 @@ public class SlaiderPanel : MonoBehaviour {
 		newsbtns [curItem].value = true;
 	}
 	public void ReSize(){
-		for(int i=0; i<allNewsPivot.childCount;i++){
-			allNewsPivot.GetChild(i).GetComponent<UIWidget>().SetDimensions((int)allNewsPanel.baseClipRegion.w, (int)allNewsPanel.baseClipRegion.z);
-
-
+		offset = oneNewPrefab.GetComponent<UIWidget> ().width;
+		//first is shablon
+		for (int i=1; i<=newsCount; i++) {
+						
+			allNewsPivot.transform.GetChild(i).localPosition = new Vector3 (offset *( i-1), 0, 0);
 		}
 	}
 	void GenerateNewsBoxes(){
 
-		offset = allNewsPanel.baseClipRegion.w;
+		offset = oneNewPrefab.GetComponent<UIWidget> ().width;
 		float btnoffset = onewNewButton.GetComponent<UISprite> ().width;
 		List<NewUpdate> news = NewsManager.instance. getNewsList();
 		newsCount = news.Count;
@@ -103,7 +105,7 @@ public class SlaiderPanel : MonoBehaviour {
 			objectnews.transform.localScale = new Vector3(1f,1f,1f);
 
 			objectnews.transform.localPosition   = new Vector3(offset*i, 0, 0);
-			objectnews.GetComponent<UIWidget>().SetDimensions((int)allNewsPanel.baseClipRegion.w, (int)allNewsPanel.baseClipRegion.z);
+			//objectnews.GetComponent<UIWidget>().SetDimensions((int)allNewsPanel.baseClipRegion.w, (int)allNewsPanel.baseClipRegion.z);
 			objectnews.GetComponent<UIWidget>().alpha = 1.0f;
 
 			//SERVER DATA SET
@@ -128,7 +130,7 @@ public class SlaiderPanel : MonoBehaviour {
 			newsbtns.Add(objectbtn.GetComponent<UIToggle>());
 		}
 		
-		
+		SetButtons ();
 	
 	}
 	

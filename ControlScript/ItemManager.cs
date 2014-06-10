@@ -108,9 +108,9 @@ public class ItemManager : MonoBehaviour {
 	}
 	//parse XML string to normal Achivment Pattern
 	protected IEnumerator ParseList(string XML){
-		Debug.Log (XML);
+		//Debug.Log (XML);
 	  	XmlDocument xmlDoc = new XmlDocument();
-		//xmlDoc.LoadXml(XML);
+		xmlDoc.LoadXml(XML);
 
 		int i = 0;
 	
@@ -127,7 +127,7 @@ public class ItemManager : MonoBehaviour {
 			yield return www;
 			entry.textureGUI = new Texture2D(www.texture.width, www.texture.height);
 			www.LoadImageIntoTexture(entry.textureGUI);
-			//Debug.Log (entry.name + " " +entry.textureGUI + " " +entry.weaponId );
+		//	Debug.Log (entry.name + " " +entry.textureGUI + " " +entry.weaponId );
 			weaponIndexTable[entry.weaponId]=entry;	
 			weaponPrefabsListbyId[entry.weaponId].HUDIcon = entry.textureGUI;
 			if(bool.Parse(node.SelectSingleNode ("default").InnerText)){
@@ -241,9 +241,10 @@ public class ItemManager : MonoBehaviour {
 	}
 	
 	public List<GUIItem> GetItemForSlot(GameClassEnum gameClass, int gameSlot){
-			if(lastGameClass==gameClass&&lastGameSlot==gameSlot){	
+		if(lastGameClass==gameClass&&lastGameSlot==gameSlot&&weaponList.Count!=0){	
 				return weaponList;
 			}
+		//Debug.Log (gameClass +"  "+ gameSlot);
 			switch(gameSlot){
 				//Taunt section look WeaponPlayer.cs for details
 				case 5:

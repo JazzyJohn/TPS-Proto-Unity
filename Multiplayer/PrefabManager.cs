@@ -52,6 +52,7 @@ public class PrefabManager : MonoBehaviour {
 	}
 	void Update(){
 		if(inProgress){
+
 			ServerHolder.progress.curLoader= www.progress*100f;
 		}
 	}
@@ -74,66 +75,69 @@ public class PrefabManager : MonoBehaviour {
 		{
 			yield return www;
 			
-			if (www.error != null)
-				throw new Exception("WWW download had an error:" + www.error);
+			if (www.error == null){
+
 			
-			AssetBundle bundle = www.assetBundle;
-			//Debug.Log(bundle.mainAsset);
-			//bundle
-			//Debug.Log(bundle.mainAsset);
-			//prefabObjects = bundle.LoadAll();
+				AssetBundle bundle = www.assetBundle;
+				//Debug.Log(bundle.mainAsset);
+				//bundle
+				//Debug.Log(bundle.mainAsset);
+				//prefabObjects = bundle.LoadAll();
 
 
-				prefabObjects = bundle.LoadAll(Type.GetType(typeOfObject));
+					prefabObjects = bundle.LoadAll(Type.GetType(typeOfObject));
 
-		
-				//if(!sp) Debug.Log ("No sp");
+			
+					//if(!sp) Debug.Log ("No sp");
 
-				//Debug.Log (prefabObjects.Length);
+					//Debug.Log (prefabObjects.Length);
 
-				for(int i=0;i<prefabObjects.Length;i++)
-				{
+					for(int i=0;i<prefabObjects.Length;i++)
+					{
 
 
-					if(!prefabObjects[i]){
-						Debug.Log("No prefabObj");continue;}
-				
-				
-						//Debug.Log (prefabObjects[i]);
-						//AssetDatabase.AddObjectToAsset(prefabObjects[i], "Assets/Resources/"+prefabObjects[i].name+".prefab");
-						//Debug.Log(AssetDatabase.GetAssetPath(prefabObjects[i]));
+						if(!prefabObjects[i]){
+							Debug.Log("No prefabObj");continue;}
 					
-
+					
+							//Debug.Log (prefabObjects[i]);
+							//AssetDatabase.AddObjectToAsset(prefabObjects[i], "Assets/Resources/"+prefabObjects[i].name+".prefab");
+							//Debug.Log(AssetDatabase.GetAssetPath(prefabObjects[i]));
 						
-						GameObject prefab =((MonoBehaviour)prefabObjects[i]).gameObject;
-						if(!	PhotonResourceWrapper.allobject.ContainsKey(prefab.name)){
-							PhotonResourceWrapper.allobject[prefab.name] =prefab;	
-						}
-						switch(typeOfObject){
-						case "BaseWeapon":
-						//Debug.Log(prefab);
-							ItemManager.instance.SetNewWeapon(prefab.GetComponent<BaseWeapon>());
+
+							
+							GameObject prefab =((MonoBehaviour)prefabObjects[i]).gameObject;
+							if(!	PhotonResourceWrapper.allobject.ContainsKey(prefab.name)){
+								PhotonResourceWrapper.allobject[prefab.name] =prefab;	
+							}
+							switch(typeOfObject){
+							case "BaseWeapon":
+							//Debug.Log(prefab);
+								ItemManager.instance.SetNewWeapon(prefab.GetComponent<BaseWeapon>());
+								break;
+
+							}
+							//DestroyImmediate(obj);
+
+							//GameObject photonObj = PhotonNetwork.Instantiate(obj.name,sp.transform.position,sp.transform.rotation,0,null) as GameObject;
+
+					}
+			
+	//			Debug.Log (sp.transform.position);
+				if (onStart) {
+					switch(typeOfObject){
+					case "BaseWeapon":
+						ItemManager.instance.ReoadItems();
 							break;
-
-						}
-						//DestroyImmediate(obj);
-
-						//GameObject photonObj = PhotonNetwork.Instantiate(obj.name,sp.transform.position,sp.transform.rotation,0,null) as GameObject;
-
+					}
 				}
-		
-//			Debug.Log (sp.transform.position);
-			if (onStart) {
-				switch(typeOfObject){
-				case "BaseWeapon":
-					ItemManager.instance.ReoadItems();
-						break;
-				}
+			
+				www.Dispose();
+				//sbundle.Unload(false);
 			}
 			inProgress =false;
 			Debug.Log("PrefabManager " + BundleURL+" has been instantiated.");
 			instantiated = true;
-			//sbundle.Unload(false);
 		}
 	}
 

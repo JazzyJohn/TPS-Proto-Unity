@@ -16,34 +16,43 @@ public class AIPatrol : AIState
 	public override void Tick()
 	{
 		DirectVisibility (out _distanceToTarget);
-
-		if (Vector3.Distance (patrolPoints [step].position, controlledPawn.myTransform.position)<agent.size*2) {
-			step++;
-			if(step>=patrolPoints.Length){
-
-				step=0;
-			}
-			agent.SetTarget (patrolPoints[step].position);
-
+	//	Debug.Log (Vector3.Distance (patrolPoints [step].position, controlledPawn.myTransform.position)+"  "+agent.size);
+		if (AIAgentComponent.IsRiched(patrolPoints [step].position, controlledPawn.myTransform.position,agent.size)) {
+			NextPoint();
 		}
 			
 		
 	}
+	protected void NextPoint(){
+		step++;
+		if(step>=patrolPoints.Length){
+			
+			step=0;
+		}
+		agent.SetTarget (patrolPoints[step].position);
+
+
+	}
+
 	public override void StartState(){
 		agent = GetComponent<AIAgentComponent>();
 		//Debug.Log (agent);
 		agent.SetTarget (patrolPoints[0].position);
 		agent.SetSpeed(controlledPawn.groundWalkSpeed);
-		agent.size = controlledPawn.GetSize ()/2;
+		agent.ParsePawn (controlledPawn);
 		base.StartState ();
 		
 	}
 	public void FixedUpdate(){
-
+			bool needJump = agent.needJump;
 			agent.WalkUpdate ();
-			//Debug.Log(agent.GetTranslate());
-			controlledPawn.Movement (agent.GetTranslate(),CharacterState.Walking);
-			
+			needJump = !needJump&&agent.needJump;
+			if (!needJump) {
+					controlledPawn.Movement (agent.GetTranslate (), CharacterState.Walking);
+			} else {
+			Debug.Log ("jump");
+				controlledPawn.Movement (agent.GetTranslate () +controlledPawn.JumpVector(), CharacterState.Jumping);
+			}
 			controlledPawn.SetAiRotation( agent.GetTarget());
 		
 	}

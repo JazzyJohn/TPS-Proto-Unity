@@ -16,7 +16,7 @@ public class MapDownloader : MonoBehaviour {
 	private bool inProgress;
 	private WWW www;
 	 
-	public GameObejct playerHud;
+	public GameObject playerHud;
 
 	public bool isReady()
 	{

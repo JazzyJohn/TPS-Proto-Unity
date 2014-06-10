@@ -301,11 +301,13 @@ public class Player : MonoBehaviour {
 	
 	public void RobotDead(Player Killer){
 		robotTimer=robotTime;
-		inBot= false;
-		currentPawn.Activate ();
-		currentPawn.rigidbody.MovePosition(robotPawn.playerExitPositon.position);
-		currentPawn.myTransform.rotation = robotPawn.playerExitPositon.rotation;
-		currentPawn.transform.parent = null;
+		if (inBot) {
+				inBot = false;
+				currentPawn.Activate ();
+				currentPawn.rigidbody.MovePosition (robotPawn.playerExitPositon.position);
+				currentPawn.myTransform.rotation = robotPawn.playerExitPositon.rotation;
+				currentPawn.transform.parent = null;
+		}
 	
 	}
 	public void PawnDead(Player Killer){

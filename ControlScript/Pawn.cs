@@ -195,7 +195,6 @@ public class Pawn : DamagebleObject {
 	private bool _isGrounded;
 
 	private bool netIsGround;
-	private float TimerNotGround = 0;
 
 	public float distanceToGround; // Проверка дистанции до земли (+)
 
@@ -388,7 +387,7 @@ public class Pawn : DamagebleObject {
 			ivnMan.SetSlot(ItemManager.instance.weaponPrefabsListbyId[idPersonal]);
 		}
 		if (idMain != -1) {
-		//	Debug.Log (ItemManager.instance.weaponPrefabsListbyId[idMain]);
+			Debug.Log (ItemManager.instance.weaponPrefabsListbyId[idMain]);
 			ivnMan.SetSlot(ItemManager.instance.weaponPrefabsListbyId[idMain]);
 		}
 		if (idExtra != -1) {
@@ -484,7 +483,7 @@ public class Pawn : DamagebleObject {
 		}
 
 		if (player != null) {
-			if(player.inBot){
+			if(player.GetRobot()==this){
 				player.RobotDead(killerPlayer);
 			}else{
 				player.PawnDead(killerPlayer);
@@ -614,7 +613,7 @@ public class Pawn : DamagebleObject {
 				case CharacterState.Running:
 					if(characterState == CharacterState.Jumping||characterState == CharacterState.DoubleJump){
 						animator.ApllyJump(false);
-						TimerNotGround = 0f;
+
 					}
 					sControl.playFullClip (stepSound);
 					animator.ApllyMotion (2.0f, speed, strafe);
@@ -651,9 +650,7 @@ public class Pawn : DamagebleObject {
 					break;
 				case CharacterState.Jumping:
 					animator.ApllyJump(true);
-					if(characterState!=CharacterState.Jumping){
-						TimerNotGround = 0f;
-					}
+
 					if(characterState==CharacterState.WallRunning){					
 						animator.WallAnimation(false,false,false);
 						animator.FreeFall();
@@ -701,8 +698,7 @@ public class Pawn : DamagebleObject {
 	protected void Update () {
 		//Debug.Log (photonView.isSceneView);
 
-		TimerNotGround += Time.deltaTime;
-		animator.animator.SetFloat("TimerFree", TimerNotGround);
+	
 		if (!isActive) {
 			return;		
 		}
@@ -725,13 +721,13 @@ public class Pawn : DamagebleObject {
 			}
 
 			if(canMove){
-				if(CurWeapon!=null){
+
 					//if(aimRotation.sqrMagnitude==0){
 					getAimRotation();
 					/*}else{
 						aimRotation = Vector3.Lerp(aimRotation,getAimRotation(CurWeapon.weaponRange), Time.deltaTime*10);
 					}*/
-					Vector3 eurler = Quaternion.LookRotation(aimRotation-myTransform.position).eulerAngles;
+					Vector3 eurler = Quaternion.LookRotation((aimRotation-myTransform.position).normalized).eulerAngles;
 					eurler.z =0;
 					eurler.x =0;
 					if(characterState == CharacterState.WallRunning||characterState ==CharacterState.PullingUp){
@@ -741,7 +737,7 @@ public class Pawn : DamagebleObject {
 					}else{
 						if ( characterState == CharacterState.Idle){
 							if((Math.Abs (eurler.y -myTransform.rotation.eulerAngles.y)> 90f)){
-								myTransform.rotation= Quaternion.Lerp(myTransform.rotation,Quaternion.Euler(eurler),Time.deltaTime);			
+							myTransform.rotation=Quaternion.Slerp(myTransform.rotation, Quaternion.Euler(eurler),Time.deltaTime);
 							}
 						}else{
 							myTransform.rotation= Quaternion.Euler(eurler);
@@ -759,35 +755,8 @@ public class Pawn : DamagebleObject {
 					}
 */
 
-				}else{
+			
 
-					//if(aimRotation.sqrMagnitude==0){
-						getAimRotation();
-					/*}else{
-						aimRotation = Vector3.Lerp(aimRotation,getAimRotation(50), Time.deltaTime*10);
-					}*/
-					Vector3 eurler = Quaternion.LookRotation(aimRotation-myTransform.position).eulerAngles;
-					eurler.z =0;
-					eurler.x =0;
-					if(characterState == CharacterState.WallRunning||characterState ==CharacterState.PullingUp){
-						if(forwardRotation.sqrMagnitude>0){
-							myTransform.rotation= Quaternion.LookRotation(forwardRotation);
-						}
-					}else{
-						if ( characterState == CharacterState.Idle){
-							if((Math.Abs (eurler.y -myTransform.rotation.eulerAngles.y)> 90f)){
-								myTransform.rotation= Quaternion.Lerp(myTransform.rotation,Quaternion.Euler(eurler),Time.deltaTime);			
-							}
-						}else{
-							myTransform.rotation= Quaternion.Euler(eurler);
-						}
-
-					}
-					
-
-
-					
-				}
 			}
 			//TODO: TEMP SOLUTION BEFORE NORMAL BONE ORIENTATION
 			
@@ -1032,27 +1001,27 @@ public class Pawn : DamagebleObject {
 	}
 	//For weapon that have shoot animation like  bug tail
 	public void  StartShootAnimation(string animName){
-		aniamtor.StartShootAniamtion(animName);
+		animator.StartShootAniamtion(animName);
 		if (photonView.isMine) {
 			photonView.RPC("RPCStartShootAnimation",PhotonTargets.Others, animName);
 		}
 	}
 	[RPC]
 	public void  RPCStartShootAnimation(string animName){
-		aniamtor.StartShootAniamtion(animName);
+		animator.StartShootAniamtion(animName);
 		
 	}
 	
 	
 	public void  StopShootAnimation(string animName){
-		aniamtor.StopShootAniamtion(animName);
+		animator.StopShootAniamtion(animName);
 		if (photonView.isMine) {
 			photonView.RPC("RPCStopShootAnimation",PhotonTargets.Others, animName);
 		}
 	}
 	[RPC]
 	public void  RPCStopShootAnimation(string animName){
-		aniamtor.StopShootAniamtion(animName);
+		animator.StopShootAniamtion(animName);
 		
 	}
 	
@@ -1100,7 +1069,7 @@ public class Pawn : DamagebleObject {
 	public void StopKick(){
 		naturalWeapon.StopKick();
 		if (photonView.isMine) {
-			photonView.RPC("RPCStopKick",PhotonTargets.Others,i);
+			photonView.RPC("RPCStopKick",PhotonTargets.Others);
 		}
 	}
 	
@@ -1193,6 +1162,12 @@ public class Pawn : DamagebleObject {
 				
 	
 	}
+
+	public Vector3 JumpVector ()
+	{
+		return Vector3.up*CalculateJumpVerticalSpeed(jumpHeight);
+	}
+
 	protected float CalculateSpeed(){
 		float result =Vector3.Project (_rb.velocity,myTransform.forward).magnitude;
 		//Debug.Log (result);
@@ -1417,7 +1392,7 @@ public class Pawn : DamagebleObject {
 		yield return new WaitForSeconds (sec);
 		_canWallRun = true;
 	}
-
+	//TODO ADD STEP CHECK WITH RAYS
 	void OnCollisionStay(Collision collisionInfo) {
 		if (lastJumpTime + 0.1f > Time.time) {
 			return;		
@@ -1433,9 +1408,13 @@ public class Pawn : DamagebleObject {
 				}*/
 				Vector3 Direction = contact.point - myTransform.position -((CapsuleCollider)myCollider).center;
 				//Debug.Log (this.ToString()+collisionInfo.collider+Vector3.Dot(Direction.normalized ,Vector3.down) );
-				if (Vector3.Dot (Direction.normalized, Vector3.down) > 0.75) {
+				float minAngle = 0.75f;
+				if(((CapsuleCollider)myCollider).direction ==2){
+					minAngle =0.5f;
+				}
+				if (Vector3.Dot (Direction.normalized, Vector3.down) > minAngle	) {
 					isGrounded = true;
-					TimerNotGround=0;
+				
 					floorNormal = 	contact.normal;
 				}
 			
@@ -1456,27 +1435,7 @@ public class Pawn : DamagebleObject {
 
 	}
 	//
-	public void CheckSteps(){
-		if (isCheckSteps) {
 
-			Vector3 startFloor =myTransform.position+((CapsuleCollider)myCollider).center + ((CapsuleCollider)myCollider).radius*0.9f*Vector3.down;
-			bool isFloor=false,isWall=false;
-			Vector3 moveDirection  = myTransform.forward;
-			moveDirection.y=0;
-			///Debug.DrawLine(startFloor,startFloor+ moveDirection.normalized*size/2,Color.red,5.0f);
-			isFloor= Physics.Raycast(startFloor, moveDirection.normalized,size/2,floorLayer);			
-			
-			Vector3 startWall = startFloor +Vector3.up*stepHeight;
-			//Debug.DrawLine(startWall,startWall+ moveDirection.normalized*size/2,Color.red,5.0f);
-			isWall= Physics.Raycast(startWall, moveDirection.normalized,size/2,floorLayer);							
-
-			if(isFloor&&!isWall){
-				rigidbody.AddForce(CalculateJumpVerticalSpeed(jumpHeight)*(Vector3.up+myTransform.forward/2f).normalized, ForceMode.VelocityChange);
-				Jump();
-			}
-		}
-
-	}
 	public float CalculateJumpVerticalSpeed ( float targetJumpHeight  )
 	{
 		// From the jump height and gravity we deduce the upwards speed 
@@ -1522,7 +1481,7 @@ public class Pawn : DamagebleObject {
 				}else{
 					characterState=CharacterState.Jumping;
 				}
-				CheckSteps();
+
 			break;
 		case CharacterState.Sprinting:
 
@@ -1552,7 +1511,7 @@ public class Pawn : DamagebleObject {
 				}
 				ToggleAim(false);
 				
-				CheckSteps();
+				
 			
 			break;
 		case CharacterState.Jumping:
@@ -1762,7 +1721,7 @@ public class Pawn : DamagebleObject {
 		animator.FinishPullingUp();
 		characterState = CharacterState.Idle;
 		isGrounded = true;
-		TimerNotGround=0;
+	
 		SendMessage ("DidLand", SendMessageOptions.DontRequireReceiver);
 
 	}

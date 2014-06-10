@@ -6,7 +6,7 @@ using System.Collections.Generic;
 
 
 public class BaseWeapon : DestroyableNetworkObject {
-	class ShootData{
+	protected class ShootData{
 		public double timeShoot;
 		public Quaternion  direction;
 		public Vector3 position;
@@ -25,7 +25,7 @@ public class BaseWeapon : DestroyableNetworkObject {
 
 	private Queue<ShootData> shootsToSend = new Queue<ShootData>();
 
-	private Queue<ShootData> shootsToSpawn = new Queue<ShootData>();
+	protected Queue<ShootData> shootsToSpawn = new Queue<ShootData>();
 
 	public enum AMUNITONTYPE{SIMPLEHIT, PROJECTILE, RAY, HTHWEAPON, AOE};
 
@@ -373,7 +373,7 @@ public class BaseWeapon : DestroyableNetworkObject {
 		projScript.damage =new BaseDamage(damageAmount) ;
 		projScript.owner = owner.gameObject;
 	}
-	protected void ReplicationGenerate (){
+	protected virtual void ReplicationGenerate (){
 		if(shootsToSpawn.Count>0){
 				sControl.playClip (fireSound);
 		}
@@ -381,6 +381,9 @@ public class BaseWeapon : DestroyableNetworkObject {
 			ShootData spawnShoot = shootsToSpawn.Dequeue();
 			
 			GenerateProjectileRep(spawnShoot.position,spawnShoot.direction,spawnShoot.timeShoot);
+			if (rifleParticleController != null) {
+				rifleParticleController.CreateShootFlame ();
+			}
 		}
 	}
 	protected void GenerateProjectileRep(Vector3 startPoint,Quaternion startRotation,double timeShoot){
@@ -390,9 +393,7 @@ public class BaseWeapon : DestroyableNetworkObject {
 		projScript.transform.Translate (startRotation*Vector3.forward*(float)(PhotonNetwork.time-timeShoot));
 		projScript.damage =new BaseDamage(damageAmount) ;
 		projScript.owner = owner.gameObject;
-		if (rifleParticleController != null) {
-			rifleParticleController.CreateShootFlame ();
-		}
+
 	}
 
 	protected void SendShoot(Vector3 position, Quaternion rotation){

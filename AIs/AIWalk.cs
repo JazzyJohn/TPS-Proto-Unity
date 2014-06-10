@@ -57,7 +57,8 @@ public class AIWalk : AIState
 		agent = GetComponent<AIAgentComponent>();
 		//Debug.Log (agent);
 		agent.SetSpeed(controlledPawn.groundRunSpeed);
-		agent.size = controlledPawn.GetSize ()/2;
+		agent.ParsePawn (controlledPawn);
+	
 
 		base.StartState ();
 	}
@@ -68,10 +69,15 @@ public class AIWalk : AIState
 			if(agent.GetTranslate().sqrMagnitude<0.1f){
 				controlledPawn.Movement (Vector3.zero,CharacterState.Idle);
 			}else{
-				controlledPawn.Movement (agent.GetTranslate(),CharacterState.Running);
+				if (!agent.needJump) {
+					controlledPawn.Movement (agent.GetTranslate(),CharacterState.Running);
+				} else {
+					controlledPawn.Movement (agent.GetTranslate () +controlledPawn.JumpVector(), CharacterState.Jumping);
+				}
 			}
 
 		}else{
+
 			controlledPawn.Movement (Vector3.zero,CharacterState.Idle);
 		}
 		

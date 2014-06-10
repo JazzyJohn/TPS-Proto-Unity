@@ -65,6 +65,7 @@ public class WeaponPlayer : MonoBehaviour {
 
 		if (MenuTF._Pl_Ro == 0) {
 						List<GUIItem> listOfItems = ItemManager.instance.GetItemForSlot ((GameClassEnum)Choice._Player, (_IntActive-1));
+
 						switch (_IntActive) {
 
 						//Main

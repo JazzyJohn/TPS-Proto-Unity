@@ -185,7 +185,7 @@ public class MainMenuGUI : MonoBehaviour {
 		_playerInfo.GITP = _playerInfo.Player.gold;
 		_playerInfo.playerLvl = lvl.playerLvl;
 		_playerInfo.playerExp =  LevelingManager.instance.playerExp;
-		_playerInfo.playerExpNeed =  LevelingManager.instanceplayerNeededExp[_playerInfo.playerLvl];
+		_playerInfo.playerExpNeed =  LevelingManager.instance.playerNeededExp[_playerInfo.playerLvl];
 		_playerInfo.playerProcent = lvl.playerProcent;
 	}
 
@@ -195,12 +195,19 @@ public class MainMenuGUI : MonoBehaviour {
 		_PlayerComponent.Lvl.text = "Lvl " + _playerInfo.playerLvl;
 		_PlayerComponent.Exp.text = _playerInfo.playerExp + " / " + _playerInfo.playerExpNeed;
 		_PlayerComponent.ExpBar.value = _playerInfo.playerProcent /100f;
-		_PlayerComponent.KP.text = _playerInfo.KP;
-		_PlayerComponent.GITP.text = _playerInfo.GITP;
+		_PlayerComponent.KP.text = _playerInfo.KP.ToString();
+		_PlayerComponent.GITP.text = _playerInfo.GITP.ToString();
 	}
 
 	public void ReSize() //Правка позиции компонентов
 	{
+
+
+		StartCoroutine (LateFrameResize ());
+	}
+	public IEnumerator LateFrameResize(){
+		yield return  new WaitForEndOfFrame();
+		yield return  new WaitForEndOfFrame();
 		ChatComponent.ChatLabel.transform.localPosition = new Vector3(-180, -(ChatComponent.ChatPanel.GetViewSize().y/2)+20, 0f);
 		_PanelsNgui.slaiderPanel.ReSize ();
 	}

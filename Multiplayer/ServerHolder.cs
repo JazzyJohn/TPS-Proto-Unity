@@ -231,7 +231,7 @@ public class ServerHolder : MonoBehaviour
 									
 				PhotonNetwork.JoinRoom (room);
 			}
-			Server.connectingToRoom = true;
+			connectingToRoom = true;
 	}
 		
 		
@@ -371,7 +371,7 @@ public class ServerHolder : MonoBehaviour
 		yield return new WaitForEndOfFrame();
 		GameObject menu =Instantiate (loader.playerHud, Vector3.zero, Quaternion.identity) as GameObject;
 		Camera.main.GetComponent<PlayerMainGui> ().enabled = true;
-		menu.tarnsform.parent = Camera.main.transfrom;
+		menu.transform.parent = Camera.main.transform;
 		PhotonNetwork.Instantiate ("Player",Vector3.zero,Quaternion.identity,0);
 	
 	}

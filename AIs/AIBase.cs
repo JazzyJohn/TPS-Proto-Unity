@@ -80,6 +80,7 @@ public class AIBase : MonoBehaviour
 			//    break;
 			
 		}
+		_currentState.enabled = true;
 		_currentState.StartState();
 	}
 	

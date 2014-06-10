@@ -23,4 +23,19 @@ public class BaseShootgun : BaseWeapon {
 				projScript.owner = owner.gameObject;
 		}
 	}
+
+	protected override void ReplicationGenerate (){
+		if(shootsToSpawn.Count>0){
+			sControl.playClip (fireSound);
+			if (rifleParticleController != null) {
+				rifleParticleController.CreateShootFlame ();
+			}
+		}
+		while(shootsToSpawn.Count>0){
+			ShootData spawnShoot = shootsToSpawn.Dequeue();
+			
+			GenerateProjectileRep(spawnShoot.position,spawnShoot.direction,spawnShoot.timeShoot);
+
+		}
+	}
 }

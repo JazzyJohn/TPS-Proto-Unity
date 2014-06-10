@@ -19,6 +19,7 @@ public class AIAgentComponent : MonoBehaviour {
 	private float radius = 0.5f;
 	private bool agentAvoidance = true;
 	private bool aceleration = false;
+	public bool needJump = false;
 	protected Vector3 target;
 
 	protected Vector3 resultTranslate;
@@ -51,6 +52,14 @@ public class AIAgentComponent : MonoBehaviour {
 		}
 		return Vector3.zero;
 	}
+
+	public void ParsePawn (Pawn controlledPawn)
+	{
+		size = controlledPawn.GetSize ()/2;
+		agent.jumpHeight = controlledPawn.jumpHeight;
+		agent.stepHeight = controlledPawn.stepHeight;
+	}
+
 	public void SetTarget(Vector3 newTarget,bool forced = false){
 
 		if (forced) {
@@ -66,6 +75,7 @@ public class AIAgentComponent : MonoBehaviour {
 	
 	public void WalkUpdate () {
 		resultTranslate  =Vector3.zero;
+		needJump = false;
 		if(agent.path.Count>0){
 			bool walkable = true;
 			//Check if exist some dynamic obstacle in our path.
@@ -103,9 +113,9 @@ public class AIAgentComponent : MonoBehaviour {
 		
 			if(walkable){
 				//Smooth path
-				List<Vector3> Points = new List<Vector3>();
+				List<PathNode> Points = new List<PathNode>();
 				stepsCount = 0;
-				foreach (Vector3 step in agent.path) {
+				foreach (PathNode step in agent.path) {
 					if (stepsCount < stepsToSmooth ){
 						Points.Add(step);
 					}else{ break; }
@@ -127,6 +137,7 @@ public class AIAgentComponent : MonoBehaviour {
 	
 	public void GotoNextStep(){
 		//if there's a path.
+	
 		if( agent.path.Count>0 ){
 			bool nextStep = false;
 
@@ -146,10 +157,10 @@ public class AIAgentComponent : MonoBehaviour {
 				}
 			}	
 			
-			
+			Debug.Log ("nextStep"+nextStep);
 			if(!nextStep){
 				//Get the next waypoint...
-				Vector3 point=agent.path[0];
+				PathNode point=agent.path[0];
 				//...and rotate pivot towards it.
 				Vector3 dir=point-agent.pivot.transform.position ;
 				if(dir!=Vector3.zero){
@@ -161,18 +172,20 @@ public class AIAgentComponent : MonoBehaviour {
 				Vector3 direction=(point-agent.pivot.transform.position).normalized;
 				float speed = agent.speed;
 			
-			
+		
 				resultTranslate  =direction * Mathf.Min(dist, speed * Time.deltaTime)/Time.deltaTime;
+		
 				//Assign transform position with height and pivot position.
 				//transform.parent = agent.pivot.transform;
 				//transform.position = agent.pivot.transform.position + new Vector3(0,agent.yOffset,0);
+				needJump = point.needJump;
 				if(dir!=Vector3.zero){
 					resultRotation= Quaternion.Slerp(transform.rotation, Quaternion.LookRotation(dir),Time.deltaTime*15);
 				}
 				//resultRotation = transform.rotation;
 				//If the agent arrive to waypoint position, delete waypoint from the path.
 
-				if(IsRiched(point)){
+				if(IsRiched(point,agent.pivot.transform.position,size)){
 					agent.path.RemoveAt(0);
 				}
 			}else{
@@ -180,15 +193,15 @@ public class AIAgentComponent : MonoBehaviour {
 			}
 		}
 	}
-	public bool IsRiched(Vector3 point){
+	public static bool IsRiched(Vector3 point,Vector3 target,float inputSize){
 		//Debug.Log(Mathf.Abs (agent.pivot.transform.position.y - point.y) +"   " +"   "+size);
 
-		if (PathfindingEngine.Instance.oneLevelHeight > Mathf.Abs (agent.pivot.transform.position.y - point.y)) {
-			Vector3 flatPoint= point,flatPostion  =  agent.pivot.transform.position;
+			if (PathfindingEngine.Instance.oneLevelHeight > Mathf.Abs (target.y - point.y)) {
+						Vector3 flatPoint= point,flatPostion  =  target;
 			flatPostion.y =0;
 			flatPoint.y=0;
 			//Debug.Log(Mathf.Abs (agent.pivot.transform.position.y - point.y) +"   "+ (flatPoint-flatPostion).sqrMagnitude +"   "+size);
-			if((flatPoint-flatPostion).sqrMagnitude<size*size){
+			if((flatPoint-flatPostion).sqrMagnitude<inputSize*inputSize){
 				return true;
 
 			}
@@ -209,16 +222,16 @@ public class AIAgentComponent : MonoBehaviour {
 	
 	
 	
-	public List<Vector3> MakeSmooth(List<Vector3> _points){
+	public List<PathNode> MakeSmooth(List<PathNode> _points){
 		int curvedLength = ((_points.Count)*Mathf.RoundToInt(1.4f))-1;
-		List<Vector3> curvedPoints = new List<Vector3>(curvedLength);
+		List<PathNode> curvedPoints = new List<PathNode>(curvedLength);
 		
 		for(int pointInTimeOnCurve = 0;pointInTimeOnCurve < curvedLength+1;pointInTimeOnCurve++){
 			float t = Mathf.InverseLerp(0,curvedLength,pointInTimeOnCurve);
 			
 			for(int j = curvedLength; j > 0; j--){
 				for (int i = 0; i < j; i++){
-					_points[i] = (1-t)*_points[i] + t*_points[i+1];
+					_points[i].node = (1-t)*_points[i].node + t*_points[i+1].node;
 				}
 			}
 			curvedPoints.Add(_points[0]);
@@ -243,6 +256,10 @@ public class AIAgentComponent : MonoBehaviour {
 					for(int i=1; i<agent.path.Count; i++){
 						if (i>stepsToSmooth-2)
 							Gizmos.color = new Color(1-gizmoColorPath.r,1-gizmoColorPath.g,1-gizmoColorPath.b, 0.1f);
+
+						if(agent.path[i].needJump){
+							Gizmos.DrawSphere(agent.path[i],1.0f);
+						}
 						Gizmos.DrawLine( agent.path[i-1] + offset , agent.path[i] + offset );
 					}
 				}
