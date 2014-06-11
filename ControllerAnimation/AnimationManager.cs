@@ -1,4 +1,5 @@
 ﻿using UnityEngine;
+using System;
 using System.Collections;
 
 public class AnimationManager : MonoBehaviour
@@ -251,4 +252,75 @@ public class AnimationManager : MonoBehaviour
 	
 		animator.SetTrigger ("Reload");
 	}
+	[Serializable]
+	public class Leg
+	{
+		public LegBone[] LegBones;
+		public Transform ZeroPoint;
+		[HideInInspector]
+		public float FootHeight;
+		[HideInInspector]
+		public float BonesLenght;
+		public void LegStep(){
+			LegBone LegBoneFirst = LegBones[0];
+			LegBone LegBoneEnd = LegBones[LegBones.Length - 1];
+			Vector3 RayPoint = new Vector3(LegBoneEnd.Bone.transform.position.x, LegBoneFirst.Bone.transform.position.y, LegBoneEnd.Bone.transform.position.z);
+			Ray ray = new Ray(RayPoint, Vector3.down);
+			RaycastHit hit;
+			if(Physics.Raycast(ray, out hit, BonesLenght + FootHeight)){
+				float Distance = Vector3.Distance(RayPoint, hit.point);
+				float LegDistance = Vector3.Distance(LegBoneFirst.Bone.transform.position, LegBoneEnd.Bone.transform.position)+FootHeight;
+				float Angle;
+				Angle = 90f*(LegDistance-Distance)/LegDistance;
+				LegBoneFirst.Bone.transform.rotation *= Quaternion.AngleAxis(Angle, LegBoneFirst.GetWorldDirection());
+				for (int j = 1; j < LegBones.Length-1; j++){
+					LegBones[j].Bone.transform.rotation *= Quaternion.AngleAxis(-2f*Angle, LegBones[j].GetWorldDirection());
+				}
+				LegBoneEnd.Bone.transform.rotation = Quaternion.FromToRotation(LegBoneEnd.GetDirection(), hit.normal) * LegBoneEnd.Bone.transform.rotation;
+			}
+		}
+		public void LegSet(){
+			int Lenght = LegBones.Length-1;
+			float[] BoneLength = new float[Lenght];
+			float BonesLenght = 0;
+			for (int j = 0; j < Lenght; j++) {
+				BoneLength[j] = Vector3.Distance(LegBones[j].Bone.transform.position, LegBones[j+1].Bone.transform.position);
+				BonesLenght+=BoneLength[j];
+			}
+			for (int j = 0; j < Lenght; j++)
+				LegBones[j].Factor = 90f/BonesLenght;
+			//			LegBones[0].Factor = (BoneLength[0]/BonesLenght)*90f/BonesLenght;
+			BonesLenght = BonesLenght;
+			FootHeight = LegBones[Lenght].Bone.transform.position.y - ZeroPoint.position.y;
+		}
+	}
+	[Serializable]
+	public class LegBone
+	{
+		public GameObject Bone;
+		[HideInInspector]
+		public float Factor;
+		public Vector Direction;
+		public Vector3 GetDirection(){
+			Vector3 Up = new Vector3();
+			if (Direction == Vector.Right)Up = Bone.transform.right;
+			else if (Direction == Vector.Left)Up = -Bone.transform.right;
+			else if (Direction == Vector.Up)Up = Bone.transform.up;
+			else if (Direction == Vector.Down)Up = -Bone.transform.up;
+			else if (Direction == Vector.Forward)Up = Bone.transform.forward;
+			else if (Direction == Vector.Back)Up = -Bone.transform.forward;
+			return Up;
+		}
+		public Vector3 GetWorldDirection(){
+			Vector3 Up = new Vector3();
+			if (Direction == Vector.Right)Up = Vector3.right;
+			else if (Direction == Vector.Left)Up = Vector3.left;
+			else if (Direction == Vector.Up)Up = Vector3.up;
+			else if (Direction == Vector.Down)Up = Vector3.down;
+			else if (Direction == Vector.Forward)Up = Vector3.forward;
+			else if (Direction == Vector.Back)Up = Vector3.back;
+			return Up;
+		}
+	}
+	public enum Vector {Up, Down, Left, Right, Forward, Back};
 }

@@ -246,6 +246,9 @@ public class Pawn : DamagebleObject {
 	private bool isSpawn=false;//флаг респавна
 
 
+	//ноги
+
+	public AnimationManager.Leg[] Legs;
 
 
 	protected void Awake(){
@@ -300,6 +303,8 @@ public class Pawn : DamagebleObject {
 		ivnMan.Init ();
 		AfterSpawnAction ();
 		//Debug.Log (distToGround);
+		foreach(AnimationManager.Leg l in Legs)
+			l.LegSet();
 
 	}
 	public virtual void AfterSpawnAction(){
@@ -610,6 +615,8 @@ public class Pawn : DamagebleObject {
 				isSpawn=false;//то освобождаем все движения и повреждения
 			}
 		}
+		foreach(AnimationManager.Leg l in Legs)
+			l.LegStep();
 
 		if (photonView.isMine) {
 
