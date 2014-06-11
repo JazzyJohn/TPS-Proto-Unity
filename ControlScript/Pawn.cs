@@ -31,8 +31,18 @@ public class singleDPS
 	public float lastTime=1.0f;
 	public bool noOnwer = false;
 
-}	
-
+}
+public class DamagerEntry
+{
+    public float forgetTime;
+    public float amount = 0f;
+    public Pawn pawn;
+    public Vector3 lastHitDirection;
+    public DamagerEntry(Pawn initPawn)
+    {
+        pawn = initPawn;
+    }
+}
 public class Pawn : DamagebleObject {
 
 
@@ -291,6 +301,7 @@ public class Pawn : DamagebleObject {
 
 	private bool isSpawn=false;//флаг респавна
 
+
 	//FOR killcamera size offset; Like robot always big;
 	
 	public bool bigTarget = false;
@@ -303,18 +314,18 @@ public class Pawn : DamagebleObject {
 	public float maxStandRotate  = 60.0f;
 	
 	//AssistSection
-	class DamagerEntry{
-		public float forgetTime;
-		public float amount=0f;
-		public Pawn pawn;
-		public Vector3 lastHitDirection;
-		public DamagerEntry(Pawn initPawn){
-			pawn = initPawn;
-		}
-	}
 	
-	protected List<DamagerEntry> damagers = new DamagerEntry():
 	
+	protected List<DamagerEntry> damagers = new List<DamagerEntry>();
+	
+
+
+	//ноги
+
+	public AnimationManager.Leg[] Legs;
+
+
+
 	protected void Awake(){
 		myTransform = transform;
 		ivnMan =GetComponent<InventoryManager> ();
@@ -381,6 +392,8 @@ public class Pawn : DamagebleObject {
 			AfterSpawnAction ();
 		}
 		//Debug.Log (distToGround);
+		foreach(AnimationManager.Leg l in Legs)
+			l.LegSet();
 
 	}
 
@@ -462,18 +475,19 @@ public class Pawn : DamagebleObject {
 		if (!photonView.isMine){
 			return;
 		}
-		DamagerEntry entry = damagers.Find(
-		delegate(DamagerEntry entry){
-			return entry.pawn ==killer;
-		});
-		if(entry==null){
-			DamagerEntry entry = new DamagerEntry(killer);
-			damagers.Add(entry);
-		}
-		entry.forgetTime = Time.time + ASSIT_FORGET_TIME;
-		entry.amount +=damage.Damage;
-		entry.lastHitDirection = 	damage.pushDirection;
-		
+        if (killerPawn != null)
+        {
+
+            DamagerEntry entry = damagers.Find(delegate(DamagerEntry entry) { return entry.pawn == killerPawn; });
+            if (entry == null)
+            {
+                entry = new DamagerEntry(killerPawn);
+                damagers.Add(entry);
+            }
+            entry.forgetTime = Time.time + ASSIT_FORGET_TIME;
+            entry.amount += damage.Damage;
+            entry.lastHitDirection = damage.pushDirection;
+        }
 		if (isAi) {
 			mainAi.WasHitBy(killer);
 
@@ -738,8 +752,13 @@ public class Pawn : DamagebleObject {
 		}
 
 	}
+    void LateUpdate() {
+		foreach(AnimationManager.Leg l in Legs)
+			l.LegStep();
 
+	}
 	protected void Update () {
+
 		//Debug.Log (photonView.isSceneView);
 
 	
@@ -754,6 +773,7 @@ public class Pawn : DamagebleObject {
 				isSpawn=false;//то освобождаем все движения и повреждения
 			}
 		}
+
 
 		if (photonView.isMine) {
 

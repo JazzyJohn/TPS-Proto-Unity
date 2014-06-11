@@ -98,7 +98,7 @@ public class PlayerManager : MonoBehaviour {
 		cachedPawns.Add (target);
 	}
 	public void FixedUpdate(){
-		cachedPawns.RemoveAll (delegate(Pawn v) {
+        cachedPawns.RemoveAll (delegate(Pawn v) {
 			return v==null;
 		});
 		cachedPlayers.RemoveAll (delegate(Player v) {
