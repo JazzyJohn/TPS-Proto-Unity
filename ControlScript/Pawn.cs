@@ -16,6 +16,7 @@ public enum CharacterState {
 	DoubleJump= 7,
 	DeActivate = 8,
 	Activate = 9,
+	Dead = 10,
 }
 public enum WallState{
 	WallL,
@@ -39,6 +40,8 @@ public class Pawn : DamagebleObject {
 	public List<singleDPS> activeDPS = new List<singleDPS> ();
 
 	public const int SYNC_MULTUPLIER = 5;
+	
+	public const float ASSIT_FORGET_TIME = 5.0f;
 
 	private LayerMask groundLayers =  1;
 	private LayerMask wallRunLayers = 1;
@@ -246,8 +249,6 @@ public class Pawn : DamagebleObject {
 
 	private Vector3 floorNormal;
 
-	private ContactPoint[] contacts;
-
 	public Vector3 centerOffset;
 
 	public Vector3 headOffset;
@@ -301,6 +302,18 @@ public class Pawn : DamagebleObject {
 	
 	public float maxStandRotate  = 60.0f;
 	
+	//AssistSection
+	class DamagerEntry{
+		public float forgetTime;
+		public float amount=0f;
+		public Pawn pawn;
+		public Vector3 lastHitDirection;
+		public DamagerEntry(Pawn initPawn){
+			pawn = initPawn;
+		}
+	}
+	
+	protected List<DamagerEntry> damagers = new DamagerEntry():
 	
 	protected void Awake(){
 		myTransform = transform;
@@ -449,11 +462,23 @@ public class Pawn : DamagebleObject {
 		if (!photonView.isMine){
 			return;
 		}
+		DamagerEntry entry = damagers.Find(
+		delegate(DamagerEntry entry){
+			return entry.pawn ==killer;
+		});
+		if(entry==null){
+			DamagerEntry entry = new DamagerEntry(killer);
+			damagers.Add(entry);
+		}
+		entry.forgetTime = Time.time + ASSIT_FORGET_TIME;
+		entry.amount +=damage.Damage;
+		entry.lastHitDirection = 	damage.pushDirection;
+		
 		if (isAi) {
 			mainAi.WasHitBy(killer);
 
 		}
-
+		
 		
 		//Debug.Log ("DAMAGE");
 		base.Damage(damage,killer);
@@ -499,6 +524,16 @@ public class Pawn : DamagebleObject {
 	
 
 		
+	}
+	
+	protected virtual void ActualKillMe(){
+		characterState = CharacterState.Dead;
+		Animator.StartDeath();	
+	}
+	
+	public IEnumerator AfterAnimKill(){
+		yield return new WaitForSeconds(3f);
+		PhotonNetwork.Destroy(gameObject);
 	}
 	//EFFECCT SECTION
 	void AddEffect(Vector3 position){
@@ -678,8 +713,11 @@ public class Pawn : DamagebleObject {
 						animator.StartPullingUp();
 					}
 					break;
-					
-					
+				case CharacterState.Dead:
+					if(characterState!=CharacterState.Dead){
+						Animator.StartDeath();	
+					}
+					break;
 				}
 				characterState = nextState;
 			}
@@ -1412,7 +1450,7 @@ public class Pawn : DamagebleObject {
 		if(characterState==CharacterState.WallRunning){
 		   return;
 		}
-	    contacts = collisionInfo.contacts;
+		ContactPoint[] contacts = collisionInfo.contacts;
 		if (contacts != null) {
 			foreach (ContactPoint contact in contacts) {
 				/*if(contact.otherCollider.CompareTag("decoration")){
@@ -1468,6 +1506,9 @@ public class Pawn : DamagebleObject {
 			_rb.AddForce(new Vector3(0,-gravity * rigidbody.mass,0)+pushingForce);
 		}
 		if (!canMove) {
+			return;	
+		}
+		if (!isDead) {
 			return;	
 		}
 		Vector3 velocity = _rb.velocity;

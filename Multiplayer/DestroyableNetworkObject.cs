@@ -18,10 +18,12 @@ public class DestroyableNetworkObject : MonoBehaviour {
 	[RPC]
 	public void KillMe(){
 		//Debug.Log ("RPC KILL ME");
-
-		PhotonNetwork.Destroy(gameObject);
+		ActualKillMe()
+	
 			
 	}
-
+	protected virtual void ActualKillMe(){
+			PhotonNetwork.Destroy(gameObject);
+	}
 
 }

@@ -256,6 +256,9 @@ public class AnimationManager : MonoBehaviour
 	
 		animator.SetTrigger ("Reload");
 	}
+	public void StartDeath(){
+		animator.SetTrigger ("Death");
+	}
 	
 	public void ShootAnim(){
 		animator.SetTrigger ("Shoot");
