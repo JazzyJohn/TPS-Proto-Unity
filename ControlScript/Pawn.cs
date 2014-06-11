@@ -600,7 +600,10 @@ public class Pawn : DamagebleObject {
 		}
 
 	}
-
+	void LateUpdate() {
+		foreach(AnimationManager.Leg l in Legs)
+			l.LegStep();
+	}
 	void Update () {
 		//Debug.Log (photonView.isSceneView);
 
@@ -615,8 +618,7 @@ public class Pawn : DamagebleObject {
 				isSpawn=false;//то освобождаем все движения и повреждения
 			}
 		}
-		foreach(AnimationManager.Leg l in Legs)
-			l.LegStep();
+
 
 		if (photonView.isMine) {
 
