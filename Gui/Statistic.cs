@@ -1,5 +1,7 @@
 ﻿using UnityEngine;
 using System.Collections;
+using System.Collections.Generic;
+
 
 public class TeamSlot{
 	public UIPanel panel;
@@ -37,6 +39,8 @@ public class Statistic : MonoBehaviour {
 	TeamSlot[] RedTeamlPlayer = new TeamSlot[12];
 	TeamSlot[] BlueTeamlPlayer = new TeamSlot[12];
 
+    Player LocalPlayer;
+
 	// Use this for initialization
 	void Start () 
 	{
@@ -58,7 +62,12 @@ public class Statistic : MonoBehaviour {
 			RedTeamlPlayer[i].message=RedTeamlPlayer[i].panel.GetComponent<StatisticMessage>();
 		}
 	}
-	
+
+
+    public void SetLocalPalyer(Player newPlayer) {
+        LocalPlayer = newPlayer;
+    }
+
 	// Update is called once per frame
 	void Update () 
 	{

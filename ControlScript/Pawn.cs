@@ -478,7 +478,7 @@ public class Pawn : DamagebleObject {
         if (killerPawn != null)
         {
 
-            DamagerEntry entry = damagers.Find(delegate(DamagerEntry entry) { return entry.pawn == killerPawn; });
+            DamagerEntry entry = damagers.Find(delegate(DamagerEntry searchentry) { return searchentry.pawn == killerPawn; });
             if (entry == null)
             {
                 entry = new DamagerEntry(killerPawn);
@@ -542,7 +542,7 @@ public class Pawn : DamagebleObject {
 	
 	protected virtual void ActualKillMe(){
 		characterState = CharacterState.Dead;
-		Animator.StartDeath();	
+		animator.StartDeath();	
 	}
 	
 	public IEnumerator AfterAnimKill(){
@@ -729,7 +729,7 @@ public class Pawn : DamagebleObject {
 					break;
 				case CharacterState.Dead:
 					if(characterState!=CharacterState.Dead){
-						Animator.StartDeath();	
+                        animator.StartDeath();	
 					}
 					break;
 				}

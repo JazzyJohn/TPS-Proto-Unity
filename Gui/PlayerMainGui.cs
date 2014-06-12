@@ -146,6 +146,7 @@ public class PlayerMainGui : MonoBehaviour {
 			holder.SetPlayer(newPlayer);	
 		}
 		stat =  GetComponentInChildren<Statistic>(); //Статистика (+)
+        stat.SetLocalPalyer(newPlayer);
 		hud = GetComponentInChildren<PlayerHudNgui> ();
 		hud.SetLocalPlayer(LocalPlayer);
 		ChageState(GUIState.Respawn);
@@ -516,8 +517,8 @@ public class PlayerMainGui : MonoBehaviour {
 		Rect rectforName = new Rect ((screenX - crosshairWidth * 10) / 2, crosshairHeight, crosshairWidth * 10, crosshairHeight);
 		GUI.Label (rectforName, FormTeamName (1) + gamestats.score [0] + "|" + gamestats.maxScore + " |" + FormTeamName (2) + gamestats.score [1]);
 
-		Player[] players = PlayerManager.instance.FindAllPlayer ();
-		for (int i =0; i<players.Length; i++) {
+		List<Player> players = PlayerManager.instance.FindAllPlayer ();
+		for (int i =0; i<players.Count; i++) {
 			float size = crosshairWidth / 2;
 			Rect messRect = new Rect (size, size * (6 + i), screenX, size);
 			GUI.Label (messRect, players [i].GetName () +"    Kill:"+players [i].Score.Kill +"    Death:"+players [i].Score.Death +"    Assist:"+players [i].Score.Assist);

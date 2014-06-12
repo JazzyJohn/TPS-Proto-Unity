@@ -1,5 +1,6 @@
 ﻿using UnityEngine;
 using System.Collections;
+using System.Collections.Generic;
 //[ExecuteInEditMode]
 
 public class MenuTF : MonoBehaviour {
@@ -549,7 +550,7 @@ public class MenuTF : MonoBehaviour {
 
 	//Team
 		int[] teamCount = new int[2];
-		Player[] players = PlayerManager.instance.FindAllPlayer ();
+		List<Player> players = PlayerManager.instance.FindAllPlayer ();
 		foreach(Player player in players) {
 			if(player.team!=0){
 				teamCount[player.team-1]++;

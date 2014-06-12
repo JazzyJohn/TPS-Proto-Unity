@@ -237,8 +237,8 @@ public class AIState : MonoBehaviour {
 		controlledPawn.StopKick();
 	}
 	protected virtual bool IsInWeaponRange(){
-	   float weaponDistance = WeaponDistance(); controlledPawn.OptimalDistance(isMelee);
-		return (_enemy.myTransform.position-controlledPawn.myTransform.position).sqrMagnitude-_enemy.GetSize() -controlledPawn.GetSize()<weaponDistance*weaponDistance
+	   float weaponDistance =controlledPawn.OptimalDistance(isMelee);
+       return (_enemy.myTransform.position - controlledPawn.myTransform.position).sqrMagnitude - _enemy.GetSize() - controlledPawn.GetSize() < weaponDistance * weaponDistance;
 	}
 	
 }

@@ -50,7 +50,7 @@ public class AIPatrol : AIState
 			if (!needJump) {
 					controlledPawn.Movement (agent.GetTranslate (), CharacterState.Walking);
 			} else {
-			Debug.Log ("jump");
+			//Debug.Log ("jump");
 				controlledPawn.Movement (agent.GetTranslate () +controlledPawn.JumpVector(), CharacterState.Jumping);
 			}
 			controlledPawn.SetAiRotation( agent.GetTarget());

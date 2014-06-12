@@ -157,7 +157,7 @@ public class AIAgentComponent : MonoBehaviour {
 				}
 			}	
 			
-			Debug.Log ("nextStep"+nextStep);
+			//Debug.Log ("nextStep"+nextStep);
 			if(!nextStep){
 				//Get the next waypoint...
 				PathNode point=agent.path[0];

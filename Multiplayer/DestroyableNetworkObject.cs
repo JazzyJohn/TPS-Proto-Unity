@@ -18,7 +18,7 @@ public class DestroyableNetworkObject : MonoBehaviour {
 	[RPC]
 	public void KillMe(){
 		//Debug.Log ("RPC KILL ME");
-		ActualKillMe()
+        ActualKillMe();
 	
 			
 	}
