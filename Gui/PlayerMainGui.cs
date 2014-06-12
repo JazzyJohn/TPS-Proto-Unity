@@ -1,4 +1,4 @@
-using UnityEngine;
+﻿using UnityEngine;
 using System.Collections;
 using System.Collections.Generic;
 
@@ -145,17 +145,26 @@ public class PlayerMainGui : MonoBehaviour {
 		foreach (ChatHolder holder in chats) {
 			holder.SetPlayer(newPlayer);	
 		}
+
 		stat =  GetComponentInChildren<Statistic>(); //Статистика (+)
         stat.SetLocalPalyer(newPlayer);
+
 		hud = GetComponentInChildren<PlayerHudNgui> ();
 		hud.SetLocalPlayer(LocalPlayer);
 		ChageState(GUIState.Respawn);
 	}
 
-
+    public void ReSize() {
+        hud.ReSize();
+        stat.ReSize();
+    }
 
 
 	void Update(){
+        if (LocalPlayer == null)
+        {
+            return;
+        }
 		if (guiState == GUIState.Dedicated) {
 			return;
 		}
@@ -553,7 +562,7 @@ public class PlayerMainGui : MonoBehaviour {
 	public static string FormTeamName(int team){
 		switch (team) {
 			case 1:
-			return "Команда А"	;
+                return "Команда А";
 				break;
 		case 2:
 			return"Команда B";

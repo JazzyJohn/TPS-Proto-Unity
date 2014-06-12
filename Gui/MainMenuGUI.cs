@@ -210,6 +210,7 @@ public class MainMenuGUI : MonoBehaviour {
 		yield return  new WaitForEndOfFrame();
 		ChatComponent.ChatLabel.transform.localPosition = new Vector3(-180, -(ChatComponent.ChatPanel.GetViewSize().y/2)+20, 0f);
 		_PanelsNgui.slaiderPanel.ReSize ();
+        _PanelsNgui.mainpanel.Invalidate(true);
 	}
 
 	public void FullScreen() // На весь экран
@@ -395,5 +396,5 @@ public class PanelsNgui
 {
 	public UIPanel SliderPanel;
 	public SlaiderPanel slaiderPanel;
-
+    public UIPanel mainpanel;
 }

@@ -9,6 +9,7 @@ public class TeamSlot{
 }
 
 public class Statistic : MonoBehaviour {
+    private Player LocalPlayer;
 
 	public UIPanel MainPanel;
 
@@ -73,7 +74,22 @@ public class Statistic : MonoBehaviour {
 	{
 	
 	}
+    public void SetLocalPlayer(Player newPlayer)
+    {
+        LocalPlayer = newPlayer;
+    }
+    public IEnumerator LateFrameResize()
+    {
+        yield return new WaitForEndOfFrame();
+        yield return new WaitForEndOfFrame();
+        MainPanel.Invalidate(true);
+    }
+    public void ReSize() //Правка позиции компонентов
+    {
 
+
+        StartCoroutine(LateFrameResize());
+    }
 	void FixedUpdate()
 	{
 		if(active){

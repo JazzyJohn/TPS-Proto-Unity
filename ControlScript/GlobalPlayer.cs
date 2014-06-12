@@ -37,8 +37,21 @@ public class GlobalPlayer : MonoBehaviour {
 			}else{
 				Screen.SetResolution( Screen.resolutions[ Screen.resolutions.Length-1].width,  Screen.resolutions[ Screen.resolutions.Length-1].height, true);
 			}
+            ResizeCall();
 		}
 	}
+    void ResizeCall()
+    {
+        MainMenuGUI gui = FindObjectOfType<MainMenuGUI>();
+        if(gui!=null){
+            gui.ReSize();
+        }
+        PlayerMainGui hud = FindObjectOfType<PlayerMainGui>();
+        if (hud != null)
+        {
+            hud.ReSize();
+        }
+    }
 	public String GetPlayerName(){
 		return PlayerName;
 	}	

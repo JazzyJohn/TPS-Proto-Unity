@@ -478,7 +478,9 @@ public class Pawn : DamagebleObject {
         if (killerPawn != null)
         {
 
+
             DamagerEntry entry = damagers.Find(delegate(DamagerEntry searchentry) { return searchentry.pawn == killerPawn; });
+
             if (entry == null)
             {
                 entry = new DamagerEntry(killerPawn);
@@ -540,9 +542,12 @@ public class Pawn : DamagebleObject {
 		
 	}
 	
-	protected virtual void ActualKillMe(){
+	protected override void ActualKillMe(){
 		characterState = CharacterState.Dead;
-		animator.StartDeath();	
+
+		animator.StartDeath();
+        StartCoroutine(AfterAnimKill());
+
 	}
 	
 	public IEnumerator AfterAnimKill(){
@@ -598,6 +603,10 @@ public class Pawn : DamagebleObject {
 		float strafe = 0;
 		//Debug.Log (strafe);	
 		float speed =0 ;
+        if (isDead) {
+            return;
+        }
+
 		//Debug.Log (speed);
 		if (animator != null && animator.gameObject.activeSelf) {
 			if (photonView.isMine) {
@@ -729,9 +738,11 @@ public class Pawn : DamagebleObject {
 					break;
 				case CharacterState.Dead:
 					if(characterState!=CharacterState.Dead){
+
                         animator.StartDeath();	
+
 					}
-					break;
+					return;
 				}
 				characterState = nextState;
 			}
@@ -786,7 +797,7 @@ public class Pawn : DamagebleObject {
 				}
 			}
 
-			if(canMove){
+			if(canMove&&!isDead){
 
 					//if(aimRotation.sqrMagnitude==0){
 					getAimRotation();
@@ -1169,7 +1180,7 @@ public class Pawn : DamagebleObject {
 		if (other.tag == "damageArea") {
 			//Debug.Log (other.GetComponent<ContiniusGun> ());
 			MuzzlePoint muzzlePoint = other.GetComponent<MuzzlePoint>();
-			singleDPS newDPS= null;
+			
 			if(muzzlePoint !=null){
 				 muzzlePoint.gun.GetComponent<ContiniusGun> ().fireDamage (this);
 			}
@@ -1480,7 +1491,7 @@ public class Pawn : DamagebleObject {
 				//Debug.Log (this.ToString()+collisionInfo.collider+Vector3.Dot(Direction.normalized ,Vector3.down) );
 				float minAngle = 0.75f;
 				if(((CapsuleCollider)myCollider).direction ==2){
-					minAngle =0.5f;
+					minAngle =0.2f;
 				}
 				if (Vector3.Dot (Direction.normalized, Vector3.down) > minAngle	) {
 					isGrounded = true;
@@ -1528,7 +1539,7 @@ public class Pawn : DamagebleObject {
 		if (!canMove) {
 			return;	
 		}
-		if (!isDead) {
+		if (isDead) {
 			return;	
 		}
 		Vector3 velocity = _rb.velocity;

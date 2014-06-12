@@ -19,8 +19,10 @@ public class RobotPawn : Pawn {
 	}
 	
 	public IEnumerator WaitBeforeActive(float waitTime) {
+
         if (isPilotIn)
         {
+
 			yield return new WaitForSeconds(waitTime);
 			GetComponent<ThirdPersonController>().enabled = true;
 			ivnMan.GenerateWeaponStart();

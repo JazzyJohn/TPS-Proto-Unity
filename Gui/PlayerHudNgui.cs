@@ -7,6 +7,7 @@ public class PlayerHudNgui : MonoBehaviour {
     PlayerMainGui.PlayerStats Stats= null;
     
 
+
     public UILabel healthLabel;
     public UILabel juggernautDropTime;
     public UILabel ammoInGun;
@@ -33,6 +34,9 @@ public class PlayerHudNgui : MonoBehaviour {
     public UILabel BlueTeamScore;
 
 	public UIPanel hudpanel;
+
+
+
     /*
         public float robotTime=0;
 		public float health=0;
@@ -50,10 +54,22 @@ public class PlayerHudNgui : MonoBehaviour {
         Waiting = 0,
         Work = 1
     }
+    public IEnumerator LateFrameResize()
+    {
+        yield return new WaitForEndOfFrame();
+        yield return new WaitForEndOfFrame();
+        hudpanel.Invalidate(true);
+    }
+    public void ReSize() //Правка позиции компонентов
+    {
 
+
+        StartCoroutine(LateFrameResize());
+    }
     void Update()
     {
         PlayerMainGui.GameStats gamestats = PVPGameRule.instance.GetStats();
+      
         if (LocalPlayer)Stats = LocalPlayer.GetPlayerStats();
         if (LocalPlayer != null)
         {

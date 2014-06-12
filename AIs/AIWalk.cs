@@ -90,7 +90,7 @@ public class AIWalk : AIState
 	}
 	public override void SetEnemy(Pawn enemy){
 		if (_enemy != enemy) {
-						controlledPawn.PlayTaunt ();
+				controlledPawn.PlayTaunt ();
 		}
 		
 		base.SetEnemy(enemy);

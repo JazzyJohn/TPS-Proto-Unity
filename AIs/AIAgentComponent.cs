@@ -157,7 +157,7 @@ public class AIAgentComponent : MonoBehaviour {
 				}
 			}	
 			
-			//Debug.Log ("nextStep"+nextStep);
+
 			if(!nextStep){
 				//Get the next waypoint...
 				PathNode point=agent.path[0];
@@ -179,6 +179,7 @@ public class AIAgentComponent : MonoBehaviour {
 				//transform.parent = agent.pivot.transform;
 				//transform.position = agent.pivot.transform.position + new Vector3(0,agent.yOffset,0);
 				needJump = point.needJump;
+                
 				if(dir!=Vector3.zero){
 					resultRotation= Quaternion.Slerp(transform.rotation, Quaternion.LookRotation(dir),Time.deltaTime*15);
 				}
@@ -236,7 +237,10 @@ public class AIAgentComponent : MonoBehaviour {
 			}
 			curvedPoints.Add(_points[0]);
 		}
-		
+        for (int i = 0; i < curvedPoints.Count-1;i++ )
+        {
+            curvedPoints[i].needJump = agent.IsJump(curvedPoints[i], curvedPoints[i+1]);
+        }
 		return(curvedPoints);
 	}
 	

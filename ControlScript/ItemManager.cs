@@ -188,31 +188,31 @@ public class ItemManager : MonoBehaviour {
 		switch (text) {
 			case "ENGINEER":
 				return  GameClassEnum.ENGINEER;
-				break;
+				
 			case "ASSAULT":
 				return  GameClassEnum.ASSAULT;
-				break;
+				
 			case "MEDIC":
 				return  GameClassEnum.MEDIC;
-				break;
+			
 			case "SCOUT":
 				return  GameClassEnum.SCOUT;
-				break;
+				
 			case "ANY":
 				return  GameClassEnum.ANY;
-				break;
+				
 			case "ROBOTHEAVY":
 				return  GameClassEnum.ROBOTHEAVY;
-				break;
+				
 			case "ROBOTMEDIUM":
 				return  GameClassEnum.ROBOTMEDIUM;
-				break;
+				
 			case "ROBOTLIGHT":
 				return  GameClassEnum.ROBOTLIGHT;
-				break;
+				
 			case "ANYROBOT":
 				return  GameClassEnum.ANYROBOT;
-				break;
+				
 				
 				
 		}
@@ -249,10 +249,10 @@ public class ItemManager : MonoBehaviour {
 				//Taunt section look WeaponPlayer.cs for details
 				case 5:
 					return  GetAnimationForSlot( gameClass);
-				break;
+			
 				default:
 					return  GetWeaponForSlot( gameClass, (BaseWeapon.SLOTTYPE) gameSlot);
-				break;
+			
 				
 			
 			

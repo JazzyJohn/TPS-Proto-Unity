@@ -258,8 +258,10 @@ public class AnimationManager : MonoBehaviour
 		animator.SetTrigger ("Reload");
 	}
 
-    public void StartDeath()
-    {
+
+	public void StartDeath(){
+        SetNotMainLayer(0.0f);
+
 		animator.SetTrigger ("Death");
 	}
 	

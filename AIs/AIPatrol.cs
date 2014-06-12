@@ -37,7 +37,7 @@ public class AIPatrol : AIState
 	public override void StartState(){
 		agent = GetComponent<AIAgentComponent>();
 		//Debug.Log (agent);
-		agent.SetTarget (patrolPoints[0].position);
+        agent.SetTarget(patrolPoints[step].position);
 		agent.SetSpeed(controlledPawn.groundWalkSpeed);
 		agent.ParsePawn (controlledPawn);
 		base.StartState ();
@@ -46,11 +46,14 @@ public class AIPatrol : AIState
 	public void FixedUpdate(){
 			bool needJump = agent.needJump;
 			agent.WalkUpdate ();
+           // Debug.Log("Jump" + needJump + agent.needJump);
 			needJump = !needJump&&agent.needJump;
+          
 			if (!needJump) {
 					controlledPawn.Movement (agent.GetTranslate (), CharacterState.Walking);
+
 			} else {
-			//Debug.Log ("jump");
+
 				controlledPawn.Movement (agent.GetTranslate () +controlledPawn.JumpVector(), CharacterState.Jumping);
 			}
 			controlledPawn.SetAiRotation( agent.GetTarget());

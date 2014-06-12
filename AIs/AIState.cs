@@ -238,6 +238,7 @@ public class AIState : MonoBehaviour {
 	}
 	protected virtual bool IsInWeaponRange(){
 	   float weaponDistance =controlledPawn.OptimalDistance(isMelee);
+
        return (_enemy.myTransform.position - controlledPawn.myTransform.position).sqrMagnitude - _enemy.GetSize() - controlledPawn.GetSize() < weaponDistance * weaponDistance;
 	}
 	
