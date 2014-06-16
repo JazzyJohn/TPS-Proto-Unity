@@ -177,7 +177,7 @@ public class AnimationManager : MonoBehaviour
 	}
 	//Pulling weapon up near wall;
 	public void WeaponDown(bool value){
-		if (aimPos != null) {
+		/*if (aimPos != null) {
 						if (value && shouldAim) {
 								shouldAim = false;
 
@@ -189,7 +189,7 @@ public class AnimationManager : MonoBehaviour
 								aimPos.EvalToWeight(1.0f);
 						}
 		}
-		animator.SetBool("wall_stop", value);	
+		animator.SetBool("wall_stop", value);	*/
 	}
 	//HTH attack anim switch
 	public virtual void StartAttackAnim(string name){
@@ -238,7 +238,7 @@ public class AnimationManager : MonoBehaviour
 		animator.SetBool("LongPull", longPull);
 	}
 	//Check if weapon look forward or in air because of near wall
-	public bool isWeaponAimable(){
+	public  bool isWeaponAimable(){
 		return !animator.GetBool("wall_stop");
 	}
 	//COntol aim behavieor of object
@@ -322,16 +322,16 @@ public class AnimationManager : MonoBehaviour
 		public void LegSet(){
 			int Lenght = LegBones.Length-1;
 			float[] BoneLength = new float[Lenght];
-			float BonesLenght = 0;
 			for (int j = 0; j < Lenght; j++) {
 				BoneLength[j] = Vector3.Distance(LegBones[j].Bone.position, LegBones[j+1].Bone.position);
 				BonesLenght+=BoneLength[j];
+
 			}
 			for (int j = 0; j < Lenght; j++)
 				LegBones[j].Factor = 90f/BonesLenght;
 			//			LegBones[0].Factor = (BoneLength[0]/BonesLenght)*90f/BonesLenght;
-			//BonesLenght = BonesLenght;
-			FootHeight = LegBones[Lenght].Bone.position.y - ZeroPoint.position.y;
+        	this.FootHeight = LegBones[Lenght].Bone.position.y - ZeroPoint.position.y;
+
 		}
 	}
 	[Serializable]

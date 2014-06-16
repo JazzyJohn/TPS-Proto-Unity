@@ -236,7 +236,8 @@ public class Player : MonoBehaviour {
 				}else {
 					
 						if(!inBot&&robotPawn!=null){
-							if(currentPawn.curLookTarget!=null&&currentPawn.curLookTarget.gameObject==robotPawn.gameObject&&(currentPawn.myTransform.position-robotPawn.myTransform.position).sqrMagnitude<SQUERED_RADIUS_OF_ACTION){
+                            //Debug.Log(currentPawn.curLookTarget.gameObject +" "+ (currentPawn.myTransform.position - robotPawn.myTransform.position).sqrMagnitude);
+							if(currentPawn.curLookTarget!=null&&currentPawn.curLookTarget.gameObject==robotPawn.gameObject&&(currentPawn.myTransform.position-robotPawn.myTransform.position).sqrMagnitude<SQUERED_RADIUS_OF_ACTION*2.0f){
 								if(Input.GetButtonDown("Use")){
 									EnterBot();
 								}
@@ -246,6 +247,7 @@ public class Player : MonoBehaviour {
 					if(currentPawn.curLookTarget!=null){
 
 						useTarget = currentPawn.curLookTarget.GetComponent<UseObject>();
+                     
 					if(useTarget!=null&&(currentPawn.myTransform.position-useTarget.myTransform.position).sqrMagnitude<SQUERED_RADIUS_OF_ACTION&&Input.GetButtonDown("Use")){
 							useTarget.Use(currentPawn);
 

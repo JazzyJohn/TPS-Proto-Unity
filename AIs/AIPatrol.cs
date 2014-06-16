@@ -48,14 +48,19 @@ public class AIPatrol : AIState
 			agent.WalkUpdate ();
            // Debug.Log("Jump" + needJump + agent.needJump);
 			needJump = !needJump&&agent.needJump;
-          
+            Vector3 translateVect = agent.GetTranslate();
 			if (!needJump) {
-					controlledPawn.Movement (agent.GetTranslate (), CharacterState.Walking);
+                controlledPawn.Movement(translateVect, CharacterState.Walking);
 
 			} else {
 
-				controlledPawn.Movement (agent.GetTranslate () +controlledPawn.JumpVector(), CharacterState.Jumping);
+                controlledPawn.Movement(translateVect + controlledPawn.JumpVector(), CharacterState.Jumping);
 			}
+            if (translateVect.sqrMagnitude == 0)
+            {
+                //Debug.Log("recalculate");
+                agent.SetTarget(patrolPoints[step].position);
+            }
 			controlledPawn.SetAiRotation( agent.GetTarget());
 		
 	}

@@ -772,8 +772,9 @@ public class Pawn : DamagebleObject {
 
 		//Debug.Log (photonView.isSceneView);
 
-	
-		if (!isActive) {
+
+        if (!isActive && !photonView.isMine)
+        {
 			//replicate position to get rid off teleportation after bot is dead			
 			ReplicatePosition();		
 			return;		

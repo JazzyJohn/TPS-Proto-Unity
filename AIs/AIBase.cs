@@ -19,7 +19,10 @@ public class AIBase : MonoBehaviour
         //DetectionRadius,
 				AngleRange;
 
+    public bool isStarted = false;
 	public int PatrolPointCount;
+
+    public float timer=0f;
         
 	public static float TickPause = 0.3f;
    // private SphereCollider _SC;
@@ -93,13 +96,14 @@ public class AIBase : MonoBehaviour
 		controlledPawn = GetComponent<Pawn> ();
 		
 		InitState ();
-		StartCoroutine("Tick");
+        isStarted = true;
     }
-    private IEnumerator Tick()
+   void Update()
     {
-        while (true)
+        timer += Time.deltaTime;
+        if (isStarted&&timer >= TickPause)
         {
-          
+            timer = 0f;
 			_currentState.PawnList = controlledPawn.getAllSeenPawn().ToArray();
 			_currentState.Tick();                  
 			foreach(AIState.AITransition trans in _currentState.Transition){
@@ -116,8 +120,7 @@ public class AIBase : MonoBehaviour
 
 			}
 
-			 yield return new WaitForSeconds(TickPause);
-            //Debug.Log("Work");
+			
         }
     }
 

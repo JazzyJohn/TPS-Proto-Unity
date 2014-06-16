@@ -40,8 +40,6 @@ public class Statistic : MonoBehaviour {
 	TeamSlot[] RedTeamlPlayer = new TeamSlot[12];
 	TeamSlot[] BlueTeamlPlayer = new TeamSlot[12];
 
-    Player LocalPlayer;
-
 	// Use this for initialization
 	void Start () 
 	{
