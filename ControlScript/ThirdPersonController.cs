@@ -77,7 +77,8 @@ protected float walkTimeStart= 0.0f;
 private float lastJumpButtonTime= -10.0f;
 // Last time we performed a jump
 private float lastJumpTime= -1.0f;
-
+//Last time DoubleJumping
+private float lastDoubleTime = -1.0f;
 
 // the height we jumped from (Used to determine for how long to apply extra jump power after jumping.)
 private float lastJumpStartHeight= 0.0f;
@@ -205,10 +206,11 @@ public virtual void UpdateSmoothedMovementDirection ()
 			}else{
 				characterState = CharacterState.Idle;
 			}
-		
-		} else if ((Input.GetKey (KeyCode.LeftShift) || Input.GetKey (KeyCode.RightShift)) &&pawn.CanSprint())
+
+        }
+        else if (Input.GetButton("Sprint") && pawn.CanSprint())
 		{
-			targetSpeed *= pawn.groundSprintSpeed;
+            targetSpeed *= pawn.groundRunSpeed;
 			if(isMoving){
 				characterState = CharacterState.Sprinting;
 			}else{
@@ -251,7 +253,7 @@ void  ApplyJumping (){
 		// - Only when pressing the button down
 		// - With a timeout so you can press the button slightly before landing		
 
-		if (canJump && Time.time <= lastJumpButtonTime + jumpTimeout) {
+		if (canJump&&!doubleJump && Time.time <= lastJumpButtonTime + jumpTimeout) {
 			//Debug.Log(lastJumpButtonTime+jumpTimeout);
 			verticalSpeed = CalculateJumpVerticalSpeed (pawn.jumpHeight);
 			SendMessage("DidJump", SendMessageOptions.DontRequireReceiver);
@@ -278,9 +280,9 @@ public float CalculateJumpVerticalSpeed ( float targetJumpHeight  )
 		lastJumpStartHeight = transform.position.y;
 		lastJumpButtonTime = -10;
 		if (jumping == true ) {
-				doubleJump= true;
-				characterState = CharacterState.DoubleJump;
-		} else {
+            doubleJump = true;
+            characterState = CharacterState.DoubleJump;
+		} else{
 				characterState = CharacterState.Jumping;	
 		}
 		jumping = true;
@@ -325,14 +327,59 @@ public float CalculateJumpVerticalSpeed ( float targetJumpHeight  )
 								
 							pawn.PlayTaunt();
 						}
+                       
 		}
 
+}
+    /// <summary>
+    /// IS palyer Want DoubleJump
+    /// </summary>
+void ApplyDoubleJumping() {
+   
+        if(!pawn.isGrounded)
+        {
+            switch (pawn.GetState())
+            {
+                case CharacterState.DoubleJump:
+                     if ((doubleJump && Input.GetButton("Jump")) || Input.GetButton("Sprint"))
+                    {
+                        characterState = CharacterState.DoubleJump;
+
+                    }
+                    else
+                    {
+                        characterState = CharacterState.Jumping;
+                    }
+                    break;
+
+                case CharacterState.Jumping:
+                case CharacterState.Sprinting:
+                    if (lastDoubleTime < Time.time - 1.0f)
+                    {
+                        if ((doubleJump && Input.GetButton("Jump")) || Input.GetButton("Sprint"))
+                        {
+                            characterState = CharacterState.DoubleJump;
+                            lastDoubleTime = Time.time;
+                        }
+                        else
+                        {
+                            characterState = CharacterState.Jumping;
+                        }
+                    }
+                    break;
+               default:
+                    break;
+
+
+            }
+            
+        }  
 }
 void FixedUpdate ()
 {
 	moveDirection = Vector3.zero;
-	
-	
+
+   
 	UpdateSmoothedMovementDirection();
 	
 	
@@ -340,6 +387,8 @@ void FixedUpdate ()
 	ApplyJumping ();
 		//Debug.Log (jumping.ToString()+doubleJump);
 	// Calculate actual motion
+    ApplyDoubleJumping();
+   
 	Vector3 movement= moveDirection * moveSpeed + new Vector3 (0, verticalSpeed, 0) + inAirVelocity;
 	
 		//Debug.Log (movement.magnitude);
@@ -383,7 +432,10 @@ public void WallLand(){
 			//
 		}
 	}
-
+public void WallJump()
+{
+    lastDoubleTime = Time.time;
+}
 public float GetSpeed ()
 {
 	return moveSpeed;

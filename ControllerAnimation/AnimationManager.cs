@@ -201,23 +201,30 @@ public class AnimationManager : MonoBehaviour
 		animator.SetBool(name, false);	
 		
 	}
-	public void StartPullingUp(){
-		if (aimPos != null) {
+    /// <summary>
+    /// Turn on and of IK of aiming
+    /// </summary>
+    public void ToggleAimPos(bool state){
+        if (aimPos != null) {
 
-				aimPos.SetWeight(0.0f);
-				
-			
-		}
+            if (state)
+            {
+                aimPos.EvalToWeight(1.0f);
+            }else{
+                aimPos.SetWeight(0.0f);
+            }
+        }
+    }
+	public void StartPullingUp(){
+
+
+
+        ToggleAimPos(false);	
 		animator.SetBool("PullUp", true);	
 		SetNotMainLayer (0.0f);
 	}
 	public void FinishPullingUp(){
-		if (aimPos != null) {
-			
-			aimPos.EvalToWeight(1.0f);
-			
-			
-		}
+        ToggleAimPos(true);	
 		animator.SetBool("PullUp", false);	
 		SetNotMainLayer (1.0f);
 	}

@@ -133,6 +133,7 @@ public class BaseWeapon : DestroyableNetworkObject {
 			photonView = GetComponent<PhotonView>();
 		}
 		owner = inowner;
+
 		curTransform.parent = weaponSlot;
 		curTransform.localPosition = Offset;
 		//Debug.Log (name + weaponRotator);

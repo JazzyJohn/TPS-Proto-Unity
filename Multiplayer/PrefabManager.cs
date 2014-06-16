@@ -52,8 +52,9 @@ public class PrefabManager : MonoBehaviour {
 	}
 	void Update(){
 		if(inProgress){
-
-			ServerHolder.progress.curLoader= www.progress*100f;
+         
+                ServerHolder.progress.curLoader = www.progress * 100f;
+            
 		}
 	}
 	public void DownLoad()

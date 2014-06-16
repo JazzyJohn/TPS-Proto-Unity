@@ -99,8 +99,8 @@ public class PlayerHudNgui : MonoBehaviour {
 			}
             if (reloadingSprite) reloadingSprite.fillAmount = 1 - Stats.reloadTime;
 
-            if (jetPackCharge) jetPackCharge.text = Stats.jetPackCharge.ToString();
-
+            if (jetPackCharge) jetPackCharge.text = Stats.jetPackCharge.ToString("0.0");
+          
 
             if (Kills) Kills.text = LocalPlayer.Score.Kill.ToString();
             if (Death) Death.text = LocalPlayer.Score.Death.ToString();

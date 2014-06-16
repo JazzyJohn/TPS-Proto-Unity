@@ -138,9 +138,11 @@ public class AchievementManager : MonoBehaviour, LocalPlayerListener{
 			Debug.Log (incomeQueue.Count	);
 						while (incomeQueue.Count>0) {
 								IncomingMessage mess = incomeQueue.Dequeue ();
+                                //Debug.Log(mess.param);
 								foreach (Achievement achiv in ongoingAchivment) {
+                               
 										if (achiv.achivParams.ContainsKey (mess.param)) {
-						//Debug.Log (achiv.ToString());
+					
 												achiv.achivParams [mess.param].current += mess.delta;
 										}
 								}

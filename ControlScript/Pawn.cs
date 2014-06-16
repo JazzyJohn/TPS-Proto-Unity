@@ -120,11 +120,13 @@ public class Pawn : DamagebleObject {
 
 	protected CharacterState nextState;
 
-	private int jetPackCharge;
+	private float jetPackCharge;
 
 	private float jetPackTimer= 0.0f;
 
-	public float jetPackTime=5.0f;
+    private bool jetPackEnable = false;
+
+	public float jetPackTime=1.0f;
 
 	private Vector3 nextMovement;
 
@@ -174,6 +176,8 @@ public class Pawn : DamagebleObject {
 
 	public float groundRunSpeed;
 
+    public float flySpeed;
+
 	public float groundWalkSpeed;
 
 	public float jumpHeight;
@@ -189,10 +193,6 @@ public class Pawn : DamagebleObject {
 	public float PullUpStartTimer= 0.0f;
 	
 	public float PullUpTime=2.0f;
-
-	private float sprintTimer=0.0f;
-
-	public float sprintTime = 3.0f;
 
 	private float v;
 
@@ -790,13 +790,45 @@ public class Pawn : DamagebleObject {
 		if (photonView.isMine) {
 
 			UpdateSeenList();
-			if (canJump&&jetPackCharge<charMan.GetIntChar(CharacteristicList.JETPACKCHARGE)){
-				jetPackTimer+=Time.deltaTime;
-				if(jetPackTimer>=jetPackTime){
-					jetPackTimer=0.0f;
-					jetPackCharge++;
-				}
-			}
+            if (jetPackEnable == false)
+            {
+                   float maxCharge=  charMan.GetFloatChar(CharacteristicList.JETPACKCHARGE);
+                   if (canJump && jetPackCharge < maxCharge)
+                {
+
+                    jetPackTimer += Time.deltaTime;
+                    if (jetPackTimer >= jetPackTime)
+                    {
+                        jetPackTimer = 0.0f;
+                        jetPackCharge += 1.0f;
+                        if (jetPackCharge > maxCharge)
+                        {
+                            jetPackCharge = maxCharge;
+                        }
+                    }
+
+                }
+            }
+            else
+            {
+                if (jetPackCharge > 0.0f)
+                {
+                    if (characterState == CharacterState.DoubleJump)
+                    {
+                        jetPackCharge -= Time.deltaTime;
+                    }
+                    else
+                    {
+                        jetPackCharge -= Time.deltaTime * 0.5f ;
+                    }
+                }
+                else
+                {
+                    jetPackCharge = 0.0f;
+                    jetPackEnable = false;
+                }
+
+            }
 
 			if(canMove&&!isDead){
 
@@ -1075,6 +1107,7 @@ public class Pawn : DamagebleObject {
 	public void Reload(){
 		if (CurWeapon != null) {
 			CurWeapon.ReloadStart();
+            
 		}
 
 	}
@@ -1238,7 +1271,10 @@ public class Pawn : DamagebleObject {
 		
 
 	//Movement section
-
+    public CharacterState GetState()
+    {
+        return characterState;
+    }
 	protected float CalculateStarfe(){
 		return Vector3.Dot (myTransform.right, _rb.velocity.normalized);
 				
@@ -1317,7 +1353,7 @@ public class Pawn : DamagebleObject {
 	
 	}
 	public bool CanSprint(){
-		return jetPackCharge > 0||characterState==CharacterState.Sprinting;
+		return jetPackCharge >= 1.0f||characterState==CharacterState.Sprinting;
 	}
 	bool WallRun (Vector3 movement,CharacterState state)
 	{
@@ -1336,13 +1372,14 @@ public class Pawn : DamagebleObject {
 			return false;
 		}*/
 		
-		if (_rb.velocity.sqrMagnitude < 0.02f&&characterState == CharacterState.WallRunning) {
+		if ((_rb.velocity.sqrMagnitude < 0.02f||!jetPackEnable)&&characterState == CharacterState.WallRunning) {
 			characterState = CharacterState.Jumping;
 			lastTimeOnWall = Time.time;
 
 			return false;
 		}
-		if (characterState != CharacterState.DoubleJump&&characterState != CharacterState.Sprinting&&characterState != CharacterState.WallRunning) {
+        if (characterState != CharacterState.DoubleJump && characterState != CharacterState.Sprinting && characterState != CharacterState.WallRunning && characterState != CharacterState.Jumping)
+        {
 			return false;
 		}
 		//Debug.Log (characterState);
@@ -1381,13 +1418,15 @@ public class Pawn : DamagebleObject {
 				_rb.velocity = tangVect*wallRunSpeed + myTransform.up*wallRunSpeed/3;
 				if(!(characterState == CharacterState.WallRunning))
 				{
+                    StartJetPack();
 					wallState =WallState.WallL;
 					characterState = CharacterState.WallRunning;
+                    state = characterState;
 					//animator.SetBool("WallRunL", true);
-					StartCoroutine( WallRunCoolDown(WALL_TIME_SIDE)); // Exclude if not needed
+					//StartCoroutine( WallRunCoolDown(WALL_TIME_SIDE)); // Exclude if not needed
 				}
-				
-				if(state == CharacterState.Jumping)
+
+                if (state == CharacterState.Jumping || state == CharacterState.DoubleJump)
 				{
 					_rb.velocity = myTransform.up*movement.y  +leftH.normal*movement.y;
 					StartCoroutine( WallJump(1f)); // Exclude if not needed
@@ -1402,12 +1441,14 @@ public class Pawn : DamagebleObject {
 				_rb.velocity = tangVect*wallRunSpeed + myTransform.up*wallRunSpeed/3;
 				if(!(characterState == CharacterState.WallRunning))
 				{
+                    StartJetPack();
 					wallState =WallState.WallR;
 					characterState = CharacterState.WallRunning;
-					StartCoroutine( WallRunCoolDown(WALL_TIME_SIDE)); // Exclude if not needed
+                    state = characterState;
+					//StartCoroutine( WallRunCoolDown(WALL_TIME_SIDE)); // Exclude if not needed
 				}
-				
-				if(state == CharacterState.Jumping)
+
+                if (state == CharacterState.Jumping || state == CharacterState.DoubleJump)
 				{
 					_rb.velocity = myTransform.up*movement.y  +rightH.normal*movement.y;
 					StartCoroutine( WallJump(1f)); // Exclude if not needed
@@ -1420,12 +1461,14 @@ public class Pawn : DamagebleObject {
 				tangVect = frontH.normal*-1;
 				if(!(characterState == CharacterState.WallRunning))
 				{
+                    StartJetPack();
 					wallState =WallState.WallF;
 					characterState = CharacterState.WallRunning;
-					StartCoroutine( WallRunCoolDown(WALL_TIME_UP)); // Exclude if not needed
+                    state = characterState;
+					//StartCoroutine( WallRunCoolDown(WALL_TIME_UP)); // Exclude if not needed
 				}
-				
-				if(state == CharacterState.Jumping)
+
+                if (state == CharacterState.Jumping || state == CharacterState.DoubleJump)
 				{
 					_rb.velocity =( myTransform.up+myTransform.forward*-1).normalized*movement.y;
 					StartCoroutine( WallJump(1f)); // Exclude if not needed
@@ -1448,26 +1491,12 @@ public class Pawn : DamagebleObject {
 		return false;
 
 	}
-	// Wall run cool-down
-	IEnumerator WallRunCoolDown (float sec)
-	{
-		_canWallRun = true;
-		if (player != null) {
-			EventHolder.instance.FireEvent(typeof(LocalPlayerListener),"EventStartWallRun",player,myTransform.position);
-
-		}
-		yield return new WaitForSeconds (sec);
-
-		_canWallRun = false;
-		characterState = CharacterState.Jumping;
-		yield return new WaitForSeconds (sec);
-		_canWallRun = true;
-	}
+	
 	// Wall run cool-down
 	IEnumerator WallJump (float sec)
 	{
 		Jump ();
-
+        SendMessage("WallJump", SendMessageOptions.DontRequireReceiver);
 		//Debug.Log ("WALLJUMP");
 		_canWallRun = false;
 		characterState = CharacterState.Jumping;
@@ -1510,13 +1539,21 @@ public class Pawn : DamagebleObject {
 
 
 	public void StartSprint(){
-	
-		sprintTimer = 0.0f;
-		jetPackCharge--;
 
+        if (jetPackCharge >= 1.0f)
+        {
+            StartJetPack();
+            characterState =CharacterState.Sprinting;
+        }
 
 	}
-	//
+    public void StopSprint() {
+        jetPackEnable = false;
+    }
+    public void StartJetPack() {
+        jetPackEnable = true;
+        jetPackTimer = 0.0f;
+    }
 
 	public float CalculateJumpVerticalSpeed ( float targetJumpHeight  )
 	{
@@ -1543,7 +1580,8 @@ public class Pawn : DamagebleObject {
 		if (isDead) {
 			return;	
 		}
-		Vector3 velocity = _rb.velocity;
+        Vector3 velocity = _rb.velocity ;
+        nextMovement = nextMovement;// -Vector3.up * gravity + pushingForce / rigidbody.mass;
 		Vector3 velocityChange = (nextMovement - velocity);
 	
 		switch (characterState) {
@@ -1555,10 +1593,17 @@ public class Pawn : DamagebleObject {
 					
 					//Debug.Log (this+ " " +velocityChange);
 					rigidbody.AddForce(velocityChange, ForceMode.VelocityChange);
-					characterState = nextState;
-					if(nextState==CharacterState.Sprinting){
-						StartSprint();
-					}
+
+                    if (nextState == CharacterState.Sprinting)
+                    {
+                    
+                        StartSprint();
+                     
+                    }
+                    else
+                    {
+                        characterState = nextState;
+                    }
 					if(nextState==CharacterState.Jumping){
 						Jump ();
 						
@@ -1575,22 +1620,43 @@ public class Pawn : DamagebleObject {
 					velocityChange=nextMovement.normalized*groundSprintSpeed-velocity;
 				}
 				//Debug.Log (velocityChange);
-				if (isGrounded) {
-					rigidbody.AddForce(velocityChange, ForceMode.VelocityChange);
+                if (!jetPackEnable)
+                {
+                    if (isGrounded)
+                    {
+                        // Debug.Log("STOPSPRINT");
+                        characterState = CharacterState.Running;
+                    }
+                    else
+                    {
+                        characterState = CharacterState.Jumping;
+                    }
+                }
+                else
+                {
+                    characterState = nextState;
+                    if (characterState != CharacterState.Sprinting)
+                    {
+                        StopSprint();
+                    }
+                    if (isGrounded)
+                    {
+                        rigidbody.AddForce(velocityChange, ForceMode.VelocityChange);
 
-					if(nextState==CharacterState.Jumping){
-						Jump ();
-						
-					}
-				}
-				sprintTimer+=Time.fixedDeltaTime;
-				if(sprintTimer>=sprintTime){
-					if (isGrounded) {
-						characterState = nextState;
-					}else{
-						characterState=CharacterState.Jumping;
-					}
-				}
+                        if (nextState == CharacterState.DoubleJump)
+                        {
+                            DoubleJump();
+
+                        }
+                    }
+                    else
+                    {
+                        ForcedDoubleJump();
+                    }
+                }
+              
+               
+                
 				if(WallRun (nextMovement,nextState)){
 					SendMessage ("WallLand", SendMessageOptions.DontRequireReceiver);
 				}
@@ -1621,24 +1687,42 @@ public class Pawn : DamagebleObject {
 			}
 			break;
 		case CharacterState.DoubleJump:
-
+            velocityChange = nextMovement.normalized * groundSprintSpeed+ Vector3.up*flySpeed - velocity;
 			animator.ApllyJump(true);						
 			animator.WallAnimation(false,false,false);
+            rigidbody.AddForce(velocityChange, ForceMode.VelocityChange);
+            if (!jetPackEnable)
+            {
+                if (isGrounded)
+                {
+                    characterState = nextState;
+                }
+                else
+                {
+                    characterState = CharacterState.Jumping;
+                }
+            }
+            else
+            {
+                characterState = nextState;
+                if (characterState != CharacterState.DoubleJump)
+                {
+                    StopDoubleJump();
+                }
+                PullUp();
+                if (WallRun(nextMovement, nextState))
+                {
+                    SendMessage("WallLand", SendMessageOptions.DontRequireReceiver);
+                }
+            }
+		
+		  
 
-			if(WallRun (nextMovement,nextState)){
-				SendMessage ("WallLand", SendMessageOptions.DontRequireReceiver);
-			}
-			PullUp();
-			if(nextState==CharacterState.DoubleJump){
-				DoubleJump();
-				
-			}
-			if (isGrounded) {
-				characterState = nextState;
-			}
-
+			
+		
 			break;
 		case CharacterState.WallRunning:
+            //Debug.Log(nextState);
 			if(!WallRun (nextMovement,nextState)){
 				characterState=CharacterState.Jumping;
 				animator.ApllyJump(true);						
@@ -1742,7 +1826,7 @@ public class Pawn : DamagebleObject {
 		lastJumpTime = Time.time;
 		//photonView.RPC("JumpChange",PhotonTargets.OthersBuffered,true);
 	}
-	public int GetJetPackCharges(){
+	public float GetJetPackCharges(){
 		return jetPackCharge;
 	
 	}
@@ -1817,9 +1901,11 @@ public class Pawn : DamagebleObject {
 			if (!PullUpCheck ()) {
 				return;
 			}
-		   //Debug.Log (characterState);
+		    Debug.Log (characterState);
 			if(	characterState != CharacterState.PullingUp){
+                jetPackEnable = false;
 				characterState = CharacterState.PullingUp;
+                animator.WallAnimation(false, false, false);
 				_rb.isKinematic = true;
 				StartCoroutine("PullUpEnd",PullUpTime);
 				animator.StartPullingUp();
@@ -1843,11 +1929,15 @@ public class Pawn : DamagebleObject {
 						
 				
 	}
+    void StopDoubleJump()
+    {
+        jetPackEnable = false;
+    }
 	void DoubleJump(){
-		if(jetPackCharge>0){
+		if(jetPackCharge>=1.0f){
 			Vector3 velocity = _rb.velocity;
 			Vector3 velocityChange = (nextMovement - velocity);
-			jetPackCharge--;
+            StartJetPack();
 			animator.DoubleJump();
 			rigidbody.AddForce(velocityChange, ForceMode.VelocityChange);
 			if (player != null) {
@@ -1859,6 +1949,14 @@ public class Pawn : DamagebleObject {
 		
 		
 	}
+    /// <summary>
+    /// Double jump for forced situation like fallin of a cliff
+    /// </summary>
+    void ForcedDoubleJump() {
+        StartJetPack();
+        animator.DoubleJump();
+        characterState = CharacterState.DoubleJump;
+    }
 	public void StopMachine(){
 		characterState = CharacterState.Idle;
 		nextMovement = Vector3.zero;
