@@ -42,6 +42,7 @@ public class DamagerEntry
     {
         pawn = initPawn;
     }
+
 }
 public class Pawn : DamagebleObject {
 
@@ -318,7 +319,7 @@ public class Pawn : DamagebleObject {
 	
 	protected List<DamagerEntry> damagers = new List<DamagerEntry>();
 	
-
+	protected Vector3 lastHitDirection = Vector3.zero;
 
 	//ноги
 
@@ -471,8 +472,8 @@ public class Pawn : DamagebleObject {
 
 			}	
 		
-		}
-		if (!photonView.isMine){
+		}else{
+			lastHitDirection=damage.pushDirection;
 			return;
 		}
         if (killerPawn != null)
@@ -541,11 +542,42 @@ public class Pawn : DamagebleObject {
 
 		
 	}
-	
+	/// <summary>
+    /// Sort and return last damager that hit pawn
+    /// </summary>
+	protected DamagerEntry RetrunLastDamager(){
+	   damagers.Sort(delegate(DamagerEntry x, DamagerEntry y)
+        {
+           return x.forgetTime.CompareTo(y.forgetTime)*-1;
+        });
+		if(damagers.Count>0){
+			return damagers[0];
+		}
+		else{
+			return null;
+		}
+		
+	}
 	protected override void ActualKillMe(){
 		characterState = CharacterState.Dead;
-
-		animator.StartDeath();
+		DamagerEntry last = RetrunLastDamager();
+		if(last==null){
+			animator.StartDeath(AnimDirection.Front);
+		}else{
+			float angle  = Vector3.Dot (last.lastHitDirection,myTransform.forward);
+			// If last hit direction equals negative forward it's hit in face
+			if(angle<=0){
+				animator.StartDeath(AnimDirection.Front);
+			}else{
+				animator.StartDeath(AnimDirection.Back);
+			}
+		}
+		if(cameraController!=null){
+			cameraController.enabled = false;
+			GetComponent<ThirdPersonController> ().enabled= false;
+		}
+		
+		animator.StartDeath(AnimDirection.Front);
         StartCoroutine(AfterAnimKill());
 
 	}
@@ -595,8 +627,10 @@ public class Pawn : DamagebleObject {
 				}
 				seenPawns.Add(allPawn[i]);
 			}
-			
-		}
+		//If we already do something slow)) lets clean up damagers lists
+		damagers.RemoveAll (delegate(DamagerEntry v) {
+			return v.forgetTime <Time.time;
+		});
 
 	}
 	protected virtual void UpdateAnimator(){
@@ -738,7 +772,13 @@ public class Pawn : DamagebleObject {
 					break;
 				case CharacterState.Dead:
 					if(characterState!=CharacterState.Dead){
-
+						float angle  = Vector3.Dot (lastHitDirection,myTransform.forward);
+						// If last hit direction equals negative forward it's hit in face
+						if(angle<=0){
+							animator.StartDeath(AnimDirection.Front);
+						}else{
+							animator.StartDeath(AnimDirection.Back);
+						}
                         animator.StartDeath();	
 
 					}
@@ -1405,14 +1445,14 @@ public class Pawn : DamagebleObject {
 	
 
 
-		Vector3 tangVect = Vector3.zero;
+		Vector3 tangVect = Vector3.zero, normal  = Vector3.zero;
 		
 		if(!animator.animator.IsInTransition(0) && !_rb.isKinematic)
 		{
 			if(leftW)
 			{
 				
-				
+				normal =leftH.normal;
 				tangVect = Vector3.Cross(leftH.normal,Vector3.up);
 				//tangVect = Vector3.Project(movement,tangVect).normalized;
 				_rb.velocity = tangVect*wallRunSpeed + myTransform.up*wallRunSpeed/3;
@@ -1435,7 +1475,7 @@ public class Pawn : DamagebleObject {
 			
 			else if(rightW)
 			{
-				
+				normal=rightH.normal;
 				tangVect = -Vector3.Cross(rightH.normal,Vector3.up);
 				//tangVect = Vector3.Project(movement,tangVect).normalized;
 				_rb.velocity = tangVect*wallRunSpeed + myTransform.up*wallRunSpeed/3;
@@ -1458,6 +1498,7 @@ public class Pawn : DamagebleObject {
 			else if(frontW)
 			{
 				_rb.velocity = myTransform.up*wallRunSpeed/1.5f;
+				normal = frontH.normal
 				tangVect = frontH.normal*-1;
 				if(!(characterState == CharacterState.WallRunning))
 				{
@@ -1477,8 +1518,17 @@ public class Pawn : DamagebleObject {
 				if(characterState == CharacterState.WallRunning){
 					characterState = CharacterState.Jumping;
 					lastTimeOnWall = Time.time;
+					jetPackEnable = false;
 				}
 
+			}
+			float angle =Mathf.Abs( Vector3.Dot(normal, Vector3.up));
+			
+			if(angle>0.5f){
+				characterState = CharacterState.Jumping;
+				lastTimeOnWall = Time.time;
+				jetPackEnable = false;
+				return false;
 			}
 
 			forwardRotation  =  tangVect*5;

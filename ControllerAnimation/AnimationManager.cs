@@ -3,6 +3,7 @@ using System;
 using System.Collections;
 
 public enum AnimType {TAUNT};
+public enum AnimDirection {Front,Back};
 public class AnimationManager : MonoBehaviour
 {
     private float
@@ -215,6 +216,19 @@ public class AnimationManager : MonoBehaviour
             }
         }
     }
+	/// <summary>
+    /// Short cut to turn off IK
+    /// </summary>
+	public void IKOff(){
+		ToggleAimPos(false);
+	}
+	/// <summary>
+    /// Short cut to turn on IK
+    /// </summary>
+	public void IKOn(){
+		ToggleAimPos(true);
+	}
+	
 	public void StartPullingUp(){
 
 
@@ -266,10 +280,18 @@ public class AnimationManager : MonoBehaviour
 	}
 
 
-	public void StartDeath(){
+	public void StartDeath(AnimDirection direction){
         SetNotMainLayer(0.0f);
 
-		animator.SetTrigger ("Death");
+		switch(direction){
+			case AnimDirection.Front:
+				animator.SetTrigger ("Death");
+				break;
+			case AnimDirection.Back:
+				animator.SetTrigger ("DeathBack");
+				break;
+		
+		}
 	}
 	
 	public void ShootAnim(){
