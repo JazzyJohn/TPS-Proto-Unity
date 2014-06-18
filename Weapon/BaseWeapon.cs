@@ -35,10 +35,63 @@ public class BaseWeapon : DestroyableNetworkObject {
 
 	public SLOTTYPE slotType;
 	
-	public AMMOTYPE ammoType; 
+	public AMMOTYPE ammoType;
+    //SHOOT LOGIC
+
+    /// <summary>
+    /// Define Fireing type like Auto SemiAuto
+    /// </summary>
+    public enum FIRETYPE {FULLAUTO,SEMIAUTO,BOLT}
+
+    public FIRETYPE firetype;
 
 	public float fireInterval;
-	
+    
+    /// <summary>
+    /// For SemiAuto ANd BoltAmmo
+    /// </summary>
+    private bool _waitForRelease = false;
+    public bool waitForRelease = false;
+
+    public float releaseInterval;
+    protected float _releaseInterval;
+    /// <summary>
+    /// For semiAuto amout in shoot;
+    /// </summary>
+    public int amountInShoot;
+
+    protected int _amountInShoot;
+    /// <summary>
+    /// Define Pre firing mode
+    /// </summary>
+    public enum PREFIRETYPE {Normal,Spooling, Salvo, ChargedPower, ChargedAccuracy,Guidance,ChargedRange}
+
+    public PREFIRETYPE prefiretype;
+    /// <summary>
+    /// For semiAuto amout in shoot;
+    /// </summary>
+    public float pumpAmount;
+    protected float _pumpAmount;
+    /// <summary>
+    ///  Use to Caclulate impact of pumping 
+    /// </summary>
+    public float pumpCoef;
+    protected float _pumpCoef;
+   
+
+    /// <summary>
+    /// After Pump Finish action
+    /// </summary>
+    public enum AFTERPUMPACTION { Wait, Fire, Ammo, Damage }
+
+    public AFTERPUMPACTION afterPumpAction;
+    /// <summary>
+    ///  Use to Caclulate impact of pumping benead threshold
+    /// </summary>
+    public float afterPumpCoef;
+
+    protected float _afterPumpAmount;
+
 	public float reloadTime;
 
 	public int clipSize;
@@ -62,6 +115,15 @@ public class BaseWeapon : DestroyableNetworkObject {
 	public float weaponRange;
 
 	public int curAmmo;
+    /// <summary>
+    ///  Ammo that ready to shot in barrel in other word
+    /// </summary>
+    protected int alredyGunedAmmo;
+
+    /// <summary>
+    ///  Ammo that ready to shot in barrel in other word maximum
+    /// </summary>
+    public int alredyGunedAmmoMax;
 
 	protected Pawn owner;
 
@@ -70,6 +132,8 @@ public class BaseWeapon : DestroyableNetworkObject {
 	private bool isReload = false;
 
 	protected bool isShooting = false;
+
+    protected bool isPumping = false;
 
 	private float fireTimer =  0.0f;
 	
@@ -90,6 +154,7 @@ public class BaseWeapon : DestroyableNetworkObject {
 	public const float MAXDIFFERENCEINANGLE=0.7f;
 
 	private bool shootAfterReload;
+    private bool pumpAfterReload;
 
 	//звуки
 	protected soundControl sControl;//глобальный обьект контроллера звука
@@ -180,25 +245,151 @@ public class BaseWeapon : DestroyableNetworkObject {
 			reloadTimer-=Time.deltaTime;
 			return;
 		}
-		if (isShooting) {
-			if(fireTimer<=0){
-				fireTimer = fireInterval;
-				Fire();
-			}
-		}
-		if (fireTimer >= 0) {
-			fireTimer-=Time.deltaTime;
-		}
+        switch(prefiretype){
+            case PREFIRETYPE.Normal:
+		        if (isShooting) {
+                    ShootTick();
+		        }
+                if (fireTimer >= 0)
+                {
+                    fireTimer -= Time.deltaTime;
+                }
+
+                break;
+            default:
+                if (isShooting||isPumping)
+                {
+                    if (_pumpAmount >= pumpAmount)
+                    {
+                        if (isShooting)
+                        {
+                            ShootTick();
+
+                        }
+                        else
+                        {
+                            switch (afterPumpAction) {
+                                case AFTERPUMPACTION.Fire:
+                                    if (fireTimer <= 0)
+                                    {
+                                        fireTimer = fireInterval;
+                                        Fire();
+                                    }
+                                    break;
+                                case AFTERPUMPACTION.Ammo:
+                                    _afterPumpAmount += Time.deltaTime*afterPumpCoef;
+                                    if (_afterPumpAmount >= 1.0f) {
+                                        _afterPumpAmount = 0;
+                                        if (curAmmo > 0 )
+                                        {
+                                            curAmmo--;
+                                          
+                                        } 
+                                     
+                                    }
+                                    break;
+                                case AFTERPUMPACTION.Damage:
+                                    BaseDamage selfdamage = new BaseDamage(damageAmount);
+                                    selfdamage.Damage = Time.deltaTime*afterPumpCoef;
+                                    owner.Damage(selfdamage, owner.gameObject);
+                                    break;
+                            }
+                        }
+                        if (fireTimer >= 0)
+                        {
+                            fireTimer -= Time.deltaTime;
+                        }
+
+                    }
+                    else
+                    {
+                        switch (prefiretype)
+                        {
+                            case PREFIRETYPE.Salvo:
+                                if (curAmmo == 0 && alredyGunedAmmo == 0) {
+                                    ReloadStart();
+                                }
+                               _pumpCoef += Time.deltaTime*pumpCoef;
+                               if (_pumpCoef >= 1.0f)
+                               {
+                                   _pumpCoef = 0;
+                                   if(curAmmo > 0 &&alredyGunedAmmoMax > alredyGunedAmmo){
+                                       alredyGunedAmmo++;
+                                       curAmmo--;
+                                   }
+                               }
+
+                                break;
+                         }
+                        _pumpAmount += Time.deltaTime;
+                    }
+                }
+                break;
+        }
+     
 	}
+
+    private void ShootTick()
+    {
+        if (fireTimer <= 0)
+        {
+            fireTimer = fireInterval;
+            Fire();
+        }
+        if (_waitForRelease && !waitForRelease)
+        {
+            _releaseInterval += Time.deltaTime;
+            if (releaseInterval < _releaseInterval)
+            {
+                _releaseInterval = 0.0f;
+                _amountInShoot = 0;
+                _waitForRelease = false;
+            }
+        }
+    }
 	public virtual void StartFire(){
 		isShooting = true;
 
 	}
+    public virtual void StartPumping()
+    {
+        isPumping = true;
+
+    }
+    public virtual void StopPumping()
+    {
+        isPumping = false;
+        if (!isShooting)
+        {
+            _pumpCoef = 0.0f;
+            _pumpAmount = 0.0f;
+        }
+        pumpAfterReload = false;
+    
+    }
 	public virtual void StopFire(){
+        switch (prefiretype)
+        {
+            case PREFIRETYPE.Normal:
+            case PREFIRETYPE.Spooling:
+
+                break;
+            default:
+                Fire();
+                break;
+        }
 		isShooting = false;
 		shootAfterReload = false;
 		ReleaseFire ();
-	}
+        _waitForRelease = false;
+        _amountInShoot = 0;
+        fireTimer = fireInterval;
+        if (!isPumping) {
+            _pumpCoef = 0.0f;
+            _pumpAmount = 0.0f;
+        }
+
+    }
 	
 	public void ReloadStart(){
 		if (isReload) {
@@ -211,6 +402,11 @@ public class BaseWeapon : DestroyableNetworkObject {
 				StopFire();
 				shootAfterReload = true;
 			}
+            if (isPumping)
+            {
+                StopPumping();
+                pumpAfterReload = true;
+            }
 			//играем звук перезарядки
 			sControl.playClip (reloadSound);
 			if(owner.animator!=null){
@@ -233,6 +429,10 @@ public class BaseWeapon : DestroyableNetworkObject {
 			shootAfterReload=false;
 			StartFire();
 		}
+        if (pumpAfterReload) {
+            pumpAfterReload = false;
+            StartPumping();
+        }
 		if (owner.player != null) {
 			EventHolder.instance.FireEvent (typeof(LocalPlayerListener), "EventPawnReload", owner.player);
 		}
@@ -252,6 +452,10 @@ public class BaseWeapon : DestroyableNetworkObject {
 		}
 		return 0.0f;
 	}
+    public float PumpCoef()
+    {
+        return _pumpAmount / pumpAmount * 100.0f;
+    }
 	//temporary function to fix wrong aiming
 	public virtual void AimFix(){
 
@@ -260,15 +464,24 @@ public class BaseWeapon : DestroyableNetworkObject {
 		if (!CanShoot ()) {
 			return;		
 		}
-	
 
+        LogicShoot();
+        
 		if(curAmmo>0){
 			curAmmo--;
 		}else{
-			if(clipSize>0){
-				ReloadStart();
-				return;
-			}
+            if (alredyGunedAmmo <= 0)
+            {
+                if (clipSize > 0)
+                {
+                    ReloadStart();
+                    return;
+                }
+            }
+            else
+            {
+                alredyGunedAmmo--;
+            }
 		}
 			//играем звук стрельбы
 		
@@ -278,34 +491,75 @@ public class BaseWeapon : DestroyableNetworkObject {
 		
 		owner.shootEffect();
 
-				
-		switch (amunitionType) {
-		case AMUNITONTYPE.SIMPLEHIT:
-			sControl.playClip (fireSound);
-			DoSimpleDamage();
-			break;
-		case AMUNITONTYPE.PROJECTILE:
-			sControl.playClip (fireSound);
-			GenerateProjectile();
-			break;
-		case AMUNITONTYPE.RAY:
-			
-			break;
-		case AMUNITONTYPE.HTHWEAPON:
-			sControl.playClip (fireSound);
-			owner.animator.StartAttackAnim(attackAnim);
-			ChangeWeaponStatus(true);
-			break;
-			
-		}
+        if (alredyGunedAmmo > 0)
+        {
+            for (int i = 0; i < alredyGunedAmmo; i++)
+            {
+                ActualFire();
+            }
+            alredyGunedAmmo = 0;
+        }
+        else
+        {
+            ActualFire();
+        }
 	
 		owner.HasShoot ();
+        AfterShootLogic();
 		//photonView.RPC("FireEffect",PhotonTargets.Others);
 	}
 
+    private void ActualFire()
+    {
+        switch (amunitionType)
+        {
+            case AMUNITONTYPE.SIMPLEHIT:
+                sControl.playClip(fireSound);
+                DoSimpleDamage();
+                break;
+            case AMUNITONTYPE.PROJECTILE:
+                sControl.playClip(fireSound);
+                GenerateProjectile();
+                break;
+            case AMUNITONTYPE.RAY:
 
+                break;
+            case AMUNITONTYPE.HTHWEAPON:
+                sControl.playClip(fireSound);
+                owner.animator.StartAttackAnim(attackAnim);
+                ChangeWeaponStatus(true);
+                break;
+
+        }
+    }
+
+    public virtual  void LogicShoot()
+    {
+        _amountInShoot++;
+        _releaseInterval = 0.0f;
+        switch (firetype)
+        {
+            case FIRETYPE.SEMIAUTO:
+                if (_amountInShoot >= amountInShoot) {
+                    _waitForRelease = true; 
+                }
+                break;
+            case FIRETYPE.BOLT:
+                _waitForRelease = true;
+                break;
+        }
+
+    }
+
+    public virtual void AfterShootLogic()
+    {
+
+    }
 	public virtual bool CanShoot (){
-
+        if (_waitForRelease)
+        {
+            return false;
+        }
 		Vector3 aimDir = (owner.getCachedAimRotation() -muzzlePoint.position).normalized;
 		Vector3 realDir = muzzlePoint.forward;
 		float angle = Vector3.Dot (aimDir, realDir);
@@ -446,4 +700,6 @@ public class BaseWeapon : DestroyableNetworkObject {
 		return (muzzlePoint.position + muzzleOffset - curTransform.position).sqrMagnitude;
 	}
 
+
+  
 }

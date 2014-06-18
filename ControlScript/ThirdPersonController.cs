@@ -283,6 +283,7 @@ public float CalculateJumpVerticalSpeed ( float targetJumpHeight  )
             doubleJump = true;
             characterState = CharacterState.DoubleJump;
 		} else{
+            lastDoubleTime = Time.time;
 				characterState = CharacterState.Jumping;	
 		}
 		jumping = true;
@@ -310,6 +311,16 @@ public float CalculateJumpVerticalSpeed ( float targetJumpHeight  )
 				
 								pawn.StopFire ();
 						}
+                        if (Input.GetButtonDown("PreFire"))
+                        {
+
+                            pawn.StartPumping();
+                        }
+                        if (Input.GetButtonUp("PreFire"))
+                        {
+
+                            pawn.StopPumping();
+                        }
 						if (Input.GetButtonUp ("Reload")) {
 							
 							pawn.Reload ();
@@ -341,7 +352,7 @@ void ApplyDoubleJumping() {
             switch (pawn.GetState())
             {
                 case CharacterState.DoubleJump:
-                     if ((doubleJump && Input.GetButton("Jump")) || Input.GetButton("Sprint"))
+                     if ((Input.GetButton("Jump")) || Input.GetButton("Sprint"))
                     {
                         characterState = CharacterState.DoubleJump;
 
@@ -356,7 +367,7 @@ void ApplyDoubleJumping() {
                 case CharacterState.Sprinting:
                     if (lastDoubleTime < Time.time - 1.0f)
                     {
-                        if ((doubleJump && Input.GetButton("Jump")) || Input.GetButton("Sprint"))
+                        if ((Input.GetButton("Jump")) || Input.GetButton("Sprint"))
                         {
                             characterState = CharacterState.DoubleJump;
                             lastDoubleTime = Time.time;
@@ -432,7 +443,7 @@ public void WallLand(){
 			//
 		}
 	}
-public void WallJump()
+public void WallJumpMessage()
 {
     lastDoubleTime = Time.time;
 }

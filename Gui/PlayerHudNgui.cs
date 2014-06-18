@@ -16,6 +16,7 @@ public class PlayerHudNgui : MonoBehaviour {
     public UILabel reloadTime;
     
     public UILabel jetPackCharge;
+    public UILabel pumpLabel;
     public UILabel gunName;
     //frags labels
     public UILabel Kills;
@@ -100,8 +101,8 @@ public class PlayerHudNgui : MonoBehaviour {
             if (reloadingSprite) reloadingSprite.fillAmount = 1 - Stats.reloadTime;
 
             if (jetPackCharge) jetPackCharge.text = Stats.jetPackCharge.ToString("0.0");
-          
-
+            if (pumpLabel) pumpLabel.text = Stats.pumpCoef.ToString("0.0");
+     
             if (Kills) Kills.text = LocalPlayer.Score.Kill.ToString();
             if (Death) Death.text = LocalPlayer.Score.Death.ToString();
             if (Assists) Assists.text = LocalPlayer.Score.Assist.ToString();

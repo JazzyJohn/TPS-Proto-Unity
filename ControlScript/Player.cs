@@ -474,7 +474,7 @@ public class Player : MonoBehaviour {
 				stats.gun  = curPawn.CurWeapon;
 				stats.ammoInBag = curPawn.GetAmmoInBag ();
 				stats.reloadTime = curPawn.CurWeapon.ReloadTimer();
-			
+                stats.pumpCoef = curPawn.CurWeapon.PumpCoef();
 				
 			}
 			stats.jetPackCharge  = curPawn.GetJetPackCharges();

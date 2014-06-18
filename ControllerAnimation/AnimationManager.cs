@@ -285,17 +285,17 @@ public class AnimationManager : MonoBehaviour
 
 		switch(direction){
 			case AnimDirection.Front:
-				animator.SetTrigger ("Death");
+                animator.SetTrigger("Front_death");
 				break;
 			case AnimDirection.Back:
-				animator.SetTrigger ("DeathBack");
+                animator.SetTrigger("Back_death");
 				break;
 		
 		}
 	}
 	
 	public void ShootAnim(){
-		animator.SetTrigger ("Shoot");
+		//animator.SetTrigger ("Shoot");
 	}
 	public void PlayTaunt(string tauntName){
 		SetNotMainLayer (0.0f);
@@ -331,6 +331,9 @@ public class AnimationManager : MonoBehaviour
 		[HideInInspector]
 		public float BonesLenght;
 		public void LegStep(){
+			if (BonesLenght + FootHeight <= 0) {
+				return;
+			}
 			LegBone LegBoneFirst = LegBones[0];
 			LegBone LegBoneEnd = LegBones[LegBones.Length - 1];
 			Vector3 RayPoint = new Vector3(LegBoneEnd.Bone.position.x, LegBoneFirst.Bone.position.y, LegBoneEnd.Bone.position.z);

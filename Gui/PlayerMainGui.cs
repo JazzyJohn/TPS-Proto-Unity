@@ -85,6 +85,7 @@ public class PlayerMainGui : MonoBehaviour {
 		public float ammoInBag=0;
 		public float reloadTime=0;
 		public float jetPackCharge= 0;
+        public float pumpCoef = 0;
 	       
 	}
 	public class LevelStats{
