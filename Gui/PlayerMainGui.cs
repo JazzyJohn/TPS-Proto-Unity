@@ -598,6 +598,20 @@ public class PlayerMainGui : MonoBehaviour {
 			ChageState (GUIState.Respawn);
 		}
 	}
+	public void InitKillCam(Pawn killer){
+		if (killer != null) {
+				KillCamera s_Instance =FindObjectOfType<KillCamera>();
+				s_Instance.enabled = true;
+				if (s_Instance.Init (killer)) {
+						Debug.Log("killcam");
+						ChageState (GUIState.KillCam);
+				} else {
+						ChageState (GUIState.Respawn);
+				}
+		} else {
+			ChageState (GUIState.Respawn);
+		}
+	}
 	public void StopKillCam(){
 		ChageState(GUIState.Respawn);
 	}

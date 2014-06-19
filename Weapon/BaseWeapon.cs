@@ -10,13 +10,22 @@ public class BaseWeapon : DestroyableNetworkObject {
 		public double timeShoot;
 		public Quaternion  direction;
 		public Vector3 position;
+		public float power;
+		public float range;
+		public int viewId;
 		public void PhotonSerialization(PhotonStream stream){
+			stream.SendNext (power);
+
+			stream.SendNext( range);
+			stream.SendNext( viewId);
 			stream.SendNext (timeShoot);
 
 			stream.SendNext( direction);
 			ServerHolder.WriteVectorToShort (stream, position);
 		}
 		public void PhotonDeserialization(PhotonStream stream){
+			power= (float)stream.ReceiveNext ();
+			range= (float)stream.ReceiveNext ();
 			timeShoot = (double)stream.ReceiveNext ();
 			direction = (Quaternion)stream.ReceiveNext ();
 			position = ServerHolder.ReadVectorFromShort (stream);
@@ -97,10 +106,30 @@ public class BaseWeapon : DestroyableNetworkObject {
 	public int clipSize;
 
 	public BaseDamage damageAmount;
-
+	/// <summary>
+    ///  Rand to Shoot direction in normal state
+    /// </summary>
 	public float normalRandCoef;
-
+	/// <summary>
+    ///  Rand to Shoot direction in aim state
+    /// </summary>
 	public float aimRandCoef;
+	/// <summary>
+    ///  Rand to Shoot direction add after one shoot;
+    /// </summary>
+	public float randPerShoot;
+	/// <summary>
+    ///  Rand to Shoot direction summary from some effects;
+    /// </summary>
+	protected float _randShootCoef=0.0f;
+	/// <summary>
+    /// How cooling move to zero;
+    /// </summary>
+	public float randCoolingEffect;
+	/// <summary>
+    ///MAximum of all random Effect;
+    /// </summary>
+	public float maxRandEffect;
 
 	public GameObject projectilePrefab;
 	
@@ -261,6 +290,7 @@ public class BaseWeapon : DestroyableNetworkObject {
                 {
                     if (_pumpAmount >= pumpAmount)
                     {
+						
                         if (isShooting)
                         {
                             ShootTick();
@@ -303,13 +333,14 @@ public class BaseWeapon : DestroyableNetworkObject {
                     }
                     else
                     {
+						_pumpCoef += Time.deltaTime*pumpCoef;
                         switch (prefiretype)
                         {
                             case PREFIRETYPE.Salvo:
                                 if (curAmmo == 0 && alredyGunedAmmo == 0) {
                                     ReloadStart();
                                 }
-                               _pumpCoef += Time.deltaTime*pumpCoef;
+                               
                                if (_pumpCoef >= 1.0f)
                                {
                                    _pumpCoef = 0;
@@ -320,12 +351,19 @@ public class BaseWeapon : DestroyableNetworkObject {
                                }
 
                                 break;
+							default:
+								  if (curAmmo == 0) {
+                                    ReloadStart();
+                                }
+                               
+								break;
                          }
                         _pumpAmount += Time.deltaTime;
                     }
                 }
                 break;
         }
+		_randShootCoef-=randCoolingEffect*Time.deltaTime;
      
 	}
 
@@ -490,18 +528,20 @@ public class BaseWeapon : DestroyableNetworkObject {
 		}
 		
 		owner.shootEffect();
-
+	
         if (alredyGunedAmmo > 0)
         {
             for (int i = 0; i < alredyGunedAmmo; i++)
             {
                 ActualFire();
             }
+			_randShootCoef+=alredyGunedAmmo*randPerShoot;
             alredyGunedAmmo = 0;
         }
         else
         {
             ActualFire();
+			_randShootCoef+=randPerShoot;
         }
 	
 		owner.HasShoot ();
@@ -531,6 +571,7 @@ public class BaseWeapon : DestroyableNetworkObject {
                 break;
 
         }
+		
     }
 
     public virtual  void LogicShoot()
@@ -606,11 +647,11 @@ public class BaseWeapon : DestroyableNetworkObject {
 			}
 		}
 	}
-	protected virtual void GenerateProjectile(){
-		Vector3 startPoint  = muzzlePoint.position+muzzleOffset;
-		Quaternion startRotation = getAimRotation();
-		GameObject proj;
-		float effAimRandCoef = 0.0f;
+	/// <summary>
+    /// Generate random distribution coef for projectile
+    /// </summary>
+	protected float GetRandomeDirectionCoef(){
+		float effAimRandCoef = _randShootCoef;
 		if (owner.isAiming) {
 			effAimRandCoef=aimRandCoef;
 		}else{
@@ -618,16 +659,65 @@ public class BaseWeapon : DestroyableNetworkObject {
 		}
 
 		effAimRandCoef+= owner.AimingCoef ();
+		if(effAimRandCoef>maxRandEffect){
+			effAimRandCoef =maxRandEffect;
+		}
+		if(prefiretype==PREFIRETYPE.ChargedAccuracy){
+			effAimRandCoef-= _pumpCoef;
+			_pumpCoef=0;
+		}
+		return effAimRandCoef;
+	}
+	/// <summary>
+    /// Return target from owner;
+    /// </summary>
+	protected Pawn GetGuidanceTarget(){
+		Transform target  = owner.curLookTarget;
+		if(target!=null){
+			return target.GetComponent<Pawn>();
+		}
+		return null;
+	}
+	protected virtual void GenerateProjectile(){
+		Vector3 startPoint  = muzzlePoint.position+muzzleOffset;
+		Quaternion startRotation = getAimRotation();
+		GameObject proj;
+		float effAimRandCoef = GetRandomeDirectionCoef();
+		
 		if (effAimRandCoef > 0) {
 			startRotation = Quaternion.Euler (startRotation.eulerAngles + new Vector3 (Random.Range (-1 * effAimRandCoef, 1 * effAimRandCoef), Random.Range (-1 * effAimRandCoef, 1 * effAimRandCoef), Random.Range (-1 * effAimRandCoef, 1 * effAimRandCoef)));
 		}
 		proj=Instantiate(projectilePrefab,startPoint,startRotation) as GameObject;
-		if (photonView.isMine) {
-			SendShoot(startPoint,startRotation);
+		float power=0;
+		float range = 0;
+		int viewId = 0;
+		switch(prefiretype){
+			case PREFIRETYPE.ChargedPower:
+				power += _pumpCoef;
+			break;
+			case PREFIRETYPE.ChargedRange:
+				range += _pumpCoef;
+			break;
+			case PREFIRETYPE.Guidance:
+				if(_pumpCoef>=1.0f){
+					Pawn target = GetGuidanceTarget();
+					GuidanceProjectile guidanceScript  = proj.GetComponent<GuidanceProjectile>();
+					if(guidanceScript!=null&&Pawn!=null){
+						guidanceScript.target = target;
+						viewId = target.photonView.viewID;
+					}
+				}
+			break;
 		}
+		if (photonView.isMine) {
+			SendShoot(startPoint,startRotation,power,range,viewId);
+		}
+		
 		BaseProjectile projScript =proj.GetComponent<BaseProjectile>();
 		projScript.damage =new BaseDamage(damageAmount) ;
 		projScript.owner = owner.gameObject;
+		projScript.damage.Damage+=power;
+		projScript.range+=range;
 	}
 	protected virtual void ReplicationGenerate (){
 		if(shootsToSpawn.Count>0){
@@ -637,26 +727,42 @@ public class BaseWeapon : DestroyableNetworkObject {
 		while(shootsToSpawn.Count>0){
 			ShootData spawnShoot = shootsToSpawn.Dequeue();
 			
-			GenerateProjectileRep(spawnShoot.position,spawnShoot.direction,spawnShoot.timeShoot);
+			BaseProjectile  proj = GenerateProjectileRep(spawnShoot.position,spawnShoot.direction,spawnShoot.timeShoot);
 			if (rifleParticleController != null) {
 				rifleParticleController.CreateShootFlame ();
 			}
+			proj.damage.Damage+=spawnShoot.power;
+			proj.range+=spawnShoot.range;
+			switch(prefiretype){
+				case PREFIRETYPE.Guidance:
+					GuidanceProjectile guidanceScript  = proj.GetComponent<GuidanceProjectile>();
+					if(guidanceScript!=null&&spawnShoot.viewId!=0){
+						Pawn target =PhotonView.Find(spawnShoot.viewId).GetComponent<Pawn>();
+				
+					
+						guidanceScript.target = target;
+					}
+				break;
+			}
 		}
 	}
-	protected void GenerateProjectileRep(Vector3 startPoint,Quaternion startRotation,double timeShoot){
+	protected BaseProjectile GenerateProjectileRep(Vector3 startPoint,Quaternion startRotation,double timeShoot){
 
 		GameObject proj=Instantiate(projectilePrefab,startPoint,startRotation) as GameObject;
 		BaseProjectile projScript = proj.GetComponent<BaseProjectile>();
 		projScript.transform.Translate (startRotation*Vector3.forward*(float)(PhotonNetwork.time-timeShoot));
 		projScript.damage =new BaseDamage(damageAmount) ;
 		projScript.owner = owner.gameObject;
-
+		return projScript;
 	}
 
-	protected void SendShoot(Vector3 position, Quaternion rotation){
+	protected void SendShoot(Vector3 position, Quaternion rotation,float power,float range,int viewId){
 		ShootData send = new ShootData ();
 		send.position = position;
 		send.direction = rotation;
+		send.power = power;
+		send.range = range;
+		send.viewId = viewId;
 		send.timeShoot = PhotonNetwork.time;
 		shootsToSend.Enqueue (send);
 	}

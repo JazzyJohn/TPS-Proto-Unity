@@ -536,7 +536,7 @@ public class Pawn : DamagebleObject {
 			if(player.GetRobot()==this){
 				player.RobotDead(killerPlayer);
 			}else{
-				player.PawnDead(killerPlayer);
+				player.PawnDead(killerPlayer,killerPawn);
 			}
 		}
 
@@ -1046,9 +1046,12 @@ public class Pawn : DamagebleObject {
 					}else{
 						aimRotation =myTransform.position+myTransform.forward*10;
 					}
+					curLookTarget= null;
 				}else{
 					aimRotation =Vector3.Lerp( aimRotation,enemy.myTransform.position,Time.deltaTime*10);
+					curLookTarget=enemy.myTransform;
 				}
+			
 			}else{
 				if(cameraController.enabled ==false){
 					aimRotation= myTransform.position +myTransform.forward*50;

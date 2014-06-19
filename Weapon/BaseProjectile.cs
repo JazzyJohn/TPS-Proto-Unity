@@ -31,6 +31,10 @@ public class BaseProjectile : MonoBehaviour {
 	public BaseDamage damage;
 	public float startImpulse;
 	public GameObject owner;
+	public float range;
+	public float minDamageRange;
+	static float minimunProcent = 0.1;
+	public Vector3 startPosition;
 	public GameObject hitParticle;
 
 	public float splashRadius;
@@ -47,12 +51,48 @@ public class BaseProjectile : MonoBehaviour {
 
 	protected DamagebleObject shootTarget;
 	
+	/// <summary>
+    /// Define Projectile Hit Effect 
+    /// </summary>
+    public enum HITEFFECT {Destruction,Rebound, Penetration,Cluster,Sticking,Flak,NextTarget,AdjacentTarget}
+	
+	public HITEFFECT projHtEffect;
+	
+	/// <summary>
+    /// Define is Any Detonator effects
+    /// </summary>
+    public enum DETONATOR {Impact,ImpactCharacter, Manual,Proximity,Timed}
+	
+	public DETONATOR detonator;
+	
+	/// <summary>
+    /// Define is Speed Change Effect
+    /// </summary>
+    public enum SPEEDCHANGE {Uniform,Acceleration,Deceleration}
+	
+	public SPEEDCHANGE speedchange;
+	
+	/// <summary>
+    /// Define is attraction of projectile
+    /// </summary>
+    public enum ATTRACTION {NoAttraction,Gravitation,Target,LaserGuidance,Homing}
+	
+	public ATTRACTION attarction;
+	
+	/// <summary>
+    /// Define is trajectory of projectile
+    /// </summary>
+    public enum TRAJECTORY {Line,Lobbed,Mortar,Bend,Corkscrew,Scuttle,Wave}
+	
+	public TRAJECTORY attarction;
+	
 	void Start () {
 		aSource = GetComponent<AudioSource> ();
 		sControl = new soundControl (aSource);//создаем обьект контроллера звука и передаем указатель на источник
 		sControl.playClip (reactiveEngineSound);
 
 		mTransform = transform;
+		startPosition= mTransform.position;
 		mRigidBody = rigidbody;
 		mRigidBody.velocity = mTransform.TransformDirection(Vector3.forward * startImpulse);
 		
@@ -67,7 +107,7 @@ public class BaseProjectile : MonoBehaviour {
 		}
 	}
 	
-	void Update() {
+	protected void Update() {
 		
 		RaycastHit hit;
 		mTransform.rotation = Quaternion.LookRotation ( mRigidBody.velocity);
@@ -85,7 +125,15 @@ public class BaseProjectile : MonoBehaviour {
 		if (owner == hit.transform.gameObject||used) {
 			return;
 		}
-		used = true;
+		float distance = (startPosition-mTransform.position).magnitude
+		if(range<distance){
+			float coef = 1 -(distance -range)/minDamageRange;
+			if(coef<minimunProcent){
+				coef =minimunProcent;
+			}
+			damage.Damage=damage.Damage*coef;
+		}
+	
 		damage.pushDirection = mTransform.forward;
 		damage.hitPosition = hit.point;
 		DamagebleObject obj = hit.transform.gameObject.GetComponent <DamagebleObject>();
@@ -95,7 +143,9 @@ public class BaseProjectile : MonoBehaviour {
 			//Debug.Log ("HADISH INTO SOME PLAYER! " + hit.transform.gameObject.name);
 			Destroy (gameObject, 0.1f);
 		}
-
+		
+		used = true;
+		
 		if(hitParticle!=null){
 			Instantiate(hitParticle, hit.point, Quaternion.LookRotation(hit.normal));
 		}

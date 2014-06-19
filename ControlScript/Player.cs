@@ -318,10 +318,10 @@ public class Player : MonoBehaviour {
 		}
 	
 	}
-	public void PawnDead(Player Killer){
+	public void PawnDead(Player Killer,Pawn killerPawn ){
 	
 
-		int viewID = 0;
+		int viewID = 0,pawnViewId =0;
 		if (Killer != null) {
 			viewID = Killer.photonView.viewID;
 			
@@ -330,12 +330,12 @@ public class Player : MonoBehaviour {
 		} else {
 			EventHolder.instance.FireEvent(typeof(LocalPlayerListener),"EventPawnDeadByAI",this);
 		}
-		photonView.RPC("RPCPawnDead",photonView.owner,viewID);
+		photonView.RPC("RPCPawnDead",photonView.owner,viewID,pawnViewId);
 			
 
 	}
 	[RPC]
-	public void RPCPawnDead(int viewId){
+	public void RPCPawnDead(int viewId,int pawnViewId){
 		
 		Score.Death++;
 		isStarted = false;
@@ -350,7 +350,8 @@ public class Player : MonoBehaviour {
 		
 			StatisticHandler.SendPlayerKillbyPlayer(UID, PlayerName, killer.UID, killer.PlayerName);
 		} else {
-			PlayerMainGui.instance.InitKillCam(null);
+			Pawn killer = PhotonView.Find (pawnViewId).GetComponent<Pawn> ();
+			PlayerMainGui.instance.InitKillCam(killer);
 			StatisticHandler.SendPlayerKillbyNPC(UID, PlayerName);
 		}
 		
