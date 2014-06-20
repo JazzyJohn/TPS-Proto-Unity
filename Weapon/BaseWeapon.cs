@@ -671,12 +671,10 @@ public class BaseWeapon : DestroyableNetworkObject {
 	/// <summary>
     /// Return target from owner;
     /// </summary>
-	protected Pawn GetGuidanceTarget(){
+	protected Transform GetGuidanceTarget(){
 		Transform target  = owner.curLookTarget;
-		if(target!=null){
-			return target.GetComponent<Pawn>();
-		}
-		return null;
+	
+		return target;
 	}
 	protected virtual void GenerateProjectile(){
 		Vector3 startPoint  = muzzlePoint.position+muzzleOffset;
@@ -688,6 +686,7 @@ public class BaseWeapon : DestroyableNetworkObject {
 			startRotation = Quaternion.Euler (startRotation.eulerAngles + new Vector3 (Random.Range (-1 * effAimRandCoef, 1 * effAimRandCoef), Random.Range (-1 * effAimRandCoef, 1 * effAimRandCoef), Random.Range (-1 * effAimRandCoef, 1 * effAimRandCoef)));
 		}
 		proj=Instantiate(projectilePrefab,startPoint,startRotation) as GameObject;
+		BaseProjectile projScript =proj.GetComponent<BaseProjectile>();
 		float power=0;
 		float range = 0;
 		int viewId = 0;
@@ -700,11 +699,11 @@ public class BaseWeapon : DestroyableNetworkObject {
 			break;
 			case PREFIRETYPE.Guidance:
 				if(_pumpCoef>=1.0f){
-					Pawn target = GetGuidanceTarget();
-					GuidanceProjectile guidanceScript  = proj.GetComponent<GuidanceProjectile>();
-					if(guidanceScript!=null&&Pawn!=null){
-						guidanceScript.target = target;
-						viewId = target.photonView.viewID;
+					Transform target = GetGuidanceTarget();
+				
+					if(target!=null){
+						projScript.target = target;
+						viewId = target.GetComponent<PhotonView>().viewID;
 					}
 				}
 			break;
@@ -713,7 +712,7 @@ public class BaseWeapon : DestroyableNetworkObject {
 			SendShoot(startPoint,startRotation,power,range,viewId);
 		}
 		
-		BaseProjectile projScript =proj.GetComponent<BaseProjectile>();
+		
 		projScript.damage =new BaseDamage(damageAmount) ;
 		projScript.owner = owner.gameObject;
 		projScript.damage.Damage+=power;
@@ -735,12 +734,11 @@ public class BaseWeapon : DestroyableNetworkObject {
 			proj.range+=spawnShoot.range;
 			switch(prefiretype){
 				case PREFIRETYPE.Guidance:
-					GuidanceProjectile guidanceScript  = proj.GetComponent<GuidanceProjectile>();
-					if(guidanceScript!=null&&spawnShoot.viewId!=0){
-						Pawn target =PhotonView.Find(spawnShoot.viewId).GetComponent<Pawn>();
+					if(spawnShoot.viewId!=0){
+						Transform target =PhotonView.Find(spawnShoot.viewId).GetComponent<Transform>();
 				
 					
-						guidanceScript.target = target;
+						proj.target = target;
 					}
 				break;
 			}

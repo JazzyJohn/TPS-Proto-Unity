@@ -31,6 +31,7 @@ public class BaseProjectile : MonoBehaviour {
 	public BaseDamage damage;
 	public float startImpulse;
 	public GameObject owner;
+	public Transform target;
 	public float range;
 	public float minDamageRange;
 	static float minimunProcent = 0.1;
@@ -54,10 +55,13 @@ public class BaseProjectile : MonoBehaviour {
 	/// <summary>
     /// Define Projectile Hit Effect 
     /// </summary>
-    public enum HITEFFECT {Destruction,Rebound, Penetration,Cluster,Sticking,Flak,NextTarget,AdjacentTarget}
+    public enum HITEFFECT {Destruction,Rebound, Penetration,Cluster,Sticking,Flak,NextTarget}
 	
 	public HITEFFECT projHtEffect;
 	
+	public int proojHitCnt;
+	
+	public int projHitMax;
 	/// <summary>
     /// Define is Any Detonator effects
     /// </summary>
@@ -70,19 +74,22 @@ public class BaseProjectile : MonoBehaviour {
     /// </summary>
     public enum SPEEDCHANGE {Uniform,Acceleration,Deceleration}
 	
-	public SPEEDCHANGE speedchange;
+	public SPEEDCHANGE speedChange;
+	
+	public float speedChangeCoef;
 	
 	/// <summary>
     /// Define is attraction of projectile
     /// </summary>
     public enum ATTRACTION {NoAttraction,Gravitation,Target,LaserGuidance,Homing}
 	
-	public ATTRACTION attarction;
+	public ATTRACTION attraction;
 	
+	public float attractionCoef;
 	/// <summary>
     /// Define is trajectory of projectile
     /// </summary>
-    public enum TRAJECTORY {Line,Lobbed,Mortar,Bend,Corkscrew,Scuttle,Wave}
+    public enum TRAJECTORY {Line,Bend,Corkscrew,Scuttle,Wave}
 	
 	public TRAJECTORY attarction;
 	
@@ -105,11 +112,31 @@ public class BaseProjectile : MonoBehaviour {
 				onBulletHit(hit);
 			}
 		}
+		
+		
+			mRigidBody.useGravity  = false;
+}
 	}
 	
 	protected void Update() {
 		
 		RaycastHit hit;
+	
+		switch(attraction){
+			case ATTRACTION.Attraction:
+				mRigidBody.Addforce((target.position -mTransform.position).normalized*attractionCoef,ForceMode.Acceleration);
+			case ATTRACTION.Homing:
+			case ATTRACTION.LaserGuidance:
+				Quaternion rotation = Quaternion.LookRotation((target.position -mTransform.position).normalized);
+				mRigidBody.velocity =  rotation*mRigidBody.velocity;
+			break;
+			case ATTRACTION.Gravitation:
+				
+				mRigidBody.AddForce(new Vector3(0,-gravity * rigidbody.mass,0));		
+			break;
+
+		
+		}		
 		mTransform.rotation = Quaternion.LookRotation ( mRigidBody.velocity);
 		if (Physics.Raycast (transform.position, mRigidBody.velocity.normalized, out hit)){
 			
@@ -117,6 +144,14 @@ public class BaseProjectile : MonoBehaviour {
 			{
 				onBulletHit(hit);
 			}
+		}
+		switch(speedChange){
+			case SPEEDCHANGE.Acceleration:
+				mRigidBody.velocity+= mRigidBody.velocity.normalized*Time.deltaTime*speedChangeCoef;
+			break;
+			case SPEEDCHANGE.Deceleration:
+				mRigidBody.velocity-= mRigidBody.velocity.normalized*Time.deltaTime*speedChangeCoef;
+			break;
 		}
 	}
 	
@@ -142,16 +177,77 @@ public class BaseProjectile : MonoBehaviour {
 			shootTarget= obj;
 			//Debug.Log ("HADISH INTO SOME PLAYER! " + hit.transform.gameObject.name);
 			Destroy (gameObject, 0.1f);
-		}
+		}else{
+			switch(projHtEffect){
+				case HITEFFECT.Destruction:
+					used = true;
+					if(hitParticle!=null){
+						Instantiate(hitParticle, hit.point, Quaternion.LookRotation(hit.normal));
+					}
 		
-		used = true;
-		
-		if(hitParticle!=null){
-			Instantiate(hitParticle, hit.point, Quaternion.LookRotation(hit.normal));
+					Destroy (gameObject, 0.1f);
+				break;
+				case HITEFFECT.Rebound:
+					if(!replication){
+						proojHitCnt++;
+						//TODO: REBOUND LOGIC
+					}else{
+						if(proojHitCnt>=projHitMax){
+							Destroy (gameObject, 0.1f);
+						}
+					}		
+				break;
+				case HITEFFECT.Penetration:
+					if(!replication){
+						proojHitCnt++;
+						//TODO: PRC CALL
+					}else{
+						if(proojHitCnt>=projHitMax){
+							Destroy (gameObject, 0.1f);
+						}
+					}		
+				break;
+				case HITEFFECT.Cluster:
+					//TODO CLASTER LOGIC:
+				
+				
+				break;
+				case HITEFFECT.Sticking:
+					//TODO CLASTER LOGIC:
+					if(!replication){
+				
+					}
+				
+				break;
+				case HITEFFECT.NextTarget:
+					//TODO CLASTER NextTarget: same RPC taht in rebound
+					if(!replication){
+						proojHitCnt++;
+						//TODO: REBOUND LOGIC
+					}else{
+						if(proojHitCnt>=projHitMax){
+							Destroy (gameObject, 0.1f);
+						}
+					}	
+				
+				break;
+			
+			}
 		}
 	
-		Destroy (gameObject, 0.1f);
 
+	}
+	
+	void NewVelocity(Vector3 velocity ,int cnt){
+		mRigidBody.velocity =velocity;
+		proojHitCnt=cnt;
+	}
+	void NewHitCount(int cnt){
+		proojHitCnt=cnt;
+	}
+	void StickPosition(Vector3 position){
+		mTransform.position=position;
+		mRigidBody.velocity =Vector3.zero;
 	}
 	
 	void OnDestroy() {
