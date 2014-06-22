@@ -62,7 +62,8 @@ public class ThirdPersonCamera : MonoBehaviour
 	private bool closeFOV= false;
 	private float startFov =60.0f;
 	public float sprintFov =60.0f;
-	
+
+    private static LayerMask layer = -123909;
 	Vector3 curAddShake= Vector3.zero;
 	
 	void  Awake (){
@@ -233,8 +234,9 @@ public class ThirdPersonCamera : MonoBehaviour
 	//	Debug.DrawRay (wallRay.origin, wallRay.direction);
 		float magnitude = distance*distance+10.0f;
 		//Debug.DrawLine (wallRay.origin,wallRay.origin+ wallRay.direction*distance);
-	
-		foreach (RaycastHit target  in Physics.RaycastAll (wallRay, distance)) {
+
+        foreach (RaycastHit target in Physics.RaycastAll(wallRay, distance, layer))
+        {
 			
 			
 			if(target.distance<magnitude){
@@ -252,7 +254,9 @@ public class ThirdPersonCamera : MonoBehaviour
 			} 
 			
 		}
-		foreach (RaycastHit target  in Physics.SphereCastAll (wallRay, 0.5f,distance)) {
+       
+        foreach (RaycastHit target in Physics.SphereCastAll(wallRay, 0.5f, distance, layer))
+        {
 
 
 			if(target.distance<magnitude){

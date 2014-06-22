@@ -27,7 +27,7 @@ public class WeaponOfExtremities : MonoBehaviour {
 
 	public Pawn owner;
 	
-	public Transform curTransform;
+
 
 	private bool shootAfterReload;
 
@@ -69,14 +69,18 @@ public class WeaponOfExtremities : MonoBehaviour {
 
 	public virtual void StartKick(HTHHitter Attack)
 	{
+        if (!Attack.OnMove) {
+            owner.StopMovement();
+        }
 		Attack.isKick = true;
 	}
 
 	public virtual void StopKick()
 	{
+        owner.StartMovement();
 		foreach(HTHHitter Attack in Weapon)
-		{
-			Attack.StopKick();
+		{   
+            Attack.StopKick();
 					
 		}
 	}

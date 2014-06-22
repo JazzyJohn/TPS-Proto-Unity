@@ -13,8 +13,10 @@ public class BaseWeapon : DestroyableNetworkObject {
 		public float power;
 		public float range;
 		public int viewId;
+        public int projId;
 		public void PhotonSerialization(PhotonStream stream){
-			stream.SendNext (power);
+            stream.SendNext(projId);
+            stream.SendNext (power);
 
 			stream.SendNext( range);
 			stream.SendNext( viewId);
@@ -24,13 +26,17 @@ public class BaseWeapon : DestroyableNetworkObject {
 			ServerHolder.WriteVectorToShort (stream, position);
 		}
 		public void PhotonDeserialization(PhotonStream stream){
+            projId = (int)stream.ReceiveNext();
 			power= (float)stream.ReceiveNext ();
 			range= (float)stream.ReceiveNext ();
+            viewId = (int)stream.ReceiveNext();
 			timeShoot = (double)stream.ReceiveNext ();
 			direction = (Quaternion)stream.ReceiveNext ();
 			position = ServerHolder.ReadVectorFromShort (stream);
 		}
-	}
+
+       
+    }
 
 	private Queue<ShootData> shootsToSend = new Queue<ShootData>();
 
@@ -704,12 +710,16 @@ public class BaseWeapon : DestroyableNetworkObject {
 					if(target!=null){
 						projScript.target = target;
 						viewId = target.GetComponent<PhotonView>().viewID;
+
 					}
 				}
 			break;
 		}
+     
+        projScript.projId = ProjectileManager.instance.GetNextId();
+        projScript.replication = false;
 		if (photonView.isMine) {
-			SendShoot(startPoint,startRotation,power,range,viewId);
+            SendShoot(startPoint, startRotation, power, range, viewId, projScript.projId);
 		}
 		
 		
@@ -730,6 +740,7 @@ public class BaseWeapon : DestroyableNetworkObject {
 			if (rifleParticleController != null) {
 				rifleParticleController.CreateShootFlame ();
 			}
+            proj.projId = spawnShoot.projId;
 			proj.damage.Damage+=spawnShoot.power;
 			proj.range+=spawnShoot.range;
 			switch(prefiretype){
@@ -754,13 +765,15 @@ public class BaseWeapon : DestroyableNetworkObject {
 		return projScript;
 	}
 
-	protected void SendShoot(Vector3 position, Quaternion rotation,float power,float range,int viewId){
+    protected void SendShoot(Vector3 position, Quaternion rotation, float power, float range, int viewId, int projId)
+    {
 		ShootData send = new ShootData ();
 		send.position = position;
 		send.direction = rotation;
 		send.power = power;
 		send.range = range;
-		send.viewId = viewId;
+        send.viewId = viewId;
+        send.projId = projId;
 		send.timeShoot = PhotonNetwork.time;
 		shootsToSend.Enqueue (send);
 	}

@@ -330,6 +330,9 @@ public class Player : MonoBehaviour {
 		} else {
 			EventHolder.instance.FireEvent(typeof(LocalPlayerListener),"EventPawnDeadByAI",this);
 		}
+        if (killerPawn != null) {
+            pawnViewId = killerPawn.photonView.viewID;                
+        }
 		photonView.RPC("RPCPawnDead",photonView.owner,viewID,pawnViewId);
 			
 

@@ -7,6 +7,8 @@ public class HTHHitter : MonoBehaviour {
 	public string NameAttack;
 	protected int attackId;
 
+    public bool OnMove = true;
+
 	public float radiusOfImpact;
 
 	protected Pawn owner;
@@ -92,7 +94,7 @@ public class HTHHitter : MonoBehaviour {
 			for(int i = 0; i< anim.layerCount; i++)
 			{
 				int CurAnim = anim.GetCurrentAnimatorStateInfo(i).nameHash;
-				///Debug.Log (CurAnim + "  " + attackId);
+				//Debug.Log (CurAnim + "  " + attackId);
 				if (CurAnim==attackId)
 				{
 					//Debug.Log(anim.GetCurrentAnimatorStateInfo(i).length);
@@ -114,7 +116,7 @@ public class HTHHitter : MonoBehaviour {
 		{
 			if(!wasDamage){
 				hits = Physics.RaycastAll(myTransform.position, 	myTransform.forward, 2.0f);
-				//Debug.DrawRay(myTransform.position,myTransform.forward*2.0f,Color.red,5.0f);
+			    //Debug.DrawRay(myTransform.position,myTransform.forward*2.0f,Color.red,5.0f);
 				foreach(RaycastHit hit in hits)
 				{
 					onBulletHit(hit);
@@ -141,10 +143,10 @@ public class HTHHitter : MonoBehaviour {
 
 	public virtual  void onBulletHit(RaycastHit hit)
 	{
-		//Debug.Log ("HADISH INTO " + hit.transform);
+       // Debug.Log("HADISH INTO " + hit.transform.gameObject + owner);
 		if (!wasDamage)
 		{
-			if (owner == hit.transform.gameObject) {
+			if (owner.gameObject == hit.transform.gameObject) {
 				return;
 			}
 			if (hit.transform.gameObject.CompareTag ("decoration")) {
@@ -159,6 +161,7 @@ public class HTHHitter : MonoBehaviour {
 				BaseDamage lDamage  = new BaseDamage(damage);
 				//lDamage.pushDirection = hit.point;
 				lDamage.hitPosition = hit.point;
+                lDamage.pushDirection = (hit.point - owner.myTransform.position).normalized;
 				obj.Damage(lDamage,owner.gameObject);
 				//Debug.Log ("HADISH INTO SOME PLAYER! " + hit.transform.gameObject.name);
 			}

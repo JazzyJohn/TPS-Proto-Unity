@@ -206,6 +206,7 @@ public class AnimationManager : MonoBehaviour
     /// Turn on and of IK of aiming
     /// </summary>
     public void ToggleAimPos(bool state){
+        Debug.Log(state);
         if (aimPos != null) {
 
             if (state)
@@ -272,6 +273,8 @@ public class AnimationManager : MonoBehaviour
 		if (State == 0) {
 			return;
 		}
+        Debug.Log(State);
+            
 		animator.SetInteger ("GunType",State);
 	}
 	public void ReloadStart(){
@@ -282,7 +285,8 @@ public class AnimationManager : MonoBehaviour
 
 	public void StartDeath(AnimDirection direction){
         SetNotMainLayer(0.0f);
-
+      // Debug.Log(direction);
+        IKOff();
 		switch(direction){
 			case AnimDirection.Front:
                 animator.SetTrigger("Front_death");
@@ -290,6 +294,7 @@ public class AnimationManager : MonoBehaviour
 			case AnimDirection.Back:
                 animator.SetTrigger("Back_death");
 				break;
+              
 		
 		}
 	}
@@ -320,7 +325,24 @@ public class AnimationManager : MonoBehaviour
 	public void StopShootAniamtion(string animName){
 		animator.SetTrigger (animName+"_end");
 	}
+    public void KnockOut() {
+        animator.enabled = false;
+    }
+    public void StandUp()
+    {
+       
+        animator.enabled = true;
+        SetNotMainLayer(0.0f);
+        animator.Play("GetUp_fromBack");
 
+    }
+    public void StandUpFinish()
+    {
+
+     
+        SetNotMainLayer(1.0f);
+        transform.parent.SendMessage("StandUpFinish", SendMessageOptions.DontRequireReceiver);
+    }
 	[Serializable]
 	public class Leg
 	{
@@ -331,9 +353,7 @@ public class AnimationManager : MonoBehaviour
 		[HideInInspector]
 		public float BonesLenght;
 		public void LegStep(){
-			if (BonesLenght + FootHeight <= 0) {
-				return;
-			}
+		
 			LegBone LegBoneFirst = LegBones[0];
 			LegBone LegBoneEnd = LegBones[LegBones.Length - 1];
 			Vector3 RayPoint = new Vector3(LegBoneEnd.Bone.position.x, LegBoneFirst.Bone.position.y, LegBoneEnd.Bone.position.z);
@@ -349,6 +369,7 @@ public class AnimationManager : MonoBehaviour
 					LegBones[j].Bone.rotation *= Quaternion.AngleAxis(-2f*Angle, LegBones[j].GetWorldDirection());
 				}
 				LegBoneEnd.Bone.rotation = Quaternion.FromToRotation(LegBoneEnd.GetDirection(), hit.normal) * LegBoneEnd.Bone.rotation;
+              //  Debug.Log(LegBoneEnd.Bone.rotation);
 			}
 		}
 		public void LegSet(){

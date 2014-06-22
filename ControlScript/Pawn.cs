@@ -163,9 +163,15 @@ public class Pawn : DamagebleObject {
 
 	private bool canMove=true;
 
-	public bool canPullUp;
+    public bool canPullUp;
 
 	public bool canJump;
+
+    public bool canBeKnockOut;
+
+    private bool _knockOut;
+
+    public float KnockOutTimeOut = 3.0f;
 
 	public float wallRunSpeed;
 
@@ -497,7 +503,12 @@ public class Pawn : DamagebleObject {
 			mainAi.WasHitBy(killer);
 
 		}
-		
+        if (canBeKnockOut) {
+            if (damage.knockOut) {
+                StartCoroutine(KnockOut());
+            }
+        
+        }
 		
 		//Debug.Log ("DAMAGE");
 		base.Damage(damage,killer);
@@ -563,12 +574,15 @@ public class Pawn : DamagebleObject {
 	protected override void ActualKillMe(){
 		characterState = CharacterState.Dead;
 		DamagerEntry last = RetrunLastDamager();
+        StopKick();
+        //Debug.Log(last);
 		if(last==null){
 			animator.StartDeath(AnimDirection.Front);
 		}else{
 			float angle  = Vector3.Dot (last.lastHitDirection,myTransform.forward);
 			// If last hit direction equals negative forward it's hit in face
-			if(angle<=0){
+            
+			if(angle<=0.0f){
 				animator.StartDeath(AnimDirection.Front);
 			}else{
 				animator.StartDeath(AnimDirection.Back);
@@ -578,8 +592,7 @@ public class Pawn : DamagebleObject {
 			cameraController.enabled = false;
 			GetComponent<ThirdPersonController> ().enabled= false;
 		}
-		
-		animator.StartDeath(AnimDirection.Front);
+	    
         StartCoroutine(AfterAnimKill());
 
 	}
@@ -827,6 +840,7 @@ public class Pawn : DamagebleObject {
 			ReplicatePosition();		
 			return;		
 		}
+       
 		if (isSpawn) {//если респавн
 
 			if (emitter==null) {//если все партиклы кончились
@@ -1066,7 +1080,7 @@ public class Pawn : DamagebleObject {
 				float range=aimRange;
 				foreach( RaycastHit hitInfo  in Physics.RaycastAll(centerRay, aimRange))				
 				{
-					if(hitInfo.collider==myCollider)
+					if(hitInfo.collider==myCollider ||hitInfo.transform.IsChildOf(myTransform))
 					{
 						continue;
 					}
@@ -1951,7 +1965,7 @@ public class Pawn : DamagebleObject {
 	
 
 			animator.SetLong(!middleAir);
-
+              //Debug.Log("frontAir");
 			return !frontAir;
 			
 		}
@@ -2050,7 +2064,19 @@ public class Pawn : DamagebleObject {
 		characterState = CharacterState.Idle;
 		nextMovement = Vector3.zero;
 	}
-
+    public void StopMovement()
+    {
+        characterState = CharacterState.Idle;
+        nextMovement = Vector3.zero;
+        canMove = false;
+    }
+    public void StartMovement()
+    {
+        if (!_knockOut)
+        {
+            canMove = true;
+        }
+    }
 	void AddPushForce(Vector3 force){
 		pushingForce += force;
 		StartCoroutine (RemoveForce(force));
@@ -2208,7 +2234,39 @@ public class Pawn : DamagebleObject {
 	public void RPCPlayTaunt(string taunt){
 		animator.PlayTaunt (taunt);
 	}
-	
+    public void StartKnockOut() {
+        if (canBeKnockOut)
+        {
+            StartCoroutine(KnockOut());
+        }
+    }
+
+
+    public IEnumerator KnockOut() {
+        Debug.Log("KnockOut");
+        if (!_knockOut)
+        {
+            _knockOut = true;
+            canMove = false;
+            animator.KnockOut();
+            StopKick();
+            if (photonView.isMine)
+            {
+                photonView.RPC("RPCKnockOut", PhotonTargets.Others);
+            }
+
+            yield return new WaitForSeconds(KnockOutTimeOut);
+            animator.StandUp();
+        }
+    }
+    public void StandUpFinish() {
+        _knockOut = false;
+        canMove = true;
+    }
+    [RPC]
+    public void RPCKnockOut() {
+        StartCoroutine(KnockOut());
+    }
 	 void OnMasterClientSwitched()
     {
         if (PhotonNetwork.isMasterClient&&isAi) {

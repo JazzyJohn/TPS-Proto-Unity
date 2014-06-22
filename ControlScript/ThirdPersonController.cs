@@ -325,6 +325,22 @@ public float CalculateJumpVerticalSpeed ( float targetJumpHeight  )
 							
 							pawn.Reload ();
 						}
+                        if (Input.GetButtonUp("KnockOut"))
+                        {
+
+                            pawn.StartKnockOut();
+						}
+                        if (Input.GetButtonDown("LegKick"))
+                        {
+
+                            pawn.Kick(0);
+                        }
+            
+                        if (Input.GetButtonUp("LegKick"))
+                        {
+
+                            pawn.StopKick();
+                        }
 		
 						float wheel = Input.GetAxis ("Mouse ScrollWheel");
 		

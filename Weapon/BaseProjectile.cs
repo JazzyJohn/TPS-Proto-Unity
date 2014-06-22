@@ -7,6 +7,7 @@ public class BaseDamage{
 	public float Damage;
 	public bool isVsArmor;
 	public float pushForce;
+    public bool knockOut= false;
 	[HideInInspector] 
 	public Vector3 pushDirection;
 	[HideInInspector] 
@@ -19,6 +20,7 @@ public class BaseDamage{
 		Damage = old.Damage;
 		isVsArmor = old.isVsArmor;
 		pushForce = old.pushForce;
+        knockOut = old.knockOut;
 	}
 
 }
@@ -27,14 +29,15 @@ public class BaseDamage{
 public class BaseProjectile : MonoBehaviour {
 
 
-
+    public int projId;
+    public bool replication= true;
 	public BaseDamage damage;
 	public float startImpulse;
 	public GameObject owner;
 	public Transform target;
 	public float range;
 	public float minDamageRange;
-	static float minimunProcent = 0.1;
+	static float minimunProcent = 0.1f;
 	public Vector3 startPosition;
 	public GameObject hitParticle;
 
@@ -47,7 +50,7 @@ public class BaseProjectile : MonoBehaviour {
 	private soundControl sControl;//контроллер звука
 
 	protected Transform mTransform;
-	private Rigidbody mRigidBody;
+    protected Rigidbody mRigidBody;
 	protected bool used=false;
 
 	protected DamagebleObject shootTarget;
@@ -91,9 +94,10 @@ public class BaseProjectile : MonoBehaviour {
     /// </summary>
     public enum TRAJECTORY {Line,Bend,Corkscrew,Scuttle,Wave}
 	
-	public TRAJECTORY attarction;
+	public TRAJECTORY trajectory;
 	
 	void Start () {
+        ProjectileManager.instance.AddProject(projId, this);
 		aSource = GetComponent<AudioSource> ();
 		sControl = new soundControl (aSource);//создаем обьект контроллера звука и передаем указатель на источник
 		sControl.playClip (reactiveEngineSound);
@@ -115,16 +119,17 @@ public class BaseProjectile : MonoBehaviour {
 		
 		
 			mRigidBody.useGravity  = false;
-}
-	}
+    }
+	
 	
 	protected void Update() {
 		
 		RaycastHit hit;
 	
 		switch(attraction){
-			case ATTRACTION.Attraction:
-				mRigidBody.Addforce((target.position -mTransform.position).normalized*attractionCoef,ForceMode.Acceleration);
+			case ATTRACTION.Target:
+				mRigidBody.AddForce((target.position -mTransform.position).normalized*attractionCoef,ForceMode.Acceleration);
+                break;
 			case ATTRACTION.Homing:
 			case ATTRACTION.LaserGuidance:
 				Quaternion rotation = Quaternion.LookRotation((target.position -mTransform.position).normalized);
@@ -132,7 +137,7 @@ public class BaseProjectile : MonoBehaviour {
 			break;
 			case ATTRACTION.Gravitation:
 				
-				mRigidBody.AddForce(new Vector3(0,-gravity * rigidbody.mass,0));		
+				mRigidBody.AddForce(new Vector3(0,-Pawn.gravity * rigidbody.mass,0));		
 			break;
 
 		
@@ -145,6 +150,7 @@ public class BaseProjectile : MonoBehaviour {
 				onBulletHit(hit);
 			}
 		}
+
 		switch(speedChange){
 			case SPEEDCHANGE.Acceleration:
 				mRigidBody.velocity+= mRigidBody.velocity.normalized*Time.deltaTime*speedChangeCoef;
@@ -153,14 +159,37 @@ public class BaseProjectile : MonoBehaviour {
 				mRigidBody.velocity-= mRigidBody.velocity.normalized*Time.deltaTime*speedChangeCoef;
 			break;
 		}
+        if (!replication)
+        {
+            switch(detonator){
+                case DETONATOR.Manual:
+                    if (Input.GetButtonDown("Detonate"))
+                    {
+                        //Debug.Log("boom");
+                        ProjectileManager.instance.InvokeRPC("Detonate", projId);
+                    }
+                break;
+            }
+        }
+
 	}
+    public void Detonate() {
+        Destroy(gameObject);
+    
+    }
 	
-	public virtual  void onBulletHit(RaycastHit hit)
+    public virtual void DamageLogic(DamagebleObject obj){
+    	obj.Damage(damage,owner);
+			shootTarget= obj;
+			//Debug.Log ("HADISH INTO SOME PLAYER! " + hit.transform.gameObject.name);
+			Destroy (gameObject, 0.1f);
+    }
+	public  void onBulletHit(RaycastHit hit)
 	{
 		if (owner == hit.transform.gameObject||used) {
 			return;
 		}
-		float distance = (startPosition-mTransform.position).magnitude
+        float distance = (startPosition - mTransform.position).magnitude;
 		if(range<distance){
 			float coef = 1 -(distance -range)/minDamageRange;
 			if(coef<minimunProcent){
@@ -173,10 +202,8 @@ public class BaseProjectile : MonoBehaviour {
 		damage.hitPosition = hit.point;
 		DamagebleObject obj = hit.transform.gameObject.GetComponent <DamagebleObject>();
 		if (obj != null) {
-			obj.Damage(damage,owner);
-			shootTarget= obj;
-			//Debug.Log ("HADISH INTO SOME PLAYER! " + hit.transform.gameObject.name);
-			Destroy (gameObject, 0.1f);
+            DamageLogic(obj);
+		
 		}else{
 			switch(projHtEffect){
 				case HITEFFECT.Destruction:
@@ -184,6 +211,7 @@ public class BaseProjectile : MonoBehaviour {
 					if(hitParticle!=null){
 						Instantiate(hitParticle, hit.point, Quaternion.LookRotation(hit.normal));
 					}
+                    Debug.Log("destroy");
 		
 					Destroy (gameObject, 0.1f);
 				break;
@@ -288,5 +316,11 @@ public class BaseProjectile : MonoBehaviour {
 				}	
 			}
 		}
+        if (!used) {
+            if (hitParticle != null)
+            {
+                Instantiate(hitParticle, mTransform.position, mTransform.rotation);
+            }
+        }
 	}
 }
