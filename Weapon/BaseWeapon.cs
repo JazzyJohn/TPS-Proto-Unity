@@ -375,6 +375,7 @@ public class BaseWeapon : DestroyableNetworkObject {
 
     private void ShootTick()
     {
+     
         if (fireTimer <= 0)
         {
             fireTimer = fireInterval;
@@ -427,7 +428,7 @@ public class BaseWeapon : DestroyableNetworkObject {
 		ReleaseFire ();
         _waitForRelease = false;
         _amountInShoot = 0;
-        fireTimer = fireInterval;
+       
         if (!isPumping) {
             _pumpCoef = 0.0f;
             _pumpAmount = 0.0f;
@@ -508,7 +509,7 @@ public class BaseWeapon : DestroyableNetworkObject {
 		if (!CanShoot ()) {
 			return;		
 		}
-
+       
         LogicShoot();
         
 		if(curAmmo>0){
@@ -605,6 +606,7 @@ public class BaseWeapon : DestroyableNetworkObject {
 	public virtual bool CanShoot (){
         if (_waitForRelease)
         {
+           
             return false;
         }
 		Vector3 aimDir = (owner.getCachedAimRotation() -muzzlePoint.position).normalized;
@@ -612,6 +614,7 @@ public class BaseWeapon : DestroyableNetworkObject {
 		float angle = Vector3.Dot (aimDir, realDir);
 
 		if (angle < MAXDIFFERENCEINANGLE) {
+           
 			return false;		
 		}
 

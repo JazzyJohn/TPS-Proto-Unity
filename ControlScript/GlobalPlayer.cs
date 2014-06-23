@@ -32,7 +32,7 @@ public class GlobalPlayer : MonoBehaviour {
 	
 
 	void Update(){
-		if(Input.GetButtonDown("FullScreen")){
+		if(InputManager.instance.GetButtonDown("FullScreen")){
 			if(Screen.fullScreen){
 				Screen.SetResolution(960, 600, false);
 			}else{

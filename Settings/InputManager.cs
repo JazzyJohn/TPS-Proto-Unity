@@ -1,19 +1,20 @@
 using UnityEngine;
 using System;
+using System.Xml;
 using System.Collections;
 using System.Collections.Generic;
 
 
-public InputManager{
+public class InputManager{
 
 	
 	private   Dictionary<String,String> keyMap  = new Dictionary<String,String> ();
 	private   float mouseSensitivity = 1.0f;
 	private static string MOUSESENSITIVITY ="mouseSensitivity";
 	
-	public void InputManager(){
+	public InputManager(){
 		XmlDocument xmlDoc = new XmlDocument();
-		xmlDoc.LoadXml(SettingsManager.instance.configTable);
+		xmlDoc.LoadXml(SettingsManager.instance.configTable.text);
 		foreach (XmlNode node in xmlDoc.SelectNodes("input/keys")) {
 			string name = node.SelectSingleNode ("name").InnerText;
 			if( PlayerPrefs.HasKey(name)){
@@ -38,18 +39,20 @@ public InputManager{
 	public  float GetMouseAxis(string name){
 		return Input.GetAxis(name)*mouseSensitivity;
 	}
-	public  float GetButton(string name){
-		return Input.GetKey(keyMap(name));
+    public bool GetButton(string name)
+    {
+        return Input.GetKey(keyMap[name]);
 		
 	}
-	public  float GetButtonUp(string name){
-		return Input.GetKeyUp(keyMap(name));
+	public  bool GetButtonUp(string name){
+		return Input.GetKeyUp(keyMap[name]);
 		
 	}
-	
-	
-	public  float GetButtonDown(string name){
-		return Input.GetKeyDown(keyMap(name));
+
+
+    public bool GetButtonDown(string name)
+    {
+		return Input.GetKeyDown(keyMap[name]);
 		
 	}
 	private  void SetKey(string name,string key){

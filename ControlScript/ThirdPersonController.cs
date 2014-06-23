@@ -144,8 +144,8 @@ public virtual void UpdateSmoothedMovementDirection ()
 	// Always orthogonal to the forward vector
 	Vector3 right= new Vector3(forward.z, 0, -forward.x);
 
-	float v= Input.GetAxisRaw("Vertical");
-	float h= Input.GetAxisRaw("Horizontal");
+    float v = InputManager.instance.GetAxisRaw("Vertical");
+    float h = InputManager.instance.GetAxisRaw("Horizontal");
 
 
 
@@ -208,7 +208,7 @@ public virtual void UpdateSmoothedMovementDirection ()
 			}
 
         }
-        else if (Input.GetButton("Sprint") && pawn.CanSprint())
+        else if (InputManager.instance.GetButton("Sprint") && pawn.CanSprint())
 		{
             targetSpeed *= pawn.groundRunSpeed;
 			if(isMoving){
@@ -296,64 +296,68 @@ public float CalculateJumpVerticalSpeed ( float targetJumpHeight  )
 			Input.ResetInputAxes();
 		}
 		
-		if (Input.GetButtonDown ("Jump"))
+		if (InputManager.instance.GetButtonDown ("Jump"))
 		{
 			lastJumpButtonTime = Time.time;
 			
 			
 		}
 		if (PlayerMainGui.IsMouseAV) {
-						if (Input.GetButtonDown ("Fire1")) {
+            if (InputManager.instance.GetButtonDown("Fire1"))
+            {
 				
 								pawn.StartFire ();
-						}
-						if (Input.GetButtonUp ("Fire1")) {
+			}
+            if (InputManager.instance.GetButtonUp("Fire1"))
+            {
 				
 								pawn.StopFire ();
-						}
-                        if (Input.GetButtonDown("PreFire"))
-                        {
+			}
+            if (InputManager.instance.GetButtonDown("PreFire"))
+            {
 
                             pawn.StartPumping();
-                        }
-                        if (Input.GetButtonUp("PreFire"))
-                        {
+            }
+            if (InputManager.instance.GetButtonUp("PreFire"))
+            {
 
                             pawn.StopPumping();
-                        }
-						if (Input.GetButtonUp ("Reload")) {
+            }
+            if (InputManager.instance.GetButtonUp("Reload"))
+            {
 							
-							pawn.Reload ();
-						}
-                        if (Input.GetButtonUp("KnockOut"))
-                        {
+				pawn.Reload ();
+			}
+            if (InputManager.instance.GetButtonUp("KnockOut"))
+            {
 
-                            pawn.StartKnockOut();
-						}
-                        if (Input.GetButtonDown("LegKick"))
-                        {
+                pawn.StartKnockOut();
+			}
+            if (InputManager.instance.GetButtonDown("LegKick"))
+            {
 
-                            pawn.Kick(0);
-                        }
-            
-                        if (Input.GetButtonUp("LegKick"))
-                        {
+                pawn.Kick(0);
+            }
 
-                            pawn.StopKick();
-                        }
+            if (InputManager.instance.GetButtonUp("LegKick"))
+            {
+
+                pawn.StopKick();
+            }
 		
-						float wheel = Input.GetAxis ("Mouse ScrollWheel");
+			float wheel = Input.GetAxis ("Mouse ScrollWheel");
 		
-						if (wheel < 0) {
-								pawn.GetComponent<InventoryManager> ().PrevWeapon ();
-						}
-						if (wheel > 0) {
-								pawn.GetComponent<InventoryManager> ().NextWeapon ();
-						}
-						if (Input.GetButtonUp ("Taunt")) {
+			if (wheel < 0) {
+					pawn.GetComponent<InventoryManager> ().PrevWeapon ();
+			}
+			if (wheel > 0) {
+					pawn.GetComponent<InventoryManager> ().NextWeapon ();
+			}
+            if (InputManager.instance.GetButtonUp("Taunt"))
+            {
 								
-							pawn.PlayTaunt();
-						}
+				pawn.PlayTaunt();
+			}
                        
 		}
 
@@ -368,7 +372,7 @@ void ApplyDoubleJumping() {
             switch (pawn.GetState())
             {
                 case CharacterState.DoubleJump:
-                     if ((Input.GetButton("Jump")) || Input.GetButton("Sprint"))
+                    if ((InputManager.instance.GetButton("Jump")) || InputManager.instance.GetButton("Sprint"))
                     {
                         characterState = CharacterState.DoubleJump;
 
@@ -383,7 +387,7 @@ void ApplyDoubleJumping() {
                 case CharacterState.Sprinting:
                     if (lastDoubleTime < Time.time - 1.0f)
                     {
-                        if ((Input.GetButton("Jump")) || Input.GetButton("Sprint"))
+                        if ((InputManager.instance.GetButton("Jump")) || InputManager.instance.GetButton("Sprint"))
                         {
                             characterState = CharacterState.DoubleJump;
                             lastDoubleTime = Time.time;

@@ -74,7 +74,8 @@ class ProjectileManager: MonoBehaviour
         photonView.RPC("RPCInvoke", PhotonTargets.All, theObjects);
     }
     [RPC]
-    public void RPCInvoke(string function, int id) {
+    public void RPCInvoke(params object[] theObjects)
+    {
 		string function = (string)theObjects[0];
 		int id = (int)theObjects[1];
 		object[] addParams  = new object[theObjects.Length-2];

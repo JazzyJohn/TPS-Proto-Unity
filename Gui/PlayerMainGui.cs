@@ -170,7 +170,8 @@ public class PlayerMainGui : MonoBehaviour {
 			return;
 		}
 
-		if (Input.GetButton ("ScoreBtn")) {
+        if (InputManager.instance.GetButton("ScoreBtn"))
+        {
 			
 						ChageState (GUIState.Playerlist);
 						stat.Activate();
@@ -485,7 +486,7 @@ public class PlayerMainGui : MonoBehaviour {
 			}
 			if (seenablePawn [i].team == LocalPlayer.team) {
 			
-				GUI.Label (mark, publicName+"\n"+target.health.ToString(), AliaMark);
+				GUI.Label (mark, publicName+"\n"+target.health.ToString("0"), AliaMark);
 			} else {
 				GUI.Label (mark, publicName , EnemyMark);
 			}

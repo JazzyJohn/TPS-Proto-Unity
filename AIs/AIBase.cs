@@ -101,7 +101,7 @@ public class AIBase : MonoBehaviour
    void Update()
     {
         timer += Time.deltaTime;
-        if (isStarted&&timer >= TickPause)
+        if (isStarted && timer >= TickPause && !controlledPawn.isDead)
         {
             timer = 0f;
 			_currentState.PawnList = controlledPawn.getAllSeenPawn().ToArray();

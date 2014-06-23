@@ -30,7 +30,7 @@ public class AIWalk : AIState
 		   }else{
 				StopAttack();
 				isMoving =true;
-				agent.SetTarget(_enemy.myTransform.position);
+                agent.SetTarget(_enemy.myTransform.position, true);
 		   }
 		
 			
@@ -62,14 +62,23 @@ public class AIWalk : AIState
 
 		base.StartState ();
 	}
+    public override void EndState()
+    {
+
+        StopAttack();
+        base.StartState();
+    }
 	public void FixedUpdate(){
 		if (_enemy != null&&isMoving) {
+            bool needJump = agent.needJump;
 			agent.WalkUpdate ();
 			//Debug.Log(agent.GetTranslate());
+            needJump = !needJump && agent.needJump;
 			if(agent.GetTranslate().sqrMagnitude<0.1f){
 				controlledPawn.Movement (Vector3.zero,CharacterState.Idle);
 			}else{
-				if (!agent.needJump) {
+                if (!needJump)
+                {
 					controlledPawn.Movement (agent.GetTranslate(),CharacterState.Running);
 				} else {
 					controlledPawn.Movement (agent.GetTranslate () +controlledPawn.JumpVector(), CharacterState.Jumping);

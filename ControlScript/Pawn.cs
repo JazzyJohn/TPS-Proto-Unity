@@ -29,7 +29,8 @@ public class singleDPS
 	public BaseDamage damage;
 	public GameObject killer;
 	public float lastTime=1.0f;
-	public bool noOnwer = false;
+    public float showInterval = 1.0f;
+    public bool noOnwer = false;
 
 }
 public class DamagerEntry
@@ -411,6 +412,9 @@ public class Pawn : DamagebleObject {
 		}
 		return size;
 	}
+    public Collider GetCollider() {
+        return myCollider;
+    }
 
 	public virtual void AfterSpawnAction(){
 		 ivnMan.GenerateWeaponStart();
@@ -466,7 +470,10 @@ public class Pawn : DamagebleObject {
 				killerPlayer.DamagePawn(damage);
 			}
 		}
-		AddEffect(damage.hitPosition);
+        if (damage.sendMessage)
+        {
+            AddEffect(damage.hitPosition);
+        }
 		if (photonView.isMine) {
 		
 			float forcePush =  charMan.GetFloatChar(CharacteristicList.STANDFORCE);
@@ -671,6 +678,7 @@ public class Pawn : DamagebleObject {
 				strafe = CalculateStarfe();
 				//Debug.Log(characterState);
 				speed =CalculateSpeed();
+                //Debug.Log(speed);	
 				switch(characterState){
 				case CharacterState.Jumping:
 					animator.ApllyJump(true);
@@ -721,6 +729,7 @@ public class Pawn : DamagebleObject {
 				strafe = CalculateRepStarfe();
 				//Debug.Log (strafe);	
 				speed =CalculateRepSpeed();
+              
 				switch(nextState){
 				case CharacterState.Idle:
 					if(characterState == CharacterState.Jumping||characterState == CharacterState.DoubleJump){
@@ -953,7 +962,7 @@ public class Pawn : DamagebleObject {
 
 			for(int i=0; i<activeDPS.Count;i++){
 				singleDPS key  = activeDPS[i];
-				key.lastTime=key.lastTime+Time.deltaTime;
+				key.lastTime+=Time.deltaTime;
 				if(key.noOnwer){
 					if(key.lastTime>1.0f){
 						activeDPS.RemoveAt(i);
@@ -965,17 +974,31 @@ public class Pawn : DamagebleObject {
 				ldamage.hitPosition =myTransform.position + UnityEngine.Random.onUnitSphere;
 				ldamage.isContinius = true;
 				ldamage.Damage *= Time.deltaTime;
-			
+                ldamage.sendMessage = false;
 				//Debug.Log (key.lastTime);
-				if(key.lastTime>1.0f){
-				
-					ldamage.sendMessage = true;
-					key.lastTime=0;
-				}else{
-					ldamage.sendMessage = false;
-				}
+             
 
 				Damage(ldamage,key.killer);
+                if (key.lastTime > key.showInterval)
+                {
+				    Pawn killerPawn = key.killer.GetComponent<Pawn>();
+                    if (killerPawn != null && killerPawn.team != 0 && killerPawn.team == team && !PlayerManager.instance.frendlyFire && killerPawn != this)
+                    {
+
+                        continue;
+                    }
+                    if (killerPawn != null)
+                    {
+                        Player killerPlayer = killerPawn.player;
+                        if (killerPlayer != null && killerPawn != this)
+                        {
+                            //Debug.Log ("DAMAGE" +damage.sendMessage);
+                            killerPlayer.DamagePawn((ldamage.Damage / Time.deltaTime * key.showInterval).ToString("0"),ldamage.hitPosition);
+                        }
+                    }					
+					key.lastTime=0;
+				}
+            
 			}
 		} 
 	}
@@ -1257,7 +1280,10 @@ public class Pawn : DamagebleObject {
 	}
 	
 	public void StopKick(){
-		naturalWeapon.StopKick();
+        if (naturalWeapon != null)
+        {
+            naturalWeapon.StopKick();
+        }
 		if (photonView.isMine) {
 			photonView.RPC("RPCStopKick",PhotonTargets.Others);
 		}
@@ -1265,7 +1291,10 @@ public class Pawn : DamagebleObject {
 	
 	[RPC]
 	public void RPCStopKick(){
-		naturalWeapon.StopKick();
+		if (naturalWeapon != null)
+		{
+			naturalWeapon.StopKick();
+		}
 		
 	}
 	
@@ -1322,8 +1351,8 @@ public class Pawn : DamagebleObject {
 		}
 	
 	}
-	
-	public void addDPS (BaseDamage damage, GameObject killer)
+
+    public void addDPS(BaseDamage damage, GameObject killer, float fireInterval=1.0f)
 	{
 		foreach (singleDPS key in activeDPS) {
 			if(killer == key.killer){
@@ -1334,7 +1363,8 @@ public class Pawn : DamagebleObject {
 		singleDPS newDPS = new singleDPS ();
 		newDPS.damage = damage;
 		newDPS.killer = killer;
-		
+        newDPS.showInterval = fireInterval;
+        newDPS.lastTime = fireInterval;
 		activeDPS.Add (newDPS);
 	}
 

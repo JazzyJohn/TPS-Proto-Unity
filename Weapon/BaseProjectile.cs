@@ -2,6 +2,7 @@
 using System;
 
 using System.Collections;
+using System.Collections.Generic;
 [Serializable]
 public class BaseDamage{
 	public float Damage;
@@ -178,13 +179,13 @@ public class BaseProjectile : MonoBehaviour {
         {
             switch(detonator){
                 case DETONATOR.Manual:
-                    if (Input.GetButtonDown("Detonate"))
+                    if (InputManager.instance.GetButtonDown("Detonate"))
                     {
                         //Debug.Log("boom");
                         ProjectileManager.instance.InvokeRPC("Detonate", projId);
                     }
                 break;
-				case DETONATOR.Timed
+				case DETONATOR.Timed:
 				  if (_detonateTimer>detonateTimer)
                     {
                         //Debug.Log("boom");
@@ -202,8 +203,8 @@ public class BaseProjectile : MonoBehaviour {
     
     }
 	
-    public virtual void DamageLogic(DamagebleObject obj){
-    	obj.Damage(damage,owner);
+    public virtual void DamageLogic(DamagebleObject obj,BaseDamage inDamage){
+        obj.Damage(inDamage, owner);
 			
 			//Debug.Log ("HADISH INTO SOME PLAYER! " + hit.transform.gameObject.name);
 			//Destroy (gameObject, 0.1f);
@@ -214,27 +215,29 @@ public class BaseProjectile : MonoBehaviour {
 			return;
 		}
         float distance = (startPosition - mTransform.position).magnitude;
+        BaseDamage ldamage = new BaseDamage(damage);
 		if(range<distance){
 			float coef = 1 -(distance -range)/minDamageRange;
 			if(coef<minimunProcent){
 				coef =minimunProcent;
 			}
-			damage.Damage=damage.Damage*coef;
+			ldamage.Damage=damage.Damage*coef;
 		}
 	
-		damage.pushDirection = mTransform.forward;
-		damage.hitPosition = hit.point;
+		ldamage.pushDirection = mTransform.forward;
+		ldamage.hitPosition = hit.point;
 		DamagebleObject obj = hit.transform.gameObject.GetComponent <DamagebleObject>();
-		DamageLogic(obj);
-		shootTarget= obj;
+		
 		if (obj != null) {
+            DamageLogic(obj,ldamage);
+            shootTarget = obj;
 			switch(projHtEffect){
 				
 				case HITEFFECT.NextTarget:
 					if(!replication){
 						proojHitCnt++;
 						//TODO NEW VELOCITY	
-						Pawn hitPawn = obj as Pawn, ownerPawn  = owner as Pawn;
+						Pawn hitPawn = obj as Pawn, ownerPawn  = owner.GetComponent<Pawn>();
 						List<Pawn> allPawn = PlayerManager.instance.FindAllPawn();
 						Pawn nextTarget = null;
 						float lastDistance = jumpDistance*jumpDistance;
@@ -253,25 +256,25 @@ public class BaseProjectile : MonoBehaviour {
 							if(ownerPawn==allPawn[i]){
 								continue;
 							}
-							Vector3 distance = (allPawn[i].myTransform.position - myTransform.position);
+							Vector3 distanceBeatwen = (allPawn[i].myTransform.position - mTransform.position);
 
-							if (distance.sqrMagnitude < sqreJump&&lastDistance>distance.sqrMagnitude )
+                            if (distanceBeatwen.sqrMagnitude < sqreJump && lastDistance > distanceBeatwen.sqrMagnitude)
 							{
 							
 								RaycastHit hitInfo;
-								Vector3 normalDist = distance.normalized;
+                                Vector3 normalDist = distanceBeatwen.normalized;
 								Vector3 startpoint = mTransform.position;
 
 								if (allPawn[i].team != ownerPawn.team && Physics.Raycast(startpoint, normalDist, out hitInfo))
 								{
 
-								
-									if (allPawn[i].myCollider != hitInfo.collider)
+
+                                    if (allPawn[i].GetCollider() != hitInfo.collider)
 									{
 										//Debug.Log ("WALL"+hitInfo.collider);
 										continue;
 									}
-									lastDistance=distance.sqrMagnitude;
+                                    lastDistance = distanceBeatwen.sqrMagnitude;
 									nextTarget=allPawn[i];
 								}
 								
@@ -399,7 +402,7 @@ public class BaseProjectile : MonoBehaviour {
 				lDamage.pushDirection = mTransform.forward;
 				lDamage.hitPosition = mTransform.position;
 				if (obj != null&&obj!=shootTarget) {
-					DamageLogic(obj);
+                    DamageLogic(obj, lDamage);
 				}	
 			}
 		}

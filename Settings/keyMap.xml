@@ -1,0 +1,84 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<input>
+	<keys>
+		<name>FullScreen</name>
+		<default>f12</default>
+	</keys>
+	<keys>
+		<name>SpawnBot</name>
+		<default>f</default>
+	</keys>
+	<keys>
+		<name>Use</name>
+		<default>e</default>
+	</keys>
+	<keys>
+		<name>Fire2</name>
+		<default>mouse 1</default>
+	</keys>
+	<keys>
+		<name>Weapon1</name>
+		<default>1</default>
+	</keys>
+	<keys>
+		<name>Weapon2</name>
+		<default>2</default>
+	</keys>
+	<keys>
+		<name>Weapon3</name>
+		<default>3</default>
+	</keys>
+	<keys>
+		<name>Suicide</name>
+		<default>k</default>
+	</keys>
+	<keys>
+		<name>Sprint</name>
+		<default>left shift</default>
+	</keys>
+	<keys>
+		<name>Jump</name>
+		<default>space</default>
+	</keys>
+	<keys>
+		<name>Fire1</name>
+		<default>mouse 0</default>
+	</keys>
+	<keys>
+		<name>PreFire</name>
+		<default>left ctrl</default>
+	</keys>
+	<keys>
+		<name>Reload</name>
+		<default>r</default>
+	</keys>
+	<keys>
+		<name>KnockOut</name>
+		<default>l</default>
+	</keys>
+	<keys>
+		<name>LegKick</name>
+		<default>v</default>
+	</keys>
+	<keys>
+		<name>Taunt</name>
+		<default>q</default>
+	</keys>
+	<keys>
+		<name>ScoreBtn</name>
+		<default>tab</default>
+	</keys>
+	<keys>
+		<name>ScoreBtn</name>
+		<default>tab</default>
+	</keys>
+	<keys>
+		<name>Send</name>
+		<default>t</default>
+	</keys>
+	<keys>
+		<name>Detonate</name>
+		<default>z</default>
+	</keys>
+	
+</input>

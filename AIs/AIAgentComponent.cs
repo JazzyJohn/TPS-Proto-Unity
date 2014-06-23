@@ -63,8 +63,11 @@ public class AIAgentComponent : MonoBehaviour {
 	public void SetTarget(Vector3 newTarget,bool forced = false){
 
 		if (forced) {
-			agent.GoTo(newTarget);
-			target= newTarget;
+			if((newTarget -target).sqrMagnitude>4.0f||agent.path.Count>5){
+				agent.GoTo(newTarget);
+				target= newTarget;
+			}
+				
 		} else {
 			if((newTarget -target).sqrMagnitude>4.0f){
 				agent.GoTo(newTarget);
@@ -155,9 +158,13 @@ public class AIAgentComponent : MonoBehaviour {
 						nextStep = true;
 					}
 				}
-			}	
-			
+			}
 
+				while(agent.path.Count>1 &&IsRiched(agent.path[0],agent.pivot.transform.position,size)){
+					agent.path.RemoveAt(0);
+				}
+
+           // Debug.Log(nextStep + "  " + agent.path[0] + "  " + agent.path.Count);
 			if(!nextStep){
 				//Get the next waypoint...
 				PathNode point=agent.path[0];

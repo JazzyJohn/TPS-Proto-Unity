@@ -198,8 +198,8 @@ public class ThirdPersonCamera : MonoBehaviour
 		
 		// Set the position of the camera on the x-z plane to:
 		// distance meters behind the target
-		float vert =Input.GetAxis("Mouse Y");
-		float horizont =Input.GetAxis("Mouse X");
+		float vert =InputManager.instance.GetMouseAxis("Mouse Y");
+        float horizont = InputManager.instance.GetMouseAxis("Mouse X");
 		if (PlayerMainGui.IsMouseAV) {
 				yAngle -= vert * angularMaxSpeed;
 

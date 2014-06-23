@@ -19,7 +19,7 @@ public class ContiniusGun : BaseWeapon
 	public void fireDamage (Pawn target)
 	{
 		if (target != null) {
-			target.addDPS (new BaseDamage (damageAmount), owner.gameObject);
+            target.addDPS(new BaseDamage(damageAmount), owner.gameObject, fireInterval);
 		}
 	}
 
@@ -28,7 +28,7 @@ public class ContiniusGun : BaseWeapon
 		singleDPS newDPS = new singleDPS ();
 		newDPS.damage = new BaseDamage (damageAmount);
 		newDPS.killer = owner.gameObject;
-
+      
 		return newDPS;
 	}
 

@@ -15,6 +15,8 @@ public class MainMenuGUI : MonoBehaviour {
 
 	public PanelsNgui _PanelsNgui;
 
+    public SettingsPanel _SettingPanel;
+
 	public List<Chat> _chat;
 
 	public Class1 ChatComponent;
@@ -304,9 +306,41 @@ public class MainMenuGUI : MonoBehaviour {
 	
 	
 	}
-	
+
+    public void ShowSetting()
+    {
+
+        //Debug.Log (_RoomsNgui.RoomsFound.alpha);
+        if (_PanelsNgui.settings.alpha > 0f) {
+            HideAllPanel();
+            _PanelsNgui.SliderPanel.alpha = 1f;
+        }
+        else
+        {
+            HideAllPanel();
+            _PanelsNgui.settings.alpha = 1f;
+        }
+       
 
 
+    }
+    public void HideAllSettingsPanel() {
+        _SettingPanel.video.alpha = 0f;
+        _SettingPanel.control.alpha = 0f;
+    }
+    public void ShowControl() {
+        
+            HideAllSettingsPanel();
+            _SettingPanel.control.alpha = 1f;
+     
+    }
+    public void ShowVideo()
+    {
+
+        HideAllSettingsPanel();
+        _SettingPanel.video.alpha = 1f;
+
+    }
 }
 
 //Группы переменных
@@ -397,4 +431,12 @@ public class PanelsNgui
 	public UIPanel SliderPanel;
 	public SlaiderPanel slaiderPanel;
     public UIPanel mainpanel;
+    public UIPanel settings;
+}
+[System.Serializable]
+public class SettingsPanel
+{
+    public UIPanel control;
+    public UIPanel video;
+    public UIPanel game;
 }

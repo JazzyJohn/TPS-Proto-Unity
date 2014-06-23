@@ -23,7 +23,7 @@ public class MusicHolder : MonoBehaviour {
 			volume = newVolume;
 			MusicHolder holder = FindObjectOfType(typeof (MusicHolder)) as MusicHolder;
 			if(holder!=null){
-				holder.AudioSource.volume  =volume;
+                holder.musicPlayer.volume = volume;
 			}
 		}
 	
@@ -42,7 +42,7 @@ public class MusicHolder : MonoBehaviour {
 
 	}
 	void Start(){
-		AudioSource.volume  =volume;
+        musicPlayer.volume = volume;
 	}
 	
 	// Update is called once per frame

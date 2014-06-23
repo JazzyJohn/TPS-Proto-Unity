@@ -1,10 +1,11 @@
 using UnityEngine;
 using System;
+using System.Xml;
 using System.Collections;
 using System.Collections.Generic;
 
 
-public SettingsManager: MonoBehaviour{
+public class SettingsManager: MonoBehaviour{
 
 	 private static SettingsManager s_Instance = null;
 
@@ -31,12 +32,12 @@ public SettingsManager: MonoBehaviour{
 		LoadSetting();
 	}
 	public int GetSetting(string name){
-		return PlayerPrefs.GetInt(name)
+        return PlayerPrefs.GetInt(name);
 		
 	}
 	public void LoadSetting(){
 		XmlDocument xmlDoc = new XmlDocument();
-		xmlDoc.LoadXml(configTable);
+		xmlDoc.LoadXml(configTable.text);
 		foreach (XmlNode node in xmlDoc.SelectNodes("settings/setting")){
 			string name = node.SelectSingleNode ("name").InnerText;
 			if( PlayerPrefs.HasKey(name)){
@@ -48,18 +49,19 @@ public SettingsManager: MonoBehaviour{
 	
 	}
 	public void SetSetting(string name, int value){
-		
-		PlayerPrefs.SetInt(name,value)
+
+        PlayerPrefs.SetInt(name, value);
 		SettingLogic(name,value);
 	}
 	
 	
 
-	public static const string FULLSCREEN = "fullscreen";
-	public static const string MUSICVOLUME = "musicvolume";
-	public static const string SOUNDVOLUME = "soundvolume";
+	public const string FULLSCREEN = "fullscreen";
+	public const string MUSICVOLUME = "musicvolume";
+	public const string SOUNDVOLUME = "soundvolume";
 	public void SettingLogic(string name,int value){
 		if(name ==FULLSCREEN){
+            Resolution[] resolutions = Screen.resolutions;
 			if(value==1){
 				Screen.SetResolution(800, 600, false);	
 				GlobalPlayer.ResizeCall();				

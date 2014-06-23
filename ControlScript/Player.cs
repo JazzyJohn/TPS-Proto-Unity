@@ -180,7 +180,7 @@ public class Player : MonoBehaviour {
 				robotTimer-=Time.deltaTime;
 				
 				if(robotTimer<=0&&canSpamBot){
-					if(Input.GetButton("SpawnBot")){
+					if(InputManager.instance.GetButton("SpawnBot")){
 						
 						if(Physics.Raycast(centerofScreen, out hitinfo,50.0f)){
 							if(ghostBot==null){
@@ -208,7 +208,8 @@ public class Player : MonoBehaviour {
 						}
 						
 					}
-					if(Input.GetButtonUp("SpawnBot")){
+                    if (InputManager.instance.GetButtonUp("SpawnBot"))
+                    {
 						if(ghostBot!=null&&canSpawnBot){
 							Vector3 spamPoint =ghostBot.transform.position;
 							spamPoint.y+= 30;
@@ -229,7 +230,8 @@ public class Player : MonoBehaviour {
 				
 				if(inBot){
 					useTarget= null;
-					if(Input.GetButtonDown("Use")){
+                    if (InputManager.instance.GetButtonDown("Use"))
+                    {
 						ExitBot();
 					}
 					
@@ -238,7 +240,7 @@ public class Player : MonoBehaviour {
 						if(!inBot&&robotPawn!=null){
                             //Debug.Log(currentPawn.curLookTarget.gameObject +" "+ (currentPawn.myTransform.position - robotPawn.myTransform.position).sqrMagnitude);
 							if(currentPawn.curLookTarget!=null&&currentPawn.curLookTarget.gameObject==robotPawn.gameObject&&(currentPawn.myTransform.position-robotPawn.myTransform.position).sqrMagnitude<SQUERED_RADIUS_OF_ACTION*2.0f){
-								if(Input.GetButtonDown("Use")){
+								if(InputManager.instance.GetButtonDown("Use")){
 									EnterBot();
 								}
 							}
@@ -247,8 +249,9 @@ public class Player : MonoBehaviour {
 					if(currentPawn.curLookTarget!=null){
 
 						useTarget = currentPawn.curLookTarget.GetComponent<UseObject>();
-                     
-					if(useTarget!=null&&(currentPawn.myTransform.position-useTarget.myTransform.position).sqrMagnitude<SQUERED_RADIUS_OF_ACTION&&Input.GetButtonDown("Use")){
+
+                        if (useTarget != null && (currentPawn.myTransform.position - useTarget.myTransform.position).sqrMagnitude < SQUERED_RADIUS_OF_ACTION && InputManager.instance.GetButtonDown("Use"))
+                        {
 							useTarget.Use(currentPawn);
 
 						}
@@ -258,7 +261,8 @@ public class Player : MonoBehaviour {
 					//Debug.Log (currentPawn.curLookTarget);
 
 				}
-			if(Input.GetButton("Fire2")){
+             if (InputManager.instance.GetButton("Fire2"))
+             {
 				currentPawn.ToggleAim(true);
 				if(robotPawn!=null){
 					robotPawn.ToggleAim(true);
@@ -269,7 +273,8 @@ public class Player : MonoBehaviour {
 					robotPawn.ToggleAim(false);
 				}
 			}
-			if(Input.GetButtonDown("Weapon1")){
+             if (InputManager.instance.GetButtonDown("Weapon1"))
+             {
 			
 				if(inBot&&robotPawn!=null){
 					robotPawn.ChangeWeapon (0);
@@ -277,7 +282,8 @@ public class Player : MonoBehaviour {
 					currentPawn.ChangeWeapon (0);
 				}
 			}
-			if(Input.GetButtonDown("Weapon2")){
+             if (InputManager.instance.GetButtonDown("Weapon2"))
+             {
 				
 				if(inBot&&robotPawn!=null){
 					robotPawn.ChangeWeapon (1);
@@ -285,7 +291,8 @@ public class Player : MonoBehaviour {
 					currentPawn.ChangeWeapon (1);
 				}
 			}
-			if(Input.GetButtonDown("Weapon3")){
+             if (InputManager.instance.GetButtonDown("Weapon3"))
+             {
 				
 				if(inBot&&robotPawn!=null){
 					robotPawn.ChangeWeapon (2);
@@ -293,7 +300,8 @@ public class Player : MonoBehaviour {
 					currentPawn.ChangeWeapon (2);
 				}
 			}
-			if(Input.GetButtonDown("Suicide")){
+             if (InputManager.instance.GetButtonDown("Suicide"))
+             {
 				currentPawn.RequestKillMe();
 				if(robotPawn!=null){
 					robotPawn.RequestKillMe();
@@ -427,12 +435,15 @@ public class Player : MonoBehaviour {
 			return;
 		}
 		if (damage.sendMessage) {
-			if(damage.isContinius){
-				PlayerMainGui.instance.AddMessage ((damage.Damage/Time.deltaTime).ToString ("0.0"), damage.hitPosition, PlayerMainGui.MessageType.DMG_TEXT);
-			}else{
-				PlayerMainGui.instance.AddMessage (damage.Damage.ToString (), damage.hitPosition, PlayerMainGui.MessageType.DMG_TEXT);
-			}
+	        PlayerMainGui.instance.AddMessage(damage.Damage.ToString("0.0"), damage.hitPosition, PlayerMainGui.MessageType.DMG_TEXT);
 		}
+	}
+    public void DamagePawn(String damage, Vector3 position){
+		if (!photonView.isMine) {
+			return;
+		}
+		PlayerMainGui.instance.AddMessage(damage, position, PlayerMainGui.MessageType.DMG_TEXT);
+			
 	}
 	public void PawnAssist(){
 		Score.Assist++;

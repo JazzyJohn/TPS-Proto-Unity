@@ -2,7 +2,7 @@
 using System.Collections;
 
 public class HealingProjectile : BaseProjectile {
-    public override void DamageLogic(DamagebleObject obj)
+    public override void DamageLogic(DamagebleObject obj, BaseDamage inDamage)
     {
         Pawn pawn = (Pawn)obj;
         if (pawn != null)
@@ -16,7 +16,7 @@ public class HealingProjectile : BaseProjectile {
             //Debug.Log ("HADISH INTO SOME PLAYER! " + hit.transform.gameObject.name);
 
         }
-		base.DamageLogic(obj);
+        base.DamageLogic(obj, inDamage);
         //Debug.Log ("HADISH INTO SOME PLAYER! " + hit.transform.gameObject.name);
 
     }

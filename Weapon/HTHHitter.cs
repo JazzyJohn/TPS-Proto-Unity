@@ -76,7 +76,7 @@ public class HTHHitter : MonoBehaviour {
 	public void StopKick(){
 		isKick= false;
 		wasDamage = false;
-	
+
 	}
 	
 
@@ -87,6 +87,7 @@ public class HTHHitter : MonoBehaviour {
 			timer-=Time.deltaTime;
 		}
 	//	Debug.Log (this + "  " + isKick);
+		KickPlay = false;
 		if (isKick&&anim != null)
 		{
 			bool ok = false;
@@ -116,7 +117,7 @@ public class HTHHitter : MonoBehaviour {
 		{
 			if(!wasDamage){
 				hits = Physics.RaycastAll(myTransform.position, 	myTransform.forward, 2.0f);
-			    //Debug.DrawRay(myTransform.position,myTransform.forward*2.0f,Color.red,5.0f);
+			    Debug.DrawRay(myTransform.position,myTransform.forward*2.0f,Color.red,5.0f);
 				foreach(RaycastHit hit in hits)
 				{
 					onBulletHit(hit);

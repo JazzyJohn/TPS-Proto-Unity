@@ -42,8 +42,9 @@ public class ChatHolder : MonoBehaviour {
 
 
 	void Update(){
-		
-		if(Input.GetButtonDown("Send")){
+
+        if (InputManager.instance.GetButtonDown("Send"))
+        {
 			//Debug.Log (GUI.GetNameOfFocusedControl());
 			needChat=true;	
 			chatInput="";
