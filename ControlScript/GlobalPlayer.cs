@@ -28,6 +28,7 @@ public class GlobalPlayer : MonoBehaviour {
 	
 	public int cash;
 	
+
 	
 
 	void Update(){
@@ -40,7 +41,7 @@ public class GlobalPlayer : MonoBehaviour {
             ResizeCall();
 		}
 	}
-    void ResizeCall()
+   public  static void ResizeCall()
     {
         MainMenuGUI gui = FindObjectOfType<MainMenuGUI>();
         if(gui!=null){

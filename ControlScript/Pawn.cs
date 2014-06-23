@@ -2069,6 +2069,7 @@ public class Pawn : DamagebleObject {
         characterState = CharacterState.Idle;
         nextMovement = Vector3.zero;
         canMove = false;
+		_rb.velocity = Vector3.zero;
     }
     public void StartMovement()
     {

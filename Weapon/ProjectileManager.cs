@@ -46,7 +46,7 @@ class ProjectileManager: MonoBehaviour
     }
     public int GetNextId() {
         if(nextId>=maxId){
-            nextId =MAXPERPLAYER * PhotonNetwork.player.ID;
+            nextId =MAXPERPLAYER * (PhotonNetwork.player.ID+1);
         }
         for (int i = nextId+1; i < maxId; i++) {
             if (!allProjectile.ContainsKey(i)) {
@@ -68,17 +68,24 @@ class ProjectileManager: MonoBehaviour
     public void AddProject(int id,BaseProjectile projectile) {
         allProjectile[id] = projectile;
     }
-    public void InvokeRPC(string function, int id)
+    public void InvokeRPC(params object[] theObjects)
     {
-        photonView.RPC("RPCInvoke", PhotonTargets.All, function, id);
+		
+        photonView.RPC("RPCInvoke", PhotonTargets.All, theObjects);
     }
     [RPC]
     public void RPCInvoke(string function, int id) {
+		string function = (string)theObjects[0];
+		int id = (int)theObjects[1];
+		object[] addParams  = new object[theObjects.Length-2];
+		for(int i = 2; i<theObjects.Length;i++){
+			addParams[i-2] = theObjects[i];
+		}
         if (allProjectile.ContainsKey(id)) {
             BaseProjectile proj = allProjectile[id];
             Type thisType = proj.GetType();
             MethodInfo theMethod = thisType.GetMethod(function);
-            theMethod.Invoke(proj, null);
+            theMethod.Invoke(proj, addParams);
             
         }
     

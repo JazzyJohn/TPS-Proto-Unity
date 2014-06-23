@@ -41,6 +41,7 @@ public class BaseProjectile : MonoBehaviour {
 	public Vector3 startPosition;
 	public GameObject hitParticle;
 
+	
 	public float splashRadius;
 
 	//звуки
@@ -62,6 +63,8 @@ public class BaseProjectile : MonoBehaviour {
 	
 	public HITEFFECT projHtEffect;
 	
+	public float jumpDistance;
+	
 	public int proojHitCnt;
 	
 	public int projHitMax;
@@ -71,6 +74,10 @@ public class BaseProjectile : MonoBehaviour {
     public enum DETONATOR {Impact,ImpactCharacter, Manual,Proximity,Timed}
 	
 	public DETONATOR detonator;
+	
+	public float detonateTimer = 3.0f;
+	
+	private float _detonateTimer =0.0f;
 	
 	/// <summary>
     /// Define is Speed Change Effect
@@ -95,6 +102,8 @@ public class BaseProjectile : MonoBehaviour {
     public enum TRAJECTORY {Line,Bend,Corkscrew,Scuttle,Wave}
 	
 	public TRAJECTORY trajectory;
+	
+	public float trajectoryCoef;
 	
 	void Start () {
         ProjectileManager.instance.AddProject(projId, this);
@@ -153,11 +162,17 @@ public class BaseProjectile : MonoBehaviour {
 
 		switch(speedChange){
 			case SPEEDCHANGE.Acceleration:
-				mRigidBody.velocity+= mRigidBody.velocity.normalized*Time.deltaTime*speedChangeCoef;
+				mRigidBody.AddForce(mRigidBody.velocity.normalized*Time.deltaTime*speedChangeCoef,ForceMode.Acceleration);
 			break;
 			case SPEEDCHANGE.Deceleration:
-				mRigidBody.velocity-= mRigidBody.velocity.normalized*Time.deltaTime*speedChangeCoef;
+				mRigidBody.AddForce( mRigidBody.velocity.normalized*Time.deltaTime*speedChangeCoef,ForceMode.Acceleration);
 			break;
+		}
+		switch(trajectory){
+			case TRAJECTORY.Corkscrew:
+				mRigidBody.AddForce( mTransform.right*Time.deltaTime*trajectoryCoef,ForceMode.Acceleration);
+			break;
+		
 		}
         if (!replication)
         {
@@ -169,7 +184,16 @@ public class BaseProjectile : MonoBehaviour {
                         ProjectileManager.instance.InvokeRPC("Detonate", projId);
                     }
                 break;
+				case DETONATOR.Timed
+				  if (_detonateTimer>detonateTimer)
+                    {
+                        //Debug.Log("boom");
+
+                        ProjectileManager.instance.InvokeRPC("Detonate", projId);
+                    }
+				break;
             }
+			_detonateTimer+= Time.deltaTime;
         }
 
 	}
@@ -180,9 +204,9 @@ public class BaseProjectile : MonoBehaviour {
 	
     public virtual void DamageLogic(DamagebleObject obj){
     	obj.Damage(damage,owner);
-			shootTarget= obj;
+			
 			//Debug.Log ("HADISH INTO SOME PLAYER! " + hit.transform.gameObject.name);
-			Destroy (gameObject, 0.1f);
+			//Destroy (gameObject, 0.1f);
     }
 	public  void onBulletHit(RaycastHit hit)
 	{
@@ -201,8 +225,77 @@ public class BaseProjectile : MonoBehaviour {
 		damage.pushDirection = mTransform.forward;
 		damage.hitPosition = hit.point;
 		DamagebleObject obj = hit.transform.gameObject.GetComponent <DamagebleObject>();
+		DamageLogic(obj);
+		shootTarget= obj;
 		if (obj != null) {
-            DamageLogic(obj);
+			switch(projHtEffect){
+				
+				case HITEFFECT.NextTarget:
+					if(!replication){
+						proojHitCnt++;
+						//TODO NEW VELOCITY	
+						Pawn hitPawn = obj as Pawn, ownerPawn  = owner as Pawn;
+						List<Pawn> allPawn = PlayerManager.instance.FindAllPawn();
+						Pawn nextTarget = null;
+						float lastDistance = jumpDistance*jumpDistance;
+						//For easy calculation;
+						float sqreJump = jumpDistance*jumpDistance;
+						for (int i = 0; i < allPawn.Count; i++)
+						{
+							if (allPawn[i] == null)
+							{
+								continue;
+							}
+							if (allPawn[i] == hitPawn)
+							{
+								continue;
+							}
+							if(ownerPawn==allPawn[i]){
+								continue;
+							}
+							Vector3 distance = (allPawn[i].myTransform.position - myTransform.position);
+
+							if (distance.sqrMagnitude < sqreJump&&lastDistance>distance.sqrMagnitude )
+							{
+							
+								RaycastHit hitInfo;
+								Vector3 normalDist = distance.normalized;
+								Vector3 startpoint = mTransform.position;
+
+								if (allPawn[i].team != ownerPawn.team && Physics.Raycast(startpoint, normalDist, out hitInfo))
+								{
+
+								
+									if (allPawn[i].myCollider != hitInfo.collider)
+									{
+										//Debug.Log ("WALL"+hitInfo.collider);
+										continue;
+									}
+									lastDistance=distance.sqrMagnitude;
+									nextTarget=allPawn[i];
+								}
+								
+							}
+						}
+						if(nextTarget!=null){
+							mRigidBody.velocity = 	mRigidBody.velocity.magnitude *(nextTarget.myTransform.position-mTransform.position).normalized;
+							ProjectileManager.instance.InvokeRPC("NewVelocity", projId,mRigidBody.velocity,proojHitCnt);
+						}else{
+							
+							ProjectileManager.instance.InvokeRPC("Detonate", projId);
+						}
+
+					}else{
+						if(proojHitCnt>=projHitMax){
+							Destroy (gameObject, 0.1f);
+						}
+					}	
+				
+				break;
+				default:
+					Destroy (gameObject, 0.1f);
+				break;
+			}
 		
 		}else{
 			switch(projHtEffect){
@@ -218,7 +311,10 @@ public class BaseProjectile : MonoBehaviour {
 				case HITEFFECT.Rebound:
 					if(!replication){
 						proojHitCnt++;
-						//TODO: REBOUND LOGIC
+						
+						mRigidBody.velocity = 	mRigidBody.velocity + 2* Vector3.Project(	mRigidBody.velocity,hit.normal);
+						
+						ProjectileManager.instance.InvokeRPC("NewVelocity", projId,mRigidBody.velocity,proojHitCnt);
 					}else{
 						if(proojHitCnt>=projHitMax){
 							Destroy (gameObject, 0.1f);
@@ -228,7 +324,7 @@ public class BaseProjectile : MonoBehaviour {
 				case HITEFFECT.Penetration:
 					if(!replication){
 						proojHitCnt++;
-						//TODO: PRC CALL
+						ProjectileManager.instance.InvokeRPC("NewHitCount", projId,proojHitCnt);
 					}else{
 						if(proojHitCnt>=projHitMax){
 							Destroy (gameObject, 0.1f);
@@ -237,28 +333,19 @@ public class BaseProjectile : MonoBehaviour {
 				break;
 				case HITEFFECT.Cluster:
 					//TODO CLASTER LOGIC:
-				
-				
+					if(!replication){
+					
+					}				
 				break;
 				case HITEFFECT.Sticking:
-					//TODO CLASTER LOGIC:
-					if(!replication){
 				
+					if(!replication){
+						StickPosition(hit.point);
+						ProjectileManager.instance.InvokeRPC("StickPosition", projId,hit.point);
 					}
 				
 				break;
-				case HITEFFECT.NextTarget:
-					//TODO CLASTER NextTarget: same RPC taht in rebound
-					if(!replication){
-						proojHitCnt++;
-						//TODO: REBOUND LOGIC
-					}else{
-						if(proojHitCnt>=projHitMax){
-							Destroy (gameObject, 0.1f);
-						}
-					}	
-				
-				break;
+			
 			
 			}
 		}
@@ -312,7 +399,7 @@ public class BaseProjectile : MonoBehaviour {
 				lDamage.pushDirection = mTransform.forward;
 				lDamage.hitPosition = mTransform.position;
 				if (obj != null&&obj!=shootTarget) {
-					obj.Damage(lDamage,owner);
+					DamageLogic(obj);
 				}	
 			}
 		}

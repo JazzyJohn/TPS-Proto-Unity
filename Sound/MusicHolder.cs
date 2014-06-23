@@ -16,6 +16,19 @@ public class MusicHolder : MonoBehaviour {
 	
 	int[] MusicBefore;
 	
+	private static float volume = 1.0f;
+	
+	public static void  SetVolume(float newVolume){
+		if(volume!=newVolume){
+			volume = newVolume;
+			MusicHolder holder = FindObjectOfType(typeof (MusicHolder)) as MusicHolder;
+			if(holder!=null){
+				holder.AudioSource.volume  =volume;
+			}
+		}
+	
+	}
+	
 	// Use this for initialization
 	void Awake () {
 		musicPlayer = GetComponent<AudioSource> ();
@@ -27,6 +40,9 @@ public class MusicHolder : MonoBehaviour {
 			//Debug.Log(MusicBefore[i]);
 		}
 
+	}
+	void Start(){
+		AudioSource.volume  =volume;
 	}
 	
 	// Update is called once per frame
