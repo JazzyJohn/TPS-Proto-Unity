@@ -218,8 +218,6 @@ public class Pawn : DamagebleObject {
 
 	private bool _isGrounded;
 
-	private bool netIsGround;
-
 	public float distanceToGround; // Проверка дистанции до земли (+)
 
 	public bool isGrounded
@@ -393,6 +391,8 @@ public class Pawn : DamagebleObject {
 		health= charMan.GetIntChar(CharacteristicList.MAXHEALTH);
 		if (canJump) {
 			jetPackCharge = charMan.GetFloatChar(CharacteristicList.JETPACKCHARGE);
+		}else{
+			jetPackCharge= 0;
 		}
 
 		if (isAi) {
@@ -683,6 +683,10 @@ public class Pawn : DamagebleObject {
 				case CharacterState.Jumping:
 					animator.ApllyJump(true);
 					break;
+				case CharacterState.DoubleJump:
+					animator.ApllyJump(true);
+					animator.DoubleJump();
+					break;	
 				case CharacterState.Idle:
 					if(isGrounded){
 						animator.ApllyJump(false);
@@ -732,33 +736,24 @@ public class Pawn : DamagebleObject {
               
 				switch(nextState){
 				case CharacterState.Idle:
-					if(characterState == CharacterState.Jumping||characterState == CharacterState.DoubleJump){
-						animator.ApllyJump(false);
-
-					}
-
+					animator.ApllyJump(false);
 					animator.ApllyMotion (0.0f, speed, strafe);
 					break;
 				case CharacterState.Running:
-					if(characterState == CharacterState.Jumping||characterState == CharacterState.DoubleJump){
-						animator.ApllyJump(false);
-
-					}
+					animator.ApllyJump(false);
 					sControl.playFullClip (stepSound);
 					animator.ApllyMotion (2.0f, speed, strafe);
 					break;
 				case CharacterState.Sprinting:
-					if(characterState == CharacterState.Jumping||characterState == CharacterState.DoubleJump){
+					if(characterState == CharacterState.Jumping){
 						animator.ApllyJump(false);
-						animator.Sprint();
 					}
+				    animator.Sprint();
 					sControl.playFullClip (stepSound);
 					animator.ApllyMotion (2.0f, speed, strafe);
 					break;
 				case CharacterState.Walking:
-					if(characterState == CharacterState.Jumping||characterState == CharacterState.DoubleJump){
-						animator.ApllyJump(false);
-					}
+					animator.ApllyJump(false);
 					sControl.playFullClip (stepSound);
 					animator.ApllyMotion (1.0f, speed, strafe);
 					break;
@@ -863,9 +858,9 @@ public class Pawn : DamagebleObject {
 			UpdateSeenList();
             if (jetPackEnable == false)
             {
-                   float maxCharge=  charMan.GetFloatChar(CharacteristicList.JETPACKCHARGE);
-                   if (canJump && jetPackCharge < maxCharge)
-                {
+                float maxCharge=  charMan.GetFloatChar(CharacteristicList.JETPACKCHARGE);
+                if (canJump && jetPackCharge < maxCharge)
+				{
 
                     jetPackCharge += Time.deltaTime;
                 
@@ -912,7 +907,7 @@ public class Pawn : DamagebleObject {
 							myTransform.rotation= Quaternion.LookRotation(forwardRotation);
 						}
 					}else{
-						if ( characterState == CharacterState.Idle||characterState == CharacterState.DoubleJump){
+						if ( characterState == CharacterState.Idle||characterState == CharacterState.DoubleJump ){
 
 							if((Math.Abs (eurler.y -myTransform.rotation.eulerAngles.y)> maxStandRotate)){
 								myTransform.rotation= Quaternion.Lerp(myTransform.rotation,Quaternion.Euler(eurler),Time.deltaTime);			
@@ -1637,9 +1632,9 @@ public class Pawn : DamagebleObject {
 		if(characterState==CharacterState.WallRunning){
 		   return;
 		}
-		ContactPoint[] contacts = collisionInfo.contacts;
-		if (contacts != null) {
-			foreach (ContactPoint contact in contacts) {
+	
+	
+			foreach (ContactPoint contact in  collisionInfo.contacts) {
 				/*if(contact.otherCollider.CompareTag("decoration")){
 					continue;
 				}*/
@@ -1658,8 +1653,8 @@ public class Pawn : DamagebleObject {
 				//Debug.DrawRay(contact.point, contact.normal, Color.white);
 
 			}
-			contacts= null;	
-		}
+			
+		
 
 	}
 
@@ -1813,7 +1808,7 @@ public class Pawn : DamagebleObject {
 				
 			}
 			if (isGrounded) {
-				characterState = nextState;
+			    JumpEnd(nextState);
 			}
 			break;
 		case CharacterState.DoubleJump:
@@ -1828,7 +1823,7 @@ public class Pawn : DamagebleObject {
             {
                 if (isGrounded)
                 {
-                    characterState = nextState;
+                   JumpEnd(nextState);
                 }
                 else
                 {
@@ -1939,12 +1934,18 @@ public class Pawn : DamagebleObject {
 		}
 		//Debug.Log(_rb.isKinematic);
 		*/
-			
-		netIsGround = isGrounded;
-		if (photonView.isMine) {
-						isGrounded = false;
+		isGrounded = false;
+	
+	}
+	
+	public void JumpEnd(CharacterState nextState){
+		if(nextState==CharacterState.Jumping){
+			characterState = CharacterState.Idle;
+		}else{
+			characterState = nextState;
 		}
 	}
+	
 	public bool IsGrounded ()
 	{	
 
@@ -2167,13 +2168,13 @@ public class Pawn : DamagebleObject {
 	public void Activate(){
 		if(cameraController!=null){
 			_rb.isKinematic = false;
-			isActive = true;
 			_rb.detectCollisions = true;
 			cameraController.enabled = true;
 			cameraController.Reset();
 			GetComponent<ThirdPersonController> ().enabled= true;
+			
 		}
-
+		isActive = true;
 		for (int i =0; i<myTransform.childCount; i++) {
 			myTransform.GetChild(i).gameObject.SetActive(true);
 		}

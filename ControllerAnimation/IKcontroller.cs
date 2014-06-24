@@ -7,6 +7,12 @@ public class IKcontroller : MonoBehaviour {
 	public AimIK aim;
 	protected float targetWeight=1.0f;
 	private float vel = 0.0f;
+	/// <summary>
+    /// IS we under IK controll
+    /// </summary>
+	public bool IsIk(){
+		return targetWeight>0.5;
+	}
 	void Start(){
 		aim = gameObject.GetComponent<AimIK>();
 	}
@@ -30,4 +36,5 @@ public class IKcontroller : MonoBehaviour {
 		}
 		
 	}
+	
 }	

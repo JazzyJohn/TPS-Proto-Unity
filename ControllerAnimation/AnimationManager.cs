@@ -202,6 +202,13 @@ public class AnimationManager : MonoBehaviour
 		animator.SetBool(name, false);	
 		
 	}
+	/// <summary>
+    /// IS we under IK controll
+    /// </summary>
+	public bool IsIk(){
+		 return animPos!=null&&animPos.IsIk();
+	
+	}
     /// <summary>
     /// Turn on and of IK of aiming
     /// </summary>
