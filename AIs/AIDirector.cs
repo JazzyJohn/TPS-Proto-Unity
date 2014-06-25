@@ -2,59 +2,22 @@
 using System.Collections;
 using System.Collections.Generic;
 using ExitGames.Client.Photon;
-
-public class AIDirector : MonoBehaviour {
-
+[System.Serializable]
+public class AISwarm{
+	
 	public GameObject[] Bots;
 
-	private AISpawnPoint[] respawns;
-
-	private SelfSpawnPoint[] selfRespawns;
-
+	public AISpawnPoint[] respawns;
+ 
+	public int[] enemyIndex;
+	
 	public List<Transform>  pointOfInterest;
 	
-	protected List<Transform> avaiblePoints = new List<Transform>();
-
-	public float directorTick= 0.5f;
-
-	public void StartDirector(){
-		respawns = FindObjectsOfType<AISpawnPoint> ();
-		selfRespawns = FindObjectsOfType<SelfSpawnPoint> ();
-		ReloadList ();
-		StartCoroutine("Tick");
-        	}
-	// Use this for initialization
-	void Start () {
-    }
+	public int aiGroup;
 	
-	// Update is called once per frame
-	void Update () {
 
-	}
-
-	private IEnumerator Tick()
-	{
-		while (true)
-		{
-			if(Bots.Length>0){
-				foreach (AISpawnPoint go in respawns) {
-					if(go.isAvalable){
-						//GameObject obj = PhotonNetwork.InstantiateSceneObject (Bots[(int)(UnityEngine.Random.value*Bots.Length)].name, go.transform.position, go.transform.rotation, 0,null) as GameObject;
-						GameObject obj = PhotonNetwork.Instantiate (Bots[(int)(UnityEngine.Random.value*Bots.Length)].name, go.transform.position, go.transform.rotation, 0,null) as GameObject;
-						go.Spawned(obj.GetComponent<Pawn>());
-					}
-				}
-			}
-			foreach (SelfSpawnPoint go in selfRespawns) {
-				if(go.isAvalable){
-					go.SpawObject();
-				}
-			}
-			yield return new WaitForSeconds(directorTick);
-			//Debug.Log("Work");
-		}
-	}
-
+	protected List<Transform> avaiblePoints = new List<Transform>();
+	
 	void ReloadList(){
 		if (avaiblePoints.Count == 0) {
 			foreach(Transform point in  pointOfInterest){
@@ -75,6 +38,102 @@ public class AIDirector : MonoBehaviour {
 			ReloadList ();
 		}
 		return returnTransform;
+	}
+
+	public void SwarmTick(){
+		if(Bots.Length>0){
+				for(int i =0;i<respawns.Length;i++) {
+					AISpawnPoint go  = respawns[i];
+					if(go.IsAvalable()){
+						GameObject obj = PhotonNetwork.InstantiateSceneObject (Bots[(int)(UnityEngine.Random.value*Bots.Length)].name, go.transform.position, go.transform.rotation, 0,null) as GameObject;
+					//	GameObject obj = PhotonNetwork.Instantiate (Bots[(int)(UnityEngine.Random.value*Bots.Length)].name, go.transform.position, go.transform.rotation, 0,null) as GameObject;
+						go.Spawned(obj.GetComponent<Pawn>());
+						go.GetComponent<AIBase>().Init(aiGroup,this,i);
+					}
+				}
+			}
+	}
+	public void Init(int i ){
+			
+			aiGroup  = i;
+			ReloadList ();
+	}
+	public bool IsEnemy(int enemyGroup){
+		foreach(int enemy in enemyIndex){
+			if(enemy ==enemyGroup){
+				return true;
+			}
+		}
+		return false;
+	}
+}
+
+
+public class AIDirector : MonoBehaviour {
+
+	private SelfSpawnPoint[] selfRespawns;
+
+	public AISwarm[] swarms;
+
+	public float directorTick= 0.5f;
+	
+	private float _directorTick = 0.0f;
+	
+	private bool start = false;
+	
+	
+
+	public void StartDirector(){
+	
+		for(int i = 0;i<swarms.Lenght;i++){
+			swarms.Init(i);
+			
+			
+		}
+		start = true;
+		selfRespawns = FindObjectsOfType<SelfSpawnPoint> ();
+    }
+	// Use this for initialization
+	void Start () {
+    }
+	
+	// Update is called once per frame
+	void Update () {
+		if(start){
+			_directorTick+=Time.delatTime;
+			if(_directorTick>directorTick){
+				
+				foreach(AISwarm swarm in swarms){
+					swarm.SwarmTick();
+				}
+				
+				foreach (SelfSpawnPoint go in selfRespawns) {
+					if(go.IsAvalable()){
+						go.SpawObject();
+					}
+				}
+				yield return new WaitForSeconds(directorTick);
+				//Debug.Log("Work");
+			}
+		}
+	
+	}
+
+
+
+	private static AIDirector s_Instance = null;
+	
+	public static AIDirector instance {
+		get {
+			if (s_Instance == null) {
+				//Debug.Log ("FIND");
+				// This is where the magic happens.
+				//  FindObjectOfType(...) returns the first AManager object in the scene.
+				s_Instance =  FindObjectOfType(typeof (AIDirector)) as AIDirector;
+			}		
+			
+			return s_Instance;
+		}
 	}
 
 }

@@ -32,12 +32,25 @@ public class AIBase : MonoBehaviour
 	private AIState _currentState;
 
 	private Pawn controlledPawn;
+	
+	private int aiGroup;
+	
+	private int homeIndex;
+	
+	private AISwarm aiSwarm;
     //private AIPatrol _patrol;
     //private AIHolder _holder;
     //private AIRusher _rusher;
 
 	public Transform[] patrolPoints;
 
+	public void Init(int aiGroup,AISwarm aiSwarm,int homeIndex){
+		this.aiGroup=aiGroup;
+		this.aiSwarm=aiSwarm;
+		this.homeIndex = homeIndex;
+		this.aiSwarm.respawns[homeIndex].SpawnedSet(this,homeIndex)
+	}
+	
 	public void WasHitBy(GameObject killer){
 		Pawn killerPawn = killer.GetComponent<Pawn> ();
 		if (killerPawn != null) {
@@ -69,7 +82,7 @@ public class AIBase : MonoBehaviour
 			_currentState.controlledPawn = controlledPawn;
 			
 			if(patrolPoints.Length==0){
-				patrolPoints = FindObjectOfType<AIDirector>().GetPointOfInterest(PatrolPointCount);
+				patrolPoints = aiSwarm.GetPointOfInterest(PatrolPointCount);
 			}
 			_currentState.AngleRange = AngleRange;	
 			((AIPatrol)_currentState).patrolPoints = patrolPoints;
@@ -94,7 +107,9 @@ public class AIBase : MonoBehaviour
         _SC.radius = DetectionRadius;*/
 		_currentState = defaultAIState;
 		controlledPawn = GetComponent<Pawn> ();
-		
+		if(aiSwarm==null){
+			Init(aiGroup,AIDirector.instance.swarms[aiGroup],homeIndex);
+		}
 		InitState ();
         isStarted = true;
     }

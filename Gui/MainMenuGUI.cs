@@ -280,7 +280,25 @@ public class MainMenuGUI : MonoBehaviour {
 		}
 	
 	}
-
+	public Update(){
+	
+		if(waitForInput){
+			Event e = Event.current;
+			if(Event.isKey){
+				
+				newMap[command] = e.keyCode;
+				waitForInput= false;
+				foreach(SettingsPanel.SettingCommand command in _SettingPanel.controls){
+					if(command.command ==	command){
+						command.keyname.text =  e.keyCode.ToString();	
+						break;
+					}		
+				}
+			}
+		
+		}
+		
+	}
 	public void scroll() //СкролБар чата
 	{
 		ChatComponent.ChatPanel.transform.localPosition = new Vector3(0f, -(ChatComponent.ChatScrollBar.value*1600), 0f);
@@ -324,16 +342,22 @@ public class MainMenuGUI : MonoBehaviour {
 
 
     }
+	
+	
     public void HideAllSettingsPanel() {
         _SettingPanel.video.alpha = 0f;
         _SettingPanel.control.alpha = 0f;
     }
     public void ShowControl() {
-        
+			if(  _SettingPanel.control.alpha ==0){
+				CearControlls();				
+			}
+			
             HideAllSettingsPanel();
             _SettingPanel.control.alpha = 1f;
      
     }
+	
     public void ShowVideo()
     {
 
@@ -341,6 +365,34 @@ public class MainMenuGUI : MonoBehaviour {
         _SettingPanel.video.alpha = 1f;
 
     }
+	
+	//CONTROLL SECTION 
+	private string command ="";
+	
+	private bool waitForInput= false;
+	
+	private Dictionary<string,KeyCode> newMap ;
+	
+	public void WaitForKey(string command){
+		waitForInput = true;
+		this.command = command;
+	}
+	public void ApplyControlls(){
+		foreach(KeyValuePair<string,KeyCode> oneCom in newCommand){
+			InputManager.instance.SaveKey(oneCom.key,oneCom.value);
+		}
+		InputManager.instance.SaveSensitivity(mouseSensitivity.sliderValue*2.0f);
+	
+	}
+	public void CearControlls(){
+		newCommand  = new Dictionary<string,KeyCode>();			
+		Dictionary<String, KeyCode>  map =InputManagerinstance.instance.GetMap();
+		foreach(SettingsPanel.SettingCommand command in _SettingPanel.controls){
+			command.keyname.text = map[command.command].ToString();				
+		}
+		mouseSensitivity.sliderValue = InputManager.instance.GetSensitivity()/2f;
+	
+	}
 }
 
 //Группы переменных
@@ -436,7 +488,15 @@ public class PanelsNgui
 [System.Serializable]
 public class SettingsPanel
 {
+	[System.Serializable]
+	public class SettingCommand{
+		public UILabel codename;
+		public UILabel keyname;
+		public String command;			
+	}
+	public List<SettingCommand> controls;
+	public UISlider mouseSensitivity;
     public UIPanel control;
-    public UIPanel video;
+	public UIPanel video;
     public UIPanel game;
 }

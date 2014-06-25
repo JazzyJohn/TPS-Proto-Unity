@@ -124,11 +124,7 @@ public class Pawn : DamagebleObject {
 
 	private float jetPackCharge;
 
-	private float jetPackTimer= 0.0f;
-
     private bool jetPackEnable = false;
-
-	public float jetPackTime=1.0f;
 
 	private Vector3 nextMovement;
 
@@ -201,8 +197,6 @@ public class Pawn : DamagebleObject {
 	public float PullUpStartTimer= 0.0f;
 	
 	public float PullUpTime=2.0f;
-
-	private float v;
 
 	public Transform curLookTarget= null;
 
@@ -374,6 +368,8 @@ public class Pawn : DamagebleObject {
 		if(isAi){
 			if(photonView.isMine){
 				mainAi.StartAI();
+				photonView.RPC("PRCSetAIAfterSpawn",PhotonTargets.OtherBuffered,mainAi.aiGroup,mainAi.homeIndex );
+
 			}
 		}
 		GetSize ();
@@ -2306,4 +2302,10 @@ public class Pawn : DamagebleObject {
 			mainAi.StartAI();
 		}
     }
+	[RPC]
+	public void PRCSetAIAfterSpawn(int group, int homeindex ){
+		mainAi.aiGroup= group;
+		mainAi.homeIndex =homeindex;
+	}
+	
 }

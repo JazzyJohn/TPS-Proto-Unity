@@ -70,6 +70,8 @@ public class AIState : MonoBehaviour {
 	public  Pawn controlledPawn;
 
 	protected Pawn _enemy;
+	
+	public bool isAgressive;
 
 	public AITransition[] Transition;
 
@@ -122,7 +124,17 @@ public class AIState : MonoBehaviour {
 
 	}
 	public virtual bool IsEnemy(Pawn target){
-		return true;
+		if(isAgressive){
+			if(target.isAi){
+				return aiSwarm.IsEnemy(target.mainAi.aiGroup);
+			}else{
+				return true
+			}
+		}else{
+			
+			return false;
+		}
+		
 	}
 	
 	public virtual void WasHitBy(Pawn killer){

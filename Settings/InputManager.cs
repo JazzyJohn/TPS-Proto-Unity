@@ -8,7 +8,7 @@ using System.Collections.Generic;
 public class InputManager{
 
 	
-	private   Dictionary<String,String> keyMap  = new Dictionary<String,String> ();
+	private   Dictionary<String, KeyCode> keyMap  = new Dictionary<String, KeyCode> ();
 	private   float mouseSensitivity = 1.0f;
 	private static string MOUSESENSITIVITY ="mouseSensitivity";
 	
@@ -17,12 +17,13 @@ public class InputManager{
 		xmlDoc.LoadXml(SettingsManager.instance.configTable.text);
 		foreach (XmlNode node in xmlDoc.SelectNodes("input/keys")) {
 			string name = node.SelectSingleNode ("name").InnerText;
+			 KeyCode key = KeyCode.None;
 			if( PlayerPrefs.HasKey(name)){
-				SetKey(name,PlayerPrefs.GetString(name));
+				key = (KeyCode) System.Enum.Parse(typeof(KeyCode),PlayerPrefs.GetString(name)) ;
 			}else{
-				SetKey(name, node.SelectSingleNode ("default").InnerText);
+				key = (KeyCode) System.Enum.Parse(typeof(KeyCode),node.SelectSingleNode ("default").InnerText);
 			}
-		
+			SetKey(name,key);
 		}
 		if( PlayerPrefs.HasKey(MOUSESENSITIVITY)){
 				mouseSensitivity =  PlayerPrefs.GetFloat(MOUSESENSITIVITY);
@@ -31,7 +32,10 @@ public class InputManager{
 		}
 	
 	}
+	public Dictionary<String, KeyCode> GetMap(){
+		return keyMap;
 	
+	}
 	
 	public  float GetAxisRaw(string name){
 		return Input.GetAxisRaw(name);
@@ -55,16 +59,19 @@ public class InputManager{
 		return Input.GetKeyDown(keyMap[name]);
 		
 	}
-	private  void SetKey(string name,string key){
+	private  void SetKey(string name, KeyCode key){
 		keyMap[name] = key;
 	}
-	public void SaveKey(string name,string key){
+	public void SaveKey(string name, KeyCode key){
 		keyMap[name] = key;
 		PlayerPrefs.SetString(name,key);
 	}
 	public void SaveSensitivity(float value){
 		mouseSensitivity =  value;
 		PlayerPrefs.SetFloat(MOUSESENSITIVITY,value);
+	}
+	public float GetSensitivity(){
+		return mouseSensitivity;
 	}
 	 private static InputManager s_Instance = null;
 

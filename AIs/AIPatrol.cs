@@ -68,7 +68,7 @@ public class AIPatrol : AIState
 		if(target.team==controlledPawn.team){
 			return false;
 		}
-		return true;
+		return base.IsEnemy(target);
 	}
 	public override void SetEnemy(Pawn enemy){
 		controlledPawn. PlayTaunt();
