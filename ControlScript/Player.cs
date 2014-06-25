@@ -461,7 +461,7 @@ public class Player : MonoBehaviour {
 		//robotTimer=robotTime;
 		inBot= false;
 		currentPawn.myTransform.parent = null;
-		currentPawn.myTransform.position = robotPawn.playerExitPositon.position;
+		currentPawn.rigidbody.MovePosition (robotPawn.playerExitPositon.position);
 		currentPawn.myTransform.rotation = robotPawn.playerExitPositon.rotation;
 		currentPawn.Activate ();
 		robotPawn.DeActivate();

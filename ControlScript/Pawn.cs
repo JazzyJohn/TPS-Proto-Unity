@@ -2197,12 +2197,13 @@ public class Pawn : DamagebleObject {
 	public void DeActivate(){
 		if(cameraController!=null){
 			_rb.isKinematic = true;
-			isActive = false;
+
 			_rb.detectCollisions = false;
 			cameraController.enabled = false;
 
 			GetComponent<ThirdPersonController> ().enabled= false;
 		}
+		isActive = false;
 		for (int i =0; i<myTransform.childCount; i++) {
 			myTransform.GetChild(i).gameObject.SetActive(false);
 		}

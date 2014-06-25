@@ -206,7 +206,7 @@ public class AnimationManager : MonoBehaviour
     /// IS we under IK controll
     /// </summary>
 	public bool IsIk(){
-		 return animPos!=null&&animPos.IsIk();
+        return aimPos != null && aimPos.IsIk();
 	
 	}
     /// <summary>
