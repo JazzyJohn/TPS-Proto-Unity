@@ -83,6 +83,7 @@ public class AIState : MonoBehaviour {
 				
 	protected bool isMelee= false;
 
+    public AIBase aibase;
 	
 	public Pawn[] PawnList
 	{
@@ -104,7 +105,7 @@ public class AIState : MonoBehaviour {
 
 	// Use this for initialization
 	void Start () {
-	
+        aibase = GetComponent<AIBase>();
 	}
 	
 	// Update is called once per frame
@@ -126,9 +127,9 @@ public class AIState : MonoBehaviour {
 	public virtual bool IsEnemy(Pawn target){
 		if(isAgressive){
 			if(target.isAi){
-				return aiSwarm.IsEnemy(target.mainAi.aiGroup);
+                return aibase.IsEnemy(target.mainAi.aiGroup);
 			}else{
-				return true
+                return true;
 			}
 		}else{
 			

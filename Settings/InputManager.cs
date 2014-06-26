@@ -19,7 +19,7 @@ public class InputManager{
 			string name = node.SelectSingleNode ("name").InnerText;
 			 KeyCode key = KeyCode.None;
 			if( PlayerPrefs.HasKey(name)){
-				key = (KeyCode) System.Enum.Parse(typeof(KeyCode),PlayerPrefs.GetString(name)) ;
+                key = (KeyCode)System.Enum.Parse(typeof(KeyCode), PlayerPrefs.GetString(name));
 			}else{
 				key = (KeyCode) System.Enum.Parse(typeof(KeyCode),node.SelectSingleNode ("default").InnerText);
 			}
@@ -32,6 +32,23 @@ public class InputManager{
 		}
 	
 	}
+
+    public Dictionary<string, KeyCode> ForceReload()
+    {
+        XmlDocument xmlDoc = new XmlDocument();
+        xmlDoc.LoadXml(SettingsManager.instance.configTable.text);
+        foreach (XmlNode node in xmlDoc.SelectNodes("input/keys"))
+        {
+            string name = node.SelectSingleNode("name").InnerText;
+            KeyCode key = (KeyCode)System.Enum.Parse(typeof(KeyCode), node.SelectSingleNode("default").InnerText);
+
+            SaveKey(name, key);
+        }
+        
+         mouseSensitivity = 1.0f;
+         return keyMap;
+       
+    }
 	public Dictionary<String, KeyCode> GetMap(){
 		return keyMap;
 	
@@ -64,7 +81,7 @@ public class InputManager{
 	}
 	public void SaveKey(string name, KeyCode key){
 		keyMap[name] = key;
-		PlayerPrefs.SetString(name,key);
+		PlayerPrefs.SetString(name,key.ToString());
 	}
 	public void SaveSensitivity(float value){
 		mouseSensitivity =  value;
@@ -92,5 +109,7 @@ public class InputManager{
             return s_Instance;
         }
     }
-	
+
+
+   
 }

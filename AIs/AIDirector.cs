@@ -85,8 +85,8 @@ public class AIDirector : MonoBehaviour {
 
 	public void StartDirector(){
 	
-		for(int i = 0;i<swarms.Lenght;i++){
-			swarms.Init(i);
+		for(int i = 0;i<swarms.Length;i++){
+			swarms[i].Init(i);
 			
 			
 		}
@@ -100,7 +100,7 @@ public class AIDirector : MonoBehaviour {
 	// Update is called once per frame
 	void Update () {
 		if(start){
-			_directorTick+=Time.delatTime;
+			_directorTick+=Time.deltaTime;
 			if(_directorTick>directorTick){
 				
 				foreach(AISwarm swarm in swarms){
@@ -112,7 +112,7 @@ public class AIDirector : MonoBehaviour {
 						go.SpawObject();
 					}
 				}
-				yield return new WaitForSeconds(directorTick);
+				
 				//Debug.Log("Work");
 			}
 		}

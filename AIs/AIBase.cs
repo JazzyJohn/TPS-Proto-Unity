@@ -32,10 +32,10 @@ public class AIBase : MonoBehaviour
 	private AIState _currentState;
 
 	private Pawn controlledPawn;
-	
-	private int aiGroup;
-	
-	private int homeIndex;
+
+    public int aiGroup;
+
+    public int homeIndex;
 	
 	private AISwarm aiSwarm;
     //private AIPatrol _patrol;
@@ -48,7 +48,7 @@ public class AIBase : MonoBehaviour
 		this.aiGroup=aiGroup;
 		this.aiSwarm=aiSwarm;
 		this.homeIndex = homeIndex;
-		this.aiSwarm.respawns[homeIndex].SpawnedSet(this,homeIndex)
+        this.aiSwarm.respawns[homeIndex].SpawnedSet(controlledPawn);
 	}
 	
 	public void WasHitBy(GameObject killer){
@@ -140,5 +140,10 @@ public class AIBase : MonoBehaviour
     }
 
 
+
+   public  bool IsEnemy(int group)
+   {
+       return aiSwarm.IsEnemy(group);
+   }
 }
 

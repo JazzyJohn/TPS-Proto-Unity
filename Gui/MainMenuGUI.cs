@@ -35,7 +35,13 @@ public class MainMenuGUI : MonoBehaviour {
 
 	void Awake(){
 		DontDestroyOnLoad(transform.gameObject);
-
+        foreach (GameObject onContrl in _SettingPanel.toggleList) {
+            SettingsPanel.SettingCommand commandClass = new SettingsPanel.SettingCommand();
+            commandClass.codename = onContrl.GetComponent<UIToggle>();
+            commandClass.command = onContrl.GetComponent<ControlButton>().command;
+            commandClass.keyname = onContrl.transform.GetChild(0).GetComponent<UILabel>();
+            _SettingPanel.controls.Add(commandClass);
+        }
 	}
 	// Use this for initialization
 	void Start () 
@@ -280,21 +286,51 @@ public class MainMenuGUI : MonoBehaviour {
 		}
 	
 	}
-	public Update(){
+    public void OnGUI()
+    {
 	
 		if(waitForInput){
 			Event e = Event.current;
-			if(Event.isKey){
-				
+            Debug.Log("WAIT" + command + " " + e.keyCode);
+            if (e!=null&&e.isKey)
+            {
+                Debug.Log("SET" + e.keyCode);
 				newMap[command] = e.keyCode;
 				waitForInput= false;
-				foreach(SettingsPanel.SettingCommand command in _SettingPanel.controls){
-					if(command.command ==	command){
-						command.keyname.text =  e.keyCode.ToString();	
+				foreach(SettingsPanel.SettingCommand setCommand in _SettingPanel.controls){
+                    if (setCommand.command == command)
+                    {
+                        setCommand.keyname.text = e.keyCode.ToString();	
 						break;
 					}		
 				}
 			}
+            if (e != null && e.isMouse)
+            {
+                switch (e.button)
+                {
+                    case 0:
+                        newMap[command] = KeyCode.Mouse0;
+                        break;
+                    case 1:
+                        newMap[command] = KeyCode.Mouse1;
+                        break;
+                    case 2:
+                        newMap[command] = KeyCode.Mouse2;
+                        break;
+                }
+                
+                waitForInput = false;
+                foreach (SettingsPanel.SettingCommand setCommand in _SettingPanel.controls)
+                {
+                    if (setCommand.command == command)
+                    {
+                        setCommand.keyname.text = newMap[command].ToString();
+                        setCommand.codename.value = false;
+                        break;
+                    }
+                }
+            }
 		
 		}
 		
@@ -332,11 +368,16 @@ public class MainMenuGUI : MonoBehaviour {
         if (_PanelsNgui.settings.alpha > 0f) {
             HideAllPanel();
             _PanelsNgui.SliderPanel.alpha = 1f;
+            
         }
         else
         {
             HideAllPanel();
             _PanelsNgui.settings.alpha = 1f;
+            if (_SettingPanel.control.alpha == 1)
+            {
+                CearControlls();
+            }
         }
        
 
@@ -372,27 +413,44 @@ public class MainMenuGUI : MonoBehaviour {
 	private bool waitForInput= false;
 	
 	private Dictionary<string,KeyCode> newMap ;
-	
-	public void WaitForKey(string command){
+
+    public void WaitForKey(string command)
+    {
 		waitForInput = true;
-		this.command = command;
+        this.command = command;
 	}
 	public void ApplyControlls(){
-		foreach(KeyValuePair<string,KeyCode> oneCom in newCommand){
-			InputManager.instance.SaveKey(oneCom.key,oneCom.value);
+        foreach (KeyValuePair<string, KeyCode> oneCom in newMap)
+        {
+			InputManager.instance.SaveKey(oneCom.Key,oneCom.Value);
 		}
-		InputManager.instance.SaveSensitivity(mouseSensitivity.sliderValue*2.0f);
+        InputManager.instance.SaveSensitivity(_SettingPanel.mouseSensitivity.value * 2.0f);
 	
 	}
 	public void CearControlls(){
-		newCommand  = new Dictionary<string,KeyCode>();			
-		Dictionary<String, KeyCode>  map =InputManagerinstance.instance.GetMap();
-		foreach(SettingsPanel.SettingCommand command in _SettingPanel.controls){
-			command.keyname.text = map[command.command].ToString();				
+        newMap = new Dictionary<string, KeyCode>();
+        Dictionary<string, KeyCode> map = InputManager.instance.GetMap();
+        foreach (SettingsPanel.SettingCommand setCommand in _SettingPanel.controls)
+        {
+            setCommand.keyname.text = map[setCommand.command].ToString();				
 		}
-		mouseSensitivity.sliderValue = InputManager.instance.GetSensitivity()/2f;
+        _SettingPanel.mouseSensitivity.value = InputManager.instance.GetSensitivity() / 2f;
+        SetMouseLabel();
 	
 	}
+    public void DefaultControl() {
+        newMap = new Dictionary<string, KeyCode>();
+        Dictionary<string, KeyCode> map = InputManager.instance.ForceReload();
+        foreach (SettingsPanel.SettingCommand setCommand in _SettingPanel.controls)
+        {
+            setCommand.keyname.text = map[setCommand.command].ToString();
+        }
+        _SettingPanel.mouseSensitivity.value = InputManager.instance.GetSensitivity() / 2f;
+        SetMouseLabel();
+    }
+    public void SetMouseLabel() {
+        _SettingPanel.mouseLabel.text = (_SettingPanel.mouseSensitivity.value * 100f).ToString("0");
+    }
 }
 
 //Группы переменных
@@ -488,14 +546,16 @@ public class PanelsNgui
 [System.Serializable]
 public class SettingsPanel
 {
-	[System.Serializable]
+	
 	public class SettingCommand{
-		public UILabel codename;
+		public UIToggle codename;
 		public UILabel keyname;
-		public String command;			
+		public string command;			
 	}
-	public List<SettingCommand> controls;
+	public List<SettingCommand> controls = new List<SettingCommand>();
+    public List<GameObject> toggleList;
 	public UISlider mouseSensitivity;
+    public UILabel mouseLabel;
     public UIPanel control;
 	public UIPanel video;
     public UIPanel game;

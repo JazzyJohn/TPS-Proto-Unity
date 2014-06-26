@@ -368,7 +368,7 @@ public class Pawn : DamagebleObject {
 		if(isAi){
 			if(photonView.isMine){
 				mainAi.StartAI();
-				photonView.RPC("PRCSetAIAfterSpawn",PhotonTargets.OtherBuffered,mainAi.aiGroup,mainAi.homeIndex );
+				photonView.RPC("PRCSetAIAfterSpawn",PhotonTargets.OthersBuffered,mainAi.aiGroup,mainAi.homeIndex );
 
 			}
 		}
@@ -1669,7 +1669,7 @@ public class Pawn : DamagebleObject {
     }
     public void StartJetPack() {
         jetPackEnable = true;
-        jetPackTimer = 0.0f;
+       
     }
 
 	public float CalculateJumpVerticalSpeed ( float targetJumpHeight  )

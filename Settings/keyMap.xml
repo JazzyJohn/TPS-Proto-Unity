@@ -2,19 +2,19 @@
 <input>
 	<keys>
 		<name>FullScreen</name>
-		<default>f12</default>
+		<default>F12</default>
 	</keys>
 	<keys>
 		<name>SpawnBot</name>
-		<default>f</default>
+		<default>F</default>
 	</keys>
 	<keys>
 		<name>Use</name>
-		<default>e</default>
+		<default>E</default>
 	</keys>
 	<keys>
 		<name>Fire2</name>
-		<default>mouse 1</default>
+		<default>Mouse1</default>
 	</keys>
 	<keys>
 		<name>Weapon1</name>
@@ -30,55 +30,52 @@
 	</keys>
 	<keys>
 		<name>Suicide</name>
-		<default>k</default>
+		<default>K</default>
 	</keys>
 	<keys>
 		<name>Sprint</name>
-		<default>left shift</default>
+		<default>LeftShift</default>
 	</keys>
 	<keys>
 		<name>Jump</name>
-		<default>space</default>
+		<default>Space</default>
 	</keys>
 	<keys>
 		<name>Fire1</name>
-		<default>mouse 0</default>
+		<default>Mouse0</default>
 	</keys>
 	<keys>
 		<name>PreFire</name>
-		<default>left ctrl</default>
+		<default>LeftControl</default>
 	</keys>
 	<keys>
 		<name>Reload</name>
-		<default>r</default>
+		<default>R</default>
 	</keys>
 	<keys>
 		<name>KnockOut</name>
-		<default>l</default>
+		<default>L</default>
 	</keys>
 	<keys>
 		<name>LegKick</name>
-		<default>v</default>
+		<default>V</default>
 	</keys>
 	<keys>
 		<name>Taunt</name>
-		<default>q</default>
+		<default>Q</default>
 	</keys>
 	<keys>
 		<name>ScoreBtn</name>
-		<default>tab</default>
+		<default>Tab</default>
 	</keys>
-	<keys>
-		<name>ScoreBtn</name>
-		<default>tab</default>
-	</keys>
+	
 	<keys>
 		<name>Send</name>
-		<default>t</default>
+		<default>T</default>
 	</keys>
 	<keys>
 		<name>Detonate</name>
-		<default>z</default>
+		<default>Z</default>
 	</keys>
 	
 </input>
