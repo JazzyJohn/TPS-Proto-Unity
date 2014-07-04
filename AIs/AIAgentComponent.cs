@@ -38,6 +38,7 @@ public class AIAgentComponent : MonoBehaviour {
 	
 	public void SetSpeed(float speed){
 		agent.speed = speed;
+        target = Vector3.zero;
 	}
 	public Vector3 GetTranslate(){
 		return resultTranslate;
@@ -75,7 +76,13 @@ public class AIAgentComponent : MonoBehaviour {
 			}
 		}
 	}
-	
+	public void ForcedSetTarget(Vector3 newTarget){
+		
+
+				agent.GoTo(newTarget);
+				target= newTarget;
+		
+	}
 	public void WalkUpdate () {
 		resultTranslate  =Vector3.zero;
 		needJump = false;
@@ -216,7 +223,13 @@ public class AIAgentComponent : MonoBehaviour {
 		}
 		return false;
 	}
-	
+    public static Vector3 FlatDifference(Vector3 target, Vector3 position)
+    {
+        Vector3 flatPoint = position, flatPosition = target;
+            flatPosition.y = 0;
+			flatPoint.y=0;
+            return (flatPosition - flatPoint);
+    }
 	
 	public float HorizontalAngle(float X1, float Y1, float X2, float Y2) {
 		if (Y2 == Y1) { return (X1 > X2) ? 180 : 0; }

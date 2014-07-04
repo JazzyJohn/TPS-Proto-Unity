@@ -50,7 +50,9 @@ public class MusicHolder : MonoBehaviour {
 		if (!musicPlayer.isPlaying) {
 			StartSong();
 		}
-		if (curStage != PVPGameRule.instance.curStage) {
+        if (curStage != GameRule.instance.curStage)
+        {
+            curStage = GameRule.instance.curStage;
 			NextStage();
 		}
 	}
@@ -70,7 +72,7 @@ public class MusicHolder : MonoBehaviour {
 	
 	public void NextStage(){
 		if (curStage < MusicInStage.Length - 1) {
-				curStage++;
+				//curStage++;
 				curMusic = MusicBefore[curStage] - 1;
 			//Debug.Log (curMusic);
 				musicPlayer.Stop ();

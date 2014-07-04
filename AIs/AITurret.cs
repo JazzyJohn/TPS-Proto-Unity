@@ -39,11 +39,5 @@ public class AITurret : AIState
         }
     }
 	
-	public override bool IsEnemy(Pawn target){
-		if(target.team==controlledPawn.team){
-			return false;
-		}
-		return true;
-	}
-
+	
 }

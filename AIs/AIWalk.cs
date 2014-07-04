@@ -23,10 +23,14 @@ public class AIWalk : AIState
 		   if(IsInWeaponRange()){
 				Attack();	
 				//isMoving = false;
-				if(!isMelee){
-					isMoving = false;
-				}
-				agent.SetTarget(_enemy.myTransform.position,true);
+                if (!isMelee)
+                {
+                    isMoving = false;
+                }
+                else
+                {
+                    agent.SetTarget(_enemy.myTransform.position, true);
+                }
 		   }else{
 				StopAttack();
 				isMoving =true;
@@ -66,7 +70,7 @@ public class AIWalk : AIState
     {
 
         StopAttack();
-        base.StartState();
+        base.EndState();
     }
 	public void FixedUpdate(){
 		if (_enemy != null&&isMoving) {
@@ -74,16 +78,19 @@ public class AIWalk : AIState
 			agent.WalkUpdate ();
 			//Debug.Log(agent.GetTranslate());
             needJump = !needJump && agent.needJump;
-			if(agent.GetTranslate().sqrMagnitude<0.1f){
+			Vector3 translateVect = agent.GetTranslate();
+			if(translateVect.sqrMagnitude<0.1f){
 				controlledPawn.Movement (Vector3.zero,CharacterState.Idle);
+
 			}else{
                 if (!needJump)
                 {
-					controlledPawn.Movement (agent.GetTranslate(),CharacterState.Running);
+					controlledPawn.Movement (translateVect,CharacterState.Running);
 				} else {
-					controlledPawn.Movement (agent.GetTranslate () +controlledPawn.JumpVector(), CharacterState.Jumping);
+					controlledPawn.Movement (translateVect +controlledPawn.JumpVector(), CharacterState.Jumping);
 				}
 			}
+
 
 		}else{
 
@@ -91,12 +98,7 @@ public class AIWalk : AIState
 		}
 		
 	}
-	public override bool IsEnemy(Pawn target){
-		if(target.team==controlledPawn.team){
-			return false;
-		}
-		return true;
-	}
+
 	public override void SetEnemy(Pawn enemy){
 		if (_enemy != enemy) {
 				controlledPawn.PlayTaunt ();

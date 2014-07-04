@@ -79,15 +79,15 @@ public class StatisticHandler : MonoBehaviour {
 		StatisticHandler.instance.StartCoroutine(SendForm (form,ADD_USER));
 	}
 	public static IEnumerator SendForm(WWWForm form,string url){
-		Debug.Log (form + url);
+		//Debug.Log (form + url);
 		WWW w = null;
 		if (String.Compare(Application.absoluteURL, 0, "https", 0,5) != 0) {
 
-						Debug.Log ("STATS HTTP SEND");
+						//Debug.Log ("STATS HTTP SEND");
 						w = new WWW (STATISTIC_PHP + url, form);
 		}
 		else{
-			Debug.Log ("STATS HTTPS SEND");
+			//Debug.Log ("STATS HTTPS SEND");
 			 w = new WWW (STATISTIC_PHP_HTTPS + url, form);
 		}
 			yield return w;
@@ -102,11 +102,11 @@ public class StatisticHandler : MonoBehaviour {
 		WWW www = null;
 		if (String.Compare(Application.absoluteURL, 0, "https", 0,5) != 0) {
 			
-			Debug.Log ("STATS HTTP SEND" + StatisticHandler.STATISTIC_PHP_HTTPS + URL);
+			//Debug.Log ("STATS HTTP SEND" + StatisticHandler.STATISTIC_PHP_HTTPS + URL);
 			www = new WWW (StatisticHandler.STATISTIC_PHP + URL,form);
 		}
 		else{
-			Debug.Log ("STATS HTTPS SEND"+StatisticHandler.STATISTIC_PHP_HTTPS +  URL);
+			//Debug.Log ("STATS HTTPS SEND"+StatisticHandler.STATISTIC_PHP_HTTPS +  URL);
 			www = new WWW (StatisticHandler.STATISTIC_PHP_HTTPS +  URL,form);
 		}
 	

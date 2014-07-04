@@ -52,12 +52,6 @@ public class ItemManager : MonoBehaviour {
 	public BaseWeapon[] weaponPrefabsListbyId;
 
 
-	
-	private GameClassEnum lastGameClass;
-	
-	private int lastGameSlot;
-	
-	private List<GUIItem>  weaponList= new List<GUIItem>();
 
 	public Dictionary<int,FromDBWeapon>  weaponIndexTable = new Dictionary<int,FromDBWeapon>();
 
@@ -241,9 +235,7 @@ public class ItemManager : MonoBehaviour {
 	}
 	
 	public List<GUIItem> GetItemForSlot(GameClassEnum gameClass, int gameSlot){
-		if(lastGameClass==gameClass&&lastGameSlot==gameSlot&&weaponList.Count!=0){	
-				return weaponList;
-			}
+		
 		//Debug.Log (gameClass +"  "+ gameSlot);
 			switch(gameSlot){
 				//Taunt section look WeaponPlayer.cs for details
@@ -262,10 +254,9 @@ public class ItemManager : MonoBehaviour {
 	
 	}
 	public List<GUIItem> GetAnimationForSlot(GameClassEnum gameClass){
+
+        List<GUIItem> weaponList = new List<GUIItem>();
 		
-		weaponList.Clear();
-		lastGameClass=gameClass;
-		lastGameSlot=5;
 		GameClassEnum MyANY = GameClassEnum.ANY;
 		if((int)gameClass>(int) GameClassEnum.ANY){
 			MyANY = GameClassEnum.ANYROBOT;
@@ -288,17 +279,16 @@ public class ItemManager : MonoBehaviour {
 	
 	
 	public List<GUIItem> GetWeaponForSlot(GameClassEnum gameClass, BaseWeapon.SLOTTYPE gameSlot){
-		
-		weaponList.Clear();
-		lastGameClass=gameClass;
-		lastGameSlot=(int)gameSlot;
+
+        List<GUIItem> weaponList = new List<GUIItem>();
 		GameClassEnum MyANY = GameClassEnum.ANY;
 		if((int)gameClass>(int) GameClassEnum.ANY){
 			MyANY = GameClassEnum.ANYROBOT;
 		}
 		foreach(FromDBWeapon entry  in weaponIndexTable.Values){
 
-			if(entry.gameSlot==(BaseWeapon.SLOTTYPE)lastGameSlot&&(entry.gameClass ==MyANY||entry.gameClass==gameClass)){
+            if (entry.gameSlot ==gameSlot && (entry.gameClass == MyANY || entry.gameClass == gameClass))
+            {
 				GUIItem gui = new GUIItem();
 				gui.index = entry.weaponId;
 				gui.name= entry.name;

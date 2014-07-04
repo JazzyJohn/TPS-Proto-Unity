@@ -135,7 +135,7 @@ public class AchievementManager : MonoBehaviour, LocalPlayerListener{
 
 	private void AchivmentLoop(){
 		while (true) {
-			Debug.Log (incomeQueue.Count	);
+			//Debug.Log (incomeQueue.Count	);
 						while (incomeQueue.Count>0) {
 								IncomingMessage mess = incomeQueue.Dequeue ();
                                 //Debug.Log(mess.param);

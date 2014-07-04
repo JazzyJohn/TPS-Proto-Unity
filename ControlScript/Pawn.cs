@@ -59,8 +59,11 @@ public class Pawn : DamagebleObject {
 	private LayerMask wallRunLayers = 1;
 	private LayerMask climbLayers = 1 << 9; // Layer 9
 
-	public bool isActive =true;
+	public bool isActive =false;
 
+    //If this spawn pre defained by game designer we don't want to start in on start but on AIDirector start so set this to false;
+
+    public bool isSpawned = true;
 	//Weapon that in hand
 	public BaseWeapon CurWeapon;
 
@@ -235,18 +238,23 @@ public class Pawn : DamagebleObject {
 			switch(characterState) // Если прыжок проверить растояние (+)
 			{
 			case CharacterState.Jumping:
-				if (Physics.Raycast(transform.position, -Vector3.up, out hitGround)) 
-				{
-					distanceToGround = hitGround.distance;
-					if(distanceToGround < 0.35+GetComponent<CapsuleCollider>().height/2)
-					{
-						animator.animator.SetBool("DistanceJump", false);
-					}
-					else
-					{
-						animator.animator.SetBool("DistanceJump", true);
-					}
-				}
+            case CharacterState.DoubleJump:
+                    if (Physics.Raycast(transform.position, -Vector3.up, out hitGround))
+                    {
+                        distanceToGround = hitGround.distance;
+                        if (distanceToGround < 0.35 + GetComponent<CapsuleCollider>().height / 2)
+                        {
+                            animator.animator.SetBool("DistanceJump", false);
+                        }
+                        else
+                        {
+                            animator.animator.SetBool("DistanceJump", true);
+                        }
+                    }
+                    else
+                    {
+                        animator.animator.SetBool("DistanceJump", true);
+                    }
 				break;
 			}
 		}
@@ -322,7 +330,7 @@ public class Pawn : DamagebleObject {
 
 	//ноги
 
-	public AnimationManager.Leg[] Legs;
+	
 
 
 
@@ -331,75 +339,98 @@ public class Pawn : DamagebleObject {
 		ivnMan =GetComponent<InventoryManager> ();
 		_rb  = GetComponent<Rigidbody>();
 		capsule = GetComponent<CapsuleCollider> ();
+        myCollider = collider;
 		photonView = GetComponent<PhotonView>();
 		animator = transform.GetComponentInChildren<AnimationManager>();
 		PlayerManager.instance.addPawn (this);
+        aSource = GetComponent<AudioSource>();
+        if (!isSpawned)
+        {
+            correctPlayerPos = transform.position;
+        }
+        charMan = GetComponent<CharacteristicManager>();
+        charMan.Init();
 	}
 
 
 	// Use this for initialization
 	protected void Start () {
-		aSource = GetComponent<AudioSource> ();
-
-		sControl = new soundControl (aSource);//создаем обьект контроллера звука
-		_canWallRun = canWallRun;
-		//проигрываем звук респавна
-		sControl.playClip (spawnSound);
-
-		if (emitter != null) {
-				emitter.Emit ();//запускаем эмиттер
-				isSpawn = true;//отключаем движения и повреждения
-		}
-
-		if (!photonView.isMine) {
-
-						Destroy (GetComponent<ThirdPersonController> ());
-						Destroy (GetComponent<ThirdPersonCamera> ());
-						Destroy (GetComponent<MouseLook> ());
-						GetComponent<Rigidbody> ().isKinematic = true;
-						//ivnMan.Init ();
-		} else {
-			cameraController=GetComponent<ThirdPersonCamera> ();
-			isAi = cameraController==null;
-		}
-		mainAi =  GetComponent<AIBase> ();
-		
-		isAi = mainAi!=null;
-		if(isAi){
-			if(photonView.isMine){
-				mainAi.StartAI();
-				photonView.RPC("PRCSetAIAfterSpawn",PhotonTargets.OthersBuffered,mainAi.aiGroup,mainAi.homeIndex );
-
-			}
-		}
-		GetSize ();
-		naturalWeapon = GetComponent<WeaponOfExtremities>();
-		correctPlayerPos = transform.position;
-		myCollider = collider;
-		ivnMan.Init ();
-		centerOffset = capsule.bounds.center - myTransform.position;
-		headOffset = centerOffset;
-		headOffset.y = capsule.bounds.max.y - myTransform.position.y;
-
-		distToGround = capsule.height/2-capsule.center.y;
-		charMan = GetComponent<CharacteristicManager> ();
-		charMan.Init ();
-		health= charMan.GetIntChar(CharacteristicList.MAXHEALTH);
-		if (canJump) {
-			jetPackCharge = charMan.GetFloatChar(CharacteristicList.JETPACKCHARGE);
-		}else{
-			jetPackCharge= 0;
-		}
-
-		if (isAi) {
-			ivnMan.Init ();
-			AfterSpawnAction ();
-		}
-		//Debug.Log (distToGround);
-		foreach(AnimationManager.Leg l in Legs)
-			l.LegSet();
+        if (isSpawned || !photonView.isMine)
+        {
+            StartPawn();
+        }
 
 	}
+
+    public virtual void StartPawn()
+    {
+
+        sControl = new soundControl(aSource);//создаем обьект контроллера звука
+        _canWallRun = canWallRun;
+        //проигрываем звук респавна
+        sControl.playClip(spawnSound);
+        isActive = true;
+        if (emitter != null)
+        {
+            emitter.Emit();//запускаем эмиттер
+            isSpawn = true;//отключаем движения и повреждения
+        }
+
+        if (!photonView.isMine)
+        {
+
+            Destroy(GetComponent<ThirdPersonController>());
+            Destroy(GetComponent<ThirdPersonCamera>());
+            Destroy(GetComponent<MouseLook>());
+            GetComponent<Rigidbody>().isKinematic = true;
+            //ivnMan.Init ();
+        }
+        else
+        {
+            cameraController = GetComponent<ThirdPersonCamera>();
+            isAi = cameraController == null;
+        }
+        mainAi = GetComponent<AIBase>();
+
+        isAi = mainAi != null;
+        if (isAi)
+        {
+            if (photonView.isMine)
+            {
+                mainAi.StartAI();
+                photonView.RPC("PRCSetAIAfterSpawn", PhotonTargets.OthersBuffered, mainAi.aiGroup, mainAi.homeIndex);
+
+            }
+        }
+        GetSize();
+        naturalWeapon = GetComponent<WeaponOfExtremities>();
+        correctPlayerPos = transform.position;
+     
+        ivnMan.Init();
+        centerOffset = capsule.bounds.center - myTransform.position;
+        headOffset = centerOffset;
+        headOffset.y = capsule.bounds.max.y - myTransform.position.y;
+
+        distToGround = capsule.height / 2 - capsule.center.y;
+      
+        health = charMan.GetIntChar(CharacteristicList.MAXHEALTH);
+        if (canJump)
+        {
+            jetPackCharge = charMan.GetFloatChar(CharacteristicList.JETPACKCHARGE);
+        }
+        else
+        {
+            jetPackCharge = 0;
+        }
+
+        if (isAi)
+        {
+            ivnMan.Init();
+            AfterSpawnAction();
+        }
+        //Debug.Log (distToGround);
+
+    }
 
 	public float GetSize ()
 	{
@@ -447,7 +478,8 @@ public class Pawn : DamagebleObject {
 		}
 		//вопли при попадании
 		//выбираются случайно из массива. Звучат не прерываясь при следующем вызове
-		if (lastPainSound + 1.0f<Time.time) {
+        if (lastPainSound + 1.0f < Time.time && painSoundsArray.Length>0)
+        {
 			lastPainSound =Time.time;
 						sControl.playClipsRandom (painSoundsArray);
 		}
@@ -601,7 +633,7 @@ public class Pawn : DamagebleObject {
 	}
 	
 	public IEnumerator AfterAnimKill(){
-		yield return new WaitForSeconds(3f);
+		yield return new WaitForSeconds(8f);
 		PhotonNetwork.Destroy(gameObject);
 	}
 	//EFFECCT SECTION
@@ -649,6 +681,7 @@ public class Pawn : DamagebleObject {
                         continue;
                     }
                 }
+             //   Debug.Log(this + "  " + allPawn[i]);
                 seenPawns.Add(allPawn[i]);
             }
         }
@@ -825,8 +858,7 @@ public class Pawn : DamagebleObject {
 
 	}
     void LateUpdate() {
-		foreach(AnimationManager.Leg l in Legs)
-			l.LegStep();
+		
 
 	}
 	protected void Update () {
@@ -903,7 +935,8 @@ public class Pawn : DamagebleObject {
 							myTransform.rotation= Quaternion.LookRotation(forwardRotation);
 						}
 					}else{
-						if ( characterState == CharacterState.Idle||characterState == CharacterState.DoubleJump ){
+                        if (isLookingAt && characterState == CharacterState.Idle || characterState == CharacterState.DoubleJump)
+                        {
 
 							if((Math.Abs (eurler.y -myTransform.rotation.eulerAngles.y)> maxStandRotate)){
 								myTransform.rotation= Quaternion.Lerp(myTransform.rotation,Quaternion.Euler(eurler),Time.deltaTime);			
@@ -1081,6 +1114,9 @@ public class Pawn : DamagebleObject {
 				}
 			
 			}else{
+                if (cameraController == null) {
+                    return aimRotation;
+                }
 				if(cameraController.enabled ==false){
 					aimRotation= myTransform.position +myTransform.forward*50;
 					return aimRotation;
@@ -1251,6 +1287,9 @@ public class Pawn : DamagebleObject {
 	}
 	
 	public void RandomKick(){
+        if (AttackType.Count == 0) {
+            return;
+        }
 		int i = (int)(UnityEngine.Random.value * AttackType.Count);
 		naturalWeapon.StartKick(AttackType[i]); 
 
@@ -2304,8 +2343,10 @@ public class Pawn : DamagebleObject {
     }
 	[RPC]
 	public void PRCSetAIAfterSpawn(int group, int homeindex ){
+        mainAi = GetComponent<AIBase>();
 		mainAi.aiGroup= group;
 		mainAi.homeIndex =homeindex;
+        isActive = true;
 	}
 	
 }

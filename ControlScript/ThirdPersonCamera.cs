@@ -76,8 +76,8 @@ public class ThirdPersonCamera : MonoBehaviour
 			enabled = false;	
 		}
 		startFov = Camera.main.fieldOfView;
-		minimapTransform = GameObject.FindGameObjectWithTag ("MinimapCamera").GetComponent<Transform> ();
-		minimapCamera = minimapTransform.camera;
+		//minimapTransform = GameObject.FindGameObjectWithTag ("MinimapCamera").GetComponent<Transform> ();
+		//minimapCamera = minimapTransform.camera;
 		_target = transform;
 		_pawn = GetComponent<Pawn> ();
 		InitOffsets();

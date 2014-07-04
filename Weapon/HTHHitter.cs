@@ -117,7 +117,7 @@ public class HTHHitter : MonoBehaviour {
 		{
 			if(!wasDamage){
 				hits = Physics.RaycastAll(myTransform.position, 	myTransform.forward, 2.0f);
-			    Debug.DrawRay(myTransform.position,myTransform.forward*2.0f,Color.red,5.0f);
+			    //Debug.DrawRay(myTransform.position,myTransform.forward*2.0f,Color.red,5.0f);
 				foreach(RaycastHit hit in hits)
 				{
 					onBulletHit(hit);

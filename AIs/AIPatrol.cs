@@ -44,6 +44,7 @@ public class AIPatrol : AIState
 		
 	}
 	public void FixedUpdate(){
+       
 			bool needJump = agent.needJump;
 			agent.WalkUpdate ();
            // Debug.Log("Jump" + needJump + agent.needJump);
@@ -59,17 +60,12 @@ public class AIPatrol : AIState
             if (translateVect.sqrMagnitude == 0)
             {
                 //Debug.Log("recalculate");
-                agent.SetTarget(patrolPoints[step].position);
+				agent.ForcedSetTarget(patrolPoints[step].position);
             }
 			controlledPawn.SetAiRotation( agent.GetTarget());
 		
 	}
-	public override bool IsEnemy(Pawn target){
-		if(target.team==controlledPawn.team){
-			return false;
-		}
-		return base.IsEnemy(target);
-	}
+
 	public override void SetEnemy(Pawn enemy){
 		controlledPawn. PlayTaunt();
 		

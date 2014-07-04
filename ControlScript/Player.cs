@@ -78,7 +78,9 @@ public class Player : MonoBehaviour {
 	
 	public GlobalPlayer globalPlayer;
 
-
+    private bool robotAnnonce =false;
+    
+    public int killInRow = 0;
 
 	public bool isPlayerFriend(string playerId)
 	{
@@ -98,7 +100,7 @@ public class Player : MonoBehaviour {
 						myCamera = Camera.main;
 						((PlayerMainGui)myCamera.GetComponent (typeof(PlayerMainGui))).SetLocalPlayer(this);
 						robotTimer = robotTime;
-		
+		                
 						//this.name = "Player";		
 						PlayerName = "Player" + PhotonNetwork.playerList.Length;
 						//	photonView.RPC ("ASKTeam", PhotonTargets.MasterClient);
@@ -110,10 +112,7 @@ public class Player : MonoBehaviour {
 						photonView.RPC("RPCSetNameUID",PhotonTargets.AllBuffered,UID,PlayerName);
 						EventHolder.instance.FireEvent(typeof(LocalPlayerListener),"EventAppear",this);
 						//StatisticHandler.StartStats(UID,PlayerName);
-		} else {
-			Destroy(GetComponent<MusicHolder>());
-			Destroy(GetComponent<AudioSource>());	
-		}
+		} 
 	}
 	[RPC]
 	public void ASKTeam(){
@@ -180,6 +179,11 @@ public class Player : MonoBehaviour {
 				robotTimer-=Time.deltaTime;
 				
 				if(robotTimer<=0&&canSpamBot){
+                    if (!robotAnnonce)
+                    {
+                        robotAnnonce = true;
+                        PlayerMainGui.instance.Annonce(AnnonceType.JUGGERREADY);
+                    }
 					if(InputManager.instance.GetButton("SpawnBot")){
 						
 						if(Physics.Raycast(centerofScreen, out hitinfo,50.0f)){
@@ -302,14 +306,18 @@ public class Player : MonoBehaviour {
 			}
              if (InputManager.instance.GetButtonDown("Suicide"))
              {
-				currentPawn.RequestKillMe();
-				if(robotPawn!=null){
-					robotPawn.RequestKillMe();
-				}
-				Score.Death++;
-				isStarted = false;
-				isDead = true;
-				StatisticHandler.SendPlayerKillbyNPC(UID, PlayerName);
+                 if (!inBot)
+                 {
+                     currentPawn.RequestKillMe();
+                     if (robotPawn != null)
+                     {
+                         robotPawn.RequestKillMe();
+                     }
+                     Score.Death++;
+                     isStarted = false;
+                     isDead = true;
+                     StatisticHandler.SendPlayerKillbyNPC(UID, PlayerName);
+                 }
 			}
 		}
 	
@@ -317,8 +325,10 @@ public class Player : MonoBehaviour {
 	
 	public void RobotDead(Player Killer){
 		robotTimer=robotTime;
+        robotAnnonce = false;
 		if (inBot) {
 				inBot = false;
+           
 				currentPawn.Activate ();
 				currentPawn.rigidbody.MovePosition (robotPawn.playerExitPositon.position);
 				currentPawn.myTransform.rotation = robotPawn.playerExitPositon.rotation;
@@ -347,7 +357,7 @@ public class Player : MonoBehaviour {
 	}
 	[RPC]
 	public void RPCPawnDead(int viewId,int pawnViewId){
-		
+        killInRow = 0;
 		Score.Death++;
 		isStarted = false;
 		isDead = true;
@@ -380,11 +390,12 @@ public class Player : MonoBehaviour {
 
 
 	}
+
 	[RPC]
 	public void RPCPawnKill(Vector3 position,int viewId){
 
 		//TODO: move text to config
-		PlayerMainGui.instance.AddMessage("NAILED IT",position,PlayerMainGui.MessageType.KILL_TEXT);
+		
 		EventHolder.instance.FireEvent(typeof(LocalPlayerListener),"EventPawnKillPlayer",this);
 		Player victim = PhotonView.Find (viewId).GetComponent<Player> ();
 
@@ -392,7 +403,30 @@ public class Player : MonoBehaviour {
 		{
 			EventHolder.instance.FireEvent(typeof(LocalPlayerListener),"EventKilledAFriend",this,victim);
 		}
+        killInRow++;
+        switch (killInRow) {
+            case 1:
+                PlayerMainGui.instance.Annonce(AnnonceType.KILL);
+                break;
+            case 2:
+                PlayerMainGui.instance.Annonce(AnnonceType.DOUBLEKILL);
+                break;
+            case 3:
+                PlayerMainGui.instance.Annonce(AnnonceType.TRIPLIKILL);
+                break;
+            case 4:
+                PlayerMainGui.instance.Annonce(AnnonceType.ULTRAKILL);
+                break;
+            case 5:
+                PlayerMainGui.instance.Annonce(AnnonceType.MEGAKILL);
+                break;
+            default:
+                PlayerMainGui.instance.Annonce(AnnonceType.RAMPAGE);
+                break;
+            
 
+        
+        }
 		if(!inBot){
 			Score.Kill++;
 			robotTimer-=robotKillReduce;
@@ -408,7 +442,7 @@ public class Player : MonoBehaviour {
 	public void RPCAIKill(Vector3 position){
 		
 		//TODO: move text to config
-		PlayerMainGui.instance.AddMessage("NAILED IT",position,PlayerMainGui.MessageType.KILL_TEXT);
+        PlayerMainGui.instance.Annonce(AnnonceType.AIKILL);
 		EventHolder.instance.FireEvent(typeof(LocalPlayerListener),"EventPawnKillAI",this);
 
 		

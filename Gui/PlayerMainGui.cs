@@ -105,18 +105,17 @@ public class PlayerMainGui : MonoBehaviour {
 		Dedicated,
 		GameResult,
 		KillCam,
-		Respawn
+		Respawn,
+        None
 			
 	}
-	public GUIState guiState;
+    public GUIState guiState = GUIState.None;
 
 	public GUISkin guiSkin;
 
 	public GUISkin messageSkin;
 
-	private MenuTF respawnMenu;
-
-	private WeaponPlayer weaponMenu;
+    private SelectPlayerGUI respawnMenu;
 
 	private PlayerHudNgui hud;
 
@@ -131,10 +130,9 @@ public class PlayerMainGui : MonoBehaviour {
 	// Use this for initialization
 	void Start () {
 		MainCamera = Camera.main;
-		respawnMenu = GetComponent<MenuTF>();
+		
 	
-		weaponMenu = GetComponent<WeaponPlayer>();
-
+        
 
 	
 
@@ -152,7 +150,10 @@ public class PlayerMainGui : MonoBehaviour {
 
 		hud = GetComponentInChildren<PlayerHudNgui> ();
 		hud.SetLocalPlayer(LocalPlayer);
+        respawnMenu = GetComponentInChildren<SelectPlayerGUI>();
+        respawnMenu.SetLocalPlayer(LocalPlayer);
 		ChageState(GUIState.Respawn);
+        
 	}
 
     public void ReSize() {
@@ -174,48 +175,76 @@ public class PlayerMainGui : MonoBehaviour {
         {
 			
 						ChageState (GUIState.Playerlist);
-						stat.Activate();
-						return;
+					
+						
 		} else {
-			if(	guiState != GUIState.KillCam){
-				stat.DeActivate();
-			}
-		}
-		if (Input.GetButtonDown ("Debug")) {
-		
-			showDebug= !showDebug;
-			return;
-		}
-		if (PVPGameRule.instance.isGameEnded) {
-		
-			ChageState(GUIState.GameResult);
-			return;
-		}
-		if (LocalPlayer != null && !LocalPlayer.IsDead ()) {
+            if (LocalPlayer != null && !LocalPlayer.IsDead())
+            {
+
+                if (PVPGameRule.instance.isGameEnded)
+                {
+
+                    ChageState(GUIState.GameResult);
+                   
+                }
+                else
+                {
+                    ChageState(GUIState.Normal);
+                }
 
 
-			ChageState(GUIState.Normal);
 
-		
-		
-		} else {
-			if(	guiState != GUIState.KillCam){
-				guiState = GUIState.Respawn;
-			}
+            }
+            else
+            {
+                if (guiState != GUIState.KillCam)
+                {
+                    ChageState(GUIState.Respawn);
+                }
+            }
 		}
+		
+		
 	
 	
 
 	}
+   
 	
 	public void ChageState(GUIState nextState ){
-		if (nextState == GUIState.Normal&&guiState != GUIState.Normal) {
-			hud.Activate();
-		}else{
-			if(nextState != GUIState.Normal){
-				hud.DeActivate();
-			}
-		}
+       
+        switch (nextState)
+        {
+            case GUIState.Normal:
+                stat.DeActivate();
+                respawnMenu.DeActivate();
+                hud.Activate();
+                break;
+            case GUIState.Respawn:
+                stat.DeActivate();
+                hud.DeActivate();
+                respawnMenu.Activate();
+                break;
+            case GUIState.Playerlist:
+                hud.DeActivate();
+                respawnMenu.DeActivate();
+                stat.Activate();
+                break;
+            case GUIState.KillCam:
+                stat.DeActivate();
+                respawnMenu.DeActivate();
+                hud.DeActivate();
+                break;
+            case GUIState.GameResult:
+                stat.DeActivate();
+                respawnMenu.DeActivate();
+                hud.DeActivate();
+                break;
+            
+            
+
+        }
+		
 		guiState =nextState;
 	}
 
@@ -341,7 +370,10 @@ public class PlayerMainGui : MonoBehaviour {
 		
 	
 	}
-
+    public void Annonce(AnnonceType type) {
+        hud.Annonce(type);
+    
+    }
 	void RespawnGui(){
 		/*float screenX = Screen.width, screenY = Screen.height;
 		Screen.lockCursor = false;
@@ -361,8 +393,7 @@ public class PlayerMainGui : MonoBehaviour {
 			
 		}*/
 
-		respawnMenu.DrawMenu ();
-		weaponMenu.DrawMenu ();
+		/*
 		if (Choice._Player != -1 && Choice._Robot != -1&&Choice._Team!= -1) {
 			LocalPlayer.SetTeam (Choice._Team);
 			
@@ -382,16 +413,16 @@ public class PlayerMainGui : MonoBehaviour {
 				PhotonNetwork.Destroy(LocalPlayer.GetView());
 				guiState = GUIState.Dedicated;
 			}
-		}
+		}*/
 		
 	}
 	void GameResult(){
 		float screenX = Screen.width, screenY = Screen.height;
 		float TimerLabel = screenX / 4;
-		Rect crosrect = new Rect ((screenX - TimerLabel) / 2, (screenY - TimerLabel) / 2, TimerLabel, TimerLabel);	
-		GUI.Label (crosrect, "WINNER: " + FormTeamName(PVPGameRule.instance.Winner())+"");
-		crosrect = new Rect ((screenX - TimerLabel) / 2, (screenY - TimerLabel) / 2 +TimerLabel, TimerLabel, TimerLabel);	
-		GUI.Label (crosrect, "NEXT ROUND IN  " + PVPGameRule.instance.GetRestartTimer().ToString("0.0") +" sec.");
+		Rect crosrect = new Rect ((screenX - TimerLabel) / 2, (screenY - TimerLabel) / 2, TimerLabel, TimerLabel);
+        GUI.Label(crosrect, "WINNER: " + FormTeamName(  GameRule.instance.Winner()) + "");
+		crosrect = new Rect ((screenX - TimerLabel) / 2, (screenY - TimerLabel) / 2 +TimerLabel, TimerLabel, TimerLabel);
+        GUI.Label(crosrect, "NEXT ROUND IN  " + GameRule.instance.GetRestartTimer().ToString("0.0") + " sec.");
 	}
 	void MainHud(){
 		float screenX = Screen.width, screenY = Screen.height;
@@ -524,7 +555,7 @@ public class PlayerMainGui : MonoBehaviour {
 
 	void DedicatedDraw(){
 		float screenX = Screen.width, screenY = Screen.height;
-		GameStats gamestats = PVPGameRule.instance.GetStats ();
+        GameStats gamestats = GameRule.instance.GetStats();
 		Rect rectforName = new Rect ((screenX - crosshairWidth * 10) / 2, crosshairHeight, crosshairWidth * 10, crosshairHeight);
 		GUI.Label (rectforName, FormTeamName (1) + gamestats.score [0] + "|" + gamestats.maxScore + " |" + FormTeamName (2) + gamestats.score [1]);
 
@@ -569,6 +600,9 @@ public class PlayerMainGui : MonoBehaviour {
 		case 2:
 			return"Команда B";
 				break;
+            case 0:
+                return "Планета Каспи";
+                break;
 		}
 		return "";
 	}

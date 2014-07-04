@@ -90,7 +90,7 @@ public class AIState : MonoBehaviour {
 		set
 		{
 			_pawnArray = value;
-			//Debug.Log(_pawnArray.Length);
+			
 		}
 	}
 	
@@ -104,8 +104,9 @@ public class AIState : MonoBehaviour {
 	}
 
 	// Use this for initialization
-	void Start () {
+	void Awake () {
         aibase = GetComponent<AIBase>();
+        enabled = false;
 	}
 	
 	// Update is called once per frame
@@ -127,6 +128,7 @@ public class AIState : MonoBehaviour {
 	public virtual bool IsEnemy(Pawn target){
 		if(isAgressive){
 			if(target.isAi){
+                //Debug.Log("ENEMY? ME"+controlledPawn +"YOu" +target);
                 return aibase.IsEnemy(target.mainAi.aiGroup);
 			}else{
                 return true;
@@ -167,6 +169,7 @@ public class AIState : MonoBehaviour {
 //		Debug.Log (_pawnArray);
 		foreach (Pawn pawn in _pawnArray)
 		{
+            //Debug.Log("ENEMY? ME" + controlledPawn + "YOu" + pawn);
 			if(!IsEnemy(pawn)){
 				continue;
 			}
@@ -252,7 +255,7 @@ public class AIState : MonoBehaviour {
 	protected virtual bool IsInWeaponRange(){
 	   float weaponDistance =controlledPawn.OptimalDistance(isMelee);
 
-       return (_enemy.myTransform.position - controlledPawn.myTransform.position).sqrMagnitude - _enemy.GetSize() - controlledPawn.GetSize() < weaponDistance * weaponDistance;
+       return AIAgentComponent.FlatDifference(_enemy.myTransform.position, controlledPawn.myTransform.position).sqrMagnitude - _enemy.GetSize() - controlledPawn.GetSize() < weaponDistance * weaponDistance;
 	}
-	
+    
 }

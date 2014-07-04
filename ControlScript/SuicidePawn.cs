@@ -19,7 +19,7 @@ public class SuicidePawn : Pawn {
 	new void Update () {
 		if(isAi){
 				if(enemy!=null){
-					if((enemy.myTransform.position-myTransform.position).sqrMagnitude<detonateRadius*detonateRadius/4){
+					if(AIAgentComponent.FlatDifference(enemy.myTransform.position,myTransform.position).sqrMagnitude<detonateRadius*detonateRadius/4){
 						Detonate();
 						StartCoroutine (CoroutineRequestKillMe ());
 					}
@@ -37,6 +37,10 @@ public class SuicidePawn : Pawn {
 		base.KillIt(killer);
 		
 	}
+    protected override void ActualKillMe()
+    {
+        PhotonNetwork.Destroy(gameObject);
+    }
 	void Detonate(){
 		if(!isDetonate){
 			photonView.RPC("RPCDetonate",PhotonTargets.All);

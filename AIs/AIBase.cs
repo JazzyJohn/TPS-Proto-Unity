@@ -33,6 +33,8 @@ public class AIBase : MonoBehaviour
 
 	private Pawn controlledPawn;
 
+    public bool standAlone = false;
+
     public int aiGroup;
 
     public int homeIndex;
@@ -44,8 +46,18 @@ public class AIBase : MonoBehaviour
 
 	public Transform[] patrolPoints;
 
+    public void OnDestroy(){
+        if (aiSwarm != null) {
+            aiSwarm.AgentKilled();
+        }
+    }
+
 	public void Init(int aiGroup,AISwarm aiSwarm,int homeIndex){
+        if (controlledPawn == null) {
+            controlledPawn = GetComponent<Pawn>();
+        }
 		this.aiGroup=aiGroup;
+        //Debug.Log("Group after set" + this.aiGroup + "  " + aiGroup);
 		this.aiSwarm=aiSwarm;
 		this.homeIndex = homeIndex;
         this.aiSwarm.respawns[homeIndex].SpawnedSet(controlledPawn);
@@ -60,21 +72,10 @@ public class AIBase : MonoBehaviour
 	}
 	void InitState(){
 		//Debug.Log (_currentState.GetType ().Name);
+        _currentState.controlledPawn = controlledPawn;
+        _currentState.AngleRange = AngleRange;	
 		switch (_currentState.GetType().Name){
-		case "AITurret":
-		{
 
-			_currentState.controlledPawn = controlledPawn;
-			_currentState.AngleRange = AngleRange;		
-		}
-			break;
-		case "AIWalk":
-		{
-
-			_currentState.controlledPawn = controlledPawn;
-			_currentState.AngleRange = AngleRange;	
-		}
-			break;
 			//    break;
 		case "AIPatrol":
 		{
@@ -107,7 +108,7 @@ public class AIBase : MonoBehaviour
         _SC.radius = DetectionRadius;*/
 		_currentState = defaultAIState;
 		controlledPawn = GetComponent<Pawn> ();
-		if(aiSwarm==null){
+		if(aiSwarm==null&&!standAlone){
 			Init(aiGroup,AIDirector.instance.swarms[aiGroup],homeIndex);
 		}
 		InitState ();

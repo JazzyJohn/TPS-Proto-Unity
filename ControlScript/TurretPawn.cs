@@ -6,8 +6,9 @@ public class TurretPawn : Pawn {
 	public Transform headTransform;
 	private Quaternion startRotation;
 
-	void Start(){
-		base.Start ();
+    public override void StartPawn()
+    {
+		base.StartPawn ();
 		startRotation =Quaternion.Inverse( myTransform.rotation)* headTransform.rotation;
 	}
 

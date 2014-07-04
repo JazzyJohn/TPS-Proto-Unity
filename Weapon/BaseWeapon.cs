@@ -145,7 +145,7 @@ public class BaseWeapon : DestroyableNetworkObject {
 
 	public Transform leftHandHolder;
 
-	public Vector3 	muzzleOffset;
+	protected Vector3 	muzzleOffset;
 
 	public float weaponRange;
 
@@ -262,7 +262,10 @@ public class BaseWeapon : DestroyableNetworkObject {
 	}
 
 	// Update is called once per frame
-	void Update () {
+	void FixedUpdate () {
+        UpdateWeapon(Time.fixedDeltaTime);
+    }
+    void UpdateWeapon(float deltaTime){
 		if(init&&owner==null) {
 			RequestKillMe();
 
@@ -277,7 +280,7 @@ public class BaseWeapon : DestroyableNetworkObject {
 			if(reloadTimer<0){
 				Reload();
 			}
-			reloadTimer-=Time.deltaTime;
+            reloadTimer -= deltaTime;
 			return;
 		}
         switch(prefiretype){
@@ -287,7 +290,7 @@ public class BaseWeapon : DestroyableNetworkObject {
 		        }
                 if (fireTimer >= 0)
                 {
-                    fireTimer -= Time.deltaTime;
+                    fireTimer -= deltaTime;
                 }
 
                 break;
@@ -313,7 +316,7 @@ public class BaseWeapon : DestroyableNetworkObject {
                                     }
                                     break;
                                 case AFTERPUMPACTION.Ammo:
-                                    _afterPumpAmount += Time.deltaTime*afterPumpCoef;
+                                    _afterPumpAmount += deltaTime*afterPumpCoef;
                                     if (_afterPumpAmount >= 1.0f) {
                                         _afterPumpAmount = 0;
                                         if (curAmmo > 0 )
@@ -326,20 +329,20 @@ public class BaseWeapon : DestroyableNetworkObject {
                                     break;
                                 case AFTERPUMPACTION.Damage:
                                     BaseDamage selfdamage = new BaseDamage(damageAmount);
-                                    selfdamage.Damage = Time.deltaTime*afterPumpCoef;
+                                    selfdamage.Damage = deltaTime*afterPumpCoef;
                                     owner.Damage(selfdamage, owner.gameObject);
                                     break;
                             }
                         }
                         if (fireTimer >= 0)
                         {
-                            fireTimer -= Time.deltaTime;
+                            fireTimer -=deltaTime;
                         }
 
                     }
                     else
                     {
-						_pumpCoef += Time.deltaTime*pumpCoef;
+						_pumpCoef += deltaTime*pumpCoef;
                         switch (prefiretype)
                         {
                             case PREFIRETYPE.Salvo:
@@ -364,12 +367,12 @@ public class BaseWeapon : DestroyableNetworkObject {
                                
 								break;
                          }
-                        _pumpAmount += Time.deltaTime;
+                        _pumpAmount += deltaTime;
                     }
                 }
                 break;
         }
-		_randShootCoef-=randCoolingEffect*Time.deltaTime;
+		_randShootCoef-=randCoolingEffect*deltaTime;
      
 	}
 
@@ -614,7 +617,7 @@ public class BaseWeapon : DestroyableNetworkObject {
 		float angle = Vector3.Dot (aimDir, realDir);
 
 		if (angle < MAXDIFFERENCEINANGLE) {
-           
+           // Debug.Log("angle");
 			return false;		
 		}
 
@@ -662,9 +665,9 @@ public class BaseWeapon : DestroyableNetworkObject {
 	protected float GetRandomeDirectionCoef(){
 		float effAimRandCoef = _randShootCoef;
 		if (owner.isAiming) {
-			effAimRandCoef=aimRandCoef;
+			effAimRandCoef+=aimRandCoef;
 		}else{
-			effAimRandCoef=normalRandCoef;
+			effAimRandCoef+=normalRandCoef;
 		}
 
 		effAimRandCoef+= owner.AimingCoef ();
@@ -694,7 +697,10 @@ public class BaseWeapon : DestroyableNetworkObject {
 		if (effAimRandCoef > 0) {
 			startRotation = Quaternion.Euler (startRotation.eulerAngles + new Vector3 (Random.Range (-1 * effAimRandCoef, 1 * effAimRandCoef), Random.Range (-1 * effAimRandCoef, 1 * effAimRandCoef), Random.Range (-1 * effAimRandCoef, 1 * effAimRandCoef)));
 		}
+       // Debug.DrawLine(transform.position, startPoint, Color.red,10 );
+   
 		proj=Instantiate(projectilePrefab,startPoint,startRotation) as GameObject;
+        //Debug.DrawLine(transform.position,proj.transform.position, Color.blue, 10);
 		BaseProjectile projScript =proj.GetComponent<BaseProjectile>();
 		float power=0;
 		float range = 0;
@@ -820,6 +826,6 @@ public class BaseWeapon : DestroyableNetworkObject {
 		return (muzzlePoint.position + muzzleOffset - curTransform.position).sqrMagnitude;
 	}
 
-
+   
   
 }

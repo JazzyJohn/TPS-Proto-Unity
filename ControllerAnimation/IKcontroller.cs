@@ -23,10 +23,12 @@ public class IKcontroller : MonoBehaviour {
 	}
 	public void SetWeight(float weight){
 			aim.solver.IKPositionWeight = weight;
+          // Debug.Log("WEIGHT" + weight);
 			targetWeight = weight;
 	}
 	public void EvalToWeight(float weight){
 		//aim.solver.IKPositionWeight = weight;
+         //Debug.Log("WEIGHT" + weight);
 		targetWeight = weight;
 	}
 	void Update(){

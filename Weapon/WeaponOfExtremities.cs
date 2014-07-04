@@ -26,8 +26,8 @@ public class WeaponOfExtremities : MonoBehaviour {
 	private Queue<ShootData> shootsToSpawn = new Queue<ShootData>();
 
 	public Pawn owner;
-	
 
+    public bool isKicking = false;
 
 	private bool shootAfterReload;
 
@@ -69,10 +69,14 @@ public class WeaponOfExtremities : MonoBehaviour {
 
 	public virtual void StartKick(HTHHitter Attack)
 	{
+        if (isKicking) {
+            return;
+        }
         if (!Attack.OnMove) {
             owner.StopMovement();
         }
 		Attack.isKick = true;
+        isKicking = true;
 	}
 
 	public virtual void StopKick()
@@ -83,6 +87,7 @@ public class WeaponOfExtremities : MonoBehaviour {
             Attack.StopKick();
 					
 		}
+        isKicking = false;
 	}
 
 	void Kick(HTHHitter Attack)

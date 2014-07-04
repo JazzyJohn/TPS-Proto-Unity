@@ -1,6 +1,22 @@
 ﻿using UnityEngine;
 using System.Collections;
 
+
+public enum AnnonceType
+{
+    KILL,
+    DOUBLEKILL,
+    TRIPLIKILL,
+    ULTRAKILL,
+    MEGAKILL,
+    RAMPAGE,
+    RESLEAD,
+    INTERGRALEAD,
+    JUGGERREADY,
+    AIKILL
+
+
+}
 public class PlayerHudNgui : MonoBehaviour {
 
     private Player LocalPlayer;
@@ -36,7 +52,7 @@ public class PlayerHudNgui : MonoBehaviour {
 
 	public UIPanel hudpanel;
 
-
+    public string[] annonceSprites;
 
     /*
         public float robotTime=0;
@@ -57,8 +73,7 @@ public class PlayerHudNgui : MonoBehaviour {
     }
     public IEnumerator LateFrameResize()
     {
-        yield return new WaitForEndOfFrame();
-        yield return new WaitForEndOfFrame();
+        yield return new WaitForSeconds(1.0f);
         hudpanel.Invalidate(true);
     }
     public void ReSize() //Правка позиции компонентов
@@ -69,7 +84,7 @@ public class PlayerHudNgui : MonoBehaviour {
     }
     void Update()
     {
-        PlayerMainGui.GameStats gamestats = PVPGameRule.instance.GetStats();
+        PlayerMainGui.GameStats gamestats = GameRule.instance.GetStats();
       
         if (LocalPlayer)Stats = LocalPlayer.GetPlayerStats();
         if (LocalPlayer != null)
@@ -124,6 +139,21 @@ public class PlayerHudNgui : MonoBehaviour {
 		}
 	}
 	public void DeActivate(){
-		hudpanel.enabled = false;
+        if (hudpanel.enabled)
+        {
+            hudpanel.enabled = false;
+        }
 	}
+    public UISprite annonce;
+    public UITweener annonceTweener;
+    public void Annonce(AnnonceType type)
+    {
+        if (annonce.enabled == false) {
+            annonce.enabled = true;
+        }
+        annonce.spriteName = annonceSprites[(int)type];
+        annonceTweener.tweenFactor = 0.0f;
+        annonceTweener.PlayForward();
+
+    }
 }

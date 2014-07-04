@@ -6,7 +6,7 @@ using System.Collections.Generic;
 
 
 class PathCache{
-	public  Queue<KeyValuePair<Node, Node>> pathQueue;
+	public  Queue<KeyValuePair<Node, Node>> pathQueue= new Queue<KeyValuePair<Node,Node>>();
 	
 	public  Dictionary<Node,Dictionary<Node,List<Vector3> > > allPathDictionary   = new Dictionary<Node,Dictionary<Node,List<Vector3> > >();
 
@@ -18,13 +18,14 @@ class PathCache{
 			allPathDictionary[startNode] = new Dictionary<Node,List<Vector3> >();
 		}
 		allPathDictionary[startNode][endNode] = path;
-		pathQueue(new KeyValuePair<Node, Node>(startNode,endNode));
+		pathQueue.Enqueue(new KeyValuePair<Node, Node>(startNode,endNode));
 	}
 
 	public bool HasPath(Node startNode,Node endNode){
 		return allPathDictionary.ContainsKey(startNode)&&allPathDictionary[startNode].ContainsKey(endNode);
 	}
-	public List<Vector3> GetPath(){
+    public List<Vector3> GetPath(Node startNode, Node endNode)
+    {
 		if( allPathDictionary.ContainsKey(startNode)&&allPathDictionary[startNode].ContainsKey(endNode)){
 			return allPathDictionary[startNode][endNode];
 		}else{

@@ -1,7 +1,7 @@
 ﻿using UnityEngine;
 using System.Collections;
 
-
+public enum GAMEMODE { PVP, PVE };
 	
 public class ServerHolder : MonoBehaviour 
 {
@@ -13,10 +13,12 @@ public class ServerHolder : MonoBehaviour
 
 	public bool createRoom = false;
 	public bool connectingToRoom = false;
-	
+
+    public string map = "kaspi_map_c_2_test";
 	string playerName;
 	public string newRoomName;
 	public int newRoomMaxPlayers;
+    public int newPVERoomMaxPlayers;
 	private const float FLOAT_COEF =100.0f;
 
 	public RoomInfo[] allRooms;
@@ -48,12 +50,23 @@ public class ServerHolder : MonoBehaviour
 			PhotonNetwork.ConnectUsingSettings(version);
 			
 			allRooms = PhotonNetwork.GetRoomList();
-			newRoomMaxPlayers = 10;
-			newRoomName = "Test chamber " + Random.Range(100, 999);
+			
+			newRoomName = "Test PVP chamber " + Random.Range(100, 999);
 		}
 		
 	}
-	
+
+    public void RoomNewName(GAMEMODE mode) {
+        switch(mode){
+            case GAMEMODE.PVE:
+                newRoomName = "Test PVE chamber " + Random.Range(100, 999);
+                break;
+            case GAMEMODE.PVP:
+                newRoomName = "Test PVP chamber " + Random.Range(100, 999);
+                break;
+       
+        }
+    }
 	void Update()
 	{
 		float updateRate = 3;
@@ -206,7 +219,7 @@ public class ServerHolder : MonoBehaviour
 						if (GUILayout.Button("Создать", GUILayout.Width (150), GUILayout.Height (25)))
 						{
 							ExitGames.Client.Photon.Hashtable customProps = new ExitGames.Client.Photon.Hashtable();
-							customProps["MapName"] = "kaspi_map_c_2_test";
+                            customProps["MapName"] = map;
 							string[] exposedProps = new string[customProps.Count];
 							exposedProps[0] = "MapName";
 
@@ -235,18 +248,28 @@ public class ServerHolder : MonoBehaviour
 	}
 		
 		
-	public void CreateNewRoom() //Создание комноты (+)
+	public void CreateNewRoom(GAMEMODE mode) //Создание комноты (+)
 	{
 		ExitGames.Client.Photon.Hashtable customProps = new ExitGames.Client.Photon.Hashtable();
-		customProps["MapName"] = "kaspi_map_c_2_test";
+        customProps["MapName"] = map;
 		string[] exposedProps = new string[customProps.Count];
 		exposedProps[0] = "MapName";
-		
-		PhotonNetwork.CreateRoom(newRoomName, true, true, newRoomMaxPlayers, customProps, exposedProps);
+        int roomCnt = newRoomMaxPlayers;
+        switch (mode)
+        {
+            case GAMEMODE.PVE:
+                roomCnt = newPVERoomMaxPlayers;
+                break;
+        }
+
+
+        PhotonNetwork.CreateRoom(newRoomName, true, true, roomCnt, customProps, exposedProps);
 	}
 
 	public void LoadNextMap(){
 		connectingToRoom = true;
+        PhotonNetwork.isMessageQueueRunning = false;
+        Debug.Log("LOAD"+this);
 		StartCoroutine (LoadMap ((string)PhotonNetwork.room.customProperties ["MapName"]));
 	}
 	void OnJoinedLobby()
@@ -374,6 +397,8 @@ public class ServerHolder : MonoBehaviour
 		GameObject menu =Instantiate (loader.playerHud, Vector3.zero, Quaternion.identity) as GameObject;
 		Camera.main.GetComponent<PlayerMainGui> ().enabled = true;
 		menu.transform.parent = Camera.main.transform;
+        menu.transform.localPosition = Vector3.zero;
+        menu.transform.localRotation = Quaternion.identity;
 		PhotonNetwork.Instantiate ("Player",Vector3.zero,Quaternion.identity,0);
 	
 	}
@@ -385,7 +410,7 @@ public class ServerHolder : MonoBehaviour
 		connectingToRoom = false;
 		if (PhotonNetwork.isMasterClient) 
 		{
-			FindObjectOfType<PVPGameRule> ().StartGame ();
+			FindObjectOfType<GameRule> ().StartGame ();
 		}
 		MainMenuGUI mainMenu = FindObjectOfType<MainMenuGUI> ();
 		if (mainMenu != null) {
@@ -416,7 +441,7 @@ public class ServerHolder : MonoBehaviour
 		//TODO: director fix
 	
 		if (PhotonNetwork.isMasterClient) {
-			FindObjectOfType<PVPGameRule> ().StartGame ();	
+			FindObjectOfType<GameRule> ().StartGame ();	
 		}
 	}
 

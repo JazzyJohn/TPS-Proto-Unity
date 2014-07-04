@@ -7,47 +7,12 @@ public class PVPGameRule : GameRule {
 		
 		protected int[] teamScore;
 		
-		protected float timer=0.0f;
-
-		protected float restartTimer=0.0f;
 		
-		protected int maxScore;
-		
-		public float gameTime;
-
-		public float restartTime  = 10.0f;
-
-		public bool isGameEnded = false;
-		
-		public  bool lvlChanging = false;
-
-		public PhotonView photonView;
-		
-		public int curStage=0;
-		 // s_Instance is used to cache the instance found in the scene so we don't have to look it up every time.
-		private static PVPGameRule s_Instance = null;
-	 
-		// This defines a static instance property that attempts to find the manager object in the scene and
-		// returns it to the caller.
-		public static PVPGameRule instance {
-			get {
-				if (s_Instance == null) {
-					// This is where the magic happens.
-					//  FindObjectOfType(...) returns the first AManager object in the scene.
-					s_Instance =  FindObjectOfType(typeof (PVPGameRule)) as PVPGameRule;
-				}
-	 
-				return s_Instance;
-			}
-		}	
-
 
 		
 		protected void Awake(){
-			isGameEnded = false;
-			lvlChanging = false;
-			PhotonNetwork.isMessageQueueRunning = true;
-			photonView = GetComponent<PhotonView>();
+            base.Awake();
+			
 			teamScore= new int[PlayerManager.instance.MaxTeam];
 			teamKill= new int[PlayerManager.instance.MaxTeam];
 		}
@@ -72,16 +37,31 @@ public class PVPGameRule : GameRule {
 					//PhotonNetwork.automaticallySyncScene = true;
 					//PhotonNetwork.LoadLevel(NextMap());
 			
-			}	
+			}
+            Annonce();
 			timer+= Time.deltaTime;			
 		}
+
+        public AnnonceType type;
+        public void Annonce() {
+            if (teamScore[0] > teamScore[1] && type!=AnnonceType.INTERGRALEAD)
+            {
+                type = AnnonceType.INTERGRALEAD;
+                PlayerMainGui.instance.Annonce(type);
+            }
+            if (teamScore[0] < teamScore[1] && type != AnnonceType.RESLEAD)
+            {
+                type = AnnonceType.RESLEAD;
+                PlayerMainGui.instance.Annonce(type);
+            }
+        }
 		public virtual bool IsGameEnded(){
 			if(timer>gameTime){
 				return true;
 			}
 			return false;
 		}
-		public virtual PlayerMainGui.GameStats GetStats(){
+		public override PlayerMainGui.GameStats GetStats(){
 			PlayerMainGui.GameStats  stats = new PlayerMainGui.GameStats();
 			stats.gameTime = gameTime-timer;
 			stats.score = teamScore;
@@ -93,7 +73,7 @@ public class PVPGameRule : GameRule {
 			return Application.loadedLevelName;
 		}
 		
-		public void Kill(int team){
+		public override void Kill(int team){
 			photonView.RPC("RPCKill",PhotonTargets.MasterClient,team);
 		}
 		[RPC]
@@ -105,7 +85,8 @@ public class PVPGameRule : GameRule {
 			teamKill[team-1]++;
 		}
 		//For ticket system like in Battlefield
-		public void Spawn(int team){
+        public override void Spawn(int team)
+        {
 			photonView.RPC("RPCSpawn",PhotonTargets.MasterClient,team);
 		}
 		[RPC]
@@ -116,10 +97,7 @@ public class PVPGameRule : GameRule {
 			
 
 		}
-		public float GetRestartTimer(){
-			return restartTime- restartTimer;
-
-		}
+		
 		public void OnPhotonSerializeView(PhotonStream stream, PhotonMessageInfo info)
 		{
 				if (stream.isWriting) {
@@ -135,7 +113,7 @@ public class PVPGameRule : GameRule {
 				}
 
 		}
-		public int Winner(){
+		public override int Winner(){
 			int maxScore = 0;
 			int winner = 0;
 			for(int i=0;i<teamScore.Length;i++){
@@ -146,10 +124,7 @@ public class PVPGameRule : GameRule {
 			}
 			return (winner+1);
 		}
-		public void StartGame(){
-			IsLvlChanging = false;
-			FindObjectOfType<AIDirector> ().StartDirector ();
-		}
+		
 		
 		[RPC]
 		public void GameEnded(){

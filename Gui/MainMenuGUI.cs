@@ -33,6 +33,8 @@ public class MainMenuGUI : MonoBehaviour {
 
 	public UIRect[] MainPanels;
 
+    public GAMEMODE gameMode = GAMEMODE.PVP;
+
 	void Awake(){
 		DontDestroyOnLoad(transform.gameObject);
         foreach (GameObject onContrl in _SettingPanel.toggleList) {
@@ -71,6 +73,7 @@ public class MainMenuGUI : MonoBehaviour {
 								_RoomsNgui.ScrollBar.barSize = 0;
 						}
 				}
+        ShowSetting();
 	}
 	void HideAllPanel(){
 		foreach(UIRect panel in MainPanels){
@@ -150,7 +153,7 @@ public class MainMenuGUI : MonoBehaviour {
 		Server.newRoomName = _RoomsNgui.NameNewRoom.value;
 		HideAllPanel ();
 		_RoomsNgui.Loading.alpha = 1f;
-		Server.CreateNewRoom();
+		Server.CreateNewRoom(gameMode);
 	}
 
 	public void BackBut() //Вернуться к выбору комнат
@@ -214,8 +217,7 @@ public class MainMenuGUI : MonoBehaviour {
 		StartCoroutine (LateFrameResize ());
 	}
 	public IEnumerator LateFrameResize(){
-		yield return  new WaitForEndOfFrame();
-		yield return  new WaitForEndOfFrame();
+        yield return new WaitForSeconds(1.0f);
 		ChatComponent.ChatLabel.transform.localPosition = new Vector3(-180, -(ChatComponent.ChatPanel.GetViewSize().y/2)+20, 0f);
 		_PanelsNgui.slaiderPanel.ReSize ();
         _PanelsNgui.mainpanel.Invalidate(true);
@@ -406,7 +408,22 @@ public class MainMenuGUI : MonoBehaviour {
         _SettingPanel.video.alpha = 1f;
 
     }
-	
+   
+    public void ToogleMode(int mode) {
+        if (_RoomsNgui.CreateRoom.alpha == 1.0f)
+        {
+            gameMode = (GAMEMODE)mode;
+            Server.RoomNewName((GAMEMODE)mode);
+            _RoomsNgui.NameNewRoom.value = Server.newRoomName;
+        }
+    }
+    public void ToggleMap(string mapName) {
+        if (_RoomsNgui.CreateRoom.alpha == 1.0f)
+        {
+            Server.map = mapName;
+
+        }
+    }
 	//CONTROLL SECTION 
 	private string command ="";
 	

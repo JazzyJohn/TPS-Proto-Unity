@@ -213,7 +213,7 @@ public class AnimationManager : MonoBehaviour
     /// Turn on and of IK of aiming
     /// </summary>
     public void ToggleAimPos(bool state){
-        Debug.Log(state);
+       // Debug.Log(state);
         if (aimPos != null) {
 
             if (state)
@@ -227,13 +227,14 @@ public class AnimationManager : MonoBehaviour
 	/// <summary>
     /// Short cut to turn off IK
     /// </summary>
-	public void IKOff(){
+	public virtual  void IKOff(){
 		ToggleAimPos(false);
 	}
 	/// <summary>
     /// Short cut to turn on IK
     /// </summary>
-	public void IKOn(){
+    public virtual void IKOn()
+    {
 		ToggleAimPos(true);
 	}
 	
@@ -280,7 +281,7 @@ public class AnimationManager : MonoBehaviour
 		if (State == 0) {
 			return;
 		}
-        Debug.Log(State);
+        //Debug.Log(State);
             
 		animator.SetInteger ("GunType",State);
 	}
@@ -322,6 +323,11 @@ public class AnimationManager : MonoBehaviour
 	public void SetSome(string some, bool value){
 		animator.SetBool(some, value);
 	}
+    //I'm not sure in necessity of this function maybe we should change logic of some script to get rid of it . JazzyJohn.
+    public void SetSome(string some)
+    {
+        animator.SetTrigger(some);
+    }
 	//This for natural shooting weapons like bug tail, we know about shot only from animation
 	public void WeaponShoot(){
 		transform.parent.SendMessage ("WeaponShoot", SendMessageOptions.DontRequireReceiver);
@@ -333,6 +339,13 @@ public class AnimationManager : MonoBehaviour
 		animator.SetTrigger (animName+"_end");
 	}
     public void KnockOut() {
+        animator.enabled = false;
+    }
+    public void DollOn(){
+         animator.enabled = true;
+    }
+    public void DollOff()
+    {
         animator.enabled = false;
     }
     public void StandUp()
@@ -350,7 +363,7 @@ public class AnimationManager : MonoBehaviour
         SetNotMainLayer(1.0f);
         transform.parent.SendMessage("StandUpFinish", SendMessageOptions.DontRequireReceiver);
     }
-	[Serializable]
+	/*[Serializable]
 	public class Leg
 	{
 		public LegBone[] LegBones;
@@ -423,5 +436,5 @@ public class AnimationManager : MonoBehaviour
 		}
 	}
 	public enum Vector {Up, Down, Left, Right, Forward, Back};
-
+    */
 }

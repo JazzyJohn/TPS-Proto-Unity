@@ -78,8 +78,7 @@ public class Statistic : MonoBehaviour {
     }
     public IEnumerator LateFrameResize()
     {
-        yield return new WaitForEndOfFrame();
-        yield return new WaitForEndOfFrame();
+        yield return new WaitForSeconds(1.0f);
         MainPanel.Invalidate(true);
     }
     public void ReSize() //Правка позиции компонентов
