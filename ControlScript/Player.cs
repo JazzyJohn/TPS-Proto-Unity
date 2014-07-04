@@ -12,9 +12,11 @@ public class Player : MonoBehaviour {
 
 	public float respawnTime = 10.0f;
 	
-	public float robotTime = 60.0f;
+	private float robotTime = 60.0f;
 	
-	public float robotKillReduce  =5.0f;
+	private float robotTimer;
+	
+	private float robotKillReduce  =5.0f;
 
 	public bool isStarted = false;
 
@@ -54,7 +56,7 @@ public class Player : MonoBehaviour {
 		public int RobotKill=0;
 	}
  
-	private float robotTimer;
+	
 	
 	private float respawnTimer;
 	
@@ -81,6 +83,8 @@ public class Player : MonoBehaviour {
     private bool robotAnnonce =false;
     
     public int killInRow = 0;
+	
+	private CharacteristicPlayerManager charMan;
 
 	public bool isPlayerFriend(string playerId)
 	{
@@ -96,10 +100,13 @@ public class Player : MonoBehaviour {
 	void Start(){
 		photonView = GetComponent<PhotonView> ();
 		PlayerManager.instance.addPlayer(this);
+		charMan = GetComponent<CharacteristicPlayerManager>();
+        charMan.Init();
 		if (photonView.isMine) {
+		
 						myCamera = Camera.main;
 						((PlayerMainGui)myCamera.GetComponent (typeof(PlayerMainGui))).SetLocalPlayer(this);
-						robotTimer = robotTime;
+						robotTimer = 0;
 		                
 						//this.name = "Player";		
 						PlayerName = "Player" + PhotonNetwork.playerList.Length;
@@ -159,6 +166,7 @@ public class Player : MonoBehaviour {
 		
 			SendDelayedExternal();
 			respawnTimer-=Time.deltaTime;
+			
 //			Debug.Log ("Dead");
 			if(respawnTimer<=0&&isStarted){
 				respawnTimer=respawnTime;
@@ -171,14 +179,15 @@ public class Player : MonoBehaviour {
 				prefabGhostBot =PlayerManager.instance.ghostsBots[selectedBot];
 
 			}
+			robotTime =  charMan.GetFloatChar(CharacteristicList.PLAYER_JUGGER_TIME);
 			canSpamBot=true;
 		}else{
 			Ray centerofScreen =Camera.main.ViewportPointToRay(new Vector3(0.5f, 0.5f, 0f));
 			RaycastHit hitinfo;			
 			if(robotPawn==null){
-				robotTimer-=Time.deltaTime;
+				robotTimer+=Time.deltaTime;
 				
-				if(robotTimer<=0&&canSpamBot){
+				if(robotTimer<=_robotTime&&canSpamBot){
                     if (!robotAnnonce)
                     {
                         robotAnnonce = true;
@@ -324,7 +333,7 @@ public class Player : MonoBehaviour {
 	}
 	
 	public void RobotDead(Player Killer){
-		robotTimer=robotTime;
+		robotTimer=0;
         robotAnnonce = false;
 		if (inBot) {
 				inBot = false;
@@ -429,7 +438,7 @@ public class Player : MonoBehaviour {
         }
 		if(!inBot){
 			Score.Kill++;
-			robotTimer-=robotKillReduce;
+			robotTimer+=charMan.GetFloatChar(CharacteristicList.PLAYER_JUGGER_KILL_BONUS);
 		}else{
 			Score.Kill++;
 			Score.RobotKill++;
@@ -540,10 +549,11 @@ public class Player : MonoBehaviour {
 		return "";
 	}
 	public float GetRobotTimer(){
-		if (robotTimer < 0) {
+		float result = robotTime- robotTimer;
+		if (result < 0) {
 			return 0;
 		}
-		return robotTimer;
+		return result;
 	}
 	public float GetRespawnTimer(){
 		if (respawnTimer < 0) {
@@ -603,13 +613,14 @@ public class Player : MonoBehaviour {
 	
 		if (photonView.isMine) {
 			//Debug.Log ("SEND");
-			photonView.RPC("RPCAfterSpawnSetting",PhotonTargets.AllBuffered,pawn.GetComponent<PhotonView>().viewID,(int)type,rTeam);
+			photonView.RPC("RPCAfterSpawnSetting",PhotonTargets.AllBuffered,pawn.GetComponent<PhotonView>().viewID,(int)type,rTeam,activeSteampacks.toArray());
 		}
 	}
-
+	
+	
 
 	[RPC]
-	public void RPCAfterSpawnSetting(int viewid,int type,int iteam){
+	public void RPCAfterSpawnSetting(int viewid,int type,int iteam,int[] steampacks){
 	
 		PawnType pType = (PawnType)type;
 		//Debug.Log (viewid);
@@ -617,24 +628,64 @@ public class Player : MonoBehaviour {
 		if (view == null) {
 			return;
 		}
-		Pawn pawn =PhotonView.Find (viewid).GetComponent<Pawn>();
-
-		team = iteam;	
-		pawn.player = this;
-		pawn.team = this.team;
 		switch (pType) {
 			case PawnType.PAWN:
+			DeathUpdate();
 			currentPawn = pawn;
+			
 			break;
 			case PawnType.BOT:
 			robotPawn = (RobotPawn)pawn;
 			break;
 		}
+		Pawn pawn =PhotonView.Find (viewid).GetComponent<Pawn>();
+		List<int> activeSteampacks = new List<int>();
+		
+		
+		foreach(int steampack in steampacks){
+			ActualUseOfSteampack(steampack);
+		}
+		team = iteam;	
+		pawn.player = this;
+		pawn.team = this.team;
+		pawn.Init();
+		
 	}
 	[RPC]
 	public void RPCSetNameUID(string rUID,String rPlayerName){
 		UID=rUID;
 		PlayerName=rPlayerName;
+		charMan = GetComponent<CharacteristicPlayerManager>();
+        charMan.Init();
+		
 	}
-
+	
+	//STIM PACK SECTION
+	
+	private List<int> activeSteampacks = new List<int>();
+    /// <summary>
+    /// ACTIVATE StimPack
+    /// </summary>
+	public void ActivateStimpack(int id){
+		if(ItemManager.instance.TryUseStim(id){
+			ActualUseOfSteampack(id);
+		}
+	
+	}
+	
+	private void ActualUseOfSteampack(id){
+		ActiveSteampacks.Add(id);
+		charMan.AddList(ItemManager.instance.GetStimPack(id));
+	}
+	
+	public List<CharacteristicToAdd>  GetCharacteristick(){
+		return charMan.GetCharacteristick();	
+	}
+	
+	/*[RPC]
+	public void RPCReloadCharacteristic(){
+		charMan.Reload();
+	}*/
+	
+	
 }

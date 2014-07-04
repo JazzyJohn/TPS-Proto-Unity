@@ -431,7 +431,12 @@ public class Pawn : DamagebleObject {
         //Debug.Log (distToGround);
 
     }
-
+	//INIT PLAYER PAWN TO TAKE CHARACTERISTICK
+    public void Init(){
+		charMan.AddList(player.GetCharacteristick());
+	
+	}
+	
 	public float GetSize ()
 	{
 		if(size==0){

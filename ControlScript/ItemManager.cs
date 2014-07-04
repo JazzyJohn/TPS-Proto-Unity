@@ -46,6 +46,17 @@ public class ShopSlot{
 	public GameClassEnum[] gameClasses;
 }
 
+public class StimPack{
+	public int amount;
+	
+	public bool active = false;
+	
+	public List<CharacteristicToAdd> listOfEffect = new List<CharacteristicToAdd> ();
+	
+	public Texture2D textureGUI;
+
+	public string name;
+}
 public class ItemManager : MonoBehaviour {
 
 	//PLAYER ITEM SECTION
@@ -56,6 +67,9 @@ public class ItemManager : MonoBehaviour {
 	public Dictionary<int,FromDBWeapon>  weaponIndexTable = new Dictionary<int,FromDBWeapon>();
 
 	public  Dictionary<int,FromDBAnims> animsIndexTable= new Dictionary<int,FromDBAnims>();
+	
+	
+	public List<StimPack> stimPackDictionary = new StimPack();
 	private string UID ="";
 	
 	public void Init(string uid){
@@ -156,6 +170,41 @@ public class ItemManager : MonoBehaviour {
 			www.LoadImageIntoTexture(entry.textureGUI);
 			//Debug.Log (entry.name + " " +entry.textureGUI + " " +entry.weaponId );
 			animsIndexTable[i++]=entry;	
+
+		
+		}
+		
+		foreach (XmlNode node in xmlDoc.SelectNodes("items/stims")) {
+			StimPack entry = new StimPack();
+			entry.amount = int.Parse(node.SelectSingleNode ("amount").InnerText);
+			entry.name =  node.SelectSingleNode ("name").InnerText;
+			foreach (XmlNode effect innode.SelectNodes("effects/effect")) {
+				CharacteristicToAdd add = new CharacteristicToAdd();
+				add.characteristic = (CharacteristicList)int.Parse(effect.SelectSingleNode ("characteristic").InnerText);
+				string type = effect.SelectSingleNode ("type").InnerText;
+				string value =  effect.SelectSingleNode ("value").InnerText
+				BaseEffect effect  = null;
+				if(type=="float"){
+					
+					effect = new Effect<float>(float.Parse(value));
+				}else if(type=="int"){
+					effect = new Effect<int>(int.Parse(value));
+				}
+				else{
+					effect = new Effect<bool>(bool.Parse(value));
+				}
+				effect.type  =  (EffectType)int.Parse(effect.SelectSingleNode ("effecttype").InnerText);
+				add.addEffect =effect;
+				listOfEffect.Add(add);
+			}
+			
+			WWW www = StatisticHandler.GetMeRightWWW(node.SelectSingleNode ("textureGUIName").InnerText);
+			
+			yield return www;
+			entry.textureGUI = new Texture2D(150,80);
+			www.LoadImageIntoTexture(entry.textureGUI);
+			//Debug.Log (entry.name + " " +entry.textureGUI + " " +entry.weaponId );
+			stimPackDictionary.Add(entry);
 
 		
 		}
@@ -397,6 +446,20 @@ public class ItemManager : MonoBehaviour {
 		
 		
 	}
+	public bool TryUseStim(int id){
+		if( stimPackDictionary[id].active&& stimPackDictionary[id].amount  >=0){
+			stimPackDictionary[id].active = true;
+			stimPackDictionary[id].amount --;
+			return true;
+		}
+		return false;
+		
+	}
+	public List<CharacteristicToAdd> GetStimPack(int id){
+		return stimPackDictionary[id].listOfEffect;
+		
+	}
+	
 	//END SHOPING SECTION 
 	private static ItemManager s_Instance = null;
 	

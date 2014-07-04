@@ -17,15 +17,22 @@ public enum CharacteristicList{
 		ARMOR,
 		STANDFORCE,
 		STANDFORCEAIR,
-	    JETPACKCHARGE
+	    JETPACKCHARGE,
+		
+		
+		PLAYER_JUGGER_TIME,
+		PLAYER_JUGGER_KILL_BONUS
 }
 public class BaseEffect{
 	public int timeEnd;
 	public EffectType type;
-	
+	public bool endByDeath= true;
 }
 public class Effect<T>:BaseEffect{
 	public T value;
+	public Effect(T value){
+		this.value  =value;
+	}
 	
 }
 public class BaseCharacteristic{
@@ -41,12 +48,26 @@ public class BaseCharacteristic{
 		effectList.Add(newEffect);
 		needUpdate= true;
 	}
+	public  List<BaseEffect> GetEffect(){
+		return effectList;
+	}
 	
 	public void UpdateList(){
 		if(timeUpdate>timeLastUpdate&&timeUpdate<Time.time){
 			timeLastUpdate = Time.time;
 			effectList.RemoveAll(delegate(BaseEffect eff) {
 			return eff.timeEnd <Time.time;
+			});
+			needUpdate= true;
+		}
+		
+	
+	}
+	public void UpdateListByDeath(){
+		if(timeUpdate>timeLastUpdate&&timeUpdate<Time.time){
+			timeLastUpdate = Time.time;
+			effectList.RemoveAll(delegate(BaseEffect eff) {
+			return  endByDeath
 			});
 			needUpdate= true;
 		}
@@ -67,6 +88,7 @@ public class Characteristic<T> : BaseCharacteristic {
 	public void AddEffect(Effect<T> newEffect){
 		base.AddEffect(newEffect);
 	}
+
 	public T GetValue(){
 		if(needUpdate){
 			ReCount();
@@ -179,6 +201,19 @@ public class StartFloatCharacteristic{
 	public float startValue;
 	public CharacteristicList characteristic;
 }
+
+
+public class CharacteristicToAdd{
+	public CharacteristicList characteristic;
+	public BaseEffect addEffect;
+	public CharacteristicToAdd(CharacteristicList characteristic, BaseEffect addEffect){
+		this.characteristic =characteristic;
+		this.addEffect = addEffect;
+	}
+	public CharacteristicToAdd(){
+	
+	}
+}
 public class CharacteristicManager : MonoBehaviour {
 	
 	public StartIntCharacteristic[] startIntCharacteristic;
@@ -186,10 +221,13 @@ public class CharacteristicManager : MonoBehaviour {
 	public StartFloatCharacteristic[] startFloatCharacteristic;
 	
 	
-	private BaseCharacteristic[] allCharacteristic;
+	protected BaseCharacteristic[] allCharacteristic;
+	
+	public int arraySize = 0;
 	
 	public 	void Init(){
-		allCharacteristic = new BaseCharacteristic[Enum.GetValues (typeof(CharacteristicList)).Length];
+		arraySize = Enum.GetValues (typeof(CharacteristicList)).Length;
+		allCharacteristic = new BaseCharacteristic[arraySize];
 		for(int  i=0; i<startIntCharacteristic.Length;i++){
 			allCharacteristic[(int)startIntCharacteristic[i].characteristic] = new IntCharacteristic(startIntCharacteristic[i].startValue);
 		}
@@ -205,6 +243,13 @@ public class CharacteristicManager : MonoBehaviour {
 		for(int  i=0; i<allCharacteristic.Length;i++){
 			if(allCharacteristic[i]!=null){
 				allCharacteristic[i].UpdateList();
+			}
+		}
+	}
+	public void DeathUpdate(){
+		for(int  i=0; i<allCharacteristic.Length;i++){
+			if(allCharacteristic[i]!=null){
+				allCharacteristic[i].UpdateListByDeath();
 			}
 		}
 	}
@@ -229,6 +274,38 @@ public class CharacteristicManager : MonoBehaviour {
 			}
 			return((BoolCharacteristic)allCharacteristic[(int)characteristic]).GetValue();
 	
+	}
+	public void AddList(List<CharacteristicToAdd> effects){
+		foreach(CharacteristicToAdd add in effects){
+			FloatCharacteristic floatCharacteristic  = allCharacteristic [add.characteristic] as FloatCharacteristic;
+			if(floatCharacteristic!=null){
+				floatCharacteristic.AddEffect((Effect<float>)add.addEffect);
+				continue;
+			}
+			IntCharacteristic intCharacteristic  = allCharacteristic [add.characteristic] as IntCharacteristic;
+			if(intCharacteristic!=null){
+				intCharacteristic.AddEffect((Effect<int>)add.addEffect);
+				continue;
+			}
+			BoolCharacteristic boolCharacteristic  = allCharacteristic [add.characteristic] as BoolCharacteristic;
+			if(boolCharacteristic!=null){
+				boolCharacteristic.AddEffect((Effect<bool>)add.addEffect);
+				continue;
+			}
+		
+		}
+	}
+	public List<CharacteristicToAdd>  GetCharacteristick(){
+		List<CharacteristicToAdd> answer = new List<CharacteristicToAdd>();
+		for(int i=0; i<arraySize; i++ ){
+			List<Effect> all =allCharacteristic[i].GetEffect();
+			foreach(Effect eff in all){
+			
+				answer.Add(CharacteristicToAdd((CharacteristicList)i,eff));
+			}
+			
+		}
+		return answer;		
 	}
 	
 }
