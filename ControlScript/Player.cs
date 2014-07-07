@@ -86,6 +86,8 @@ public class Player : MonoBehaviour {
 	
 	private CharacteristicPlayerManager charMan;
 
+    private List<int> activeSteampacks = new List<int>();
+
 	public bool isPlayerFriend(string playerId)
 	{
 	 	foreach (string id in friendsInfo) 
@@ -187,7 +189,7 @@ public class Player : MonoBehaviour {
 			if(robotPawn==null){
 				robotTimer+=Time.deltaTime;
 				
-				if(robotTimer<=_robotTime&&canSpamBot){
+				if(robotTimer<=robotTime&&canSpamBot){
                     if (!robotAnnonce)
                     {
                         robotAnnonce = true;
@@ -613,7 +615,7 @@ public class Player : MonoBehaviour {
 	
 		if (photonView.isMine) {
 			//Debug.Log ("SEND");
-			photonView.RPC("RPCAfterSpawnSetting",PhotonTargets.AllBuffered,pawn.GetComponent<PhotonView>().viewID,(int)type,rTeam,activeSteampacks.toArray());
+			photonView.RPC("RPCAfterSpawnSetting",PhotonTargets.AllBuffered,pawn.GetComponent<PhotonView>().viewID,(int)type,rTeam,activeSteampacks.ToArray());
 		}
 	}
 	
@@ -628,9 +630,10 @@ public class Player : MonoBehaviour {
 		if (view == null) {
 			return;
 		}
+        Pawn pawn =PhotonView.Find (viewid).GetComponent<Pawn>();
 		switch (pType) {
 			case PawnType.PAWN:
-			DeathUpdate();
+			charMan.DeathUpdate();
 			currentPawn = pawn;
 			
 			break;
@@ -638,7 +641,7 @@ public class Player : MonoBehaviour {
 			robotPawn = (RobotPawn)pawn;
 			break;
 		}
-		Pawn pawn =PhotonView.Find (viewid).GetComponent<Pawn>();
+		
 		List<int> activeSteampacks = new List<int>();
 		
 		
@@ -662,19 +665,19 @@ public class Player : MonoBehaviour {
 	
 	//STIM PACK SECTION
 	
-	private List<int> activeSteampacks = new List<int>();
+
     /// <summary>
     /// ACTIVATE StimPack
     /// </summary>
 	public void ActivateStimpack(int id){
-		if(ItemManager.instance.TryUseStim(id){
+		if(ItemManager.instance.TryUseStim(id)){
 			ActualUseOfSteampack(id);
 		}
 	
 	}
 	
-	private void ActualUseOfSteampack(id){
-		ActiveSteampacks.Add(id);
+	private void ActualUseOfSteampack(int id){
+        activeSteampacks.Add(id);
 		charMan.AddList(ItemManager.instance.GetStimPack(id));
 	}
 	

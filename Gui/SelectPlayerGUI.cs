@@ -53,7 +53,7 @@ public class SelectPlayerGUI : MonoBehaviour {
         LoadFromPrefab();
         SelectPlayer(1);
         SelectRobot();
-        AutoSelectTeam();
+      
     }
     public void Activate()
     {
@@ -194,6 +194,7 @@ public class SelectPlayerGUI : MonoBehaviour {
                         teamCount[player.team - 1]++;
                     }
                 }
+             
                 int i =0;
                 if (teamCount[0] > teamCount[1]) {
                     i=2;
@@ -233,7 +234,7 @@ public class SelectPlayerGUI : MonoBehaviour {
 		}
 		if (i == 1 && !teamAblock)
 			Choice._Team = 1;
-		else if (i== 2 && !teamAblock)
+        else if (i == 2 && !teamBblock)
 			Choice._Team = 2;
 	}
 
@@ -300,6 +301,11 @@ public class SelectPlayerGUI : MonoBehaviour {
 	public void StartGameBut()
 	{
        // Debug.Log(Choice._Player + " " + Choice._Robot + "  " + Choice._Team);  
+        if (Choice._Team == -1)
+        {
+
+            AutoSelectTeam();
+        }
         if (Choice._Player != -1 && Choice._Robot != -1 && Choice._Team != -1 )
         {
             LocalPlayer.SetTeam (Choice._Team);

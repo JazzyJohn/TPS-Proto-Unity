@@ -71,6 +71,7 @@ public class MapDownloader : MonoBehaviour {
                 bundle = www.assetBundle;
                 AssetBundleManager.setAssetBundle(bundle, crossDomainesafeURL, version);
                 GameObject obj = Instantiate(bundle.mainAsset) as GameObject;
+                StaticBatchingUtility.Combine(obj);
                 /*UnityEngine.Object[] prefabObjects = bundle.LoadAll();
 			
                 //GameObject sp = GameObject.Find("SpawnPoint");

@@ -3,7 +3,8 @@ using System.Collections;
 using System;
 using System.Collections.Generic;
 
-public class CharacteristicManager : MonoBehaviour {
+public class CharacteristicPlayerManager : CharacteristicManager
+{
 
 	public string uid;
 	public 	void Init(string uid){

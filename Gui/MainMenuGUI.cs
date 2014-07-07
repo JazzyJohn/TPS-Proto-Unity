@@ -103,6 +103,7 @@ public class MainMenuGUI : MonoBehaviour {
 												Server.JoinRoom(room.name);
 												HideAllPanel();
 												_RoomsNgui.Loading.alpha = 1f;
+                                                _PanelsNgui.SliderPanel.alpha = 1f;
 
 										}
 								}
@@ -114,6 +115,7 @@ public class MainMenuGUI : MonoBehaviour {
 				Server.JoinRoom();
 				HideAllPanel();
 				_RoomsNgui.Loading.alpha = 1f;
+                _PanelsNgui.SliderPanel.alpha = 1f;
 			}else{
 			
 				if (_RoomsNgui.CreateRoom.alpha >0f) {
@@ -144,7 +146,9 @@ public class MainMenuGUI : MonoBehaviour {
 		{
 			HideAllPanel();
 			_RoomsNgui.Loading.alpha = 1f;
+            _PanelsNgui.SliderPanel.alpha = 1f;
 		}
+      
 		_RoomsNgui.LoadingProcent.text = (_RoomsNgui.LoadingProgress.value*100).ToString("f0") + "%";
 	}
 
@@ -153,6 +157,7 @@ public class MainMenuGUI : MonoBehaviour {
 		Server.newRoomName = _RoomsNgui.NameNewRoom.value;
 		HideAllPanel ();
 		_RoomsNgui.Loading.alpha = 1f;
+        _PanelsNgui.SliderPanel.alpha = 1f;
 		Server.CreateNewRoom(gameMode);
 	}
 

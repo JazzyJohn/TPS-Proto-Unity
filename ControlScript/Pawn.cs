@@ -2195,10 +2195,8 @@ public class Pawn : DamagebleObject {
 			//Debug.Log (characterState);
 			//health=(float) stream.ReceiveNext();
 			wallState = (WallState) stream.ReceiveNext();
-			float newHealth =(float)stream.ReceiveNext();
-			if(!PhotonNetwork.isMasterClient){
-				health =newHealth;
-			}
+            health = (float)stream.ReceiveNext();
+		
 			//bool isActive =(bool)stream.ReceiveNext();
 			//isGrounded =(bool) stream.ReceiveNext();
 			//animator.ApllyJump((bool)stream.ReceiveNext());

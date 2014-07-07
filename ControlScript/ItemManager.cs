@@ -69,7 +69,7 @@ public class ItemManager : MonoBehaviour {
 	public  Dictionary<int,FromDBAnims> animsIndexTable= new Dictionary<int,FromDBAnims>();
 	
 	
-	public List<StimPack> stimPackDictionary = new StimPack();
+	public List<StimPack> stimPackDictionary = new List<StimPack>();
 	private string UID ="";
 	
 	public void Init(string uid){
@@ -178,11 +178,11 @@ public class ItemManager : MonoBehaviour {
 			StimPack entry = new StimPack();
 			entry.amount = int.Parse(node.SelectSingleNode ("amount").InnerText);
 			entry.name =  node.SelectSingleNode ("name").InnerText;
-			foreach (XmlNode effect innode.SelectNodes("effects/effect")) {
+			foreach (XmlNode nodeEffect in node.SelectNodes("effects/effect")) {
 				CharacteristicToAdd add = new CharacteristicToAdd();
-				add.characteristic = (CharacteristicList)int.Parse(effect.SelectSingleNode ("characteristic").InnerText);
-				string type = effect.SelectSingleNode ("type").InnerText;
-				string value =  effect.SelectSingleNode ("value").InnerText
+				add.characteristic = (CharacteristicList)int.Parse(nodeEffect.SelectSingleNode ("characteristic").InnerText);
+				string type = nodeEffect.SelectSingleNode ("type").InnerText;
+                string value = nodeEffect.SelectSingleNode("value").InnerText;
 				BaseEffect effect  = null;
 				if(type=="float"){
 					
@@ -193,9 +193,9 @@ public class ItemManager : MonoBehaviour {
 				else{
 					effect = new Effect<bool>(bool.Parse(value));
 				}
-				effect.type  =  (EffectType)int.Parse(effect.SelectSingleNode ("effecttype").InnerText);
+                effect.type = (EffectType)int.Parse(nodeEffect.SelectSingleNode("effecttype").InnerText);
 				add.addEffect =effect;
-				listOfEffect.Add(add);
+                entry.listOfEffect.Add(add);
 			}
 			
 			WWW www = StatisticHandler.GetMeRightWWW(node.SelectSingleNode ("textureGUIName").InnerText);

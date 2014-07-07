@@ -67,7 +67,7 @@ public class BaseCharacteristic{
 		if(timeUpdate>timeLastUpdate&&timeUpdate<Time.time){
 			timeLastUpdate = Time.time;
 			effectList.RemoveAll(delegate(BaseEffect eff) {
-			return  endByDeath
+                return eff.endByDeath;
 			});
 			needUpdate= true;
 		}
@@ -277,17 +277,17 @@ public class CharacteristicManager : MonoBehaviour {
 	}
 	public void AddList(List<CharacteristicToAdd> effects){
 		foreach(CharacteristicToAdd add in effects){
-			FloatCharacteristic floatCharacteristic  = allCharacteristic [add.characteristic] as FloatCharacteristic;
+			FloatCharacteristic floatCharacteristic  = allCharacteristic [(int)add.characteristic] as FloatCharacteristic;
 			if(floatCharacteristic!=null){
 				floatCharacteristic.AddEffect((Effect<float>)add.addEffect);
 				continue;
 			}
-			IntCharacteristic intCharacteristic  = allCharacteristic [add.characteristic] as IntCharacteristic;
+            IntCharacteristic intCharacteristic = allCharacteristic[(int)add.characteristic] as IntCharacteristic;
 			if(intCharacteristic!=null){
 				intCharacteristic.AddEffect((Effect<int>)add.addEffect);
 				continue;
 			}
-			BoolCharacteristic boolCharacteristic  = allCharacteristic [add.characteristic] as BoolCharacteristic;
+            BoolCharacteristic boolCharacteristic = allCharacteristic[(int)add.characteristic] as BoolCharacteristic;
 			if(boolCharacteristic!=null){
 				boolCharacteristic.AddEffect((Effect<bool>)add.addEffect);
 				continue;
@@ -298,10 +298,15 @@ public class CharacteristicManager : MonoBehaviour {
 	public List<CharacteristicToAdd>  GetCharacteristick(){
 		List<CharacteristicToAdd> answer = new List<CharacteristicToAdd>();
 		for(int i=0; i<arraySize; i++ ){
-			List<Effect> all =allCharacteristic[i].GetEffect();
-			foreach(Effect eff in all){
+            if (allCharacteristic[i] == null)
+            {
+                continue;
+            }
+			List<BaseEffect> all =allCharacteristic[i].GetEffect();
+            foreach (BaseEffect eff in all)
+            {
 			
-				answer.Add(CharacteristicToAdd((CharacteristicList)i,eff));
+				answer.Add(new CharacteristicToAdd((CharacteristicList)i,eff));
 			}
 			
 		}
