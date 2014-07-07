@@ -6,7 +6,7 @@ using ExitGames.Client.Photon;
 
 public class AIDirector : MonoBehaviour {
 
-	private SelfSpawnPoint[] selfRespawns;
+	protected SelfSpawnPoint[] selfRespawns;
 
 	public AISwarm[] swarms;
 
