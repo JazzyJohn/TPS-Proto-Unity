@@ -17,7 +17,14 @@ public class RobotPawn : Pawn {
 		GetComponent<ThirdPersonCamera>().Reset ();
 		StartCoroutine(WaitBeforeActive(ActivationTime));
 	}
-	
+	public override void Damage(BaseDamage damage,GameObject killer){
+		float reduce =  charMan.GetFloatChar(CharacteristicList.JUGGER_DAMAGE_REDUCE);
+		if(reduce!=0){
+				damage.damage-= damage.damage*reduce;
+		}
+
+		base.Damage(damage, killer);
+	}
 	public IEnumerator WaitBeforeActive(float waitTime) {
 
         if (isPilotIn)

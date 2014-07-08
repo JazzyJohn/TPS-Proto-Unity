@@ -186,7 +186,7 @@ public class Player : MonoBehaviour {
 		}else{
 			Ray centerofScreen =Camera.main.ViewportPointToRay(new Vector3(0.5f, 0.5f, 0f));
 			RaycastHit hitinfo;			
-			if(robotPawn==null){
+			if(CanUseJugger()&&robotPawn==null){
 				robotTimer+=Time.deltaTime;
 				
 				if(robotTimer<=robotTime&&canSpamBot){
@@ -347,6 +347,9 @@ public class Player : MonoBehaviour {
 		}
 	
 	}
+	public void CanUseJugger(){}
+	
+	
 	public void PawnDead(Player Killer,Pawn killerPawn ){
 	
 
