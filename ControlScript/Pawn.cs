@@ -289,7 +289,7 @@ public class Pawn : DamagebleObject {
 	
 	};
 
-	private CharacteristicManager charMan;
+	protected CharacteristicManager charMan;
 	public BasePawnStatistic statistic = new BasePawnStatistic();
 	//effects
 

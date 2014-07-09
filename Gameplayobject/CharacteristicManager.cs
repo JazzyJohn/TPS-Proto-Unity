@@ -18,13 +18,13 @@ public enum CharacteristicList{
 		STANDFORCE,
 		STANDFORCEAIR,
 	    JETPACKCHARGE,
-		JUGGER_DAMAGE_REDUCE
+		JUGGER_DAMAGE_REDUCE,
 		
 		PLAYER_JUGGER_TIME,
 		PLAYER_JUGGER_KILL_BONUS
 }
 public class BaseEffect{
-	public int timeEnd;
+	public int timeEnd=-1;
 	public EffectType type;
 	public bool endByDeath= true;
 }
@@ -56,7 +56,8 @@ public class BaseCharacteristic{
 		if(timeUpdate>timeLastUpdate&&timeUpdate<Time.time){
 			timeLastUpdate = Time.time;
 			effectList.RemoveAll(delegate(BaseEffect eff) {
-			return eff.timeEnd <Time.time;
+               
+                return eff.timeEnd != -1 && eff.timeEnd < Time.time;
 			});
 			needUpdate= true;
 		}
@@ -64,13 +65,17 @@ public class BaseCharacteristic{
 	
 	}
 	public void UpdateListByDeath(){
-		if(timeUpdate>timeLastUpdate&&timeUpdate<Time.time){
+	
 			timeLastUpdate = Time.time;
 			effectList.RemoveAll(delegate(BaseEffect eff) {
+                if (eff.endByDeath)
+                {
+                    Debug.Log("DELETEBY Death");
+                }
                 return eff.endByDeath;
 			});
-			needUpdate= true;
-		}
+		
+	
 		
 	
 	}
@@ -277,35 +282,72 @@ public class CharacteristicManager : MonoBehaviour {
 	}
 	public void AddList(List<CharacteristicToAdd> effects){
 		foreach(CharacteristicToAdd add in effects){
-			FloatCharacteristic floatCharacteristic  = allCharacteristic [(int)add.characteristic] as FloatCharacteristic;
-			if(floatCharacteristic!=null){
-				floatCharacteristic.AddEffect((Effect<float>)add.addEffect);
-				continue;
-			}
-            IntCharacteristic intCharacteristic = allCharacteristic[(int)add.characteristic] as IntCharacteristic;
-			if(intCharacteristic!=null){
-				intCharacteristic.AddEffect((Effect<int>)add.addEffect);
-				continue;
-			}
-            BoolCharacteristic boolCharacteristic = allCharacteristic[(int)add.characteristic] as BoolCharacteristic;
-			if(boolCharacteristic!=null){
-				boolCharacteristic.AddEffect((Effect<bool>)add.addEffect);
-				continue;
-			}
-		
+         
+            if (allCharacteristic[(int)add.characteristic] == null)
+            {
+                Effect<float> floatEffect = add.addEffect as Effect<float>;
+                if (floatEffect != null)
+                {
+                    FloatCharacteristic Characteristic= new FloatCharacteristic(0);
+                    Characteristic.AddEffect(floatEffect);
+                    
+                    allCharacteristic[(int)add.characteristic] = Characteristic;
+                    continue;
+                }
+                Effect<int> intEffect = add.addEffect as Effect<int>;
+                if (intEffect != null)
+                {
+                    IntCharacteristic Characteristic = new IntCharacteristic(0);
+                    Characteristic.AddEffect(intEffect);
+                    allCharacteristic[(int)add.characteristic] = Characteristic;
+                    continue;
+                }
+                Effect<bool> boolEffect = add.addEffect as Effect<bool>;
+                if (boolEffect != null)
+                {
+                    BoolCharacteristic Characteristic = new BoolCharacteristic(false);
+                    Characteristic.AddEffect(boolEffect);
+                    allCharacteristic[(int)add.characteristic] = Characteristic;
+                    continue;
+                }
+            }
+            else
+            {
+                FloatCharacteristic floatCharacteristic = allCharacteristic[(int)add.characteristic] as FloatCharacteristic;
+                if (floatCharacteristic != null)
+                {
+                    floatCharacteristic.AddEffect((Effect<float>)add.addEffect);
+                    continue;
+                }
+                IntCharacteristic intCharacteristic = allCharacteristic[(int)add.characteristic] as IntCharacteristic;
+                if (intCharacteristic != null)
+                {
+                    intCharacteristic.AddEffect((Effect<int>)add.addEffect);
+                    continue;
+                }
+                BoolCharacteristic boolCharacteristic = allCharacteristic[(int)add.characteristic] as BoolCharacteristic;
+                if (boolCharacteristic != null)
+                {
+                    boolCharacteristic.AddEffect((Effect<bool>)add.addEffect);
+                    continue;
+                }
+            }
 		}
 	}
 	public List<CharacteristicToAdd>  GetCharacteristick(){
 		List<CharacteristicToAdd> answer = new List<CharacteristicToAdd>();
+      
 		for(int i=0; i<arraySize; i++ ){
+      
             if (allCharacteristic[i] == null)
             {
                 continue;
             }
+            //Debug.Log("GetCharacteristick" + (CharacteristicList)i);
 			List<BaseEffect> all =allCharacteristic[i].GetEffect();
             foreach (BaseEffect eff in all)
             {
-			
+              // Debug.Log(i + " " + eff.type);
 				answer.Add(new CharacteristicToAdd((CharacteristicList)i,eff));
 			}
 			

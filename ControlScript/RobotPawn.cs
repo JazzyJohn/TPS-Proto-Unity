@@ -20,7 +20,7 @@ public class RobotPawn : Pawn {
 	public override void Damage(BaseDamage damage,GameObject killer){
 		float reduce =  charMan.GetFloatChar(CharacteristicList.JUGGER_DAMAGE_REDUCE);
 		if(reduce!=0){
-				damage.damage-= damage.damage*reduce;
+				damage.Damage-= damage.Damage*reduce;
 		}
 
 		base.Damage(damage, killer);

@@ -19,6 +19,8 @@ public class GameRule : MonoBehaviour {
 
     public bool lvlChanging = false;
 
+    public bool CanUseRobot = true;
+
     public PhotonView photonView;
 
     public int curStage = 0;

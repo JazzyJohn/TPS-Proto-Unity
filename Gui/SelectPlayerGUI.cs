@@ -7,6 +7,8 @@ public class SelectPlayerGUI : MonoBehaviour {
 
 	public _MenuElements MenuElements;
 
+    public SmallShop shop;
+
 	private int W; //Ширина
 	private int H; //Высота
 
@@ -39,6 +41,25 @@ public class SelectPlayerGUI : MonoBehaviour {
 		
 		PlayerR = _PlayerR.None;
 	}
+
+    public void ReDrawAll() {
+        
+        DrawStims();
+    }
+    public void DrawStims() {
+        for (int i = 0; i < MenuElements.Stims.Length; i++)
+        {
+            if (ItemManager.instance.stimPackDictionary.Count > i)
+            {
+                MenuElements.Stims[i].mainTexture = ItemManager.instance.stimPackDictionary[i].textureGUI;
+                MenuElements.Stims[i].GetComponentInChildren<UILabel>().text = ItemManager.instance.stimPackDictionary[i].name + ": " + ItemManager.instance.stimPackDictionary[i].amount.ToString();
+            }
+            else
+            {
+                MenuElements.Stims[i].alpha = 0.0f;
+            }
+        }
+    }
     public void SetLocalPlayer(Player player)
     {
         LocalPlayer = player;
@@ -51,9 +72,9 @@ public class SelectPlayerGUI : MonoBehaviour {
         }
       
         LoadFromPrefab();
+        ReDrawAll();
         SelectPlayer(1);
         SelectRobot();
-      
     }
     public void Activate()
     {
@@ -301,6 +322,9 @@ public class SelectPlayerGUI : MonoBehaviour {
 	public void StartGameBut()
 	{
        // Debug.Log(Choice._Player + " " + Choice._Robot + "  " + Choice._Team);  
+        if (shop.panel.alpha == 1.0) {
+            return;
+        }
         if (Choice._Team == -1)
         {
 
@@ -343,6 +367,25 @@ public class SelectPlayerGUI : MonoBehaviour {
        // Debug.Log("ROTATE");
     
     }
+    public void ActivateStimPack(int id)
+    {
+        StimPack pack  = ItemManager.instance.stimPackDictionary[id];
+        if (pack.amount > 0)
+        {
+            LocalPlayer.ActivateStimpack(id);
+            DrawStims();
+        }
+        else
+        {
+            
+            shop.Icon.mainTexture = pack.textureGUI;
+            shop.Offer.text = pack.name;
+            shop.GoldBuy.text = pack.goldPrice.ToString()+" For GITP";
+            shop.CreditBuy.text = pack.normalPrice.ToString() + " For KP";
+            shop.mysqlId = pack.mysqlId;
+            shop.Show();
+        }
+    }
 
 }
 
@@ -363,6 +406,8 @@ public class _MenuElements
 
 	public UITexture[] Weapon;
 
+    public UITexture[] Stims;
+    
     public Dictionary<int,GameObject> ClassModels  = new Dictionary<int,GameObject>();
 
 	public UILabel Red;
@@ -375,8 +420,6 @@ public class _PlayerClass
 	public string Name;
 	public UISprite Sprite;
 }
-
-
 
 
 

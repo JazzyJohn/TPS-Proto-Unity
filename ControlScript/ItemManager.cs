@@ -48,7 +48,11 @@ public class ShopSlot{
 
 public class StimPack{
 	public int amount;
-	
+
+    public int goldPrice;
+
+    public int normalPrice;
+
 	public bool active = false;
 	
 	public List<CharacteristicToAdd> listOfEffect = new List<CharacteristicToAdd> ();
@@ -56,6 +60,8 @@ public class StimPack{
 	public Texture2D textureGUI;
 
 	public string name;
+
+    public string mysqlId;
 }
 public class ItemManager : MonoBehaviour {
 
@@ -173,39 +179,54 @@ public class ItemManager : MonoBehaviour {
 
 		
 		}
-		
-		foreach (XmlNode node in xmlDoc.SelectNodes("items/stims")) {
-			StimPack entry = new StimPack();
-			entry.amount = int.Parse(node.SelectSingleNode ("amount").InnerText);
-			entry.name =  node.SelectSingleNode ("name").InnerText;
-			foreach (XmlNode nodeEffect in node.SelectNodes("effects/effect")) {
-				CharacteristicToAdd add = new CharacteristicToAdd();
-				add.characteristic = (CharacteristicList)int.Parse(nodeEffect.SelectSingleNode ("characteristic").InnerText);
-				string type = nodeEffect.SelectSingleNode ("type").InnerText;
-                string value = nodeEffect.SelectSingleNode("value").InnerText;
-				BaseEffect effect  = null;
-				if(type=="float"){
-					
-					effect = new Effect<float>(float.Parse(value));
-				}else if(type=="int"){
-					effect = new Effect<int>(int.Parse(value));
-				}
-				else{
-					effect = new Effect<bool>(bool.Parse(value));
-				}
-                effect.type = (EffectType)int.Parse(nodeEffect.SelectSingleNode("effecttype").InnerText);
-				add.addEffect =effect;
-                entry.listOfEffect.Add(add);
-			}
-			
-			WWW www = StatisticHandler.GetMeRightWWW(node.SelectSingleNode ("textureGUIName").InnerText);
-			
-			yield return www;
-			entry.textureGUI = new Texture2D(150,80);
-			www.LoadImageIntoTexture(entry.textureGUI);
-			//Debug.Log (entry.name + " " +entry.textureGUI + " " +entry.weaponId );
-			stimPackDictionary.Add(entry);
+        XmlNodeList stims = xmlDoc.SelectNodes("items/stim");
+		for(int j=0;j<stims.Count;j++){
+            XmlNode node  = stims[j];
+            if (stimPackDictionary.Count > j)
+            {
+                stimPackDictionary[j].amount = int.Parse(node.SelectSingleNode("amount").InnerText);
+            }
+            else
+            {
+                StimPack entry = new StimPack();
+                entry.amount = int.Parse(node.SelectSingleNode("amount").InnerText);
+                entry.name = node.SelectSingleNode("name").InnerText;
+                entry.goldPrice = int.Parse(node.SelectSingleNode("goldPrice").InnerText);
+                entry.normalPrice = int.Parse(node.SelectSingleNode("normalPrice").InnerText);
+                entry.mysqlId = node.SelectSingleNode("mysqlId").InnerText;
+                foreach (XmlNode nodeEffect in node.SelectNodes("effect"))
+                {
+                    CharacteristicToAdd add = new CharacteristicToAdd();
+                    add.characteristic = (CharacteristicList)System.Enum.Parse(typeof(CharacteristicList), nodeEffect.SelectSingleNode("characteristic").InnerText);
+                    string type = nodeEffect.SelectSingleNode("type").InnerText;
+                    string value = nodeEffect.SelectSingleNode("value").InnerText;
+                    BaseEffect effect = null;
+                    if (type == "float")
+                    {
 
+                        effect = new Effect<float>(float.Parse(value));
+                    }
+                    else if (type == "int")
+                    {
+                        effect = new Effect<int>(int.Parse(value));
+                    }
+                    else
+                    {
+                        effect = new Effect<bool>(bool.Parse(value));
+                    }
+                    effect.type = (EffectType)System.Enum.Parse(typeof(EffectType), nodeEffect.SelectSingleNode("effecttype").InnerText);
+                    add.addEffect = effect;
+                    entry.listOfEffect.Add(add);
+                }
+
+                WWW www = StatisticHandler.GetMeRightWWW(node.SelectSingleNode("textureGUIName").InnerText);
+
+                yield return www;
+                entry.textureGUI = new Texture2D(150, 80);
+                www.LoadImageIntoTexture(entry.textureGUI);
+                //Debug.Log (entry.name + " " +entry.textureGUI + " " +entry.weaponId );
+                stimPackDictionary.Add(entry);
+            }
 		
 		}
 
@@ -425,7 +446,7 @@ public class ItemManager : MonoBehaviour {
 		isShopLoading = false;		
 	}
 	
-	public IEnumerator  BuyItem(int itemId,bool forGold){
+	public IEnumerator  BuyItem(string itemId,bool forGold){
 		WWWForm form = new WWWForm ();
 			
 		form.AddField ("uid", UID);
@@ -443,13 +464,38 @@ public class ItemManager : MonoBehaviour {
 		}
 
 		yield return w;
-		
+      
 		
 	}
+    public IEnumerator UseItem(string[] itemId)
+    {
+        WWWForm form = new WWWForm();
+        
+        form.AddField("uid", UID);
+        form.AddField("game_item", string.Join(",", itemId));
+         WWW w = null;
+        if (String.Compare(Application.absoluteURL, 0, "https", 0, 5) != 0)
+        {
+
+            Debug.Log("STATS HTTP SEND" + StatisticHandler.STATISTIC_PHP_HTTPS + StatisticHandler.USE_ITEM);
+            w = new WWW(StatisticHandler.STATISTIC_PHP + StatisticHandler.USE_ITEM, form);
+        }
+        else
+        {
+            Debug.Log("STATS HTTPS SEND" + StatisticHandler.STATISTIC_PHP_HTTPS + StatisticHandler.USE_ITEM);
+            w = new WWW(StatisticHandler.STATISTIC_PHP_HTTPS + StatisticHandler.USE_ITEM, form);
+        }
+            
+        yield return w;
+        Debug.Log(w.text);
+
+    }
 	public bool TryUseStim(int id){
-		if( stimPackDictionary[id].active&& stimPackDictionary[id].amount  >=0){
+        Debug.Log("use");
+		if(!stimPackDictionary[id].active&& stimPackDictionary[id].amount  >0){
 			stimPackDictionary[id].active = true;
 			stimPackDictionary[id].amount --;
+            StartCoroutine(UseItem(new string[] { stimPackDictionary[id] .mysqlId}));
 			return true;
 		}
 		return false;
@@ -459,6 +505,13 @@ public class ItemManager : MonoBehaviour {
 		return stimPackDictionary[id].listOfEffect;
 		
 	}
+    public void RestartStimPack() {
+        foreach (StimPack stim in stimPackDictionary)
+        {
+            stim.active = false;
+        }
+    
+    }
 	
 	//END SHOPING SECTION 
 	private static ItemManager s_Instance = null;

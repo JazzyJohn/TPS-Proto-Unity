@@ -189,7 +189,7 @@ public class Player : MonoBehaviour {
 			if(CanUseJugger()&&robotPawn==null){
 				robotTimer+=Time.deltaTime;
 				
-				if(robotTimer<=robotTime&&canSpamBot){
+				if(robotTimer>robotTime&&canSpamBot){
                     if (!robotAnnonce)
                     {
                         robotAnnonce = true;
@@ -324,16 +324,24 @@ public class Player : MonoBehaviour {
                      {
                          robotPawn.RequestKillMe();
                      }
-                     Score.Death++;
-                     isStarted = false;
-                     isDead = true;
+                    
+                     DeathUpdate();
                      StatisticHandler.SendPlayerKillbyNPC(UID, PlayerName);
                  }
 			}
 		}
 	
 	}
-	
+    public void DeathUpdate()
+    {
+
+        killInRow = 0;
+        Score.Death++;
+        isStarted = false;
+        isDead = true; 
+        charMan.DeathUpdate();
+        ItemManager.instance.RestartStimPack();
+    }
 	public void RobotDead(Player Killer){
 		robotTimer=0;
         robotAnnonce = false;
@@ -347,7 +355,9 @@ public class Player : MonoBehaviour {
 		}
 	
 	}
-	public void CanUseJugger(){}
+	public bool CanUseJugger(){
+        return GameRule.instance.CanUseRobot;
+    }
 	
 	
 	public void PawnDead(Player Killer,Pawn killerPawn ){
@@ -371,10 +381,8 @@ public class Player : MonoBehaviour {
 	}
 	[RPC]
 	public void RPCPawnDead(int viewId,int pawnViewId){
-        killInRow = 0;
-		Score.Death++;
-		isStarted = false;
-		isDead = true;
+        
+        DeathUpdate();
 		if (viewId != 0) {
 			Player killer = PhotonView.Find (viewId).GetComponent<Player> ();
 			PlayerMainGui.instance.InitKillCam(killer);
@@ -612,7 +620,7 @@ public class Player : MonoBehaviour {
 		}else{
 			return currentPawn;
 		}
-		return null;
+	
 	}
 	public void AfterSpawnSetting(Pawn pawn,PawnType type,int rTeam){
 	
@@ -636,7 +644,17 @@ public class Player : MonoBehaviour {
         Pawn pawn =PhotonView.Find (viewid).GetComponent<Pawn>();
 		switch (pType) {
 			case PawnType.PAWN:
-			charMan.DeathUpdate();
+            if (!photonView.isMine)
+            {
+                charMan.DeathUpdate();
+                List<int> activeSteampacks = new List<int>();
+
+
+                foreach (int steampack in steampacks)
+                {
+                    ActualUseOfSteampack(steampack);
+                }
+            }
 			currentPawn = pawn;
 			
 			break;
@@ -645,12 +663,7 @@ public class Player : MonoBehaviour {
 			break;
 		}
 		
-		List<int> activeSteampacks = new List<int>();
 		
-		
-		foreach(int steampack in steampacks){
-			ActualUseOfSteampack(steampack);
-		}
 		team = iteam;	
 		pawn.player = this;
 		pawn.team = this.team;

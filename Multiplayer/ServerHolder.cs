@@ -1,7 +1,7 @@
 ﻿using UnityEngine;
 using System.Collections;
 
-public enum GAMEMODE { PVP, PVE };
+public enum GAMEMODE { PVP, PVE,RUNNER };
 	
 public class ServerHolder : MonoBehaviour 
 {
@@ -19,6 +19,7 @@ public class ServerHolder : MonoBehaviour
 	public string newRoomName;
 	public int newRoomMaxPlayers;
     public int newPVERoomMaxPlayers;
+    public int newRunnerRoomMaxPlayers;
 	private const float FLOAT_COEF =100.0f;
 
 	public RoomInfo[] allRooms;
@@ -63,6 +64,9 @@ public class ServerHolder : MonoBehaviour
                 break;
             case GAMEMODE.PVP:
                 newRoomName = "Test PVP chamber " + Random.Range(100, 999);
+                break;
+            case GAMEMODE.RUNNER:
+                newRoomName = "Test Runner chamber " + Random.Range(100, 999);
                 break;
        
         }
@@ -255,15 +259,20 @@ public class ServerHolder : MonoBehaviour
 		string[] exposedProps = new string[customProps.Count];
 		exposedProps[0] = "MapName";
         int roomCnt = newRoomMaxPlayers;
+        bool isVisible = true;
         switch (mode)
         {
             case GAMEMODE.PVE:
                 roomCnt = newPVERoomMaxPlayers;
                 break;
+            case GAMEMODE.RUNNER:
+                roomCnt = newRunnerRoomMaxPlayers;
+                isVisible = false;
+                break;
         }
 
 
-        PhotonNetwork.CreateRoom(newRoomName, true, true, roomCnt, customProps, exposedProps);
+        PhotonNetwork.CreateRoom(newRoomName, isVisible, true, roomCnt, customProps, exposedProps);
 	}
 
 	public void LoadNextMap(){

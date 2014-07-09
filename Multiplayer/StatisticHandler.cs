@@ -27,6 +27,8 @@ public class StatisticHandler : MonoBehaviour {
 	public static string LOAD_SHOP = "loadshop";
 	
 	public static string BUY_ITEM = "buyItem";
+
+    public static string USE_ITEM = "useItem";
 	
 	public static string SAVE_ITEM = "saveitem";
 

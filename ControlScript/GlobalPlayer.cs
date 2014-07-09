@@ -27,9 +27,27 @@ public class GlobalPlayer : MonoBehaviour {
 	public int gold;
 	
 	public int cash;
-	
 
-	
+
+    // s_Instance is used to cache the instance found in the scene so we don't have to look it up every time.
+    private static GlobalPlayer s_Instance = null;
+
+    // This defines a static instance property that attempts to find the manager object in the scene and
+    // returns it to the caller.
+    public static GlobalPlayer instance
+    {
+        get
+        {
+            if (s_Instance == null)
+            {
+                // This is where the magic happens.
+                //  FindObjectOfType(...) returns the first AManager object in the scene.
+                s_Instance = FindObjectOfType(typeof(GlobalPlayer)) as GlobalPlayer;
+            }
+
+            return s_Instance;
+        }
+    }
 
 	void Update(){
 		if(InputManager.instance.GetButtonDown("FullScreen")){
@@ -101,10 +119,10 @@ public class GlobalPlayer : MonoBehaviour {
 		//Debug.Log (w.text);
 		parseProfile(w.text);
 	}	
-	protected IEnumerator  ReloadStats(string Uid){
+	public IEnumerator  ReloadStats(){
 		WWWForm form = new WWWForm ();
-	
-		form.AddField ("uid", Uid);
+
+        form.AddField("uid", UID);
 		WWW w = null;
 		if (String.Compare(Application.absoluteURL, 0, "https", 0,5) != 0) {
 			
@@ -127,7 +145,7 @@ public class GlobalPlayer : MonoBehaviour {
 	
 	}
 	public void ReloadProfile(){
-		StartCoroutine(ReloadStats(UID));
+		StartCoroutine(ReloadStats());
 	}
 	
 	public void  SetName(String newname)
