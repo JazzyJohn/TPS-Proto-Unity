@@ -48,14 +48,18 @@ public class MainMenuGUI : MonoBehaviour {
 	// Use this for initialization
 	void Start () 
 	{
-		//Показать список комнат
-
-
+		//Загрузка настроек
+		_SettingPanel.graphicSetting.ResolutionScroll.value = PlayerPrefs.GetFloat("Resolution");
+		_SettingPanel.graphicSetting.TextureScroll.value = PlayerPrefs.GetFloat("TextureQuality");
+		_SettingPanel.graphicSetting.ShadowScroll.value = PlayerPrefs.GetFloat("ShadowQuality");
+		_SettingPanel.graphicSetting.LighningScroll.value = PlayerPrefs.GetFloat("LighningQuality");
+		_SettingPanel.volumes.VolumeScroll.value = PlayerPrefs.GetFloat("OverallVolume");
+		_SettingPanel.volumes.SoundFxScroll.value = PlayerPrefs.GetFloat("SoundFX");
+		_SettingPanel.volumes.MusicScroll.value = PlayerPrefs.GetFloat("Music");
+		ApplyGraphicSetting();
 
 		//Поправить размер формы
 		ReSize();
-
-		//Загрузить значения персонажа
 
 		//Получение с сервера комнат
 		Server = _playerInfo.Player.GetComponent<ServerHolder>();
@@ -235,13 +239,13 @@ public class MainMenuGUI : MonoBehaviour {
 		{
 		case true:
 			SizeScreen.FullScreen_Z = false;
-			Screen.SetResolution(800, 600, SizeScreen.FullScreen_Z);
+			Screen.SetResolution(Screen.width, Screen.height, SizeScreen.FullScreen_Z);
 			ReSize();
 
 			break;
 		case false:
 			SizeScreen.FullScreen_Z = true;
-			Screen.SetResolution(resolutions[resolutions.Length-1].width, resolutions[resolutions.Length-1].height, SizeScreen.FullScreen_Z);
+			Screen.SetResolution(Screen.width, Screen.height, SizeScreen.FullScreen_Z);
 			ReSize();
 
 			break;
@@ -291,7 +295,9 @@ public class MainMenuGUI : MonoBehaviour {
 			LoadData();		
 		
 		}
-	
+
+
+
 	}
     public void OnGUI()
     {
@@ -419,7 +425,6 @@ public class MainMenuGUI : MonoBehaviour {
         {
             gameMode = (GAMEMODE)mode;
             Server.RoomNewName((GAMEMODE)mode);
-            Debug.Log(Server.newRoomName);
             _RoomsNgui.NameNewRoom.value = Server.newRoomName;
         }
     }
@@ -474,6 +479,206 @@ public class MainMenuGUI : MonoBehaviour {
     public void SetMouseLabel() {
         _SettingPanel.mouseLabel.text = (_SettingPanel.mouseSensitivity.value * 100f).ToString("0");
     }
+
+	public void SetValueVolume(int IntArg, UIScrollBar ScrollArg) //Установка звука (Текст)
+	{
+		string value = (ScrollArg.value * 100f).ToString("0");
+		switch(IntArg)
+		{
+		case 0:
+			_SettingPanel.volumes.Volume.text = value;
+			break;
+		case 1:
+			_SettingPanel.volumes.SoundFx.text = value;
+			break;
+		case 2:
+			_SettingPanel.volumes.Music.text = value;
+			break;
+		}
+	}
+	public void SetGraphic(UILabel ValueLabel, UIScrollBar ScrollValue, string Setting) //Настройки графики (текст)
+	{
+
+		int arg1 = Mathf.RoundToInt(ScrollValue.value*(ScrollValue.numberOfSteps-1));
+		
+		switch(arg1)
+		{
+		case 0:
+			switch(Setting)
+			{
+			case "Graphic":
+				_SettingPanel.graphicSetting.Texture.text = "Low";
+				_SettingPanel.graphicSetting.Shadow.text = "Low";
+				_SettingPanel.graphicSetting.Lighning.text = "Low";
+				_SettingPanel.graphicSetting.TextureScroll.value = 0f;
+				_SettingPanel.graphicSetting.ShadowScroll.value = 0f;
+				_SettingPanel.graphicSetting.LighningScroll.value = 0f;
+					break;
+			case "Resolution":
+				ValueLabel.text = "800x600";
+				break;
+			default:
+				ValueLabel.text = "Low";
+				break;
+			}
+			break;
+		case 1:
+			switch(Setting)
+			{
+			case "Graphic":
+				_SettingPanel.graphicSetting.Texture.text = "Medium";
+				_SettingPanel.graphicSetting.Shadow.text = "Medium";
+				_SettingPanel.graphicSetting.Lighning.text = "Medium";
+				_SettingPanel.graphicSetting.TextureScroll.value = 0.5f;
+				_SettingPanel.graphicSetting.ShadowScroll.value = 0.5f;
+				_SettingPanel.graphicSetting.LighningScroll.value = 0.5f;
+				break;
+			case "Resolution":
+				ValueLabel.text = "1024x768";
+				break;
+			default:
+				ValueLabel.text = "Medium";
+				break;
+			}
+			break;
+		case 2:
+			switch(Setting)
+			{
+			case "Graphic":
+				_SettingPanel.graphicSetting.Texture.text = "High";
+				_SettingPanel.graphicSetting.Shadow.text = "High";
+				_SettingPanel.graphicSetting.Lighning.text = "High";
+				_SettingPanel.graphicSetting.TextureScroll.value = 1f;
+				_SettingPanel.graphicSetting.ShadowScroll.value = 1f;
+				_SettingPanel.graphicSetting.LighningScroll.value = 1f;
+				break;
+			case "Resolution":
+				ValueLabel.text = "1152x864";
+				break;
+			default:
+				ValueLabel.text = "High";
+				break;
+			}
+			break;
+		case 3:
+			switch(Setting)
+			{
+			case "Resolution":
+				ValueLabel.text = "1280x720";
+				break;
+			}
+			break;
+		case 4:
+			switch(Setting)
+			{
+			case "Resolution":
+				ValueLabel.text = "1280x768";
+				break;
+			}
+			break;
+		case 5:
+			switch(Setting)
+			{
+			case "Resolution":
+				ValueLabel.text = "1280x800";
+				break;
+			}
+			break;
+		case 6:
+			switch(Setting)
+			{
+			case "Resolution":
+				ValueLabel.text = "1360x768";
+				break;
+			}
+			break;
+		case 7:
+			switch(Setting)
+			{
+			case "Resolution":
+				ValueLabel.text = "1440x900";
+				break;
+			}
+			break;
+		case 8:
+			switch(Setting)
+			{
+			case "Resolution":
+				ValueLabel.text = "1600x900";
+				break;
+			}
+			break;
+		}
+
+		if (_SettingPanel.graphicSetting.Lighning.text != _SettingPanel.graphicSetting.Texture.text 
+		    || _SettingPanel.graphicSetting.Shadow.text != _SettingPanel.graphicSetting.Texture.text
+		    || _SettingPanel.graphicSetting.Lighning.text != _SettingPanel.graphicSetting.Shadow.text)
+		{
+			_SettingPanel.graphicSetting.Graphic.text = "Optional";
+			_SettingPanel.graphicSetting.GraphicScroll.value = 1f;
+		}
+		else if (_SettingPanel.graphicSetting.Texture.text == "Low" && _SettingPanel.graphicSetting.Shadow.text == "Low"
+		         && _SettingPanel.graphicSetting.Lighning.text == "Low" && _SettingPanel.graphicSetting.GraphicScroll.value != 0f)
+		{
+			_SettingPanel.graphicSetting.Graphic.text = "Low";
+			_SettingPanel.graphicSetting.GraphicScroll.value = 0f;
+		}
+		else if (_SettingPanel.graphicSetting.Texture.text == "Medium" && _SettingPanel.graphicSetting.Shadow.text == "Medium"
+		         && _SettingPanel.graphicSetting.Lighning.text == "Medium" && _SettingPanel.graphicSetting.GraphicScroll.value != 1/3)
+		{
+			_SettingPanel.graphicSetting.Graphic.text = "Medium";
+			_SettingPanel.graphicSetting.GraphicScroll.value = 1f/3;
+		}
+		else if (_SettingPanel.graphicSetting.Texture.text == "High" && _SettingPanel.graphicSetting.Shadow.text == "High"
+		         && _SettingPanel.graphicSetting.Lighning.text == "High" && _SettingPanel.graphicSetting.GraphicScroll.value != 1/3*2)
+		{
+			_SettingPanel.graphicSetting.Graphic.text = "High";
+			_SettingPanel.graphicSetting.GraphicScroll.value = 1f/3*2;
+		}
+	}
+
+	public void SaveGraphicSetting()
+	{
+		PlayerPrefs.SetFloat("ResolutionQuality", _SettingPanel.graphicSetting.ResolutionScroll.value);
+		PlayerPrefs.SetFloat("TextureQuality", _SettingPanel.graphicSetting.TextureScroll.value);
+		PlayerPrefs.SetFloat("ShadowQuality", _SettingPanel.graphicSetting.ShadowScroll.value);
+		PlayerPrefs.SetFloat("LighningQuality", _SettingPanel.graphicSetting.LighningScroll.value);
+		PlayerPrefs.SetFloat("OverallVolume", _SettingPanel.volumes.VolumeScroll.value);
+		PlayerPrefs.SetFloat("SoundFX", _SettingPanel.volumes.SoundFxScroll.value);
+		PlayerPrefs.SetFloat("Music", _SettingPanel.volumes.MusicScroll.value);
+		Debug.Log("Save Music = "+PlayerPrefs.GetFloat("Music"));
+		ApplyGraphicSetting();
+	}
+
+	public void ApplyGraphicSetting()
+	{
+		string[] x_y = _SettingPanel.graphicSetting.Resolution.text.Split('x');
+		Screen.SetResolution(int.Parse(x_y[0]), int.Parse(x_y[1]), Screen.fullScreen);
+		switch(_SettingPanel.graphicSetting.Texture.text)
+		{
+		case "Low":
+			QualitySettings.SetQualityLevel((int)QualityLevel.Fast);
+			break;
+		case "Medium":
+			QualitySettings.SetQualityLevel((int)QualityLevel.Good);
+			break;
+		case "High":
+			QualitySettings.SetQualityLevel((int)QualityLevel.Beautiful);
+			break;
+		}
+		AudioListener.volume = _SettingPanel.volumes.VolumeScroll.value;
+	}
+
+	public void DefaultGraphic()
+	{
+		_SettingPanel.graphicSetting.ResolutionScroll.value = 0f;
+		_SettingPanel.graphicSetting.TextureScroll.value = 0.5f;
+		_SettingPanel.graphicSetting.ShadowScroll.value = 0.5f;
+		_SettingPanel.graphicSetting.LighningScroll.value = 0.5f;
+		_SettingPanel.volumes.VolumeScroll.value = 0.75f;
+		_SettingPanel.volumes.SoundFxScroll.value = 0.75f;
+		_SettingPanel.volumes.MusicScroll.value = 0.75f;
+	}
 }
 
 //Группы переменных
@@ -582,4 +787,34 @@ public class SettingsPanel
     public UIPanel control;
 	public UIPanel video;
     public UIPanel game;
+	public Volumes volumes;
+	public string[] AllResolution;
+
+	public GraphicSetting graphicSetting; 
+
+	[System.Serializable]
+	public class Volumes
+	{
+		public UILabel Volume;
+		public UILabel SoundFx;
+		public UILabel Music;
+		public UIScrollBar VolumeScroll;
+		public UIScrollBar SoundFxScroll;
+		public UIScrollBar MusicScroll;
+	}
+
+	[System.Serializable]
+	public class GraphicSetting
+	{
+		public UILabel Resolution;
+		public UILabel Graphic;
+		public UILabel Texture;
+		public UILabel Shadow;
+		public UILabel Lighning;
+		public UIScrollBar ResolutionScroll;
+		public UIScrollBar GraphicScroll;
+		public UIScrollBar TextureScroll;
+		public UIScrollBar ShadowScroll;
+		public UIScrollBar LighningScroll;
+	}
 }

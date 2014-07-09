@@ -574,22 +574,33 @@ public class Pawn : DamagebleObject {
 		}
 
 		StartCoroutine (CoroutineRequestKillMe ());
-		Pawn killerPawn =killer.GetComponent<Pawn> ();
-		Player killerPlayer = null;
-		if (killerPawn != null) {
-			killerPlayer = killerPawn.player;
-			if(killerPlayer!=null){
-				killerPlayer.PawnKill(player,myTransform.position);
-			}
-		}
-
-		if (player != null) {
-			if(player.GetRobot()==this){
-				player.RobotDead(killerPlayer);
-			}else{
-				player.PawnDead(killerPlayer,killerPawn);
-			}
-		}
+        Pawn killerPawn =null;
+        Player killerPlayer = null;
+        if (killer != null)
+        {
+            killerPawn = killer.GetComponent<Pawn>();
+        
+            if (killerPawn != null)
+            {
+                killerPlayer = killerPawn.player;
+                if (killerPlayer != null)
+                {
+                    killerPlayer.PawnKill(player, myTransform.position);
+                }
+            }
+        }
+            if (player != null)
+            {
+                if (player.GetRobot() == this)
+                {
+                    player.RobotDead(killerPlayer);
+                }
+                else
+                {
+                    player.PawnDead(killerPlayer, killerPawn);
+                }
+            }
+        
 
 	
 
@@ -1741,6 +1752,10 @@ public class Pawn : DamagebleObject {
 		if (isDead) {
 			return;	
 		}
+        if (myTransform.position.y < GameRule.instance.DeathY)
+        {
+            KillIt(null);
+        }
         Vector3 velocity = _rb.velocity ;
        /* if(nextMovement.y==0){
             nextMovement.y = velocity.y;

@@ -2,11 +2,20 @@
 using System;
 using System.Collections.Generic;
 
+public enum PARTDIRECTION
+{
+    FORWARD,
+    RIGHT,
+    LEFT
+}
+
 public class Part : MonoBehaviour
 {
 	public Transform Enter;
 	public Transform Exit;
 	public PreSpawner Spawner;
+
+    public PARTDIRECTION type;
 
     public Generation generator;
 	[HideInInspector]

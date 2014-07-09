@@ -138,6 +138,10 @@ public class AIBase : MonoBehaviour
 
 			
         }
+        if (!standAlone && aiSwarm == null)
+        {
+            controlledPawn.RequestKillMe();
+        }
     }
 
 

@@ -324,7 +324,7 @@ public class Player : MonoBehaviour {
                      {
                          robotPawn.RequestKillMe();
                      }
-                    
+                     PVPGameRule.instance.PlayerDeath();
                      DeathUpdate();
                      StatisticHandler.SendPlayerKillbyNPC(UID, PlayerName);
                  }
@@ -394,9 +394,12 @@ public class Player : MonoBehaviour {
 		
 			StatisticHandler.SendPlayerKillbyPlayer(UID, PlayerName, killer.UID, killer.PlayerName);
 		} else {
-			Pawn killer = PhotonView.Find (pawnViewId).GetComponent<Pawn> ();
-			PlayerMainGui.instance.InitKillCam(killer);
-			StatisticHandler.SendPlayerKillbyNPC(UID, PlayerName);
+            if (pawnViewId != 0)
+            {
+                Pawn killer = PhotonView.Find(pawnViewId).GetComponent<Pawn>();
+                PlayerMainGui.instance.InitKillCam(killer);
+                StatisticHandler.SendPlayerKillbyNPC(UID, PlayerName);
+            }
 		}
 		
 		

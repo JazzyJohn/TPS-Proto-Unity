@@ -3,12 +3,12 @@ using System.Collections;
 
 public class RunnerGameRule : GameRule {
     public Generation generator;
-
+    public int StartRoomCnt;
     protected int roomCnt;
     public override void StartGame()
     {
         generator = GetComponent<Generation>();
-        generator.Next(10);
+        generator.Next(StartRoomCnt);
 
         base.StartGame();
     }
@@ -40,9 +40,9 @@ public class RunnerGameRule : GameRule {
         }
         
     }
-     public virtual void PlayerDeath()
+     public override void PlayerDeath()
     {
-
+        Debug.Log("Palyer Death");
           isGameEnded = true;
     }
 }

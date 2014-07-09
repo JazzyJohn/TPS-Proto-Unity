@@ -16,6 +16,10 @@ public class AIPatrol : AIState
 	public override void Tick()
 	{
 		DirectVisibility (out _distanceToTarget);
+        if (patrolPoints[step] == null)
+        {
+            return;
+        }
 	//	Debug.Log (Vector3.Distance (patrolPoints [step].position, controlledPawn.myTransform.position)+"  "+agent.size);
 		if (AIAgentComponent.IsRiched(patrolPoints [step].position, controlledPawn.myTransform.position,agent.size)) {
 			NextPoint();
@@ -37,6 +41,10 @@ public class AIPatrol : AIState
 	public override void StartState(){
 		agent = GetComponent<AIAgentComponent>();
 		//Debug.Log (agent);
+        if (patrolPoints[step] == null)
+        {
+            return;
+        }
         agent.SetTarget(patrolPoints[step].position);
 		agent.SetSpeed(controlledPawn.groundWalkSpeed);
 		agent.ParsePawn (controlledPawn);

@@ -13,4 +13,11 @@ public class SelfSpawnPoint : ObjectSpawnPoint {
 		}
 			
 	}
+    public void OnDestroy()
+    {
+        if (spawnedObject != null)
+        {
+            spawnedObject.GetComponent<DestroyableNetworkObject>().StartCoroutineRequestKillMe();
+        }
+    }
 }

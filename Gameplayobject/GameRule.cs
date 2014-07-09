@@ -27,6 +27,8 @@ public class GameRule : MonoBehaviour {
 
     public bool start = false;
 
+    public float DeathY= -50f;
+
     protected void Awake()
     {
         isGameEnded = false;

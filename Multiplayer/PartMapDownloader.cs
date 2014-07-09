@@ -3,53 +3,16 @@ using UnityEngine;
 using System.Collections;
 using System.Collections.Generic;
 
+public class PartMapDownloader : MapDownloader
+{
 
-public class MapDownloader : MonoBehaviour {
-	public static MapDownloader instance;
-    protected bool instantiated;
-	
-	
-	public string MapURL = "gameRes/Maps/map_kaspi_corcas.unity3d";
-	public string MapNAME = "MapObject";
-	public int version;
-	
-	protected bool inProgress;
-    protected WWW www;
-
-    public AssetBundle bundle;
-	public GameObject playerHud;
-
-	public bool isReady()
-	{
-		return instantiated;
-	}
-	
-	void Awake() 
-	{	
-		instance = this;
-		instantiated = false;
-		//StartCoroutine (DownloadAndCache());
-	}
-	void Start(){
-		//StartCoroutine (DownloadAndCache());
-	}
-
-	public void DownLoad()
-	{
-		//StartCoroutine (DownloadAndCache());
-	}
-	void Update(){
-		if(inProgress){
-			ServerHolder.progress.curLoader= www.progress*100f;
-		}
-	}
-	
-	public virtual IEnumerator DownloadAndCache (){
-		// Wait for the Caching system to be ready
-		while (!Caching.ready)
-			yield return null;
-		string crossDomainesafeURL =StatisticHandler.GetNormalURL()+MapURL;
-		// Load the AssetBundle file from Cache if it exists with the same version or download and store it in the cache
+    public override IEnumerator DownloadAndCache()
+    {
+        // Wait for the Caching system to be ready
+        while (!Caching.ready)
+            yield return null;
+        string crossDomainesafeURL = StatisticHandler.GetNormalURL() + MapURL;
+        // Load the AssetBundle file from Cache if it exists with the same version or download and store it in the cache
         if (AssetBundleManager.isHasAssetBundle(crossDomainesafeURL, version))
         {
             bundle = AssetBundleManager.getAssetBundle(crossDomainesafeURL, version);
@@ -70,8 +33,44 @@ public class MapDownloader : MonoBehaviour {
 
                 bundle = www.assetBundle;
                 AssetBundleManager.setAssetBundle(bundle, crossDomainesafeURL, version);
-                GameObject obj = Instantiate(bundle.mainAsset) as GameObject;
-                StaticBatchingUtility.Combine(obj);
+                UnityEngine.Object[] prefabObjects = bundle.LoadAll(typeof(Part));
+                Generation generator = FindObjectOfType<Generation>();
+                for (int i = 0; i < prefabObjects.Length; i++)
+                {
+
+
+                    if (!prefabObjects[i])
+                    {
+                        Debug.Log("No prefabObj"); continue;
+                    }
+
+
+                    //Debug.Log (prefabObjects[i]);
+                    //AssetDatabase.AddObjectToAsset(prefabObjects[i], "Assets/Resources/"+prefabObjects[i].name+".prefab");
+                    //Debug.Log(AssetDatabase.GetAssetPath(prefabObjects[i]));
+
+
+
+                    Part prefab = ((MonoBehaviour)prefabObjects[i]).GetComponent<Part>();
+                    List<Part> leftTurns  = new List<Part>();
+                    List<Part> rightTurns  = new List<Part>();
+                    List<Part> forwards  = new List<Part>();
+                    switch(prefab.type){
+                        case PARTDIRECTION.FORWARD:
+                            forwards.Add(prefab);
+                            break;
+                        case PARTDIRECTION.LEFT:
+                            leftTurns.Add(prefab);
+                            break;
+                         case PARTDIRECTION.RIGHT:
+                            rightTurns.Add(prefab);
+                            break;
+                    }
+                    generator.LeftTurnParts = leftTurns.ToArray();
+                    generator.RightTurnParts = rightTurns.ToArray();
+                    generator.Parts = forwards.ToArray();
+
+                }
                 /*UnityEngine.Object[] prefabObjects = bundle.LoadAll();
 			
                 //GameObject sp = GameObject.Find("SpawnPoint");
@@ -129,8 +128,6 @@ public class MapDownloader : MonoBehaviour {
                 bundle.Unload(false);
             }
         }
-		//Destroy(this);
-	}
-	
-
+        //Destroy(this);
+    }
 }
