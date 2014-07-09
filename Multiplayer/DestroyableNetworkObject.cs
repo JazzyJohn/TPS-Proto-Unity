@@ -19,6 +19,10 @@ public class DestroyableNetworkObject : MonoBehaviour {
         }
 
 	}
+    public void StartCoroutineRequestKillMe()
+    {
+        StartCoroutine(CoroutineRequestKillMe());
+    }
 	public void RequestKillMe(){
         if (photonView.isSceneView)
         {

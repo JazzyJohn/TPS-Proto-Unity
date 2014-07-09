@@ -322,7 +322,8 @@ public class SelectPlayerGUI : MonoBehaviour {
 	public void StartGameBut()
 	{
        // Debug.Log(Choice._Player + " " + Choice._Robot + "  " + Choice._Team);  
-        if (shop.panel.alpha == 1.0) {
+        if (shop!=null&&shop.panel.alpha == 1.0)
+        {
             return;
         }
         if (Choice._Team == -1)

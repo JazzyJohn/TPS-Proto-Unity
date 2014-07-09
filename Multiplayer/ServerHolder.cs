@@ -66,7 +66,7 @@ public class ServerHolder : MonoBehaviour
                 newRoomName = "Test PVP chamber " + Random.Range(100, 999);
                 break;
             case GAMEMODE.RUNNER:
-                newRoomName = "Test Runner chamber " + Random.Range(100, 999);
+                newRoomName = "Runner chamber " + Random.Range(100, 999);
                 break;
        
         }

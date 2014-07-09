@@ -370,6 +370,7 @@ public class Player : MonoBehaviour {
 			PVPGameRule.instance.Kill (Killer.team);
 			EventHolder.instance.FireEvent(typeof(LocalPlayerListener),"EventPawnDeadByPlayer",this);
 		} else {
+            PVPGameRule.instance.PlayerDeath();
 			EventHolder.instance.FireEvent(typeof(LocalPlayerListener),"EventPawnDeadByAI",this);
 		}
         if (killerPawn != null) {

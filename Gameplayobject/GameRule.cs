@@ -74,6 +74,11 @@ public class GameRule : MonoBehaviour {
     {
        
     }
+
+    public virtual void PlayerDeath()
+    {
+
+    }
     public virtual PlayerMainGui.GameStats GetStats()
     {
         return null;

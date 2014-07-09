@@ -31,7 +31,8 @@ public class AIDirectrorTrigger : MonoBehaviour
             switch(type)
             {
                 case  TRIGGERTYPE.PlayerEnter:
-                    if (!other.GetComponent<Pawn>().isAi)
+                    Pawn pawn = other.GetComponent<Pawn>();
+                    if (pawn != null && !pawn.isAi)
                     {
                         EventDelegate.Execute(onEvent);
                     }

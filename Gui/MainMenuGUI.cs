@@ -419,6 +419,7 @@ public class MainMenuGUI : MonoBehaviour {
         {
             gameMode = (GAMEMODE)mode;
             Server.RoomNewName((GAMEMODE)mode);
+            Debug.Log(Server.newRoomName);
             _RoomsNgui.NameNewRoom.value = Server.newRoomName;
         }
     }
