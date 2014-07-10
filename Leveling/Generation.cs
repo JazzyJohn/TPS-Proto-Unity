@@ -8,11 +8,11 @@ public class Generation : MonoBehaviour {
     public Part[] RightTurnParts;
     public int lastTurn;
 	public List<Part> Rooms;
-	public Part s;
 	int RoomsCount;
     public int RoomCache;
     public Transform startTransform;
     public Transform PathEngine;
+
 	public void Next()
 	{
 		RoomsCount++;
@@ -49,10 +49,11 @@ public class Generation : MonoBehaviour {
                 }
                 break;
         }
-		
-     
+
+		NewPart.generator = this;
 		NewPart.Numb = RoomsCount;
-        if (Rooms.Count != 0) NewPart.ConnectToPart(Rooms[Rooms.Count - 1],this);
+
+        if (Rooms.Count != 0) NewPart.ConnectToPart(Rooms[Rooms.Count - 1]);
 
         else
         {
@@ -68,13 +69,32 @@ public class Generation : MonoBehaviour {
             Rooms.RemoveAt(0);
         }
         NewPart.Started();
+
 	}
+
+	public Part LastPart(){
+		return FindLast(Parts[0]);
+	}
+	Part FindLast(Part part)
+	{
+		if(!part.Entered)return null;
+		else if(part.ConnectedParts.Count == 0)return part;
+		else {
+			for (int i = 0; i < part.ConnectedParts.Count; i++) {
+				Part Finded = FindLast(part.ConnectedParts[i]);
+				if (Finded != null) return Finded;
+			}
+		}
+		return Parts[0];
+	}
+
 	void Ready()
 	{
 		for (int i = 0; i < Rooms.Count; i++) {
             Rooms[i].Started();
 		}
 	}
+
 	public void Next(int Count)
 	{
         RoomCache = (int)Math.Round(Count * 1.5f);
@@ -87,5 +107,14 @@ public class Generation : MonoBehaviour {
         PathEngine.position = transform.position;
         PathfindingEngine.Instance.GenerateStaticMap();
     }
-    
+    public void KillLastPart(){
+		for (int i = 0; i < Parts[0].ConnectedParts.Count; i++) {
+			Part Connected = Parts[0].ConnectedParts[i];
+			if (!Connected.Entered)
+			{
+				Connected.DestroyConnectedRoom();
+				Connected.DestroyRoom();
+			}
+		}
+	}
 }

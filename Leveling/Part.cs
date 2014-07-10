@@ -11,35 +11,38 @@ public enum PARTDIRECTION
 
 public class Part : MonoBehaviour
 {
+	public PARTDIRECTION type;
 	public Transform Enter;
-	public Transform Exit;
+	public Transform[] Exit;
 	public PreSpawner Spawner;
 
-    public PARTDIRECTION type;
-
+	[HideInInspector]
+	public bool Entered = false;
+	[HideInInspector]
     public Generation generator;
 	[HideInInspector]
 	public int Numb;
 	[HideInInspector]
 	public Transform PartTransform;
+	[HideInInspector]
+	public List<Part> ConnectedParts;
 
     protected void Awake()
     {
         PartTransform = transform;
     }
 
-	public void ConnectToPart(Part OldPart,Generation generator)
+	public void ConnectToPart(Part OldPart)
 	{
-        PartTransform.rotation = Quaternion.FromToRotation(OldPart.Enter.forward, OldPart.Exit.forward) * OldPart.PartTransform.rotation;
-		PartTransform.position = OldPart.Exit.position + PartTransform.position - Enter.position;
+		int FreeExit = OldPart.Exit.Length - OldPart.ConnectedParts.Count - 1;
+		PartTransform.rotation = Quaternion.FromToRotation(OldPart.Enter.forward, OldPart.Exit[FreeExit].forward) * OldPart.PartTransform.rotation;
+		PartTransform.position = OldPart.Exit[FreeExit].position + PartTransform.position - Enter.position;
         StaticBatchingUtility.Combine(gameObject);
-        this.generator = generator;
+		OldPart.ConnectedParts.Add(this);
 	}
     public virtual void Started()
     {
-       
-            Spawner.Spawn();
-        
+		Spawner.Spawn();
     }
     public virtual void PlayerEnter()
     {
@@ -52,6 +55,13 @@ public class Part : MonoBehaviour
         Spawner.Destroy();
         Destroy(gameObject);
     }
+	public virtual void DestroyConnectedRoom(){
+		foreach (Part part in ConnectedParts)
+		{
+			part.DestroyConnectedRoom();
+			part.DestroyRoom();
+		}
+	}
 }
 [Serializable]
 public class PreSpawner
