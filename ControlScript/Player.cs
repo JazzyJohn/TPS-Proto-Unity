@@ -76,6 +76,8 @@ public class Player : MonoBehaviour {
 	//param for delayed external call
 	public string delayedExternalCallData;
 	
+	public bool wasWallPost = false;
+	
 	public const float SQUERED_RADIUS_OF_ACTION = 16.0f;
 	
 	public GlobalPlayer globalPlayer;
@@ -478,8 +480,11 @@ public class Player : MonoBehaviour {
 	//Delayed external for that function that can destrupt user like VK wallpost
 	public void SendDelayedExternal(){
 		if(delayedExternalCallName!=""){
-			Application.ExternalCall(delayedExternalCallName,delayedExternalCallData);
-			delayedExternalCallName="";
+			if(!wasWallPost){
+				Application.ExternalCall(delayedExternalCallName,delayedExternalCallData);
+				delayedExternalCallName="";
+				wasWallPost =true;
+			}
 		}
 	}
 		

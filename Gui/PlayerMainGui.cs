@@ -27,7 +27,9 @@ public class PlayerMainGui : MonoBehaviour {
 			STD_MESSAGE=0,
 			DMG_TEXT=1,
 			KILL_TEXT = 2,
-			ACHIVEMENT = 3
+			ACHIVEMENT = 3,
+			ANALIZE_POINT = 4,
+			OPEN_LORE = 5
 	}
 	public Texture[] messageTexture;
 	public GUIStyle[] messageStyle;
@@ -36,6 +38,7 @@ public class PlayerMainGui : MonoBehaviour {
 	public class GUIMessage{
 		public float destroyTime;
 		public Vector3 worldPoint;
+		public Texture icon= null;
 		public string text="";
 		public MessageType type;
 		public float getMessageSize(PlayerMainGui outer){
@@ -581,6 +584,23 @@ public class PlayerMainGui : MonoBehaviour {
 		message.destroyTime = Time.time + messageDelay;
 		message.text = text;
 		message.worldPoint = worldPoint;
+		message.type = type;
+		guiMessages.Enqueue(message);
+	}
+	public void AddMessage(string text, MessageType type ){
+		GUIMessage message = new GUIMessage();
+		message.destroyTime = Time.time + messageDelay;
+		message.text = text;
+		message.worldPoint = Vector3.zero;
+		message.type = type;
+		guiMessages.Enqueue(message);
+	}
+	public void AddMessage(string text, Texture icon, MessageType type ){
+		GUIMessage message = new GUIMessage();
+		message.destroyTime = Time.time + messageDelay;
+		message.text = text;
+		message.icon = icon;
+		message.worldPoint = Vector3.zero;
 		message.type = type;
 		guiMessages.Enqueue(message);
 	}

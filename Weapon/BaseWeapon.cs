@@ -38,6 +38,8 @@ public class BaseWeapon : DestroyableNetworkObject {
        
     }
 
+	private static LayerMask layer = -123909;
+	
 	private Queue<ShootData> shootsToSend = new Queue<ShootData>();
 
 	protected Queue<ShootData> shootsToSpawn = new Queue<ShootData>();
@@ -653,12 +655,22 @@ public class BaseWeapon : DestroyableNetworkObject {
 		RaycastHit hitInfo;
 
 		if (Physics.Raycast (centerRay, out hitInfo, weaponRange)) {
+		
+			HitEffect(hitInfo);
+			
+		}
+	}
+	
+	/// <summary>
+    /// Hit logic for SimpleDamage
+    /// </summary>
+	protected virtual void HitEffect(hitInfo){
 			DamagebleObject target =(DamagebleObject) hitInfo.collider.GetComponent(typeof(DamagebleObject));
 			if(target!=null){
 				target.Damage(new BaseDamage(damageAmount) ,owner.gameObject);
 			}
-		}
 	}
+	
 	/// <summary>
     /// Generate random distribution coef for projectile
     /// </summary>
