@@ -271,15 +271,25 @@ public class ServerHolder : MonoBehaviour
                 break;
         }
 
+ 
 
-        PhotonNetwork.CreateRoom(newRoomName, isVisible, true, roomCnt, customProps, exposedProps);
+            PhotonNetwork.CreateRoom(newRoomName, isVisible, true, roomCnt, customProps, exposedProps);
+       
 	}
 
 	public void LoadNextMap(){
 		connectingToRoom = true;
         PhotonNetwork.isMessageQueueRunning = false;
         Debug.Log("LOAD"+this);
-		StartCoroutine (LoadMap ((string)PhotonNetwork.room.customProperties ["MapName"]));
+        if (PhotonNetwork.offlineMode)
+        {
+        
+            StartCoroutine(LoadMap(map));
+        }
+        else
+        {
+            StartCoroutine(LoadMap((string)PhotonNetwork.room.customProperties["MapName"]));
+        }
 	}
 	void OnJoinedLobby()
 	{
@@ -328,8 +338,14 @@ public class ServerHolder : MonoBehaviour
 		progress.curLoader=0;
 		connectingToRoom = true;
 		if (shouldLoad) {
-		
-			StartCoroutine (LoadMap ((string)PhotonNetwork.room.customProperties ["MapName"]));
+            if (PhotonNetwork.offlineMode)
+            {
+                StartCoroutine(LoadMap(map));
+            }
+            else
+            {
+                StartCoroutine(LoadMap((string)PhotonNetwork.room.customProperties["MapName"]));
+            }
 		} else {
 			FinishLoad ();
 		}

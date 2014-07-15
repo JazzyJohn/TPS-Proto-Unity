@@ -5,7 +5,7 @@ using System.Collections.Generic;
 public class AISwarm:MonoBehaviour
 {
 
-    public GameObject[] Bots;
+    public string[] Bots;
 
     public AISpawnPoint[] respawns;
 
@@ -59,7 +59,7 @@ public class AISwarm:MonoBehaviour
                 AISpawnPoint go = respawns[i];
                 if (go.IsAvalable())
                 {
-                    GameObject obj = PhotonNetwork.InstantiateSceneObject(Bots[(int)(UnityEngine.Random.value * Bots.Length)].name, go.transform.position, go.transform.rotation, 0, null) as GameObject;
+                    GameObject obj = PhotonNetwork.InstantiateSceneObject(Bots[(int)(UnityEngine.Random.value * Bots.Length)], go.transform.position, go.transform.rotation, 0, null) as GameObject;
                     //	GameObject obj = PhotonNetwork.Instantiate (Bots[(int)(UnityEngine.Random.value*Bots.Length)].name, go.transform.position, go.transform.rotation, 0,null) as GameObject;
                     go.Spawned(obj.GetComponent<Pawn>());
                     //  Debug.Log("Group before set" + this.aiGroup + "  " + aiGroup);

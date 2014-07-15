@@ -62,6 +62,8 @@ public class LoreManager : MonoBehaviour{
 	public LoreEntry[] allEntry;
 		
 	private static LoreManager s_Instance = null;
+
+    private string UID;
 	
 	public static LoreManager instance {
 		get {
@@ -96,13 +98,15 @@ public class LoreManager : MonoBehaviour{
 				AnalyzeEntry income = incomeQueue.Dequeue ();
 				AnalyzeEntry outcome = new AnalyzeEntry();
 				outcome.name  = income.name;
-				for(int i = 0; i<	allEntry.Lenght;i++){
+				for(int i = 0; i<	allEntry.Length;i++){
 					
 					LoreEntry entry = allEntry[i];
-					if(entry.openBlockId.Count==entry.allBlock.Lenght){
+                    if (entry.openBlockId.Count == entry.allBlock.Length)
+                    {
 						continue;
 					}
-					for(int j =0;j<entry.allBlock.Lenght;j++){
+                    for (int j = 0; j < entry.allBlock.Length; j++)
+                    {
 						if(entry.allBlock[j].needToOpen<=entry.allBlock[j].alreadyAnalyzed){
 							continue;
 						}
@@ -117,7 +121,7 @@ public class LoreManager : MonoBehaviour{
 					
 					}
 				}
-				outcomeQueuel.Enqueue(outcome);
+				outcomeQueue.Enqueue(outcome);
 			
 			}
 		
@@ -126,8 +130,8 @@ public class LoreManager : MonoBehaviour{
 	}
 	
 	public void Update(){
-		while (outcomeQueuel.Count>0) {
-			AnalyzeEntry outcome = outcomeQueuel.Dequeue ();
+		while (outcomeQueue.Count>0) {
+			AnalyzeEntry outcome = outcomeQueue.Dequeue ();
 			PlayerMainGui.instance.AddMessage(outcome.point.ToString(),PlayerMainGui.MessageType.ANALIZE_POINT);
 	
 		}
@@ -137,7 +141,7 @@ public class LoreManager : MonoBehaviour{
 	
 		}
 	}
-	public void Init(){
+	public void Init(string uid){
 		DontDestroyOnLoad(transform.gameObject);
 		 myThread = new Thread(new ThreadStart(this.LoreLoop));
 		 myThread.Start ();		
@@ -147,4 +151,9 @@ public class LoreManager : MonoBehaviour{
 		UID = uid;
 		StartCoroutine(LoadLore (form));
 	}
+
+    public IEnumerator LoadLore(WWWForm form)
+    {
+        return null;
+    }
 }

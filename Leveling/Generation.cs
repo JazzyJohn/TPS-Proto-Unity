@@ -26,7 +26,7 @@ public class Generation : MonoBehaviour {
                 break;
             //Right TurnRoom
             case 1:
-                if (lastTurn >= 1)
+                if (lastTurn >= 1 || RightTurnParts.Length == 0)
                 {
                     NewPart = Instantiate( Parts[UnityEngine.Random.Range(0, Parts.Length)]) as Part;
                 }
@@ -38,7 +38,7 @@ public class Generation : MonoBehaviour {
                 break;
             //LEft TurnRoom
             case 2:
-                if (lastTurn <= -1)
+                if (lastTurn <= -1 || LeftTurnParts.Length == 0)
                 {
                     NewPart = Instantiate(Parts[UnityEngine.Random.Range(0, Parts.Length)]) as Part;
                 }
@@ -68,6 +68,7 @@ public class Generation : MonoBehaviour {
             Rooms.RemoveAt(0);
         }
         NewPart.Started();
+       
 	}
 	void Ready()
 	{

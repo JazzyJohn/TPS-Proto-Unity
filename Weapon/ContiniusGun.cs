@@ -10,8 +10,8 @@ public class ContiniusGun : BaseWeapon
 	private BoxCollider AOECollider; 
 	new void Start () {
 		base.Start ();
-	
-		AOECollider = muzzlePoint.GetComponent<BoxCollider> ();
+
+        AOECollider = muzzlePoint.GetComponent<MuzzlePoint>().damager.GetComponent<BoxCollider>();
 		AOECollider.size = colliderDisableSize;
 		sControl.setLooped(true);
 	}
@@ -19,6 +19,7 @@ public class ContiniusGun : BaseWeapon
 	public void fireDamage (Pawn target)
 	{
 		if (target != null) {
+            //Debug.Log(damageAmount.Damage);
             target.addDPS(new BaseDamage(damageAmount), owner.gameObject, fireInterval);
 		}
 	}

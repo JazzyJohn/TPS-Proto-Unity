@@ -100,9 +100,12 @@ public class Player : MonoBehaviour {
 
 		return false;
 	}
-	
+    void Awake()
+    {
+        photonView = GetComponent<PhotonView>();
+    }
 	void Start(){
-		photonView = GetComponent<PhotonView> ();
+		
 		PlayerManager.instance.addPlayer(this);
 		charMan = GetComponent<CharacteristicPlayerManager>();
         charMan.Init();

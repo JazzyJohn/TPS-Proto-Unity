@@ -997,26 +997,31 @@ public class Pawn : DamagebleObject {
 		
 	}
 	public void DpsCheck(){
-		//Debug.Log ("dps"+this+activeDPS.Count );
-		if (activeDPS.Count > 0) {
 
+		
+		if (activeDPS.Count > 0) {
+            //Debug.Log("dps" + this + activeDPS.Count);
 			for(int i=0; i<activeDPS.Count;i++){
 				singleDPS key  = activeDPS[i];
 				key.lastTime+=Time.deltaTime;
+                Debug.Log(key.lastTime);
 				if(key.noOnwer){
 					if(key.lastTime>1.0f){
 						activeDPS.RemoveAt(i);
 						i--;
+                        continue;
 					}
-					continue;
+                    //Debug.Log( " NO OWNER EXIT" );
+					
 				}
 				BaseDamage ldamage = new BaseDamage(key.damage);
 				ldamage.hitPosition =myTransform.position + UnityEngine.Random.onUnitSphere;
-				ldamage.isContinius = true;
+				//ldamage.isContinius = true;
+                Debug.Log(ldamage.Damage + " " + Time.deltaTime);
 				ldamage.Damage *= Time.deltaTime;
                 ldamage.sendMessage = false;
-				//Debug.Log (key.lastTime);
-             
+
+               // Debug.Log(ldamage.Damage);
 
 				Damage(ldamage,key.killer);
                 if (key.lastTime > key.showInterval)
@@ -1146,7 +1151,7 @@ public class Pawn : DamagebleObject {
 				float range=aimRange;
 				foreach( RaycastHit hitInfo  in Physics.RaycastAll(centerRay, aimRange))				
 				{
-					if(hitInfo.collider==myCollider ||hitInfo.transform.IsChildOf(myTransform))
+                    if (hitInfo.collider == myCollider || hitInfo.transform.IsChildOf(myTransform) || hitInfo.collider.isTrigger)
 					{
 						continue;
 					}
@@ -1361,9 +1366,10 @@ public class Pawn : DamagebleObject {
 	}
 	void OnTriggerEnter (Collider other)
 	{
+        
 		if (other.tag == "damageArea") {
 			//Debug.Log (other.GetComponent<ContiniusGun> ());
-			MuzzlePoint muzzlePoint = other.GetComponent<MuzzlePoint>();
+            WeaponDamager muzzlePoint = other.GetComponent<WeaponDamager>();
 			
 			if(muzzlePoint !=null){
 				 muzzlePoint.gun.GetComponent<ContiniusGun> ().fireDamage (this);
@@ -1379,7 +1385,7 @@ public class Pawn : DamagebleObject {
 	void OnTriggerExit (Collider other)
 	{
 		if (other.tag == "damageArea") {
-			MuzzlePoint muzzlePoint = other.GetComponent<MuzzlePoint>();
+            WeaponDamager muzzlePoint = other.GetComponent<WeaponDamager>();
 			singleDPS newDPS= null;
 			if(muzzlePoint !=null){
 				 newDPS = muzzlePoint.gun.GetComponent<ContiniusGun> ().getId ();
@@ -1390,6 +1396,7 @@ public class Pawn : DamagebleObject {
 			}
 			foreach (singleDPS key in activeDPS) {
 				if(newDPS.killer == key.killer){
+                    //Debug.Log("exit");
 					key.noOnwer= true;
 					break;
 				}	

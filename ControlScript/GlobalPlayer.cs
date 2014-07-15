@@ -7,6 +7,7 @@ using System.Collections.Generic;
 public class GlobalPlayer : MonoBehaviour {
 
 	void Awake(){
+        
 			if(FindObjectsOfType<GlobalPlayer>().Length>1){
 				Destroy(gameObject);
 			}else{

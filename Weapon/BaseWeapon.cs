@@ -664,7 +664,7 @@ public class BaseWeapon : DestroyableNetworkObject {
 	/// <summary>
     /// Hit logic for SimpleDamage
     /// </summary>
-	protected virtual void HitEffect(hitInfo){
+	protected virtual void HitEffect(RaycastHit hitInfo){
 			DamagebleObject target =(DamagebleObject) hitInfo.collider.GetComponent(typeof(DamagebleObject));
 			if(target!=null){
 				target.Damage(new BaseDamage(damageAmount) ,owner.gameObject);

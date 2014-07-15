@@ -36,6 +36,7 @@ public class MainMenuGUI : MonoBehaviour {
     public GAMEMODE gameMode = GAMEMODE.PVP;
 
 	void Awake(){
+		HideAllPanel();
 		DontDestroyOnLoad(transform.gameObject);
         foreach (GameObject onContrl in _SettingPanel.toggleList) {
             SettingsPanel.SettingCommand commandClass = new SettingsPanel.SettingCommand();
@@ -45,18 +46,44 @@ public class MainMenuGUI : MonoBehaviour {
             _SettingPanel.controls.Add(commandClass);
         }
 	}
+
+	IEnumerator SetDefoltGraphic(int i)
+	{
+		yield return new WaitForSeconds(0.01f);
+		switch(i)
+		{
+		case 0:
+			SaveGraphicSetting();
+			break;
+		case 1:
+			ApplyGraphicSetting();
+			break;
+		}
+	}
+
 	// Use this for initialization
 	void Start () 
 	{
-		//Загрузка настроек
-		_SettingPanel.graphicSetting.ResolutionScroll.value = PlayerPrefs.GetFloat("Resolution");
-		_SettingPanel.graphicSetting.TextureScroll.value = PlayerPrefs.GetFloat("TextureQuality");
-		_SettingPanel.graphicSetting.ShadowScroll.value = PlayerPrefs.GetFloat("ShadowQuality");
-		_SettingPanel.graphicSetting.LighningScroll.value = PlayerPrefs.GetFloat("LighningQuality");
-		_SettingPanel.volumes.VolumeScroll.value = PlayerPrefs.GetFloat("OverallVolume");
-		_SettingPanel.volumes.SoundFxScroll.value = PlayerPrefs.GetFloat("SoundFX");
-		_SettingPanel.volumes.MusicScroll.value = PlayerPrefs.GetFloat("Music");
-		ApplyGraphicSetting();
+
+		if(PlayerPrefs.GetString("SaveSetting", "no") == "yes")
+		{
+			//Загрузка настроек
+			_SettingPanel.graphicSetting.ResolutionScroll.value = PlayerPrefs.GetFloat("Resolution");
+			_SettingPanel.graphicSetting.TextureScroll.value = PlayerPrefs.GetFloat("TextureQuality");
+			_SettingPanel.graphicSetting.ShadowScroll.value = PlayerPrefs.GetFloat("ShadowQuality");
+			_SettingPanel.graphicSetting.LighningScroll.value = PlayerPrefs.GetFloat("LighningQuality");
+			_SettingPanel.volumes.VolumeScroll.value = PlayerPrefs.GetFloat("OverallVolume");
+			_SettingPanel.volumes.SoundFxScroll.value = PlayerPrefs.GetFloat("SoundFX");
+			_SettingPanel.volumes.MusicScroll.value = PlayerPrefs.GetFloat("Music");
+			StartCoroutine(SetDefoltGraphic(1));
+
+		}
+		else
+		{
+			DefaultGraphic();
+			StartCoroutine(SetDefoltGraphic(0));
+		}
+
 
 		//Поправить размер формы
 		ReSize();
@@ -639,14 +666,14 @@ public class MainMenuGUI : MonoBehaviour {
 
 	public void SaveGraphicSetting()
 	{
-		PlayerPrefs.SetFloat("ResolutionQuality", _SettingPanel.graphicSetting.ResolutionScroll.value);
+		PlayerPrefs.SetFloat("Resolution", _SettingPanel.graphicSetting.ResolutionScroll.value);
 		PlayerPrefs.SetFloat("TextureQuality", _SettingPanel.graphicSetting.TextureScroll.value);
 		PlayerPrefs.SetFloat("ShadowQuality", _SettingPanel.graphicSetting.ShadowScroll.value);
 		PlayerPrefs.SetFloat("LighningQuality", _SettingPanel.graphicSetting.LighningScroll.value);
 		PlayerPrefs.SetFloat("OverallVolume", _SettingPanel.volumes.VolumeScroll.value);
 		PlayerPrefs.SetFloat("SoundFX", _SettingPanel.volumes.SoundFxScroll.value);
 		PlayerPrefs.SetFloat("Music", _SettingPanel.volumes.MusicScroll.value);
-		Debug.Log("Save Music = "+PlayerPrefs.GetFloat("Music"));
+		PlayerPrefs.SetString("SaveSetting", "yes");
 		ApplyGraphicSetting();
 	}
 
@@ -663,7 +690,7 @@ public class MainMenuGUI : MonoBehaviour {
 			QualitySettings.SetQualityLevel((int)QualityLevel.Good);
 			break;
 		case "High":
-			QualitySettings.SetQualityLevel((int)QualityLevel.Beautiful);
+			QualitySettings.SetQualityLevel((int)QualityLevel.Fantastic);
 			break;
 		}
 		AudioListener.volume = _SettingPanel.volumes.VolumeScroll.value;
@@ -671,10 +698,10 @@ public class MainMenuGUI : MonoBehaviour {
 
 	public void DefaultGraphic()
 	{
-		_SettingPanel.graphicSetting.ResolutionScroll.value = 0f;
-		_SettingPanel.graphicSetting.TextureScroll.value = 0.5f;
-		_SettingPanel.graphicSetting.ShadowScroll.value = 0.5f;
-		_SettingPanel.graphicSetting.LighningScroll.value = 0.5f;
+		_SettingPanel.graphicSetting.ResolutionScroll.value = 0.125f;
+		_SettingPanel.graphicSetting.TextureScroll.value = 1f;
+		_SettingPanel.graphicSetting.ShadowScroll.value = 1f;
+		_SettingPanel.graphicSetting.LighningScroll.value = 1f;
 		_SettingPanel.volumes.VolumeScroll.value = 0.75f;
 		_SettingPanel.volumes.SoundFxScroll.value = 0.75f;
 		_SettingPanel.volumes.MusicScroll.value = 0.75f;

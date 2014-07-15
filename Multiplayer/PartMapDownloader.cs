@@ -35,6 +35,9 @@ public class PartMapDownloader : MapDownloader
                 AssetBundleManager.setAssetBundle(bundle, crossDomainesafeURL, version);
                 UnityEngine.Object[] prefabObjects = bundle.LoadAll(typeof(Part));
                 Generation generator = FindObjectOfType<Generation>();
+                List<Part> leftTurns = new List<Part>();
+                List<Part> rightTurns = new List<Part>();
+                List<Part> forwards = new List<Part>();
                 for (int i = 0; i < prefabObjects.Length; i++)
                 {
 
@@ -52,9 +55,7 @@ public class PartMapDownloader : MapDownloader
 
 
                     Part prefab = ((MonoBehaviour)prefabObjects[i]).GetComponent<Part>();
-                    List<Part> leftTurns  = new List<Part>();
-                    List<Part> rightTurns  = new List<Part>();
-                    List<Part> forwards  = new List<Part>();
+                   
                     switch(prefab.type){
                         case PARTDIRECTION.FORWARD:
                             forwards.Add(prefab);
@@ -66,11 +67,12 @@ public class PartMapDownloader : MapDownloader
                             rightTurns.Add(prefab);
                             break;
                     }
-                    generator.LeftTurnParts = leftTurns.ToArray();
-                    generator.RightTurnParts = rightTurns.ToArray();
-                    generator.Parts = forwards.ToArray();
+               
 
                 }
+                generator.LeftTurnParts = leftTurns.ToArray();
+                generator.RightTurnParts = rightTurns.ToArray();
+                generator.Parts = forwards.ToArray();
                 /*UnityEngine.Object[] prefabObjects = bundle.LoadAll();
 			
                 //GameObject sp = GameObject.Find("SpawnPoint");

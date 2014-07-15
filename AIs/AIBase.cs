@@ -113,6 +113,7 @@ public class AIBase : MonoBehaviour
 		}
 		InitState ();
         isStarted = true;
+        enabled = true;
     }
    void Update()
     {

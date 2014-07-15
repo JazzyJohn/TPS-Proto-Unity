@@ -91,9 +91,10 @@ public class SelectPlayerGUI : MonoBehaviour {
         if (ThisPanel.alpha==1.0f)
         {
             ThisPanel.alpha = 0.0f;
-            HideModel();
+           
         
         }
+        HideModel();
     }
 	//Коректировка размеров
 	public void ReSize()

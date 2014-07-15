@@ -16,6 +16,8 @@ public class PartAi : Part {
             Ai.Init(Numb);
         }
 	}
+
+    
      public override void PlayerEnter()
      {
          base.PlayerEnter();
