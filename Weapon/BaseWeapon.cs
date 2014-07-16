@@ -780,8 +780,9 @@ public class BaseWeapon : DestroyableNetworkObject {
 
 		GameObject proj=Instantiate(projectilePrefab,startPoint,startRotation) as GameObject;
 		BaseProjectile projScript = proj.GetComponent<BaseProjectile>();
-		projScript.transform.Translate (startRotation*Vector3.forward*(float)(PhotonNetwork.time-timeShoot));
-		projScript.damage =new BaseDamage(damageAmount) ;
+        projScript.lateTime = timeShoot;
+
+        projScript.damage =new BaseDamage(damageAmount) ;
 		projScript.owner = owner.gameObject;
 		return projScript;
 	}

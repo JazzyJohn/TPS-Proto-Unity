@@ -84,7 +84,7 @@ public class MainMenuGUI : MonoBehaviour {
 			StartCoroutine(SetDefoltGraphic(0));
 		}
 
-
+        Debug.Log(AudioListener.volume);
 		//Поправить размер формы
 		ReSize();
 
@@ -702,9 +702,9 @@ public class MainMenuGUI : MonoBehaviour {
 		_SettingPanel.graphicSetting.TextureScroll.value = 1f;
 		_SettingPanel.graphicSetting.ShadowScroll.value = 1f;
 		_SettingPanel.graphicSetting.LighningScroll.value = 1f;
-		_SettingPanel.volumes.VolumeScroll.value = 0.75f;
-		_SettingPanel.volumes.SoundFxScroll.value = 0.75f;
-		_SettingPanel.volumes.MusicScroll.value = 0.75f;
+		_SettingPanel.volumes.VolumeScroll.value = 1f;
+		_SettingPanel.volumes.SoundFxScroll.value = 1f;
+		_SettingPanel.volumes.MusicScroll.value = 1f;
 	}
 }
 

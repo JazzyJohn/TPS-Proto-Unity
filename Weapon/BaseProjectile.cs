@@ -33,6 +33,7 @@ public class BaseProjectile : MonoBehaviour
 
     public int projId;
     public bool replication = true;
+    public double lateTime;
     public BaseDamage damage;
     public float startImpulse;
     public GameObject owner;
@@ -120,19 +121,26 @@ public class BaseProjectile : MonoBehaviour
         mRigidBody.velocity = mTransform.TransformDirection(Vector3.forward * startImpulse);
 
         RaycastHit hit;
-
-        if (Physics.Raycast(transform.position, mRigidBody.velocity.normalized, out hit))
+        float distance = mTransform.InverseTransformDirection(mRigidBody.velocity).z * 0.1f;
+        if (replication)
+        {
+            distance += (float)(PhotonNetwork.time - lateTime) /1000f* mRigidBody.velocity.magnitude;
+        }
+        if (Physics.Raycast(transform.position, mRigidBody.velocity.normalized, out hit,distance))
         {
 
-            if (hit.distance < mTransform.InverseTransformDirection(mRigidBody.velocity).z * 0.1f)
-            {
                 onBulletHit(hit);
-            }
+         
         }
 
-
+        if (replication)
+        {
+            //Debug.Log((float)(PhotonNetwork.time - lateTime));
+            transform.Translate(mRigidBody.velocity * (float)(PhotonNetwork.time - lateTime) / 1000f);
+        }
         mRigidBody.useGravity = false;
     }
+   
 
 
     protected void Update()
@@ -191,7 +199,7 @@ public class BaseProjectile : MonoBehaviour
                     if (InputManager.instance.GetButtonDown("Detonate"))
                     {
                         //Debug.Log("boom");
-                        ProjectileManager.instance.InvokeRPC("Detonate", projId);
+                        ProjectileManager.instance.InvokeRPC("Detonate", projId, mTransform.position);
                     }
                     break;
                 case DETONATOR.Timed:
@@ -199,7 +207,7 @@ public class BaseProjectile : MonoBehaviour
                     {
                         //Debug.Log("boom");
 
-                        ProjectileManager.instance.InvokeRPC("Detonate", projId);
+                        ProjectileManager.instance.InvokeRPC("Detonate", projId, mTransform.position);
                     }
                     break;
             }
@@ -207,12 +215,13 @@ public class BaseProjectile : MonoBehaviour
         }
 
     }
-    public void Detonate()
+    public void Detonate(Vector3 position)
     {
-        ExplosionDamage(transform.position);
-        Destroy(gameObject);
+        ExplosionDamage(position);
+   
 
     }
+   
 
     public virtual void DamageLogic(DamagebleObject obj, BaseDamage inDamage)
     {
@@ -316,14 +325,14 @@ public class BaseProjectile : MonoBehaviour
                         if (proojHitCnt >= projHitMax)
                         {
                             ExplosionDamage(hit.point);
-                            Destroy(gameObject, 0.1f);
+                         
                         }
                     }
 
                     break;
                 default:
                     used = true;
-                    Destroy(gameObject, 0.1f);
+                   
                     ExplosionDamage(hit.point);
                     break;
             }
@@ -340,7 +349,7 @@ public class BaseProjectile : MonoBehaviour
                         Instantiate(hitParticle, hit.point, Quaternion.LookRotation(hit.normal));
                     }
                     ExplosionDamage(hit.point);
-                    Destroy(gameObject, 0.1f);
+                 
                     break;
                 case HITEFFECT.Rebound:
                     if (!replication)
@@ -356,7 +365,7 @@ public class BaseProjectile : MonoBehaviour
                         if (proojHitCnt >= projHitMax)
                         {
                             ExplosionDamage(hit.point);
-                            Destroy(gameObject, 0.1f);
+                            
                         }
                     }
                     break;
@@ -373,7 +382,7 @@ public class BaseProjectile : MonoBehaviour
                             
                                 ExplosionDamage(hit.point);
                             
-                            Destroy(gameObject, 0.1f);
+                          
                         }
                     }
                     break;
@@ -421,6 +430,7 @@ public class BaseProjectile : MonoBehaviour
     void ExplosionDamage(Vector3 Position)
     {
         if(splashRadius==0){
+            Destroy(gameObject, 0.1f);
                 return;
         }
         sControl.stopSound();//останавливаем звук реактивного двигателя
@@ -466,5 +476,10 @@ public class BaseProjectile : MonoBehaviour
             }
 
         }
+        if (!replication)
+        {
+            ProjectileManager.instance.InvokeRPC("Detonate", projId, Position);
+        }
+        Destroy(gameObject, 0.1f);
     }
 }

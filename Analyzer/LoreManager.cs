@@ -49,9 +49,9 @@ public class LoreEntry{
 
 public class LoreManager : MonoBehaviour{
 	private struct WebSendData{
-		int blockId;
-		
-		int addPoint;
+		public int blockId;
+
+        public int addPoint;
 	
 		public WebSendData(int blockId, int addPoint){
 			this.blockId = blockId;
@@ -123,8 +123,8 @@ public class LoreManager : MonoBehaviour{
 						}
 						if(entry.allBlock[j].openName == income.name){
 							int addPoint= income.point*entry.allBlock[j].pointModifier;
-							entry.allBlock[j].alreadyAnalyzed +addPoint;
-							outcome.point = addPoint;
+							entry.allBlock[j].alreadyAnalyzed +=addPoint;
+							outcome.point += addPoint;
 							sendQueue.Enqueue(new WebSendData(entry.allBlock[j].blockId,addPoint));
 							
 							if(entry.allBlock[j].needToOpen<=entry.allBlock[j].alreadyAnalyzed){
@@ -154,7 +154,7 @@ public class LoreManager : MonoBehaviour{
 			PlayerMainGui.instance.AddMessage(allEntry[index].name,allEntry[index].guiIcon,PlayerMainGui.MessageType.OPEN_LORE);
 	
 		}
-		if(sendQueue>0){
+		if(sendQueue.Count>0){
 			StartCoroutine(UpdateWeb());
 		}
 	}
@@ -165,8 +165,8 @@ public class LoreManager : MonoBehaviour{
 		form.AddField ("uid", UID);
 		while (sendQueue.Count>0) {
 			WebSendData data = sendQueue.Dequeue ();
-			form.AddField ("index[]", data.blockId);			
-			form.AddField ("amount[]", data.point);
+			form.AddField ("index[]", data.blockId);
+            form.AddField("amount[]", data.addPoint);
 		}
 		WWW w =StatisticHandler.GetMeRightWWW(form,StatisticHandler.UPDATE_LORE);
 		yield return w;
@@ -178,16 +178,16 @@ public class LoreManager : MonoBehaviour{
 		
 		 
 		UID = uid;
-		StartCoroutine(LoadLore (form));
+		StartCoroutine(LoadLore ());
 	}
 
-    public IEnumerator LoadLore(WWWForm form)
+    public IEnumerator LoadLore()
     {
 		WWWForm form = new WWWForm ();
 			
 		form.AddField ("uid", UID);
 		WWW w =StatisticHandler.GetMeRightWWW(form,StatisticHandler.LOAD_LORE);
-		
+       yield return w;
 		ParseList (w.text);
 
 		
@@ -200,9 +200,9 @@ public class LoreManager : MonoBehaviour{
 
 		
 		XmlNodeList loreentrys = xmlDoc.SelectNodes("loreData/loreentry");
-		allEntry = new LoreEntry[loreentry.Count];
+		allEntry = new LoreEntry[loreentrys.Count];
 		for(int j=0;j<loreentrys.Count;j++){
-			node =loreentrys[j];
+            XmlNode node = loreentrys[j];
 			LoreEntry entry   =new LoreEntry();
 			allEntry[j] = entry;
 			entry.entryID = int.Parse (node.SelectSingleNode ("id").InnerText);
@@ -213,12 +213,13 @@ public class LoreManager : MonoBehaviour{
 			entry.allBlock  = new LoreBlock[loreblocks.Count];
 			for(int i=0;i<loreblocks.Count;i++){
 				LoreBlock block = new LoreBlock();
+                XmlNode nodeBlock = loreblocks[i];
 				entry.allBlock[i] =block;
-				block.blockId =int.Parse (node.SelectSingleNode ("blockId").InnerText);
-				block.openName =node.SelectSingleNode ("openName").InnerText;
-				block.needToOpen =node.SelectSingleNode ("needToOpen").InnerText;
-				block.pointModifier =node.SelectSingleNode ("pointModifier").InnerText;
-				block.alreadyAnalyzed =node.SelectSingleNode ("alreadyAnalyzed").InnerText;
+                block.blockId = int.Parse(nodeBlock.SelectSingleNode("blockId").InnerText);
+                block.openName = nodeBlock.SelectSingleNode("openName").InnerText;
+                block.needToOpen = int.Parse(nodeBlock.SelectSingleNode("needToOpen").InnerText);
+                block.pointModifier = int.Parse(nodeBlock.SelectSingleNode("pointModifier").InnerText);
+                block.alreadyAnalyzed = int.Parse(nodeBlock.SelectSingleNode("alreadyAnalyzed").InnerText);
 				if(block.alreadyAnalyzed >=	block.needToOpen){
 					entry.openBlockId.Add(i);
 				}

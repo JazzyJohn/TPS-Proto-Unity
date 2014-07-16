@@ -75,6 +75,7 @@ public class SelectPlayerGUI : MonoBehaviour {
         ReDrawAll();
         SelectPlayer(1);
         SelectRobot();
+        Choice._Team = -1;
     }
     public void Activate()
     {
@@ -223,7 +224,7 @@ public class SelectPlayerGUI : MonoBehaviour {
                 }else{
                     i=1;
                 }
-
+                
                 if (i == 1 )
                     Choice._Team = 1;
                 if (i == 2 )
@@ -240,6 +241,7 @@ public class SelectPlayerGUI : MonoBehaviour {
 
 	public void SelectTeam(int i)
 	{
+     
 		int[] teamCount = new int[2];
 		List<Player> players = PlayerManager.instance.FindAllPlayer ();
 		foreach(Player player in players) {
@@ -327,6 +329,7 @@ public class SelectPlayerGUI : MonoBehaviour {
         {
             return;
         }
+      
         if (Choice._Team == -1)
         {
 

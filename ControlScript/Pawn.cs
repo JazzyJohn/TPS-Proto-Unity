@@ -2046,26 +2046,28 @@ public class Pawn : DamagebleObject {
 		if (upCol) {
 					return false;
 		}
-		
+		/*Debug.DrawRay (myTransform.position ,
+		               myTransform.forward ,Color.black,2f );
+		Debug.DrawRay (myTransform.position+ myTransform.up ,
+		               myTransform.forward ,Color.blue,2f );
+        Debug.DrawLine(myTransform.position + myTransform.up,
+                      myTransform.position + myTransform.up + myTransform.forward * capsule.radius * 5, Color.blue,2f   );*/
 		bool frontW = Physics.Raycast (myTransform.position,
-		                               myTransform.forward,out frontH, capsule.radius + 0.2f, wallRunLayers);
+		                               myTransform.forward,out frontH, capsule.radius*2, wallRunLayers);
 		bool middleAir = Physics.Raycast (myTransform.position+ myTransform.up/2,
 		                                  myTransform.forward,out frontH, capsule.radius + 0.2f, wallRunLayers);
 		if(frontW||middleAir){
 			bool frontAir = Physics.Raycast (myTransform.position+ myTransform.up,
-		                               myTransform.forward,out frontH, capsule.radius + 0.2f, wallRunLayers);
-			forwardRotation= frontH.normal*-1;
+		                               myTransform.forward,out frontH, capsule.radius *5, wallRunLayers);
+			//forwardRotation= frontH.normal*-1;
 	
 
 			animator.SetLong(!middleAir);
-              //Debug.Log("frontAir");
+            //Debug.Log("frontAir" + frontH.transform +" is" +frontAir);
 			return !frontAir;
 			
 		}
-		/*Debug.DrawRay (myTransform.position ,
-		               myTransform.forward * -1 );
-		Debug.DrawRay (myTransform.position+ myTransform.up ,
-		               myTransform.forward * -1 );*/
+		
 		return false;
 		//Deprecated system of collider pullup system
 		/*Vector3 p1 = myTransform.position - (myTransform.up * -heightOffsetToEdge) + myTransform.forward;
