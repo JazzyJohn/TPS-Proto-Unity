@@ -33,6 +33,10 @@ public class StatisticHandler : MonoBehaviour {
 	public static string SAVE_ITEM = "saveitem";
 
 	public static string NEWS_ALL = "allnews";
+	
+	public static string UPDATE_LORE = "updatelore";
+	
+	public static string LOAD_LORE = "loadlore";
 
 	public static string STATISTIC_PHP="http://vk.rakgames.ru/kaspi/";
 

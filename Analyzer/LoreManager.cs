@@ -48,7 +48,16 @@ public class LoreEntry{
 	}
 
 public class LoreManager : MonoBehaviour{
-
+	private struct WebSendData{
+		int blockId;
+		
+		int addPoint;
+	
+		public WebSendData(int blockId, int addPoint){
+			this.blockId = blockId;
+			this.addPoint = addPoint;
+		}
+	}
 
 
 	ConcurrentQueue<AnalyzeEntry> incomeQueue = new ConcurrentQueue<AnalyzeEntry>();
@@ -56,6 +65,8 @@ public class LoreManager : MonoBehaviour{
 	ConcurrentQueue<AnalyzeEntry> outcomeQueue = new ConcurrentQueue<AnalyzeEntry>();
 	
 	ConcurrentQueue<int> openedQueue = new ConcurrentQueue<int>();
+	
+	ConcurrentQueue<WebSendData> sendQueue = new ConcurrentQueue<WebSendData>();
 	
 	private Thread myThread;
 
@@ -111,10 +122,13 @@ public class LoreManager : MonoBehaviour{
 							continue;
 						}
 						if(entry.allBlock[j].openName == income.name){
-							entry.allBlock[j].alreadyAnalyzed +=income.point*entry.allBlock[j].pointModifier;
-							outcome.point = income.point*entry.allBlock[j].pointModifier;
+							int addPoint= income.point*entry.allBlock[j].pointModifier;
+							entry.allBlock[j].alreadyAnalyzed +addPoint;
+							outcome.point = addPoint;
+							sendQueue.Enqueue(new WebSendData(entry.allBlock[j].blockId,addPoint));
+							
 							if(entry.allBlock[j].needToOpen<=entry.allBlock[j].alreadyAnalyzed){
-								entry.openBlockId.Add(entry.allBlock[j].blockId);
+								entry.openBlockId.Add(j);
 								openedQueue.Enqueue(i);
 							}
 						}
@@ -140,20 +154,76 @@ public class LoreManager : MonoBehaviour{
 			PlayerMainGui.instance.AddMessage(allEntry[index].name,allEntry[index].guiIcon,PlayerMainGui.MessageType.OPEN_LORE);
 	
 		}
+		if(sendQueue>0){
+			StartCoroutine(UpdateWeb());
+		}
 	}
+	
+	public IEnumerator UpdateWeb(){
+		var form = new WWWForm ();
+			
+		form.AddField ("uid", UID);
+		while (sendQueue.Count>0) {
+			WebSendData data = sendQueue.Dequeue ();
+			form.AddField ("index[]", data.blockId);			
+			form.AddField ("amount[]", data.point);
+		}
+		WWW w =StatisticHandler.GetMeRightWWW(form,StatisticHandler.UPDATE_LORE);
+		yield return w;
+	}
+	
+	
 	public void Init(string uid){
 		DontDestroyOnLoad(transform.gameObject);
-		 myThread = new Thread(new ThreadStart(this.LoreLoop));
-		 myThread.Start ();		
-		 	WWWForm form = new WWWForm ();
-			
-		form.AddField ("uid", uid);
+		
+		 
 		UID = uid;
 		StartCoroutine(LoadLore (form));
 	}
 
     public IEnumerator LoadLore(WWWForm form)
     {
-        return null;
+		WWWForm form = new WWWForm ();
+			
+		form.AddField ("uid", UID);
+		WWW w =StatisticHandler.GetMeRightWWW(form,StatisticHandler.LOAD_LORE);
+		
+		ParseList (w.text);
+
+		
+		myThread = new Thread(new ThreadStart(this.LoreLoop));
+		myThread.Start ();		
     }
+	protected void ParseList(string XML){
+		XmlDocument xmlDoc = new XmlDocument();
+		xmlDoc.LoadXml(XML);
+
+		
+		XmlNodeList loreentrys = xmlDoc.SelectNodes("loreData/loreentry");
+		allEntry = new LoreEntry[loreentry.Count];
+		for(int j=0;j<loreentrys.Count;j++){
+			node =loreentrys[j];
+			LoreEntry entry   =new LoreEntry();
+			allEntry[j] = entry;
+			entry.entryID = int.Parse (node.SelectSingleNode ("id").InnerText);
+			entry.guiIconWeb = node.SelectSingleNode ("guiIconWeb").InnerText;
+			entry.name = node.SelectSingleNode ("name").InnerText;
+			
+			XmlNodeList loreblocks = xmlDoc.SelectNodes("loreblock");
+			entry.allBlock  = new LoreBlock[loreblocks.Count];
+			for(int i=0;i<loreblocks.Count;i++){
+				LoreBlock block = new LoreBlock();
+				entry.allBlock[i] =block;
+				block.blockId =int.Parse (node.SelectSingleNode ("blockId").InnerText);
+				block.openName =node.SelectSingleNode ("openName").InnerText;
+				block.needToOpen =node.SelectSingleNode ("needToOpen").InnerText;
+				block.pointModifier =node.SelectSingleNode ("pointModifier").InnerText;
+				block.alreadyAnalyzed =node.SelectSingleNode ("alreadyAnalyzed").InnerText;
+				if(block.alreadyAnalyzed >=	block.needToOpen){
+					entry.openBlockId.Add(i);
+				}
+			}
+		}
+	
+	}
 }
