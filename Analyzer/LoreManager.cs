@@ -160,7 +160,7 @@ public class LoreManager : MonoBehaviour{
 	}
 	
 	public IEnumerator UpdateWeb(){
-		var form = new WWWForm ();
+		WWWForm form = new WWWForm ();
 			
 		form.AddField ("uid", UID);
 		while (sendQueue.Count>0) {

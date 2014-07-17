@@ -90,9 +90,9 @@ public class GlobalPlayer : MonoBehaviour {
 		foreach (string id in ids)
 			friendsInfo.Add (id);
 	}
-
 	
-	protected void parseProfile(string XML){
+	
+	public void parseProfile(string XML){
 		XmlDocument xmlDoc = new XmlDocument();
 		xmlDoc.LoadXml(XML);
 		gold = int.Parse (xmlDoc.SelectSingleNode ("player/gold").InnerText);

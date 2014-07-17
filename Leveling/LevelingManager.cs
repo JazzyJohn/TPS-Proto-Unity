@@ -62,7 +62,7 @@ public class LevelingManager : MonoBehaviour, LocalPlayerListener,GameListener{
 	public void Init(string uid){
 		EventHolder.instance.Bind (this);
 		DontDestroyOnLoad(transform.gameObject);
-		var form = new WWWForm ();
+		WWWForm form = new WWWForm ();
 			
 		form.AddField ("uid", uid);
 		UID = uid;
@@ -91,7 +91,7 @@ public class LevelingManager : MonoBehaviour, LocalPlayerListener,GameListener{
 		ParseList (w.text);
 	
 	}
-	//parse XML string to normal Achivment Pattern
+	//parse XML string to normal Leveling Pattern
 	protected void ParseList(string XML){
 		XmlDocument xmlDoc = new XmlDocument();
 		xmlDoc.LoadXml(XML);
