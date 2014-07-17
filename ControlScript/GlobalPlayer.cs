@@ -165,5 +165,6 @@ public class GlobalPlayer : MonoBehaviour {
 		LevelingManager.instance.Init(UID);
 		AchievementManager.instance.Init(UID);
 		ItemManager.instance.Init(UID);
+        FindObjectOfType<RewardManager>().Init(UID);
 	}
 }

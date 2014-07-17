@@ -693,7 +693,8 @@ public class MainMenuGUI : MonoBehaviour {
 			QualitySettings.SetQualityLevel((int)QualityLevel.Fantastic);
 			break;
 		}
-		AudioListener.volume = _SettingPanel.volumes.VolumeScroll.value;
+        AudioListener.volume = _SettingPanel.volumes.SoundFxScroll.value * _SettingPanel.volumes.VolumeScroll.value;
+        MusicHolder.SetVolume(_SettingPanel.volumes.MusicScroll.value * _SettingPanel.volumes.VolumeScroll.value);
 	}
 
 	public void DefaultGraphic()

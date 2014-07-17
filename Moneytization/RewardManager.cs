@@ -13,8 +13,9 @@ public class  RewardManager : MonoBehaviour, LocalPlayerListener,GameListener{
 	public const string PARAM_KILL_FRIEND = "KillFriend";
 	public const string PARAM_KILL_BY_FRIEND= "KilledByFriend"; 
 	
-	public Distionary<string,int> rewardMoneyDictionary = new Dictionary<string, int>();
-	
+	public Dictionary<string,int> rewardMoneyDictionary = new Dictionary<string, int>();
+
+    private string UID;
 	public void Init(string uid){
 		EventHolder.instance.Bind (this);
 		DontDestroyOnLoad(transform.gameObject);
@@ -40,9 +41,9 @@ public class  RewardManager : MonoBehaviour, LocalPlayerListener,GameListener{
 	protected void ParseList(string XML){
 		XmlDocument xmlDoc = new XmlDocument();
 		xmlDoc.LoadXml(XML);
-		foreach (XmlNode node in xmlDoc.SelectNodes("money")) {
-			//Debug.Log ("LEVELING" +node.SelectSingleNode("name").InnerText+" "+node.SelectSingleNode("value").InnerText);
-			expDictionary.Add(node.SelectSingleNode("name").InnerText,int.Parse(node.SelectSingleNode("value").InnerText));
+		foreach (XmlNode node in xmlDoc.SelectNodes("reward/money")) {
+			//Debug.Log ("Reward" +node.SelectSingleNode("name").InnerText+" "+node.SelectSingleNode("value").InnerText);
+            rewardMoneyDictionary.Add(node.SelectSingleNode("name").InnerText, int.Parse(node.SelectSingleNode("value").InnerText));
 		}
 	
 	}
@@ -57,14 +58,14 @@ public class  RewardManager : MonoBehaviour, LocalPlayerListener,GameListener{
 			
 		form.AddField ("uid", UID);
 		form.AddField ("upCash", upCash);
-		
+        upCash = 0;
 		StartCoroutine(_SyncReward (form));
 	}
 	private IEnumerator _SyncReward(WWWForm form){
 		WWW w =StatisticHandler.GetMeRightWWW(form,StatisticHandler.SYNC_MONEY_REWARD);
 		
 		yield return w;
-		GlobalPlayer.instance.parseProfile(w.text)
+        GlobalPlayer.instance.parseProfile(w.text);
 		
 	}
 	//Event Section
@@ -92,7 +93,7 @@ public class  RewardManager : MonoBehaviour, LocalPlayerListener,GameListener{
 	public void EventTeamWin(int teamNumber){
 		//if we not winner so no change in exp, or we a winner but no send were initiate we sync data 
 		if (myPlayer.team	!= teamNumber||(myPlayer.team == teamNumber)) {
-			UpMoney(PARAM_WIN)
+            UpMoney(PARAM_WIN);
 			SyncReward();
 		}
 		

@@ -32,6 +32,7 @@ public class MusicHolder : MonoBehaviour {
 	// Use this for initialization
 	void Awake () {
 		musicPlayer = GetComponent<AudioSource> ();
+        musicPlayer.ignoreListenerVolume = true;
 		MusicBefore = new int[MusicInStage.Length];
 		int tempMusic = 0;
 		for (int i = 0; i < MusicBefore.Length; i++) {
