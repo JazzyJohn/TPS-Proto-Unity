@@ -8,42 +8,49 @@ public enum PARTDIRECTION
     RIGHT,
     LEFT
 }
+public enum DIFFICULT
+{
+	HARD,
+	MEDIUM,
+	EASY
+}
 
 public class Part : MonoBehaviour
 {
-	public PARTDIRECTION type;
+	public GameObject Prefab;
 	public Transform Enter;
-	public Transform[] Exit;
+	public Transform Exit;
 	public PreSpawner Spawner;
+    public PARTDIRECTION type;
+	public DIFFICULT Difficult;
+	public int Cache;
+	public bool AddCacheIfNotSpawn;
 
-	[HideInInspector]
-	public bool Entered = false;
 	[HideInInspector]
     public Generation generator;
 	[HideInInspector]
 	public int Numb;
 	[HideInInspector]
 	public Transform PartTransform;
-	[HideInInspector]
-	public List<Part> ConnectedParts;
 
     protected void Awake()
     {
         PartTransform = transform;
     }
 
-	public void ConnectToPart(Part OldPart)
+	public void ConnectToPart(Part OldPart, Generation generator)
 	{
-		int FreeExit = OldPart.Exit.Length - OldPart.ConnectedParts.Count - 1;
-		PartTransform.rotation = Quaternion.FromToRotation(OldPart.Enter.forward, OldPart.Exit[FreeExit].forward) * OldPart.PartTransform.rotation;
-		PartTransform.position = OldPart.Exit[FreeExit].position + PartTransform.position - Enter.position;
+        PartTransform.rotation = Quaternion.FromToRotation(Enter.forward, -OldPart.Exit.forward) * OldPart.PartTransform.rotation;
+		PartTransform.position = OldPart.Exit.position + PartTransform.position - Enter.position;
         StaticBatchingUtility.Combine(gameObject);
-		OldPart.ConnectedParts.Add(this);
+        this.generator = generator;
 	}
+
     public virtual void Started()
     {
-		Spawner.Spawn();
+    	Spawner.Spawn();
     }
+
     public virtual void PlayerEnter()
     {
         generator.Next();
@@ -51,17 +58,18 @@ public class Part : MonoBehaviour
         ((RunnerGameRule)GameRule.instance).NextRoom();
         ((AIDirector_Runner)AIDirector.instance).NextBlock();
     }
-    public virtual void DestroyRoom(){
+
+    public virtual void DestroyRoom()
+	{
         Spawner.Destroy();
         Destroy(gameObject);
     }
-	public virtual void DestroyConnectedRoom(){
-		foreach (Part part in ConnectedParts)
-		{
-			part.DestroyConnectedRoom();
-			part.DestroyRoom();
-		}
+
+	public int GetCache()
+	{
+		return Cache;
 	}
+	
 }
 [Serializable]
 public class PreSpawner
@@ -69,7 +77,7 @@ public class PreSpawner
 	public GameObject[] Prefabs;
 	public Transform[] SpawnPoints;
     public List<TransformPrefab> SpawnedPrefabs = new List<TransformPrefab>();
-	
+
 	public void Spawn(){
 		for (int i = 0; i < SpawnPoints.Length; i++) {
 			GameObject RandomPrefab = Prefabs[UnityEngine.Random.Range(0, Prefabs.Length)];

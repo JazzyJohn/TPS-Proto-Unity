@@ -1,119 +1,135 @@
 ﻿using UnityEngine;
 using System;
 using System.Collections.Generic;
+using System.Threading;
 
 public class Generation : MonoBehaviour {
     public Part[] Parts;
-    public Part[] LeftTurnParts;
-    public Part[] RightTurnParts;
-    public int lastTurn;
+	public Transform startTransform;
 	public List<Part> Rooms;
+
 	int RoomsCount;
-    public int RoomCache;
-    public Transform startTransform;
+    
+	[HideInInspector]
     public Transform PathEngine;
+	[HideInInspector]
+	public Part[] LeftTurnParts;
+	[HideInInspector]
+	public Part[] RightTurnParts;
 
-	public void Next()
-	{
-		RoomsCount++;
-        int type = UnityEngine.Random.Range(0, 3);
-        Part NewPart = null;
-        switch (type)
-        {
-            //ForwardRoom
-            case 0:
-                NewPart = Instantiate(Parts[UnityEngine.Random.Range(0, Parts.Length)]) as Part;
-                break;
-            //Right TurnRoom
-            case 1:
-                if (lastTurn >= 1)
-                {
-                    NewPart = Instantiate( Parts[UnityEngine.Random.Range(0, Parts.Length)]) as Part;
-                }
-                else
-                {
-                    lastTurn++;
-                    NewPart = Instantiate(RightTurnParts[UnityEngine.Random.Range(0, RightTurnParts.Length)]) as Part;
-                }
-                break;
-            //LEft TurnRoom
-            case 2:
-                if (lastTurn <= -1)
-                {
-                    NewPart = Instantiate(Parts[UnityEngine.Random.Range(0, Parts.Length)]) as Part;
-                }
-                else
-                {
-                    lastTurn--;
-                    NewPart = Instantiate(LeftTurnParts[UnityEngine.Random.Range(0, LeftTurnParts.Length)]) as Part;
-                }
-                break;
-        }
-
-		NewPart.generator = this;
-		NewPart.Numb = RoomsCount;
-
-        if (Rooms.Count != 0) NewPart.ConnectToPart(Rooms[Rooms.Count - 1]);
-
-        else
-        {
-            NewPart.PartTransform.position = startTransform.position;
-            NewPart.PartTransform.rotation = startTransform.rotation;
-        }
-
-		Rooms.Add(NewPart);
-
-        if (RoomCache<Rooms.Count)
-        {
-            Rooms[0].DestroyRoom();
-            Rooms.RemoveAt(0);
-        }
-        NewPart.Started();
-
-	}
-
-	public Part LastPart(){
-		return FindLast(Parts[0]);
-	}
-	Part FindLast(Part part)
-	{
-		if(!part.Entered)return null;
-		else if(part.ConnectedParts.Count == 0)return part;
-		else {
-			for (int i = 0; i < part.ConnectedParts.Count; i++) {
-				Part Finded = FindLast(part.ConnectedParts[i]);
-				if (Finded != null) return Finded;
-			}
-		}
-		return Parts[0];
-	}
-
-	void Ready()
-	{
-		for (int i = 0; i < Rooms.Count; i++) {
-            Rooms[i].Started();
-		}
-	}
-
-	public void Next(int Count)
-	{
-        RoomCache = (int)Math.Round(Count * 1.5f);
-		for (int i = 0; i < Count; i++) {
-			Next();
-		}
-	}
+	public int Cache;
+	public int[] PartCacheBase;
+	public List<int[]> PartCache = new List<int[]>();
+	public List<int> IndexPartToSpawn = new List<int>(); 
+	
     public void MovePathTo(Transform transform)
     {
         PathEngine.position = transform.position;
         PathfindingEngine.Instance.GenerateStaticMap();
     }
-    public void KillLastPart(){
-		for (int i = 0; i < Parts[0].ConnectedParts.Count; i++) {
-			Part Connected = Parts[0].ConnectedParts[i];
-			if (!Connected.Entered)
-			{
-				Connected.DestroyConnectedRoom();
-				Connected.DestroyRoom();
+	void CacheBaseLoad()
+	{
+		PartCacheBase = new int[Parts.Length];
+		for (int i = 0; i < Parts.Length; i++) {
+			PartCacheBase[i] = Parts[i].GetCache();
+		}
+	}
+	void CacheLoad()
+	{
+		Debug.Log ("CacheLoad");
+		int[] NewCache = new int[PartCacheBase.Length];
+		int HARD = Cache, EASY = Cache;
+
+		if (Cache < 0) HARD = Math.Abs (Cache);
+		else EASY = Math.Abs (Cache);
+
+		for (int i = 0; i < PartCacheBase.Length; i++) {
+			if (Parts[i].Difficult == DIFFICULT.EASY) NewCache[i] = PartCacheBase[i] + EASY;
+			else NewCache[i] = PartCacheBase[i] + HARD;
+		}
+		PartCache.Add (NewCache);
+	}
+
+	int LoadPartIndexAtCache(int Cache)
+	{
+		Debug.Log ("LoadPartIndexAtCache");
+		for (int i = 0, dCache = 0; i < Parts.Length; i++) {
+			dCache += PartCacheBase[i];
+			if(Cache <= dCache)return i;
+		}
+		Debug.Log ("LoadPartIndexAtCache Error");
+		return 0;
+	}
+
+	public void Next(int Count)
+	{
+		for (int i = 0; i < Count; i++) {
+			Next();	
+		}
+	}
+	public void Next()
+	{
+		Thread RoomCreation = new Thread(CacheLoad);
+		RoomCreation.Start ();
+	}
+
+	void NextAtCache()
+	{
+		if (PartCache.Count == 0) {
+			Debug.Log ("NextAtCache Error");
+			return;
+		}
+		Debug.Log ("NextAtCache");
+		int FullCache = 0;
+		foreach (int Num in PartCache[0])
+			FullCache += Num;
+		IndexPartToSpawn.Add(LoadPartIndexAtCache (UnityEngine.Random.Range (0, FullCache + 1)));
+		PartCache.RemoveAt (0);
+	}
+
+	void RemovFirstPart()
+	{
+		Rooms[0].DestroyRoom();
+		Rooms.RemoveAt(0);
+	}
+	void RoomCreate()
+	{
+		if (IndexPartToSpawn.Count == 0) {
+			Debug.Log ("RoomCreate Error");
+			return;
+		}
+		Part NewPart = (Part)Instantiate(Parts[IndexPartToSpawn[0]]);
+		IndexPartToSpawn.RemoveAt (0);
+		Debug.Log ("RoomCreate");
+		NewPart.Numb = RoomsCount;
+		
+		if (Rooms.Count != 0) NewPart.ConnectToPart(Rooms[Rooms.Count - 1], this);
+		else NewPart.PartTransform = startTransform;
+		
+		Rooms.Add(NewPart);
+		
+		NewPart.Started();
+		RoomsCount++;
+
+		if (NewPart.Difficult == DIFFICULT.EASY) Cache--;
+		else if (NewPart.Difficult == DIFFICULT.HARD) Cache++;
+	}
+    void Start()
+	{
+		CacheBaseLoad ();
+		Next (10);
+	}
+
+	void Update()
+	{
+		if (PartCache.Count != 0) {
+			for (int i = 0; i < PartCache.Count; i++) {
+				NextAtCache();
+			}
+		}
+		if (IndexPartToSpawn.Count != 0) {
+			for (int i = 0; i < IndexPartToSpawn.Count; i++) {
+				RoomCreate();
 			}
 		}
 	}
