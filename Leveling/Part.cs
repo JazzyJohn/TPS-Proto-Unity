@@ -8,15 +8,25 @@ public enum PARTDIRECTION
     RIGHT,
     LEFT
 }
+public enum DIFFICULT
+{
+	HARD,
+	MEDIUM,
+	EASY
+}
 
 public class Part : MonoBehaviour
 {
+	public GameObject Prefab;
 	public Transform Enter;
 	public Transform Exit;
 	public PreSpawner Spawner;
-
     public PARTDIRECTION type;
+	public DIFFICULT Difficult;
+	public int Cache;
+	public bool AddCacheIfNotSpawn;
 
+	[HideInInspector]
     public Generation generator;
 	[HideInInspector]
 	public int Numb;
@@ -28,19 +38,19 @@ public class Part : MonoBehaviour
         PartTransform = transform;
     }
 
-	public void ConnectToPart(Part OldPart,Generation generator)
+	public void ConnectToPart(Part OldPart, Generation generator)
 	{
-        PartTransform.rotation = Quaternion.FromToRotation(OldPart.Enter.forward, OldPart.Exit.forward) * OldPart.PartTransform.rotation;
+        PartTransform.rotation = Quaternion.FromToRotation(Enter.forward, -OldPart.Exit.forward) * OldPart.PartTransform.rotation;
 		PartTransform.position = OldPart.Exit.position + PartTransform.position - Enter.position;
         StaticBatchingUtility.Combine(gameObject);
         this.generator = generator;
 	}
+
     public virtual void Started()
     {
-       
-            Spawner.Spawn();
-        
+    	Spawner.Spawn();
     }
+
     public virtual void PlayerEnter()
     {
         generator.Next();
@@ -48,10 +58,18 @@ public class Part : MonoBehaviour
         ((RunnerGameRule)GameRule.instance).NextRoom();
         ((AIDirector_Runner)AIDirector.instance).NextBlock();
     }
-    public virtual void DestroyRoom(){
+
+    public virtual void DestroyRoom()
+	{
         Spawner.Destroy();
         Destroy(gameObject);
     }
+
+	public int GetCache()
+	{
+		return Cache;
+	}
+	
 }
 [Serializable]
 public class PreSpawner
@@ -59,7 +77,7 @@ public class PreSpawner
 	public GameObject[] Prefabs;
 	public Transform[] SpawnPoints;
     public List<TransformPrefab> SpawnedPrefabs = new List<TransformPrefab>();
-	
+
 	public void Spawn(){
 		for (int i = 0; i < SpawnPoints.Length; i++) {
 			GameObject RandomPrefab = Prefabs[UnityEngine.Random.Range(0, Prefabs.Length)];
