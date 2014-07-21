@@ -128,6 +128,16 @@ public class Pawn : DamagebleObject {
 	private float jetPackCharge;
 
     private bool jetPackEnable = false;
+	
+	public float jetPackFlyFuelConsumption = 1.0f;
+	
+	public float jetPackForwardWallRunFuelConsumption = 0.5f;
+	
+	public float jetPackForwardWallRunFuelConsumption = 0.5f;
+	
+	public float jetPackWallRunFuelConsumption = 0.5f;
+	
+	public float jetPackDefaultFuelConsumption = 0.5f;	
 
 	private Vector3 nextMovement;
 
@@ -919,14 +929,25 @@ public class Pawn : DamagebleObject {
             {
                 if (jetPackCharge > 0.0f)
                 {
-                    if (characterState == CharacterState.DoubleJump)
-                    {
-                        jetPackCharge -= Time.deltaTime;
-                    }
-                    else
-                    {
-                        jetPackCharge -= Time.deltaTime * 0.5f ;
-                    }
+					switch(characterState){
+						case CharacterState.DoubleJump:
+							jetPackCharge -= Time.deltaTime*jetPackFlyFuelConsumption;
+
+						break;
+						case CharacterState.WallRunning:
+							if(wallState==WallState.WallF){
+								jetPackCharge -= Time.deltaTime*jetPackForwardWallRunFuelConsumption;
+							}else{
+								jetPackCharge -= Time.deltaTime*jetPackWallRunFuelConsumption;
+							}
+						break:
+						default:
+							jetPackCharge -= Time.deltaTime*jetPackDefaultFuelConsumption;
+						break;
+						
+					
+					}
+				                 
                 }
                 else
                 {
@@ -1006,13 +1027,13 @@ public class Pawn : DamagebleObject {
 				key.lastTime+=Time.deltaTime;
                 Debug.Log(key.lastTime);
 				if(key.noOnwer){
-					if(key.lastTime>1.0f){
+					if(key.lastTime> key.showInterval){
 						activeDPS.RemoveAt(i);
 						i--;
                         continue;
 					}
                     //Debug.Log( " NO OWNER EXIT" );
-					
+					continue;
 				}
 				BaseDamage ldamage = new BaseDamage(key.damage);
 				ldamage.hitPosition =myTransform.position + UnityEngine.Random.onUnitSphere;

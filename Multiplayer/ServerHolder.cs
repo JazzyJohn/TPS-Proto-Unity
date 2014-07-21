@@ -306,7 +306,10 @@ public class ServerHolder : MonoBehaviour
 		
 		connectingToRoom = false;
 	}
+	void OnFailedToConnectToPhoton(DisconnectCause cause){
+		PhotonNetwork.offlineMode = true;
 	
+	}
 	
 	void OnPhotonJoinRoomFailed()
 	{
