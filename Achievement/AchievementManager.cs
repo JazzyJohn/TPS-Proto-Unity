@@ -45,6 +45,7 @@ public class AchievementManager : MonoBehaviour, LocalPlayerListener{
 	public const string PARAM_RELOAD="Reload";
 	public const string PARAM_KILL_FRIEND = "KillFriend";
 	public const string PARAM_KILL_BY_FRIEND= "KilledByFriend"; 
+	public const string PARAM_ROOM_FINISHED = "RoomFinished";
 	struct IncomingMessage{
 		public string param;
 		public float delta;
@@ -332,5 +333,12 @@ public class AchievementManager : MonoBehaviour, LocalPlayerListener{
 			mess.param =PARAM_RELOAD;
 			incomeQueue.Enqueue(mess);
 		}
+	}
+	public void EventRoomFinished(){
+			IncomingMessage mess = new IncomingMessage();
+			mess.delta=1.0f;
+			mess.param =PARAM_ROOM_FINISHED;
+			incomeQueue.Enqueue(mess);
+	
 	}
 }

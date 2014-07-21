@@ -43,6 +43,7 @@ public class RunnerGameRule : GameRule {
      public override void PlayerDeath()
     {
         Debug.Log("Palyer Death");
-          isGameEnded = true;
+		EventHolder.instance.FireEvent(typeof(GameListener), "EventRestart", Winner());
+        isGameEnded = true;
     }
 }

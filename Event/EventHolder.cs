@@ -24,6 +24,7 @@ public interface  GameListener{
 	void EventStart();
 	void EventTeamWin(int teamNumber);
 	void EventRestart();
+	void EventRoomFinished();
 } 
 public interface HolderBase{
 	void Bind(object listener);

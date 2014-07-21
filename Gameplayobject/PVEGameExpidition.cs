@@ -91,6 +91,7 @@ public class PVEGameExpidition : GameRule {
         //Player player = GameObject.Find ("Player").GetComponent<Player> ();
         //player.GameEnd ();
         EventHolder.instance.FireEvent(typeof(GameListener), "EventTeamWin", Winner());
+		
     }
 
 }

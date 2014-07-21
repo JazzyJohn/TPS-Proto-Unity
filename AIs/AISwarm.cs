@@ -50,7 +50,7 @@ public class AISwarm:MonoBehaviour
         return returnTransform;
     }
 
-    public void SwarmTick()
+    public virtual void SwarmTick()
     {
         if (isActive && Bots.Length > 0)
         {

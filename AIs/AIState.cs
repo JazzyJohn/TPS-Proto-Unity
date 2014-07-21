@@ -3,7 +3,7 @@ using System.Collections;
 using System.Collections.Generic;
 	
 
-public enum AITriggerType {SeeEnemy,LostEnemy};
+public enum AITriggerType {SeeEnemy,LostEnemy,SpecificFinish,TimedChange};
 public interface AITrigger
 {
 	bool isTriggered (AIState owner, Params[] parametrs);
@@ -34,6 +34,12 @@ public class AIState : MonoBehaviour {
 			case AITriggerType.LostEnemy:
 				trigger = new LostEnemyTrigger();
 				break;
+			case AITriggerType.SpecificFinish:
+				trigger = new SpecificFinish();
+				break;
+			case AITriggerType.TimedChange:
+				trigger = new TimedTrigger();
+			break;
 
 			}
 			owner = sOwner;
@@ -59,6 +65,38 @@ public class AIState : MonoBehaviour {
 	public class LostEnemyTrigger:AITrigger{
 		public bool isTriggered(AIState owner, Params[] parametrs){
 			if (owner._enemy == null) {
+				return true;
+			} else {
+				return false;
+			}		
+			
+		}
+		
+	}	
+	public class SpecificFinish:AITrigger{
+		public bool isTriggered(AIState owner, Params[] parametrs){
+			if (owner.SpecificFinish()) {
+				return true;
+			} else {
+				return false;
+			}		
+			
+		}
+		
+	}	
+	public class TimedTrigger:AITrigger{
+		public float timeStart;
+		public TimedTrigger(){
+			timeStart = Time.time;
+		}
+		public bool isTriggered(AIState owner, Params[] parametrs){
+			float delay = 0;
+			foreach(Params param as parametrs){
+				if(param.name=="TimedTrigger"){
+					delay =param.value;
+				}
+			}
+			if (delay+timeStart<Time.time) {
 				return true;
 			} else {
 				return false;
@@ -256,6 +294,9 @@ public class AIState : MonoBehaviour {
 	   float weaponDistance =controlledPawn.OptimalDistance(isMelee);
 
        return AIAgentComponent.FlatDifference(_enemy.myTransform.position, controlledPawn.myTransform.position).sqrMagnitude - _enemy.GetSize() - controlledPawn.GetSize() < weaponDistance * weaponDistance;
+	}
+	public virtual bool SpecificFinish(){
+		return false;
 	}
     
 }

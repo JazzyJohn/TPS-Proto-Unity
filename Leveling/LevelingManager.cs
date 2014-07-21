@@ -228,8 +228,10 @@ public class LevelingManager : MonoBehaviour, LocalPlayerListener,GameListener{
 	public void EventEndWallRun(Player target, Vector3 position){}
 	public void EventPawnReload(Player target){}
 	public void EventStart(){}
-	public void EventRestart(){}
-	
+	public void EventRestart(){
+			SyncLvl();
+	}
+	public void EventRoomFinished(){}
 	private static LevelingManager s_Instance = null;
 	
 	public static LevelingManager instance {

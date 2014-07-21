@@ -60,7 +60,9 @@ public class AIBase : MonoBehaviour
         //Debug.Log("Group after set" + this.aiGroup + "  " + aiGroup);
 		this.aiSwarm=aiSwarm;
 		this.homeIndex = homeIndex;
-        this.aiSwarm.respawns[homeIndex].SpawnedSet(controlledPawn);
+		if(homeIndex!=-1){
+			this.aiSwarm.respawns[homeIndex].SpawnedSet(controlledPawn);
+		}
 	}
 	
 	public void WasHitBy(GameObject killer){
