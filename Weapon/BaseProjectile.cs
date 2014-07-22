@@ -132,12 +132,13 @@ public class BaseProjectile : MonoBehaviour
                 onBulletHit(hit);
          
         }
-
+		Debug.Log("id " + projId+ " position " + mTransform.position + " rotation "+ mTransform.rotation);
         if (replication)
         {
             //Debug.Log((float)(PhotonNetwork.time - lateTime));
             transform.Translate(mRigidBody.velocity * (float)(PhotonNetwork.time - lateTime) / 1000f);
         }
+		Debug.Log("id " + projId+ " position " + mTransform.position + " rotation "+ mTransform.rotation);
         mRigidBody.useGravity = false;
     }
    
@@ -145,7 +146,7 @@ public class BaseProjectile : MonoBehaviour
 
     protected void Update()
     {
-
+		Debug.Log("id " + projId+ " position " + mTransform.position + " rotation "+ mTransform.rotation);
         RaycastHit hit;
 
         switch (attraction)

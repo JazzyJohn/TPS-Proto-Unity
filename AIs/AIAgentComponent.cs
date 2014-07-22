@@ -90,51 +90,11 @@ public class AIAgentComponent : MonoBehaviour {
 			bool walkable = true;
 			//Check if exist some dynamic obstacle in our path.
 			int stepsCount = 0;
-			foreach (Vector3 step in agent.path) {
-				if (stepsCount < stepsToCheck ){
-					RaycastHit hit;
-					if(Physics.Raycast (step+new Vector3(0,height/2,0), Vector3.down, out hit,height,dynamicObstacleLayer)) {
-						walkable = false;
-						break;
-					}
-				}else{ break; }
-				stepsCount++;
-			}
-
-			if(agentAvoidance){
-				stepsCount = 0;
-				Vector3 stepBefore = agent.pivot.transform.position;
-				foreach (Vector3 step in agent.path) {
-					if (stepsCount < stepsToCheck/2){
-						RaycastHit hit;
-						Vector3 dir = step - stepBefore; 
-						float dist = Vector3.Distance(step,stepBefore);
-						if(Physics.SphereCast (step+new Vector3(0,0.1f,0),radius ,dir , out hit,dist,agentLayer)) {
-							walkable = false;
-							nodeWithAgent = PathfindingEngine.Instance.Vector3ToNode(step);
-							nodeWithAgent.walkable = false;
-							aceleration = true;
-						}
-						stepBefore = step;
-					}else{ break; }
-					stepsCount++;
-				}
-			}
+		
 		
 			if(walkable){
 				//Smooth path
-				List<PathNode> Points = new List<PathNode>();
-				stepsCount = 0;
-				foreach (PathNode step in agent.path) {
-					if (stepsCount < stepsToSmooth ){
-						Points.Add(step);
-					}else{ break; }
-					stepsCount++;
-				}
-				if(smoothPath)  { Points = MakeSmooth(Points); }
-				for(int i=stepsToSmooth; i<agent.path.Count; i++)  { Points.Add(agent.path[i]); }
-				agent.path = Points;
-				//Agent go to next step
+			    //Agent go to next step
 				GotoNextStep();
 			}else{
 				//Re-Find the path.
@@ -149,63 +109,47 @@ public class AIAgentComponent : MonoBehaviour {
 		//if there's a path.
 	
 		if( agent.path.Count>0 ){
-			bool nextStep = false;
+			
 
 
-			//Correction to solve the step back that appeared if we generate new target points in small time.
-			if( agent.path.Count>1 ){
-				Vector3 pa = agent.pivot.transform.position;
-				Vector3 p0 = agent.path[0];
-				Vector3 p1 = agent.path[1];
-				float angleTo0 = HorizontalAngle(pa.x,pa.z,p0.x,p0.z);
-				float angleTo1 = HorizontalAngle(pa.x,pa.z,p1.x,p1.z);
-				if( Mathf.Abs(angleTo0 - angleTo1)>44 ){
-					if(Vector3.Distance(pa,p1)<Vector3.Distance(p1,p0)){
-						agent.path.RemoveAt(0);
-						nextStep = true;
-					}
-				}
+
+			while(agent.path.Count>1 &&IsRiched(agent.path[0],agent.pivot.transform.position,size)){
+				agent.path.RemoveAt(0);
 			}
-
-				while(agent.path.Count>1 &&IsRiched(agent.path[0],agent.pivot.transform.position,size)){
-					agent.path.RemoveAt(0);
-				}
 
            // Debug.Log(nextStep + "  " + agent.path[0] + "  " + agent.path.Count);
-			if(!nextStep){
-				//Get the next waypoint...
-				PathNode point=agent.path[0];
-				//...and rotate pivot towards it.
-				Vector3 dir=point-agent.pivot.transform.position ;
-				if(dir!=Vector3.zero){
-					agent.pivot.transform.rotation=Quaternion.Slerp(agent.pivot.transform.rotation, Quaternion.LookRotation(dir),Time.deltaTime*15);
-				}
-				//Calculate the distance between current pivot position and next waypoint.
-				float dist=Vector3.Distance(agent.pivot.transform.position, point);
-				//Move towards the waypoint.
-				Vector3 direction=(point-agent.pivot.transform.position).normalized;
-				float speed = agent.speed;
-			
 		
-				resultTranslate  =direction * Mathf.Min(dist, speed * Time.deltaTime)/Time.deltaTime;
-		
-				//Assign transform position with height and pivot position.
-				//transform.parent = agent.pivot.transform;
-				//transform.position = agent.pivot.transform.position + new Vector3(0,agent.yOffset,0);
-				needJump = point.needJump;
-                
-				if(dir!=Vector3.zero){
-					resultRotation= Quaternion.Slerp(transform.rotation, Quaternion.LookRotation(dir),Time.deltaTime*15);
-				}
-				//resultRotation = transform.rotation;
-				//If the agent arrive to waypoint position, delete waypoint from the path.
-
-				if(IsRiched(point,agent.pivot.transform.position,size)){
-					agent.path.RemoveAt(0);
-				}
-			}else{
-				resultTranslate  =Vector3.zero;
+			//Get the next waypoint...
+			PathNode point=agent.path[0];
+			//...and rotate pivot towards it.
+			Vector3 dir=point-agent.pivot.transform.position ;
+			if(dir!=Vector3.zero){
+				agent.pivot.transform.rotation=Quaternion.Slerp(agent.pivot.transform.rotation, Quaternion.LookRotation(dir),Time.deltaTime*15);
 			}
+			//Calculate the distance between current pivot position and next waypoint.
+			float dist=Vector3.Distance(agent.pivot.transform.position, point);
+			//Move towards the waypoint.
+			Vector3 direction=(point-agent.pivot.transform.position).normalized;
+			float speed = agent.speed;
+		
+	
+			resultTranslate  =direction * Mathf.Min(dist, speed * Time.deltaTime)/Time.deltaTime;
+	
+			//Assign transform position with height and pivot position.
+			//transform.parent = agent.pivot.transform;
+			//transform.position = agent.pivot.transform.position + new Vector3(0,agent.yOffset,0);
+			needJump = point.needJump;
+			
+			if(dir!=Vector3.zero){
+				resultRotation= Quaternion.Slerp(transform.rotation, Quaternion.LookRotation(dir),Time.deltaTime*15);
+			}
+			//resultRotation = transform.rotation;
+			//If the agent arrive to waypoint position, delete waypoint from the path.
+
+			if(IsRiched(point,agent.pivot.transform.position,size)){
+				agent.path.RemoveAt(0);
+			}
+			
 		}
 	}
 	public static bool IsRiched(Vector3 point,Vector3 target,float inputSize){

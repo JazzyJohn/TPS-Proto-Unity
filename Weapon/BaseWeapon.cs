@@ -818,7 +818,7 @@ public class BaseWeapon : DestroyableNetworkObject {
 			while(shootsToSend.Count>0){
 				shootsToSend.Dequeue().PhotonSerialization(stream);
 			}
-			///stream.SendNext(transform.rotation);
+			//stream.SendNext(transform.rotation);
 
 		}
 		else
