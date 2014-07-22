@@ -46,7 +46,7 @@ public class BaseProjectile : MonoBehaviour
 
 
     public float splashRadius;
-
+    public LayerMask explosionLayerBlock;
     //звуки
     private AudioSource aSource;//источник звука задается в редакторе
     public AudioClip reactiveEngineSound;
@@ -199,6 +199,7 @@ public class BaseProjectile : MonoBehaviour
                     if (InputManager.instance.GetButtonDown("Detonate"))
                     {
                         //Debug.Log("boom");
+                        ExplosionDamage(mTransform.position);
                         ProjectileManager.instance.InvokeRPC("Detonate", projId, mTransform.position);
                     }
                     break;
@@ -206,7 +207,7 @@ public class BaseProjectile : MonoBehaviour
                     if (_detonateTimer > detonateTimer)
                     {
                         //Debug.Log("boom");
-
+                        ExplosionDamage(mTransform.position);
                         ProjectileManager.instance.InvokeRPC("Detonate", projId, mTransform.position);
                     }
                     break;
@@ -217,9 +218,12 @@ public class BaseProjectile : MonoBehaviour
     }
     public void Detonate(Vector3 position)
     {
-        ExplosionDamage(position);
-   
+        if (replication)
+        {
+           ExplosionDamage(position);
 
+        }
+        //Debug.Log("detonate"+ position);
     }
    
 
@@ -251,7 +255,8 @@ public class BaseProjectile : MonoBehaviour
         ldamage.pushDirection = mTransform.forward;
         ldamage.hitPosition = hit.point;
         DamagebleObject obj = hit.transform.gameObject.GetComponent<DamagebleObject>();
-
+        //move explosion center from surface so raycast dont hit it
+        Vector3 exploPosition = hit.point + hit.normal;
         if (obj != null)
         {
             DamageLogic(obj, ldamage);
@@ -316,7 +321,7 @@ public class BaseProjectile : MonoBehaviour
                         else
                         {
 
-                            ProjectileManager.instance.InvokeRPC("Detonate", projId);
+                            ProjectileManager.instance.InvokeRPC("Detonate", projId, hit.point);
                         }
 
                     }
@@ -324,7 +329,7 @@ public class BaseProjectile : MonoBehaviour
                     {
                         if (proojHitCnt >= projHitMax)
                         {
-                            ExplosionDamage(hit.point);
+                            ExplosionDamage(exploPosition);
                          
                         }
                     }
@@ -332,8 +337,8 @@ public class BaseProjectile : MonoBehaviour
                     break;
                 default:
                     used = true;
-                   
-                    ExplosionDamage(hit.point);
+
+                    ExplosionDamage(exploPosition);
                     break;
             }
 
@@ -348,7 +353,7 @@ public class BaseProjectile : MonoBehaviour
                     {
                         Instantiate(hitParticle, hit.point, Quaternion.LookRotation(hit.normal));
                     }
-                    ExplosionDamage(hit.point);
+                    ExplosionDamage(exploPosition);
                  
                     break;
                 case HITEFFECT.Rebound:
@@ -364,7 +369,7 @@ public class BaseProjectile : MonoBehaviour
                     {
                         if (proojHitCnt >= projHitMax)
                         {
-                            ExplosionDamage(hit.point);
+                            ExplosionDamage(exploPosition);
                             
                         }
                     }
@@ -379,8 +384,8 @@ public class BaseProjectile : MonoBehaviour
                     {
                         if (proojHitCnt >= projHitMax)
                         {
-                            
-                                ExplosionDamage(hit.point);
+
+                            ExplosionDamage(exploPosition);
                             
                           
                         }
@@ -430,12 +435,16 @@ public class BaseProjectile : MonoBehaviour
     void ExplosionDamage(Vector3 Position)
     {
         if(splashRadius==0){
+            if (!replication)
+            {
+                ProjectileManager.instance.InvokeRPC("Detonate", projId, Position);
+            }
             Destroy(gameObject, 0.1f);
                 return;
         }
         sControl.stopSound();//останавливаем звук реактивного двигателя
         sControl.playClip(exploseSound);//звук взрыва
-
+        //Debug.Log(splashRadius);
         Collider[] hitColliders = Physics.OverlapSphere(Position, splashRadius);
    
         RaycastHit[] hits;
@@ -444,13 +453,16 @@ public class BaseProjectile : MonoBehaviour
 
             //Debug.Log(hitColliders[i]);
           
+          
+            float distance = (hitColliders[i].transform.position - Position).magnitude;
             RaycastHit hitInfo;
-           
-           if (Physics.Raycast(Position, (hitColliders[i].transform.position - Position).normalized,out hitInfo, splashRadius))
+           // Debug.DrawLine(Position, hitColliders[i].transform.position,Color.red,100);
+           // Debug.Log( hitColliders[i]);
+            if (!Physics.Raycast(Position, (hitColliders[i].transform.position - Position).normalized,out hitInfo,  distance, explosionLayerBlock))
            {
-               //Debug.Log(hitInfo.collider + "==" + hitColliders[i]);
-               //Debug.DrawLine(Position, hitColliders[i].transform.position,Color.red,100);
-               if(hitInfo.collider ==hitColliders[i]){
+               Debug.Log(hitInfo.collider + "==" + hitColliders[i]);
+               
+           
                 DamagebleObject obj = hitColliders[i].GetComponent<DamagebleObject>();
                
                 if (obj != null && obj != shootTarget)
@@ -461,7 +473,7 @@ public class BaseProjectile : MonoBehaviour
                     DamageLogic(obj, lDamage);
                 }
 
-               }
+               
             }
           
                 
@@ -472,7 +484,7 @@ public class BaseProjectile : MonoBehaviour
         {
             if (hitParticle != null)
             {
-                Instantiate(hitParticle, mTransform.position, mTransform.rotation);
+                Instantiate(hitParticle, Position, mTransform.rotation);
             }
 
         }

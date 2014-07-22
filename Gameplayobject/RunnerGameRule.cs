@@ -8,6 +8,7 @@ public class RunnerGameRule : GameRule {
     public override void StartGame()
     {
         generator = GetComponent<Generation>();
+        generator.CacheBaseLoad();
         generator.Next(StartRoomCnt);
 
         base.StartGame();
@@ -23,6 +24,7 @@ public class RunnerGameRule : GameRule {
     }
     public void NextRoom()
     {
+        EventHolder.instance.FireEvent(typeof(GameListener), "EventRoomFinished");
         roomCnt++;
     }
     void Update()
@@ -43,7 +45,7 @@ public class RunnerGameRule : GameRule {
      public override void PlayerDeath()
     {
         Debug.Log("Palyer Death");
-		EventHolder.instance.FireEvent(typeof(GameListener), "EventRestart", Winner());
+		EventHolder.instance.FireEvent(typeof(GameListener), "EventRestart");
         isGameEnded = true;
     }
 }

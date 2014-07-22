@@ -77,5 +77,8 @@
 		<name>Detonate</name>
 		<default>Z</default>
 	</keys>
-	
+  <keys>
+    <name>Pause</name>
+    <default>F1</default>
+  </keys>
 </input>

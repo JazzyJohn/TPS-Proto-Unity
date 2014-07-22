@@ -75,7 +75,8 @@ public class AIState : MonoBehaviour {
 	}	
 	public class SpecificFinish:AITrigger{
 		public bool isTriggered(AIState owner, Params[] parametrs){
-			if (owner.SpecificFinish()) {
+            if (owner.IsSpecificFinish())
+            {
 				return true;
 			} else {
 				return false;
@@ -90,12 +91,7 @@ public class AIState : MonoBehaviour {
 			timeStart = Time.time;
 		}
 		public bool isTriggered(AIState owner, Params[] parametrs){
-			float delay = 0;
-			foreach(Params param as parametrs){
-				if(param.name=="TimedTrigger"){
-					delay =param.value;
-				}
-			}
+            float delay = parametrs[0].value;
 			if (delay+timeStart<Time.time) {
 				return true;
 			} else {
@@ -295,7 +291,7 @@ public class AIState : MonoBehaviour {
 
        return AIAgentComponent.FlatDifference(_enemy.myTransform.position, controlledPawn.myTransform.position).sqrMagnitude - _enemy.GetSize() - controlledPawn.GetSize() < weaponDistance * weaponDistance;
 	}
-	public virtual bool SpecificFinish(){
+	public virtual bool IsSpecificFinish(){
 		return false;
 	}
     

@@ -11,8 +11,9 @@ public class  RewardManager : MonoBehaviour, LocalPlayerListener,GameListener{
 	public const string PARAM_WIN = "Win";
 	public const string PARAM_KILL_AI= "KillAI"; 
 	public const string PARAM_KILL_FRIEND = "KillFriend";
-	public const string PARAM_KILL_BY_FRIEND= "KilledByFriend"; 
-	
+	public const string PARAM_KILL_BY_FRIEND= "KilledByFriend";
+    public const string PARAM_ROOM_FINISHED = "RoomFinished";
+
 	public Dictionary<string,int> rewardMoneyDictionary = new Dictionary<string, int>();
 
     private string UID;
@@ -49,7 +50,9 @@ public class  RewardManager : MonoBehaviour, LocalPlayerListener,GameListener{
 	}
 	private int upCash = 0;
 	public void UpMoney(string reason){
-		upCash+= rewardMoneyDictionary[reason];
+        if(rewardMoneyDictionary.ContainsKey(reason)){
+	    	upCash+= rewardMoneyDictionary[reason];
+        }
 		
 	}
 	
@@ -123,5 +126,10 @@ public class  RewardManager : MonoBehaviour, LocalPlayerListener,GameListener{
 	public void EventPawnReload(Player target){}
 	public void EventStart(){}
 	public void EventRestart(){}
+    public void EventRoomFinished()
+    {
+        UpMoney(PARAM_ROOM_FINISHED);	
+
+    }
 	
 }

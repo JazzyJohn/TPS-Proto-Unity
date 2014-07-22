@@ -76,6 +76,7 @@ class ProjectileManager: MonoBehaviour
     [RPC]
     public void RPCInvoke(params object[] theObjects)
     {
+       
 		string function = (string)theObjects[0];
 		int id = (int)theObjects[1];
 		object[] addParams  = new object[theObjects.Length-2];
@@ -86,6 +87,7 @@ class ProjectileManager: MonoBehaviour
             BaseProjectile proj = allProjectile[id];
             Type thisType = proj.GetType();
             MethodInfo theMethod = thisType.GetMethod(function);
+            
             theMethod.Invoke(proj, addParams);
             
         }

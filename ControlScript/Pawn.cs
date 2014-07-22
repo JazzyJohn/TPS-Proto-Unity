@@ -133,15 +133,13 @@ public class Pawn : DamagebleObject {
 	
 	public float jetPackForwardWallRunFuelConsumption = 0.5f;
 	
-	public float jetPackForwardWallRunFuelConsumption = 0.5f;
-	
 	public float jetPackWallRunFuelConsumption = 0.5f;
 	
 	public float jetPackDefaultFuelConsumption = 0.5f;	
 
 	private Vector3 nextMovement;
 
-	public ThirdPersonCamera cameraController;
+    public PlayerCamera cameraController;
 
 	public AIBase mainAi;	
 
@@ -390,14 +388,14 @@ public class Pawn : DamagebleObject {
         {
 
             Destroy(GetComponent<ThirdPersonController>());
-            Destroy(GetComponent<ThirdPersonCamera>());
+            Destroy(GetComponent<PlayerCamera>());
             Destroy(GetComponent<MouseLook>());
             GetComponent<Rigidbody>().isKinematic = true;
             //ivnMan.Init ();
         }
         else
         {
-            cameraController = GetComponent<ThirdPersonCamera>();
+            cameraController = GetComponent<PlayerCamera>();
             isAi = cameraController == null;
         }
         mainAi = GetComponent<AIBase>();
@@ -940,7 +938,7 @@ public class Pawn : DamagebleObject {
 							}else{
 								jetPackCharge -= Time.deltaTime*jetPackWallRunFuelConsumption;
 							}
-						break:
+                            break;
 						default:
 							jetPackCharge -= Time.deltaTime*jetPackDefaultFuelConsumption;
 						break;
@@ -1025,9 +1023,12 @@ public class Pawn : DamagebleObject {
 			for(int i=0; i<activeDPS.Count;i++){
 				singleDPS key  = activeDPS[i];
 				key.lastTime+=Time.deltaTime;
-                Debug.Log(key.lastTime);
+                //Debug.Log(key.lastTime);
 				if(key.noOnwer){
-					if(key.lastTime> key.showInterval){
+
+                    if (key.lastTime > key.showInterval)
+                    {
+
 						activeDPS.RemoveAt(i);
 						i--;
                         continue;
@@ -1038,7 +1039,7 @@ public class Pawn : DamagebleObject {
 				BaseDamage ldamage = new BaseDamage(key.damage);
 				ldamage.hitPosition =myTransform.position + UnityEngine.Random.onUnitSphere;
 				//ldamage.isContinius = true;
-                Debug.Log(ldamage.Damage + " " + Time.deltaTime);
+                //Debug.Log(ldamage.Damage + " " + Time.deltaTime);
 				ldamage.Damage *= Time.deltaTime;
                 ldamage.sendMessage = false;
 
@@ -1387,9 +1388,10 @@ public class Pawn : DamagebleObject {
 	}
 	void OnTriggerEnter (Collider other)
 	{
+        Debug.Log(other);
         
 		if (other.tag == "damageArea") {
-			//Debug.Log (other.GetComponent<ContiniusGun> ());
+			
             WeaponDamager muzzlePoint = other.GetComponent<WeaponDamager>();
 			
 			if(muzzlePoint !=null){

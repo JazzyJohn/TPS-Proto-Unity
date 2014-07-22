@@ -1,7 +1,7 @@
 using UnityEngine;
 using System.Collections;
 
-public class AIWalk : AIState
+public class AIQueenEgg : AIState
 {
 	
 	bool isLayed = false;
@@ -18,10 +18,11 @@ public class AIWalk : AIState
 	}
 	public void CreateEgg(){
 		GameObject egg =  Instantiate(eggPrefab,CloackPoint.position,CloackPoint.rotation) as GameObject;
-		((AISwarm_SimpleWave)aibase.aiSwarm).AddEgg(egg.transform);
+        ((AISwarm_QueenSwarm)aibase.GetAISwarm()).AddEgg(egg.transform);
 	}
 
-	public override bool SpecificFinish(){
+    public override bool IsSpecificFinish()
+    {
 		return isLayed;
 	}
 		

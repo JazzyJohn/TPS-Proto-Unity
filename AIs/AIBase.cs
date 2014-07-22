@@ -153,5 +153,9 @@ public class AIBase : MonoBehaviour
    {
        return aiSwarm.IsEnemy(group);
    }
+   public AISwarm GetAISwarm()
+   {
+       return aiSwarm;
+   }
 }
 

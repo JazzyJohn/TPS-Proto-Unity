@@ -49,7 +49,7 @@ public class ServerHolder : MonoBehaviour
 		} else {
 			PhotonNetwork.autoJoinLobby = true;
 			PhotonNetwork.ConnectUsingSettings(version);
-			
+            
 			allRooms = PhotonNetwork.GetRoomList();
 			
 			newRoomName = "Test PVP chamber " + Random.Range(100, 999);
@@ -250,10 +250,19 @@ public class ServerHolder : MonoBehaviour
 			}
 			connectingToRoom = true;
 	}
-		
-		
+
+    public void LeaveRoom() {
+        Debug.Log("LeaveTRoom");
+        PhotonNetwork.LeaveRoom();
+        PhotonNetwork.autoJoinLobby = true;
+        PhotonNetwork.ConnectUsingSettings(version);
+    }
 	public void CreateNewRoom(GAMEMODE mode) //Создание комноты (+)
 	{
+        if (map == "")
+        {
+            return;
+        }
 		ExitGames.Client.Photon.Hashtable customProps = new ExitGames.Client.Photon.Hashtable();
         customProps["MapName"] = map;
 		string[] exposedProps = new string[customProps.Count];

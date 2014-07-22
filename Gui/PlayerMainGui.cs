@@ -109,7 +109,8 @@ public class PlayerMainGui : MonoBehaviour {
 		GameResult,
 		KillCam,
 		Respawn,
-        None
+        None,
+        Pause
 			
 	}
     public GUIState guiState = GUIState.None;
@@ -119,6 +120,8 @@ public class PlayerMainGui : MonoBehaviour {
 	public GUISkin messageSkin;
 
     private SelectPlayerGUI respawnMenu;
+
+    private PauseMenu pausegui;
 
 	private PlayerHudNgui hud;
 
@@ -154,6 +157,7 @@ public class PlayerMainGui : MonoBehaviour {
 		hud = GetComponentInChildren<PlayerHudNgui> ();
 		hud.SetLocalPlayer(LocalPlayer);
         respawnMenu = GetComponentInChildren<SelectPlayerGUI>();
+        pausegui = GetComponentInChildren<PauseMenu>();
         respawnMenu.SetLocalPlayer(LocalPlayer);
 		ChageState(GUIState.Respawn);
         
@@ -173,7 +177,13 @@ public class PlayerMainGui : MonoBehaviour {
 		if (guiState == GUIState.Dedicated) {
 			return;
 		}
+        if (pausegui.IsActive())
+        
+        {
 
+            ChageState(GUIState.Pause);
+            return;
+        }
         if (InputManager.instance.GetButton("ScoreBtn"))
         {
 			
@@ -219,29 +229,40 @@ public class PlayerMainGui : MonoBehaviour {
         switch (nextState)
         {
             case GUIState.Normal:
+                 pausegui.BackToGame();
                 stat.DeActivate();
                 respawnMenu.DeActivate();
                 hud.Activate();
                 break;
             case GUIState.Respawn:
+                pausegui.BackToGame();
                 stat.DeActivate();
                 hud.DeActivate();
                 respawnMenu.Activate();
                 break;
             case GUIState.Playerlist:
+                pausegui.BackToGame();
                 hud.DeActivate();
                 respawnMenu.DeActivate();
                 stat.Activate();
                 break;
             case GUIState.KillCam:
+                pausegui.BackToGame();
                 stat.DeActivate();
                 respawnMenu.DeActivate();
                 hud.DeActivate();
                 break;
             case GUIState.GameResult:
+                pausegui.BackToGame();
                 stat.DeActivate();
                 respawnMenu.DeActivate();
                 hud.DeActivate();
+                break;
+            case GUIState.Pause:
+                stat.DeActivate();
+                respawnMenu.DeActivate();
+                hud.DeActivate();
+                pausegui.ActivateMenu();
                 break;
             
             

@@ -65,31 +65,21 @@ public class MainMenuGUI : MonoBehaviour {
 	void Start () 
 	{
 
-		if(PlayerPrefs.GetString("SaveSetting", "no") == "yes")
-		{
-			//Загрузка настроек
-			_SettingPanel.graphicSetting.ResolutionScroll.value = PlayerPrefs.GetFloat("Resolution");
-			_SettingPanel.graphicSetting.TextureScroll.value = PlayerPrefs.GetFloat("TextureQuality");
-			_SettingPanel.graphicSetting.ShadowScroll.value = PlayerPrefs.GetFloat("ShadowQuality");
-			_SettingPanel.graphicSetting.LighningScroll.value = PlayerPrefs.GetFloat("LighningQuality");
-			_SettingPanel.volumes.VolumeScroll.value = PlayerPrefs.GetFloat("OverallVolume");
-			_SettingPanel.volumes.SoundFxScroll.value = PlayerPrefs.GetFloat("SoundFX");
-			_SettingPanel.volumes.MusicScroll.value = PlayerPrefs.GetFloat("Music");
-			StartCoroutine(SetDefoltGraphic(1));
+        
 
-		}
-		else
-		{
-			DefaultGraphic();
-			StartCoroutine(SetDefoltGraphic(0));
-		}
-
-        Debug.Log(AudioListener.volume);
+        Screen.lockCursor = false;
 		//Поправить размер формы
 		ReSize();
-
+        _playerInfo.Player = FindObjectOfType<GlobalPlayer>();
 		//Получение с сервера комнат
 		Server = _playerInfo.Player.GetComponent<ServerHolder>();
+        if (PhotonNetwork.inRoom)
+        {
+            Server.LeaveRoom();
+
+
+        }
+
 		if (Server.allRooms != null) {
 						foreach (RoomInfo room in Server.allRooms) {
 								GameObject NewRoom = Instantiate (_RoomsNgui.ShablonRoom) as GameObject;
@@ -106,7 +96,7 @@ public class MainMenuGUI : MonoBehaviour {
 				}
         ShowSetting();
 	}
-	void HideAllPanel(){
+	public void HideAllPanel(){
 		foreach(UIRect panel in MainPanels){
 			panel.alpha=0.0f;
 
@@ -185,6 +175,12 @@ public class MainMenuGUI : MonoBehaviour {
 
 	public void StartBut() //Создать комнату
 	{
+
+       
+        if (Server.map == "")
+        {
+            return;
+        }
 		Server.newRoomName = _RoomsNgui.NameNewRoom.value;
 		HideAllPanel ();
 		_RoomsNgui.Loading.alpha = 1f;
@@ -414,10 +410,7 @@ public class MainMenuGUI : MonoBehaviour {
         {
             HideAllPanel();
             _PanelsNgui.settings.alpha = 1f;
-            if (_SettingPanel.control.alpha == 1)
-            {
-                CearControlls();
-            }
+           
         }
        
 
@@ -527,7 +520,8 @@ public class MainMenuGUI : MonoBehaviour {
 	{
 
 		int arg1 = Mathf.RoundToInt(ScrollValue.value*(ScrollValue.numberOfSteps-1));
-		
+
+		if(Setting != "Resolution")
 		switch(arg1)
 		{
 		case 0:
@@ -541,10 +535,8 @@ public class MainMenuGUI : MonoBehaviour {
 				_SettingPanel.graphicSetting.ShadowScroll.value = 0f;
 				_SettingPanel.graphicSetting.LighningScroll.value = 0f;
 					break;
-			case "Resolution":
-				ValueLabel.text = "800x600";
-				break;
 			default:
+
 				ValueLabel.text = "Low";
 				break;
 			}
@@ -559,9 +551,6 @@ public class MainMenuGUI : MonoBehaviour {
 				_SettingPanel.graphicSetting.TextureScroll.value = 0.5f;
 				_SettingPanel.graphicSetting.ShadowScroll.value = 0.5f;
 				_SettingPanel.graphicSetting.LighningScroll.value = 0.5f;
-				break;
-			case "Resolution":
-				ValueLabel.text = "1024x768";
 				break;
 			default:
 				ValueLabel.text = "Medium";
@@ -579,63 +568,14 @@ public class MainMenuGUI : MonoBehaviour {
 				_SettingPanel.graphicSetting.ShadowScroll.value = 1f;
 				_SettingPanel.graphicSetting.LighningScroll.value = 1f;
 				break;
-			case "Resolution":
-				ValueLabel.text = "1152x864";
-				break;
 			default:
 				ValueLabel.text = "High";
 				break;
 			}
 			break;
-		case 3:
-			switch(Setting)
-			{
-			case "Resolution":
-				ValueLabel.text = "1280x720";
-				break;
-			}
-			break;
-		case 4:
-			switch(Setting)
-			{
-			case "Resolution":
-				ValueLabel.text = "1280x768";
-				break;
-			}
-			break;
-		case 5:
-			switch(Setting)
-			{
-			case "Resolution":
-				ValueLabel.text = "1280x800";
-				break;
-			}
-			break;
-		case 6:
-			switch(Setting)
-			{
-			case "Resolution":
-				ValueLabel.text = "1360x768";
-				break;
-			}
-			break;
-		case 7:
-			switch(Setting)
-			{
-			case "Resolution":
-				ValueLabel.text = "1440x900";
-				break;
-			}
-			break;
-		case 8:
-			switch(Setting)
-			{
-			case "Resolution":
-				ValueLabel.text = "1600x900";
-				break;
-			}
-			break;
 		}
+		else
+			ValueLabel.text = _SettingPanel.AllResolution[arg1];
 
 		if (_SettingPanel.graphicSetting.Lighning.text != _SettingPanel.graphicSetting.Texture.text 
 		    || _SettingPanel.graphicSetting.Shadow.text != _SettingPanel.graphicSetting.Texture.text
@@ -816,7 +756,7 @@ public class SettingsPanel
 	public UIPanel video;
     public UIPanel game;
 	public Volumes volumes;
-	public string[] AllResolution;
+	public List<string> AllResolution;
 
 	public GraphicSetting graphicSetting; 
 

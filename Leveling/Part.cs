@@ -40,7 +40,9 @@ public class Part : MonoBehaviour
 
 	public void ConnectToPart(Part OldPart, Generation generator)
 	{
-        PartTransform.rotation = Quaternion.FromToRotation(Enter.forward, -OldPart.Exit.forward) * OldPart.PartTransform.rotation;
+       
+        PartTransform.rotation = Quaternion.FromToRotation(Enter.forward, OldPart.Exit.forward) * OldPart.PartTransform.rotation;
+
 		PartTransform.position = OldPart.Exit.position + PartTransform.position - Enter.position;
         StaticBatchingUtility.Combine(gameObject);
         this.generator = generator;

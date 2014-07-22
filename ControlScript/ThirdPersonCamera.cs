@@ -4,14 +4,9 @@
 using UnityEngine;
 using System.Collections;
 
-public class ThirdPersonCamera : MonoBehaviour
+public class ThirdPersonCamera : PlayerCamera
 {
-	public Transform cameraTransform;
 
-	protected Transform minimapTransform;
-	protected Camera minimapCamera;
-	protected Transform _target;
-	protected Pawn _pawn;
 	
 	// The distance in the x-z plane to the target
 	
@@ -35,7 +30,7 @@ public class ThirdPersonCamera : MonoBehaviour
 
 
 	private Vector3 targetOffset  = Vector3.zero;
-	public Vector3 normalOffset  = Vector3.zero;
+	//public Vector3 normalOffset  = Vector3.zero;
 	public Vector3 aimingOffset  = Vector3.zero;
 
 	public Vector3 minimapOffset  = new Vector3(0.0f,40.0f,0.0f);
@@ -45,8 +40,7 @@ public class ThirdPersonCamera : MonoBehaviour
 	public float MaxYAngle=90f;
 	public float MinYAngle=-90f;
 
-	private Vector3 headOffset= Vector3.zero;
-	private Vector3 centerOffset= Vector3.zero;
+	
 	
 	private float heightVelocity= 0.0f;
 	private float angleVelocity= 0.0f;
@@ -87,17 +81,9 @@ public class ThirdPersonCamera : MonoBehaviour
 
 	}
 
-	protected void InitOffsets(){
-		
-		CapsuleCollider characterController = _target.GetComponent<CapsuleCollider> ();
-		centerOffset = characterController.bounds.center - _target.position;
-		headOffset = centerOffset;
-		headOffset.y = characterController.bounds.max.y - _target.position.y;
-		
-		Cut(_target, centerOffset);
-	}
+	
 
-	public void ToggleAim(bool value){
+	public override void ToggleAim(bool value){
 		aiming = value;
 		
 	}
@@ -294,7 +280,7 @@ public class ThirdPersonCamera : MonoBehaviour
 	public Vector3 CurrrentOffset(){
 		return (cameraTransform.position - _target.position + centerOffset);
 	}
-	public void AddShake(float mod){
+	public override void AddShake(float mod){
 		if (_pawn != null) {
 			curAddShake = UnityEngine.Random.onUnitSphere/RECOIL_GLOBAL_MOD*mod;
 		}
@@ -314,7 +300,7 @@ public class ThirdPersonCamera : MonoBehaviour
 		Apply (transform, Vector3.zero);
 	}
 	
-	void  Cut ( Transform dummyTarget ,   Vector3 dummyCenter  ){
+    protected 	override void  Cut ( Transform dummyTarget ,   Vector3 dummyCenter  ){
 		float oldHeightSmooth= heightSmoothLag;
 		float oldSnapMaxSpeed= snapMaxSpeed;
 		float oldSnapSmooth= snapSmoothLag;
@@ -330,14 +316,16 @@ public class ThirdPersonCamera : MonoBehaviour
 		snapMaxSpeed = oldSnapMaxSpeed;
 		snapSmoothLag = oldSnapSmooth;
 	}
-	public void Reset (){
-				yAngle = 0;
-
-				xAngle = 0;
 	
-		}
 	public Vector3 GetCenterOffset (){
 		return centerOffset;
 	}
+    public override void Reset()
+    {
+        yAngle = 0;
+
+        xAngle = 0;
+
+    }
 
 }

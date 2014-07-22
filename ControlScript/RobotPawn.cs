@@ -13,8 +13,8 @@ public class RobotPawn : Pawn {
 		isPilotIn = true;
 		isActive = false;
 		characterState=CharacterState.Activate;
-		GetComponent<ThirdPersonCamera>().enabled = true;
-		GetComponent<ThirdPersonCamera>().Reset ();
+        GetComponent<PlayerCamera>().enabled = true;
+        GetComponent<PlayerCamera>().Reset();
 		StartCoroutine(WaitBeforeActive(ActivationTime));
 	}
 	public override void Damage(BaseDamage damage,GameObject killer){
@@ -49,7 +49,7 @@ public class RobotPawn : Pawn {
 		isPilotIn = false;
 		((RobotAnimationManager)animator).DeActivation();
 		GetComponent<ThirdPersonController>().enabled = false;
-		GetComponent<ThirdPersonCamera>().enabled = false;
+        GetComponent<PlayerCamera>().enabled = false;
 		ivnMan.TakeWeaponAway();
 		StopMachine ();
 		_rb.constraints = RigidbodyConstraints.FreezeAll;

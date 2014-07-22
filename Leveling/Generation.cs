@@ -7,7 +7,7 @@ public class Generation : MonoBehaviour {
     public Part[] Parts;
 	public Transform startTransform;
 	public List<Part> Rooms;
-
+    public bool onStart=false;
 	int RoomsCount;
     
 	[HideInInspector]
@@ -16,6 +16,8 @@ public class Generation : MonoBehaviour {
 	public Part[] LeftTurnParts;
 	[HideInInspector]
 	public Part[] RightTurnParts;
+
+    System.Random rand = new System.Random();
 
 	public int Cache;
 	public int[] PartCacheBase;
@@ -27,7 +29,7 @@ public class Generation : MonoBehaviour {
         PathEngine.position = transform.position;
         PathfindingEngine.Instance.GenerateStaticMap();
     }
-	void CacheBaseLoad()
+	public void CacheBaseLoad()
 	{
 		PartCacheBase = new int[Parts.Length];
 		for (int i = 0; i < Parts.Length; i++) {
@@ -53,8 +55,10 @@ public class Generation : MonoBehaviour {
 	int LoadPartIndexAtCache(int Cache)
 	{
 		Debug.Log ("LoadPartIndexAtCache");
+        int[]  PartCacheTemp = PartCache[0];
+        PartCache.RemoveAt(0);
 		for (int i = 0, dCache = 0; i < Parts.Length; i++) {
-			dCache += PartCacheBase[i];
+            dCache += PartCacheTemp[i];
 			if(Cache <= dCache)return i;
 		}
 		Debug.Log ("LoadPartIndexAtCache Error");
@@ -83,8 +87,10 @@ public class Generation : MonoBehaviour {
 		int FullCache = 0;
 		foreach (int Num in PartCache[0])
 			FullCache += Num;
-		IndexPartToSpawn.Add(LoadPartIndexAtCache (UnityEngine.Random.Range (0, FullCache + 1)));
-		PartCache.RemoveAt (0);
+
+   
+        IndexPartToSpawn.Add(LoadPartIndexAtCache(rand.Next(FullCache + 1)));
+		//PartCache.RemoveAt (0);
 	}
 
 	void RemovFirstPart()
@@ -102,9 +108,14 @@ public class Generation : MonoBehaviour {
 		IndexPartToSpawn.RemoveAt (0);
 		Debug.Log ("RoomCreate");
 		NewPart.Numb = RoomsCount;
-		
-		if (Rooms.Count != 0) NewPart.ConnectToPart(Rooms[Rooms.Count - 1], this);
-		else NewPart.PartTransform = startTransform;
+
+        if (Rooms.Count != 0) NewPart.ConnectToPart(Rooms[Rooms.Count - 1], this);
+        else
+        {
+            NewPart.PartTransform.position = startTransform.position;
+            NewPart.PartTransform.rotation = startTransform.rotation;
+
+        }
 		
 		Rooms.Add(NewPart);
 		
@@ -116,8 +127,12 @@ public class Generation : MonoBehaviour {
 	}
     void Start()
 	{
-		CacheBaseLoad ();
-		Next (10);
+        if (onStart)
+        {
+            CacheBaseLoad();
+            Next(10);
+        }
+      
 	}
 
 	void Update()

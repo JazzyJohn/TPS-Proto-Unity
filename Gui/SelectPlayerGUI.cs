@@ -337,8 +337,17 @@ public class SelectPlayerGUI : MonoBehaviour {
         }
         if (Choice._Player != -1 && Choice._Robot != -1 && Choice._Team != -1 )
         {
-            LocalPlayer.SetTeam (Choice._Team);
-			
+
+            switch (mode)
+            {
+                case GAMEMODE.PVE:
+                    LocalPlayer.SetTeam(1);
+                    break;
+                default:
+                    LocalPlayer.SetTeam(Choice._Team);
+                    break;
+
+            }
 			 int timer = (int)LocalPlayer.GetRespawnTimer();
              if (timer <= 0)
              {

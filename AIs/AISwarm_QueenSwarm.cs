@@ -1,10 +1,11 @@
 ﻿using UnityEngine;
 using System.Collections;
+using System.Collections.Generic;
 
-public class AISwarm_SimpleWave : AISwarm
+public class AISwarm_QueenSwarm : AISwarm
 {
 	public QueenPawn queen;
-	public GameObject queenPawn;
+	public string queenPawn;
     public override void DecideCheck() {
         if (queen==null|| queen.isDead) {
             isActive = false;
@@ -28,7 +29,7 @@ public class AISwarm_SimpleWave : AISwarm
     {
         if (isActive && Bots.Length > 0)
         {
-            for (int i = 0; i < eggs.Length; i++)
+            for (int i = 0; i < eggs.Count; i++)
             {
               
                     GameObject obj = PhotonNetwork.InstantiateSceneObject(Bots[(int)(UnityEngine.Random.value * Bots.Length)],eggs[i].position,eggs[i].rotation, 0, null) as GameObject;
