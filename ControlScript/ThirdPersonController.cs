@@ -358,6 +358,19 @@ public float CalculateJumpVerticalSpeed ( float targetJumpHeight  )
 								
 				pawn.PlayTaunt();
 			}
+            if (InputManager.instance.GetButtonDown("Skill1"))
+            {
+
+                pawn.UseSkill(0);
+            }
+            if (InputManager.instance.GetButtonUp("Skill1"))
+            {
+
+                pawn.UnUseSkill(0);
+            }
+
+      
+                 
                        
 		}
 

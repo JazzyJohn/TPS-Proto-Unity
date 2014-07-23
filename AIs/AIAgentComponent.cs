@@ -103,7 +103,10 @@ public class AIAgentComponent : MonoBehaviour {
 		}
 	}
 
-	
+    public bool IsPathBad()
+    {
+        return agent.pathrejected || (!agent.search && agent.path.Count == 0);
+    }
 	
 	public void GotoNextStep(){
 		//if there's a path.

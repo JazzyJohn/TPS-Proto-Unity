@@ -15,8 +15,6 @@ public class MainMenuGUI : MonoBehaviour {
 
 	public PanelsNgui _PanelsNgui;
 
-    public SettingsPanel _SettingPanel;
-
 	public List<Chat> _chat;
 
 	public Class1 ChatComponent;
@@ -38,34 +36,13 @@ public class MainMenuGUI : MonoBehaviour {
 	void Awake(){
 		HideAllPanel();
 		DontDestroyOnLoad(transform.gameObject);
-        foreach (GameObject onContrl in _SettingPanel.toggleList) {
-            SettingsPanel.SettingCommand commandClass = new SettingsPanel.SettingCommand();
-            commandClass.codename = onContrl.GetComponent<UIToggle>();
-            commandClass.command = onContrl.GetComponent<ControlButton>().command;
-            commandClass.keyname = onContrl.transform.GetChild(0).GetComponent<UILabel>();
-            _SettingPanel.controls.Add(commandClass);
-        }
-	}
-
-	IEnumerator SetDefoltGraphic(int i)
-	{
-		yield return new WaitForSeconds(0.01f);
-		switch(i)
-		{
-		case 0:
-			SaveGraphicSetting();
-			break;
-		case 1:
-			ApplyGraphicSetting();
-			break;
-		}
 	}
 
 	// Use this for initialization
 	void Start () 
 	{
 
-        
+		_PanelsNgui.SliderPanel.alpha = 1f;
 
         Screen.lockCursor = false;
 		//Поправить размер формы
@@ -76,8 +53,6 @@ public class MainMenuGUI : MonoBehaviour {
         if (PhotonNetwork.inRoom)
         {
             Server.LeaveRoom();
-
-
         }
 
 		if (Server.allRooms != null) {
@@ -94,7 +69,6 @@ public class MainMenuGUI : MonoBehaviour {
 								_RoomsNgui.ScrollBar.barSize = 0;
 						}
 				}
-        ShowSetting();
 	}
 	public void HideAllPanel(){
 		foreach(UIRect panel in MainPanels){
@@ -161,6 +135,23 @@ public class MainMenuGUI : MonoBehaviour {
 		_RoomsNgui.NameNewRoom.value = Server.newRoomName;
 
 	}
+
+	public void ToogleMode(int mode) {
+		if (_RoomsNgui.CreateRoom.alpha == 1.0f)
+		{
+			gameMode = (GAMEMODE)mode;
+			Server.RoomNewName((GAMEMODE)mode);
+			_RoomsNgui.NameNewRoom.value = Server.newRoomName;
+		}
+	}
+	public void ToggleMap(string mapName) {
+		if (_RoomsNgui.CreateRoom.alpha == 1.0f)
+		{
+			Server.map = mapName;
+			
+		}
+	}
+
 	public void Loading() //Изменения процентов при загрузке(вызывает прогресс бар)
 	{
 		if (_RoomsNgui.Loading.alpha != 1f && ActivBut != null)
@@ -322,55 +313,8 @@ public class MainMenuGUI : MonoBehaviour {
 
 
 	}
-    public void OnGUI()
-    {
-	
-		if(waitForInput){
-			Event e = Event.current;
-            Debug.Log("WAIT" + command + " " + e.keyCode);
-            if (e!=null&&e.isKey)
-            {
-                Debug.Log("SET" + e.keyCode);
-				newMap[command] = e.keyCode;
-				waitForInput= false;
-				foreach(SettingsPanel.SettingCommand setCommand in _SettingPanel.controls){
-                    if (setCommand.command == command)
-                    {
-                        setCommand.keyname.text = e.keyCode.ToString();	
-						break;
-					}		
-				}
-			}
-            if (e != null && e.isMouse)
-            {
-                switch (e.button)
-                {
-                    case 0:
-                        newMap[command] = KeyCode.Mouse0;
-                        break;
-                    case 1:
-                        newMap[command] = KeyCode.Mouse1;
-                        break;
-                    case 2:
-                        newMap[command] = KeyCode.Mouse2;
-                        break;
-                }
-                
-                waitForInput = false;
-                foreach (SettingsPanel.SettingCommand setCommand in _SettingPanel.controls)
-                {
-                    if (setCommand.command == command)
-                    {
-                        setCommand.keyname.text = newMap[command].ToString();
-                        setCommand.codename.value = false;
-                        break;
-                    }
-                }
-            }
-		
-		}
-		
-	}
+    
+
 	public void scroll() //СкролБар чата
 	{
 		ChatComponent.ChatPanel.transform.localPosition = new Vector3(0f, -(ChatComponent.ChatScrollBar.value*1600), 0f);
@@ -397,256 +341,6 @@ public class MainMenuGUI : MonoBehaviour {
 	
 	}
 
-    public void ShowSetting()
-    {
-
-        //Debug.Log (_RoomsNgui.RoomsFound.alpha);
-        if (_PanelsNgui.settings.alpha > 0f) {
-            HideAllPanel();
-            _PanelsNgui.SliderPanel.alpha = 1f;
-            
-        }
-        else
-        {
-            HideAllPanel();
-            _PanelsNgui.settings.alpha = 1f;
-           
-        }
-       
-
-
-    }
-	
-	
-    public void HideAllSettingsPanel() {
-        _SettingPanel.video.alpha = 0f;
-        _SettingPanel.control.alpha = 0f;
-    }
-    public void ShowControl() {
-			if(  _SettingPanel.control.alpha ==0){
-				CearControlls();				
-			}
-			
-            HideAllSettingsPanel();
-            _SettingPanel.control.alpha = 1f;
-     
-    }
-	
-    public void ShowVideo()
-    {
-
-        HideAllSettingsPanel();
-        _SettingPanel.video.alpha = 1f;
-
-    }
-   
-    public void ToogleMode(int mode) {
-        if (_RoomsNgui.CreateRoom.alpha == 1.0f)
-        {
-            gameMode = (GAMEMODE)mode;
-            Server.RoomNewName((GAMEMODE)mode);
-            _RoomsNgui.NameNewRoom.value = Server.newRoomName;
-        }
-    }
-    public void ToggleMap(string mapName) {
-        if (_RoomsNgui.CreateRoom.alpha == 1.0f)
-        {
-            Server.map = mapName;
-
-        }
-    }
-	//CONTROLL SECTION 
-	private string command ="";
-	
-	private bool waitForInput= false;
-	
-	private Dictionary<string,KeyCode> newMap ;
-
-    public void WaitForKey(string command)
-    {
-		waitForInput = true;
-        this.command = command;
-	}
-	public void ApplyControlls(){
-        foreach (KeyValuePair<string, KeyCode> oneCom in newMap)
-        {
-			InputManager.instance.SaveKey(oneCom.Key,oneCom.Value);
-		}
-        InputManager.instance.SaveSensitivity(_SettingPanel.mouseSensitivity.value * 2.0f);
-	
-	}
-	public void CearControlls(){
-        newMap = new Dictionary<string, KeyCode>();
-        Dictionary<string, KeyCode> map = InputManager.instance.GetMap();
-        foreach (SettingsPanel.SettingCommand setCommand in _SettingPanel.controls)
-        {
-            setCommand.keyname.text = map[setCommand.command].ToString();				
-		}
-        _SettingPanel.mouseSensitivity.value = InputManager.instance.GetSensitivity() / 2f;
-        SetMouseLabel();
-	
-	}
-    public void DefaultControl() {
-        newMap = new Dictionary<string, KeyCode>();
-        Dictionary<string, KeyCode> map = InputManager.instance.ForceReload();
-        foreach (SettingsPanel.SettingCommand setCommand in _SettingPanel.controls)
-        {
-            setCommand.keyname.text = map[setCommand.command].ToString();
-        }
-        _SettingPanel.mouseSensitivity.value = InputManager.instance.GetSensitivity() / 2f;
-        SetMouseLabel();
-    }
-    public void SetMouseLabel() {
-        _SettingPanel.mouseLabel.text = (_SettingPanel.mouseSensitivity.value * 100f).ToString("0");
-    }
-
-	public void SetValueVolume(int IntArg, UIScrollBar ScrollArg) //Установка звука (Текст)
-	{
-		string value = (ScrollArg.value * 100f).ToString("0");
-		switch(IntArg)
-		{
-		case 0:
-			_SettingPanel.volumes.Volume.text = value;
-			break;
-		case 1:
-			_SettingPanel.volumes.SoundFx.text = value;
-			break;
-		case 2:
-			_SettingPanel.volumes.Music.text = value;
-			break;
-		}
-	}
-	public void SetGraphic(UILabel ValueLabel, UIScrollBar ScrollValue, string Setting) //Настройки графики (текст)
-	{
-
-		int arg1 = Mathf.RoundToInt(ScrollValue.value*(ScrollValue.numberOfSteps-1));
-
-		if(Setting != "Resolution")
-		switch(arg1)
-		{
-		case 0:
-			switch(Setting)
-			{
-			case "Graphic":
-				_SettingPanel.graphicSetting.Texture.text = "Low";
-				_SettingPanel.graphicSetting.Shadow.text = "Low";
-				_SettingPanel.graphicSetting.Lighning.text = "Low";
-				_SettingPanel.graphicSetting.TextureScroll.value = 0f;
-				_SettingPanel.graphicSetting.ShadowScroll.value = 0f;
-				_SettingPanel.graphicSetting.LighningScroll.value = 0f;
-					break;
-			default:
-
-				ValueLabel.text = "Low";
-				break;
-			}
-			break;
-		case 1:
-			switch(Setting)
-			{
-			case "Graphic":
-				_SettingPanel.graphicSetting.Texture.text = "Medium";
-				_SettingPanel.graphicSetting.Shadow.text = "Medium";
-				_SettingPanel.graphicSetting.Lighning.text = "Medium";
-				_SettingPanel.graphicSetting.TextureScroll.value = 0.5f;
-				_SettingPanel.graphicSetting.ShadowScroll.value = 0.5f;
-				_SettingPanel.graphicSetting.LighningScroll.value = 0.5f;
-				break;
-			default:
-				ValueLabel.text = "Medium";
-				break;
-			}
-			break;
-		case 2:
-			switch(Setting)
-			{
-			case "Graphic":
-				_SettingPanel.graphicSetting.Texture.text = "High";
-				_SettingPanel.graphicSetting.Shadow.text = "High";
-				_SettingPanel.graphicSetting.Lighning.text = "High";
-				_SettingPanel.graphicSetting.TextureScroll.value = 1f;
-				_SettingPanel.graphicSetting.ShadowScroll.value = 1f;
-				_SettingPanel.graphicSetting.LighningScroll.value = 1f;
-				break;
-			default:
-				ValueLabel.text = "High";
-				break;
-			}
-			break;
-		}
-		else
-			ValueLabel.text = _SettingPanel.AllResolution[arg1];
-
-		if (_SettingPanel.graphicSetting.Lighning.text != _SettingPanel.graphicSetting.Texture.text 
-		    || _SettingPanel.graphicSetting.Shadow.text != _SettingPanel.graphicSetting.Texture.text
-		    || _SettingPanel.graphicSetting.Lighning.text != _SettingPanel.graphicSetting.Shadow.text)
-		{
-			_SettingPanel.graphicSetting.Graphic.text = "Optional";
-			_SettingPanel.graphicSetting.GraphicScroll.value = 1f;
-		}
-		else if (_SettingPanel.graphicSetting.Texture.text == "Low" && _SettingPanel.graphicSetting.Shadow.text == "Low"
-		         && _SettingPanel.graphicSetting.Lighning.text == "Low" && _SettingPanel.graphicSetting.GraphicScroll.value != 0f)
-		{
-			_SettingPanel.graphicSetting.Graphic.text = "Low";
-			_SettingPanel.graphicSetting.GraphicScroll.value = 0f;
-		}
-		else if (_SettingPanel.graphicSetting.Texture.text == "Medium" && _SettingPanel.graphicSetting.Shadow.text == "Medium"
-		         && _SettingPanel.graphicSetting.Lighning.text == "Medium" && _SettingPanel.graphicSetting.GraphicScroll.value != 1/3)
-		{
-			_SettingPanel.graphicSetting.Graphic.text = "Medium";
-			_SettingPanel.graphicSetting.GraphicScroll.value = 1f/3;
-		}
-		else if (_SettingPanel.graphicSetting.Texture.text == "High" && _SettingPanel.graphicSetting.Shadow.text == "High"
-		         && _SettingPanel.graphicSetting.Lighning.text == "High" && _SettingPanel.graphicSetting.GraphicScroll.value != 1/3*2)
-		{
-			_SettingPanel.graphicSetting.Graphic.text = "High";
-			_SettingPanel.graphicSetting.GraphicScroll.value = 1f/3*2;
-		}
-	}
-
-	public void SaveGraphicSetting()
-	{
-		PlayerPrefs.SetFloat("Resolution", _SettingPanel.graphicSetting.ResolutionScroll.value);
-		PlayerPrefs.SetFloat("TextureQuality", _SettingPanel.graphicSetting.TextureScroll.value);
-		PlayerPrefs.SetFloat("ShadowQuality", _SettingPanel.graphicSetting.ShadowScroll.value);
-		PlayerPrefs.SetFloat("LighningQuality", _SettingPanel.graphicSetting.LighningScroll.value);
-		PlayerPrefs.SetFloat("OverallVolume", _SettingPanel.volumes.VolumeScroll.value);
-		PlayerPrefs.SetFloat("SoundFX", _SettingPanel.volumes.SoundFxScroll.value);
-		PlayerPrefs.SetFloat("Music", _SettingPanel.volumes.MusicScroll.value);
-		PlayerPrefs.SetString("SaveSetting", "yes");
-		ApplyGraphicSetting();
-	}
-
-	public void ApplyGraphicSetting()
-	{
-		string[] x_y = _SettingPanel.graphicSetting.Resolution.text.Split('x');
-		Screen.SetResolution(int.Parse(x_y[0]), int.Parse(x_y[1]), Screen.fullScreen);
-		switch(_SettingPanel.graphicSetting.Texture.text)
-		{
-		case "Low":
-			QualitySettings.SetQualityLevel((int)QualityLevel.Fast);
-			break;
-		case "Medium":
-			QualitySettings.SetQualityLevel((int)QualityLevel.Good);
-			break;
-		case "High":
-			QualitySettings.SetQualityLevel((int)QualityLevel.Fantastic);
-			break;
-		}
-        AudioListener.volume = _SettingPanel.volumes.SoundFxScroll.value * _SettingPanel.volumes.VolumeScroll.value;
-        MusicHolder.SetVolume(_SettingPanel.volumes.MusicScroll.value * _SettingPanel.volumes.VolumeScroll.value);
-	}
-
-	public void DefaultGraphic()
-	{
-		_SettingPanel.graphicSetting.ResolutionScroll.value = 0.125f;
-		_SettingPanel.graphicSetting.TextureScroll.value = 1f;
-		_SettingPanel.graphicSetting.ShadowScroll.value = 1f;
-		_SettingPanel.graphicSetting.LighningScroll.value = 1f;
-		_SettingPanel.volumes.VolumeScroll.value = 1f;
-		_SettingPanel.volumes.SoundFxScroll.value = 1f;
-		_SettingPanel.volumes.MusicScroll.value = 1f;
-	}
 }
 
 //Группы переменных
@@ -738,51 +432,4 @@ public class PanelsNgui
 	public SlaiderPanel slaiderPanel;
     public UIPanel mainpanel;
     public UIPanel settings;
-}
-[System.Serializable]
-public class SettingsPanel
-{
-	
-	public class SettingCommand{
-		public UIToggle codename;
-		public UILabel keyname;
-		public string command;			
-	}
-	public List<SettingCommand> controls = new List<SettingCommand>();
-    public List<GameObject> toggleList;
-	public UISlider mouseSensitivity;
-    public UILabel mouseLabel;
-    public UIPanel control;
-	public UIPanel video;
-    public UIPanel game;
-	public Volumes volumes;
-	public List<string> AllResolution;
-
-	public GraphicSetting graphicSetting; 
-
-	[System.Serializable]
-	public class Volumes
-	{
-		public UILabel Volume;
-		public UILabel SoundFx;
-		public UILabel Music;
-		public UIScrollBar VolumeScroll;
-		public UIScrollBar SoundFxScroll;
-		public UIScrollBar MusicScroll;
-	}
-
-	[System.Serializable]
-	public class GraphicSetting
-	{
-		public UILabel Resolution;
-		public UILabel Graphic;
-		public UILabel Texture;
-		public UILabel Shadow;
-		public UILabel Lighning;
-		public UIScrollBar ResolutionScroll;
-		public UIScrollBar GraphicScroll;
-		public UIScrollBar TextureScroll;
-		public UIScrollBar ShadowScroll;
-		public UIScrollBar LighningScroll;
-	}
 }

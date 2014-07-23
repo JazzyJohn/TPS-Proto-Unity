@@ -126,19 +126,19 @@ public class BaseProjectile : MonoBehaviour
         {
             distance += (float)(PhotonNetwork.time - lateTime) /1000f* mRigidBody.velocity.magnitude;
         }
-        if (Physics.Raycast(transform.position, mRigidBody.velocity.normalized, out hit,distance))
+        if (Physics.Raycast(mTransform.position, mRigidBody.velocity.normalized, out hit, distance))
         {
 
                 onBulletHit(hit);
          
         }
-		Debug.Log("id " + projId+ " position " + mTransform.position + " rotation "+ mTransform.rotation);
+		//Debug.Log("id " + projId+ " position " + mTransform.position + " rotation "+ mTransform.rotation);
         if (replication)
         {
             //Debug.Log((float)(PhotonNetwork.time - lateTime));
             transform.Translate(mRigidBody.velocity * (float)(PhotonNetwork.time - lateTime) / 1000f);
         }
-		Debug.Log("id " + projId+ " position " + mTransform.position + " rotation "+ mTransform.rotation);
+	//	Debug.Log("id " + projId+ " position " + mTransform.position + " rotation "+ mTransform.rotation);
         mRigidBody.useGravity = false;
     }
    
@@ -146,7 +146,7 @@ public class BaseProjectile : MonoBehaviour
 
     protected void Update()
     {
-		Debug.Log("id " + projId+ " position " + mTransform.position + " rotation "+ mTransform.rotation);
+		
         RaycastHit hit;
 
         switch (attraction)
@@ -167,13 +167,12 @@ public class BaseProjectile : MonoBehaviour
 
         }
         mTransform.rotation = Quaternion.LookRotation(mRigidBody.velocity);
-        if (Physics.Raycast(transform.position, mRigidBody.velocity.normalized, out hit))
+        if (Physics.Raycast(transform.position, mRigidBody.velocity.normalized, out hit, mRigidBody.velocity.magnitude*0.1f))
         {
 
-            if (hit.distance < mTransform.InverseTransformDirection(mRigidBody.velocity).z * 0.1f)
-            {
+          
                 onBulletHit(hit);
-            }
+            
         }
 
         switch (speedChange)
@@ -219,11 +218,31 @@ public class BaseProjectile : MonoBehaviour
     }
     public void Detonate(Vector3 position)
     {
+        
         if (replication)
         {
+            RaycastHit hit;
+
+            Vector3 direction = position - mTransform.position;
+            //Debug.DrawLine(mTransform.position, mTransform.position +  mRigidBody.velocity*(direction.magnitude+0.1f),Color.red,10.0f);
+            if (Physics.Raycast(mTransform.position, mRigidBody.velocity.normalized, out hit,direction.magnitude+ mRigidBody.velocity.magnitude * 0.1f))
+            {
+
+                onBulletHit(hit);
+
+            }
+            mTransform.position = position - mRigidBody.velocity.normalized * 0.05f;
+          //  Debug.DrawLine(mTransform.position, mTransform.position + mRigidBody.velocity * (direction.magnitude + mRigidBody.velocity.magnitude * 0.15f), Color.blue, 10.0f);
+            if (Physics.Raycast(mTransform.position,  mRigidBody.velocity.normalized, out hit, direction.magnitude + mRigidBody.velocity.magnitude * 0.15f))
+            {
+
+                onBulletHit(hit);
+
+            }
            ExplosionDamage(position);
 
         }
+       // Debug.Log("DETONATE " +position +" id " + projId + " position " + mTransform.position + " rotation " + mTransform.rotation);
         //Debug.Log("detonate"+ position);
     }
    

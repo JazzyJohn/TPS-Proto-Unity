@@ -12,32 +12,78 @@ public class AITurret : AIState
         if (DirectVisibility(out _distanceToTarget))
         {
             //code to animation attack
-			if(controlledPawn.isAimimngAtEnemy()){
-				controlledPawn.StartFire();
-			}else{
-				controlledPawn.StopFire();
+            if (_enemy.isDead)
+            {
 
-			}
+                LostEnemy();
+                controlledPawn.StopFire();
+            }
+            else
+            {
+                if (controlledPawn.isAimimngAtEnemy())
+                {
+                    controlledPawn.StartFire();
+                }
+                else
+                {
+                    controlledPawn.StopFire();
+
+                }
+            }
            // Debug.Log("Shot");
         }
         else
         {
-			if(_enemy!= null){
-				controlledPawn.StopFire();
-				//Debug.Log(Time.deltaTime+" "+_lostTimer+" "+lostTime);
-				_lostTimer+=AIBase.TickPause;
-				if(_lostTimer>lostTime){
-					_lostTimer = 0.0f;
-					Debug.Log("enemyLOST");
-					LostEnemy();
+            if (_enemy != null&& _enemy.isDead)
+            {
+                LostEnemy();
+                controlledPawn.StopFire();
+            }
+            else
+            {
+                if (_enemy != null)
+                {
+                    controlledPawn.StopFire();
+                    //Debug.Log(Time.deltaTime+" "+_lostTimer+" "+lostTime);
+                    _lostTimer += AIBase.TickPause;
+                    if (_lostTimer > lostTime)
+                    {
+                        _lostTimer = 0.0f;
+                        Debug.Log("enemyLOST");
+                        LostEnemy();
 
-				}
+                    }
 
-			}else{
-				controlledPawn.StopFire();
-			}
+                }
+                else
+                {
+
+                    controlledPawn.StopFire();
+                }
+            }
         }
     }
-	
-	
+
+    public override bool IsEnemy(Pawn target)
+    {
+        if (isAgressive)
+        {
+            if (target.isDead)
+            {
+                return false;
+            }
+            else
+            {
+
+                return !(target.team == controlledPawn.team);
+            }
+            
+        }
+        else
+        {
+
+            return false;
+        }
+
+    }
 }

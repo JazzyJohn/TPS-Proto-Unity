@@ -339,14 +339,18 @@ public class AnimationManager : MonoBehaviour
 		animator.SetTrigger (animName+"_end");
 	}
     public void KnockOut() {
-        animator.enabled = false;
+        DollOn();
     }
     public void DollOn(){
-         animator.enabled = true;
+        aimPos.IKShutDown();
+         animator.enabled = false;
+        
     }
     public void DollOff()
     {
-        animator.enabled = false;
+
+        animator.enabled = true;
+        aimPos.IKTurnOn();
     }
     public void StandUp()
     {

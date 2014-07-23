@@ -66,6 +66,7 @@ public class InputManager{
 		
 	}
 	public  bool GetButtonUp(string name){
+     
 		return Input.GetKeyUp(keyMap[name]);
 		
 	}

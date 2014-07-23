@@ -21,7 +21,7 @@ public class AIPatrol : AIState
             return;
         }
 	//	Debug.Log (Vector3.Distance (patrolPoints [step].position, controlledPawn.myTransform.position)+"  "+agent.size);
-		if (AIAgentComponent.IsRiched(patrolPoints [step].position, controlledPawn.myTransform.position,agent.size)) {
+		if (AIAgentComponent.IsRiched(patrolPoints [step].position, controlledPawn.myTransform.position,agent.size)||agent.IsPathBad()) {
 			NextPoint();
 		}
 			
@@ -52,7 +52,11 @@ public class AIPatrol : AIState
 		
 	}
 	public void FixedUpdate(){
-       
+
+        if (patrolPoints[step] == null)
+        {
+            return;
+        }
 			bool needJump = agent.needJump;
 			agent.WalkUpdate ();
            // Debug.Log("Jump" + needJump + agent.needJump);

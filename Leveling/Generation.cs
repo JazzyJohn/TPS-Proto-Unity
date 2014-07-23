@@ -9,7 +9,7 @@ public class Generation : MonoBehaviour {
 	public List<Part> Rooms;
     public bool onStart=false;
 	int RoomsCount;
-    
+    public int RoomCache;
 	[HideInInspector]
     public Transform PathEngine;
 	[HideInInspector]
@@ -66,7 +66,8 @@ public class Generation : MonoBehaviour {
 	}
 
 	public void Next(int Count)
-	{
+	{  
+        RoomCache = (int)(Count*1.5);
 		for (int i = 0; i < Count; i++) {
 			Next();	
 		}
@@ -124,7 +125,12 @@ public class Generation : MonoBehaviour {
 
 		if (NewPart.Difficult == DIFFICULT.EASY) Cache--;
 		else if (NewPart.Difficult == DIFFICULT.HARD) Cache++;
-	}
+
+        if (RoomCache < Rooms.Count)
+        {
+            RemovFirstPart();
+        }
+    }
     void Start()
 	{
         if (onStart)

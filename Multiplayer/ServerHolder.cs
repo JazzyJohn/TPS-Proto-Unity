@@ -460,17 +460,17 @@ public class ServerHolder : MonoBehaviour
 	public static Vector3 ReadVectorFromShort(PhotonStream stream){
 		Vector3 newPosition = Vector3.zero;
 	//Debug.Log (stream.ReceiveNext ());
-	newPosition.x = ((short)stream.ReceiveNext())/FLOAT_COEF;
+	newPosition.x = ((int)stream.ReceiveNext())/FLOAT_COEF;
 	//Debug.Log (newPosition.x);
-		newPosition.y = ((short)stream.ReceiveNext())/FLOAT_COEF;
-		newPosition.z = ((short)stream.ReceiveNext())/FLOAT_COEF;
+    newPosition.y = ((int)stream.ReceiveNext()) / FLOAT_COEF;
+    newPosition.z = ((int)stream.ReceiveNext()) / FLOAT_COEF;
 		return newPosition;
 	}
 	public static void WriteVectorToShort(PhotonStream stream,Vector3 vect){
-		
-		stream.SendNext((short)(vect.x*FLOAT_COEF));
-		stream.SendNext((short)(vect.y*FLOAT_COEF));
-		stream.SendNext((short)(vect.z*FLOAT_COEF));
+
+        stream.SendNext((int)(vect.x * FLOAT_COEF));
+        stream.SendNext((int)(vect.y * FLOAT_COEF));
+        stream.SendNext((int)(vect.z * FLOAT_COEF));
 		
 	}
 	void OnMasterClientSwitched( PhotonPlayer newMaster )

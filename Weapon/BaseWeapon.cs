@@ -22,8 +22,8 @@ public class BaseWeapon : DestroyableNetworkObject {
 			stream.SendNext( viewId);
 			stream.SendNext (timeShoot);
 
-			stream.SendNext( direction);
-			ServerHolder.WriteVectorToShort (stream, position);
+            	stream.SendNext (direction.eulerAngles);
+                stream.SendNext(position);
 		}
 		public void PhotonDeserialization(PhotonStream stream){
             projId = (int)stream.ReceiveNext();
@@ -31,8 +31,10 @@ public class BaseWeapon : DestroyableNetworkObject {
 			range= (float)stream.ReceiveNext ();
             viewId = (int)stream.ReceiveNext();
 			timeShoot = (double)stream.ReceiveNext ();
-			direction = (Quaternion)stream.ReceiveNext ();
-			position = ServerHolder.ReadVectorFromShort (stream);
+
+            Vector3 euler = (Vector3)stream.ReceiveNext();
+            direction = Quaternion.Euler(euler);
+            position = (Vector3)stream.ReceiveNext();
 		}
 
        

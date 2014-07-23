@@ -10,7 +10,7 @@ public class SkillWeapon : BaseWeapon{
 	
 	
 	public override void AttachWeapon(Transform weaponSlot,Vector3 Offset, Quaternion weaponRotator,Pawn inowner){
-		skill.Init(inonwer);
+		skill.Init(inowner);
 		base.AttachWeapon(weaponSlot,Offset, weaponRotator,inowner);
 		
 	}

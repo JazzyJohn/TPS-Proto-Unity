@@ -5,7 +5,7 @@ public class SkillManager : MonoBehaviour
 {
 	SkillBehaviour[] allskill; 
 	void Awake(){
-		Pawn owner=  GetComponentn<Pawn>();
+		Pawn owner=  GetComponent<Pawn>();
 		allskill =GetComponentsInChildren<SkillBehaviour>();
 		foreach(SkillBehaviour skill in allskill){
 			skill.Init(owner);
@@ -14,10 +14,17 @@ public class SkillManager : MonoBehaviour
 	}
 	
 	public void ActivateSkill(int i){
-		if(allskill.Lenght>i){
+      
+		if(allskill.Length>i){
 			allskill[i].Use();
 		}
 	}
-	
+    public void DeActivateSkill(int i)
+    {
+        if (allskill.Length > i)
+        {
+            allskill[i].UnUse();
+        }
+    }
 	
 }

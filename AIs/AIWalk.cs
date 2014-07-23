@@ -49,7 +49,7 @@ public class AIWalk : AIState
 				_lostTimer+=AIBase.TickPause;
 				if(_lostTimer>lostTime){
 					_lostTimer = 0.0f;
-					Debug.Log("enemyLOST");
+					//Debug.Log("enemyLOST");
 					LostEnemy();
 
 				}

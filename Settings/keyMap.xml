@@ -81,4 +81,8 @@
     <name>Pause</name>
     <default>F1</default>
   </keys>
+  <keys>
+    <name>Skill1</name>
+    <default>G</default>
+  </keys>
 </input>

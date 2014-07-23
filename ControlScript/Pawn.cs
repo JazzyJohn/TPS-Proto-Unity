@@ -359,6 +359,7 @@ public class Pawn : DamagebleObject {
         }
         charMan = GetComponent<CharacteristicManager>();
         charMan.Init();
+        skillManager = GetComponent<SkillManager>();
 	}
 
 
@@ -1388,6 +1389,13 @@ public class Pawn : DamagebleObject {
 			skillManager.ActivateSkill(i);
 		}
 	}
+    public void UnUseSkill(int i)
+    {
+        if (skillManager != null)
+        {
+            skillManager.DeActivateSkill(i);
+        }
+    }
 	
 	//END WEAPON SECTION
 	void OnCollisionEnter(Collision collision) {

@@ -5,6 +5,8 @@ using RootMotion.FinalIK;
 public class IKcontroller : MonoBehaviour {
 	
 	public AimIK aim;
+    public FullBodyBipedIK fullBody;
+    public GrounderFBBIK grounder;
 	protected float targetWeight=1.0f;
 	private float vel = 0.0f;
 	/// <summary>
@@ -15,6 +17,8 @@ public class IKcontroller : MonoBehaviour {
 	}
 	void Start(){
 		aim = gameObject.GetComponent<AimIK>();
+        fullBody = gameObject.GetComponent<FullBodyBipedIK>();
+        grounder = gameObject.GetComponent<GrounderFBBIK>();
 	}
 	
 	public Vector3 aimPosition{
@@ -38,5 +42,36 @@ public class IKcontroller : MonoBehaviour {
 		}
 		
 	}
-	
-}	
+
+
+    public void IKShutDown()
+    {
+        if (aim != null)
+        {
+            aim.enabled = false;
+        }
+        if (fullBody != null)
+        {
+            fullBody.enabled = false;
+        }
+        if (grounder != null)
+        {
+            grounder.enabled = false;
+        }
+    }
+    public void IKTurnOn()
+    {
+        if (aim != null)
+        {
+            aim.enabled = true;
+        }
+        if (fullBody != null)
+        {
+            fullBody.enabled = true;
+        }
+        if (grounder != null)
+        {
+            grounder.enabled = true;
+        }
+    }
+}
