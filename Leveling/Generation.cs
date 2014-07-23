@@ -8,8 +8,9 @@ public class Generation : MonoBehaviour {
 	public Transform startTransform;
 	public List<Part> Rooms;
 
-	int RoomsCount;
-    
+	public int RoomsCount;
+	public bool TestGenerator;
+
 	[HideInInspector]
     public Transform PathEngine;
 	[HideInInspector]
@@ -19,8 +20,9 @@ public class Generation : MonoBehaviour {
 
 	public int Cache;
 	public int[] PartCacheBase;
-	public List<int[]> PartCache = new List<int[]>();
-	public List<int> IndexPartToSpawn = new List<int>(); 
+	public Queue<int[]> PartCache = new Queue<int[]> ();
+	public bool isCreation = false;
+	public Queue<Thread> PartCreation = new Queue<Thread> ();
 	
     public void MovePathTo(Transform transform)
     {
@@ -36,29 +38,34 @@ public class Generation : MonoBehaviour {
 	}
 	void CacheLoad()
 	{
-		Debug.Log ("CacheLoad");
 		int[] NewCache = new int[PartCacheBase.Length];
-		int HARD = Cache, EASY = Cache;
-
-		if (Cache < 0) HARD = Math.Abs (Cache);
-		else EASY = Math.Abs (Cache);
 
 		for (int i = 0; i < PartCacheBase.Length; i++) {
-			if (Parts[i].Difficult == DIFFICULT.EASY) NewCache[i] = PartCacheBase[i] + EASY;
-			else NewCache[i] = PartCacheBase[i] + HARD;
+			NewCache[i] = PartCacheBase[i];
+			if (Parts[i].Difficult == DIFFICULT.EASY) NewCache[i] += Cache;
+			else  if (Parts[i].Difficult == DIFFICULT.HARD) NewCache[i] += -Cache;
 		}
-		PartCache.Add (NewCache);
+		Debug.Log ("CacheLoad");
+		PartCache.Enqueue (NewCache);
 	}
 
 	int LoadPartIndexAtCache(int Cache)
 	{
-		Debug.Log ("LoadPartIndexAtCache");
+		int[] NewCache = PartCache.Peek();
+//		if (Cache <= 100)Debug.Log (Cache);
+//		Debug.Log (Cache);
 		for (int i = 0, dCache = 0; i < Parts.Length; i++) {
-			dCache += PartCacheBase[i];
-			if(Cache <= dCache)return i;
+			dCache += NewCache[i];
+			if(Cache <= dCache) return i;
 		}
 		Debug.Log ("LoadPartIndexAtCache Error");
 		return 0;
+	}
+
+	void AddRoomInCache (Part NewRoom)
+	{
+		if (NewRoom.Difficult == DIFFICULT.EASY) Cache -= 10;
+		else if (NewRoom.Difficult == DIFFICULT.HARD) Cache += 10;
 	}
 
 	public void Next(int Count)
@@ -67,70 +74,78 @@ public class Generation : MonoBehaviour {
 			Next();	
 		}
 	}
+
 	public void Next()
 	{
 		Thread RoomCreation = new Thread(CacheLoad);
-		RoomCreation.Start ();
+		PartCreation.Enqueue (RoomCreation);
 	}
 
-	void NextAtCache()
+	int GetNextRoomIndex(int[] Cache)
 	{
-		if (PartCache.Count == 0) {
-			Debug.Log ("NextAtCache Error");
-			return;
-		}
-		Debug.Log ("NextAtCache");
 		int FullCache = 0;
-		foreach (int Num in PartCache[0])
+		foreach (int Num in Cache)
 			FullCache += Num;
-		IndexPartToSpawn.Add(LoadPartIndexAtCache (UnityEngine.Random.Range (0, FullCache + 1)));
-		PartCache.RemoveAt (0);
+		int Index = UnityEngine.Random.Range (0, FullCache) + 1;
+		return LoadPartIndexAtCache (Index);
 	}
 
-	void RemovFirstPart()
+	void RemoveFirstRoom()
 	{
 		Rooms[0].DestroyRoom();
 		Rooms.RemoveAt(0);
 	}
-	void RoomCreate()
+	void RoomCreate(Part NewPart)
 	{
-		if (IndexPartToSpawn.Count == 0) {
-			Debug.Log ("RoomCreate Error");
-			return;
-		}
-		Part NewPart = (Part)Instantiate(Parts[IndexPartToSpawn[0]]);
-		IndexPartToSpawn.RemoveAt (0);
-		Debug.Log ("RoomCreate");
-		NewPart.Numb = RoomsCount;
+		Part NewRoom = (Part)Instantiate(NewPart);
 		
-		if (Rooms.Count != 0) NewPart.ConnectToPart(Rooms[Rooms.Count - 1], this);
-		else NewPart.PartTransform = startTransform;
+		if (Rooms.Count != 0) NewRoom.ConnectToPart(Rooms[Rooms.Count - 1], this);
+		else NewRoom.PartTransform.position = startTransform.position;
 		
-		Rooms.Add(NewPart);
-		
-		NewPart.Started();
+		Rooms.Add(NewRoom);
+		NewRoom.Started();
+		NewRoom.Numb = RoomsCount;
 		RoomsCount++;
 
-		if (NewPart.Difficult == DIFFICULT.EASY) Cache--;
-		else if (NewPart.Difficult == DIFFICULT.HARD) Cache++;
+		AddRoomInCache (NewPart);
+
+		isCreation = false;
 	}
     void Start()
 	{
 		CacheBaseLoad ();
+		if (TestGenerator) TestRoomNext (1000);
 		Next (10);
 	}
-
+	void TestRoomNext(int Count)
+	{
+		for (int i = 0; i < Parts.Length; i++) {
+			RoomCreate(Parts[i]);
+		}
+		for (int i = 0; i < Count; i++) {
+			Next();
+		}
+	}
+	void TestRoomUp(Part TestRoom)
+	{
+		Vector3 NewPosition = TestRoom.PartTransform.position;
+		NewPosition.y += 0.01f;
+		TestRoom.PartTransform.position = NewPosition;
+		AddRoomInCache (TestRoom);
+		isCreation = false;
+	}
 	void Update()
 	{
-		if (PartCache.Count != 0) {
-			for (int i = 0; i < PartCache.Count; i++) {
-				NextAtCache();
-			}
+		if (!isCreation && PartCreation.Count != 0 && PartCache.Count == 0) {
+			PartCreation.Peek().Start();
+			PartCreation.Dequeue();
+			isCreation = true;
 		}
-		if (IndexPartToSpawn.Count != 0) {
-			for (int i = 0; i < IndexPartToSpawn.Count; i++) {
-				RoomCreate();
-			}
+		if (PartCache.Count != 0) {
+			int Index = GetNextRoomIndex(PartCache.Peek());
+			if(!TestGenerator) RoomCreate(Parts[Index]);
+			else TestRoomUp(Rooms[Index]);
+			PartCache.Dequeue();
 		}
 	}
 }
