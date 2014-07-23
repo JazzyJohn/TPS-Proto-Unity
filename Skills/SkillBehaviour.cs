@@ -31,8 +31,8 @@ public class SkillBehaviour : MonoBehaviour
 	public GameObject targetEffect;
 	
 	public GameObject casterEffect;
-	
-	private PhotonView photonView;
+
+    protected PhotonView photonView;
 	
 	public void Init(Pawn owner){
 		this.owner = owner;
