@@ -32,14 +32,20 @@ public class SkillBehaviour : MonoBehaviour
 	
 	public GameObject casterEffect;
 	
+	private PhotonView photonView;
+	
 	public void Init(Pawn owner){
 		this.owner = owner;
+		photonView = GetComponent<PhotonView>();
 	}
 	
 	public void Update(){
 		Tick(Time.deltaTime);
 	}
 	protected  void Activate(){
+		if(photonview.isMine){
+			AskActivate();
+		}
 		
 		switch(type){
 			case TargetType.SELF:
@@ -86,8 +92,16 @@ public class SkillBehaviour : MonoBehaviour
 			GameObject effect  =    Instantiate(casterEffect, owner.myTransform.position,  owner.myTransform.rotation) as GameObject;
 			effect.transform.parent = owner.myTransform;
 		}
+		if(photonview.isMine){
+			AskCast();
+		}
 		
 	}
+	
+	
+	
+	
+	
 	public void Tick(float delta){
 		if(isUse){
 			if(activationTime<=_activationTime){
@@ -157,5 +171,57 @@ public class SkillBehaviour : MonoBehaviour
 	protected virtual void ActualUse(Vector3 target){
 	
 	}
-
+	
+	protected void AskCast(){
+		  photonView.RPC ("RPCCasterEfffect", PhotonTargets.Other);
+	
+	}
+	[RPC]
+	public void RPCCasterEfffect(){
+		CasterVisualEffect();
+	}
+	protected void 	AskActivate(){
+		switch(type){
+				case TargetType.SELF:
+				case TargetType.GROUPOFPAWN_BYSELF:	
+					 photonView.RPC ("RPCActivateSkill", PhotonTargets.Other);
+				case TargetType.PAWN:
+				case TargetType.GROUPOFPAWN_BYPAWN:
+					if(target!=null){
+			
+						photonView.RPC ("RPCActivateSkill", PhotonTargets.Other, PhotonTargets.Other,target.photonView.viewID);					
+					}
+				break;
+				case TargetType.POINT:
+				case TargetType.GROUPOFPAWN_BYPOINT:
+	
+					photonView.RPC ("RPCActivateSkill", PhotonTargets.Other,targetPoint);					
+									
+				break;				
+			}
+	}
+	
+	[RPC]
+	public void RPCActivateSkill(params object[] theObjects){
+	
+		switch(type){
+				case TargetType.SELF:
+				case TargetType.GROUPOFPAWN_BYSELF:	
+					target = owner;
+					Activate();
+				case TargetType.PAWN:
+				case TargetType.GROUPOFPAWN_BYPAWN:
+					int id = (int) theObjects[0];
+					target=PhotonView.Find (id).GetComponent<Pawn>();
+				break;
+				case TargetType.POINT:
+				case TargetType.GROUPOFPAWN_BYPOINT:
+	
+					targetPoint = (Vector3) theObjects[0];			
+									
+				break;				
+			}
+	
+	}
+	
 }
