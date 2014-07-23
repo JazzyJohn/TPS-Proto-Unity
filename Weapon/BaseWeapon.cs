@@ -227,7 +227,7 @@ public class BaseWeapon : DestroyableNetworkObject {
 		}
 	}
 
-	public void AttachWeapon(Transform weaponSlot,Vector3 Offset, Quaternion weaponRotator,Pawn inowner){
+	public virtual void AttachWeapon(Transform weaponSlot,Vector3 Offset, Quaternion weaponRotator,Pawn inowner){
 		if (curTransform == null) {
 			curTransform = transform;		
 		}

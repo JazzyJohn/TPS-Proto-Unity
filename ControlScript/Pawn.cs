@@ -298,6 +298,7 @@ public class Pawn : DamagebleObject {
 	};
 
 	protected CharacteristicManager charMan;
+	protected SkillManager skillManager;
 	public BasePawnStatistic statistic = new BasePawnStatistic();
 	//effects
 
@@ -1380,6 +1381,12 @@ public class Pawn : DamagebleObject {
 		}
 		return 0.0f;
 	
+	}
+	
+	public void UseSkill(int i){
+		if(skillManager!=null){
+			skillManager.ActivateSkill(i);
+		}
 	}
 	
 	//END WEAPON SECTION

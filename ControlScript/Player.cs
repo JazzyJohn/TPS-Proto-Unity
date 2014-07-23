@@ -8,6 +8,9 @@ public enum PawnType{PAWN,BOT};
 public enum GameClassEnum{ENGINEER,ASSAULT,SCOUT,MEDIC,ANY,ROBOTHEAVY,ROBOTMEDIUM,ROBOTLIGHT,ANYROBOT};
 
 public class Player : MonoBehaviour {
+
+	public LayerMask robotLayer =1 ;
+
 	public List<string> friendsInfo = new List<string>();
 
 	public float respawnTime = 10.0f;
@@ -202,7 +205,7 @@ public class Player : MonoBehaviour {
                     }
 					if(InputManager.instance.GetButton("SpawnBot")){
 						
-						if(Physics.Raycast(centerofScreen, out hitinfo,50.0f)){
+						if(Physics.Raycast(centerofScreen, out hitinfo,50.0f,robotLayer)){
 							if(ghostBot==null){
 								GameObject ghostGameObj = Instantiate(prefabGhostBot,hitinfo.point,currentPawn.transform.rotation) as GameObject;
 								ghostBot =ghostGameObj.GetComponent<GhostObject>();

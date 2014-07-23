@@ -8,7 +8,7 @@ public class Analyzer : BaseWeapon{
 
 	/// <summary>
     /// Hit logic for 
-	protected virtual void HitEffect(RaycastHit hitInfo){
+	protected override void HitEffect(RaycastHit hitInfo){
 			AnalyzedObject target =hitInfo.collider.GetComponent<AnalyzedObject>();
 			if(target!=null){
 				if(target.Analyze()){
