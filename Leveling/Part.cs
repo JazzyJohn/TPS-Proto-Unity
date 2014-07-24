@@ -8,12 +8,7 @@ public enum PARTDIRECTION
     RIGHT,
     LEFT
 }
-public enum DIFFICULT
-{
-	HARD,
-	MEDIUM,
-	EASY
-}
+
 
 public class Part : MonoBehaviour
 {
@@ -23,6 +18,10 @@ public class Part : MonoBehaviour
 	public PreSpawner Spawner;
     public PARTDIRECTION type;
 	public DIFFICULT Difficult;
+	public ROOMTYPE roomType;
+	public ROOMSUBTYPE subType;
+	public float subTypeMultiplier;
+	public BIOMS biom;
 	public int Cache;
 	public bool AddCacheIfNotSpawn;
 

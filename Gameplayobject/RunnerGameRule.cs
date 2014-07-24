@@ -1,16 +1,34 @@
 ﻿using UnityEngine;
 using System.Collections;
 
+[Serializable]
+public class RoomScenarioEntry{
+	public int maxRoomNumber;
+	public BIOMS planedBiom;	
+}
+
+[Serializable]
+public class RoomTypeSetting{
+	public int weidth;
+	public ROOMTYPE type;	
+}
+
 public class RunnerGameRule : GameRule {
     public Generation generator;
     public int StartRoomCnt;
     protected int roomCnt;
+	public RoomScenarioEntry[] scenario;
+	public RoomTypeSetting[] settings;
+	private Dictionary<ROOMTYPE,int> typeDictionary  = new Dictionary<ROOMTYPE,int>();
+	
     public override void StartGame()
     {
         generator = GetComponent<Generation>();
         generator.CacheBaseLoad();
         generator.Next(StartRoomCnt);
-
+		foreach(RoomTypeSetting typeSetting in settings){
+			typeDictionary[typeSetting.type] = typeSetting.weidth;
+		}
         base.StartGame();
     }
     public override PlayerMainGui.GameStats GetStats()
@@ -48,4 +66,15 @@ public class RunnerGameRule : GameRule {
 		EventHolder.instance.FireEvent(typeof(GameListener), "EventRestart");
         isGameEnded = true;
     }
+	public void ChangeCondition(GeneratorCondition condition,int roomCount){
+		condition.currentBiom = RoomScenarioEntry[0].planedBiom
+		for(RoomScenarioEntry scenarioEntry in  scenario){
+			if(roomCount<StartRoomCnt){
+				condition.currentBiom = scenarioEntry.planedBiom;
+				break;
+			}
+		}
+		condition.byTypeWeight = typeDictionary;
+		
+	}
 }

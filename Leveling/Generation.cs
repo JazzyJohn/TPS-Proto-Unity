@@ -24,19 +24,42 @@ public static class ThreadRandomGen
 		return inst.Next(int max);
 	}
 }
-public enum BIOMS{CITY,DESERT,SWAMP,FOREST};
+public enum DIFFICULT
+{
+	HARD,
+	MEDIUM,
+	EASY
+}
+public enum BIOMS{
+	CITY,
+	DESERT,
+	SWAMP,
+	FOREST
+};
+public enum ROOMTYPE{
+	AI,
+	ACROBATIC,
+	STEALTH,
+	RIDDLE
+	
+}
+public enum ROOMSUBTYPE{
+	NORMAL,
+	AISUB
+}
 //This is some sort of Dictionary for generator game rule and Ai director fill it with info 
 //about course of generation. It's needed cause Generator is multithread and we couldn't use direct access
 // to director or gamerule
 public struct GeneratorCondition{
 	public BIOMS currentBiom;
-	
+	public Dictionary<ROOMTYPE,int> byTypeWeight;
 }
 public class Generation : MonoBehaviour {
     public Part[] Parts;
 	public Transform startTransform;
 	public List<Part> Rooms;
 
+	public Transform[] TestCubic;
     public bool onStart=false;
 	int RoomsCount;
     public int RoomCache;
@@ -53,7 +76,8 @@ public class Generation : MonoBehaviour {
 	public volatile GeneratorCondition condition= GeneratorCondition();
 	
 
-	public volatile int Cache;
+	private volatile int DificultyCache=0;
+	private volatile int normalRoomCount=0;
 	public int[] PartCacheBase;
 	public volatile ConcurrentQueue<int> PartCache = new ConcurrentQueue<int> ();
 	public bool isCreation = false;
@@ -81,10 +105,24 @@ public class Generation : MonoBehaviour {
 		FullCache = 0;
 		for (int i = 0; i < PartCacheBase.Length; i++) {
 			NewCache[i] = PartCacheBase[i];
-			if (Parts[i].Difficult == DIFFICULT.EASY) NewCache[i] += Cache;
-			else  if (Parts[i].Difficult == DIFFICULT.HARD) NewCache[i] += -Cache;
-			FullCache+=	NewCache[i];
+			if(Parts[i].biom != condition.currentBiom){
+				NewCache[i] = 0;
+				continue;
+			}
+			if(!condition.byTypeWeight.ContainsKey(Parts[i].roomType)){
+				NewCache[i] = 0;
+				continue;
+			}
+			NewCache[i]+=condition.byTypeWeight[Parts[i].roomType];
+			if (Parts[i].Difficult == DIFFICULT.EASY) NewCache[i] +=DificultyCache;
+			else  if (Parts[i].Difficult == DIFFICULT.HARD) NewCache[i] += -DificultyCache;
 			
+			if(Parts[i].sybType !=ROOMSUBTYPE.NORMAL){
+				NewCache[i] *= (int)(Parts[i].subTypeMultiplier * normalRoomCount);
+			}
+			
+			
+			FullCache+=	NewCache[i];
 		}
 		//Debug.Log ("CacheLoad");
 		
@@ -118,8 +156,14 @@ public class Generation : MonoBehaviour {
 	//END Multi Thread Section
 	void AddRoomInCache (Part NewRoom)
 	{
-		if (NewRoom.Difficult == DIFFICULT.EASY) Cache -= 10;
-		else if (NewRoom.Difficult == DIFFICULT.HARD) Cache += 10;
+		if (NewRoom.Difficult == DIFFICULT.EASY)DificultyCache -= 10;
+		else if (NewRoom.Difficult == DIFFICULT.HARD)DificultyCache += 10;
+		
+		if(NewRoom.subType==ROOMSUBTYPE.NORMAL){
+			normalRoomCount++;
+		}else{
+			normalRoomCount =0;
+		}
 	}
 
 	public void Next(int Count)
@@ -169,8 +213,11 @@ public class Generation : MonoBehaviour {
         if (onStart)
         {
 			CacheBaseLoad ();
-			if (TestGenerator) TestRoomNext (1000);
-			Next (10);
+			if (TestGenerator){
+				TestRoomNext (1000)
+			]else{
+				Next (10);
+			}
         }
       
 
@@ -179,36 +226,38 @@ public class Generation : MonoBehaviour {
   
 	void TestRoomNext(int Count)
 	{
-		for (int i = 0; i < Parts.Length; i++) {
-			RoomCreate(Parts[i]);
-		}
 		for (int i = 0; i < Count; i++) {
 			Next();
 		}
 	}
-	void TestRoomUp(Part TestRoom)
+	void TestRoomUp(Transform TestRoom)
 	{
-		Vector3 NewPosition = TestRoom.PartTransform.position;
-		NewPosition.y += 0.01f;
-		TestRoom.PartTransform.position = NewPosition;
+		//TestRoom.PartTransform.position.y += 0.01f;
+		TestRoom.scale.y += 0.01f;
 		AddRoomInCache (TestRoom);
 		isCreation = false;
 	}
 	void Update()
 	{
 		if (!isCreation && PartCreation.Count != 0 && PartCache.Count == 0) {
-		
+			StartNextThread();
 		}
 		if (PartCache.Count != 0) {
 			int Index = PartCache.Peek();
-			if(!TestGenerator) RoomCreate(Parts[Index]);
-			else TestRoomUp(Rooms[Index]);
+		
+			if(!TestGenerator){
+				RoomCreate(Parts[Index]);
+				
+			}
+			if(TestCubic.length>0){
+				TestRoomUp(TestCubic[Index]);
+			}
 			
 		}
 	}
 	void StartNextThread(){
 		PartCreation.Dequeue().Start();
-		
+		((RunnerGameRule)GameRule.instance).ChangeCondition(condition,RoomsCount)
 		isCreation = true;
 	}
 }
