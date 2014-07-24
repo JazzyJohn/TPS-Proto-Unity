@@ -3,13 +3,46 @@ using System;
 using System.Collections.Generic;
 using System.Threading;
 
+
+
+
+public static class ThreadRandomGen
+{
+	private static Random _global = new Random();
+	[ThreadStatic]
+	private static Random _local;
+
+	public static int Next(int max)
+	{
+		Random inst = _local;
+		if (inst == null)
+		{
+			int seed;
+			lock (_global) seed = _global.Next();
+			_local = inst = new Random(seed);
+		}
+		return inst.Next(int max);
+	}
+}
+public enum BIOMS{CITY,DESERT,SWAMP,FOREST};
+//This is some sort of Dictionary for generator game rule and Ai director fill it with info 
+//about course of generation. It's needed cause Generator is multithread and we couldn't use direct access
+// to director or gamerule
+public struct GeneratorCondition{
+	public BIOMS currentBiom;
+	
+}
 public class Generation : MonoBehaviour {
     public Part[] Parts;
 	public Transform startTransform;
 	public List<Part> Rooms;
+
     public bool onStart=false;
 	int RoomsCount;
     public int RoomCache;
+
+	public bool TestGenerator;
+
 	[HideInInspector]
     public Transform PathEngine;
 	[HideInInspector]
@@ -17,12 +50,14 @@ public class Generation : MonoBehaviour {
 	[HideInInspector]
 	public Part[] RightTurnParts;
 
-    System.Random rand = new System.Random();
+	public volatile GeneratorCondition condition= GeneratorCondition();
+	
 
-	public int Cache;
+	public volatile int Cache;
 	public int[] PartCacheBase;
-	public List<int[]> PartCache = new List<int[]>();
-	public List<int> IndexPartToSpawn = new List<int>(); 
+	public volatile ConcurrentQueue<int> PartCache = new ConcurrentQueue<int> ();
+	public bool isCreation = false;
+	public volatile ConcurrentQueue<Thread> PartCreation = new ConcurrentQueue<Thread> ();
 	
     public void MovePathTo(Transform transform)
     {
@@ -36,33 +71,55 @@ public class Generation : MonoBehaviour {
 			PartCacheBase[i] = Parts[i].GetCache();
 		}
 	}
+	//Multi Thread Section
+	//THIS function  involved in multi thread Weight count for room
+	// so any operation must do with caution;
+	
 	void CacheLoad()
 	{
-		Debug.Log ("CacheLoad");
 		int[] NewCache = new int[PartCacheBase.Length];
-		int HARD = Cache, EASY = Cache;
-
-		if (Cache < 0) HARD = Math.Abs (Cache);
-		else EASY = Math.Abs (Cache);
-
+		FullCache = 0;
 		for (int i = 0; i < PartCacheBase.Length; i++) {
-			if (Parts[i].Difficult == DIFFICULT.EASY) NewCache[i] = PartCacheBase[i] + EASY;
-			else NewCache[i] = PartCacheBase[i] + HARD;
+			NewCache[i] = PartCacheBase[i];
+			if (Parts[i].Difficult == DIFFICULT.EASY) NewCache[i] += Cache;
+			else  if (Parts[i].Difficult == DIFFICULT.HARD) NewCache[i] += -Cache;
+			FullCache+=	NewCache[i];
+			
 		}
-		PartCache.Add (NewCache);
+		//Debug.Log ("CacheLoad");
+		
+		PartCache.Enqueue (	GetNextRoomIndex(NewCache,FullCache));
 	}
 
-	int LoadPartIndexAtCache(int Cache)
+	int LoadPartIndexAtCache(int[] weights, int needWeight)
 	{
-		Debug.Log ("LoadPartIndexAtCache");
-        int[]  PartCacheTemp = PartCache[0];
-        PartCache.RemoveAt(0);
-		for (int i = 0, dCache = 0; i < Parts.Length; i++) {
-            dCache += PartCacheTemp[i];
-			if(Cache <= dCache)return i;
+
+		
+//		if (Cache <= 100)Debug.Log (Cache);
+//		Debug.Log (Cache);
+		for (int i = 0, dCache = 0; i < weights.Length; i++) {
+			dCache += weights[i];
+			if(needWeight <= dCache) return i;
+
 		}
 		Debug.Log ("LoadPartIndexAtCache Error");
 		return 0;
+	}
+	
+	int GetNextRoomIndex(int[] weights,int fullWeights)
+	{
+		
+
+		int Index =ThreadRandomGen.Next( fullWeights-1) + 1;
+		return LoadPartIndexAtCache (weights,Index);
+
+	}
+	
+	//END Multi Thread Section
+	void AddRoomInCache (Part NewRoom)
+	{
+		if (NewRoom.Difficult == DIFFICULT.EASY) Cache -= 10;
+		else if (NewRoom.Difficult == DIFFICULT.HARD) Cache += 10;
 	}
 
 	public void Next(int Count)
@@ -72,59 +129,35 @@ public class Generation : MonoBehaviour {
 			Next();	
 		}
 	}
+
 	public void Next()
 	{
 		Thread RoomCreation = new Thread(CacheLoad);
-		RoomCreation.Start ();
+		PartCreation.Enqueue (RoomCreation);
 	}
 
-	void NextAtCache()
-	{
-		if (PartCache.Count == 0) {
-			Debug.Log ("NextAtCache Error");
-			return;
-		}
-		Debug.Log ("NextAtCache");
-		int FullCache = 0;
-		foreach (int Num in PartCache[0])
-			FullCache += Num;
+	
 
-   
-        IndexPartToSpawn.Add(LoadPartIndexAtCache(rand.Next(FullCache + 1)));
-		//PartCache.RemoveAt (0);
-	}
-
-	void RemovFirstPart()
+	void RemoveFirstRoom()
 	{
 		Rooms[0].DestroyRoom();
 		Rooms.RemoveAt(0);
 	}
-	void RoomCreate()
+	void RoomCreate(Part NewPart)
 	{
-		if (IndexPartToSpawn.Count == 0) {
-			Debug.Log ("RoomCreate Error");
-			return;
-		}
-		Part NewPart = (Part)Instantiate(Parts[IndexPartToSpawn[0]]);
-		IndexPartToSpawn.RemoveAt (0);
-		Debug.Log ("RoomCreate");
-		NewPart.Numb = RoomsCount;
+		Part NewRoom = (Part)Instantiate(NewPart);
 
-        if (Rooms.Count != 0) NewPart.ConnectToPart(Rooms[Rooms.Count - 1], this);
-        else
-        {
-            NewPart.PartTransform.position = startTransform.position;
-            NewPart.PartTransform.rotation = startTransform.rotation;
-
-        }
+		if (Rooms.Count != 0) NewRoom.ConnectToPart(Rooms[Rooms.Count - 1], this);
+		else NewRoom.PartTransform.position = startTransform.position;
 		
-		Rooms.Add(NewPart);
-		
-		NewPart.Started();
+		Rooms.Add(NewRoom);
+		NewRoom.Started();
+		NewRoom.Numb = RoomsCount;
 		RoomsCount++;
 
-		if (NewPart.Difficult == DIFFICULT.EASY) Cache--;
-		else if (NewPart.Difficult == DIFFICULT.HARD) Cache++;
+		AddRoomInCache (NewPart);
+
+		isCreation = false;
 
         if (RoomCache < Rooms.Count)
         {
@@ -135,23 +168,47 @@ public class Generation : MonoBehaviour {
 	{
         if (onStart)
         {
-            CacheBaseLoad();
-            Next(10);
+			CacheBaseLoad ();
+			if (TestGenerator) TestRoomNext (1000);
+			Next (10);
         }
       
-	}
 
+	
+	}
+  
+	void TestRoomNext(int Count)
+	{
+		for (int i = 0; i < Parts.Length; i++) {
+			RoomCreate(Parts[i]);
+		}
+		for (int i = 0; i < Count; i++) {
+			Next();
+		}
+	}
+	void TestRoomUp(Part TestRoom)
+	{
+		Vector3 NewPosition = TestRoom.PartTransform.position;
+		NewPosition.y += 0.01f;
+		TestRoom.PartTransform.position = NewPosition;
+		AddRoomInCache (TestRoom);
+		isCreation = false;
+	}
 	void Update()
 	{
+		if (!isCreation && PartCreation.Count != 0 && PartCache.Count == 0) {
+		
+		}
 		if (PartCache.Count != 0) {
-			for (int i = 0; i < PartCache.Count; i++) {
-				NextAtCache();
-			}
+			int Index = PartCache.Peek();
+			if(!TestGenerator) RoomCreate(Parts[Index]);
+			else TestRoomUp(Rooms[Index]);
+			
 		}
-		if (IndexPartToSpawn.Count != 0) {
-			for (int i = 0; i < IndexPartToSpawn.Count; i++) {
-				RoomCreate();
-			}
-		}
+	}
+	void StartNextThread(){
+		PartCreation.Dequeue().Start();
+		
+		isCreation = true;
 	}
 }
