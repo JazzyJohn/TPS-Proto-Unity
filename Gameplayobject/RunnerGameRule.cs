@@ -1,5 +1,7 @@
 ﻿using UnityEngine;
 using System.Collections;
+using System.Collections.Generic;
+using System;
 
 [Serializable]
 public class RoomScenarioEntry{
@@ -26,9 +28,7 @@ public class RunnerGameRule : GameRule {
         generator = GetComponent<Generation>();
         generator.CacheBaseLoad();
         generator.Next(StartRoomCnt);
-		foreach(RoomTypeSetting typeSetting in settings){
-			typeDictionary[typeSetting.type] = typeSetting.weidth;
-		}
+        LoadType();
         base.StartGame();
     }
     public override PlayerMainGui.GameStats GetStats()
@@ -67,9 +67,14 @@ public class RunnerGameRule : GameRule {
         isGameEnded = true;
     }
 	public void ChangeCondition(GeneratorCondition condition,int roomCount){
-		condition.currentBiom = RoomScenarioEntry[0].planedBiom
-		for(RoomScenarioEntry scenarioEntry in  scenario){
-			if(roomCount<StartRoomCnt){
+        if (condition.byTypeWeight == null)
+        {
+            LoadType();
+        }
+		condition.currentBiom = scenario[0].planedBiom;
+		foreach(RoomScenarioEntry scenarioEntry in  scenario){
+			if(roomCount<scenarioEntry.maxRoomNumber){
+           
 				condition.currentBiom = scenarioEntry.planedBiom;
 				break;
 			}
@@ -77,4 +82,11 @@ public class RunnerGameRule : GameRule {
 		condition.byTypeWeight = typeDictionary;
 		
 	}
+    void LoadType()
+    {
+        foreach (RoomTypeSetting typeSetting in settings)
+        {
+            typeDictionary[typeSetting.type] = typeSetting.weidth;
+        }
+    }
 }

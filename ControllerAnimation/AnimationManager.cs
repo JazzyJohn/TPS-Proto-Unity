@@ -14,6 +14,8 @@ public class AnimationManager : MonoBehaviour
 	public IKcontroller aimPos;
 	private bool shouldAim= true;
 	public Rigidbody rb;
+    protected RaggdollRoot raggdollRoot;
+    public bool isDead = false;
 	protected void Awake()
     {
         animator = GetComponent<Animator>();
@@ -24,6 +26,7 @@ public class AnimationManager : MonoBehaviour
             Debug.LogError("Animator not find!", this);
 
 		animator.logWarnings = false;
+        raggdollRoot = gameObject.GetComponentInChildren<RaggdollRoot>();
     }
 
     //debug
@@ -293,6 +296,7 @@ public class AnimationManager : MonoBehaviour
 
 	public void StartDeath(AnimDirection direction){
         SetNotMainLayer(0.0f);
+        isDead = true;
       // Debug.Log(direction);
         IKOff();
 		switch(direction){
@@ -344,18 +348,32 @@ public class AnimationManager : MonoBehaviour
     public void DollOn(){
         aimPos.IKShutDown();
          animator.enabled = false;
-        
+         if (raggdollRoot != null)
+         {
+             raggdollRoot.enabled = true;
+         }
     }
     public void DollOff()
     {
 
         animator.enabled = true;
         aimPos.IKTurnOn();
+        if (raggdollRoot != null)
+        {
+            raggdollRoot.enabled = false;
+        }
     }
     public void StandUp()
     {
-       
+        if (isDead)
+        {
+            return;
+        }
         animator.enabled = true;
+        if (raggdollRoot != null)
+        {
+            raggdollRoot.enabled = false;
+        }
         SetNotMainLayer(0.0f);
         animator.Play("GetUp_fromBack");
 
@@ -363,7 +381,7 @@ public class AnimationManager : MonoBehaviour
     public void StandUpFinish()
     {
 
-     
+        DollOff();
         SetNotMainLayer(1.0f);
         transform.parent.SendMessage("StandUpFinish", SendMessageOptions.DontRequireReceiver);
     }

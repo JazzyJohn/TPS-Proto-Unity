@@ -2389,7 +2389,10 @@ public class Pawn : DamagebleObject {
             }
 
             yield return new WaitForSeconds(KnockOutTimeOut);
-            animator.StandUp();
+            if (!isDead)
+            {
+                animator.StandUp();
+            }
         }
     }
     public void StandUpFinish() {
