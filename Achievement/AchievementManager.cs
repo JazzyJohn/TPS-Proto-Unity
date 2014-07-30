@@ -227,7 +227,7 @@ public class AchievementManager : MonoBehaviour, LocalPlayerListener{
 	public Vector3 wallRunningStartPosition;
 
 	public void EventAppear(Player target){
-		if (target.GetView ().isMine) {
+		if (target.isMine) {
 			myPlayer = target;
 			
 

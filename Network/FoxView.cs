@@ -2,8 +2,8 @@ using UnityEngine;
 using System.Collections;
 
 using System;
-using SmartFoxClientAPI;
-using SmartFoxClientAPI.Data
+using System.Reflection;
+using Sfs2X.Entities.Data;
 
 
 public class FoxView : MonoBehaviour {
@@ -11,27 +11,29 @@ public class FoxView : MonoBehaviour {
 	
 	private static string methodName  =  "UDPSerialization";
 	
+    private int ownerId;
+    
+    private int  subId;
+
 	public int viewID
     {
         get { return ownerId * NetworkController.MAX_VIEW_IDS + subId; }
         set
         {
             // if ID was 0 for an awakened PhotonView, the view should add itself into the networkingPeer.photonViewList after setup
-            bool viewMustRegister = this.didAwake && this.subId == 0;
+          
 
 
             this.ownerId = value / NetworkController.MAX_VIEW_IDS;
 
             this.subId = value % NetworkController.MAX_VIEW_IDS;
 
-            if (viewMustRegister)
-            {
-               //TODO: SHOW TAHT THIS ID IS OCupied;
-            }
+            
             
         }
     }
-
+    
+    /*
 	public void UDP(SFSObject data)
     {
 		Type type	=observed.GetType();
@@ -61,5 +63,22 @@ public class FoxView : MonoBehaviour {
 	
 	}
 
+    */
 
+    public  void SetInit(ISFSObject data)
+    {
+        TransformWrite(transform, data);
+        data.PutFloat("id",viewID);
+    }
+    public static void TransformWrite(Transform transform, ISFSObject data)
+    {
+        data.PutFloat("px", transform.position.x);
+        data.PutFloat("py", transform.position.y);
+        data.PutFloat("pz", transform.position.z);
+
+        data.PutFloat("qx", transform.rotation.x);
+        data.PutFloat("qy", transform.rotation.y);
+        data.PutFloat("qz", transform.rotation.z);
+        data.PutFloat("qw", transform.rotation.w);
+    }
 }

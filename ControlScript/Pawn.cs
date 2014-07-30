@@ -2416,5 +2416,10 @@ public class Pawn : DamagebleObject {
 		mainAi.homeIndex =homeindex;
         isActive = true;
 	}
-	
+
+
+    public nstuff.juggerfall.extension.pawn.Pawn GetSerilizedData()
+    {
+        return new nstuff.juggerfall.extension.pawn.Pawn();
+    }
 }

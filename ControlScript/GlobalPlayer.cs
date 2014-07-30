@@ -12,9 +12,7 @@ public class GlobalPlayer : MonoBehaviour {
 				Destroy(gameObject);
 			}else{
 				Application.ExternalCall ("SayMyName");
-				if (Application.platform == RuntimePlatform.WindowsEditor) {
-					SetUid(UID);
-				}
+				
 				DontDestroyOnLoad(transform.gameObject);
 			}
 		
@@ -47,6 +45,13 @@ public class GlobalPlayer : MonoBehaviour {
             }
 
             return s_Instance;
+        }
+    }
+    public void Start()
+    {
+        if (Application.platform == RuntimePlatform.WindowsEditor)
+        {
+            SetUid(UID);
         }
     }
 
@@ -166,5 +171,6 @@ public class GlobalPlayer : MonoBehaviour {
 		AchievementManager.instance.Init(UID);
 		ItemManager.instance.Init(UID);
         FindObjectOfType<RewardManager>().Init(UID);
+        NetworkController.Instance.SetLogin(UID);
 	}
 }
