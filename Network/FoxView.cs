@@ -15,14 +15,23 @@ public class FoxView : MonoBehaviour {
     
     private int  subId;
 
+	public bool isMine;
+	
+	public bool isSceneView;
+	
 	public int viewID
     {
         get { return ownerId * NetworkController.MAX_VIEW_IDS + subId; }
         set
         {
             // if ID was 0 for an awakened PhotonView, the view should add itself into the networkingPeer.photonViewList after setup
-          
-
+			isSceneView = ownerId ==0;
+			
+			if(isSceneView){
+				isMine = NetworkController.smartFox.MySelf.ContainsVariable("Master")&&NetworkController.smartFox.MySelf.GetVariable("Master").GetBoolValue();
+			}else{
+				isMine = NetworkController.smartFox.MySelf.Id == ownerId;			
+			}
 
             this.ownerId = value / NetworkController.MAX_VIEW_IDS;
 
@@ -64,21 +73,52 @@ public class FoxView : MonoBehaviour {
 	}
 
     */
-
-    public  void SetInit(ISFSObject data)
+	public void StartShoot(string animName){
+		NetworkController.Instance.PawnChangeShootAnimStateRequest( viewID,  animName,true);
+	}
+	public void StopShoot(string animName){
+		NetworkController.Instance.PawnChangeShootAnimStateRequest( viewID,  animName,false);
+	}
+	public void StartKick(int i){
+		NetworkController.Instance.PawnKickRequest( viewID,i,true);
+	}
+	public void StopKick(){
+		NetworkController.Instance.PawnKickRequest(viewID,0,false);
+	}
+	public void Activate(){
+		NetworkController.Instance.PawnActiveStateRequest(viewID,true);
+	}
+	public void DeActivate(){
+		NetworkController.Instance.PawnActiveStateRequest(viewID,false);
+	}
+	
+	public void PawnUpdate( nstuff.juggerfall.extension.pawn.Pawn pawn){
+		NetworkController.Instance.PawnUpdateRequest(pawn);
+	}
+	public void Taunt(string name){
+		NetworkController.Instance.PawnTauntRequest(viewID, name);
+	}
+	public void KnockOut(){
+		NetworkController.Instance.PawnKnockOutRequest(viewID);
+	}
+	public void Destroy(){
+		NetworkController.Instance.DeleteViewRequest(viewID);
+	}
+	
+    public void SendShoot(Vector3 position, Quaternion rotation, float power, float range, int viewId, int projId)
     {
-        TransformWrite(transform, data);
-        data.PutFloat("id",viewID);
-    }
-    public static void TransformWrite(Transform transform, ISFSObject data)
-    {
-        data.PutFloat("px", transform.position.x);
-        data.PutFloat("py", transform.position.y);
-        data.PutFloat("pz", transform.position.z);
-
-        data.PutFloat("qx", transform.rotation.x);
-        data.PutFloat("qy", transform.rotation.y);
-        data.PutFloat("qz", transform.rotation.z);
-        data.PutFloat("qw", transform.rotation.w);
-    }
+		ShootData send = new ShootData ();
+		ISFSObject data = new SFSObject();
+     
+     	data.PutClass("position", position);
+		data.PutClass("direction", rotation);
+		data.PutFloat("power", power);
+		data.PutFloat("range", range);
+		data.PutFloat("viewId", viewId);
+		data.PutFloat("projId", projId);	
+		data.PutFloat("projId", projId);	
+		send.timeShoot = TimeManager.Instance.NetworkTime();
+		data.PutFloat("id", viewID);	
+		NetworkController.Instance.WeaponShoot(data);
+	}
 }

@@ -337,9 +337,9 @@ public class Pawn : DamagebleObject {
 	
 	protected Vector3 lastHitDirection = Vector3.zero;
 
-	//ноги
+	//Serialization
 
-	
+	nstuff.juggerfall.extension.pawn.Pawn  serPawn   =	new nstuff.juggerfall.extension.pawn.Pawn();
 
 
 
@@ -349,7 +349,7 @@ public class Pawn : DamagebleObject {
 		_rb  = GetComponent<Rigidbody>();
 		capsule = GetComponent<CapsuleCollider> ();
         myCollider = collider;
-		photonView = GetComponent<PhotonView>();
+		foxView = GetComponent<FoxView>();
 		animator = transform.GetComponentInChildren<AnimationManager>();
 		PlayerManager.instance.addPawn (this);
         aSource = GetComponent<AudioSource>();
@@ -365,7 +365,7 @@ public class Pawn : DamagebleObject {
 
 	// Use this for initialization
 	protected void Start () {
-        if (isSpawned || !photonView.isMine)
+        if (isSpawned || !foxView.isMine)
         {
             StartPawn();
         }
@@ -386,7 +386,7 @@ public class Pawn : DamagebleObject {
             isSpawn = true;//отключаем движения и повреждения
         }
 
-        if (!photonView.isMine)
+        if (!foxView.isMine)
         {
 
             Destroy(GetComponent<ThirdPersonController>());
@@ -405,10 +405,11 @@ public class Pawn : DamagebleObject {
         isAi = mainAi != null;
         if (isAi)
         {
-            if (photonView.isMine)
+            if (foxView.isMine)
             {
                 mainAi.StartAI();
-                photonView.RPC("PRCSetAIAfterSpawn", PhotonTargets.OthersBuffered, mainAi.aiGroup, mainAi.homeIndex);
+				//TODO AI SYNC
+               // photonView.RPC("PRCSetAIAfterSpawn", PhotonTargets.OthersBuffered, mainAi.aiGroup, mainAi.homeIndex);
 
             }
         }
@@ -517,7 +518,7 @@ public class Pawn : DamagebleObject {
         {
             AddEffect(damage.hitPosition);
         }
-		if (photonView.isMine) {
+		if (foxView.isMine) {
 		
 			float forcePush =  charMan.GetFloatChar(CharacteristicList.STANDFORCE);
 			///Debug.Log(forcePush +" "+damage.pushForce);
@@ -727,7 +728,7 @@ public class Pawn : DamagebleObject {
 
 		//Debug.Log (speed);
 		if (animator != null && animator.gameObject.activeSelf) {
-			if (photonView.isMine) {
+			if (foxView.isMine) {
 				
 				
 				strafe = CalculateStarfe();
@@ -892,7 +893,7 @@ public class Pawn : DamagebleObject {
 		//Debug.Log (photonView.isSceneView);
 
 
-        if (!isActive && !photonView.isMine)
+        if (!isActive && !foxView.isMine)
         {
 			//replicate position to get rid off teleportation after bot is dead			
 			ReplicatePosition();		
@@ -907,7 +908,7 @@ public class Pawn : DamagebleObject {
 		}
 
 
-		if (photonView.isMine) {
+		if (foxView.isMine) {
 
 			UpdateSeenList();
             if (jetPackEnable == false)
@@ -1144,7 +1145,7 @@ public class Pawn : DamagebleObject {
 	
 	public virtual Vector3 getAimRotation(){
 		
-		if(photonView.isMine){
+		if(foxView.isMine){
 			if(isAi){
 				if(enemy==null){
 					if(aiAimRotation.sqrMagnitude>0){
@@ -1284,28 +1285,21 @@ public class Pawn : DamagebleObject {
 	//For weapon that have shoot animation like  bug tail
 	public void  StartShootAnimation(string animName){
 		animator.StartShootAniamtion(animName);
-		if (photonView.isMine) {
-			photonView.RPC("RPCStartShootAnimation",PhotonTargets.Others, animName);
+		if (foxView.isMine) {
+			foxView.StartShoot(animName);
+			//photonView.RPC("RPCStartShootAnimation",PhotonTargets.Others, animName);
 		}
 	}
-	[RPC]
-	public void  RPCStartShootAnimation(string animName){
-		animator.StartShootAniamtion(animName);
-		
-	}
+	
 	
 	
 	public void  StopShootAnimation(string animName){
 		animator.StopShootAniamtion(animName);
-		if (photonView.isMine) {
-			photonView.RPC("RPCStopShootAnimation",PhotonTargets.Others, animName);
+		if (foxView.isMine) {
+			foxView.StopShoot(animName);
 		}
 	}
-	[RPC]
-	public void  RPCStopShootAnimation(string animName){
-		animator.StopShootAniamtion(animName);
-		
-	}
+
 	
 	//We must tell our gun it's time to spit some projectiles cause of animation 
 	public void WeaponShoot(){
@@ -1326,8 +1320,8 @@ public class Pawn : DamagebleObject {
 //		Debug.Log ("ATtack");
 		//animator.SetSome("Any",true);
 		//((DogAnimationManager) animator).AnyDo();
-		if (photonView.isMine) {
-			photonView.RPC("RPCKick",PhotonTargets.Others,i);
+		if (foxView.isMine) {
+			foxView.StartKick(i);
 		}
 	}
 	
@@ -1340,18 +1334,10 @@ public class Pawn : DamagebleObject {
 
 		//animator.SetSome("Any",true);
 		//((DogAnimationManager) animator).AnyDo();
-		if (photonView.isMine) {
-			photonView.RPC("RPCKick",PhotonTargets.Others,i);
+		if (foxView.isMine) {
+				foxView.StartKick(i);
 		}
 	
-	}
-	[RPC]
-	public void RPCKick(int i){
-
-		naturalWeapon.StartKick(AttackType[i]); 
-		
-		//animator.SetSome("Any",true);
-		//((DogAnimationManager) animator).AnyDo();
 	}
 	
 	public void StopKick(){
@@ -1359,19 +1345,11 @@ public class Pawn : DamagebleObject {
         {
             naturalWeapon.StopKick();
         }
-		if (photonView.isMine) {
-			photonView.RPC("RPCStopKick",PhotonTargets.Others);
+		if (foxView.isMine) {
+				foxView.StopKick();
 		}
 	}
 	
-	[RPC]
-	public void RPCStopKick(){
-		if (naturalWeapon != null)
-		{
-			naturalWeapon.StopKick();
-		}
-		
-	}
 	
 	public float OptimalDistance(bool isMelee){
 		if(CurWeapon!=null&&!isMelee){
@@ -1553,7 +1531,7 @@ public class Pawn : DamagebleObject {
 	}
 	bool WallRun (Vector3 movement,CharacterState state)
 	{
-		if ((!canWallRun||!_canWallRun)&&photonView.isMine) return false;
+		if ((!canWallRun||!_canWallRun)&&foxView.isMine) return false;
 
 		//if (isGrounded) return false;
 		if (lastTimeOnWall + 1.0f > Time.time) {
@@ -1784,7 +1762,7 @@ public class Pawn : DamagebleObject {
 		if (!isActive) {
 			return;		
 		}
-		if (!photonView.isMine) {
+		if (!foxView.isMine) {
 			return;
 		}
 		if (!_rb.isKinematic) {
@@ -2035,7 +2013,7 @@ public class Pawn : DamagebleObject {
 		//Debug.Log(_rb.isKinematic);
 		*/
 		isGrounded = false;
-	
+		foxView.PawnUpdate( GetSerilizedData());
 	}
 	
 	public void JumpEnd(CharacterState nextState){
@@ -2225,46 +2203,7 @@ public class Pawn : DamagebleObject {
 
 
 	
-	//NetworkSection
-	public void OnPhotonSerializeView(PhotonStream stream, PhotonMessageInfo info)
-	{
-		if (stream.isWriting)
-		{
-			// We own this player: send the others our data
-			ServerHolder.WriteVectorToShort(stream,transform.position);
-			stream.SendNext(transform.rotation.eulerAngles.y);
-			ServerHolder.WriteVectorToShort(stream,aimRotation);
-			
-			stream.SendNext(characterState);
-			//stream.SendNext(health);
-			stream.SendNext(wallState);
-			stream.SendNext(health);
-			//stream.SendNext(isActive);
-			//stream.SendNext(netIsGround);
-			//stream.SendNext(animator.GetJump());
-
-		}
-		else
-		{
-			// Network player, receive data
-		
-			correctPlayerPos = ServerHolder.ReadVectorFromShort(stream);
-			correctPlayerRot =  Quaternion.Euler(0,(float)stream.ReceiveNext(),0);
-		
-			this.aimRotation = ServerHolder.ReadVectorFromShort(stream);
-			//Debug.Log(aimRotation);
-			nextState = (CharacterState) stream.ReceiveNext();
-			//Debug.Log (characterState);
-			//health=(float) stream.ReceiveNext();
-			wallState = (WallState) stream.ReceiveNext();
-            health = (float)stream.ReceiveNext();
-		
-			//bool isActive =(bool)stream.ReceiveNext();
-			//isGrounded =(bool) stream.ReceiveNext();
-			//animator.ApllyJump((bool)stream.ReceiveNext());
-			//Debug.Log (wallState);
-		}
-	}
+	
 	public void Activate(){
 		if(cameraController!=null){
 			_rb.isKinematic = false;
@@ -2278,10 +2217,10 @@ public class Pawn : DamagebleObject {
 		for (int i =0; i<myTransform.childCount; i++) {
 			myTransform.GetChild(i).gameObject.SetActive(true);
 		}
-		photonView.RPC("RPCActivate",PhotonTargets.OthersBuffered);
+		foxView.Activate();
 	}
-	[RPC]
-	public void RPCActivate(){
+
+	public void RemoteActivate(){
 		//Debug.Log ("RPCActivate");
 		if(cameraController!=null){
 			cameraController.enabled = true;
@@ -2307,11 +2246,11 @@ public class Pawn : DamagebleObject {
 		for (int i =0; i<myTransform.childCount; i++) {
 			myTransform.GetChild(i).gameObject.SetActive(false);
 		}
-		photonView.RPC("RPCDeActivate",PhotonTargets.OthersBuffered);
+		foxView.DeActivate();
 		
 	}
-	[RPC]
-	public void RPCDeActivate(){
+	
+	public void RemoteDeActivate(){
 		//Debug.Log ("RPCDeActivate");
 		if(cameraController!=null){
 			cameraController.enabled = false;
@@ -2324,10 +2263,7 @@ public class Pawn : DamagebleObject {
 		}
 
 	}
-	[RPC]
-	public void RPCSetHealth(float value){
-		health = value;
-	}
+	
 
 	//EndNetworkSection
 
@@ -2336,15 +2272,7 @@ public class Pawn : DamagebleObject {
 	public List<Pawn> getAllSeenPawn(){
 		return seenPawns;
 	}
-	public void SetTeam(int newTeam){
-		team = newTeam;
-		photonView.RPC("RPCSetTeam",PhotonTargets.OthersBuffered,team);
-	}
-	[RPC]
-	public void RPCSetTeam(int newTeam){
-		team = newTeam;
-	}
-
+	
 	//end seen hear work
 
 	
@@ -2357,14 +2285,13 @@ public class Pawn : DamagebleObject {
 		canMove = false;
 		animator.PlayTaunt (tauntAnimation);
 		
-		photonView.RPC("RPCPlayTaunt",PhotonTargets.Others,tauntAnimation);
+		foxView.Taunt(tauntAnimation);
 	}
 	public void  StopTaunt(){
 		canMove = true;
 
 	}
-	[RPC]
-	public void RPCPlayTaunt(string taunt){
+	public void RemotePlayTaunt(string taunt){
 		animator.PlayTaunt (taunt);
 	}
     public void StartKnockOut() {
@@ -2376,16 +2303,16 @@ public class Pawn : DamagebleObject {
 
 
     public IEnumerator KnockOut() {
-        Debug.Log("KnockOut");
+       // Debug.Log("KnockOut");
         if (!_knockOut)
         {
             _knockOut = true;
             canMove = false;
             animator.KnockOut();
             StopKick();
-            if (photonView.isMine)
+            if (foxView.isMine)
             {
-                photonView.RPC("RPCKnockOut", PhotonTargets.Others);
+               foxView.KnockOut();
             }
 
             yield return new WaitForSeconds(KnockOutTimeOut);
@@ -2399,10 +2326,7 @@ public class Pawn : DamagebleObject {
         _knockOut = false;
         canMove = true;
     }
-    [RPC]
-    public void RPCKnockOut() {
-        StartCoroutine(KnockOut());
-    }
+  
 	 void OnMasterClientSwitched()
     {
         if (PhotonNetwork.isMasterClient&&isAi) {
@@ -2418,8 +2342,21 @@ public class Pawn : DamagebleObject {
 	}
 
 
+	
     public nstuff.juggerfall.extension.pawn.Pawn GetSerilizedData()
     {
-        return new nstuff.juggerfall.extension.pawn.Pawn();
+		serPawn.id = foxView.ViewID;
+		serPawn.wallState =(int)wallState;
+		serPawn.team =team;
+		serPawn.characterState =(int)characterState;
+		serPawn.active =active;
+		serPawn.isDead =isDead;
+	    return  serPawn;
+    }
+	public void NetUpdate(nstuff.juggerfall.extension.pawn.Pawn pawn)
+    {
+		nextState = (CharacterState) pawn.characterState;
+		wallState = (WallState) pawn.wallState;
+	 
     }
 }

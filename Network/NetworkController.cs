@@ -58,6 +58,15 @@ public class NetworkController : MonoBehaviour {
 	}
 
     public ServerHolder serverHolder;
+	
+	public static FoxView GetView(int id){
+		if(foxViewList.	ContainsKey(id)){
+			return foxViewList[id];
+		}
+		return null;
+	}
+	
+	
 		// We start working from here
     void Awake()
     {
@@ -264,6 +273,19 @@ public class NetworkController : MonoBehaviour {
                     }
 
                     break;
+				case "pawnSpawn":
+					{
+						HandlePawnSpawn(dt);
+					
+					}
+					break;
+				case "pawnChangeShootAnimStateRequest":
+					HandlePawnChangeShootAnimState(dt);
+					break;
+				case "pawnStartKick":
+					HandlePawnKick(dt);
+					break;
+					
             }
         }
         catch (Exception e)
@@ -273,10 +295,17 @@ public class NetworkController : MonoBehaviour {
 
     }
  
-    
+    public Player GetPlayer(int uid){
+		 if (!PlayerView.allPlayer.ContainsKey(uid))
+		{
+			SpawnPlayer(uid);
+		}
+			
+		return PlayerView.allPlayer[uid].GetComponent<Player>();
+	}
 
 
-    private GameObject InstantiateNetPrefab(string prefab, Vector3 vector3, Quaternion quaternion, ISFSObject data)
+    private GameObject InstantiateNetPrefab(string prefab, Vector3 vector3, Quaternion quaternion, ISFSObject data,bool AI)
     {
         GameObject newObject = _SpawnPrefab(prefab,vector3,quaternion);
         if (newObject == null)
@@ -284,11 +313,29 @@ public class NetworkController : MonoBehaviour {
             return null;
         }
         FoxView view =  newObject.GetComponent<FoxView>();
-        view.viewID = AllocateViewID(_smartFox.MySelf.Id);
-        view.SetInit(data);
-
+		if(!AI){
+			view.viewID = AllocateViewID(_smartFox.MySelf.Id);
+		}else{
+			view.viewID = AllocateViewID(0);
+		}
+		
         return newObject;
     }
+	 private GameObject RemoteInstantiateNetPrefab(string prefab, Vector3 vector3, Quaternion quaternion, int viewId)
+    {
+        GameObject newObject = _SpawnPrefab(prefab,vector3,quaternion);
+        if (newObject == null)
+        {
+            return null;
+        }
+        FoxView view =  newObject.GetComponent<FoxView>();
+		
+		view.viewID =viewId;
+		
+		
+        return newObject;
+    }
+	
     private GameObject _SpawnPrefab(string prefabName, Vector3 vector3, Quaternion quaternion)
     {
         GameObject resourceGameObject = null;
@@ -376,6 +423,30 @@ public class NetworkController : MonoBehaviour {
             throw new Exception(string.Format("AllocateViewID() failed. User {0} is out of subIds, as all viewIDs are used.", ownerId));
         }
     }
+	
+	  /// <summary>
+    /// Spawn current player object
+    /// </summary>	
+    public void SpawnPlayer(nstuff.juggerfall.extension.player.Player player)
+    {
+
+        Debug.Log( "CREATE PLAYER " + player.userId );
+        GameObject newObject = _SpawnPrefab("Player", Vector3.zero, Quaternion.identity);
+        PlayerView view = newObject.GetComponent<PlayerView>();
+        view.SetId(player.userId);
+        view.NetUpdate(player);
+
+    }
+	 public void SpawnPlayer(int uid)
+    {
+
+        Debug.Log( "CREATE PLAYER " + player.userId );
+        GameObject newObject = _SpawnPrefab("Player", Vector3.zero, Quaternion.identity);
+        PlayerView view = newObject.GetComponent<PlayerView>();
+        view.SetId(uid);
+        
+    }
+	
 
     //REQUEST SECTION
 
@@ -388,19 +459,7 @@ public class NetworkController : MonoBehaviour {
         ExtensionRequest request = new ExtensionRequest("getTime", new SFSObject(), room);
         smartFox.Send(request);
     }
-    /// <summary>
-    /// Spawn current playerobject
-    /// </summary>	
-    public void SpawnPlayer(nstuff.juggerfall.extension.player.Player player)
-    {
-
-        Debug.Log( "CREATE PLAYER " + player.userId );
-        GameObject newObject = _SpawnPrefab("Player", Vector3.zero, Quaternion.identity);
-        PlayerView view = newObject.GetComponent<PlayerView>();
-        view.SetId(player.userId);
-        view.NetUpdate(player);
-
-    }
+  
     /// <summary>
     /// setNameUID request to server
     /// </summary>	
@@ -431,7 +490,7 @@ public class NetworkController : MonoBehaviour {
     /// <summary>
     /// pawnSpawn request to server
     /// </summary>	
-    public GameObject PawnSpawnRequest(string prefab, Vector3 vector3,Quaternion quaternion,bool isAI)
+    public GameObject PawnSpawnRequest(string prefab, Vector3 vector3,Quaternion quaternion,bool isAI,int[] stims)
     {
         ISFSObject data = new SFSObject();
 
@@ -439,13 +498,194 @@ public class NetworkController : MonoBehaviour {
         {
             data.PutBool("AI", isAI);
         }
+		data.PutIntArray("stims", stims);
         GameObject go = InstantiateNetPrefab(prefab, vector3, quaternion, data);
-        data.PutClass("pawn",go.GetComponent<Pawn>().GetSerilizedData());
-        ExtensionRequest request = new ExtensionRequest("pawnSpawn", data, serverHolder.gameRoom);
+		nstuff.juggerfall.extension.pawn.Pawn pawn  =go.GetComponent<Pawn>().GetSerilizedData();
+		pawn.type = prefab;
+        data.PutClass("pawn",pawn);
+        ExtensionRequest request = new ExtensionRequest("pawnSpawn", data, serverHolder.gameRoom,isAI);
         smartFox.Send(request);
         return go;
 
 
     }
-    
+	
+    /// <summary>
+    /// pawnChangeShootAnimStateRequest request to server
+    /// </summary>	
+    public void PawnChangeShootAnimStateRequest(int id,string animName,bool state)
+    {
+         ISFSObject data = new SFSObject();
+
+        data.PutInt("id", id);
+		data.PutBool("state", state);
+		data.PutString("animName", animName);
+        ExtensionRequest request = new ExtensionRequest("pawnChangeShootAnimStateRequest", data, serverHolder.gameRoom);
+        smartFox.Send(request);
+
+    }
+	/// <summary>
+    /// pawnStartKick request to server
+    /// </summary>	
+    public void PawnKickRequest(int id,int kick,bool state)
+    {
+         ISFSObject data = new SFSObject();
+
+        data.PutInt("id", id);
+		data.PutBool("state", state);
+		data.PutInt("kick", kick);
+        ExtensionRequest request = new ExtensionRequest("pawnStartKick", data, serverHolder.gameRoom);
+        smartFox.Send(request);
+
+    /// <summary>
+    /// pawnActiveState request to server
+    /// </summary>	
+    public void PawnActiveStateRequest(int id,bool state)
+    {
+         ISFSObject data = new SFSObject();
+
+        data.PutInt("id", id);
+		data.PutBool("active", state);
+	    ExtensionRequest request = new ExtensionRequest("pawnActiveState", data, serverHolder.gameRoom);
+        smartFox.Send(request);
+
+    }
+    /// <summary>
+    /// pawnUpdate request to server
+    /// </summary>	
+    public void PawnUpdateRequest(nstuff.juggerfall.extension.pawn.Pawn  pawn)
+    {
+        ISFSObject data = new SFSObject();
+     
+     	data.PutClass("pawn", pawn);
+	    ExtensionRequest request = new ExtensionRequest("pawnUpdate", data, serverHolder.gameRoom);
+        smartFox.Send(request);
+
+    }
+	/// <summary>
+    /// pawnTaunt request to server
+    /// </summary>	
+    public void PawnTauntRequest(int id,string animName)
+    {
+        ISFSObject data = new SFSObject();
+     
+     	data.PutInt("id", id);
+		data.PutString("animName", animName);
+	    ExtensionRequest request = new ExtensionRequest("pawnTaunt", data, serverHolder.gameRoom);
+        smartFox.Send(request);
+
+    }
+	/// <summary>
+    /// pawnKnockOut request to server
+    /// </summary>	
+    public void PawnKnockOutRequest(int id)
+    {
+        ISFSObject data = new SFSObject();
+     
+     	data.PutInt("id", id);
+	    ExtensionRequest request = new ExtensionRequest("pawnKnockOut", data, serverHolder.gameRoom);
+        smartFox.Send(request);
+
+    }
+	/// <summary>
+    /// deleteView request to server
+    /// </summary>	
+    public void DeleteViewRequest(int id)
+    {
+        ISFSObject data = new SFSObject();
+     
+     	data.PutInt("id", id);
+	    ExtensionRequest request = new ExtensionRequest("deleteView", data, serverHolder.gameRoom);
+        smartFox.Send(request);
+
+    }
+	/// <summary>
+    /// weaponSpawn request to server
+    /// </summary>	
+	
+	public GameObject WeaponSpawn(string prefab, Vector3 vector3,Quaternion quaternion,bool isAI,int pawnId)
+    {
+        ISFSObject data = new SFSObject();
+
+       
+        GameObject go = InstantiateNetPrefab(prefab, vector3, quaternion, data,isAI);
+		nstuff.juggerfall.extension.weapon.Weapon  weapon  = go.GetComponent<BaseWeapon>().GetSerilizedData()
+		weapon.type = prefab;
+        data.PutClass("weapon",weapon);
+		data.PutInt("pawnId",pawnId);
+        ExtensionRequest request = new ExtensionRequest("weaponSpawn", data, serverHolder.gameRoom);
+        smartFox.Send(request);
+        return go;
+
+
+    }
+	/// <summary>
+    /// weaponSpawn request to server
+    /// </summary>	
+	
+	public void WeaponSpawn(ISFSObject data )
+    {
+        ExtensionRequest request = new ExtensionRequest("weaponSpawn", data, serverHolder.gameRoom);
+        smartFox.Send(request);
+
+
+    }
+		
+		
+		
+		
+		
+		
+		
+		
+		
+		
+	//Handler SECTION
+	/// <summary>
+    /// handle pawnSpawn  from Server
+    /// </summary>	
+	
+	public void HandlePawnSpawn(ISFSObject dt )
+    {
+		nstuff.juggerfall.extension.pawn.Pawn sirPawn =  (nstuff.juggerfall.extension.pawn.Pawn)dt.GetClass("pawn");
+		GameObject go =RemoteInstantiateNetPrefab(sirPawn.type, Vector3.zero,Quaternion.indentity,sirPawn.id);
+		
+		Player player  = GetPlayer(dt.GetInt("ownerId"));
+		Pawn pawn  = go.GetComponent<Pawn>();
+		player.AfterSpawnSetting(pawn,sirPawn.team,dt.GetIntArray("stims"));
+		pawn.NetUpdate(sirPawn);
+		 
+		 
+	}
+	/// <summary>
+    /// handle pawnChangeShootAnimState(  from Server
+    /// </summary>	
+	
+	public void HandlePawnChangeShootAnimState(ISFSObject dt )
+    {
+			
+		Pawn pawn = GetView(dt.GetInt("id")).GetComponent<Pawn>();
+		if(dt.GetBool("state")){
+			pawn.StartShootAnimation(dt.GeUtfString("animName"));
+		}else{
+			pawn.StopShootAnimation(dt.GeUtfString("animName"));
+		}
+		 
+	}
+	/// <summary>
+    /// handle pawnStartKick  from Server
+    /// </summary>	
+	
+	public void HandlePawnKick(ISFSObject dt )
+    {
+			
+		Pawn pawn = GetView(dt.GetInt("id")).GetComponent<Pawn>();
+		if(dt.GetBool("state")){
+			pawn.Kick(dt.GetInt("kick"));
+		}else{
+			pawn.StopKick();
+		}
+		 
+	}
 }
+

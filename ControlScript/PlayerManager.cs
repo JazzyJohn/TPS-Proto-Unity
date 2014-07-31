@@ -54,7 +54,7 @@ public class PlayerManager : MonoBehaviour {
     }
  
     // Add the rest of the code here...
-    public Pawn SpawmPlayer(String newPalyerClass,int team) {
+    public Pawn SpawmPlayer(String newPalyerClass,int team,int[] stims) {
 		Pawn localPlayer;
 		Transform targetPos = GetSpamPosition (team);
 
@@ -65,7 +65,7 @@ public class PlayerManager : MonoBehaviour {
     }
 	
 
-    public Pawn SpawmPlayer(Pawn newPalyerClass, Vector3 position,Quaternion rotation ) {
+    public Pawn SpawmBot(Pawn newPalyerClass, Vector3 position,Quaternion rotation ) {
 		Pawn localPlayer;
 	
 

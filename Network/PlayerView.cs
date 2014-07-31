@@ -13,6 +13,7 @@ public class PlayerView : MonoBehaviour {
     private int ownerId;
 
     public Player observed;
+   
     public bool isMine;
 
     public void SetId(int userId)

@@ -38,6 +38,8 @@ namespace nstuff.juggerfall.extension.pawn
     [Serializable]
     public class Pawn : SerializableSFSType
     {
+		public int id;
+	 
         public string type;
 
         public int wallState;
@@ -47,10 +49,29 @@ namespace nstuff.juggerfall.extension.pawn
         public int characterState;
 
         public bool active;
+		
+		public int  pawnType;
 
         public bool isDead;
 
         public Pawn()
+        {
+
+        }
+    }
+
+}
+namespace nstuff.juggerfall.extension.weapon
+{
+
+    [Serializable]
+    public class Weapon : SerializableSFSType
+    {
+		public int id;
+	 
+        public string type;
+
+        public Weapon()
         {
 
         }

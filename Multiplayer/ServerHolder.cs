@@ -131,7 +131,7 @@ public class ServerHolder : MonoBehaviour
 
     private void SetupRoomList()
     {
-        List<Sfs2X.Entities.Room> roomList = NetworkController.smartFox.RoomManager.GetRoomList();
+        List<Sfs2X.Entities.Room> roomList = NetworkController.smartFox.RoomManager.GetRoomListFromGroup("games");
         allRooms = new List<RoomData>();
         foreach (Sfs2X.Entities.Room room in roomList)
         {

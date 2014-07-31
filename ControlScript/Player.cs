@@ -108,16 +108,18 @@ public class Player : MonoBehaviour {
 	}
     void Awake()
     {
+		DontDestroyOnLoad(gameObject);
         playerView = GetComponent<PlayerView>();
+		
     }
 	void Start(){
 		
 		PlayerManager.instance.addPlayer(this);
-		charMan = GetComponent<CharacteristicPlayerManager>();
-        charMan.Init();
+		
         if (playerView.isMine)
         {
-		
+						charMan = GetComponent<CharacteristicPlayerManager>();
+						charMan.Init();
 						myCamera = Camera.main;
 						((PlayerMainGui)myCamera.GetComponent (typeof(PlayerMainGui))).SetLocalPlayer(this);
 						robotTimer = 0;
@@ -153,13 +155,7 @@ public class Player : MonoBehaviour {
 		}
 	}
 	public void Respawn(Pawn newPawn){
-        if (!inBot && playerView.isMine)
-        {
-			currentPawn.RequestKillMe();
-			currentPawn  =PlayerManager.instance.SpawmPlayer(newPawn,currentPawn.myTransform.position,currentPawn.myTransform.rotation);
-			canSpamBot=false;
-            AfterSpawnSetting(currentPawn, PawnType.PAWN, team, activeSteampacks.ToArray());
-		}
+       
 
 	}
 	void Update(){
@@ -177,11 +173,11 @@ public class Player : MonoBehaviour {
 //			Debug.Log ("Dead");
 			if(respawnTimer<=0&&isStarted){
 				respawnTimer=respawnTime;
-				currentPawn =PlayerManager.instance.SpawmPlayer(PlayerManager.instance.pawnName[selected],team);
+				currentPawn =PlayerManager.instance.SpawmPlayer(PlayerManager.instance.pawnName[selected],team,activeSteampacks.ToArray());
 				currentPawn.ChangeDefaultWeapon(Choice._Player);
 				ItemManager.instance.SaveItemForSlot();
 				PVPGameRule.instance.Spawn(team);
-				AfterSpawnSetting(currentPawn,PawnType.PAWN,team,activeSteampacks.ToArray());
+				AfterSpawnSetting(currentPawn,team,activeSteampacks.ToArray());
 				prefabBot =PlayerManager.instance.avaibleBots[selectedBot];
 				prefabGhostBot =PlayerManager.instance.ghostsBots[selectedBot];
 
@@ -233,10 +229,10 @@ public class Player : MonoBehaviour {
 						if(ghostBot!=null&&canSpawnBot){
 							Vector3 spamPoint =ghostBot.transform.position;
 							spamPoint.y+= 30;
-							robotPawn =(RobotPawn)PlayerManager.instance.SpawmPlayer(prefabBot,spamPoint,ghostBot.transform.rotation);
+							robotPawn =(RobotPawn)PlayerManager.instance.SpawmBot(prefabBot,spamPoint,ghostBot.transform.rotation);
 							robotPawn.ChangeDefaultWeapon(selectedBot);
 							//Debug.Log("robot spawn"+robotPawn);
-                            AfterSpawnSetting(robotPawn, PawnType.BOT, team, activeSteampacks.ToArray());
+                            AfterSpawnSetting(robotPawn, team, activeSteampacks.ToArray());
 
 						
 							canSpawnBot=false;							
@@ -586,17 +582,23 @@ public class Player : MonoBehaviour {
 		}
 	
 	}
-    public void AfterSpawnSetting(Pawn pawn, PawnType type, int rTeam, int[] steampacks)
+    public void AfterSpawnSetting(Pawn pawn,  int rTeam, int[] steampacks)
     {
 
-       
+       PawnType type =PawnType.PAWN;
         //Debug.Log (viewid);
-
+		
+		if((pawn as RobotPawn)!=null){
+		  type =PawnType.BOT;
+		}
         switch (type)
         {
             case PawnType.PAWN:
                 if (!playerView.isMine)
                 {
+					if(charMan==null){
+						charMan = GetComponent<CharacteristicPlayerManager>();
+					}
                     charMan.DeathUpdate();
                     List<int> activeSteampacks = new List<int>();
 

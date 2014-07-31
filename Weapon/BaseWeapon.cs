@@ -206,7 +206,10 @@ public class BaseWeapon : DestroyableNetworkObject {
 	//ID for MySqlBAse
 	public int SQLId;
 
-
+	void Awake(){
+		foxView = GetComponent<foxView>();
+	}
+	
 	// Use this for initialization
 	protected void Start () {
 		aSource = GetComponent<AudioSource> ();
@@ -221,10 +224,10 @@ public class BaseWeapon : DestroyableNetworkObject {
 		}
 		
 		curTransform = transform;
-		photonView = GetComponent<PhotonView>();
+	
 		rifleParticleController = GetComponentInChildren<RifleParticleController>();
 	
-		if (rifleParticleController != null&&photonView.isMine) {
+		if (rifleParticleController != null&&foxView.isMine) {
 			rifleParticleController.SetOwner (owner.collider);
 		}
 	}
@@ -233,8 +236,8 @@ public class BaseWeapon : DestroyableNetworkObject {
 		if (curTransform == null) {
 			curTransform = transform;		
 		}
-		if (photonView == null) {
-			photonView = GetComponent<PhotonView>();
+		if (foxView == null) {
+			foxView = GetComponent<FoxView>();
 		}
 		owner = inowner;
 
@@ -242,17 +245,16 @@ public class BaseWeapon : DestroyableNetworkObject {
 		curTransform.localPosition = Offset;
 		//Debug.Log (name + weaponRotator);
 		curTransform.localRotation = weaponRotator;
-		if (photonView.isMine) {
-			photonView.RPC("AttachWeaponRep",PhotonTargets.OthersBuffered,inowner.photonView.viewID);
-		}
+		RemoteAttachWeapon(inowner);
+		
+		
 	}
 
-	[RPC]
-	public void AttachWeaponRep(int viewid){
+	public void RemoteAttachWeapon(Pawn newowner){
 		if (curTransform == null) {
 			curTransform = transform;		
 		}
-		owner =PhotonView.Find (viewid).GetComponent<Pawn>();
+		owner =newowner;
 		if (owner == null) {
 			//Destroy(photonView);
 			Debug.Log ("DestoroyATTACHEs");
@@ -275,10 +277,7 @@ public class BaseWeapon : DestroyableNetworkObject {
 
 		}
 		//AimFix ();
-		if (!photonView.isMine) {
-			ReplicationGenerate ();
-			return;
-		}
+		
 
 		if(isReload){
 			if(reloadTimer<0){
@@ -741,8 +740,8 @@ public class BaseWeapon : DestroyableNetworkObject {
      
         projScript.projId = ProjectileManager.instance.GetNextId();
         projScript.replication = false;
-		if (photonView.isMine) {
-            SendShoot(startPoint, startRotation, power, range, viewId, projScript.projId);
+		if (foxView.isMine) {
+            foxView.SendShoot(startPoint, startRotation, power, range, viewId, projScript.projId);
 		}
 		
 		
@@ -751,32 +750,26 @@ public class BaseWeapon : DestroyableNetworkObject {
 		projScript.damage.Damage+=power;
 		projScript.range+=range;
 	}
-	protected virtual void ReplicationGenerate (){
-		if(shootsToSpawn.Count>0){
-				sControl.playClip (fireSound);
-				owner.shootEffect();
-		}
-		while(shootsToSpawn.Count>0){
-			ShootData spawnShoot = shootsToSpawn.Dequeue();
-			
-			BaseProjectile  proj = GenerateProjectileRep(spawnShoot.position,spawnShoot.direction,spawnShoot.timeShoot);
+	public virtual void RemoteGenerate (Vector3 position, Quaternion rotation, float power, float range, int viewId, int projId){
+
+			BaseProjectile  proj = GenerateProjectileRep(position,direction,timeShoot);
 			if (rifleParticleController != null) {
 				rifleParticleController.CreateShootFlame ();
 			}
-            proj.projId = spawnShoot.projId;
-			proj.damage.Damage+=spawnShoot.power;
-			proj.range+=spawnShoot.range;
+            proj.projId = projId;
+			proj.damage.Damage+=power;
+			proj.range+=range;
 			switch(prefiretype){
 				case PREFIRETYPE.Guidance:
-					if(spawnShoot.viewId!=0){
-						Transform target =PhotonView.Find(spawnShoot.viewId).GetComponent<Transform>();
+					if(viewId!=0){
+						Transform target =NetworkController.GetView(viewId).GetComponent<Transform>();
 				
 					
 						proj.target = target;
 					}
 				break;
 			}
-		}
+		
 	}
 	protected BaseProjectile GenerateProjectileRep(Vector3 startPoint,Quaternion startRotation,double timeShoot){
 
@@ -789,18 +782,6 @@ public class BaseWeapon : DestroyableNetworkObject {
 		return projScript;
 	}
 
-    protected void SendShoot(Vector3 position, Quaternion rotation, float power, float range, int viewId, int projId)
-    {
-		ShootData send = new ShootData ();
-		send.position = position;
-		send.direction = rotation;
-		send.power = power;
-		send.range = range;
-        send.viewId = viewId;
-        send.projId = projId;
-		send.timeShoot = PhotonNetwork.time;
-		shootsToSend.Enqueue (send);
-	}
 	protected Quaternion getAimRotation(){
 		/*Vector3 randVec = Random.onUnitSphere;
 		Vector3 normalDirection  = owner.getAimRotation(weaponRange)-muzzlePoint.position;
@@ -811,36 +792,14 @@ public class BaseWeapon : DestroyableNetworkObject {
 
 	}
 	
-	public void OnPhotonSerializeView(PhotonStream stream, PhotonMessageInfo info)
-	{
-		if (stream.isWriting)
-		{
-			// We own this player: send the others our data
-			stream.SendNext(shootsToSend.Count);
-			while(shootsToSend.Count>0){
-				shootsToSend.Dequeue().PhotonSerialization(stream);
-			}
-			//stream.SendNext(transform.rotation);
-
-		}
-		else
-		{
-			// Network player, receive data
-			int shootCount = (int) stream.ReceiveNext();
-			for(int i=0;i<shootCount;i++){
-				ShootData data = new ShootData();
-				data.PhotonDeserialization(stream);
-				shootsToSpawn.Enqueue(data);
-			}
-			//this.transform.rotation = (Quaternion) stream.ReceiveNext();
-
-		}
-	}
+	
 	public float MuzzleOffset(){
 
 		return (muzzlePoint.position + muzzleOffset - curTransform.position).sqrMagnitude;
 	}
-
-   
+	nstuff.juggerfall.extension.weapon.Weapon sirWep  = new nstuff.juggerfall.extension.weapon.Weapon();
+    public nstuff.juggerfall.extension.weapon.Weapon GetSerilizedData(){
+		return sirWep;
+	}
   
 }
