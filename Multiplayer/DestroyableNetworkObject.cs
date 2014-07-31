@@ -11,7 +11,7 @@ public class DestroyableNetworkObject : MonoBehaviour {
        // Debug.Log("RPC KILL ME REQUEST" + this);
       
 		foxView.Destroy();	
-		foxView.KillMe();
+		KillMe();
 
 	}
     public void StartCoroutineRequestKillMe()
@@ -20,7 +20,7 @@ public class DestroyableNetworkObject : MonoBehaviour {
     }
 	public void RequestKillMe(){
        foxView.Destroy();	
-		foxView.KillMe();
+		KillMe();
 	}
 	
 	public void KillMe(){

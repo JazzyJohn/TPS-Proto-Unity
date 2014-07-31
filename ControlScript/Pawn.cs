@@ -2,6 +2,7 @@
 using System;
 using System.Collections;
 using System.Collections.Generic;
+using nstuff.juggerfall.extension.models;
 
 
 public enum CharacterState {
@@ -111,10 +112,7 @@ public class Pawn : DamagebleObject {
 		
 		
 		set {
-			if(_characterState!=value&&photonView.isMine){
-				//photonView.RPC("SendCharacterState",PhotonTargets.Others,value,wallState);
-				
-			}
+			
 			_characterState = value;
 			
 		}
@@ -339,9 +337,11 @@ public class Pawn : DamagebleObject {
 
 	//Serialization
 
-	nstuff.juggerfall.extension.pawn.Pawn  serPawn   =	new nstuff.juggerfall.extension.pawn.Pawn();
+    PawnModel serPawn = new PawnModel();
 
+    public static float updateDelay = 0.01f;
 
+    public float updateTimer = 0.0f;
 
 	protected void Awake(){
 		myTransform = transform;
@@ -574,7 +574,10 @@ public class Pawn : DamagebleObject {
 
 	}
 
-
+    public void SetTeam(int team)
+    {
+        this.team = team;
+    }
 	public override void KillIt(GameObject killer){
 		if (isDead) {
 			return;		
@@ -634,6 +637,7 @@ public class Pawn : DamagebleObject {
 		
 	}
 	protected override void ActualKillMe(){
+        isDead = true;
 		characterState = CharacterState.Dead;
 		DamagerEntry last = RetrunLastDamager();
         StopKick();
@@ -661,7 +665,7 @@ public class Pawn : DamagebleObject {
 	
 	public IEnumerator AfterAnimKill(){
 		yield return new WaitForSeconds(8f);
-		PhotonNetwork.Destroy(gameObject);
+		Destroy(gameObject);
 	}
 	//EFFECCT SECTION
 	void AddEffect(Vector3 position){
@@ -1001,7 +1005,7 @@ public class Pawn : DamagebleObject {
 			//TODO: TEMP SOLUTION BEFORE NORMAL BONE ORIENTATION
 			
 			//animator.SetFloat("Pitch",pitchAngle);
-
+            SendNetUpdate();
 		} else {
 			ReplicatePosition();
 
@@ -1018,6 +1022,14 @@ public class Pawn : DamagebleObject {
 
 		
 	}
+    public void SendNetUpdate() {
+        updateTimer += Time.deltaTime;
+        if (updateTimer > updateDelay&&!isDead)
+        {
+            updateTimer = 0.0f;
+            foxView.PawnUpdate(GetSerilizedData());
+        }
+    }
 	public void DpsCheck(){
 
 		
@@ -2013,7 +2025,7 @@ public class Pawn : DamagebleObject {
 		//Debug.Log(_rb.isKinematic);
 		*/
 		isGrounded = false;
-		foxView.PawnUpdate( GetSerilizedData());
+		
 	}
 	
 	public void JumpEnd(CharacterState nextState){
@@ -2342,18 +2354,18 @@ public class Pawn : DamagebleObject {
 	}
 
 
-	
-    public nstuff.juggerfall.extension.pawn.Pawn GetSerilizedData()
+
+    public PawnModel GetSerilizedData()
     {
-		serPawn.id = foxView.ViewID;
+		serPawn.id = foxView.viewID;
 		serPawn.wallState =(int)wallState;
 		serPawn.team =team;
 		serPawn.characterState =(int)characterState;
-		serPawn.active =active;
+        serPawn.active = isActive;
 		serPawn.isDead =isDead;
 	    return  serPawn;
     }
-	public void NetUpdate(nstuff.juggerfall.extension.pawn.Pawn pawn)
+    public void NetUpdate(PawnModel pawn)
     {
 		nextState = (CharacterState) pawn.characterState;
 		wallState = (WallState) pawn.wallState;

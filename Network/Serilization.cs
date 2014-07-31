@@ -3,10 +3,11 @@ using System;
 using System.Collections;
 using Sfs2X.Protocol.Serialization;
 
-namespace nstuff.juggerfall.extension.player{
+namespace nstuff.juggerfall.extension.models
+{
 
     [Serializable]
-    public class Player : SerializableSFSType
+    public class PlayerModel : SerializableSFSType
     {
         public string uid;
 
@@ -24,21 +25,17 @@ namespace nstuff.juggerfall.extension.player{
 
         public int userId;
 
-        public Player()
+        public PlayerModel()
         {
 
         }   
     }
-
-}
-
-namespace nstuff.juggerfall.extension.pawn
-{
+  
 
     [Serializable]
-    public class Pawn : SerializableSFSType
+    public class PawnModel : SerializableSFSType
     {
-		public int id;
+        public int id;
 	 
         public string type;
 
@@ -50,28 +47,23 @@ namespace nstuff.juggerfall.extension.pawn
 
         public bool active;
 		
-		public int  pawnType;
+	    public bool isDead;
 
-        public bool isDead;
-
-        public Pawn()
+        public PawnModel()
         {
 
         }
     }
 
-}
-namespace nstuff.juggerfall.extension.weapon
-{
 
     [Serializable]
-    public class Weapon : SerializableSFSType
+    public class WeaponModel : SerializableSFSType
     {
-		public int id;
-	 
+        public int id;
+		 
         public string type;
 
-        public Weapon()
+        public WeaponModel()
         {
 
         }

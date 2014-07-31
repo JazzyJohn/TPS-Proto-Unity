@@ -11,7 +11,7 @@ public class AlphaDogPawn : Pawn {
 	public override Vector3 getAimRotation()
 	{
 
-		if(photonView.isMine){
+		if(foxView.isMine){
 			if(isAi){
 				if(enemy==null){
 					aimRotation =myTransform.position+myTransform.forward*10;
@@ -86,7 +86,8 @@ public class AlphaDogPawn : Pawn {
 		//
 
 		if (animator != null && animator.gameObject.activeSelf) {
-			if (photonView.isMine) {
+            if (foxView.isMine)
+            {
 				
 				
 				strafe = CalculateStarfe();

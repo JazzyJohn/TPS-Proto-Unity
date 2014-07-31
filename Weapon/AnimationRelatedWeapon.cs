@@ -17,12 +17,7 @@ class AnimationRelatedWeapon: BaseWeapon {
 			RequestKillMe();
 
 		}
-		//AimFix ();
-		if (!photonView.isMine) {
-			ReplicationGenerate ();
-			return;
-		}
-
+	
 		
 	}
 	public virtual void StartFire(){

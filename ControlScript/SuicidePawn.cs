@@ -43,7 +43,8 @@ public class SuicidePawn : Pawn {
     }
 	void Detonate(){
 		if(!isDetonate){
-			photonView.RPC("RPCDetonate",PhotonTargets.All);
+            //TODO: DETONATE
+           // foxView.RPC("RPCDetonate", PhotonTargets.All);
 		}
 
 	}

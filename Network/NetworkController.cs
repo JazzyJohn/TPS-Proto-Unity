@@ -11,6 +11,7 @@ using Sfs2X.Logging;
 using System.Collections.Generic;
 using Sfs2X.Protocol.Serialization;
 using System.Reflection;
+using nstuff.juggerfall.extension.models;
 
 public enum RPCTransitTargetType
 {
@@ -242,8 +243,9 @@ public class NetworkController : MonoBehaviour {
                     break;
             
                 case "playersSpawm":
-                  
-                     foreach(nstuff.juggerfall.extension.player.Player  player in dt.GetSFSArray("owners")){
+
+                    foreach (PlayerModel player in dt.GetSFSArray("owners"))
+                    {
                          if (player.userId != _smartFox.MySelf.Id)
                          {
                              if (PlayerView.allPlayer.ContainsKey(player.userId))
@@ -259,7 +261,7 @@ public class NetworkController : MonoBehaviour {
                     break;
                 case "updatePlayerInfo":
                     {
-                        nstuff.juggerfall.extension.player.Player player = (nstuff.juggerfall.extension.player.Player)dt.GetClass("player");
+                        PlayerModel player = (PlayerModel)dt.GetClass("player");
                         if (PlayerView.allPlayer.ContainsKey(player.userId))
                         {
                             PlayerView.allPlayer[player.userId].NetUpdate(player);
@@ -427,7 +429,7 @@ public class NetworkController : MonoBehaviour {
 	  /// <summary>
     /// Spawn current player object
     /// </summary>	
-    public void SpawnPlayer(nstuff.juggerfall.extension.player.Player player)
+    public void SpawnPlayer(PlayerModel player)
     {
 
         Debug.Log( "CREATE PLAYER " + player.userId );
@@ -440,7 +442,7 @@ public class NetworkController : MonoBehaviour {
 	 public void SpawnPlayer(int uid)
     {
 
-        Debug.Log( "CREATE PLAYER " + player.userId );
+        Debug.Log("CREATE PLAYER " + uid);
         GameObject newObject = _SpawnPrefab("Player", Vector3.zero, Quaternion.identity);
         PlayerView view = newObject.GetComponent<PlayerView>();
         view.SetId(uid);
@@ -499,8 +501,8 @@ public class NetworkController : MonoBehaviour {
             data.PutBool("AI", isAI);
         }
 		data.PutIntArray("stims", stims);
-        GameObject go = InstantiateNetPrefab(prefab, vector3, quaternion, data);
-		nstuff.juggerfall.extension.pawn.Pawn pawn  =go.GetComponent<Pawn>().GetSerilizedData();
+        GameObject go = InstantiateNetPrefab(prefab, vector3, quaternion, data,isAI);
+        PawnModel pawn = go.GetComponent<Pawn>().GetSerilizedData();
 		pawn.type = prefab;
         data.PutClass("pawn",pawn);
         ExtensionRequest request = new ExtensionRequest("pawnSpawn", data, serverHolder.gameRoom,isAI);
@@ -519,7 +521,7 @@ public class NetworkController : MonoBehaviour {
 
         data.PutInt("id", id);
 		data.PutBool("state", state);
-		data.PutString("animName", animName);
+		data.PutUtfString("animName", animName);
         ExtensionRequest request = new ExtensionRequest("pawnChangeShootAnimStateRequest", data, serverHolder.gameRoom);
         smartFox.Send(request);
 
@@ -527,16 +529,16 @@ public class NetworkController : MonoBehaviour {
 	/// <summary>
     /// pawnStartKick request to server
     /// </summary>	
-    public void PawnKickRequest(int id,int kick,bool state)
+    public void PawnKickRequest(int id, int kick, bool state)
     {
-         ISFSObject data = new SFSObject();
+        ISFSObject data = new SFSObject();
 
         data.PutInt("id", id);
-		data.PutBool("state", state);
-		data.PutInt("kick", kick);
+        data.PutBool("state", state);
+        data.PutInt("kick", kick);
         ExtensionRequest request = new ExtensionRequest("pawnStartKick", data, serverHolder.gameRoom);
         smartFox.Send(request);
-
+    }
     /// <summary>
     /// pawnActiveState request to server
     /// </summary>	
@@ -553,7 +555,7 @@ public class NetworkController : MonoBehaviour {
     /// <summary>
     /// pawnUpdate request to server
     /// </summary>	
-    public void PawnUpdateRequest(nstuff.juggerfall.extension.pawn.Pawn  pawn)
+    public void PawnUpdateRequest(PawnModel pawn)
     {
         ISFSObject data = new SFSObject();
      
@@ -570,7 +572,7 @@ public class NetworkController : MonoBehaviour {
         ISFSObject data = new SFSObject();
      
      	data.PutInt("id", id);
-		data.PutString("animName", animName);
+		data.PutUtfString("animName", animName);
 	    ExtensionRequest request = new ExtensionRequest("pawnTaunt", data, serverHolder.gameRoom);
         smartFox.Send(request);
 
@@ -609,7 +611,7 @@ public class NetworkController : MonoBehaviour {
 
        
         GameObject go = InstantiateNetPrefab(prefab, vector3, quaternion, data,isAI);
-		nstuff.juggerfall.extension.weapon.Weapon  weapon  = go.GetComponent<BaseWeapon>().GetSerilizedData()
+        WeaponModel weapon = go.GetComponent<BaseWeapon>().GetSerilizedData();
 		weapon.type = prefab;
         data.PutClass("weapon",weapon);
 		data.PutInt("pawnId",pawnId);
@@ -622,8 +624,8 @@ public class NetworkController : MonoBehaviour {
 	/// <summary>
     /// weaponSpawn request to server
     /// </summary>	
-	
-	public void WeaponSpawn(ISFSObject data )
+
+    public void WeaponShootRequest(ISFSObject data)
     {
         ExtensionRequest request = new ExtensionRequest("weaponSpawn", data, serverHolder.gameRoom);
         smartFox.Send(request);
@@ -647,8 +649,8 @@ public class NetworkController : MonoBehaviour {
 	
 	public void HandlePawnSpawn(ISFSObject dt )
     {
-		nstuff.juggerfall.extension.pawn.Pawn sirPawn =  (nstuff.juggerfall.extension.pawn.Pawn)dt.GetClass("pawn");
-		GameObject go =RemoteInstantiateNetPrefab(sirPawn.type, Vector3.zero,Quaternion.indentity,sirPawn.id);
+        PawnModel sirPawn = (PawnModel)dt.GetClass("pawn");
+		GameObject go =RemoteInstantiateNetPrefab(sirPawn.type, Vector3.zero,Quaternion.identity,sirPawn.id);
 		
 		Player player  = GetPlayer(dt.GetInt("ownerId"));
 		Pawn pawn  = go.GetComponent<Pawn>();
@@ -666,9 +668,9 @@ public class NetworkController : MonoBehaviour {
 			
 		Pawn pawn = GetView(dt.GetInt("id")).GetComponent<Pawn>();
 		if(dt.GetBool("state")){
-			pawn.StartShootAnimation(dt.GeUtfString("animName"));
+			pawn.StartShootAnimation(dt.GetUtfString("animName"));
 		}else{
-			pawn.StopShootAnimation(dt.GeUtfString("animName"));
+			pawn.StopShootAnimation(dt.GetUtfString("animName"));
 		}
 		 
 	}

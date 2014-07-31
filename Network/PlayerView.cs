@@ -4,6 +4,7 @@ using System.Collections.Generic;
 using System;
 using System.Reflection;
 using Sfs2X.Entities.Data;
+using nstuff.juggerfall.extension.models;
  
 
 public class PlayerView : MonoBehaviour {
@@ -41,7 +42,7 @@ public class PlayerView : MonoBehaviour {
 
 
 
-    public  void NetUpdate(nstuff.juggerfall.extension.player.Player player)
+    public void NetUpdate(PlayerModel player)
     {
         Debug.Log("NET UPDATE "+player.uid +" name " + player.name);
         observed.UID = player.uid;

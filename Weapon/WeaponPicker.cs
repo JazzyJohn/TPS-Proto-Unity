@@ -27,8 +27,8 @@ public class WeaponPicker : UseObject {
 
 	public void SetNewData( InventoryManager.WeaponBackUp info){
 
-
-		photonView.RPC("RPCSetPicker",PhotonTargets.All,info.amount,(int)info.type);
+//todo Puicker
+        //foxView.RPC("RPCSetPicker", PhotonTargets.All, info.amount, (int)info.type);
 
 	}
 	[RPC] 

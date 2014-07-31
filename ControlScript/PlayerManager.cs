@@ -59,7 +59,7 @@ public class PlayerManager : MonoBehaviour {
 		Transform targetPos = GetSpamPosition (team);
 
 
-        localPlayer = (Pawn)NetworkController.Instance.PawnSpawnRequest(newPalyerClass, targetPos.position, targetPos.rotation, false).GetComponent<Pawn>();
+        localPlayer = (Pawn)NetworkController.Instance.PawnSpawnRequest(newPalyerClass, targetPos.position, targetPos.rotation, false, stims).GetComponent<Pawn>();
 
 		return localPlayer;
     }

@@ -1,6 +1,7 @@
 ﻿using UnityEngine;
 using System.Collections;
 using System.Collections.Generic;
+using nstuff.juggerfall.extension.models;
 
 
 
@@ -207,7 +208,7 @@ public class BaseWeapon : DestroyableNetworkObject {
 	public int SQLId;
 
 	void Awake(){
-		foxView = GetComponent<foxView>();
+		foxView = GetComponent<FoxView>();
 	}
 	
 	// Use this for initialization
@@ -750,9 +751,9 @@ public class BaseWeapon : DestroyableNetworkObject {
 		projScript.damage.Damage+=power;
 		projScript.range+=range;
 	}
-	public virtual void RemoteGenerate (Vector3 position, Quaternion rotation, float power, float range, int viewId, int projId){
+	public virtual void RemoteGenerate (Vector3 position, Quaternion rotation, float power, float range, int viewId, int projId,double timeShoot){
 
-			BaseProjectile  proj = GenerateProjectileRep(position,direction,timeShoot);
+        BaseProjectile proj = GenerateProjectileRep(position, rotation, timeShoot);
 			if (rifleParticleController != null) {
 				rifleParticleController.CreateShootFlame ();
 			}
@@ -797,8 +798,9 @@ public class BaseWeapon : DestroyableNetworkObject {
 
 		return (muzzlePoint.position + muzzleOffset - curTransform.position).sqrMagnitude;
 	}
-	nstuff.juggerfall.extension.weapon.Weapon sirWep  = new nstuff.juggerfall.extension.weapon.Weapon();
-    public nstuff.juggerfall.extension.weapon.Weapon GetSerilizedData(){
+    WeaponModel sirWep = new WeaponModel();
+    public WeaponModel GetSerilizedData()
+    {
 		return sirWep;
 	}
   

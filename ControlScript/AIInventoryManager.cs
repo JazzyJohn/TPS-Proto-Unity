@@ -26,7 +26,7 @@ public class AIInventoryManager : InventoryManager {
 	public override void Init(){
 		if (owner == null) {
 			owner = GetComponent<Pawn> ();
-			if (owner.photonView.isMine) {
+			if (owner.foxView.isMine) {
 				
 			
 				GenerateInfo ();

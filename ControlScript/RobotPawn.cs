@@ -39,7 +39,7 @@ public class RobotPawn : Pawn {
 			for (int i =0; i<myTransform.childCount; i++) {
 				myTransform.GetChild(i).gameObject.SetActive(true);
 			}
-			photonView.RPC("RPCActivate",PhotonTargets.OthersBuffered);
+            foxView.Activate();
 		}
 		//base.Activate();
 	}
@@ -74,7 +74,7 @@ public class RobotPawn : Pawn {
 	protected override void UpdateAnimator(){
 		//Debug.Log (isGrounded);
 		if (animator != null && animator.gameObject.activeSelf) {
-			if(!photonView.isMine){
+			if(!foxView.isMine){
 
 				RobotAnimationManager roboanim =(RobotAnimationManager)animator;
 				if(!roboanim.isActive()&&isPilotIn){
@@ -93,8 +93,7 @@ public class RobotPawn : Pawn {
 	//NetworkSection
 	public new void OnPhotonSerializeView(PhotonStream stream, PhotonMessageInfo info)
 	{
-
-		base.OnPhotonSerializeView (stream,info);
+//TODO PILOT
 		//Debug.Log (this);
 		if (stream.isWriting)
 		{

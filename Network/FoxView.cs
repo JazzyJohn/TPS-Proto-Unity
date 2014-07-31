@@ -4,6 +4,7 @@ using System.Collections;
 using System;
 using System.Reflection;
 using Sfs2X.Entities.Data;
+using nstuff.juggerfall.extension.models;
 
 
 public class FoxView : MonoBehaviour {
@@ -25,18 +26,21 @@ public class FoxView : MonoBehaviour {
         set
         {
             // if ID was 0 for an awakened PhotonView, the view should add itself into the networkingPeer.photonViewList after setup
-			isSceneView = ownerId ==0;
 			
-			if(isSceneView){
-				isMine = NetworkController.smartFox.MySelf.ContainsVariable("Master")&&NetworkController.smartFox.MySelf.GetVariable("Master").GetBoolValue();
-			}else{
-				isMine = NetworkController.smartFox.MySelf.Id == ownerId;			
-			}
 
             this.ownerId = value / NetworkController.MAX_VIEW_IDS;
 
             this.subId = value % NetworkController.MAX_VIEW_IDS;
+            isSceneView = ownerId == 0;
 
+            if (isSceneView)
+            {
+                isMine = NetworkController.smartFox.MySelf.ContainsVariable("Master") && NetworkController.smartFox.MySelf.GetVariable("Master").GetBoolValue();
+            }
+            else
+            {
+                isMine = NetworkController.smartFox.MySelf.Id == ownerId;
+            }
             
             
         }
@@ -91,8 +95,9 @@ public class FoxView : MonoBehaviour {
 	public void DeActivate(){
 		NetworkController.Instance.PawnActiveStateRequest(viewID,false);
 	}
-	
-	public void PawnUpdate( nstuff.juggerfall.extension.pawn.Pawn pawn){
+
+    public void PawnUpdate(PawnModel pawn)
+    {
 		NetworkController.Instance.PawnUpdateRequest(pawn);
 	}
 	public void Taunt(string name){
@@ -107,7 +112,7 @@ public class FoxView : MonoBehaviour {
 	
     public void SendShoot(Vector3 position, Quaternion rotation, float power, float range, int viewId, int projId)
     {
-		ShootData send = new ShootData ();
+		
 		ISFSObject data = new SFSObject();
      
      	data.PutClass("position", position);
@@ -116,9 +121,9 @@ public class FoxView : MonoBehaviour {
 		data.PutFloat("range", range);
 		data.PutFloat("viewId", viewId);
 		data.PutFloat("projId", projId);	
-		data.PutFloat("projId", projId);	
-		send.timeShoot = TimeManager.Instance.NetworkTime();
+		data.PutFloat("projId", projId);
+        data.PutDouble("timeShoot", TimeManager.Instance.NetworkTime);
 		data.PutFloat("id", viewID);	
-		NetworkController.Instance.WeaponShoot(data);
+		NetworkController.Instance.WeaponShootRequest(data);
 	}
 }

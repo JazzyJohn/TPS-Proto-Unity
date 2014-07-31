@@ -176,7 +176,7 @@ public class Player : MonoBehaviour {
 				currentPawn =PlayerManager.instance.SpawmPlayer(PlayerManager.instance.pawnName[selected],team,activeSteampacks.ToArray());
 				currentPawn.ChangeDefaultWeapon(Choice._Player);
 				ItemManager.instance.SaveItemForSlot();
-				PVPGameRule.instance.Spawn(team);
+				//PVPGameRule.instance.Spawn(team);
 				AfterSpawnSetting(currentPawn,team,activeSteampacks.ToArray());
 				prefabBot =PlayerManager.instance.avaibleBots[selectedBot];
 				prefabGhostBot =PlayerManager.instance.ghostsBots[selectedBot];
@@ -364,7 +364,7 @@ public class Player : MonoBehaviour {
 	public void PawnDead(Player Killer,Pawn killerPawn ){
 	
 
-		int viewID = 0,pawnViewId =0;
+		int pawnViewId =0;
 		if (Killer != null) {
          
 		
@@ -375,7 +375,7 @@ public class Player : MonoBehaviour {
 			EventHolder.instance.FireEvent(typeof(LocalPlayerListener),"EventPawnDeadByAI",this);
 		}
         if (killerPawn != null) {
-            pawnViewId = killerPawn.photonView.viewID;                
+            pawnViewId = killerPawn.foxView.viewID;                
         }
 
         DeathUpdate();

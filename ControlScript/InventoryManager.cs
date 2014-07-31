@@ -65,7 +65,7 @@ public class InventoryManager : MonoBehaviour {
 	}
 	//Start Weapon generation
 	public void GenerateWeaponStart(){
-		if (owner.foxView.issMine) {
+		if (owner.foxView.isMine) {
 			for(int i=0;i<prefabWeapon.Length;i++){
 				if(prefabWeapon[i].slotType==BaseWeapon.SLOTTYPE.MAIN){
 						_ChangeWeapon (i);
@@ -275,12 +275,12 @@ public class InventoryManager : MonoBehaviour {
 		BaseWeapon firstWeapon;
         if (owner.foxView.isSceneView)
         {
-            firstWeapon = NetworkController.Instance.WeaponSpawn(prefabWeapon[newWeapon].name, transform.position, Quaternion.identity,false,owner.foxView.viewID).GetComponent<BaseWeapon>();
+            firstWeapon = NetworkController.Instance.WeaponSpawn(prefabWeapon[newWeapon].name, transform.position, Quaternion.identity,true,owner.foxView.viewID).GetComponent<BaseWeapon>();
             //Debug.Log("Turret weapon spawn");
         }
         else
         {
-            firstWeapon = NetworkController.Instance.WeaponSpawn(prefabWeapon[newWeapon].name, transform.position, Quaternion.identity,true,owner.foxView.viewID)).GetComponent<BaseWeapon>();
+            firstWeapon = NetworkController.Instance.WeaponSpawn(prefabWeapon[newWeapon].name, transform.position, Quaternion.identity,false,owner.foxView.viewID).GetComponent<BaseWeapon>();
         }
 
 	
