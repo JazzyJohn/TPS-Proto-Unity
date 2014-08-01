@@ -66,6 +66,9 @@ public class NetworkController : MonoBehaviour {
 		}
 		return null;
 	}
+	public static void ClearView(int id){
+		foxViewList.Remove(id);
+	}
 	
 	
 		// We start working from here
@@ -287,7 +290,39 @@ public class NetworkController : MonoBehaviour {
 				case "pawnStartKick":
 					HandlePawnKick(dt);
 					break;
-					
+				case "pawnActiveState":
+					HandlePawnActiveState(dt);
+					break;
+				case "pawnUpdate":
+					HandlePawnUpdate(dt);
+					break;
+				case "pawnTaunt":
+					HandlePawnTaunt(dt);
+					break;
+				case "pawnKnockOut":
+					HandleKnockOut(dt);
+					break;
+				case "deleteView":
+					HandleDeleteView(dt);
+					break;
+				case "weaponSpawn":
+					HandleWeaponSpawn(dt);
+					break;
+				case "weaponShoot":
+					HanldeWeaponShoot(dt);
+					break;
+				case "pawnSkillCastEffect":
+					HandleSkillCastEffect(dt);
+					break;
+				case "pawnSkillActivate":
+					HandleSkillActivate(dt);
+					break;
+				case "pawnDetonate":
+					HandlePawnDetonate(dt);
+					break;
+				case "pawnSetAIRequest":
+					HandleSetAIRequest(dt);
+					break;
             }
         }
         catch (Exception e)
@@ -622,7 +657,7 @@ public class NetworkController : MonoBehaviour {
 
     }
 	/// <summary>
-    /// weaponSpawn request to server
+    /// weaponShoot request to server
     /// </summary>	
 
     public void WeaponShootRequest(ISFSObject data)
@@ -632,11 +667,64 @@ public class NetworkController : MonoBehaviour {
 
 
     }
+	/// <summary>
+    /// pawnSkillCastEffect request to server
+    /// </summary>	
+
+    public void SkillCastEffectRequest(int id,string name)
+    {
+		ISFSObject data = new SFSObject();
+     
+     	data.PutInt("id", id);
+		data.PutUtfString("name", name);
+        ExtensionRequest request = new ExtensionRequest("pawnSkillCastEffect", data, serverHolder.gameRoom);
+        smartFox.Send(request);
+
+
+    }
+			
+	/// <summary>
+    /// pawnSkillActivate request to server
+    /// </summary>	
+
+    public void SkillActivateRequest(ISFSObject data)
+    {
+        ExtensionRequest request = new ExtensionRequest("pawnSkillActivate", data, serverHolder.gameRoom);
+        smartFox.Send(request);
+
+
+    }	
 		
-		
-		
-		
-		
+	/// <summary>
+    /// pawnDetonate request to server
+    /// </summary>	
+
+    public void DetonateRequest(int id)
+    {
+		ISFSObject data = new SFSObject();
+     
+     	data.PutInt("id", id);
+        ExtensionRequest request = new ExtensionRequest("pawnDetonate", data, serverHolder.gameRoom);
+        smartFox.Send(request);
+
+
+    }		
+	/// <summary>
+    /// pawnSetAI request to server
+    /// </summary>	
+
+    public void SetAIRequest(int id,int group, int home)
+    {
+		ISFSObject data = new SFSObject();
+     
+     	data.PutInt("id", id);
+		data.PutInt("group", group);
+		data.PutInt("home", home);
+        ExtensionRequest request = new ExtensionRequest("pawnSetAI", data, serverHolder.gameRoom);
+        smartFox.Send(request);
+
+
+    }			
 		
 		
 		
@@ -666,7 +754,7 @@ public class NetworkController : MonoBehaviour {
 	public void HandlePawnChangeShootAnimState(ISFSObject dt )
     {
 			
-		Pawn pawn = GetView(dt.GetInt("id")).GetComponent<Pawn>();
+		Pawn pawn = GetView(dt.GetInt("id")).pawn;
 		if(dt.GetBool("state")){
 			pawn.StartShootAnimation(dt.GetUtfString("animName"));
 		}else{
@@ -681,12 +769,154 @@ public class NetworkController : MonoBehaviour {
 	public void HandlePawnKick(ISFSObject dt )
     {
 			
-		Pawn pawn = GetView(dt.GetInt("id")).GetComponent<Pawn>();
+		Pawn pawn = GetView(dt.GetInt("id")).pawn;
 		if(dt.GetBool("state")){
 			pawn.Kick(dt.GetInt("kick"));
 		}else{
 			pawn.StopKick();
 		}
+		 
+	}
+	/// <summary>
+    /// handle pawnActiveState  from Server
+    /// </summary>	
+	
+	public void HandlePawnActiveState(ISFSObject dt )
+    {
+			
+		Pawn pawn = GetView(dt.GetInt("id")).pawn;
+		if(dt.GetBool("active")){
+			pawn.RemoteActivate();
+		}else{
+			pawn.RemoteDeActivate();
+		}
+		 
+	}
+	/// <summary>
+    /// handle pawnUpdate  from Server
+    /// </summary>	
+	
+	public void HandlePawnUpdate(ISFSObject dt )
+    {
+		PawnModel pawnModel = (PawnModel)data.GetClass("pawn");
+		Pawn pawn = GetView(pawnModel.id).pawn;
+		pawn.NetUpdate(pawnModel);
+		 
+	}
+	/// <summary>
+    /// handle pawnTaunt  from Server
+    /// </summary>	
+	
+	public void HandlePawnTaunt(ISFSObject dt )
+    {
+		Pawn pawn = GetView(dt.GetInt("id")).pawn;
+		pawn.RemotePlayTaunt(dt.GetUtfString("animName"));
+		 
+	}
+	/// <summary>
+    /// handle pawnKnockOut  from Server
+    /// </summary>	
+	
+	public void HandlePawnKnockOut(ISFSObject dt )
+    {
+		Pawn pawn = GetView(dt.GetInt("id")).pawn;
+		pawn.StartKnockOut();
+		 
+	}	
+	/// <summary>
+    /// handle deleteView  from Server
+    /// </summary>	
+	
+	public void HandleDeleteView(ISFSObject dt )
+    {
+		DestroyableNetworkObject obj = GetView(dt.GetInt("id")).GetComponent<DestroyableNetworkObject>();
+		
+		obj.KillMe();
+		 
+	}	
+	/// <summary>
+    /// handle weaponSpawn  from Server
+    /// </summary>	
+	
+	public void HandleWeaponSpawn(ISFSObject dt )
+    {
+		WeaponModel sirWeapon = (WeaponModel)dt.GetClass("weapon");
+		GameObject go =RemoteInstantiateNetPrefab(sirWeapon.type, Vector3.zero,Quaternion.identity,sirWeapon.id);
+		BaseWeapon weapon = go.GetCompenent<BaseWeapon>();
+		weapon.NetUpdate(sirWeapon);
+		Pawn pawn  =  GetView(dt.GetInt("pawnId")).pawn;
+		weapon.RemoteAttachWeapon(pawn);
+	
+		
+		 
+	}	
+	/// <summary>
+    /// handle weaponShoot  from Server
+    /// </summary>	
+	
+	 (Vector3 position, Quaternion rotation, float power, float range, int viewId, int projId,double timeShoot){
+	public void HanldeWeaponShoot(ISFSObject dt )
+    {
+		BaseWeapon weapon = GetView(dt.GetInt("id")).weapon;
+		
+		weapon.RemoteGenerate(((Vector3Model)dt.GetClass("position")).GetVector(),
+								((QuaternionModel)dt.GetClass("direction")).GetQuat(),
+								dt.GetFloat("power"),dt.GetFloat("range"),dt.GetFloat("viewId"),dt.GetDouble("projId"),dt.GetFloat("timeShoot");
+								
+	}	
+	/// <summary>
+    /// handle pawnSkillCastEffect  from Server
+    /// </summary>	
+	
+	public void HandlePawnSkillCastEffect(ISFSObject dt )
+    {
+		Pawn pawn = GetView(dt.GetInt("id")).pawn;
+		pawn.skillManager.GetSkill(dt.GetUtfString(name)).CasterVisualEffect();
+		 
+	}
+	/// <summary>
+    /// handle pawnSkillActivate  from Server
+    /// </summary>	
+	
+	public void HandleSkillActivate(ISFSObject dt )
+    {
+		Pawn pawn = GetView(dt.GetInt("id")).pawn;
+		SkillBehaviour skill =pawn.skillManager.GetSkill(dt.GetUtfString(name));
+			switch(skill.type){
+				case TargetType.SELF:
+				case TargetType.GROUPOFPAWN_BYSELF:	
+					skill.RemoteActivateSkill();
+                    break;
+				case TargetType.PAWN:
+				case TargetType.GROUPOFPAWN_BYPAWN:
+					skill.RemoteActivateSkill(dt.GetInt("viewId"));
+				break;
+				case TargetType.POINT:
+				case TargetType.GROUPOFPAWN_BYPOINT:	
+					skill.RemoteActivateSkill(((Vector3Model)dt.GetClass("position")).GetVector());											
+				break;				
+			}
+		
+		 
+	}
+	/// <summary>
+    /// handle pawnDetonate  from Server
+    /// </summary>	
+	
+	public void HandlePawnDetonate(ISFSObject dt )
+    {
+		SuicidePawn pawn = GetView(dt.GetInt("id")).pawn as SuicidePawn;
+		pawn.RemoteDetonate();
+		 
+	}
+	/// <summary>
+    /// handle pawnSetAI  from Server
+    /// </summary>	
+	
+	public void HandleSetAIRequest(ISFSObject dt)
+    {
+	
+		 GetView(dt.GetInt("id")).pawn.RemoteSetAI(dt.GetInt("group"),dt.GetInt("home"));
 		 
 	}
 }

@@ -26,5 +26,13 @@ public class SkillManager : MonoBehaviour
             allskill[i].UnUse();
         }
     }
+	public Skill GetSkill(string name){
+		foreach(SkillBehaviour skill in allskill){
+			if(skill.name == name){
+				return skill;
+			}
+		}
+		return null;
+	}
 	
 }

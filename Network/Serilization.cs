@@ -24,8 +24,8 @@ namespace nstuff.juggerfall.extension.models
 	    public int team;
 
         public int userId;
-
-        public PlayerModel()
+		
+		public PlayerModel()
         {
 
         }   
@@ -48,6 +48,14 @@ namespace nstuff.juggerfall.extension.models
         public bool active;
 		
 	    public bool isDead;
+		
+		public float health;
+		
+		public Vector3Model position  = new Vector3Model();
+		
+		public Vector3Model aimRotation  = new Vector3Model();
+		
+		public QuaternionModel rotation = new QuaternionModel();
 
         public PawnModel()
         {
@@ -68,5 +76,78 @@ namespace nstuff.juggerfall.extension.models
 
         }
     }
+	[Serializable]
+	public class Vector3Model{
+		public float x;
+		
+		public float y;
+		
+		public float z;
+		
+		public Vector3Model(){
 
+		}		
+		
+		public Vector3Model(Vector3 vector){
+			x = vector.x;
+			y = vector.y;
+			z = vector.z;
+		}
+		public WriteVector(Vector3 vector){
+			x = vector.x;
+			y = vector.y;
+			z = vector.z;
+		}
+		public Vector3 MakeVector(Vector3 vector3){
+			vector3.x = x;
+			vector3.y = y;
+			vector3.z = z;
+			return vector3;
+		}
+		public Vector3 GetVector(){
+			Vector3 vector = new Vector3();
+			return MakeVector(vector);
+		}
+	}	
+	
+	[Serializable]
+	public class QuaternionModel{
+		public float x;
+		
+		public float y;
+		
+		public float z;
+		
+		public float w;
+		
+		public QuaternionModel(){
+
+		}		
+		
+		public QuaternionModel(Quaternion quaternion){
+			x = quaternion.x;
+			y = quaternion.y;
+			z = quaternion.z;
+			w =quaternion.w
+		}	
+		
+		public void WriteQuat(Quaternion quaternion){
+			x = quaternion.x;
+			y = quaternion.y;
+			z = quaternion.z;
+			w = quaternion.w
+		}	
+		public  Quaternion MakeQuaternion( Quaternion quaternion){
+			quaternion.x = x;
+			quaternion.y = y;
+			quaternion.z = z;
+			quaternion.w = w;
+			return quaternion;
+		}
+		public Quaternion GetQuat(){
+			Quaternion quat = new Quaternion();
+			return MakeQuaternion(quat);
+		}
+	}	
+	 
 }

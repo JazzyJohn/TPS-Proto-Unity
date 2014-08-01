@@ -8,9 +8,9 @@ using nstuff.juggerfall.extension.models;
 
 
 public class FoxView : MonoBehaviour {
-	public MonoBehaviour observed;
+	public Pawn pawn;
 	
-	private static string methodName  =  "UDPSerialization";
+	public BaseWeapon weapon;
 	
     private int ownerId;
     
@@ -42,10 +42,13 @@ public class FoxView : MonoBehaviour {
                 isMine = NetworkController.smartFox.MySelf.Id == ownerId;
             }
             
-            
+          
         }
     }
-    
+    void Awake(){
+		pawn = GetComponent<Pawn>();
+		weapon = GetComponent<BaseWeapon>();
+	}
     /*
 	public void UDP(SFSObject data)
     {
@@ -77,6 +80,9 @@ public class FoxView : MonoBehaviour {
 	}
 
     */
+	void OnDestroy(){
+		NetworkController.ClearView(viewID);
+	}
 	public void StartShoot(string animName){
 		NetworkController.Instance.PawnChangeShootAnimStateRequest( viewID,  animName,true);
 	}
@@ -109,21 +115,48 @@ public class FoxView : MonoBehaviour {
 	public void Destroy(){
 		NetworkController.Instance.DeleteViewRequest(viewID);
 	}
-	
+	public void Detonate(){
+		NetworkController.Instance.DetonateRequest(viewID);
+	}
+	public void SetAI(int group,int home){
+		NetworkController.Instance.SetAIRequest(viewID,group,home);
+	}
     public void SendShoot(Vector3 position, Quaternion rotation, float power, float range, int viewId, int projId)
     {
 		
 		ISFSObject data = new SFSObject();
      
-     	data.PutClass("position", position);
-		data.PutClass("direction", rotation);
+     	data.PutClass("position",new Vector3Model(position));
+		data.PutClass("direction",new QuaternionModel(rotation));
 		data.PutFloat("power", power);
 		data.PutFloat("range", range);
 		data.PutFloat("viewId", viewId);
 		data.PutFloat("projId", projId);	
-		data.PutFloat("projId", projId);
-        data.PutDouble("timeShoot", TimeManager.Instance.NetworkTime);
-		data.PutFloat("id", viewID);	
+	    data.PutDouble("timeShoot", TimeManager.Instance.NetworkTime);
+		data.PutInt("id", viewID);	
 		NetworkController.Instance.WeaponShootRequest(data);
+	}
+	public void SkillCastEffect(string name){
+		NetworkController.Instance.SkillCastEffectRequest(viewID);
+	}
+	public void SkillActivate(string name){
+		ISFSObject data = new SFSObject();
+		data.PutInt("id", viewID);	
+		data.PutUtfString("name", name);			
+		NetworkController.Instance.SkillActivateRequest(data);
+	}
+	public void SkillActivate(string name,Vector3 position){
+		ISFSObject data = new SFSObject();
+		data.PutInt("id", viewID);	
+		data.PutUtfString("name", name);			
+		data.PutClass("position", new Vector3Model(position));
+		NetworkController.Instance.SkillActivateRequest(data);
+	}
+	public void SkillActivate(string name,int viewId){
+		ISFSObject data = new SFSObject();
+		data.PutInt("id", viewID);	
+		data.PutUtfString("name", name);			
+		data.PutClass("viewId", viewId);
+		NetworkController.Instance.SkillActivateRequest(data);
 	}
 }

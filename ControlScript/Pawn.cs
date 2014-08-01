@@ -408,9 +408,9 @@ public class Pawn : DamagebleObject {
             if (foxView.isMine)
             {
                 mainAi.StartAI();
-				//TODO AI SYNC
-               // photonView.RPC("PRCSetAIAfterSpawn", PhotonTargets.OthersBuffered, mainAi.aiGroup, mainAi.homeIndex);
-
+				
+				foxView.SetAI(mainAi.aiGroup,mainAi.homeIndex);
+				
             }
         }
         GetSize();
@@ -2345,8 +2345,8 @@ public class Pawn : DamagebleObject {
 			mainAi.StartAI();
 		}
     }
-	[RPC]
-	public void PRCSetAIAfterSpawn(int group, int homeindex ){
+	
+	public void RemoteSetAI(int group, int homeindex ){
         mainAi = GetComponent<AIBase>();
 		mainAi.aiGroup= group;
 		mainAi.homeIndex =homeindex;
@@ -2363,12 +2363,20 @@ public class Pawn : DamagebleObject {
 		serPawn.characterState =(int)characterState;
         serPawn.active = isActive;
 		serPawn.isDead =isDead;
+		serPawn.positon.WriteVector(stream,transform.position);
+		serPawn.aimRotation.WriteVector(stream,aimRotation);
+		serPawn.rotation.WriteQuat(stream,transform.rotation);
+		serPawn.health =health;
 	    return  serPawn;
     }
     public void NetUpdate(PawnModel pawn)
     {
 		nextState = (CharacterState) pawn.characterState;
 		wallState = (WallState) pawn.wallState;
-	 
+		correctPlayerPos = pawn.position.MakeVector(correctPlayerPos);
+		correctPlayerRot = pawn.rotation.MakeQuaternion(correctPlayerRot);
+		aimRotation = pawn.aimRotation.MakeVector(aimRotation);
+		team=serPawn.team;
+		health = serPawn.health;
     }
 }

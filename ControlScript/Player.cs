@@ -402,7 +402,12 @@ public class Player : MonoBehaviour {
 
 	}
 	public void PawnKill(Player victim,Vector3 position){
-
+		if (!playerView.isMine)
+        {
+			return;
+		
+		}
+	
 		if (victim != null) {
             //TODO: move text to config
 

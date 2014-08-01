@@ -195,38 +195,34 @@ public class SkillBehaviour : MonoBehaviour
 	}
 	
 	protected void AskCast(){
-        //TODO SKILL
-		  //photonView.RPC ("RPCCasterEfffect", PhotonTargets.Others);
+
+            foxView.SkillCastEffect(name);
+
 	
-	}
-	[RPC]
-	public void RPCCasterEfffect(){
-		CasterVisualEffect();
 	}
 	protected void 	AskActivate(){
 		switch(type){
 				case TargetType.SELF:
 				case TargetType.GROUPOFPAWN_BYSELF:
-                 //   photonView.RPC("RPCActivateSkill", PhotonTargets.Others);
+                   foxView.SkillActivate(name);
                     break;
 				case TargetType.PAWN:
 				case TargetType.GROUPOFPAWN_BYPAWN:
 					if(target!=null){
 
-                       // photonView.RPC("RPCActivateSkill", PhotonTargets.Others, target.photonView.viewID);					
+                         foxView.SkillActivate(name,target.foxView.viewID);
 					}
 				break;
 				case TargetType.POINT:
 				case TargetType.GROUPOFPAWN_BYPOINT:
+                      foxView.SkillActivate(name, targetPoint);
 
-               // photonView.RPC("RPCActivateSkill", PhotonTargets.Others, targetPoint);					
-									
 				break;				
 			}
 	}
 	
-	[RPC]
-	public void RPCActivateSkill(params object[] theObjects){
+
+	public void RemoteActivateSkill(params object[] theObjects){
 	
 		switch(type){
 				case TargetType.SELF:
@@ -237,7 +233,7 @@ public class SkillBehaviour : MonoBehaviour
 				case TargetType.PAWN:
 				case TargetType.GROUPOFPAWN_BYPAWN:
 					int id = (int) theObjects[0];
-					target=PhotonView.Find (id).GetComponent<Pawn>();
+					target=NetworkController.GetView(id).pawn;
 				break;
 				case TargetType.POINT:
 				case TargetType.GROUPOFPAWN_BYPOINT:
