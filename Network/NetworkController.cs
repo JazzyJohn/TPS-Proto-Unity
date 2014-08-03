@@ -31,6 +31,7 @@ public class NetworkController : MonoBehaviour {
 
     public string serverName = "127.0.0.1";
     public int serverPort = 9933;
+    public int udpPort = 9934;
     public string zone = "BasicJugger";
     public bool debug = true;
     public bool pause = false;
@@ -222,6 +223,7 @@ public class NetworkController : MonoBehaviour {
             // On to the lobby
             serverHolder = GetComponent<ServerHolder>();
             serverHolder.Connect();
+
         }
     }
 
@@ -237,7 +239,7 @@ public class NetworkController : MonoBehaviour {
         {
             string cmd = (string)evt.Params["cmd"];
             ISFSObject dt = (SFSObject)evt.Params["params"];
-            Debug.Log("CMD" + cmd);
+           
             switch (cmd)
             {
                 case "getTime":
@@ -261,10 +263,37 @@ public class NetworkController : MonoBehaviour {
                              }
                          }
                      }
+                
+
+                    //TODO Think maybe faster would be to sort it?
+                    foreach (SFSObject dtIt in dt.GetSFSArray("views"))
+                    {
+                        if (dtIt.ContainsKey("pawn"))
+                        {
+                            HandlePawnSpawn(dtIt);
+                        }else if (dtIt.ContainsKey("model"))
+                        {
+                            HandleSimplePrefabSpawn(dtIt);
+                        }
+                       
+                    }
+                    foreach (SFSObject dtIt in dt.GetSFSArray("views"))
+                    {
+                        if (dtIt.ContainsKey("weapon"))
+                        {
+                            HandleWeaponSpawn(dtIt);
+                        }
+
+                    }
+                    if(dt.ContainsKey("Master")&&dt.GetBool("Master")){
+                        HandleMasterStart();
+                    }
+                
                     break;
                 case "updatePlayerInfo":
                     {
                         PlayerModel player = (PlayerModel)dt.GetClass("player");
+                        Debug.Log("updatePlayerInfo team" + player.team);
                         if (PlayerView.allPlayer.ContainsKey(player.userId))
                         {
                             PlayerView.allPlayer[player.userId].NetUpdate(player);
@@ -300,7 +329,7 @@ public class NetworkController : MonoBehaviour {
 					HandlePawnTaunt(dt);
 					break;
 				case "pawnKnockOut":
-					HandleKnockOut(dt);
+					HandlePawnKnockOut(dt);
 					break;
 				case "deleteView":
 					HandleDeleteView(dt);
@@ -312,7 +341,7 @@ public class NetworkController : MonoBehaviour {
 					HanldeWeaponShoot(dt);
 					break;
 				case "pawnSkillCastEffect":
-					HandleSkillCastEffect(dt);
+					HandlePawnSkillCastEffect(dt);
 					break;
 				case "pawnSkillActivate":
 					HandleSkillActivate(dt);
@@ -323,6 +352,24 @@ public class NetworkController : MonoBehaviour {
 				case "pawnSetAIRequest":
 					HandleSetAIRequest(dt);
 					break;
+                case "invokeProjectileCall":
+                    HandleInvokeProjectileCall(dt);
+                    break;
+                case "simplePrefabSpawn":
+                    HandleSimplePrefabSpawn(dt);
+                    break;
+                case "gameStart":
+                    HandleGameStart();
+                    break;
+                case "gameUpdate":
+                    HandleGameUpdate(dt);
+                    break;
+                case "nextMap":
+                    HandleNextMap(dt);
+                    break;
+                case "pawnDiedByKill":
+                    HandlePawnDiedByKill(dt);
+                    break;
             }
         }
         catch (Exception e)
@@ -355,7 +402,7 @@ public class NetworkController : MonoBehaviour {
 		}else{
 			view.viewID = AllocateViewID(0);
 		}
-		
+        foxViewList.Add(view.viewID, view);
         return newObject;
     }
 	 private GameObject RemoteInstantiateNetPrefab(string prefab, Vector3 vector3, Quaternion quaternion, int viewId)
@@ -368,8 +415,8 @@ public class NetworkController : MonoBehaviour {
         FoxView view =  newObject.GetComponent<FoxView>();
 		
 		view.viewID =viewId;
-		
-		
+
+        foxViewList.Add(view.viewID, view);
         return newObject;
     }
 	
@@ -404,6 +451,11 @@ public class NetworkController : MonoBehaviour {
             return null;
         }
        return  Instantiate(resourceGameObject, vector3, quaternion) as GameObject;
+    }
+    public  static void RegisterSceneView(FoxView view)
+    {
+        view.viewID = AllocateViewID(0);
+        foxViewList.Add(view.viewID, view);
     }
 
     // use 0 for scene-targetPhotonView-ids
@@ -530,17 +582,16 @@ public class NetworkController : MonoBehaviour {
     public GameObject PawnSpawnRequest(string prefab, Vector3 vector3,Quaternion quaternion,bool isAI,int[] stims)
     {
         ISFSObject data = new SFSObject();
-
-        if (!isAI)
-        {
-            data.PutBool("AI", isAI);
-        }
+       
+        data.PutBool("AI", isAI);
+     
 		data.PutIntArray("stims", stims);
         GameObject go = InstantiateNetPrefab(prefab, vector3, quaternion, data,isAI);
         PawnModel pawn = go.GetComponent<Pawn>().GetSerilizedData();
 		pawn.type = prefab;
         data.PutClass("pawn",pawn);
-        ExtensionRequest request = new ExtensionRequest("pawnSpawn", data, serverHolder.gameRoom,isAI);
+        Debug.Log(serverHolder.gameRoom);
+        ExtensionRequest request = new ExtensionRequest("pawnSpawn", data, serverHolder.gameRoom);
         smartFox.Send(request);
         return go;
 
@@ -595,7 +646,7 @@ public class NetworkController : MonoBehaviour {
         ISFSObject data = new SFSObject();
      
      	data.PutClass("pawn", pawn);
-	    ExtensionRequest request = new ExtensionRequest("pawnUpdate", data, serverHolder.gameRoom);
+	    ExtensionRequest request = new ExtensionRequest("pawnUpdate", data, serverHolder.gameRoom,true);
         smartFox.Send(request);
 
     }
@@ -630,7 +681,7 @@ public class NetworkController : MonoBehaviour {
     public void DeleteViewRequest(int id)
     {
         ISFSObject data = new SFSObject();
-     
+        Debug.Log("DeleteView Request");
      	data.PutInt("id", id);
 	    ExtensionRequest request = new ExtensionRequest("deleteView", data, serverHolder.gameRoom);
         smartFox.Send(request);
@@ -662,7 +713,7 @@ public class NetworkController : MonoBehaviour {
 
     public void WeaponShootRequest(ISFSObject data)
     {
-        ExtensionRequest request = new ExtensionRequest("weaponSpawn", data, serverHolder.gameRoom);
+        ExtensionRequest request = new ExtensionRequest("weaponShoot", data, serverHolder.gameRoom);
         smartFox.Send(request);
 
 
@@ -724,9 +775,50 @@ public class NetworkController : MonoBehaviour {
         smartFox.Send(request);
 
 
-    }			
-		
-		
+    }
+    /// <summary>
+    /// invokeProjectileCall request to server
+    /// </summary>	
+
+    public void InvokeProjectileCallRequest(ISFSObject data)
+    {
+        ExtensionRequest request = new ExtensionRequest("invokeProjectileCall", data, serverHolder.gameRoom);
+        smartFox.Send(request);
+
+    }		
+	  /// <summary>
+    /// simplePrefabSpawn request to server
+    /// </summary>	
+
+    public GameObject  SimplePrefabSpawn(string prefab, Vector3 vector3, Quaternion quaternion)
+    {
+        ISFSObject data = new SFSObject();
+        GameObject go = InstantiateNetPrefab(prefab, vector3, quaternion, data, true);
+        SimpleNetModel model = new SimpleNetModel();
+        model.id = go.GetComponent<FoxView>().viewID;
+        model.type = prefab;
+        model.position.WriteVector(vector3);
+        model.rotation.WriteQuat(quaternion);
+        data.PutClass("model", model);
+        ExtensionRequest request = new ExtensionRequest("simplePrefabSpawn", data, serverHolder.gameRoom);
+        smartFox.Send(request);
+        return go;
+
+    }	
+      /// <summary>
+    /// pawnDiedByKill request to server
+    /// </summary>	
+
+    public void PawnDiedByKillRequest(int id, int player)
+    {
+
+        ISFSObject data = new SFSObject();
+        data.PutInt("viewId", id);
+        data.PutInt("player", player);
+        ExtensionRequest request = new ExtensionRequest("pawnDiedByKill", data, serverHolder.gameRoom);
+        smartFox.Send(request);
+    }
+
 		
 		
 		
@@ -738,11 +830,15 @@ public class NetworkController : MonoBehaviour {
 	public void HandlePawnSpawn(ISFSObject dt )
     {
         PawnModel sirPawn = (PawnModel)dt.GetClass("pawn");
+        Debug.Log("Pawn Spawn" + sirPawn.type);
 		GameObject go =RemoteInstantiateNetPrefab(sirPawn.type, Vector3.zero,Quaternion.identity,sirPawn.id);
-		
-		Player player  = GetPlayer(dt.GetInt("ownerId"));
-		Pawn pawn  = go.GetComponent<Pawn>();
-		player.AfterSpawnSetting(pawn,sirPawn.team,dt.GetIntArray("stims"));
+        Pawn pawn = go.GetComponent<Pawn>();
+		if(dt.ContainsKey("ownerId")){
+		    Player player  = GetPlayer(dt.GetInt("ownerId"));
+		  
+           
+		    player.AfterSpawnSetting(pawn,dt.GetIntArray("stims"));
+        }
 		pawn.NetUpdate(sirPawn);
 		 
 		 
@@ -798,9 +894,17 @@ public class NetworkController : MonoBehaviour {
 	
 	public void HandlePawnUpdate(ISFSObject dt )
     {
-		PawnModel pawnModel = (PawnModel)data.GetClass("pawn");
-		Pawn pawn = GetView(pawnModel.id).pawn;
-		pawn.NetUpdate(pawnModel);
+		PawnModel pawnModel = (PawnModel)dt.GetClass("pawn");
+        FoxView view = GetView(pawnModel.id);
+        if (view != null)
+        {
+            Pawn pawn = view.pawn;
+            pawn.NetUpdate(pawnModel);
+        }
+        else
+        {
+            Debug.Log("NOT FOUND" + pawnModel.id);
+        }
 		 
 	}
 	/// <summary>
@@ -842,9 +946,10 @@ public class NetworkController : MonoBehaviour {
     {
 		WeaponModel sirWeapon = (WeaponModel)dt.GetClass("weapon");
 		GameObject go =RemoteInstantiateNetPrefab(sirWeapon.type, Vector3.zero,Quaternion.identity,sirWeapon.id);
-		BaseWeapon weapon = go.GetCompenent<BaseWeapon>();
+		BaseWeapon weapon = go.GetComponent<BaseWeapon>();
 		weapon.NetUpdate(sirWeapon);
 		Pawn pawn  =  GetView(dt.GetInt("pawnId")).pawn;
+        Debug.Log("PAwn" + pawn + " View" + GetView(dt.GetInt("pawnId")) + "ID" + dt.GetInt("pawnId"));
 		weapon.RemoteAttachWeapon(pawn);
 	
 		
@@ -854,14 +959,14 @@ public class NetworkController : MonoBehaviour {
     /// handle weaponShoot  from Server
     /// </summary>	
 	
-	 (Vector3 position, Quaternion rotation, float power, float range, int viewId, int projId,double timeShoot){
+	
 	public void HanldeWeaponShoot(ISFSObject dt )
     {
 		BaseWeapon weapon = GetView(dt.GetInt("id")).weapon;
 		
 		weapon.RemoteGenerate(((Vector3Model)dt.GetClass("position")).GetVector(),
 								((QuaternionModel)dt.GetClass("direction")).GetQuat(),
-								dt.GetFloat("power"),dt.GetFloat("range"),dt.GetFloat("viewId"),dt.GetDouble("projId"),dt.GetFloat("timeShoot");
+								dt.GetFloat("power"),dt.GetFloat("range"),dt.GetInt("viewId"),dt.GetInt("projId"),dt.GetDouble("timeShoot"));
 								
 	}	
 	/// <summary>
@@ -919,5 +1024,99 @@ public class NetworkController : MonoBehaviour {
 		 GetView(dt.GetInt("id")).pawn.RemoteSetAI(dt.GetInt("group"),dt.GetInt("home"));
 		 
 	}
+    /// <summary>
+    /// handle invokeProjectileCall  from Server
+    /// </summary>	
+
+    public void HandleInvokeProjectileCall(ISFSObject dt)
+    {
+
+        ProjectileManager.instance.RemoteInvoke(dt);
+
+    }
+
+    /// <summary>
+    ///handle  simplePrefabSpawn  from server
+    /// </summary>	
+
+    public void HandleSimplePrefabSpawn(ISFSObject dt)
+    {
+        SimpleNetModel model = (SimpleNetModel)dt.GetClass("model");
+        GameObject go = RemoteInstantiateNetPrefab(model.type, model.position.GetVector(), model.rotation.GetQuat(), model.id);
+
+    }	
+
+    /// <summary>
+    ///handle  gameStart  from server
+    /// </summary>	
+
+    public void HandleGameStart()
+    {
+       Debug.Log("GAME START");
+        //GameRule.instance.StartGame();
+
+    }	
+
+    /// <summary>
+    ///handle masterStart  from server
+    /// </summary>	
+
+    public void HandleMasterStart()
+    {
+        Debug.Log("master");
+       foreach(FoxView view in foxViewList.Values){
+           if(view.isSceneView){
+               view.isMine = true;
+               view.SendMessage("OnMasterClientSwitched",SendMessageOptions.DontRequireReceiver);
+           }
+       }
+
+    }	
+    /// <summary>
+    ///handle gameUpdate  from server
+    /// </summary>	
+
+    public void HandleGameUpdate(ISFSObject dt)
+    {
+        Debug.Log("gameeUPDATE");
+        GameRuleModel model = (GameRuleModel)dt.GetClass("game");
+        GameRule.instance.SetFromModel(model);
+
+    }	
+      /// <summary>
+    ///handle nextMap  from server
+    /// </summary>	
+
+    public void HandleNextMap(ISFSObject dt)
+    {
+
+        string map=   dt.GetUtfString("map");
+        serverHolder.LoadNextMap(map);
+
+    }	
+      /// <summary>
+    ///handle pawnDiedByKill  from server
+    /// </summary>	
+
+    public void HandlePawnDiedByKill(ISFSObject dt)
+    {
+        Debug.Log("PAWN DIED");
+        Pawn pawn = GetView(dt.GetInt("viewId")).pawn;
+        pawn.PawnKill();
+        int player = dt.GetInt("player");
+        if(player==_smartFox.MySelf.Id){
+            if (pawn.player != null)
+            {
+                GetPlayer(player).PawnKill(pawn.player,pawn.myTransform.position);
+
+            }
+        }
+
+       
+
+    }	
+
+    
+    
 }
 

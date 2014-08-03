@@ -296,7 +296,7 @@ public class Pawn : DamagebleObject {
 	};
 
 	protected CharacteristicManager charMan;
-	protected SkillManager skillManager;
+    public SkillManager skillManager;
 	public BasePawnStatistic statistic = new BasePawnStatistic();
 	//effects
 
@@ -583,13 +583,11 @@ public class Pawn : DamagebleObject {
 			return;		
 		}
 		isDead = true;
-		if (CurWeapon != null) {
-			CurWeapon.	RequestKillMe();
-		}
-
-		StartCoroutine (CoroutineRequestKillMe ());
+		
+		//StartCoroutine (CoroutineRequestKillMe ());
         Pawn killerPawn =null;
         Player killerPlayer = null;
+        int killerID = -1;
         if (killer != null)
         {
             killerPawn = killer.GetComponent<Pawn>();
@@ -599,24 +597,27 @@ public class Pawn : DamagebleObject {
                 killerPlayer = killerPawn.player;
                 if (killerPlayer != null)
                 {
-                    killerPlayer.PawnKill(player, myTransform.position);
+                    killerID = killerPlayer.playerView.GetId();
                 }
             }
         }
-            if (player != null)
-            {
-                if (player.GetRobot() == this)
-                {
-                    player.RobotDead(killerPlayer);
-                }
-                else
-                {
-                    player.PawnDead(killerPlayer, killerPawn);
-                }
-            }
-        
 
-	
+        foxView.PawnDiedByKill(killerID);
+       
+        if (player != null)
+        {
+            if (player.GetRobot() == this)
+            {
+                player.RobotDead(killerPlayer);
+            }
+            else
+            {
+                player.PawnDead(killerPlayer, killerPawn);
+            }
+        }
+
+
+        PawnKill();
 
 		
 	}
@@ -636,6 +637,10 @@ public class Pawn : DamagebleObject {
 		}
 		
 	}
+    public  void PawnKill(){
+        ActualKillMe();
+    }
+
 	protected override void ActualKillMe(){
         isDead = true;
 		characterState = CharacterState.Dead;
@@ -2341,7 +2346,7 @@ public class Pawn : DamagebleObject {
   
 	 void OnMasterClientSwitched()
     {
-        if (PhotonNetwork.isMasterClient&&isAi) {
+        if (isAi) {
 			mainAi.StartAI();
 		}
     }
@@ -2363,9 +2368,9 @@ public class Pawn : DamagebleObject {
 		serPawn.characterState =(int)characterState;
         serPawn.active = isActive;
 		serPawn.isDead =isDead;
-		serPawn.positon.WriteVector(stream,transform.position);
-		serPawn.aimRotation.WriteVector(stream,aimRotation);
-		serPawn.rotation.WriteQuat(stream,transform.rotation);
+		serPawn.position.WriteVector(transform.position);
+		serPawn.aimRotation.WriteVector(aimRotation);
+		serPawn.rotation.WriteQuat(transform.rotation);
 		serPawn.health =health;
 	    return  serPawn;
     }
@@ -2376,7 +2381,8 @@ public class Pawn : DamagebleObject {
 		correctPlayerPos = pawn.position.MakeVector(correctPlayerPos);
 		correctPlayerRot = pawn.rotation.MakeQuaternion(correctPlayerRot);
 		aimRotation = pawn.aimRotation.MakeVector(aimRotation);
-		team=serPawn.team;
-		health = serPawn.health;
+       
+        team = pawn.team;
+        health = pawn.health;
     }
 }

@@ -44,7 +44,10 @@ public class FPSScripts : MonoBehaviour
 			// display two fractional digits (f2 format)
 			float fps = accum/frames;
 			string format = System.String.Format("{0:F2} FPS",fps);
-            format += "\n" + TimeManager.Instance.averagePing.ToString("0.00") + "PING";
+            if (TimeManager.Instance != null)
+            {
+                format += "\n" + TimeManager.Instance.averagePing.ToString("0.00") + "PING";
+            }
 			guiText.text = format;
 			
 			if(fps < 30)

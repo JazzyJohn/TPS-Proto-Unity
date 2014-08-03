@@ -40,8 +40,21 @@ public class ServerHolder : MonoBehaviour
 	private const float FLOAT_COEF =100.0f;
 
     public List<RoomData> allRooms = new List<RoomData>();
+    
+    private  Sfs2X.Entities.Room _gameRoom;
+    
+    public Sfs2X.Entities.Room gameRoom{
+        get { 
+            if(_gameRoom==null){
+                _gameRoom = NetworkController.smartFox.LastJoinedRoom;
+            }
+            return _gameRoom;
+        }   
+        set{
+            _gameRoom = value;
+        }
+    }
 
-    public Sfs2X.Entities.Room gameRoom;
 	public string version;
 	public struct LoadProgress{
 		public int allLoader;
@@ -82,12 +95,18 @@ public class ServerHolder : MonoBehaviour
 	}
 
 	void OnJoinRoom(BaseEvent evt) {
-    
-     // Debug.Log("OnJoinRoom: " + evt.Params.ToStringFull());
+
+        
+      
       Sfs2X.Entities.Room room = (Sfs2X.Entities.Room)evt.Params["room"];
       NetworkController.Instance.pause = true;
-     
-		// If we joined a game room, then we either created it (and auto joined) or manually selected a game to join
+      Debug.Log("OnJoinRoom: " + room);
+	
+      if (room == null)
+      {
+          return; 
+      }
+    	// If we joined a game room, then we either created it (and auto joined) or manually selected a game to join
       if (shouldLoad)
       {
 
@@ -146,7 +165,7 @@ public class ServerHolder : MonoBehaviour
             roomData.playerCount = room.UserCount;
             roomData.maxPlayers = room.MaxUsers;
             allRooms.Add(roomData);
-            Debug.Log("Room id: " + room.Id + " has name: " + room.Name +"map" +room.GetVariable("map").GetStringValue());
+            ///Debug.Log("Room id: " + room.Id + " has name: " + room.Name +"map" +room.GetVariable("map").GetStringValue());
 
         }
 
@@ -191,6 +210,7 @@ public class ServerHolder : MonoBehaviour
 				nextUpdateTime += updateRate;
 			}
 		}*/
+        SetupRoomList();
 	}
 	
 	void OnReceivedRoomList()
@@ -370,29 +390,37 @@ public class ServerHolder : MonoBehaviour
         */
         bool isVisible = true;
         int roomCnt = newRoomMaxPlayers;
-        RoomVariable gameRule = null;
+        RoomSettings settings = new RoomSettings(newRoomName);
+        RoomVariable gameRule = null, maxScore = null, maxTime=null;
+        settings.MaxVariables = 10;
         switch (mode)
         {
             case GAMEMODE.PVE:
                 roomCnt = newPVERoomMaxPlayers;
                  gameRule =new SFSRoomVariable("ruleClass", "nstuff.juggerfall.extension.gamerule.PVEGameRule");
+                 settings.Variables.Add(new SFSRoomVariable("teamCount", 2));
                 break;
             case GAMEMODE.RUNNER:
                 roomCnt = newRunnerRoomMaxPlayers;
                 isVisible = false;
                 gameRule = new SFSRoomVariable("ruleClass", "nstuff.juggerfall.extension.gamerule.RUNNERGameRule");
+
                 break;
             case GAMEMODE.PVP:
                 gameRule = new SFSRoomVariable("ruleClass", "nstuff.juggerfall.extension.gamerule.PVPGameRule");
+                settings.Variables.Add(new SFSRoomVariable("teamCount", 2));
+                maxTime =new SFSRoomVariable("maxTime", 0);
+                maxScore =new SFSRoomVariable("maxScore", 25);
                 break;
         }
 
-        RoomSettings settings = new RoomSettings(newRoomName);
+        settings.Variables.Add(maxScore);
+        settings.Variables.Add(maxTime);
         settings.GroupId = "games";
         settings.IsGame = true;
         RoomVariable mapVar = new SFSRoomVariable("map", map);
         settings.Variables.Add(mapVar);
-        RoomVariable visVar = new SFSRoomVariable("visible",false);
+        RoomVariable visVar = new SFSRoomVariable("visible", isVisible);
         settings.Variables.Add(visVar);
         settings.Variables.Add(gameRule);
         settings.MaxUsers =(short)roomCnt;
@@ -417,6 +445,11 @@ public class ServerHolder : MonoBehaviour
             StartCoroutine(LoadMap((string)PhotonNetwork.room.customProperties["MapName"]));
         }
 	}
+    public void LoadNextMap(string map)
+    {
+
+        StartCoroutine(LoadMap(map));
+    }
 	void OnJoinedLobby()
 	{
 		print ("Мы в лобби.");
@@ -559,10 +592,7 @@ public class ServerHolder : MonoBehaviour
         
 		}
 		connectingToRoom = false;
-		if (PhotonNetwork.isMasterClient) 
-		{
-			FindObjectOfType<GameRule> ().StartGame ();
-		}
+		
 		MainMenuGUI mainMenu = FindObjectOfType<MainMenuGUI> ();
 		if (mainMenu != null) {
 				Destroy (mainMenu.gameObject);
@@ -587,14 +617,7 @@ public class ServerHolder : MonoBehaviour
         stream.SendNext((int)(vect.z * FLOAT_COEF));
 		
 	}
-	void OnMasterClientSwitched( PhotonPlayer newMaster )
-	{
-		//TODO: director fix
 	
-		if (PhotonNetwork.isMasterClient) {
-			FindObjectOfType<GameRule> ().StartGame ();	
-		}
-	}
 
 
 

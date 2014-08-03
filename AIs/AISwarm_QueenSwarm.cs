@@ -19,7 +19,7 @@ public class AISwarm_QueenSwarm : AISwarm
        
 		AISpawnPoint respawn = respawns[(int)(UnityEngine.Random.value * respawns.Length)];
 		
-		 GameObject obj = NetworkController.PawnSpawnRequest(queenPawn, respawn.transform.position, respawn.transform.rotation, true, new int[]);
+		 GameObject obj =  NetworkController.Instance.PawnSpawnRequest(queenPawn, respawn.transform.position, respawn.transform.rotation, true, new int[0]);
                  
 		obj.GetComponent<Pawn>().SetTeam(0);
 		AIBase ai = obj.GetComponent<AIBase>();
@@ -35,7 +35,7 @@ public class AISwarm_QueenSwarm : AISwarm
             {
               
                    // GameObject obj = PhotonNetwork.InstantiateSceneObject(Bots[(int)(UnityEngine.Random.value * Bots.Length)],eggs[i].position,eggs[i].rotation, 0, null) as GameObject;
-					GameObject obj = NetworkController.PawnSpawnRequest(Bots[(int)(UnityEngine.Random.value * Bots.Length)], eggs[i].position,eggs[i].rotation, true, new int[]);
+					GameObject obj =  NetworkController.Instance.PawnSpawnRequest(Bots[(int)(UnityEngine.Random.value * Bots.Length)], eggs[i].position,eggs[i].rotation, true, new int[0]);
                                   
 				 //	GameObject obj = PhotonNetwork.Instantiate (Bots[(int)(UnityEngine.Random.value*Bots.Length)].name, go.transform.position, go.transform.rotation, 0,null) as GameObject;
                     // go.Spawned(obj.GetComponent<Pawn>());

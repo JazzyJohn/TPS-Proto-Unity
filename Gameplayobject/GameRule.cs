@@ -1,5 +1,6 @@
 ﻿using UnityEngine;
 using System.Collections;
+using nstuff.juggerfall.extension.models;
 
 public class GameRule : MonoBehaviour {
 	static public bool IsLvlChanging=false;
@@ -104,5 +105,10 @@ public class GameRule : MonoBehaviour {
         }
         IsLvlChanging = false;
         FindObjectOfType<AIDirector>().StartDirector();
+    }
+
+    public virtual void SetFromModel(GameRuleModel model)
+    {
+
     }
 }

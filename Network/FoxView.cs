@@ -19,6 +19,10 @@ public class FoxView : MonoBehaviour {
 	public bool isMine;
 	
 	public bool isSceneView;
+
+    public bool preLoad;
+
+    public int DebufViewID;
 	
 	public int viewID
     {
@@ -41,13 +45,17 @@ public class FoxView : MonoBehaviour {
             {
                 isMine = NetworkController.smartFox.MySelf.Id == ownerId;
             }
-            
+            DebufViewID = value;
           
         }
     }
     void Awake(){
 		pawn = GetComponent<Pawn>();
 		weapon = GetComponent<BaseWeapon>();
+        if (preLoad)
+        {
+            NetworkController.RegisterSceneView(this);
+        }
 	}
     /*
 	public void UDP(SFSObject data)
@@ -130,14 +138,14 @@ public class FoxView : MonoBehaviour {
 		data.PutClass("direction",new QuaternionModel(rotation));
 		data.PutFloat("power", power);
 		data.PutFloat("range", range);
-		data.PutFloat("viewId", viewId);
-		data.PutFloat("projId", projId);	
+        data.PutInt("viewId", viewId);
+        data.PutInt("projId", projId);	
 	    data.PutDouble("timeShoot", TimeManager.Instance.NetworkTime);
 		data.PutInt("id", viewID);	
 		NetworkController.Instance.WeaponShootRequest(data);
 	}
 	public void SkillCastEffect(string name){
-		NetworkController.Instance.SkillCastEffectRequest(viewID);
+        NetworkController.Instance.SkillCastEffectRequest(viewID, name);
 	}
 	public void SkillActivate(string name){
 		ISFSObject data = new SFSObject();
@@ -159,4 +167,16 @@ public class FoxView : MonoBehaviour {
 		data.PutClass("viewId", viewId);
 		NetworkController.Instance.SkillActivateRequest(data);
 	}
+
+    public void InvokeProjectileCall(ISFSObject data)
+    {
+        NetworkController.Instance.InvokeProjectileCallRequest(data);
+    }
+
+    public void PawnDiedByKill(int userId)
+    {
+        NetworkController.Instance.PawnDiedByKillRequest(viewID, userId);
+    }
+
+   
 }

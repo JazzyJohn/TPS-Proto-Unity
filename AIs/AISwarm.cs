@@ -59,7 +59,7 @@ public class AISwarm:MonoBehaviour
                 AISpawnPoint go = respawns[i];
                 if (go.IsAvalable())
                 {
-                    GameObject obj = NetworkController.PawnSpawnRequest(Bots[(int)(UnityEngine.Random.value * Bots.Length)], go.transform.position, go.transform.rotation, true, new int[]);
+                    GameObject obj = NetworkController.Instance.PawnSpawnRequest(Bots[(int)(UnityEngine.Random.value * Bots.Length)], go.transform.position, go.transform.rotation, true, new int[0]);
                     //	GameObject obj = PhotonNetwork.Instantiate (Bots[(int)(UnityEngine.Random.value*Bots.Length)].name, go.transform.position, go.transform.rotation, 0,null) as GameObject;
                     go.Spawned(obj.GetComponent<Pawn>());
                     //  Debug.Log("Group before set" + this.aiGroup + "  " + aiGroup);

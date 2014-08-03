@@ -25,7 +25,10 @@ public class PlayerView : MonoBehaviour {
         allPlayer.Add(ownerId, this);
     }
 
-  
+    public int GetId()
+    {
+        return ownerId;
+    }
     public void SetNameUID(string UID, string PlayerName)
     {
         NetworkController.Instance.SetNameUIDRequest( UID,  PlayerName);
@@ -44,7 +47,7 @@ public class PlayerView : MonoBehaviour {
 
     public void NetUpdate(PlayerModel player)
     {
-        Debug.Log("NET UPDATE "+player.uid +" name " + player.name);
+        Debug.Log("NET UPDATE " + player.uid + " name " + player.name + "team" + player.team);
         observed.UID = player.uid;
         observed.team =  player.team;
         observed.PlayerName = player.name;

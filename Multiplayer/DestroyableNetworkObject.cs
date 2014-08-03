@@ -30,7 +30,7 @@ public class DestroyableNetworkObject : MonoBehaviour {
 			
 	}
 	protected virtual void ActualKillMe(){
-			PhotonNetwork.Destroy(gameObject);
+			Destroy(gameObject);
 	}
 
 }

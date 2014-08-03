@@ -246,7 +246,8 @@ public class BaseWeapon : DestroyableNetworkObject {
 		curTransform.localPosition = Offset;
 		//Debug.Log (name + weaponRotator);
 		curTransform.localRotation = weaponRotator;
-		RemoteAttachWeapon(inowner);
+        
+		//RemoteAttachWeapon(inowner);
 		
 		
 	}
@@ -260,6 +261,7 @@ public class BaseWeapon : DestroyableNetworkObject {
 			//Destroy(photonView);
 			Debug.Log ("DestoroyATTACHEs");
 			Destroy(gameObject);
+            return;
 		}
 		owner.setWeapon (this);
 		if (rifleParticleController != null) {
@@ -801,7 +803,12 @@ public class BaseWeapon : DestroyableNetworkObject {
     WeaponModel sirWep = new WeaponModel();
     public WeaponModel GetSerilizedData()
     {
+        sirWep.id = foxView.viewID;
 		return sirWep;
 	}
+    public void NetUpdate(WeaponModel model)
+    {
+
+    }
   
 }

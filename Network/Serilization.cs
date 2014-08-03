@@ -2,6 +2,7 @@
 using System;
 using System.Collections;
 using Sfs2X.Protocol.Serialization;
+using System.Collections.Generic;
 
 namespace nstuff.juggerfall.extension.models
 {
@@ -76,8 +77,26 @@ namespace nstuff.juggerfall.extension.models
 
         }
     }
+    [Serializable]
+    public class SimpleNetModel : SerializableSFSType
+    {
+        public int id;
+		 
+        public string type;
+
+        public Vector3Model position = new Vector3Model();
+
+       public QuaternionModel rotation = new QuaternionModel();
+
+        public SimpleNetModel()
+        {
+
+        }
+    }
+    
 	[Serializable]
-	public class Vector3Model{
+    public class Vector3Model : SerializableSFSType
+    {
 		public float x;
 		
 		public float y;
@@ -93,7 +112,7 @@ namespace nstuff.juggerfall.extension.models
 			y = vector.y;
 			z = vector.z;
 		}
-		public WriteVector(Vector3 vector){
+		public void WriteVector(Vector3 vector){
 			x = vector.x;
 			y = vector.y;
 			z = vector.z;
@@ -111,7 +130,8 @@ namespace nstuff.juggerfall.extension.models
 	}	
 	
 	[Serializable]
-	public class QuaternionModel{
+    public class QuaternionModel : SerializableSFSType
+    {
 		public float x;
 		
 		public float y;
@@ -128,14 +148,14 @@ namespace nstuff.juggerfall.extension.models
 			x = quaternion.x;
 			y = quaternion.y;
 			z = quaternion.z;
-			w =quaternion.w
+            w = quaternion.w;
 		}	
 		
 		public void WriteQuat(Quaternion quaternion){
 			x = quaternion.x;
 			y = quaternion.y;
 			z = quaternion.z;
-			w = quaternion.w
+            w = quaternion.w;
 		}	
 		public  Quaternion MakeQuaternion( Quaternion quaternion){
 			quaternion.x = x;
@@ -148,6 +168,19 @@ namespace nstuff.juggerfall.extension.models
 			Quaternion quat = new Quaternion();
 			return MakeQuaternion(quat);
 		}
-	}	
-	 
+	}
+    [Serializable]
+    public class GameRuleModel : SerializableSFSType
+    {
+    }
+
+    [Serializable]
+    public class PVPGameRuleModel : GameRuleModel
+    {
+        public bool isGameEnded;
+
+        public ArrayList teamScore;
+
+        public ArrayList teamKill;
+    }
 }

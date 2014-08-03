@@ -124,9 +124,10 @@ public class BaseProjectile : MonoBehaviour
         float distance = mTransform.InverseTransformDirection(mRigidBody.velocity).z * 0.1f;
         if (replication)
         {
-            distance += (float)(PhotonNetwork.time - lateTime) /1000f* mRigidBody.velocity.magnitude;
+            distance += (float)(TimeManager.Instance.NetworkTime - lateTime) /1000f* mRigidBody.velocity.magnitude;
         }
-        if (Physics.Raycast(mTransform.position, mRigidBody.velocity.normalized, out hit, distance))
+
+        if (distance>0&&Physics.Raycast(mTransform.position, mRigidBody.velocity.normalized, out hit, distance))
         {
 
                 onBulletHit(hit);
@@ -136,7 +137,7 @@ public class BaseProjectile : MonoBehaviour
         if (replication)
         {
             //Debug.Log((float)(PhotonNetwork.time - lateTime));
-            transform.Translate(mRigidBody.velocity * (float)(PhotonNetwork.time - lateTime) / 1000f);
+            transform.Translate(mRigidBody.velocity * (float)(TimeManager.Instance.NetworkTime - lateTime) / 1000f);
         }
 	//	Debug.Log("id " + projId+ " position " + mTransform.position + " rotation "+ mTransform.rotation);
         mRigidBody.useGravity = false;

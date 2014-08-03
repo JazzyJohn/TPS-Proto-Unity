@@ -11,12 +11,12 @@ public class ObjectSpawnPoint : MonoBehaviour {
 	
 	private bool sendAv= false;
 
-    protected foxView myView;
+    protected FoxView myView;
 
 	protected GameObject spawnedObject;
 	// Use this for initialization
-	void Awake() { 
-		myView = GetComponent<foxView>(); 
+	void Awake() {
+        myView = GetComponent<FoxView>(); 
 		respawnTimer = respawnTime;
 	}
 
@@ -34,7 +34,7 @@ public class ObjectSpawnPoint : MonoBehaviour {
 
 	// Update is called once per frame
 	void Update () {
-            if (!isAvalable && spawnedObject == null && foxView.isMine)
+        if (!isAvalable && spawnedObject == null && myView.isMine)
             {
 				
 				

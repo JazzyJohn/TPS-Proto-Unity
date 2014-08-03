@@ -72,7 +72,7 @@ public class Player : MonoBehaviour {
 
 	private bool canSpamBot = true;
 
-	private PlayerView playerView;
+    public PlayerView playerView;
 
     public bool isMine { get { return playerView.isMine; } set { } }
 
@@ -115,27 +115,38 @@ public class Player : MonoBehaviour {
 	void Start(){
 		
 		PlayerManager.instance.addPlayer(this);
-		
+
         if (playerView.isMine)
         {
-						charMan = GetComponent<CharacteristicPlayerManager>();
-						charMan.Init();
-						myCamera = Camera.main;
-						((PlayerMainGui)myCamera.GetComponent (typeof(PlayerMainGui))).SetLocalPlayer(this);
-						robotTimer = 0;
-		                
-						//this.name = "Player";		
-						PlayerName = "Player" + PhotonNetwork.playerList.Length;
-						//	photonView.RPC ("ASKTeam", PhotonTargets.MasterClient);
-						globalPlayer =  FindObjectOfType<GlobalPlayer>();
-						UID = globalPlayer.GetUID();
-						PlayerName = globalPlayer.GetPlayerName();
-						//vkAvavtar= globalPlayer.GetPlayerAvatar();
-						friendsInfo = globalPlayer.friendsInfo;
-                        playerView.SetNameUID(UID, PlayerName);
-						EventHolder.instance.FireEvent(typeof(LocalPlayerListener),"EventAppear",this);
-						//StatisticHandler.StartStats(UID,PlayerName);
-		} 
+            if (charMan == null)
+            {
+                charMan = GetComponent<CharacteristicPlayerManager>();
+                charMan.Init();
+            }
+            myCamera = Camera.main;
+            ((PlayerMainGui)myCamera.GetComponent(typeof(PlayerMainGui))).SetLocalPlayer(this);
+            robotTimer = 0;
+
+            //this.name = "Player";		
+            PlayerName = "Player" + PhotonNetwork.playerList.Length;
+            //	photonView.RPC ("ASKTeam", PhotonTargets.MasterClient);
+            globalPlayer = FindObjectOfType<GlobalPlayer>();
+            UID = globalPlayer.GetUID();
+            PlayerName = globalPlayer.GetPlayerName();
+            //vkAvavtar= globalPlayer.GetPlayerAvatar();
+            friendsInfo = globalPlayer.friendsInfo;
+            playerView.SetNameUID(UID, PlayerName);
+            EventHolder.instance.FireEvent(typeof(LocalPlayerListener), "EventAppear", this);
+            //StatisticHandler.StartStats(UID,PlayerName);
+        }
+        else
+        {
+            if (charMan == null)
+            {
+                charMan = GetComponent<CharacteristicPlayerManager>();
+                charMan.Init();
+            }
+        }
 	}
 	
 	
@@ -177,7 +188,7 @@ public class Player : MonoBehaviour {
 				currentPawn.ChangeDefaultWeapon(Choice._Player);
 				ItemManager.instance.SaveItemForSlot();
 				//PVPGameRule.instance.Spawn(team);
-				AfterSpawnSetting(currentPawn,team,activeSteampacks.ToArray());
+				AfterSpawnSetting(currentPawn,activeSteampacks.ToArray());
 				prefabBot =PlayerManager.instance.avaibleBots[selectedBot];
 				prefabGhostBot =PlayerManager.instance.ghostsBots[selectedBot];
 
@@ -232,7 +243,7 @@ public class Player : MonoBehaviour {
 							robotPawn =(RobotPawn)PlayerManager.instance.SpawmBot(prefabBot,spamPoint,ghostBot.transform.rotation);
 							robotPawn.ChangeDefaultWeapon(selectedBot);
 							//Debug.Log("robot spawn"+robotPawn);
-                            AfterSpawnSetting(robotPawn, team, activeSteampacks.ToArray());
+                            AfterSpawnSetting(robotPawn, activeSteampacks.ToArray());
 
 						
 							canSpawnBot=false;							
@@ -587,7 +598,7 @@ public class Player : MonoBehaviour {
 		}
 	
 	}
-    public void AfterSpawnSetting(Pawn pawn,  int rTeam, int[] steampacks)
+    public void AfterSpawnSetting(Pawn pawn,   int[] steampacks)
     {
 
        PawnType type =PawnType.PAWN;
@@ -603,6 +614,7 @@ public class Player : MonoBehaviour {
                 {
 					if(charMan==null){
 						charMan = GetComponent<CharacteristicPlayerManager>();
+                        charMan.Init();
 					}
                     charMan.DeathUpdate();
                     List<int> activeSteampacks = new List<int>();
@@ -622,7 +634,6 @@ public class Player : MonoBehaviour {
         }
 
 
-        team = rTeam;
         pawn.player = this;
         pawn.team = this.team;
         pawn.Init();
