@@ -407,6 +407,10 @@ public class NetworkController : MonoBehaviour {
     }
 	 private GameObject RemoteInstantiateNetPrefab(string prefab, Vector3 vector3, Quaternion quaternion, int viewId)
     {
+		if(foxViewList.ContainsKey(viewId){
+			return foxViewList[viewId].gameObject;
+			
+		}
         GameObject newObject = _SpawnPrefab(prefab,vector3,quaternion);
         if (newObject == null)
         {
@@ -579,12 +583,12 @@ public class NetworkController : MonoBehaviour {
     /// <summary>
     /// pawnSpawn request to server
     /// </summary>	
-    public GameObject PawnSpawnRequest(string prefab, Vector3 vector3,Quaternion quaternion,bool isAI,int[] stims)
+    public GameObject PawnSpawnRequest(string prefab, Vector3 vector3,Quaternion quaternion,bool isAI,int[] stims,bool scene)
     {
         ISFSObject data = new SFSObject();
        
-        data.PutBool("AI", isAI);
-     
+        data.PutBool("Scene", scene);
+        data.PutBool("isAI", isAI);
 		data.PutIntArray("stims", stims);
         GameObject go = InstantiateNetPrefab(prefab, vector3, quaternion, data,isAI);
         PawnModel pawn = go.GetComponent<Pawn>().GetSerilizedData();
@@ -818,7 +822,34 @@ public class NetworkController : MonoBehaviour {
         ExtensionRequest request = new ExtensionRequest("pawnDiedByKill", data, serverHolder.gameRoom);
         smartFox.Send(request);
     }
+	/// <summary>
+    /// vipSpawned request to server
+    /// </summary>	
 
+    public void VipSpawnedRequest(PawnModel pawn)
+    {
+        ISFSObject data = new SFSObject();
+     
+     	data.PutClass("pawn", pawn);
+        ExtensionRequest request = new ExtensionRequest("vipSpawned", data, serverHolder.gameRoom);
+        smartFox.Send(request);
+    }
+		/// <summary>
+    /// registerSceneView request to server
+    /// </summary>	
+
+    public void RegisterSceneViewRequest(SimpleNetModel model)
+    {
+        ISFSObject data = new SFSObject();
+     
+     	data.PutClass("model", model);
+        ExtensionRequest request = new ExtensionRequest("registerSceneView", data, serverHolder.gameRoom);
+        smartFox.Send(request);
+    }
+			
+
+		
+		
 		
 		
 		
@@ -836,8 +867,11 @@ public class NetworkController : MonoBehaviour {
 		if(dt.ContainsKey("ownerId")){
 		    Player player  = GetPlayer(dt.GetInt("ownerId"));
 		  
-           
-		    player.AfterSpawnSetting(pawn,dt.GetIntArray("stims"));
+			if(dt.GetBool("isAI"){
+				player.AISpawnSetting(pawn,dt.GetIntArray("stims"));	
+			}else{
+				player.AfterSpawnSetting(pawn,dt.GetIntArray("stims"));	
+			}
         }
 		pawn.NetUpdate(sirPawn);
 		 
@@ -1066,7 +1100,7 @@ public class NetworkController : MonoBehaviour {
         Debug.Log("master");
        foreach(FoxView view in foxViewList.Values){
            if(view.isSceneView){
-               view.isMine = true;
+               view.SetMine(true);
                view.SendMessage("OnMasterClientSwitched",SendMessageOptions.DontRequireReceiver);
            }
        }

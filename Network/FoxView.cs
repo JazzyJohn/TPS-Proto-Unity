@@ -57,6 +57,13 @@ public class FoxView : MonoBehaviour {
             NetworkController.RegisterSceneView(this);
         }
 	}
+	public void SetMine(bool isMine){
+		this.isMine = isMine;
+		if(pawn==null&&weapon==null){
+			SimpleNetModel view= new SimpleNetModel();
+			NetworkController.Instance.RegisterSceneViewRequest(view);
+		} 		
+	}
     /*
 	public void UDP(SFSObject data)
     {
@@ -177,6 +184,10 @@ public class FoxView : MonoBehaviour {
     {
         NetworkController.Instance.PawnDiedByKillRequest(viewID, userId);
     }
-
+	
+	public void VipSpawnedRequest(PawnModel pawn)
+    {
+		NetworkController.Instance.VipSpawnedRequest(pawn);
+	}
    
 }

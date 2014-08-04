@@ -240,7 +240,7 @@ public class Player : MonoBehaviour {
 						if(ghostBot!=null&&canSpawnBot){
 							Vector3 spamPoint =ghostBot.transform.position;
 							spamPoint.y+= 30;
-							robotPawn =(RobotPawn)PlayerManager.instance.SpawmBot(prefabBot,spamPoint,ghostBot.transform.rotation);
+							robotPawn =(RobotPawn)PlayerManager.instance.SpawmBot(prefabBot,spamPoint,ghostBot.transform.rotation,activeSteampacks.ToArray());
 							robotPawn.ChangeDefaultWeapon(selectedBot);
 							//Debug.Log("robot spawn"+robotPawn);
                             AfterSpawnSetting(robotPawn, activeSteampacks.ToArray());
@@ -597,6 +597,10 @@ public class Player : MonoBehaviour {
 			return currentPawn;
 		}
 	
+	}
+	public void AISpawnSetting(Pawn pawn,   int[] steampacks){
+		pawn.player = this;
+        pawn.team = this.team;
 	}
     public void AfterSpawnSetting(Pawn pawn,   int[] steampacks)
     {

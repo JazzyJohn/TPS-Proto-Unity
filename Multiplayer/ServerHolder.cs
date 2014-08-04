@@ -403,7 +403,7 @@ public class ServerHolder : MonoBehaviour
             case GAMEMODE.RUNNER:
                 roomCnt = newRunnerRoomMaxPlayers;
                 isVisible = false;
-                gameRule = new SFSRoomVariable("ruleClass", "nstuff.juggerfall.extension.gamerule.RUNNERGameRule");
+                gameRule = new SFSRoomVariable("ruleClass", "nstuff.juggerfall.extension.gamerule.RunnerGameRule");
 
                 break;
             case GAMEMODE.PVP:
