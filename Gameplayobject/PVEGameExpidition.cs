@@ -1,5 +1,7 @@
 ﻿using UnityEngine;
 using System.Collections;
+using Sfs2X.Entities.Data;
+using nstuff.juggerfall.extension.models;
 
 public class PVEGameExpidition : GameRule {
 
@@ -15,9 +17,9 @@ public class PVEGameExpidition : GameRule {
 
     void Update()
     {
-        
-        
-        timer += Time.deltaTime;
+
+
+        base.Update();
     }
 
     public bool IsGameEnded()
@@ -39,6 +41,9 @@ public class PVEGameExpidition : GameRule {
     }
     public void Arrived(){
         isArrived = true;
+        if(NetworkController.Instance.IsMaster()){
+            NetworkController.Instance.GameRuleArrivedRequest();
+        }
     }
     public override int Winner()
     {
@@ -60,27 +65,29 @@ public class PVEGameExpidition : GameRule {
     
     }
 
-    public override void SetFromModel(PVEGameRuleModel model)
+    public override void SetFromModel(GameRuleModel model)
 	{
 		PVEGameRuleModel pvemodel = (PVEGameRuleModel)model;
 		if (!isGameEnded && pvemodel.isGameEnded)
 		{
-			GameEnded();
+			
 			isGameEnded = true;
 		}
-		for (int i = 0; i < pvemodel.teamKill.Count; i++)
+        teamScore = new int[pvemodel.teamScore.Count];
+        for (int i = 0; i < pvemodel.teamScore.Count; i++)
 		{
 		  
 			teamScore[i] = (int)pvemodel.teamScore[i];
 		}
 		if(VipPawn==null||VipPawn.foxView.viewID!=pvemodel.vipID){
-			VipPawn = GetView(pvemodel.vipID).pawn;
+			VipPawn = NetworkController.GetView(pvemodel.vipID).pawn;
 		}
 	}
 
 	public virtual void ReadMasterInfo(ISFSObject dt){
 		if(dt.ContainsKey("route")){
 			VipPawn.GetComponent<AIVipRoute>().ReCreateRoute(dt.GetIntArray("route"));
+            
 		}
 	}
 }

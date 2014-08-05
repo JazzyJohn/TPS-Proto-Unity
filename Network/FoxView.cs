@@ -61,6 +61,7 @@ public class FoxView : MonoBehaviour {
 		this.isMine = isMine;
 		if(pawn==null&&weapon==null){
 			SimpleNetModel view= new SimpleNetModel();
+            view.id = viewID;
 			NetworkController.Instance.RegisterSceneViewRequest(view);
 		} 		
 	}

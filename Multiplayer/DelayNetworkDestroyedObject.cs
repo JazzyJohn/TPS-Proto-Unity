@@ -10,7 +10,8 @@ public class DelayNetworkDestroyedObject : MonoBehaviour {
 	void Update () {
 		timer += Time.deltaTime;
 		if (timer > timeLimit) {
-			if(PhotonNetwork.isMasterClient){
+
+			if(GetComponent<FoxView>().isMine){
 				SendMessage("RequestKillMe", SendMessageOptions.DontRequireReceiver);
 			}
 		}

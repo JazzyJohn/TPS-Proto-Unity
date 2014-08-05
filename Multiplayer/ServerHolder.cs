@@ -39,6 +39,8 @@ public class ServerHolder : MonoBehaviour
     public int newRunnerRoomMaxPlayers;
 	private const float FLOAT_COEF =100.0f;
 
+    public GAMEMODE DefaultGameMode;
+
     public List<RoomData> allRooms = new List<RoomData>();
     
     private  Sfs2X.Entities.Room _gameRoom;
@@ -100,7 +102,7 @@ public class ServerHolder : MonoBehaviour
       
       Sfs2X.Entities.Room room = (Sfs2X.Entities.Room)evt.Params["room"];
       NetworkController.Instance.pause = true;
-      Debug.Log("OnJoinRoom: " + room);
+      gameRoom = room;
 	
       if (room == null)
       {
@@ -140,7 +142,7 @@ public class ServerHolder : MonoBehaviour
     */
 	public void OnRoomAdded(BaseEvent evt) { //Room room) {
         Sfs2X.Entities.Room room = (Sfs2X.Entities.Room)evt.Params["room"];
-        gameRoom = room;
+       
 		// Update view (only if room is game)
 		if ( room.IsGame ) {
 			SetupRoomList();
@@ -227,7 +229,10 @@ public class ServerHolder : MonoBehaviour
 	
 	void OnGUI()
 	{
-
+        if (!shouldLoad && gameRoom == null)
+        {
+            ShowConnectMenu();
+        }
         /*if(!shouldLoad){
             if (!PhotonNetwork.inRoom && PhotonNetwork.connected)
             {
@@ -278,92 +283,34 @@ public class ServerHolder : MonoBehaviour
 
         }	*/
     }
-	
-
-	
-	void ShowConnectMenu()
-	{
-				GUILayout.Space (10);
-
-		if (!PhotonNetwork.inRoom)
-		{
-
-			if (!createRoom)
-			{
-				scroll = GUILayout.BeginScrollView(scroll, GUILayout.Width(200), GUILayout.Height(150));
-
-				
-								if (allRooms.Count > 0) {
-                                    foreach (RoomData room in allRooms)
-                                    {
-												GUILayout.BeginHorizontal ("box");
-												GUILayout.Label (room.name +"  "+  room.playerCount + " / " +room.maxPlayers, GUILayout.Width (150));
-												GUILayout.FlexibleSpace ();
-					
-												if( room.playerCount<newRoomMaxPlayers){
-													if (GUILayout.Button ("Войти", GUILayout.Width (100))) {
-																
-																				
-															PhotonNetwork.JoinRoom (room.name);
-															connectingToRoom = true;
-													}
-												}
-												GUILayout.EndHorizontal ();
-										}
-								}
-
-                                if (allRooms.Count == 0)
-										GUILayout.Label ("Нет доступных комнат.");
-				
-								GUILayout.EndScrollView ();
-								GUILayout.Space (5);
-				
-								GUILayout.FlexibleSpace ();
-								GUILayout.BeginHorizontal ();
-								GUILayout.FlexibleSpace ();
-				
-								if (GUILayout.Button ("Создать комнату", GUILayout.Width (150), GUILayout.Height (25)))
-										createRoom = true;
-				
-								GUILayout.EndHorizontal ();
-						} else {
-								GUILayout.BeginHorizontal ();
-								GUILayout.Label ("Создание новой комнаты.", GUILayout.Width (130));
-								GUILayout.EndHorizontal ();
-				
-								GUILayout.BeginHorizontal ();
-								GUILayout.Label ("Название комнаты: ", GUILayout.Width (130));
-								newRoomName = GUILayout.TextField (newRoomName, 30, GUILayout.Height (25));
-								GUILayout.EndHorizontal ();
-				
-								GUILayout.FlexibleSpace ();
-				
-								GUILayout.BeginHorizontal ();
-				
-
-						if (GUILayout.Button("Отмена", GUILayout.Width (150), GUILayout.Height (25)))
-							createRoom = false;
-						GUILayout.FlexibleSpace ();
-						if (GUILayout.Button("Создать", GUILayout.Width (150), GUILayout.Height (25)))
-						{
-						/*	ExitGames.Client.Photon.Hashtable customProps = new ExitGames.Client.Photon.Hashtable();
-                            customProps["MapName"] = map;
-							string[] exposedProps = new string[customProps.Count];
-							exposedProps[0] = "MapName";
-
-							PhotonNetwork.CreateRoom(newRoomName, true, true, newRoomMaxPlayers, customProps, exposedProps);*/
-						}
-
-				
-								GUILayout.EndHorizontal ();
-				
-
-			
-						}
-				}
 
 
-		}
+
+    void ShowConnectMenu()
+    {
+
+
+        if (!createRoom)
+        {
+
+            GUILayout.Space(5);
+
+            GUILayout.FlexibleSpace();
+            GUILayout.BeginHorizontal();
+            GUILayout.FlexibleSpace();
+
+            if (GUILayout.Button("Создать комнату", GUILayout.Width(150), GUILayout.Height(25)))
+            {
+                CreateNewRoom(DefaultGameMode);
+            }
+                
+            GUILayout.EndHorizontal();
+
+
+
+
+        }
+    }
 		
 	public void JoinRoom(RoomData room){
 
@@ -399,12 +346,15 @@ public class ServerHolder : MonoBehaviour
                 roomCnt = newPVERoomMaxPlayers;
                  gameRule =new SFSRoomVariable("ruleClass", "nstuff.juggerfall.extension.gamerule.PVEGameRule");
                  settings.Variables.Add(new SFSRoomVariable("teamCount", 2));
+                 maxTime =new SFSRoomVariable("maxTime", 0);
+                maxScore =new SFSRoomVariable("maxScore",0);
                 break;
             case GAMEMODE.RUNNER:
                 roomCnt = newRunnerRoomMaxPlayers;
                 isVisible = false;
                 gameRule = new SFSRoomVariable("ruleClass", "nstuff.juggerfall.extension.gamerule.RunnerGameRule");
-
+                 maxTime =new SFSRoomVariable("maxTime", 0);
+                maxScore =new SFSRoomVariable("maxScore",0);
                 break;
             case GAMEMODE.PVP:
                 gameRule = new SFSRoomVariable("ruleClass", "nstuff.juggerfall.extension.gamerule.PVPGameRule");
@@ -448,7 +398,7 @@ public class ServerHolder : MonoBehaviour
     public void LoadNextMap(string map)
     {
 
-        StartCoroutine(LoadMap(map));
+        StartCoroutine(LoadMap(map,true));
     }
 	void OnJoinedLobby()
 	{
@@ -528,7 +478,7 @@ public class ServerHolder : MonoBehaviour
 		}
 		return ((float)progress.finishedLoader)/progress.allLoader*100f +progress.curLoader/progress.allLoader;
 	}
-	IEnumerator LoadMap (string mapName)
+	IEnumerator LoadMap (string mapName,bool next =false)
 	{
 		AsyncOperation async;
 
@@ -575,7 +525,7 @@ public class ServerHolder : MonoBehaviour
 
 
 
-        NetworkController.Instance.pause = false;
+      
 		FinishLoad ();
 		yield return new WaitForEndOfFrame();
 		GameObject menu =Instantiate (loader.playerHud, Vector3.zero, Quaternion.identity) as GameObject;
@@ -583,13 +533,30 @@ public class ServerHolder : MonoBehaviour
 		menu.transform.parent = Camera.main.transform;
         menu.transform.localPosition = Vector3.zero;
         menu.transform.localRotation = Quaternion.identity;
+        Debug.Log("SPawn");
+        NetworkController.Instance.pause = false;
+        if (next)
+        {
+            Player[] allPlayer = FindObjectsOfType<Player>();
+            foreach (Player player in allPlayer)
+            {
+                player.Restart();
+            }
+        }
       //  NetworkController.Instance.SpawnPlayer( Vector3.zero, Quaternion.identity);
 	
 	}
 	public void FinishLoad(){
 		if(!shouldLoad){
-			Camera.main.GetComponent<PlayerMainGui> ().enabled = true;
-        
+            MapDownloader loader = FindObjectOfType<MapDownloader>();
+            GameObject menu = Instantiate(loader.playerHud, Vector3.zero, Quaternion.identity) as GameObject;
+
+            menu.transform.parent = Camera.main.transform;
+            menu.transform.localPosition = Vector3.zero;
+            menu.transform.localRotation = Quaternion.identity;
+            Camera.main.GetComponent<PlayerMainGui>().enabled = true;
+
+            NetworkController.Instance.pause = false;
 		}
 		connectingToRoom = false;
 		

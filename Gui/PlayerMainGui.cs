@@ -143,7 +143,10 @@ public class PlayerMainGui : MonoBehaviour {
 	
 
 	}
-
+    void OnEnabled()
+    {
+        Debug.Log("OLOLO");
+    }
 	public void SetLocalPlayer(Player newPlayer){
 		LocalPlayer = newPlayer;
 		chats = FindObjectsOfType<ChatHolder> ();
@@ -158,6 +161,7 @@ public class PlayerMainGui : MonoBehaviour {
 		hud.SetLocalPlayer(LocalPlayer);
         respawnMenu = GetComponentInChildren<SelectPlayerGUI>();
         pausegui = GetComponentInChildren<PauseMenu>();
+       
         respawnMenu.SetLocalPlayer(LocalPlayer);
 		ChageState(GUIState.Respawn);
         

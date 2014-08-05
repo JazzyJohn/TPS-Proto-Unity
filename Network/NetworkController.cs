@@ -79,8 +79,13 @@ public class NetworkController : MonoBehaviour {
        }
 	
 	}
-	
-	
+
+    public bool IsMaster()
+    {
+        return NetworkController.smartFox.MySelf.ContainsVariable("Master") && NetworkController.smartFox.MySelf.GetVariable("Master").GetBoolValue();
+    }
+
+   
 		// We start working from here
     void Awake()
     {
@@ -181,6 +186,7 @@ public class NetworkController : MonoBehaviour {
         {
             SmartFoxConnection.Connection = _smartFox;
         }
+        Debug.Log(UID);
         if (UID!="")
         {
             Login(UID);
@@ -379,9 +385,15 @@ public class NetworkController : MonoBehaviour {
                 case "pawnDiedByKill":
                     HandlePawnDiedByKill(dt);
                     break;
+
 				case "newMaster":
 					HandleMasterStart(dt);
 					break;
+
+                case "playerLeave":
+                    HandlePlayerLeave(dt);
+                    break;
+
             }
         }
         catch (Exception e)
@@ -401,15 +413,17 @@ public class NetworkController : MonoBehaviour {
 	}
 
 
-    private GameObject InstantiateNetPrefab(string prefab, Vector3 vector3, Quaternion quaternion, ISFSObject data,bool AI)
+    private GameObject InstantiateNetPrefab(string prefab, Vector3 vector3, Quaternion quaternion, ISFSObject data,bool Scene)
     {
         GameObject newObject = _SpawnPrefab(prefab,vector3,quaternion);
         if (newObject == null)
         {
             return null;
         }
+        
         FoxView view =  newObject.GetComponent<FoxView>();
-		if(!AI){
+        if (!Scene)
+        {
 			view.viewID = AllocateViewID(_smartFox.MySelf.Id);
 		}else{
 			view.viewID = AllocateViewID(0);
@@ -419,7 +433,7 @@ public class NetworkController : MonoBehaviour {
     }
 	 private GameObject RemoteInstantiateNetPrefab(string prefab, Vector3 vector3, Quaternion quaternion, int viewId)
     {
-		if(foxViewList.ContainsKey(viewId){
+		if(foxViewList.ContainsKey(viewId)){
 			return foxViewList[viewId].gameObject;
 			
 		}
@@ -862,7 +876,7 @@ public class NetworkController : MonoBehaviour {
     /// nextRoom request to server
     /// </summary>	
 
-    public void NextRoomRequest(SimpleNetModel model)
+    public void NextRoomRequest()
     {
         ISFSObject data = new SFSObject();
      
@@ -881,7 +895,17 @@ public class NetworkController : MonoBehaviour {
         smartFox.Send(request);
     }		
 
-		
+	/// <summary>
+    /// gameRuleArrived request to server
+    /// </summary>	
+
+    public void GameRuleArrivedRequest()
+    {
+        ISFSObject data = new SFSObject();
+
+        ExtensionRequest request = new ExtensionRequest("gameRuleArrived", data, serverHolder.gameRoom);
+        smartFox.Send(request);
+    }		
 		
 		
 		
@@ -900,7 +924,7 @@ public class NetworkController : MonoBehaviour {
 		if(dt.ContainsKey("ownerId")){
 		    Player player  = GetPlayer(dt.GetInt("ownerId"));
 		  
-			if(dt.GetBool("isAI"){
+			if(dt.GetBool("isAI")){
 				player.AISpawnSetting(pawn,dt.GetIntArray("stims"));	
 			}else{
 				player.AfterSpawnSetting(pawn,dt.GetIntArray("stims"));	
@@ -1111,6 +1135,7 @@ public class NetworkController : MonoBehaviour {
         SimpleNetModel model = (SimpleNetModel)dt.GetClass("model");
         GameObject go = RemoteInstantiateNetPrefab(model.type, model.position.GetVector(), model.rotation.GetQuat(), model.id);
 
+
     }	
 
     /// <summary>
@@ -1168,17 +1193,34 @@ public class NetworkController : MonoBehaviour {
         pawn.PawnKill();
         int player = dt.GetInt("player");
         if(player==_smartFox.MySelf.Id){
-            if (pawn.player != null)
-            {
-                GetPlayer(player).PawnKill(pawn.player,pawn.myTransform.position);
+              GetPlayer(player).PawnKill(pawn.player,pawn.myTransform.position);
 
-            }
+            
         }
 
        
 
-    }	
+    }
+    /// <summary>
+    ///handle playerLeave  from server
+    /// </summary>	
 
+    public void HandlePlayerLeave(ISFSObject dt)
+    {
+      
+        int playerID =dt.GetInt("playerId");
+        Destroy(PlayerView.allPlayer[playerID].gameObject);
+        PlayerView.allPlayer.Remove(playerID);
+        foreach (int viewId in dt.GetSFSArray("views"))
+        {
+            FoxView view = GetView(viewId);
+            if (view != null)
+            {
+                Destroy(view.gameObject);
+            }   
+        }
+
+    }	
     
     
 }

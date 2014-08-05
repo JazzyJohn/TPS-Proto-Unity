@@ -31,7 +31,7 @@ public class AIAgentComponent : MonoBehaviour {
 		agent.Launch (transform);
 		dynamicObstacleLayer = PathfindingEngine.Instance.dynamicObstacleLayer;
 		agentLayer = PathfindingEngine.Instance.agentLayer;
-		height = PathfindingEngine.Instance.area.height;
+		height = PathfindingEngine.Instance.area.Height;
 		radius = PathfindingEngine.Instance.area.tileSize * 0.45f;
 		agentAvoidance = PathfindingEngine.Instance.agentAvoidance;
 	}

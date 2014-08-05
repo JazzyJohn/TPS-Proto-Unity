@@ -112,10 +112,18 @@ public class Player : MonoBehaviour {
         playerView = GetComponent<PlayerView>();
 		
     }
-	void Start(){
+    void Start()
+    {
+        Init();
+    }
+    public void Restart()
+    {
+        Init();
+    }
+	void Init(){
 		
 		PlayerManager.instance.addPlayer(this);
-
+       
         if (playerView.isMine)
         {
             if (charMan == null)
@@ -147,13 +155,21 @@ public class Player : MonoBehaviour {
                 charMan.Init();
             }
         }
+        DeathUpdate();
+        Score.Assist = 0;
+        Score.Death = 0;
+        Score.Kill = 0;
+        Score.RobotKill = 0;
+        isStarted = false;
+        respawnTimer = 0;
 	}
 	
 	
 	public void SetTeam(int intTeam){
 		team = intTeam;	
         playerView.SetTeam(intTeam);
-	
+        
+
 	}
 	
 

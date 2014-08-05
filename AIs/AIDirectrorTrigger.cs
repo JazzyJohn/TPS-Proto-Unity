@@ -34,6 +34,7 @@ public class AIDirectrorTrigger : MonoBehaviour
                     Pawn pawn = other.GetComponent<Pawn>();
                     if (pawn != null && !pawn.isAi)
                     {
+                        Debug.Log("EVENT");
                         EventDelegate.Execute(onEvent);
                     }
                 break;

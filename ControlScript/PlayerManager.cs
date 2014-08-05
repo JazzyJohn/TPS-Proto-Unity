@@ -111,7 +111,7 @@ public class PlayerManager : MonoBehaviour {
 		return cachedPawns;
 	}
 	public void addPlayer(Player target){
-		if(target.payerView.isMine){
+		if(target.playerView.isMine){
 			LocalPlayer= target;
 		}
 		cachedPlayers.Add (target);

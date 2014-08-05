@@ -2,6 +2,7 @@
 using System.Collections;
 using System.Collections.Generic;
 using System;
+using nstuff.juggerfall.extension.models;
 
 [Serializable]
 public class RoomScenarioEntry{
@@ -43,7 +44,7 @@ public class RunnerGameRule : GameRule {
     public void NextRoom()
     {
         EventHolder.instance.FireEvent(typeof(GameListener), "EventRoomFinished");
-		NetworkController.Instance.NextRoomRequest();
+        NetworkController.Instance.NextRoomRequest();
         roomCnt++;
     }
     void Update()
@@ -95,10 +96,10 @@ public class RunnerGameRule : GameRule {
 		RunnerGameRuleModel runnermodel = (RunnerGameRuleModel)model;
 		if (!isGameEnded && runnermodel.isGameEnded)
 		{
-			GameEnded();
+			
 			isGameEnded = true;
 		}
-		for (int i = 0; i < runnermodel.teamKill.Count; i++)
+        for (int i = 0; i < runnermodel.teamScore.Count; i++)
 		{
 		  
 			teamScore[i] = (int)runnermodel.teamScore[i];

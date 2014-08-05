@@ -6,7 +6,7 @@ public class PVPGameRule : GameRule {
 
 		protected int[] teamKill;
 		
-		protected int[] teamScore;
+		
 		
 		
 
@@ -21,7 +21,8 @@ public class PVPGameRule : GameRule {
 		void Update(){
 			
             Annonce();
-			timer+= Time.deltaTime;			
+            base.Update();
+				
 		}
 
         public AnnonceType type;

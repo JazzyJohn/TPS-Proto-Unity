@@ -87,6 +87,7 @@ public class AISwarm:MonoBehaviour
     
     }
     public virtual void Activate() {
+        Debug.Log("Activate");
         isActive = true;
     }
     public bool IsEnemy(int enemyGroup)

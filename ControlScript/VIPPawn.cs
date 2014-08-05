@@ -3,8 +3,8 @@ using System.Collections;
 
 public class VIPPawn : Pawn {
 
-	public Awake(){
-		base.Awake();
+	public void Start(){
+        base.Start();
 		foxView.VipSpawnedRequest(GetSerilizedData());	
 	}
 

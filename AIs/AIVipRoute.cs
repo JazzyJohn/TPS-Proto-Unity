@@ -15,6 +15,7 @@ public class RoutePoint
     public RoutePoint NextPoint(out int nextTarget)
     {
         if (avPoints.Length == 0) {
+            nextTarget=0;
             return null;
         }
 		nextTarget   =(int)(UnityEngine.Random.value * avPoints.Length);
@@ -64,8 +65,8 @@ public class AIVipRoute : AIState {
         }
 		NetworkController.Instance.NextRouteRequest(nextTarget);
     }
-	public void ReCreateRoute(int route){
-		for(int i;i<route.lenght;i++){
+	public void ReCreateRoute(int[] route){
+		for(int i=0;i<route.Length;i++){
 			routePoint = routePoint.RecreateRoute(route[i]);
 		}
 	}

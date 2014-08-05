@@ -1,10 +1,12 @@
 ﻿using UnityEngine;
 using System.Collections;
 using nstuff.juggerfall.extension.models;
+using Sfs2X.Entities.Data;
 
 public class GameRule : MonoBehaviour {
 	static public bool IsLvlChanging=false;
 
+    protected int[] teamScore;
 
     protected float timer = 0.0f;
 
@@ -43,8 +45,12 @@ public class GameRule : MonoBehaviour {
 	}
 	
 	// Update is called once per frame
-	void Update () {
-	
+	protected void Update () {
+        timer += Time.deltaTime;
+        if (isGameEnded)
+        {
+            restartTimer += Time.deltaTime;
+        }
 	}
 
     // s_Instance is used to cache the instance found in the scene so we don't have to look it up every time.
@@ -98,6 +104,7 @@ public class GameRule : MonoBehaviour {
     }
     public virtual void StartGame()
     {
+        Debug.Log("Start Game");
         start = true;
         if (PathfindingEngine.Instance != null)
         {

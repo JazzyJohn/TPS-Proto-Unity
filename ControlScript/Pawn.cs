@@ -339,16 +339,16 @@ public class Pawn : DamagebleObject {
 
     PawnModel serPawn = new PawnModel();
 
-    public static float updateDelay = 0.01f;
+    public static float updateDelay = 0.1f;
 
     public float updateTimer = 0.0f;
 	
 	//DYNAMIC OCLUSION SECTION
-	public float LastUpdate = 0;
+	public float lastNetUpdate = 0;
 	
 	private bool isLocalVisible =true;
 	
-	public static float MAXRENDERDISTANCE = 900.0;
+	public static float MAXRENDERDISTANCE = 2500.0f;
 
 	protected void Awake(){
 		myTransform = transform;
@@ -381,7 +381,7 @@ public class Pawn : DamagebleObject {
 
     public virtual void StartPawn()
     {
-
+        Debug.Log("Start PAwn");
         sControl = new soundControl(aSource);//создаем обьект контроллера звука
         _canWallRun = canWallRun;
         //проигрываем звук респавна
@@ -605,10 +605,15 @@ public class Pawn : DamagebleObject {
                 if (killerPlayer != null)
                 {
                     killerID = killerPlayer.playerView.GetId();
+                    if (foxView.isMine && killerPawn.foxView.isMine)
+                    {
+                        killerPlayer.PawnKill(player, myTransform.position);
+                    }
                 }
             }
+            
         }
-
+      
         foxView.PawnDiedByKill(killerID);
        
         if (player != null)
@@ -1018,7 +1023,7 @@ public class Pawn : DamagebleObject {
 			
 			//animator.SetFloat("Pitch",pitchAngle);
             SendNetUpdate();
-			if(isAI){
+			if(isAi){
 				CheckVisibilite();
 			}
 		} else {
@@ -1101,7 +1106,8 @@ public class Pawn : DamagebleObject {
 	}
 	//Net replication of position 
 	public void ReplicatePosition(){
-		if(Time.time - lastUpdate>2.0f){
+        if (Time.time - lastNetUpdate > 2.0f)
+        {
 			StopReplicationVisibilite();
 		}
 		if (initialReplication) {
@@ -1117,8 +1123,8 @@ public class Pawn : DamagebleObject {
 
 	public void CheckVisibilite(){
 		Pawn pawn  =PlayerManager.instance.LocalPlayer.GetActivePawn();
-		if(pawn!=null&&(pawn.myTransform.position - myTransform.positon).sqrMagnitude>MAXRENDERDISTANCE){
-			StopReplicationVisibilite();
+		if(pawn!=null&&(pawn.myTransform.position - myTransform.position).sqrMagnitude>MAXRENDERDISTANCE){
+            StopLocalVisibilite();
 		}else{
 			RestartLocalVisibilite();
 		}
@@ -2369,8 +2375,11 @@ public class Pawn : DamagebleObject {
   
 	 void OnMasterClientSwitched()
     {
+        Debug.Log("Master On PAwn");
         if (isAi) {
 			mainAi.StartAI();
+            
+            RestartReplicationVisibilite();
 		}
     }
 	
@@ -2410,12 +2419,13 @@ public class Pawn : DamagebleObject {
        
         team = pawn.team;
         health = pawn.health;
-		lastUpdate =  Time.time;
+        lastNetUpdate = Time.time;
 		RestartReplicationVisibilite();
     }
 	//For that object that far from us we turn off gameobject on remote machine
 	public void RestartReplicationVisibilite(){
-		if(!gameObject.activeSelf){
+        if (!gameObject.activeSelf)
+        {
 			gameObject.SetActive(true);
 		}
 	}
@@ -2434,7 +2444,8 @@ public class Pawn : DamagebleObject {
 		}
 	}
 	//For Local machine we turn on render 
-	public void StopReplicationVisibilite(){
+	public void StopLocalVisibilite(){
+        isLocalVisible = false;
 		for (int i =0; i<myTransform.childCount; i++) {
 			myTransform.GetChild(i).gameObject.SetActive(false);
 		}

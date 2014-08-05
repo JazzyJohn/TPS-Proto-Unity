@@ -5,6 +5,7 @@ using System.Collections;
 public class PauseMenu : MonoBehaviour {
 
 	public GameObject camera;
+    public BlurEffect effect;
 	public SettingGUI Setting;
 	public UIPanel Menu;
 
@@ -18,6 +19,7 @@ public class PauseMenu : MonoBehaviour {
 
 	private PlayerMainGui PlayerGUI;
 
+    
 
 	public bool _VisableSetting;
 
@@ -35,18 +37,21 @@ public class PauseMenu : MonoBehaviour {
 		}
 	}
 
-	// Use this for initialization
-	void Start () 
-	{
-		camera = GameObject.Find("Main Camera");
-		PlayerGUI = FindObjectOfType<PlayerMainGui>();
-	}
-
+    void Awake()
+    {
+       camera = GameObject.Find("Main Camera");
+       effect =camera.GetComponent<BlurEffect>();
+       PlayerGUI = FindObjectOfType<PlayerMainGui>();
+    }
+	
 	public void GoToMainMenu()
 	{
     
 		Pause = false;
-		camera.GetComponent<BlurEffect>().enabled = false;
+        if (effect != null)
+        {
+            effect.enabled = false;
+        }
 		Screen.lockCursor = false;
         
         Application.LoadLevel(0);
@@ -57,7 +62,10 @@ public class PauseMenu : MonoBehaviour {
          if (PausePanel.alpha == 0f)
 		{
                 Pause = true;
-				camera.GetComponent<BlurEffect>().enabled = true;
+                if (effect != null)
+                {
+                    effect.enabled = true;
+                }
 				PlayerGUI.guiState = PlayerMainGui.GUIState.Pause;
 				Screen.lockCursor = false;
 				PlayGUI.alpha = 0f;
@@ -79,7 +87,10 @@ public class PauseMenu : MonoBehaviour {
 	{
       
             Pause = false;
-            camera.GetComponent<BlurEffect>().enabled = false;
+            if (effect != null)
+            {
+                effect.enabled = false;
+            }
             PlayerGUI.guiState = PlayerMainGui.GUIState.Normal;
             
             Setting.CearControlls();
