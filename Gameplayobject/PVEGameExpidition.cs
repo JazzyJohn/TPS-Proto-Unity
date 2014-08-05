@@ -16,29 +16,7 @@ public class PVEGameExpidition : GameRule {
     void Update()
     {
         
-        if (isGameEnded)
-        {
-
-            restartTimer += Time.deltaTime;
-            if (restartTimer > restartTime && !lvlChanging)
-            {
-                lvlChanging = true;
-                FindObjectOfType<ServerHolder>().LoadNextMap();
-            }
-        }
-        else if (!PhotonNetwork.isMasterClient)
-        {
-            return;
-        }
-        else if (IsGameEnded())
-        {
-            IsLvlChanging = true;
-            isGameEnded = true;
-            photonView.RPC("PVEGameEnded", PhotonTargets.All);
-            //PhotonNetwork.automaticallySyncScene = true;
-            //PhotonNetwork.LoadLevel(NextMap());
-
-        }
+        
         timer += Time.deltaTime;
     }
 
@@ -82,16 +60,27 @@ public class PVEGameExpidition : GameRule {
     
     }
 
-    [RPC]
-    public void PVEGameEnded()
-    {
-        //PhotonNetwork.automaticallySyncScene = true;
+    public override void SetFromModel(PVEGameRuleModel model)
+	{
+		PVEGameRuleModel pvemodel = (PVEGameRuleModel)model;
+		if (!isGameEnded && pvemodel.isGameEnded)
+		{
+			GameEnded();
+			isGameEnded = true;
+		}
+		for (int i = 0; i < pvemodel.teamKill.Count; i++)
+		{
+		  
+			teamScore[i] = (int)pvemodel.teamScore[i];
+		}
+		if(VipPawn==null||VipPawn.foxView.viewID!=pvemodel.vipID){
+			VipPawn = GetView(pvemodel.vipID).pawn;
+		}
+	}
 
-        isGameEnded = true;
-        //Player player = GameObject.Find ("Player").GetComponent<Player> ();
-        //player.GameEnd ();
-        EventHolder.instance.FireEvent(typeof(GameListener), "EventTeamWin", Winner());
-		
-    }
-
+	public virtual void ReadMasterInfo(ISFSObject dt){
+		if(dt.ContainsKey("route")){
+			VipPawn.GetComponent<AIVipRoute>().ReCreateRoute(dt.GetIntArray("route"));
+		}
+	}
 }

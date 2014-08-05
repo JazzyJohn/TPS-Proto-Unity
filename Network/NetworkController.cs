@@ -70,6 +70,15 @@ public class NetworkController : MonoBehaviour {
 	public static void ClearView(int id){
 		foxViewList.Remove(id);
 	}
+	public void MasterViewUpdate(){
+		foreach(FoxView view in foxViewList.Values){
+           if(view.isSceneView){
+               view.SetMine(true);
+               view.SendMessage("OnMasterClientSwitched",SendMessageOptions.DontRequireReceiver);
+           }
+       }
+	
+	}
 	
 	
 		// We start working from here
@@ -286,7 +295,7 @@ public class NetworkController : MonoBehaviour {
 
                     }
                     if(dt.ContainsKey("Master")&&dt.GetBool("Master")){
-                        HandleMasterStart();
+                        HandleMasterStart(dt);
                     }
                 
                     break;
@@ -370,6 +379,9 @@ public class NetworkController : MonoBehaviour {
                 case "pawnDiedByKill":
                     HandlePawnDiedByKill(dt);
                     break;
+				case "newMaster":
+					HandleMasterStart(dt);
+					break;
             }
         }
         catch (Exception e)
@@ -834,7 +846,7 @@ public class NetworkController : MonoBehaviour {
         ExtensionRequest request = new ExtensionRequest("vipSpawned", data, serverHolder.gameRoom);
         smartFox.Send(request);
     }
-		/// <summary>
+	/// <summary>
     /// registerSceneView request to server
     /// </summary>	
 
@@ -846,7 +858,28 @@ public class NetworkController : MonoBehaviour {
         ExtensionRequest request = new ExtensionRequest("registerSceneView", data, serverHolder.gameRoom);
         smartFox.Send(request);
     }
-			
+	/// <summary>
+    /// nextRoom request to server
+    /// </summary>	
+
+    public void NextRoomRequest(SimpleNetModel model)
+    {
+        ISFSObject data = new SFSObject();
+     
+		ExtensionRequest request = new ExtensionRequest("nextRoom", data, serverHolder.gameRoom);
+        smartFox.Send(request);
+    }		
+	/// <summary>
+    /// nextRoute request to server
+    /// </summary>	
+
+    public void NextRouteRequest(int nextRoute)
+    {
+        ISFSObject data = new SFSObject();
+		data.PutInt("nextRoute",nextRoute);
+		ExtensionRequest request = new ExtensionRequest("nextRoute", data, serverHolder.gameRoom);
+        smartFox.Send(request);
+    }		
 
 		
 		
@@ -1087,23 +1120,19 @@ public class NetworkController : MonoBehaviour {
     public void HandleGameStart()
     {
        Debug.Log("GAME START");
-        //GameRule.instance.StartGame();
+        GameRule.instance.StartGame();
 
     }	
 
     /// <summary>
     ///handle masterStart  from server
     /// </summary>	
-
-    public void HandleMasterStart()
+	
+    public void HandleMasterStart(ISFSObject dt)
     {
         Debug.Log("master");
-       foreach(FoxView view in foxViewList.Values){
-           if(view.isSceneView){
-               view.SetMine(true);
-               view.SendMessage("OnMasterClientSwitched",SendMessageOptions.DontRequireReceiver);
-           }
-       }
+		GameRule.instance.ReadMasterInfo(dt);
+		MasterViewUpdate();      
 
     }	
     /// <summary>

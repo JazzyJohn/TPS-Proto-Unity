@@ -12,13 +12,17 @@ public class RoutePoint
     {
         return myPoint;
     }
-    public RoutePoint NextPoint()
+    public RoutePoint NextPoint(out int nextTarget)
     {
         if (avPoints.Length == 0) {
             return null;
         }
-        return avPoints[(int)(UnityEngine.Random.value * avPoints.Length)];
+		nextTarget   =(int)(UnityEngine.Random.value * avPoints.Length);
+        return avPoints[nextTarget];
     }
+	public RoutePoint RecreateRoute(int nextTarget){
+		return avPoints[nextTarget];
+	}
 }
 
 public class AIVipRoute : AIState {
@@ -49,7 +53,8 @@ public class AIVipRoute : AIState {
     protected void NextPoint()
     {
         waitTime = curPoint.maxWaitTime;
-        curPoint = curPoint.NextPoint();
+		int nextTarget;
+        curPoint = curPoint.NextPoint(out nextTarget);
         if (curPoint != null)
         {
             
@@ -57,8 +62,13 @@ public class AIVipRoute : AIState {
            
             waiting = true;
         }
+		NetworkController.Instance.NextRouteRequest(nextTarget);
     }
-
+	public void ReCreateRoute(int route){
+		for(int i;i<route.lenght;i++){
+			routePoint = routePoint.RecreateRoute(route[i]);
+		}
+	}
     public void MoveOn() {
         waiting = false;
         _waitTimer = 0;

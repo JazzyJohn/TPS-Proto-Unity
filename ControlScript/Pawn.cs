@@ -342,6 +342,13 @@ public class Pawn : DamagebleObject {
     public static float updateDelay = 0.01f;
 
     public float updateTimer = 0.0f;
+	
+	//DYNAMIC OCLUSION SECTION
+	public float LastUpdate = 0;
+	
+	private bool isLocalVisible =true;
+	
+	public static float MAXRENDERDISTANCE = 900.0;
 
 	protected void Awake(){
 		myTransform = transform;
@@ -901,7 +908,7 @@ public class Pawn : DamagebleObject {
 
 		//Debug.Log (photonView.isSceneView);
 
-
+		
         if (!isActive && !foxView.isMine)
         {
 			//replicate position to get rid off teleportation after bot is dead			
@@ -1011,6 +1018,9 @@ public class Pawn : DamagebleObject {
 			
 			//animator.SetFloat("Pitch",pitchAngle);
             SendNetUpdate();
+			if(isAI){
+				CheckVisibilite();
+			}
 		} else {
 			ReplicatePosition();
 
@@ -1091,6 +1101,9 @@ public class Pawn : DamagebleObject {
 	}
 	//Net replication of position 
 	public void ReplicatePosition(){
+		if(Time.time - lastUpdate>2.0f){
+			StopReplicationVisibilite();
+		}
 		if (initialReplication) {
 			myTransform.position = correctPlayerPos;
 			myTransform.rotation = correctPlayerRot;
@@ -1100,6 +1113,16 @@ public class Pawn : DamagebleObject {
 		myTransform.rotation = Quaternion.Lerp(myTransform.rotation, correctPlayerRot, Time.deltaTime * SYNC_MULTUPLIER);
 
 
+	}
+
+	public void CheckVisibilite(){
+		Pawn pawn  =PlayerManager.instance.LocalPlayer.GetActivePawn();
+		if(pawn!=null&&(pawn.myTransform.position - myTransform.positon).sqrMagnitude>MAXRENDERDISTANCE){
+			StopReplicationVisibilite();
+		}else{
+			RestartLocalVisibilite();
+		}
+		
 	}
 	[RPC]
 	public void SendCharacterState(int nextrpcState,int nextwallState){
@@ -2374,6 +2397,9 @@ public class Pawn : DamagebleObject {
 		serPawn.health =health;
 	    return  serPawn;
     }
+
+	
+	
     public void NetUpdate(PawnModel pawn)
     {
 		nextState = (CharacterState) pawn.characterState;
@@ -2384,5 +2410,33 @@ public class Pawn : DamagebleObject {
        
         team = pawn.team;
         health = pawn.health;
+		lastUpdate =  Time.time;
+		RestartReplicationVisibilite();
     }
+	//For that object that far from us we turn off gameobject on remote machine
+	public void RestartReplicationVisibilite(){
+		if(!gameObject.activeSelf){
+			gameObject.SetActive(true);
+		}
+	}
+	//For that object that close to us we turn on gameobject on remote machine
+	public void StopReplicationVisibilite(){
+		gameObject.SetActive(false);
+	}
+
+	//For Local machine we turn off render but leave logic and movement 
+	public void RestartLocalVisibilite(){
+		if(!isLocalVisible){
+			for (int i =0; i<myTransform.childCount; i++) {
+				myTransform.GetChild(i).gameObject.SetActive(true);
+			}
+			isLocalVisible =true;
+		}
+	}
+	//For Local machine we turn on render 
+	public void StopReplicationVisibilite(){
+		for (int i =0; i<myTransform.childCount; i++) {
+			myTransform.GetChild(i).gameObject.SetActive(false);
+		}
+	}
 }

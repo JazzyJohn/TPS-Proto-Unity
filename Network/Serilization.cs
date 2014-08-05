@@ -183,4 +183,21 @@ namespace nstuff.juggerfall.extension.models
 
         public ArrayList teamKill;
     }
+	 [Serializable]
+    public class RunnerGameRuleModel : GameRuleModel
+    {
+        public bool isGameEnded;
+
+        public ArrayList teamScore;
+
+    }
+	[Serializable]
+    public class PVEGameRuleModel : GameRuleModel
+    {
+        public bool isGameEnded;
+
+        public ArrayList teamScore;
+		
+		public int vipID;
+    }
 }

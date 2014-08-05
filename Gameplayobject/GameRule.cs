@@ -111,4 +111,8 @@ public class GameRule : MonoBehaviour {
     {
 
     }
+	
+	public virtual void ReadMasterInfo(ISFSObject dt){
+		
+	}
 }

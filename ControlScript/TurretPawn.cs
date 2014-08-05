@@ -38,7 +38,7 @@ public class TurretPawn : Pawn {
 			//TODO: TEMP SOLUTION BEFORE NORMAL BONE ORIENTATION
 			
 			//animator.SetFloat("Pitch",pitchAngle);
-
+			 SendNetUpdate();
 		} else {
 			ReplicatePosition();
 

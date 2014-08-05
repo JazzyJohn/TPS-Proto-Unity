@@ -18,6 +18,8 @@ public class PlayerManager : MonoBehaviour {
 	private int curTeam =1;
 
 	public int MaxTeam = 2;
+	
+	public Player LocalPlayer;
 
 	public bool frendlyFire =false;
 
@@ -109,6 +111,9 @@ public class PlayerManager : MonoBehaviour {
 		return cachedPawns;
 	}
 	public void addPlayer(Player target){
+		if(target.payerView.isMine){
+			LocalPlayer= target;
+		}
 		cachedPlayers.Add (target);
 	}
 	public List<Player> FindAllPlayer(){
