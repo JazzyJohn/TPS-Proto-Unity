@@ -5,7 +5,7 @@ using System.Collections.Generic;
 
 public class ChatHolder : MonoBehaviour {
 
-	private PhotonView photonview;
+
 
 	private int roomId;
 
@@ -33,7 +33,7 @@ public class ChatHolder : MonoBehaviour {
 	private bool closeChat = true;
 	// Use this for initialization
 	void Start(){
-		photonview = GetComponent<PhotonView> ();
+		
 		//scrollPos.y = 1000000;
 	}
 	public void SetPlayer (Player newPlayer) {
@@ -108,7 +108,7 @@ public class ChatHolder : MonoBehaviour {
 
 	void AddMessage(string Message){
 
-		photonview.RPC("RPCAddToChat",PhotonTargets.All,Message, localPlayer.team, localPlayer.GetUid (), localPlayer.GetName());
+		//photonview.RPC("RPCAddToChat",PhotonTargets.All,Message, localPlayer.team, localPlayer.GetUid (), localPlayer.GetName());
 	}
 	[RPC]
 	public void RPCAddToChat(string message,int team,string uid,string name){
@@ -122,11 +122,6 @@ public class ChatHolder : MonoBehaviour {
 
 
 	}
-	public void OnPhotonSerializeView(PhotonStream stream, PhotonMessageInfo info)
-	{
-
-
-
-	}
+	
 
 }

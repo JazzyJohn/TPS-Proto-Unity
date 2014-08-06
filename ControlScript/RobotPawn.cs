@@ -11,6 +11,7 @@ public class RobotPawn : Pawn {
 		((RobotAnimationManager)animator).Activation();
 		_rb.constraints = RigidbodyConstraints.FreezeRotation;
 		isPilotIn = true;
+        foxView.InPilotChange(isPilotIn);
 		isActive = false;
 		characterState=CharacterState.Activate;
         GetComponent<PlayerCamera>().enabled = true;
@@ -47,6 +48,7 @@ public class RobotPawn : Pawn {
 	public new void  DeActivate(){
 		characterState=CharacterState.DeActivate;
 		isPilotIn = false;
+        foxView.InPilotChange(isPilotIn);
 		((RobotAnimationManager)animator).DeActivation();
 		GetComponent<ThirdPersonController>().enabled = false;
         GetComponent<PlayerCamera>().enabled = false;
@@ -90,30 +92,9 @@ public class RobotPawn : Pawn {
 		}
 		base.UpdateAnimator();
 	}
-	//NetworkSection
-	public new void OnPhotonSerializeView(PhotonStream stream, PhotonMessageInfo info)
-	{
-//TODO PILOT
-		//Debug.Log (this);
-		if (stream.isWriting)
-		{
-
-
-			stream.SendNext(isPilotIn);
-			//stream.SendNext(netIsGround);
-			//stream.SendNext(animator.GetJump());
-			
-		}
-		else
-		{
-
-			isPilotIn =(bool)stream.ReceiveNext();
-			//isGrounded =(bool) stream.ReceiveNext();
-			//animator.ApllyJump((bool)stream.ReceiveNext());
-			//Debug.Log (wallState);
-		}
-	}
+	
 	public override void ChangeDefaultWeapon(int myId){
 
 	}
+
 }

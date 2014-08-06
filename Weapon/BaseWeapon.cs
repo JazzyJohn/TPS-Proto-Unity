@@ -7,46 +7,10 @@ using nstuff.juggerfall.extension.models;
 
 
 public class BaseWeapon : DestroyableNetworkObject {
-	protected class ShootData{
-		public double timeShoot;
-		public Quaternion  direction;
-		public Vector3 position;
-		public float power;
-		public float range;
-		public int viewId;
-        public int projId;
-		public void PhotonSerialization(PhotonStream stream){
-            stream.SendNext(projId);
-            stream.SendNext (power);
-
-			stream.SendNext( range);
-			stream.SendNext( viewId);
-			stream.SendNext (timeShoot);
-
-            	stream.SendNext (direction.eulerAngles);
-                stream.SendNext(position);
-		}
-		public void PhotonDeserialization(PhotonStream stream){
-            projId = (int)stream.ReceiveNext();
-			power= (float)stream.ReceiveNext ();
-			range= (float)stream.ReceiveNext ();
-            viewId = (int)stream.ReceiveNext();
-			timeShoot = (double)stream.ReceiveNext ();
-
-            Vector3 euler = (Vector3)stream.ReceiveNext();
-            direction = Quaternion.Euler(euler);
-            position = (Vector3)stream.ReceiveNext();
-		}
-
-       
-    }
-
+	
 	private static LayerMask layer = -123909;
 	
-	private Queue<ShootData> shootsToSend = new Queue<ShootData>();
-
-	protected Queue<ShootData> shootsToSpawn = new Queue<ShootData>();
-
+	
 	public enum AMUNITONTYPE{SIMPLEHIT, PROJECTILE, RAY, HTHWEAPON, AOE};
 
 	public AMUNITONTYPE amunitionType;
@@ -734,7 +698,7 @@ public class BaseWeapon : DestroyableNetworkObject {
 				
 					if(target!=null){
 						projScript.target = target;
-						viewId = target.GetComponent<PhotonView>().viewID;
+						viewId = target.GetComponent<FoxView>().viewID;
 
 					}
 				}

@@ -4,27 +4,7 @@ using System.Collections.Generic;
 
 public class WeaponOfExtremities : MonoBehaviour {
 
-	class ShootData{
-		public double timeShoot;
-		public Quaternion  direction;
-		public Vector3 position;
-		public void PhotonSerialization(PhotonStream stream){
-			stream.SendNext (timeShoot);
-			
-			stream.SendNext( direction);
-			ServerHolder.WriteVectorToShort (stream, position);
-		}
-		public void PhotonDeserialization(PhotonStream stream){
-			timeShoot = (double)stream.ReceiveNext ();
-			direction = (Quaternion)stream.ReceiveNext ();
-			position = ServerHolder.ReadVectorFromShort (stream);
-		}
-	}
-
-	private Queue<ShootData> shootsToSend = new Queue<ShootData>();
 	
-	private Queue<ShootData> shootsToSpawn = new Queue<ShootData>();
-
 	public Pawn owner;
 
     public bool isKicking = false;

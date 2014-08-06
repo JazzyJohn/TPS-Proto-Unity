@@ -393,6 +393,9 @@ public class NetworkController : MonoBehaviour {
                 case "playerLeave":
                     HandlePlayerLeave(dt);
                     break;
+                case "pawnInPilotChange":
+                    HandlePawnInPilotChange(dt);
+                    break;
 
             }
         }
@@ -906,7 +909,38 @@ public class NetworkController : MonoBehaviour {
         ExtensionRequest request = new ExtensionRequest("gameRuleArrived", data, serverHolder.gameRoom);
         smartFox.Send(request);
     }		
-		
+	/// <summary>
+    /// leaveRoom request to server
+    /// </summary>	
+
+    public void LeaveRoomReuqest()
+    {
+      
+
+        LeaveRoomRequest request = new LeaveRoomRequest(serverHolder.gameRoom);
+        PlayerManager.instance.ClearAll();
+        PlayerView.allPlayer.Clear();
+        smartFox.Send(request);
+    }
+    /// <summary>
+    /// pawnInPilotChange request to server
+    /// </summary>	
+
+
+    internal void InPilotChangeRequest(int id,bool isPilotIn)
+    {
+         ISFSObject data = new SFSObject();
+
+        data.PutInt("id", id);
+        data.PutBool("isPilotIn", isPilotIn);
+        ExtensionRequest request = new ExtensionRequest("pawnInPilotChange", data, serverHolder.gameRoom);
+        smartFox.Send(request);
+    }
+
+
+
+
+
 		
 		
 		
@@ -1146,7 +1180,7 @@ public class NetworkController : MonoBehaviour {
     {
        Debug.Log("GAME START");
         GameRule.instance.StartGame();
-
+        TimeManager.Instance.Init();
     }	
 
     /// <summary>
@@ -1220,8 +1254,20 @@ public class NetworkController : MonoBehaviour {
             }   
         }
 
-    }	
+    }
+    /// <summary>
+    /// handle pawnInPilotChange(  from Server
+    /// </summary>	
+
+    public void HandlePawnInPilotChange(ISFSObject dt)
+    {
+
+        RobotPawn pawn = GetView(dt.GetInt("id")).pawn as RobotPawn;
+        pawn.isPilotIn = dt.GetBool("isPilotIn");
+
+    }
     
-    
+
+   
 }
 

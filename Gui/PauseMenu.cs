@@ -53,7 +53,8 @@ public class PauseMenu : MonoBehaviour {
             effect.enabled = false;
         }
 		Screen.lockCursor = false;
-        
+        NetworkController.Instance.LeaveRoomReuqest();
+     
         Application.LoadLevel(0);
 
          

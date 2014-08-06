@@ -26,7 +26,7 @@ public class BaseShootgun : BaseWeapon {
                      target = GetGuidanceTarget();
                      if (target != null)
                      {
-                         viewId = target.GetComponent<PhotonView>().viewID;
+                         viewId = target.GetComponent<FoxView>().viewID;
                      }
                     
                 }

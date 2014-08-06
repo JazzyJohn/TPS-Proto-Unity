@@ -38,7 +38,7 @@ public class TimeManager : MonoBehaviour {
 
 	void Awake() {
 		instance = this;
-        Init();
+        
 	}
 	
 	public void Init() {

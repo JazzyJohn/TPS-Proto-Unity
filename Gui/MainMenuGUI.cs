@@ -50,10 +50,7 @@ public class MainMenuGUI : MonoBehaviour {
         _playerInfo.Player = FindObjectOfType<GlobalPlayer>();
 		//Получение с сервера комнат
 		Server = _playerInfo.Player.GetComponent<ServerHolder>();
-        if (PhotonNetwork.inRoom)
-        {
-            Server.LeaveRoom();
-        }
+        
 
 		if (Server.allRooms != null) {
             foreach (RoomData room in Server.allRooms)

@@ -5,6 +5,7 @@ using System.Collections;
 using System.Collections.Generic;
 
 using Facebook.MiniJSON;
+using Facebook;
 public enum PLATFORMTYPE{
 	VK,
 	FACEBOOK
@@ -48,20 +49,34 @@ public class GlobalPlayer : MonoBehaviour {
 	public void SetFaceBookInit() {
 		if(FB.IsLoggedIn) {
 			UID ="FB"+FB.UserId;
-			FB.API ("/me/scores", HttpMethod.POST, SetFacebookName, new Dictionary<string, string>());
-			PlayerName=="FACEBOOK_GUEST";
+           Debug.Log("FB NAME" + FB.UserId);
+			FB.API ("/me/", HttpMethod.GET, SetFacebookName, new Dictionary<string, string>());
+			PlayerName="FACEBOOK_GUEST";
 		} else {
-			UID="FACEBOOK_GUEST";
-			PlayerName=="FACEBOOK_GUEST";
+           
+            FB.Login("email,publish_actions", LoginCallback);    
 		}
 	}
+    public void LoginCallback(FBResult result)
+    {
+        if (FB.IsLoggedIn)
+        {
+            UID = "FB" + FB.UserId;
+           // Debug.Log("FB NAME"+ FB.UserId);
+            FB.API("/me/", HttpMethod.GET, SetFacebookName, new Dictionary<string, string>());
+            PlayerName = "FACEBOOK_GUEST";
+        }
+
+    }
 	private void OnHideFaceBookUnity(bool isGameShown) {
-		
+       
 	}
 	
-	public void SetFacebookName(string jsonString){
-		Dictionary<string,object> dict = Json.Deserialize(jsonString) as Dictionary<string,object>;
-		PlayerName = dict["name"];
+	public void SetFacebookName(FBResult result){
+        Debug.Log("FB Result" + result.Text);
+        Debug.Log("FB Result" + result.GetType());
+		Dictionary<string,object> dict = Json.Deserialize(result.Text) as Dictionary<string,object>;
+		PlayerName = (string)dict["name"];
 		SetUid(UID);
 	
 	}

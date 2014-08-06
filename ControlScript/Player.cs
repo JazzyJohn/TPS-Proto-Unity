@@ -136,7 +136,7 @@ public class Player : MonoBehaviour {
             robotTimer = 0;
 
             //this.name = "Player";		
-            PlayerName = "Player" + PhotonNetwork.playerList.Length;
+      
             //	photonView.RPC ("ASKTeam", PhotonTargets.MasterClient);
             globalPlayer = FindObjectOfType<GlobalPlayer>();
             UID = globalPlayer.GetUID();
@@ -421,7 +421,7 @@ public class Player : MonoBehaviour {
         {
             if (pawnViewId != 0)
             {
-                Pawn killer = PhotonView.Find(pawnViewId).GetComponent<Pawn>();
+                Pawn killer = NetworkController.GetView(pawnViewId).GetComponent<Pawn>();
                 PlayerMainGui.instance.InitKillCam(killer);
                 StatisticHandler.SendPlayerKillbyNPC(UID, PlayerName);
             }

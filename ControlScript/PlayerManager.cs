@@ -39,17 +39,14 @@ public class PlayerManager : MonoBehaviour {
                 s_Instance =  FindObjectOfType(typeof (PlayerManager)) as PlayerManager;
             }
  
-            // If it is still null, create a new instance
-            if (s_Instance == null) {
-                GameObject obj = new GameObject("PlayerManager");
-                s_Instance = obj.AddComponent(typeof (PlayerManager)) as PlayerManager;
-               
-            }
+            
  
             return s_Instance;
         }
     }
- 
+    public void Awake(){
+        version = FindObjectOfType<ServerHolder>().version;
+    }
     // Ensure that the instance is destroyed when the game is stopped in the editor.
     void OnApplicationQuit() {
         s_Instance = null;
@@ -120,8 +117,16 @@ public class PlayerManager : MonoBehaviour {
 		return cachedPlayers;
 
 	}
- 
- }
+
+
+    public void ClearAll()
+    {
+        foreach(Player player in cachedPlayers){
+            Destroy(player.gameObject);
+        }
+      
+    }
+}
 	
 
 

@@ -190,5 +190,10 @@ public class FoxView : MonoBehaviour {
     {
 		NetworkController.Instance.VipSpawnedRequest(pawn);
 	}
-   
+
+
+    public void InPilotChange(bool isPilotIn)
+    {
+        NetworkController.Instance.InPilotChangeRequest(viewID,isPilotIn);
+    }
 }

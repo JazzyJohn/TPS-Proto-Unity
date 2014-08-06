@@ -39,7 +39,7 @@ public class SuicidePawn : Pawn {
 	}
     protected override void ActualKillMe()
     {
-        PhotonNetwork.Destroy(gameObject);
+       Destroy(gameObject);
     }
 	void Detonate(){
 		if(!isDetonate){

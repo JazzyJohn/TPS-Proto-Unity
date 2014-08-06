@@ -84,11 +84,11 @@ public class ServerHolder : MonoBehaviour
         NetworkController.smartFox.AddEventListener(SFSEvent.USER_EXIT_ROOM, OnUserLeaveRoom);
         NetworkController.smartFox.AddEventListener(SFSEvent.ROOM_ADD, OnRoomAdded);
         NetworkController.smartFox.AddEventListener(SFSEvent.ROOM_REMOVE, OnRoomDeleted);
-
+       
         SetupRoomList();
 
 	}
-
+      
     //SMART FOX LOGIC
     void OnPublicMessage(BaseEvent evt) {
 		string message = (string)evt.Params["message"];
@@ -317,12 +317,7 @@ public class ServerHolder : MonoBehaviour
         NetworkController.smartFox.Send(new JoinRoomRequest(room.id));
 	}
 
-    public void LeaveRoom() {
-        Debug.Log("LeaveTRoom");
-        PhotonNetwork.LeaveRoom();
-        PhotonNetwork.autoJoinLobby = true;
-        PhotonNetwork.ConnectUsingSettings(version);
-    }
+  
 	public void CreateNewRoom(GAMEMODE mode) //Создание комноты (+)
 	{
         if (map == "")
@@ -381,97 +376,13 @@ public class ServerHolder : MonoBehaviour
       
 	}
 
-	public void LoadNextMap(){
-		connectingToRoom = true;
-        PhotonNetwork.isMessageQueueRunning = false;
-        Debug.Log("LOAD"+this);
-        if (PhotonNetwork.offlineMode)
-        {
-        
-            StartCoroutine(LoadMap(map));
-        }
-        else
-        {
-            StartCoroutine(LoadMap((string)PhotonNetwork.room.customProperties["MapName"]));
-        }
-	}
+	
     public void LoadNextMap(string map)
     {
 
         StartCoroutine(LoadMap(map,true));
     }
-	void OnJoinedLobby()
-	{
-		print ("Мы в лобби.");
-		
-	}
 	
-	void OnConnectedToPhoton()
-	{
-		print ("Мы подключились к Photon.");
-		
-		if (PhotonNetwork.room != null)
-			PhotonNetwork.LeaveRoom();
-		
-		connectingToRoom = false;
-	}
-	void OnFailedToConnectToPhoton(DisconnectCause cause){
-		PhotonNetwork.offlineMode = true;
-	
-	}
-	
-	void OnPhotonJoinRoomFailed()
-	{
-		connectingToRoom = false;
-		FindObjectOfType<MainMenuGUI> ().CreateRoom ();
-		print ("Не удалось подключиться к комнате.");
-	}
-	
-	void OnPhotonCreateRoomFailed()
-	{
-		connectingToRoom = false;
-		FindObjectOfType<MainMenuGUI> ().ShowRoomList ();
-		print ("Не удалось создать комнату.");
-	}
-	
-	void OnPhotonJoinRandomJoinFailed()
-	{
-		connectingToRoom = false;
-		FindObjectOfType<MainMenuGUI> ().ShowRoomList ();
-		print ("Не удалось подключиться к случайной комнате.");
-	}
-	
-	void OnJoinedRoom()
-	{
-		print("Удалось подключиться к комнате " + PhotonNetwork.room.name);
-		PhotonNetwork.isMessageQueueRunning = false;
-		progress.allLoader=0;
-		progress.finishedLoader=0;
-		progress.curLoader=0;
-		connectingToRoom = true;
-		if (shouldLoad) {
-            if (PhotonNetwork.offlineMode)
-            {
-                StartCoroutine(LoadMap(map));
-            }
-            else
-            {
-                StartCoroutine(LoadMap((string)PhotonNetwork.room.customProperties["MapName"]));
-            }
-		} else {
-			FinishLoad ();
-		}
-
-		/*Camera.main.GetComponent<PlayerMainGui> ().enabled = true;
-		PhotonNetwork.Instantiate ("Player",Vector3.zero,Quaternion.identity,0);
-		if (PhotonNetwork.isMasterClient) {
-			FindObjectOfType<PVPGameRule> ().StartGame ();
-		}*/
-
-
-
-	}
-
 	public float LoadProcent() {
 		if(progress.allLoader==0){
 			return 0f;
@@ -568,22 +479,6 @@ public class ServerHolder : MonoBehaviour
 	
 	}
 
-	public static Vector3 ReadVectorFromShort(PhotonStream stream){
-		Vector3 newPosition = Vector3.zero;
-	//Debug.Log (stream.ReceiveNext ());
-	newPosition.x = ((int)stream.ReceiveNext())/FLOAT_COEF;
-	//Debug.Log (newPosition.x);
-    newPosition.y = ((int)stream.ReceiveNext()) / FLOAT_COEF;
-    newPosition.z = ((int)stream.ReceiveNext()) / FLOAT_COEF;
-		return newPosition;
-	}
-	public static void WriteVectorToShort(PhotonStream stream,Vector3 vect){
-
-        stream.SendNext((int)(vect.x * FLOAT_COEF));
-        stream.SendNext((int)(vect.y * FLOAT_COEF));
-        stream.SendNext((int)(vect.z * FLOAT_COEF));
-		
-	}
 	
 
 

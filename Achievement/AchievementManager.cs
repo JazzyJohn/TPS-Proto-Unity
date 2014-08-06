@@ -22,7 +22,7 @@ public class Achievement{
 	public Texture2D textureIcon;
 	public bool isDone = false;
 	public override string ToString(){
-		return name + " " + description + " " + achievementId + " " + achivParams.ToStringFull ();
+		return name + " " + description + " " + achievementId + " " + achivParams.ToString();
 	}
 	public virtual bool CheckDone(){
 		bool lIsDone = true;

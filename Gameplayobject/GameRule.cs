@@ -24,7 +24,7 @@ public class GameRule : MonoBehaviour {
 
     public bool CanUseRobot = true;
 
-    public PhotonView photonView;
+   
 
     public int curStage = 0;
 
@@ -37,7 +37,7 @@ public class GameRule : MonoBehaviour {
         isGameEnded = false;
         lvlChanging = false;
        // PhotonNetwork.isMessageQueueRunning = true;
-        photonView = GetComponent<PhotonView>();
+       
     }
 	// Use this for initialization
 	void Start () {

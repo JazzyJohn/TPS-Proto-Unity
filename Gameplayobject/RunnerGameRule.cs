@@ -57,7 +57,7 @@ public class RunnerGameRule : GameRule {
             if (restartTimer > restartTime && !lvlChanging)
             {
                 lvlChanging = true;
-                FindObjectOfType<ServerHolder>().LoadNextMap();
+          
             }
         }
         

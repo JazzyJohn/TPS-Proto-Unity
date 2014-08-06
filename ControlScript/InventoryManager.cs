@@ -236,7 +236,7 @@ public class InventoryManager : MonoBehaviour {
 	//implementation of dropping weapon on ground after picking another one 
 	void DropWeapon(BaseWeapon oldWeapon,WeaponBackUp weaponinfo){
 
-		GameObject droppedWeapon =PhotonNetwork.Instantiate(oldWeapon.pickupPrefabPrefab.name,transform.position,transform.rotation,0) as GameObject;
+		GameObject droppedWeapon =NetworkController.Instance.SimplePrefabSpawn(oldWeapon.pickupPrefabPrefab.name,transform.position,transform.rotation);
 		WeaponPicker picker = droppedWeapon.GetComponent<WeaponPicker>();
 		picker.SetNewData (weaponinfo);
 		//picker.info =weaponinfo;
