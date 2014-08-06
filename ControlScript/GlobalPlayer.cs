@@ -4,6 +4,11 @@ using System.Xml;
 using System.Collections;
 using System.Collections.Generic;
 
+using Facebook.MiniJSON;
+public enum PLATFORMTYPE{
+	VK,
+	FACEBOOK
+}
 public class GlobalPlayer : MonoBehaviour {
 
 	void Awake(){
@@ -11,7 +16,18 @@ public class GlobalPlayer : MonoBehaviour {
 			if(FindObjectsOfType<GlobalPlayer>().Length>1){
 				Destroy(gameObject);
 			}else{
-				Application.ExternalCall ("SayMyName");
+				switch(platformType){
+					case PLATFORMTYPE.VK:
+					
+						Application.ExternalCall ("SayMyName");
+					break;
+					case PLATFORMTYPE.FACEBOOK:
+						FB.Init(SetFaceBookInit, OnHideFaceBookUnity);
+						Application.ExternalCall ("SayMyName");
+					break;
+				
+				}
+			
 				
 				DontDestroyOnLoad(transform.gameObject);
 			}
@@ -21,12 +37,34 @@ public class GlobalPlayer : MonoBehaviour {
 
 	public string PlayerName="VK NAME";
 
+	public PLATFORMTYPE platformType;
+
 	public string UID;
 	
 	public int gold;
 	
 	public int cash;
-
+	
+	public void SetFaceBookInit() {
+		if(FB.IsLoggedIn) {
+			UID ="FB"+FB.UserId;
+			FB.API ("/me/scores", HttpMethod.POST, SetFacebookName, new Dictionary<string, string>());
+			PlayerName=="FACEBOOK_GUEST";
+		} else {
+			UID="FACEBOOK_GUEST";
+			PlayerName=="FACEBOOK_GUEST";
+		}
+	}
+	private void OnHideFaceBookUnity(bool isGameShown) {
+		
+	}
+	
+	public void SetFacebookName(string jsonString){
+		Dictionary<string,object> dict = Json.Deserialize(jsonString) as Dictionary<string,object>;
+		PlayerName = dict["name"];
+		SetUid(UID);
+	
+	}
 
     // s_Instance is used to cache the instance found in the scene so we don't have to look it up every time.
     private static GlobalPlayer s_Instance = null;
