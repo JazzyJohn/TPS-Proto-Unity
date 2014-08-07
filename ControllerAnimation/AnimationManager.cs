@@ -350,7 +350,7 @@ public class AnimationManager : MonoBehaviour
          animator.enabled = false;
          if (raggdollRoot != null)
          {
-             raggdollRoot.enabled = true;
+             raggdollRoot.Start();
          }
     }
     public void DollOff()
@@ -360,7 +360,7 @@ public class AnimationManager : MonoBehaviour
         aimPos.IKTurnOn();
         if (raggdollRoot != null)
         {
-            raggdollRoot.enabled = false;
+            raggdollRoot.Stop();
         }
     }
     public void StandUp()
