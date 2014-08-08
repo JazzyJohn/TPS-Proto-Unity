@@ -12,6 +12,8 @@ public class FoxView : MonoBehaviour {
 	
 	public BaseWeapon weapon;
 	
+	public ConquestPoint conquestPoint;
+	
     private int ownerId;
     
     private int  subId;
@@ -54,6 +56,7 @@ public class FoxView : MonoBehaviour {
     void Awake(){
 		pawn = GetComponent<Pawn>();
 		weapon = GetComponent<BaseWeapon>();
+		conquestPoint = GetComponent<ConquestPoint>(); 
         if (preLoad)
         {
             NetworkController.RegisterSceneView(this);
@@ -61,7 +64,7 @@ public class FoxView : MonoBehaviour {
 	}
 	public void SetMine(bool isMine){
 		this.isMine = isMine;
-		if(pawn==null&&weapon==null&&needRegister){
+		if(pawn==null&&weapon==null&&conquestPoint==null&&needRegister){
 			SimpleNetModel view= new SimpleNetModel();
             view.id = viewID;
 			NetworkController.Instance.RegisterSceneViewRequest(view);
@@ -204,4 +207,12 @@ public class FoxView : MonoBehaviour {
     {
         NetworkController.Instance.UpdateSimpleDestroyableObjectRequest(model);
     }
+	public void UpdateConquestPointRequest(ConquestPointModel model)
+    {
+		NetworkController.Instance.UpdateConquestPointRequest(model);
+	}
+	
+	
+	
+	
 }

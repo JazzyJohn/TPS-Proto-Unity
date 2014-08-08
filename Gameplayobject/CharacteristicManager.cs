@@ -25,8 +25,9 @@ public enum CharacteristicList{
 }
 public class BaseEffect{
 	public int timeEnd=-1;
-	public EffectType type;
+	public EffectType type =EffectType.ADD;
 	public bool endByDeath= true;
+	public bool initalEffect =false;
 }
 public class Effect<T>:BaseEffect{
 	public T value;
@@ -92,6 +93,18 @@ public class Characteristic<T> : BaseCharacteristic {
 	}
 	public void AddEffect(Effect<T> newEffect){
 		base.AddEffect(newEffect);
+	}
+	public void Remove(T value){
+		effectList.Remove(delegate(BaseEffect eff) {
+                if (!eff.initalEffect)
+                {
+					Effect<T> realEff = eff as Effect<T> ;
+					return realEff.value==value;
+                }
+				return false;
+				
+               
+			});
 	}
 
 	public T GetValue(){
@@ -280,6 +293,49 @@ public class CharacteristicManager : MonoBehaviour {
 			return((BoolCharacteristic)allCharacteristic[(int)characteristic]).GetValue();
 	
 	}
+	public void AddEffect(int characteristic, object value){
+		
+	
+		FloatCharacteristic floatCharacteristic=allCharacteristic [characteristic]as FloatCharacteristic 
+		if(FloatCharacteristic!=null){
+			
+			BaseEffect effect = Effect<float>((float)value);	
+			floatCharacteristic.Add(effect);
+			return;
+		}
+	
+		BoolCharacteristic boolCharacteristic=allCharacteristic [characteristic]as BoolCharacteristic 
+		if(Characteristic!=null){
+			BaseEffect effect = Effect<bool>((bool)value);	
+			boolCharacteristic.Add(effect);
+			return;
+		}
+		
+		IntCharacteristic intCharacteristic=allCharacteristic [characteristic]as IntCharacteristic 
+		if(Characteristic!=null){
+			BaseEffect effect = Effect<int>((int)value);	
+			intCharacteristic.Add(effect);
+			return;
+		}
+	}
+
+	public void RemoveEffect(int characteristic, object value){
+		FloatCharacteristic floatCharacteristic=allCharacteristic [characteristic]as FloatCharacteristic 
+		if(Characteristic!=null){
+			floatCharacteristic.Remove((float)value);
+		}
+		BoolCharacteristic boolCharacteristic=allCharacteristic [characteristic]as BoolCharacteristic 
+		if(Characteristic!=null){
+			boolCharacteristic.Remove((bool)value);
+		}
+		IntCharacteristic intCharacteristic=allCharacteristic [characteristic]as IntCharacteristic 
+		if(Characteristic!=null){
+			intCharacteristic.Add((int)value);
+		}
+	}
+	
+	
+	
 	public void AddList(List<CharacteristicToAdd> effects){
 		foreach(CharacteristicToAdd add in effects){
          

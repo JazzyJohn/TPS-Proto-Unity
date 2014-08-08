@@ -998,7 +998,19 @@ public class NetworkController : MonoBehaviour {
         smartFox.Send(request);
     
     }
+	/// <summary>
+    /// updateConquestPoint request to server
+    /// </summary>	
 
+    public void UpdateConquestPointRequest(ConquestPointModel model)
+    {
+        ISFSObject data = new SFSObject();
+
+        data.PutClass("model", model);
+        ExtensionRequest request = new ExtensionRequest("updateConquestPoint", data, serverHolder.gameRoom);
+        smartFox.Send(request);
+    
+    }
 
 
 
@@ -1340,7 +1352,18 @@ public class NetworkController : MonoBehaviour {
 
     }
     
+	/// <summary>
+    /// handle updateConquestPoint from Server
+    /// </summary>	
 
+    public void HandleUpdateConquestPoint(ISFSObject dt)
+    {
+
+        ConquestPointModel model = (ConquestPointModel)dt.GetClass("model");
+        ConquestPoint target = GetView(model.id).conquestPoint;
+        target.UpdateFromModel(model);
+
+    }
 
 }
 

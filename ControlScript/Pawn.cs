@@ -2373,6 +2373,36 @@ public class Pawn : DamagebleObject {
         canMove = true;
     }
   
+  //END OF VISULA EFFECT
+  
+  
+  //BUFF SECTION 
+   public void  AddBuff(int characteristic, object value){
+		switch((CharacteristicList)characteristic){
+			case CharacteristicList.MAXHEALTH:
+				health+= (int)value;
+			break;
+		}
+		charMan.AddEffect(characteristic,value);
+   
+   }
+	public void  RemoveBuff(int characteristic,object value){
+		switch((CharacteristicList)characteristic){
+			case CharacteristicList.MAXHEALTH:
+				health-= (int)value;
+				if(health<=0){
+					health=1;
+				}
+			break;
+		}
+   		charMan.RemoveEffect(characteristic,value);
+   
+   }
+  
+  //END OF BUFF SECTION
+  
+  
+  //NETWORK SECTION
 	 void OnMasterClientSwitched()
     {
         Debug.Log("Master On PAwn");
@@ -2385,8 +2415,7 @@ public class Pawn : DamagebleObject {
 	
 	public void RemoteSetAI(int group, int homeindex ){
         mainAi = GetComponent<AIBase>();
-		mainAi.aiGroup= group;
-		mainAi.homeIndex =homeindex;
+		mainAi.RemoteInit(group,homeindex);	
         isActive = true;
 	}
 

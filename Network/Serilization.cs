@@ -226,4 +226,16 @@ namespace nstuff.juggerfall.extension.models
 
         public int id;
     }
+	[Serializable]
+    public class ConquestPointModel  : SerializableSFSType{
+		public int id;
+		
+		public int scorePoint;
+		
+		public int owner;
+		
+	}
+	
+	
+	
 }

@@ -7,10 +7,13 @@ public class Base : DamagebleObject {
     public int team;
 
     public float startHealth;
+	
+	public ShowOnGuiComponent guiElement;
 
     void Awake()
     {
         health = startHealth;
+		guiElement= GetComponent<ShowOnGuiComponent>();
     }
 
     public void StartBase(){
@@ -39,7 +42,9 @@ public class Base : DamagebleObject {
                 }
             }
         }
+		
         NetworkController.Instance.BaseDamageRequest(team,(int)damage.Damage);
         base.Damage(damage, killer);
+		guiElement.SetTitle(health.Tostring(0));
     }
 }

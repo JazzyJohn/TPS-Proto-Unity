@@ -2,6 +2,11 @@
 using System.Collections;
 using System.Collections.Generic;
 
+public class AISwarmBuff{
+	int characteristic;
+	object value;
+}
+
 public class AISwarm:MonoBehaviour
 {
 
@@ -12,6 +17,10 @@ public class AISwarm:MonoBehaviour
     public int[] enemyIndex;
 
     public List<Transform> pointOfInterest;
+	
+	public List<AISwarmBuff> allBuffs = new List<AISwarmBuff>();
+	
+	public List<AIBase> allPawn;
 
     public int aiGroup;
 
@@ -84,11 +93,20 @@ public class AISwarm:MonoBehaviour
     public virtual void DecideCheck() { 
             
     }
+	public void RemoteAdd(AIBase ai){
+		allPawn.Add(ai);
+		foreach(AISwarmBuff buff in allBuffs){
+			aiBase.GetPawn().AddBuff(buff.characteristic,buff.value);
+		}
+	}
     public virtual void AfterSpawnAction(AIBase ai) { 
-    
+		allPawn.Add(ai);
+		foreach(AISwarmBuff buff in allBuffs){
+			aiBase.GetPawn().AddBuff(buff.characteristic,buff.value);
+		}
     }
-    public virtual void AgentKilled() { 
-    
+    public virtual void AgentKilled(AIBase ai) { 
+		allPawn.Remove(ai);
     }
     public virtual void Activate() {
         Debug.Log("Activate");
@@ -111,4 +129,20 @@ public class AISwarm:MonoBehaviour
     {
         return pointOfInterest.ToArray();
     }
+	
+	public void AddBuffOnAll(int characteristic, object value){
+		allBuffs.Add(new AISwarmBuff(characteristic,value));
+		foreach(AIBase aibase in allPawn){
+			aiBase.GetPawn().AddBuff(characteristic,value);
+		}
+	}
+	public void RemoveBuffOnAll(int characteristic, object value){
+		allBuffs.Remove(delegate(AISwarmBuff eff) {
+                return eff.characteristic = characteristic&&value.Equals(eff.value) ;
+               
+			});
+		foreach(AIBase aibase in allPawn){
+			aiBase.GetPawn().RemoveBuff(characteristic,value);
+		}
+	}
 }

@@ -18,10 +18,12 @@ public class AISwarm_SimpleWave : AISwarm
     }
     public override void AfterSpawnAction(AIBase ai)
     {
+		base.AfterSpawnAction(ai);
         _alreadySpawn++;
     }
-    public override void AgentKilled()
+    public override void AgentKilled(AIBase ai)
     {
+		base.AgentKilled(ai);
         _alredyDead++;
         if (_alredyDead >= maxSpawnCount || _alredyDead >= needToKill) {
             SendMessage("SwarmEnd", SendMessageOptions.DontRequireReceiver);

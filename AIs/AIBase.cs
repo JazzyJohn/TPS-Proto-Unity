@@ -48,7 +48,7 @@ public class AIBase : MonoBehaviour
 
     public void OnDestroy(){
         if (aiSwarm != null) {
-            aiSwarm.AgentKilled();
+            aiSwarm.AgentKilled(this);
         }
     }
 
@@ -64,7 +64,12 @@ public class AIBase : MonoBehaviour
 			this.aiSwarm.respawns[homeIndex].SpawnedSet(controlledPawn);
 		}
 	}
-	
+	public void RemoteInit(int group, int homeindex){
+	   controlledPawn = GetComponent<Pawn>();
+		mainAi.aiGroup= group;
+		mainAi.homeIndex =homeindex;
+		AIDirector.instance.swarmsp[aiGroup].RemoteAdd(this);
+	}
 	public void WasHitBy(GameObject killer){
 		Pawn killerPawn = killer.GetComponent<Pawn> ();
 		if (killerPawn != null) {
@@ -168,6 +173,9 @@ public class AIBase : MonoBehaviour
    public AISwarm GetAISwarm()
    {
        return aiSwarm;
+   }
+   public Pawn GetPawn(){
+		return controlledPawn;
    }
 }
 

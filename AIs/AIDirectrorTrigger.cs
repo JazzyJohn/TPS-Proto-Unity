@@ -8,7 +8,8 @@ public class AIDirectrorTrigger : MonoBehaviour
         PlayerEnter,
         Destroy,
         ObjectArrived,
-        AISwarmEnd
+        AISwarmEnd,
+		ConquestEvents
     }
 
     public TRIGGERTYPE type;
@@ -56,13 +57,19 @@ public class AIDirectrorTrigger : MonoBehaviour
         }
 
     }
-	// Use this for initialization
-	void Start () {
+	 public void StartUse()
+    {
+        if (type == TRIGGERTYPE.ConquestEvents) {
+            EventDelegate.Execute(onEvent);
+        }
+
+    }
+	 public void StopUse()
+    {
+        if (type == TRIGGERTYPE.ConquestEvents) {
+            EventDelegate.Execute(onEvent);
+        }
+
+    }
 	
-	}
-	
-	// Update is called once per frame
-	void Update () {
-	
-	}
 }
