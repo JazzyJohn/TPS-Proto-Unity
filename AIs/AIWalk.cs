@@ -59,7 +59,7 @@ public class AIWalk : AIState
     }
 	public override void StartState(){
 		agent = GetComponent<AIAgentComponent>();
-		//Debug.Log (agent);
+		Debug.Log ("BATTLE");
 		agent.SetSpeed(controlledPawn.groundRunSpeed);
 		agent.ParsePawn (controlledPawn);
 	

@@ -396,6 +396,9 @@ public class NetworkController : MonoBehaviour {
                 case "pawnInPilotChange":
                     HandlePawnInPilotChange(dt);
                     break;
+                case "updateSimpleDestroyableObject":
+                    HandleUpdateSimpleDestroyableObject(dt);
+                    break;
 
             }
         }
@@ -927,7 +930,7 @@ public class NetworkController : MonoBehaviour {
     /// </summary>	
 
 
-    internal void InPilotChangeRequest(int id,bool isPilotIn)
+    public void InPilotChangeRequest(int id, bool isPilotIn)
     {
          ISFSObject data = new SFSObject();
 
@@ -936,15 +939,73 @@ public class NetworkController : MonoBehaviour {
         ExtensionRequest request = new ExtensionRequest("pawnInPilotChange", data, serverHolder.gameRoom);
         smartFox.Send(request);
     }
+    /// <summary>
+    /// pawnBattleJuggerSpawn request to server
+    /// </summary>	
+    public GameObject BattleJuggerSpawnRequest(string prefab, Vector3 vector3, Quaternion quaternion, int[] stims)
+    {
+        ISFSObject data = new SFSObject();
+
+        data.PutBool("Scene", true);
+        data.PutIntArray("stims", stims);
+        GameObject go = InstantiateNetPrefab(prefab, vector3, quaternion, data, true);
+        PawnModel pawn = go.GetComponent<Pawn>().GetSerilizedData();
+        pawn.type = prefab;
+        data.PutClass("pawn", pawn);
+        Debug.Log(serverHolder.gameRoom);
+        ExtensionRequest request = new ExtensionRequest("pawnBattleJuggerSpawn", data, serverHolder.gameRoom);
+        smartFox.Send(request);
+        return go;
+
+
+    }
+
+    /// <summary>
+    /// baseSpawned request to server
+    /// </summary>	
+
+    public void BaseSpawnedRequest(BaseModel model)
+    {
+        ISFSObject data = new SFSObject();
+
+        data.PutClass("model", model);
+        ExtensionRequest request = new ExtensionRequest("baseSpawned", data, serverHolder.gameRoom);
+        smartFox.Send(request);
+    }
+    /// <summary>
+    /// gameRuleDamageBase request to server
+    /// </summary>	
+
+    public void BaseDamageRequest(int team,int damage)
+    {
+        ISFSObject data = new SFSObject();
+
+        data.PutInt("team", team);
+        data.PutInt("damage", team);
+        ExtensionRequest request = new ExtensionRequest("gameRuleDamageBase", data, serverHolder.gameRoom);
+        smartFox.Send(request);
+    }
+    /// <summary>
+    /// updateSimpleDestroyableObject request to server
+    /// </summary>	
+
+    public void UpdateSimpleDestroyableObjectRequest(SimpleDestroyableModel model)
+    {
+        ISFSObject data = new SFSObject();
+
+        data.PutClass("model", model);
+        ExtensionRequest request = new ExtensionRequest("updateSimpleDestroyableObject", data, serverHolder.gameRoom);
+        smartFox.Send(request);
+    
+    }
 
 
 
 
 
-		
-		
-		
-	//Handler SECTION
+
+
+    //Handler SECTION
 	/// <summary>
     /// handle pawnSpawn  from Server
     /// </summary>	
@@ -1256,7 +1317,7 @@ public class NetworkController : MonoBehaviour {
 
     }
     /// <summary>
-    /// handle pawnInPilotChange(  from Server
+    /// handle pawnInPilotChange  from Server
     /// </summary>	
 
     public void HandlePawnInPilotChange(ISFSObject dt)
@@ -1266,8 +1327,20 @@ public class NetworkController : MonoBehaviour {
         pawn.isPilotIn = dt.GetBool("isPilotIn");
 
     }
+     /// <summary>
+    /// handle updateSimpleDestroyableObject from Server
+    /// </summary>	
+
+    public void HandleUpdateSimpleDestroyableObject(ISFSObject dt)
+    {
+
+        SimpleDestroyableModel model = (SimpleDestroyableModel)dt.GetClass("model");
+        DamagebleObject target = GetView(model.id).GetComponent<DamagebleObject>();
+        target.health = model.id;
+
+    }
     
 
-   
+
 }
 

@@ -91,6 +91,18 @@ public class AIBase : MonoBehaviour
 			((AIPatrol)_currentState).patrolPoints = patrolPoints;
 		}
 			break;
+        case "AIBattleJugger":
+            {
+
+                _currentState.controlledPawn = controlledPawn;
+
+                
+                patrolPoints = aiSwarm.GetRoutePoint();
+             
+                _currentState.AngleRange = AngleRange;
+                ((AIBattleJugger)_currentState).GeneratePath(patrolPoints);
+            }
+            break;
 			//case AIType.Rusher:
 			//    {
 			//        _rusher = gameObject.AddComponent<AIRusher>();

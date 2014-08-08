@@ -13,8 +13,9 @@ public class RaggdollRoot : MonoBehaviour {
 	// Use this for initialization
 	void Awake () {
         myTransform = transform;
-        Stop();
+       
 		allrigidbody = GetComponentsInChildren<Rigidbody>();
+        Stop();
 	}
     void OnEnable()
     {
@@ -24,7 +25,7 @@ public class RaggdollRoot : MonoBehaviour {
 	void FixedUpdate () {
         Vector3 cahcechPos = myTransform.position;
      
-
+           
         pawnTransform.MovePosition(cahcechPos);
 	}
 	public void Start(){

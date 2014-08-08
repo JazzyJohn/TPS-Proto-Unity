@@ -56,7 +56,7 @@ public class PVEGameExpidition : GameRule {
             return 0;
         }
     }
-    public void MoveOn()
+    public override void MoveOn()
     {
         curStage = 0;
     }

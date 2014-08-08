@@ -27,7 +27,7 @@ public class AISwarm_QueenSwarm : AISwarm
         AfterSpawnAction(ai);
 		base.Init(i);
     }
-	public override void SwarmTick()
+	public override void SwarmTick(float delta)
     {
         if (isActive && Bots.Length > 0)
         {

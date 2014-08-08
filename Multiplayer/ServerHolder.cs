@@ -10,7 +10,7 @@ using Sfs2X.Requests;
 using Sfs2X.Logging;
 
 
-public enum GAMEMODE { PVP, PVE,RUNNER };
+public enum GAMEMODE { PVP, PVE,RUNNER, PVPJUGGERFIGHT};
 
 public class RoomData
 {
@@ -192,6 +192,9 @@ public class ServerHolder : MonoBehaviour
             case GAMEMODE.RUNNER:
                 newRoomName = "Runner chamber " + UnityEngine.Random.Range(100, 999);
                 break;
+            case GAMEMODE.PVPJUGGERFIGHT:
+                 newRoomName = "Jugger Fight chamber " + UnityEngine.Random.Range(100, 999);
+                break;
        
         }
     }
@@ -356,6 +359,12 @@ public class ServerHolder : MonoBehaviour
                 settings.Variables.Add(new SFSRoomVariable("teamCount", 2));
                 maxTime =new SFSRoomVariable("maxTime", 0);
                 maxScore =new SFSRoomVariable("maxScore", 25);
+                break;
+            case GAMEMODE.PVPJUGGERFIGHT:
+                gameRule = new SFSRoomVariable("ruleClass", "nstuff.juggerfall.extension.gamerule.PVPJuggerFightGameRule");
+                settings.Variables.Add(new SFSRoomVariable("teamCount", 2));
+                maxTime = new SFSRoomVariable("maxTime", 0);
+                maxScore = new SFSRoomVariable("maxScore", 25);
                 break;
         }
 

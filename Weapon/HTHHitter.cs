@@ -44,10 +44,14 @@ public class HTHHitter : MonoBehaviour {
 
 	public bool CanShoot ()
 	{
-		if (timer<=0f)
-			return true;
-		else
-			return false;
+        if (timer <= 0f)
+        {
+            
+            return true;
+
+        }
+        else
+            return false;
 	}
 
 	// Use this for initialization
@@ -117,7 +121,7 @@ public class HTHHitter : MonoBehaviour {
 		{
 			if(!wasDamage){
 				hits = Physics.RaycastAll(myTransform.position, 	myTransform.forward, 2.0f);
-			    //Debug.DrawRay(myTransform.position,myTransform.forward*2.0f,Color.red,5.0f);
+			    Debug.DrawRay(myTransform.position,myTransform.forward*2.0f,Color.red,5.0f);
 				foreach(RaycastHit hit in hits)
 				{
 					onBulletHit(hit);

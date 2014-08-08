@@ -122,4 +122,9 @@ public class GameRule : MonoBehaviour {
 	public virtual void ReadMasterInfo(ISFSObject dt){
 		
 	}
+
+    public virtual void MoveOn()
+    {
+       
+    }
 }

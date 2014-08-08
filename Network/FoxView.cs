@@ -22,6 +22,8 @@ public class FoxView : MonoBehaviour {
 
     public bool preLoad;
 
+    public bool needRegister=true;
+
     public int DebufViewID;
 	
 	public int viewID
@@ -59,7 +61,7 @@ public class FoxView : MonoBehaviour {
 	}
 	public void SetMine(bool isMine){
 		this.isMine = isMine;
-		if(pawn==null&&weapon==null){
+		if(pawn==null&&weapon==null&&needRegister){
 			SimpleNetModel view= new SimpleNetModel();
             view.id = viewID;
 			NetworkController.Instance.RegisterSceneViewRequest(view);
@@ -195,5 +197,11 @@ public class FoxView : MonoBehaviour {
     public void InPilotChange(bool isPilotIn)
     {
         NetworkController.Instance.InPilotChangeRequest(viewID,isPilotIn);
+    }
+
+
+    public void UpdateSimpleDestroyableObject(SimpleDestroyableModel model)
+    {
+        NetworkController.Instance.UpdateSimpleDestroyableObjectRequest(model);
     }
 }

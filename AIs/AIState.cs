@@ -1,9 +1,9 @@
 ﻿using UnityEngine;
 using System.Collections;
 using System.Collections.Generic;
-	
 
-public enum AITriggerType {SeeEnemy,LostEnemy,SpecificFinish,TimedChange};
+
+public enum AITriggerType { SeeEnemy, LostEnemy, SpecificFinish, TimedChange, DeadEnemy };
 public interface AITrigger
 {
 	bool isTriggered (AIState owner, Params[] parametrs);
@@ -34,6 +34,9 @@ public class AIState : MonoBehaviour {
 			case AITriggerType.LostEnemy:
 				trigger = new LostEnemyTrigger();
 				break;
+            case AITriggerType.DeadEnemy:
+                trigger = new EnemyDeadTrigger();
+                break;
 			case AITriggerType.SpecificFinish:
 				trigger = new SpecificFinish();
 				break;
@@ -72,7 +75,23 @@ public class AIState : MonoBehaviour {
 			
 		}
 		
-	}	
+	}
+    public class EnemyDeadTrigger : AITrigger
+    {
+        public bool isTriggered(AIState owner, Params[] parametrs)
+        {
+            if (owner._enemy == null || owner._enemy.isDead)
+            {
+                return true;
+            }
+            else
+            {
+                return false;
+            }
+
+        }
+
+    }	
 	public class SpecificFinish:AITrigger{
 		public bool isTriggered(AIState owner, Params[] parametrs){
             if (owner.IsSpecificFinish())
@@ -240,7 +259,7 @@ public class AIState : MonoBehaviour {
 		if (target == null) {
 			return false;
 		}
-
+      //  Debug.Log("SELECTED TARGET" + target);
 		if (Physics.Linecast (transform.position, target.myTransform.position, out hit))
 			if (hit.collider == target.collider) {
 				distance = hit.distance;

@@ -200,4 +200,30 @@ namespace nstuff.juggerfall.extension.models
 		
 		public int vipID;
     }
+
+    [Serializable]
+    public class PVPJuggerFightGameRuleModel : GameRuleModel
+    {
+        public bool isGameEnded;
+
+        public ArrayList teamScore;
+
+        public ArrayList baseHealth;
+    }
+
+    [Serializable]
+    public class BaseModel:  SerializableSFSType
+    {
+        public int team;
+	
+		public float health;
+    }
+
+    [Serializable]
+    public class SimpleDestroyableModel : SerializableSFSType
+    {
+        public float health;
+
+        public int id;
+    }
 }

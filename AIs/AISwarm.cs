@@ -17,6 +17,7 @@ public class AISwarm:MonoBehaviour
 
     public bool isActive = false;
 
+    
 
     protected List<Transform> avaiblePoints = new List<Transform>();
 
@@ -50,7 +51,7 @@ public class AISwarm:MonoBehaviour
         return returnTransform;
     }
 
-    public virtual void SwarmTick()
+    public virtual void SwarmTick(float delta)
     {
         if (isActive && Bots.Length > 0)
         {
@@ -61,10 +62,13 @@ public class AISwarm:MonoBehaviour
                 {
                     GameObject obj = NetworkController.Instance.PawnSpawnRequest(Bots[(int)(UnityEngine.Random.value * Bots.Length)], go.transform.position, go.transform.rotation, true, new int[0],true);
                     //	GameObject obj = PhotonNetwork.Instantiate (Bots[(int)(UnityEngine.Random.value*Bots.Length)].name, go.transform.position, go.transform.rotation, 0,null) as GameObject;
-                    go.Spawned(obj.GetComponent<Pawn>());
+                    Pawn pawn =obj.GetComponent<Pawn>();
+                    go.Spawned(pawn);
+                 
                     //  Debug.Log("Group before set" + this.aiGroup + "  " + aiGroup);
                     AIBase ai = obj.GetComponent<AIBase>();
                     ai.Init(aiGroup, this, i);
+                    
                     AfterSpawnAction(ai);
                 }
             }
@@ -101,5 +105,10 @@ public class AISwarm:MonoBehaviour
             }
         }
         return false;
+    }
+
+    public Transform[] GetRoutePoint()
+    {
+        return pointOfInterest.ToArray();
     }
 }

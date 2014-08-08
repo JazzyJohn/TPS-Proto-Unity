@@ -37,9 +37,9 @@ public class AIDirector : MonoBehaviour {
 		if(start){
 			_directorTick+=Time.deltaTime;
 			if(_directorTick>directorTick){
-				
+                _directorTick = 0;
 				foreach(AISwarm swarm in swarms){
-					swarm.SwarmTick();
+                    swarm.SwarmTick(directorTick);
 				}
 				
 				foreach (SelfSpawnPoint go in selfRespawns) {
@@ -48,7 +48,7 @@ public class AIDirector : MonoBehaviour {
 					}
 				}
 				
-				//Debug.Log("Work");
+				
 			}
 		}
 	
