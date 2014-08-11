@@ -12,7 +12,7 @@ public class AIBattleJugger : AIState
 
     public bool isCrushing = false;
 
-    public GameObject Target = null;
+    public Transform Target = null;
 
     protected AIAgentComponent agent;
 
@@ -28,17 +28,30 @@ public class AIBattleJugger : AIState
     {
         if (isCrushing)
         {
-            if (Target == null)
+            if (Target != null)
             {
 
-                isCrushing = false;
+                if (IsInWeaponRange())
+                {
+                    Attack();
+                    //isMoving = false;
+
+                    agent.SetTarget(Target.position, true);
+                  
+                }
+                else
+                {
+                    StopAttack();
+                 
+                    agent.SetTarget(Target.position, true);
+                }
                
             }
             else
             {
-                Attack();
+                isCrushing = false;
             }
-
+           
         }
         else
         {
@@ -57,7 +70,7 @@ public class AIBattleJugger : AIState
         {
 
             isCrushing = true;
-            Target = collision.gameObject;
+            Target = collision.transform;
 
         }
     }
@@ -91,7 +104,8 @@ public class AIBattleJugger : AIState
     {
         agent = GetComponent<AIAgentComponent>();
         //Debug.Log (agent);
-      
+        Debug.Log("start state");
+
         agent.SetTarget(curPoint.GiveTarget().position);
         agent.SetSpeed(controlledPawn.groundWalkSpeed);
         agent.ParsePawn(controlledPawn);
@@ -173,6 +187,11 @@ public class AIBattleJugger : AIState
     }
     public override void WasHitBy(Pawn killer)
     {
-        
+        if (killer.GetComponent<AIWallTurret>()!=null)
+        {
+            Target = killer.GetComponent<AIBase>().GetAISwarm().transform;
+            isCrushing = true;
+        }
     }
+   
 }

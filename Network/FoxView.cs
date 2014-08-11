@@ -40,14 +40,16 @@ public class FoxView : MonoBehaviour {
 
             this.subId = value % NetworkController.MAX_VIEW_IDS;
             isSceneView = ownerId == 0;
-
-            if (isSceneView)
+            if (NetworkController.smartFox != null && NetworkController.smartFox.MySelf!=null)
             {
-                isMine = NetworkController.smartFox.MySelf.ContainsVariable("Master") && NetworkController.smartFox.MySelf.GetVariable("Master").GetBoolValue();
-            }
-            else
-            {
-                isMine = NetworkController.smartFox.MySelf.Id == ownerId;
+                if (isSceneView)
+                {
+                    isMine = NetworkController.smartFox.MySelf.ContainsVariable("Master") && NetworkController.smartFox.MySelf.GetVariable("Master").GetBoolValue();
+                }
+                else
+                {
+                    isMine = NetworkController.smartFox.MySelf.Id == ownerId;
+                }
             }
             DebufViewID = value;
           
@@ -207,7 +209,7 @@ public class FoxView : MonoBehaviour {
     {
         NetworkController.Instance.UpdateSimpleDestroyableObjectRequest(model);
     }
-	public void UpdateConquestPointRequest(ConquestPointModel model)
+	public void UpdateConquestPoint(ConquestPointModel model)
     {
 		NetworkController.Instance.UpdateConquestPointRequest(model);
 	}

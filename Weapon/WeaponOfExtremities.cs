@@ -25,7 +25,7 @@ public class WeaponOfExtremities : MonoBehaviour {
 		for (int i = 0; i < this.GetComponentsInChildren<HTHHitter>().Length; i++)
 		{
 			Weapon.Add(this.GetComponentsInChildren<HTHHitter>()[i]);
-			Weapon[i].Luke_I_am_your_father(this, owner);
+			Weapon[i].SetOwner(this, owner);
 		}
 	}
 

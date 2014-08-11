@@ -407,6 +407,7 @@ public class Pawn : DamagebleObject {
             cameraController = GetComponent<PlayerCamera>();
             isAi = cameraController == null;
         }
+        naturalWeapon = GetComponent<WeaponOfExtremities>();
         mainAi = GetComponent<AIBase>();
 
         isAi = mainAi != null;
@@ -421,7 +422,7 @@ public class Pawn : DamagebleObject {
             }
         }
         GetSize();
-        naturalWeapon = GetComponent<WeaponOfExtremities>();
+      
         correctPlayerPos = transform.position;
      
         ivnMan.Init();
@@ -2383,6 +2384,8 @@ public class Pawn : DamagebleObject {
 				health+= (int)value;
 			break;
 		}
+       
+        
 		charMan.AddEffect(characteristic,value);
    
    }
@@ -2438,7 +2441,7 @@ public class Pawn : DamagebleObject {
 
 	
 	
-    public void NetUpdate(PawnModel pawn)
+    public virtual void NetUpdate(PawnModel pawn)
     {
 		nextState = (CharacterState) pawn.characterState;
 		wallState = (WallState) pawn.wallState;

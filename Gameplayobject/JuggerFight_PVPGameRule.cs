@@ -120,6 +120,7 @@ public class JuggerFight_PVPGameRule : GameRule {
         public override void SetFromModel(GameRuleModel model)
         {
             PVPJuggerFightGameRuleModel pvpmodel = (PVPJuggerFightGameRuleModel)model;
+        
             if (!isGameEnded && pvpmodel.isGameEnded)
             {
                 GameEnded();

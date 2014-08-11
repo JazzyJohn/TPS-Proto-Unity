@@ -49,8 +49,11 @@ public class NetworkController : MonoBehaviour {
     {
         get
         {
-
-            return instance._smartFox;
+            if (instance != null)
+            {
+                return instance._smartFox;
+            }
+            return null;
         }
     }
     private SmartFox _smartFox;  // The reference to SFS client
@@ -72,10 +75,18 @@ public class NetworkController : MonoBehaviour {
 	}
 	public void MasterViewUpdate(){
 		foreach(FoxView view in foxViewList.Values){
-           if(view.isSceneView){
-               view.SetMine(true);
-               view.SendMessage("OnMasterClientSwitched",SendMessageOptions.DontRequireReceiver);
-           }
+            
+            if (view.isSceneView)
+            {
+                Debug.Log("MasterViewUpdate" + view);
+                if (view.viewID == 0)
+                {
+                    NetworkController.RegisterSceneView(view);
+                }
+                view.SetMine(true);
+                view.SendMessage("OnMasterClientSwitched", SendMessageOptions.DontRequireReceiver);
+            }
+            
        }
 	
 	}
@@ -490,6 +501,7 @@ public class NetworkController : MonoBehaviour {
     }
     public  static void RegisterSceneView(FoxView view)
     {
+          
         view.viewID = AllocateViewID(0);
         foxViewList.Add(view.viewID, view);
     }
@@ -970,6 +982,7 @@ public class NetworkController : MonoBehaviour {
 
         data.PutClass("model", model);
         ExtensionRequest request = new ExtensionRequest("baseSpawned", data, serverHolder.gameRoom);
+        Debug.Log("BaseSpawnedRequest");
         smartFox.Send(request);
     }
     /// <summary>
@@ -981,8 +994,9 @@ public class NetworkController : MonoBehaviour {
         ISFSObject data = new SFSObject();
 
         data.PutInt("team", team);
-        data.PutInt("damage", team);
+        data.PutInt("damage", damage);
         ExtensionRequest request = new ExtensionRequest("gameRuleDamageBase", data, serverHolder.gameRoom);
+       
         smartFox.Send(request);
     }
     /// <summary>

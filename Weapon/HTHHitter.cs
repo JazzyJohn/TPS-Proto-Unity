@@ -69,10 +69,10 @@ public class HTHHitter : MonoBehaviour {
 		myTransform = transform;
 	}
 
-	public void Luke_I_am_your_father(WeaponOfExtremities Darth_Vader,Pawn  owner1)
+    public void SetOwner(WeaponOfExtremities weapon, Pawn owner)
 	{
-		WeaponControl=Darth_Vader;
-		owner = owner1;
+        WeaponControl = weapon;
+		this.owner = owner;
 
 		anim = owner.animator.animator;
 

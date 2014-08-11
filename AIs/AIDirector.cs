@@ -37,6 +37,7 @@ public class AIDirector : MonoBehaviour {
 		if(start){
 			_directorTick+=Time.deltaTime;
 			if(_directorTick>directorTick){
+                swarms.Remove(null);
                 _directorTick = 0;
 				foreach(AISwarm swarm in swarms){
                     swarm.SwarmTick(directorTick);

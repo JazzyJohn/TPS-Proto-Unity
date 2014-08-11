@@ -37,7 +37,7 @@ public class JuggerWall : DamagebleObject {
     {
         if (destructableObject)
         {
-            Pawn killerPawn = killer.GetComponent<Pawn>();
+            BattleJugger killerPawn = killer.GetComponent<BattleJugger>();
             if (killerPawn != null)
             {
                 if (killerPawn.team == team)
@@ -46,11 +46,16 @@ public class JuggerWall : DamagebleObject {
                 }
                 if (!killerPawn.foxView.isMine)
                 {
+                    Debug.Log("Not Mine" + killerPawn);
                     return;
                 }
             }
+            else
+            {
+                return;
+            }
         }
-        NetworkController.Instance.BaseDamageRequest(team,(int)damage.Damage);
+        //NetworkController.Instance.BaseDamageRequest(team,(int)damage.Damage);
         base.Damage(damage, killer);
         Debug.Log("wall health" + health);
         if(health>0){

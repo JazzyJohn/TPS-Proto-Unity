@@ -57,14 +57,14 @@ public class AIDirectrorTrigger : MonoBehaviour
         }
 
     }
-	 public void StartUse()
+	 public void StartUse(int owner)
     {
         if (type == TRIGGERTYPE.ConquestEvents) {
             EventDelegate.Execute(onEvent);
         }
 
     }
-	 public void StopUse()
+	 public void StopUse(int owner)
     {
         if (type == TRIGGERTYPE.ConquestEvents) {
             EventDelegate.Execute(onEvent);

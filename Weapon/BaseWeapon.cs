@@ -235,8 +235,8 @@ public class BaseWeapon : DestroyableNetworkObject {
 	}
 
 	// Update is called once per frame
-	void Update () {
-        UpdateWeapon(Time.deltaTime);
+	void FixedUpdate () {
+        UpdateWeapon(Time.fixedDeltaTime);
     }
     void UpdateWeapon(float deltaTime){
 		if(init&&owner==null) {

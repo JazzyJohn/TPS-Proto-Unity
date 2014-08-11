@@ -361,6 +361,33 @@ public class PlayerMainGui : MonoBehaviour {
 				break;
 				}
 		}
+
+
+        foreach (ShowOnGuiComponent component in ShowOnGuiComponent.allShowOnGui)
+        {
+
+
+            Vector3 Position = MainCamera.WorldToScreenPoint(component.myTransform.position );
+            if (Position.z < 0)
+            {
+                continue;
+            }
+            float size = MarkSize;
+
+            Rect mark = new Rect(Position.x - size / 2, Screen.height - Position.y, size, size);
+            string publicName = component.GetTitle();
+            if (component.team == LocalPlayer.team)
+            {
+
+                GUI.Label(mark, publicName , AliaMark);
+            }
+            else
+            {
+                GUI.Label(mark, publicName, EnemyMark);
+            }
+
+        }
+
 		while (logMessages.Count>50) {
 				logMessages.Dequeue ();
 

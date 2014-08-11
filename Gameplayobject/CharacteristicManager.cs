@@ -95,16 +95,16 @@ public class Characteristic<T> : BaseCharacteristic {
 		base.AddEffect(newEffect);
 	}
 	public void Remove(T value){
-		effectList.Remove(delegate(BaseEffect eff) {
+		effectList.RemoveAt(effectList.FindIndex(delegate(BaseEffect eff) {
                 if (!eff.initalEffect)
                 {
 					Effect<T> realEff = eff as Effect<T> ;
-					return realEff.value==value;
+					return realEff.value.Equals(value);
                 }
 				return false;
 				
                
-			});
+			}));
 	}
 
 	public T GetValue(){
@@ -296,41 +296,47 @@ public class CharacteristicManager : MonoBehaviour {
 	public void AddEffect(int characteristic, object value){
 		
 	
-		FloatCharacteristic floatCharacteristic=allCharacteristic [characteristic]as FloatCharacteristic 
-		if(FloatCharacteristic!=null){
-			
-			BaseEffect effect = Effect<float>((float)value);	
-			floatCharacteristic.Add(effect);
+		FloatCharacteristic floatCharacteristic=allCharacteristic [characteristic]as FloatCharacteristic ;
+        if (floatCharacteristic != null)
+        {
+
+            Effect<float> effect = new Effect<float>((float)value);	
+			floatCharacteristic.AddEffect(effect);
 			return;
 		}
 	
-		BoolCharacteristic boolCharacteristic=allCharacteristic [characteristic]as BoolCharacteristic 
-		if(Characteristic!=null){
-			BaseEffect effect = Effect<bool>((bool)value);	
-			boolCharacteristic.Add(effect);
+		BoolCharacteristic boolCharacteristic=allCharacteristic [characteristic]as BoolCharacteristic ;
+        if (boolCharacteristic != null)
+        {
+            Effect<bool> effect = new Effect<bool>((bool)value);
+            boolCharacteristic.AddEffect(effect);
 			return;
 		}
-		
-		IntCharacteristic intCharacteristic=allCharacteristic [characteristic]as IntCharacteristic 
-		if(Characteristic!=null){
-			BaseEffect effect = Effect<int>((int)value);	
-			intCharacteristic.Add(effect);
+
+        IntCharacteristic intCharacteristic = allCharacteristic[characteristic] as IntCharacteristic;
+        if (intCharacteristic != null)
+        {
+            Effect<int> effect = new Effect<int>((int)value);
+            intCharacteristic.AddEffect(effect);
 			return;
 		}
 	}
 
 	public void RemoveEffect(int characteristic, object value){
-		FloatCharacteristic floatCharacteristic=allCharacteristic [characteristic]as FloatCharacteristic 
-		if(Characteristic!=null){
+		FloatCharacteristic floatCharacteristic=allCharacteristic [characteristic]as FloatCharacteristic ;
+        if (floatCharacteristic != null)
+        {
 			floatCharacteristic.Remove((float)value);
 		}
-		BoolCharacteristic boolCharacteristic=allCharacteristic [characteristic]as BoolCharacteristic 
-		if(Characteristic!=null){
+		BoolCharacteristic boolCharacteristic=allCharacteristic [characteristic]as BoolCharacteristic ;
+        if (boolCharacteristic != null)
+        {
 			boolCharacteristic.Remove((bool)value);
 		}
-		IntCharacteristic intCharacteristic=allCharacteristic [characteristic]as IntCharacteristic 
-		if(Characteristic!=null){
-			intCharacteristic.Add((int)value);
+        IntCharacteristic intCharacteristic = allCharacteristic[characteristic] as IntCharacteristic;
+        if (intCharacteristic != null)
+        {
+            intCharacteristic.Remove((int)value);
 		}
 	}
 	

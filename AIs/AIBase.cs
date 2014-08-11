@@ -66,9 +66,9 @@ public class AIBase : MonoBehaviour
 	}
 	public void RemoteInit(int group, int homeindex){
 	   controlledPawn = GetComponent<Pawn>();
-		mainAi.aiGroup= group;
-		mainAi.homeIndex =homeindex;
-		AIDirector.instance.swarmsp[aiGroup].RemoteAdd(this);
+		aiGroup= group;
+		this.homeIndex =homeindex;
+		AIDirector.instance.swarms[aiGroup].RemoteAdd(this);
 	}
 	public void WasHitBy(GameObject killer){
 		Pawn killerPawn = killer.GetComponent<Pawn> ();

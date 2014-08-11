@@ -215,8 +215,8 @@ namespace nstuff.juggerfall.extension.models
     public class BaseModel:  SerializableSFSType
     {
         public int team;
-	
-		public float health;
+
+        public int health;
     }
 
     [Serializable]

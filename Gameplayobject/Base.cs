@@ -14,12 +14,13 @@ public class Base : DamagebleObject {
     {
         health = startHealth;
 		guiElement= GetComponent<ShowOnGuiComponent>();
+        guiElement.SetTitle(health.ToString("0"));
     }
 
     public void StartBase(){
 
         BaseModel  model = new BaseModel();
-        model.health = health;
+        model.health = (int)health;
         model.team  = team;
         NetworkController.Instance.BaseSpawnedRequest(model);
     }
@@ -45,6 +46,6 @@ public class Base : DamagebleObject {
 		
         NetworkController.Instance.BaseDamageRequest(team,(int)damage.Damage);
         base.Damage(damage, killer);
-		guiElement.SetTitle(health.Tostring(0));
+		guiElement.SetTitle(health.ToString("0"));
     }
 }
