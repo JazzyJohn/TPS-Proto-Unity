@@ -462,6 +462,7 @@ public class ServerHolder : MonoBehaviour
             {
                 player.Restart();
             }
+			NetworkController.Instance.MasterViewUpdate();
         }
       //  NetworkController.Instance.SpawnPlayer( Vector3.zero, Quaternion.identity);
 	
