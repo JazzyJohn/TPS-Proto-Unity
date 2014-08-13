@@ -13,8 +13,7 @@ public class AIWalk : AIMovementState
 	
 	public float DangerRadius;
 	
-	public bool hasPermission;
-	
+
 	public BattleState state;
 	
 	protected float _lastTimeAttack=0.0f;
@@ -25,25 +24,33 @@ public class AIWalk : AIMovementState
 
 	protected bool attacking= false;
 
-    protected bool hasPermision = false;
+    protected bool hasPermission = false;
 
     public bool CirleAttack = false;
 	
 	public void UpdateState(){
+          BattleState nextstate;
 		if(_distanceToTarget>DangerRadius){
-			state=BattleState.Inclosing;
+           nextstate = BattleState.Inclosing;
 		
 		}else{
 			if( IsInWeaponRange()){
-				if(hasPermision){
-					state = BattleState.Attacking;
+                if (attacking)
+                {
+                   
+                    nextstate = BattleState.Attacking;
 				}else{
-					state = BattleState.WaitForAttack;
+                    nextstate = BattleState.WaitForAttack;
 				}
 			}else{
-				state = BattleState.InDangerArea;
+                nextstate = BattleState.InDangerArea;
 			}
 		}
+        if (state == BattleState.Attacking && nextstate != BattleState.Attacking)
+        {
+            _enemy.attackers.Remove(controlledPawn);
+        }
+        state = nextstate;
 	
 	}
 	
@@ -54,7 +61,10 @@ public class AIWalk : AIMovementState
             //code to animation attack
 			DecideTacktick();
            // Debug.Log("Shot");
-			if(isMelee){
+            if (isMelee && CirleAttack)
+            {
+                isMoving = true;
+                agent.SetTarget(_enemy.myTransform.position, true);
 				UpdateState();
 				switch(state){
 					case BattleState.Inclosing:
@@ -68,8 +78,8 @@ public class AIWalk : AIMovementState
 						//If we can attack
 						if(_lastTimeAttack+coolDown<Time.time){
 							//If amount of attackers small move close
-							if(_enemy.attackers.Count>=maxAttackers){
-								_pathCoef =1.0f;
+							if(_enemy.attackers.Count<maxAttackers){
+                                _pathCoef = pathCoef;
 								StopAvoid();
 								StopStrafe();
 							}else{
@@ -86,8 +96,9 @@ public class AIWalk : AIMovementState
 					case BattleState.WaitForAttack:
 							//if we after last attack move away
 							AskForPermisssion();
+                            Debug.Log("My permission " + hasPermission);
 							//if we got permission  start attack
-							if(hasPermision){
+							if(hasPermission){
 								Attack();	
 								
 							}else{
@@ -100,7 +111,7 @@ public class AIWalk : AIMovementState
 						
 					break;
 					case BattleState.Attacking:
-						_pathCoef =1.0f;
+                    _pathCoef = pathCoef;
 						StopAvoid();
 						StopStrafe();
 					break;
@@ -148,21 +159,36 @@ public class AIWalk : AIMovementState
         }
     }
 	public override void KickFinish(){
-		StopAttack();
+        if (CirleAttack)
+        {
+            
+            StopAttack();
+        }
 	
 	}
+    void OnDestroy()
+    {
+        if (_enemy != null)
+        {
+            _enemy.attackers.Remove(controlledPawn);
+        }
+
+    }
 	protected override void Attack(){
 		attacking=true;
-		hasPermission= false;
+        _lastTimeAttack = Time.time;
+        hasPermission = false;
 		base.Attack();
 	}
 	protected override void StopAttack(){
 		attacking=false;
-		_lastTimeAttack = Time.time;
+		
 		base.StopAttack();
 	}
 	public void AskForPermisssion(){
-        hasPermission =  _enemy.attackers.Count < maxAttackers && _lastTimeAttack + coolDown < Time.time;
+        
+        hasPermission =   (_enemy.attackers.Count < maxAttackers)&& (_lastTimeAttack + coolDown < Time.time);
+       
 	}
 	public override void StartState(){
 		agent = GetComponent<AIAgentComponent>();
@@ -179,6 +205,7 @@ public class AIWalk : AIMovementState
 		StopAvoid();
 		StopStrafe();
         StopAttack();
+        _enemy.attackers.Remove(controlledPawn);
         base.EndState();
     }
 	public void FixedUpdate(){
@@ -217,5 +244,9 @@ public class AIWalk : AIMovementState
 		base.SetEnemy(enemy);
 
 	}
+    public override bool ShoudAvoid(Pawn pawn)
+    {
+        return pawn.team == controlledPawn.team;
+    }
 
 }

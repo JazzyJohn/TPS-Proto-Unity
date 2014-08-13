@@ -12,6 +12,8 @@ public class AIMovementState : AIState
 	public Transform strafe;
 	
 	public float avoidCoef = 1.0f;
+
+    public float avoidnessRadius = 10.0f;
 	
 	public  float separationCoef=1.0f;
 	
@@ -34,6 +36,7 @@ public class AIMovementState : AIState
 		_avoidCoef=avoidCoef;
 		_separationCoef =separationCoef;
 		_pathCoef  = pathCoef;
+        _strafeCoef = strafeCoef;
 		
 	}
 	protected float stateSpeed;
@@ -47,15 +50,15 @@ public class AIMovementState : AIState
 		if(controlledPawn!=null){
 			
 			List<Pawn> list =controlledPawn.getAllSeenPawn();
-			float sizeSqrt =4*controlledPawn.GetSize()*controlledPawn.GetSize() ;
+            
 			
 			foreach(Pawn pawn in list){
 					
 				if(ShoudAvoid(pawn)){
 					Vector3 distance = (pawn.myTransform.position -controlledPawn.myTransform.position);
-					if(distance.sqrMagnitude<=sizeSqrt){
-						addForce.z+= distance.z;
-						addForce.x+= distance.x;
+                    if (distance.sqrMagnitude <= avoidnessRadius)
+                    {
+                        addForce += distance;
 						neighborCount++;
 					}
 				}
@@ -66,14 +69,17 @@ public class AIMovementState : AIState
 			return Vector3.zero;
 		}else{
 			addForce= addForce/neighborCount;
-			addForce =  new Vector3(addForce.x-controlledPawn.myTransform.position.x,0,addForce.x-controlledPawn.myTransform.position.y);
+            addForce = addForce - controlledPawn.myTransform.position;
 			addForce = addForce*(-1);
 			return addForce.normalized;
 		}
 	}
     public Vector3 GetSteeringForce(){
-		
-		return Vector3.ClampMagnitude(agent.GetTranslate()*_pathCoef + DynamicAwoidness()*_separationCoef+AvoidOneTarget()*_avoidCoef +StrafeOneTarget(),stateSpeed );
+        Debug.DrawRay(controlledPawn.myTransform.position, DynamicAwoidness() * _separationCoef, Color.black);
+        Debug.DrawRay(controlledPawn.myTransform.position, AvoidOneTarget() * _avoidCoef, Color.blue);
+        Debug.DrawRay(controlledPawn.myTransform.position, StrafeOneTarget() * _strafeCoef, Color.green);
+        Debug.DrawRay(controlledPawn.myTransform.position, agent.GetTranslate()  * _pathCoef, Color.red);
+		return Vector3.ClampMagnitude(agent.GetTranslate()*_pathCoef + DynamicAwoidness()*_separationCoef+AvoidOneTarget()*_avoidCoef +StrafeOneTarget()*_strafeCoef,stateSpeed );
 		
 	}
 	public Vector3 AvoidOneTarget(){

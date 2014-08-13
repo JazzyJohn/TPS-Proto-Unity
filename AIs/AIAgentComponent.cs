@@ -6,6 +6,8 @@ using System.Collections.Generic;
 enum PathType{NATIVE, PATHFINDINGENGINE}
 
 public class AIAgentComponent : MonoBehaviour {
+
+     
 	private PathType type;
 	//PathFinding
 	private Agent agent = new Agent(5,0,true);
@@ -39,9 +41,12 @@ public class AIAgentComponent : MonoBehaviour {
 	protected Quaternion resultRotation;
 	void Awake(){
 		if(PathfindingEngine.Instance==null){
-			type = PathType.NATIVE;
+            type = PathType.NATIVE;
+                	myTransform =transform;
+				path = new NavMeshPath(); 
 		}else{
 			type = PathType.PATHFINDINGENGINE;
+
 		}
 	}
 	
@@ -56,8 +61,7 @@ public class AIAgentComponent : MonoBehaviour {
 				agentAvoidance = PathfindingEngine.Instance.agentAvoidance;
 				break;
 			case PathType.NATIVE:
-				myTransform =transform;
-				path = new NavMeshPath(); 
+			
 				break;
 			}
 	}
@@ -136,6 +140,8 @@ public class AIAgentComponent : MonoBehaviour {
 				agent.GoTo(newTarget);
 				break;
 			case PathType.NATIVE:
+               
+                curCorner = 0;
 				validPath =   NavMesh.CalculatePath(myTransform.position, target, -1, path);				
 				break;
 		
@@ -143,6 +149,7 @@ public class AIAgentComponent : MonoBehaviour {
     }
 	public void WalkUpdate () {
 		resultTranslate  =Vector3.zero;
+       
 		switch(type){
 			case PathType.PATHFINDINGENGINE:
 				needJump = false;
@@ -163,6 +170,7 @@ public class AIAgentComponent : MonoBehaviour {
 				}
 			break;
 			case PathType.NATIVE:
+          
 				if(validPath &&path.status!=NavMeshPathStatus.PathInvalid&& path.corners.Length>curCorner){
 					GotoNextStepNative();
 				}
@@ -242,6 +250,10 @@ public class AIAgentComponent : MonoBehaviour {
 				curCorner++;
 			}
 
+            if (path.corners.Length <= curCorner)
+            {
+                return;
+            }
            // Debug.Log(nextStep + "  " + agent.path[0] + "  " + agent.path.Count);
 		
 			//Get the next waypoint...

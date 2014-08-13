@@ -59,7 +59,7 @@ public class Pawn : DamagebleObject {
 	private LayerMask groundLayers =  1;
 	private LayerMask wallRunLayers = 1;
 	private LayerMask climbLayers = 1 << 9; // Layer 9
-
+    public  LayerMask seenlist = 1;
 	public bool isActive =false;
 
     //If this spawn pre defained by game designer we don't want to start in on start but on AIDirector start so set this to false;
@@ -725,12 +725,13 @@ public class Pawn : DamagebleObject {
                 Vector3 normalDist = distance.normalized;
                 Vector3 startpoint = myTransform.position + normalDist * Mathf.Max(capsule.radius, capsule.height);
 
-                if (allPawn[i].team != team && Physics.Raycast(startpoint, normalDist, out hitInfo))
+                if (allPawn[i].team != team && Physics.Raycast(startpoint, normalDist, out hitInfo, seenDistance,seenlist))
                 {
 
 
                     if (allPawn[i].myCollider != hitInfo.collider)
                     {
+                     
                         //Debug.Log ("WALL"+hitInfo.collider);
                         continue;
                     }
@@ -1370,6 +1371,7 @@ public class Pawn : DamagebleObject {
 	
 	public void Kick(int i)
 	{
+       
 		naturalWeapon.StartKick(AttackType[i]); 
 //		Debug.Log ("ATtack");
 		//animator.SetSome("Any",true);
@@ -1384,6 +1386,7 @@ public class Pawn : DamagebleObject {
             return;
         }
 		int i = (int)(UnityEngine.Random.value * AttackType.Count);
+      
 		naturalWeapon.StartKick(AttackType[i]); 
 
 		//animator.SetSome("Any",true);

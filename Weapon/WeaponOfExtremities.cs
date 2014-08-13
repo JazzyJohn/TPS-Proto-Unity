@@ -55,6 +55,7 @@ public class WeaponOfExtremities : MonoBehaviour {
         if (!Attack.OnMove) {
             owner.StopMovement();
         }
+      
 		Kick(Attack);
         isKicking = true;
 	}
@@ -76,6 +77,7 @@ public class WeaponOfExtremities : MonoBehaviour {
 		{
 			return;		
 		}
+     
 		Attack.timer = Attack.KDTime;
 		switch (Attack.AttakType) 
 		{
@@ -83,6 +85,7 @@ public class WeaponOfExtremities : MonoBehaviour {
 			owner.animator.StartAttackAnim(Attack.NameAttack);
 			break;
 		}
+       
 		Attack.StartKick();
 	}
     public virtual void KickFinish()

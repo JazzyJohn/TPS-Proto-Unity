@@ -80,13 +80,14 @@ public class HTHHitter : MonoBehaviour {
 
 	}
 	public void StartKick(){
+       
 		isKick= true;
 		checkAnimation= true;
 	}
 	
 	public void StopKick(){
 		isKick= false;
-		wasDamage = false;
+		
 
 	}
 	
@@ -136,7 +137,7 @@ public class HTHHitter : MonoBehaviour {
 			{
 				if(!wasDamage){
 					hits = Physics.RaycastAll(myTransform.position, 	myTransform.forward, 2.0f);
-					Debug.DrawRay(myTransform.position,myTransform.forward*2.0f,Color.red,5.0f);
+					///Debug.DrawRay(myTransform.position,myTransform.forward*2.0f,Color.red,5.0f);
 					foreach(RaycastHit hit in hits)
 					{
 						onBulletHit(hit);

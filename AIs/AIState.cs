@@ -267,20 +267,27 @@ public class AIState : MonoBehaviour {
 		}
 
       //  Debug.Log("SELECTED TARGET" + target);
-		if (Physics.Linecast (controlledPawn.myTransform.position, target.myTransform.position, out hit))
+        if (Physics.Linecast(controlledPawn.myTransform.position, target.myTransform.position, out hit,controlledPawn.seenlist)){
 
-			if (hit.collider == target.collider) {
-				distance = hit.distance;
-				SetEnemy(target);
-				return true;
-			}
+           // Debug.Log("SELECTED TARGET" + hit.collider);
+            if (hit.collider == target.collider)
+            {
+                distance = hit.distance;
+                SetEnemy(target);
+                return true;
+            }
             else
             {
                 distance = hit.distance;
                 return false;
             }
+        }
         else
-            return false;
+        {
+            distance = (target.myTransform.position - controlledPawn.myTransform.position).magnitude;
+            SetEnemy(target);
+            return true;
+        }
 
     }
 	protected virtual void DecideTacktick(){
@@ -315,7 +322,6 @@ public class AIState : MonoBehaviour {
 	}
 	protected virtual bool IsInWeaponRange(){
 	   float weaponDistance =controlledPawn.OptimalDistance(isMelee);
-
        return AIAgentComponent.FlatDifference(_enemy.myTransform.position, controlledPawn.myTransform.position).sqrMagnitude - _enemy.GetSize()*_enemy.GetSize() - controlledPawn.GetSize()*controlledPawn.GetSize() < weaponDistance * weaponDistance;
 	}
 	public virtual bool IsSpecificFinish(){
