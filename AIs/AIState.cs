@@ -120,6 +120,7 @@ public class AIState : MonoBehaviour {
 		}
 		
 	}	
+
 	public  Pawn controlledPawn;
 
 	protected Pawn _enemy;
@@ -240,7 +241,7 @@ public class AIState : MonoBehaviour {
 				float rangeDistance = direction.magnitude;
 				direction.y += 0.3f;
 				direction.Normalize();
-				foreach (RaycastHit hit in Physics.RaycastAll(transform.position, direction, rangeDistance))
+				foreach (RaycastHit hit in Physics.RaycastAll(controlledPawn.myTransform, direction, rangeDistance))
 					if (hit.transform == pawn.transform)
 				{
 					target = pawn;
@@ -260,7 +261,7 @@ public class AIState : MonoBehaviour {
 			return false;
 		}
       //  Debug.Log("SELECTED TARGET" + target);
-		if (Physics.Linecast (transform.position, target.myTransform.position, out hit))
+		if (Physics.Linecast (controlledPawn.myTransform.position, target.myTransform.position, out hit))
 			if (hit.collider == target.collider) {
 				distance = hit.distance;
 				SetEnemy(target);
@@ -308,10 +309,13 @@ public class AIState : MonoBehaviour {
 	protected virtual bool IsInWeaponRange(){
 	   float weaponDistance =controlledPawn.OptimalDistance(isMelee);
 
-       return AIAgentComponent.FlatDifference(_enemy.myTransform.position, controlledPawn.myTransform.position).sqrMagnitude - _enemy.GetSize() - controlledPawn.GetSize() < weaponDistance * weaponDistance;
+       return AIAgentComponent.FlatDifference(_enemy.myTransform.position, controlledPawn.myTransform.position).sqrMagnitude - _enemy.GetSize()*_enemy.GetSize() - controlledPawn.GetSize()*controlledPawn.GetSize() < weaponDistance * weaponDistance;
 	}
 	public virtual bool IsSpecificFinish(){
 		return false;
 	}
-    
+	public virtual void KickFinish(){
+	
+	
+	}
 }

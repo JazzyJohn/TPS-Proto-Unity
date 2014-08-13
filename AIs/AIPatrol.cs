@@ -1,13 +1,11 @@
 ﻿using UnityEngine;
 using System.Collections;
 
-public class AIPatrol : AIState
+public class AIPatrol : AIMovementState
 {
 	private float _lostTimer;
 	
 	public float lostTime=5.0f;
-	
-	protected  AIAgentComponent agent;
 
 	public Transform[] patrolPoints;
 
@@ -45,6 +43,7 @@ public class AIPatrol : AIState
         {
             return;
         }
+		stateSpeed =controlledPawn.groundWalkSpeed;
         agent.SetTarget(patrolPoints[step].position);
 		agent.SetSpeed(controlledPawn.groundWalkSpeed);
 		agent.ParsePawn (controlledPawn);
@@ -61,7 +60,7 @@ public class AIPatrol : AIState
 			agent.WalkUpdate ();
            // Debug.Log("Jump" + needJump + agent.needJump);
 			needJump = !needJump&&agent.needJump;
-            Vector3 translateVect = agent.GetTranslate();
+            Vector3 translateVect = GetSteeringForce();
 			if (!needJump) {
                 controlledPawn.Movement(translateVect, CharacterState.Walking);
 

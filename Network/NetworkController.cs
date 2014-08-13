@@ -494,7 +494,7 @@ public class NetworkController : MonoBehaviour {
         }
         if (resourceGameObject==null)
         {
-            Debug.LogError("PhotonNetwork error: Could not Instantiate the prefab [" + prefabName + "]. Please verify you have this gameobject in a Resources folder.");
+            Debug.LogError("FoxNetwork error: Could not Instantiate the prefab [" + prefabName + "]. Please verify you have this gameobject in a Resources folder.");
             return null;
         }
        return  Instantiate(resourceGameObject, vector3, quaternion) as GameObject;

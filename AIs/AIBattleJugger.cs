@@ -1,7 +1,7 @@
 ﻿using UnityEngine;
 using System.Collections;
 
-public class AIBattleJugger : AIState
+public class AIBattleJugger : AIMovementState
 {
 
     private float _waitTimer;
@@ -13,8 +13,6 @@ public class AIBattleJugger : AIState
     public bool isCrushing = false;
 
     public Transform Target = null;
-
-    protected AIAgentComponent agent;
 
     public RoutePoint routePoint;
 
@@ -105,7 +103,7 @@ public class AIBattleJugger : AIState
         agent = GetComponent<AIAgentComponent>();
         //Debug.Log (agent);
         Debug.Log("start state");
-
+		stateSpeed =controlledPawn.groundWalkSpeed;
         agent.SetTarget(curPoint.GiveTarget().position);
         agent.SetSpeed(controlledPawn.groundWalkSpeed);
         agent.ParsePawn(controlledPawn);
@@ -132,7 +130,7 @@ public class AIBattleJugger : AIState
         agent.WalkUpdate();
         // Debug.Log("Jump" + needJump + agent.needJump);
         needJump = !needJump && agent.needJump;
-        Vector3 translateVect = agent.GetTranslate();
+        Vector3 translateVect = GetSteeringForce(); 
         if (!needJump)
         {
             controlledPawn.Movement(translateVect, CharacterState.Walking);
@@ -166,7 +164,9 @@ public class AIBattleJugger : AIState
         }
 
     }
-
+	public override bool ShoudAvoid(Pawn pawn){
+		return pawn.team==controlledPawn.team&&pawn as BattleJugger != null;
+	}
 
 
     public void GeneratePath(Transform[] patrolPoints)

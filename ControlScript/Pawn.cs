@@ -333,6 +333,8 @@ public class Pawn : DamagebleObject {
 	
 	protected List<DamagerEntry> damagers = new List<DamagerEntry>();
 	
+	protected List<Pawn> attackers = new List<Pawn>();
+	
 	protected Vector3 lastHitDirection = Vector3.zero;
 
 	//Serialization
@@ -1395,6 +1397,12 @@ public class Pawn : DamagebleObject {
 		if (foxView.isMine) {
 				foxView.StopKick();
 		}
+	}
+	public void KickFinish(){
+		if(mainAi!=null){
+			mainAi. KickFinish();
+		}
+	
 	}
 	
 	

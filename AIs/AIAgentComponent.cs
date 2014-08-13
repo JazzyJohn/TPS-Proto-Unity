@@ -3,42 +3,79 @@ using System.Collections;
 using System.Collections.Generic;
 
 
-
+enum PathType{NATIVE, PATHFINDINGENGINE}
 
 public class AIAgentComponent : MonoBehaviour {
-	
+	private PathType type;
+	//PathFinding
 	private Agent agent = new Agent(5,0,true);
 	private int stepsToSmooth = 4;
 	private int stepsToCheck = 6;
 	public bool smoothPath = true; 
-	public float size;
+	
 	private LayerMask dynamicObstacleLayer;
 	private LayerMask agentLayer;
-	private float height = 1;
+
 	private Node nodeWithAgent;
-	private float radius = 0.5f;
-	private bool agentAvoidance = true;
+
 	private bool aceleration = false;
 	public bool needJump = false;
+	//NATIVE
+	protected float pawnSpeed;
+	protected NavMeshPath path
+	protected int curCorner;
+	protected Transform myTransform;
+	protected bool validPath;
+	
+	private float radius = 0.5f;
+	private float height = 1;
+	public float size;
+
 	protected Vector3 target;
+	
+	private bool agentAvoidance = true;
 
 	protected Vector3 resultTranslate;
 	protected Quaternion resultRotation;
-	
+	void Awake(){
+		if(PathfindingEngine.Instance==null){
+			type = PathType.NATIVE;
+		}else{
+			type = PathType.PATHFINDINGENGINE;
+		}
+	}
 	
 	void Start () {
-		
-		agent.Launch (transform);
-		dynamicObstacleLayer = PathfindingEngine.Instance.dynamicObstacleLayer;
-		agentLayer = PathfindingEngine.Instance.agentLayer;
-		height = PathfindingEngine.Instance.area.Height;
-		radius = PathfindingEngine.Instance.area.tileSize * 0.45f;
-		agentAvoidance = PathfindingEngine.Instance.agentAvoidance;
+		switch(type){
+			case PathType.PATHFINDINGENGINE:
+				agent.Launch (transform);
+				dynamicObstacleLayer = PathfindingEngine.Instance.dynamicObstacleLayer;
+				agentLayer = PathfindingEngine.Instance.agentLayer;
+				height = PathfindingEngine.Instance.area.Height;
+				radius = PathfindingEngine.Instance.area.tileSize * 0.45f;
+				agentAvoidance = PathfindingEngine.Instance.agentAvoidance;
+				break;
+			case PathType.NATIVE:
+				myTransform =transform;
+				path = new NavMeshPath(); 
+				break;
+			}
 	}
 	
 	public void SetSpeed(float speed){
-		agent.speed = speed;
-        target = Vector3.zero;
+		switch(type){
+			case PathType.PATHFINDINGENGINE:
+				
+				agent.speed = speed;
+				target = Vector3.zero;
+			break;
+			case PathType.NATIVE:
+				if(path.corners.Lenght>curCorner){
+				
+				}
+				pawnSpeed= speed;
+				break;
+			}
 	}
 	public Vector3 GetTranslate(){
 		return resultTranslate;
@@ -47,68 +84,105 @@ public class AIAgentComponent : MonoBehaviour {
 		return resultRotation;
 	}
 	public Vector3 GetTarget(){
-		if(agent.path.Count>0){
-			//Debug.Log (agent.path[0]);
-			return agent.path[0];
-		}
+		switch(type){
+			case PathType.PATHFINDINGENGINE:
+				
+			if(agent.path.Count>0){
+				//Debug.Log (agent.path[0]);
+				return agent.path[0];
+			}
+			break;
+			case PathType.NATIVE:
+				if(path.status!=NavMeshPathStatus.PathInvalid&& path.corners.Lenght>curCorner){
+					return path.corners[curCorner];
+				}
+				
+				break;
+			}
 		return Vector3.zero;
 	}
 
 	public void ParsePawn (Pawn controlledPawn)
 	{
 		size = controlledPawn.GetSize ()/2;
-		agent.jumpHeight = controlledPawn.jumpHeight;
-		agent.stepHeight = controlledPawn.stepHeight;
+			switch(type){
+			case PathType.PATHFINDINGENGINE:
+				agent.jumpHeight = controlledPawn.jumpHeight;
+				agent.stepHeight = controlledPawn.stepHeight;
+				break;
+			
+			}
+	
 	}
 
 	public void SetTarget(Vector3 newTarget,bool forced = false){
 
 		if (forced) {
 			if((newTarget -target).sqrMagnitude>4.0f||agent.path.Count>5){
-				agent.GoTo(newTarget);
-				target= newTarget;
+					ForcedSetTarget(newTarget);
 			}
 				
 		} else {
 			if((newTarget -target).sqrMagnitude>4.0f){
-				agent.GoTo(newTarget);
-				target= newTarget;
+				ForcedSetTarget(newTarget);
 			}
 		}
 	}
 	public void ForcedSetTarget(Vector3 newTarget){
-		
+		target= newTarget;
+		switch(type){
+			case PathType.PATHFINDINGENGINE:
 
 				agent.GoTo(newTarget);
-				target= newTarget;
+				break;
+			case PathType.NATIVE:
+				validPath =   NavMesh.CalculatePath(myTransform.position, target, -1, path);				
+				break;
 		
 	}
 	public void WalkUpdate () {
 		resultTranslate  =Vector3.zero;
-		needJump = false;
-		if(agent.path.Count>0){
-			bool walkable = true;
-			//Check if exist some dynamic obstacle in our path.
-			int stepsCount = 0;
-		
-		
-			if(walkable){
-				//Smooth path
-			    //Agent go to next step
-				GotoNextStep();
-			}else{
-				//Re-Find the path.
-				agent.GoTo(target);
-			}
+		switch(type){
+			case PathType.PATHFINDINGENGINE:
+				needJump = false;
+				if(agent.path.Count>0){
+					bool walkable = true;
+					//Check if exist some dynamic obstacle in our path.
+					int stepsCount = 0;
+					
+				
+					if(walkable){
+						//Smooth path
+						//Agent go to next step
+						GotoNextStepEngine();
+					}else{
+						//Re-Find the path.
+						agent.GoTo(target);
+					}
+				}
+			break;
+			case PathType.NATIVE:
+				if(validPath &&path.status!=NavMeshPathStatus.PathInvalid&& path.corners.Lenght>curCorner){
+					GotoNextStepNative();
+				}
+			break;
 		}
+		
 	}
 
     public bool IsPathBad()
-    {
-        return agent.pathrejected || (!agent.search && agent.path.Count == 0);
+    {	switch(type){
+			case PathType.PATHFINDINGENGINE:
+			   return 	agent.pathrejected || (!agent.search && agent.path.Count == 0);
+			break;
+				return !(validPath &&path.status!=NavMeshPathStatus.PathInvalid&& path.corners.Lenght>curCorner);
+			break;
+			
+		}
+		return false;
     }
 	
-	public void GotoNextStep(){
+	public void GotoNextStepEngine(){
 		//if there's a path.
 	
 		if( agent.path.Count>0 ){
@@ -155,14 +229,61 @@ public class AIAgentComponent : MonoBehaviour {
 			
 		}
 	}
+	public void GotoNextStepNative(){
+		//if there's a path.
+	
+		if(path.corners.Lenght>curCorner ){
+			
+
+
+
+			while(path.corners.Lenght>curCorner &&IsRiched(path.corners[curCorner],myTransform.position,size)){
+				curCorner++;
+			}
+
+           // Debug.Log(nextStep + "  " + agent.path[0] + "  " + agent.path.Count);
+		
+			//Get the next waypoint...
+			Vector3 point=path.corners[curCorner];
+			//...and rotate pivot towards it.
+			Vector3 dir=point-myTransform.position;
+			
+			//Calculate the distance between current pivot position and next waypoint.
+			float dist=Vector3.Distance(myTransform.position, point);
+			//Move towards the waypoint.
+			Vector3 direction=(point-myTransform.position).normalized;
+		
+		
+	
+			resultTranslate  =direction * Mathf.Min(dist, pawnSpeed * Time.deltaTime)/Time.deltaTime;
+	
+			//Assign transform position with height and pivot position.
+			//transform.parent = agent.pivot.transform;
+			//transform.position = agent.pivot.transform.position + new Vector3(0,agent.yOffset,0);
+			
+			
+			if(dir!=Vector3.zero){
+				resultRotation= Quaternion.Slerp(myTransform.rotation, Quaternion.LookRotation(dir),Time.deltaTime*15);
+			}
+			//resultRotation = transform.rotation;
+			//If the agent arrive to waypoint position, delete waypoint from the path.
+
+			if(IsRiched(path.corners[curCorner],myTransform.position,size)){
+					curCorner++;
+			}
+			
+		}
+	}
+
+	
+	
 	public static bool IsRiched(Vector3 point,Vector3 target,float inputSize){
 		//Debug.Log(Mathf.Abs (agent.pivot.transform.position.y - point.y) +"   " +"   "+size);
 
-			if (PathfindingEngine.Instance.oneLevelHeight > Mathf.Abs (target.y - point.y)) {
-						Vector3 flatPoint= point,flatPostion  =  target;
+			Vector3 flatPoint= point,flatPostion  =  target;
 			flatPostion.y =0;
 			flatPoint.y=0;
-			//Debug.Log(Mathf.Abs (agent.pivot.transform.position.y - point.y) +"   "+ (flatPoint-flatPostion).sqrMagnitude +"   "+size);
+		
 			if((flatPoint-flatPostion).sqrMagnitude<inputSize*inputSize){
 				return true;
 
@@ -220,6 +341,8 @@ public class AIAgentComponent : MonoBehaviour {
 	void OnDrawGizmos(){
 		if(showGizmo){
 			if(showPath){
+				switch(type){
+				case PathType.PATHFINDINGENGINE:
 				if(agent.path!=null && agent.path.Count>0){
 					Vector3 offset = new Vector3(0,0.1f,0);
 					Gizmos.color = gizmoColorPath;
@@ -234,6 +357,18 @@ public class AIAgentComponent : MonoBehaviour {
 						Gizmos.DrawLine( agent.path[i-1] + offset , agent.path[i] + offset );
 					}
 				}
+				break;
+				case PathType.NATIVE:
+				if(path!=null && path.corners.Lenght>0){
+					Vector3 offset = new Vector3(0,0.1f,0);
+					Gizmos.color = gizmoColorPath;
+					Gizmos.DrawLine( myTransform.position + offset, path.corners[0] + offset );
+					for(int i=1; i< path.corners.Lenght; i++){
+					
+						Gizmos.DrawLine(  path.corners[i-1] + offset , path.corners[i] + offset );
+					}
+				}
+				break;
 			}
 		}
 	}

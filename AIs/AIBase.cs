@@ -77,6 +77,10 @@ public class AIBase : MonoBehaviour
 		}
 
 	}
+	public void KickFinish(){
+		_currentState.KickFinish();
+	
+	}
 	void InitState(){
 		//Debug.Log (_currentState.GetType ().Name);
         _currentState.controlledPawn = controlledPawn;
