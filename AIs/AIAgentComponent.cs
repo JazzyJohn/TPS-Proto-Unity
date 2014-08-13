@@ -22,7 +22,7 @@ public class AIAgentComponent : MonoBehaviour {
 	public bool needJump = false;
 	//NATIVE
 	protected float pawnSpeed;
-	protected NavMeshPath path
+	protected NavMeshPath path;
 	protected int curCorner;
 	protected Transform myTransform;
 	protected bool validPath;
@@ -70,7 +70,7 @@ public class AIAgentComponent : MonoBehaviour {
 				target = Vector3.zero;
 			break;
 			case PathType.NATIVE:
-				if(path.corners.Lenght>curCorner){
+				if(path.corners.Length>curCorner){
 				
 				}
 				pawnSpeed= speed;
@@ -93,7 +93,7 @@ public class AIAgentComponent : MonoBehaviour {
 			}
 			break;
 			case PathType.NATIVE:
-				if(path.status!=NavMeshPathStatus.PathInvalid&& path.corners.Lenght>curCorner){
+				if(path.status!=NavMeshPathStatus.PathInvalid&& path.corners.Length>curCorner){
 					return path.corners[curCorner];
 				}
 				
@@ -139,7 +139,8 @@ public class AIAgentComponent : MonoBehaviour {
 				validPath =   NavMesh.CalculatePath(myTransform.position, target, -1, path);				
 				break;
 		
-	}
+	    }
+    }
 	public void WalkUpdate () {
 		resultTranslate  =Vector3.zero;
 		switch(type){
@@ -162,7 +163,7 @@ public class AIAgentComponent : MonoBehaviour {
 				}
 			break;
 			case PathType.NATIVE:
-				if(validPath &&path.status!=NavMeshPathStatus.PathInvalid&& path.corners.Lenght>curCorner){
+				if(validPath &&path.status!=NavMeshPathStatus.PathInvalid&& path.corners.Length>curCorner){
 					GotoNextStepNative();
 				}
 			break;
@@ -175,7 +176,7 @@ public class AIAgentComponent : MonoBehaviour {
 			case PathType.PATHFINDINGENGINE:
 			   return 	agent.pathrejected || (!agent.search && agent.path.Count == 0);
 			break;
-				return !(validPath &&path.status!=NavMeshPathStatus.PathInvalid&& path.corners.Lenght>curCorner);
+            return !(validPath && path.status != NavMeshPathStatus.PathInvalid && path.corners.Length > curCorner);
 			break;
 			
 		}
@@ -232,12 +233,12 @@ public class AIAgentComponent : MonoBehaviour {
 	public void GotoNextStepNative(){
 		//if there's a path.
 	
-		if(path.corners.Lenght>curCorner ){
+		if(path.corners.Length>curCorner ){
 			
 
 
 
-			while(path.corners.Lenght>curCorner &&IsRiched(path.corners[curCorner],myTransform.position,size)){
+			while(path.corners.Length>curCorner &&IsRiched(path.corners[curCorner],myTransform.position,size)){
 				curCorner++;
 			}
 
@@ -288,7 +289,7 @@ public class AIAgentComponent : MonoBehaviour {
 				return true;
 
 			}
-		}
+		
 		return false;
 	}
     public static Vector3 FlatDifference(Vector3 target, Vector3 position)
@@ -338,38 +339,48 @@ public class AIAgentComponent : MonoBehaviour {
 	public bool showGizmo;
 	public bool showPath;
 	public Color gizmoColorPath = Color.blue;
-	void OnDrawGizmos(){
-		if(showGizmo){
-			if(showPath){
-				switch(type){
-				case PathType.PATHFINDINGENGINE:
-				if(agent.path!=null && agent.path.Count>0){
-					Vector3 offset = new Vector3(0,0.1f,0);
-					Gizmos.color = gizmoColorPath;
-					Gizmos.DrawLine( transform.position + offset, agent.path[0] + offset );
-					for(int i=1; i<agent.path.Count; i++){
-						if (i>stepsToSmooth-2)
-							Gizmos.color = new Color(1-gizmoColorPath.r,1-gizmoColorPath.g,1-gizmoColorPath.b, 0.1f);
+    void OnDrawGizmos()
+    {
+        if (showGizmo)
+        {
+            if (showPath)
+            {
+                switch (type)
+                {
+                    case PathType.PATHFINDINGENGINE:
+                        if (agent.path != null && agent.path.Count > 0)
+                        {
+                            Vector3 offset = new Vector3(0, 0.1f, 0);
+                            Gizmos.color = gizmoColorPath;
+                            Gizmos.DrawLine(transform.position + offset, agent.path[0] + offset);
+                            for (int i = 1; i < agent.path.Count; i++)
+                            {
+                                if (i > stepsToSmooth - 2)
+                                    Gizmos.color = new Color(1 - gizmoColorPath.r, 1 - gizmoColorPath.g, 1 - gizmoColorPath.b, 0.1f);
 
-						if(agent.path[i].needJump){
-							Gizmos.DrawSphere(agent.path[i],1.0f);
-						}
-						Gizmos.DrawLine( agent.path[i-1] + offset , agent.path[i] + offset );
-					}
-				}
-				break;
-				case PathType.NATIVE:
-				if(path!=null && path.corners.Lenght>0){
-					Vector3 offset = new Vector3(0,0.1f,0);
-					Gizmos.color = gizmoColorPath;
-					Gizmos.DrawLine( myTransform.position + offset, path.corners[0] + offset );
-					for(int i=1; i< path.corners.Lenght; i++){
-					
-						Gizmos.DrawLine(  path.corners[i-1] + offset , path.corners[i] + offset );
-					}
-				}
-				break;
-			}
-		}
-	}
+                                if (agent.path[i].needJump)
+                                {
+                                    Gizmos.DrawSphere(agent.path[i], 1.0f);
+                                }
+                                Gizmos.DrawLine(agent.path[i - 1] + offset, agent.path[i] + offset);
+                            }
+                        }
+                        break;
+                    case PathType.NATIVE:
+                        if (path != null && path.corners.Length > 0)
+                        {
+                            Vector3 offset = new Vector3(0, 0.1f, 0);
+                            Gizmos.color = gizmoColorPath;
+                            Gizmos.DrawLine(myTransform.position + offset, path.corners[0] + offset);
+                            for (int i = 1; i < path.corners.Length; i++)
+                            {
+
+                                Gizmos.DrawLine(path.corners[i - 1] + offset, path.corners[i] + offset);
+                            }
+                        }
+                        break;
+                }
+            }
+        }
+    }
 }

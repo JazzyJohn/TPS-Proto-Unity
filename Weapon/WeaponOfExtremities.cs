@@ -85,8 +85,8 @@ public class WeaponOfExtremities : MonoBehaviour {
 		}
 		Attack.StartKick();
 	}
-	public virtual void StopKick()
+    public virtual void KickFinish()
 	{
-		Owner.KickFinish();
+		owner.KickFinish();
 	}
 }

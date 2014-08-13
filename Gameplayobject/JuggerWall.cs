@@ -10,6 +10,10 @@ public class JuggerWall : DamagebleObject {
 
     SimpleDestroyableModel model;
 
+    private bool isOpen;
+
+    public GameObject wall;
+
     void Awake()
     {
         foxView = GetComponent<FoxView>();
@@ -35,6 +39,7 @@ public class JuggerWall : DamagebleObject {
 
     public override void Damage(BaseDamage damage, GameObject killer)
     {
+        Debug.Log("damage");
         if (destructableObject)
         {
             BattleJugger killerPawn = killer.GetComponent<BattleJugger>();
@@ -67,5 +72,33 @@ public class JuggerWall : DamagebleObject {
 		
 
 	}
+    void Update()
+    {
+        if (isOpen)
+        {
 
+            isOpen = false;
+            if (wall.activeSelf)
+            {
+                wall.SetActive(false);
+            }
+        }
+        else
+        {
+            if (!wall.activeSelf)
+            {
+                wall.SetActive(true);
+            }
+        }
+
+    }
+    public void OnTriggerStay(Collider other)
+    {
+
+        BattleJugger pawn = other.GetComponent<BattleJugger>();
+        if ( pawn!=null&&pawn.team==team)
+        {
+            isOpen=true;
+        }
+    }
 }

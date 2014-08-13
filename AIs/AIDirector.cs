@@ -19,7 +19,10 @@ public class AIDirector : MonoBehaviour {
 	
 
 	public virtual void StartDirector(){
-	
+        if (swarms.Length == 0)
+        {
+            swarms = FindObjectsOfType<AISwarm>();
+        }
 		for(int i = 0;i<swarms.Length;i++){
 			swarms[i].Init(i);
 			

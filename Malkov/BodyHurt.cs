@@ -6,7 +6,7 @@ using System.Collections;
 // Его задача передавать получаемый урон в родительский скрипт
 public class BodyHurt : DamagebleObject {
 
-	public Pawn TargetHarm;
+    public DamagebleObject TargetHarm;
 
 	public float multiDamage;
 
@@ -37,7 +37,7 @@ public class BodyHurt : DamagebleObject {
 			}
 		}
 
-	public virtual void Damage(BaseDamage damage,GameObject killer)
+	public override void Damage(BaseDamage damage,GameObject killer)
 	{
 		if (TargetHarm)
 		{

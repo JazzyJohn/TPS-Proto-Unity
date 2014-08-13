@@ -47,6 +47,7 @@ public class AIBattleJugger : AIMovementState
             }
             else
             {
+                StopAttack();
                 isCrushing = false;
             }
            
@@ -64,7 +65,17 @@ public class AIBattleJugger : AIMovementState
 
     void OnCollisionEnter(Collision collision)
     {
-        if (collision.collider.CompareTag("Wall") || collision.collider.CompareTag("Base"))
+        if (collision.collider.CompareTag("Wall"))
+        {
+            if (collision.transform.parent.GetComponent<JuggerWall>().team != controlledPawn.team)
+            {
+                isCrushing = true;
+                Target = collision.transform;
+
+            }
+        }
+            
+            if(collision.collider.CompareTag("Base"))
         {
 
             isCrushing = true;
@@ -193,5 +204,13 @@ public class AIBattleJugger : AIMovementState
             isCrushing = true;
         }
     }
+
+    protected override bool IsInWeaponRange()
+    {
+	   float weaponDistance =controlledPawn.OptimalDistance(isMelee);
+
+       return AIAgentComponent.FlatDifference(Target.position, controlledPawn.myTransform.position).sqrMagnitude + controlledPawn.GetSize()*2 < weaponDistance * weaponDistance;
+	}
+
    
 }

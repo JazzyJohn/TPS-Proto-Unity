@@ -332,8 +332,8 @@ public class Pawn : DamagebleObject {
 	
 	
 	protected List<DamagerEntry> damagers = new List<DamagerEntry>();
-	
-	protected List<Pawn> attackers = new List<Pawn>();
+
+    public List<Pawn> attackers = new List<Pawn>();
 	
 	protected Vector3 lastHitDirection = Vector3.zero;
 
@@ -350,7 +350,7 @@ public class Pawn : DamagebleObject {
 	
 	private bool isLocalVisible =true;
 	
-	public static float MAXRENDERDISTANCE = 2500.0f;
+	public static float MAXRENDERDISTANCE = 250000.0f;
 
 	protected void Awake(){
 		myTransform = transform;
@@ -663,7 +663,10 @@ public class Pawn : DamagebleObject {
         StopKick();
         //Debug.Log(last);
 		if(last==null){
-			animator.StartDeath(AnimDirection.Front);
+            if (animator != null)
+            {
+                animator.StartDeath(AnimDirection.Front);
+            }
 		}else{
 			float angle  = Vector3.Dot (last.lastHitDirection,myTransform.forward);
 			// If last hit direction equals negative forward it's hit in face
@@ -1358,7 +1361,9 @@ public class Pawn : DamagebleObject {
 		}
 	}
 	public void shootEffect(){
-		animator.ShootAnim();
+        if(animator!=null){
+		    animator.ShootAnim();
+        }
 	}
 	
 	//Natural weapon

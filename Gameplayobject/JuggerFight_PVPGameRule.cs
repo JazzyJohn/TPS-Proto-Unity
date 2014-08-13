@@ -12,6 +12,14 @@ public class JuggerFight_PVPGameRule : GameRule {
         {
            
             base.StartGame();
+            if(bases.Length==0){
+                Base[] tempBases = FindObjectsOfType<Base>();
+                bases = new Base[2];
+                foreach (Base baseObj in tempBases)
+                {
+                    bases[baseObj.team - 1] = baseObj;
+                }
+            }
             foreach (Base baseObj in bases)
             {
                 baseObj.StartBase();

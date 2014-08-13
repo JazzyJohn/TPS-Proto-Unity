@@ -42,9 +42,9 @@ public class StatisticHandler : MonoBehaviour {
 	
 	public static string SYNC_MONEY_REWARD = "syncmoneyreward";
 
-	public static string STATISTIC_PHP="http://vk.rakgames.ru/kaspi/";
+    public static string STATISTIC_PHP = "http://juggerfall.com/";
 
-	public static string STATISTIC_PHP_HTTPS="https://vk.rakgames.ru/kaspi/";
+    public static string STATISTIC_PHP_HTTPS = "https://juggerfall.com/";
 
 	// s_Instance is used to cache the instance found in the scene so we don't have to look it up every time.
 	private static StatisticHandler s_Instance = null;

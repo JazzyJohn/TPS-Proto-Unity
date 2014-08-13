@@ -17,7 +17,7 @@ public class TurretPawn : Pawn {
 	}
 	void Update () {
 		//Debug.Log (photonView.isSceneView);
-		if (!isActive) {
+		if (!isActive&&!isDead) {
 			return;		
 		}
 //		Debug.Log (characterState);

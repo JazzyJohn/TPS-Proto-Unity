@@ -138,6 +138,8 @@ public class AIState : MonoBehaviour {
 	protected bool isMelee= false;
 
     public AIBase aibase;
+
+    public bool IsDebug = false;
 	
 	public Pawn[] PawnList
 	{
@@ -158,7 +160,7 @@ public class AIState : MonoBehaviour {
 	}
 
 	// Use this for initialization
-	void Awake () {
+	protected void Awake () {
         aibase = GetComponent<AIBase>();
         enabled = false;
 	}
@@ -220,10 +222,11 @@ public class AIState : MonoBehaviour {
 			return _enemy;
 		}
 		Pawn target = null;
-//		Debug.Log (_pawnArray);
+       
+		
 		foreach (Pawn pawn in _pawnArray)
 		{
-            //Debug.Log("ENEMY? ME" + controlledPawn + "YOu" + pawn);
+           
 			if(!IsEnemy(pawn)){
 				continue;
 			}
@@ -241,12 +244,14 @@ public class AIState : MonoBehaviour {
 				float rangeDistance = direction.magnitude;
 				direction.y += 0.3f;
 				direction.Normalize();
-				foreach (RaycastHit hit in Physics.RaycastAll(controlledPawn.myTransform, direction, rangeDistance))
-					if (hit.transform == pawn.transform)
-				{
-					target = pawn;
-					break;
-				}
+                foreach (RaycastHit hit in Physics.RaycastAll(controlledPawn.myTransform.position, direction, rangeDistance))
+                {
+                    if (hit.transform == pawn.transform)
+                    {
+                        target = pawn;
+                        break;
+                    }
+                }
 			}
 
 		}
@@ -260,8 +265,10 @@ public class AIState : MonoBehaviour {
 		if (target == null) {
 			return false;
 		}
+
       //  Debug.Log("SELECTED TARGET" + target);
 		if (Physics.Linecast (controlledPawn.myTransform.position, target.myTransform.position, out hit))
+
 			if (hit.collider == target.collider) {
 				distance = hit.distance;
 				SetEnemy(target);

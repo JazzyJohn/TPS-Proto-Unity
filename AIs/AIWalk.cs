@@ -17,27 +17,31 @@ public class AIWalk : AIMovementState
 	
 	public BattleState state;
 	
-	protected float _lastTimeAttack=0.f;
+	protected float _lastTimeAttack=0.0f;
 	
-	protected static float coolDown = 1.f;
+	protected static float coolDown = 1.0f;
 	
 	protected static int maxAttackers = 2;
 
 	protected bool attacking= false;
+
+    protected bool hasPermision = false;
+
+    public bool CirleAttack = false;
 	
-	public void UpdtaeState(){
+	public void UpdateState(){
 		if(_distanceToTarget>DangerRadius){
-			state=Inclosing;
+			state=BattleState.Inclosing;
 		
 		}else{
 			if( IsInWeaponRange()){
 				if(hasPermision){
-					state = Attacking;
+					state = BattleState.Attacking;
 				}else{
-					state = WaitForAttack;
+					state = BattleState.WaitForAttack;
 				}
 			}else{
-				state = InDangerArea;
+				state = BattleState.InDangerArea;
 			}
 		}
 	
@@ -53,50 +57,50 @@ public class AIWalk : AIMovementState
 			if(isMelee){
 				UpdateState();
 				switch(state){
-					case Inclosing:
+					case BattleState.Inclosing:
 					//move Close to enemy
 						_pathCoef=pathCoef;
 						StopAvoid();
 						StopStrafe();
 					break;
-					case InDangerArea:
+					case BattleState.InDangerArea:
 					
 						//If we can attack
 						if(_lastTimeAttack+coolDown<Time.time){
 							//If amount of attackers small move close
-							if(enemy.attackers.lenght>=maxAttackers){
-								_pathCoef =1.f;
+							if(_enemy.attackers.Count>=maxAttackers){
+								_pathCoef =1.0f;
 								StopAvoid();
 								StopStrafe();
 							}else{
 							//else strafe around;
-								_pathCoef =0.f;
+								_pathCoef =0.0f;
 								StopAvoid();
-								StartStrafe(Enemy.myTransform);
+								StartStrafe(_enemy.myTransform);
 							}
 						}else{
 							//strafe around;
-							StartStrafe(Enemy.myTransform);
+							StartStrafe(_enemy.myTransform);
 						}
 					break;
-					case WaitForAttack:
+					case BattleState.WaitForAttack:
 							//if we after last attack move away
 							AskForPermisssion();
 							//if we got permission  start attack
-							if(hasPermision)
+							if(hasPermision){
 								Attack();	
 								
 							}else{
 								//Else avoid
-								_pathCoef =0.f;
+								_pathCoef =0.0f;
 								StopStrafe();
-								StartAvoid(Enemy.myTransform);
+								StartAvoid(_enemy.myTransform);
 							}
-						}
+						
 						
 					break;
-					case Attacking;
-						_pathCoef =1.f;
+					case BattleState.Attacking:
+						_pathCoef =1.0f;
 						StopAvoid();
 						StopStrafe();
 					break;
@@ -158,7 +162,7 @@ public class AIWalk : AIMovementState
 		base.StopAttack();
 	}
 	public void AskForPermisssion(){
-		return enemy.attackers.lenght<maxAttackers&&_lastTimeAttack+coolDown<Time.time;
+        hasPermission =  _enemy.attackers.Count < maxAttackers && _lastTimeAttack + coolDown < Time.time;
 	}
 	public override void StartState(){
 		agent = GetComponent<AIAgentComponent>();

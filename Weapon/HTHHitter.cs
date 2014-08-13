@@ -92,7 +92,7 @@ public class HTHHitter : MonoBehaviour {
 	
 	public void AttackFinish(){
 		if(KickPlay){
-			WeaponControl.AttackFinish();
+            WeaponControl.KickFinish();
 			checkAnimation=false;
 			wasDamage = false;
 		}

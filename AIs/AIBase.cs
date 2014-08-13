@@ -112,6 +112,10 @@ public class AIBase : MonoBehaviour
                 ((AIBattleJugger)_currentState).GeneratePath(patrolPoints);
             }
             break;
+         
+
+
+            break;
 			//case AIType.Rusher:
 			//    {
 			//        _rusher = gameObject.AddComponent<AIRusher>();
