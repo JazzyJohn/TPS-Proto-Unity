@@ -79,4 +79,9 @@ public class SettingsManager: MonoBehaviour{
 		  MusicHolder.SetVolume(((float) value)/100.0f);
 		}
 	}
+	
+	
+	
+	
+
 }

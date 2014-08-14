@@ -39,22 +39,10 @@ public class HTHHitter : MonoBehaviour {
 	public bool isKick;
 	
 	private bool checkAnimation=false;
-	[HideInInspector]
-	public float timer;
+
 
 	private bool wasDamage = false;
 
-	public bool CanShoot ()
-	{
-        if (timer <= 0f)
-        {
-            
-            return true;
-
-        }
-        else
-            return false;
-	}
 
 	// Use this for initialization
 	void Start () 
@@ -101,13 +89,14 @@ public class HTHHitter : MonoBehaviour {
 		
 	
 	}
+	public bool IsPlaying(){
+		return checkAnimation;
+	}
 
 	// Update is called once per frame
 	void Update () 
 	{
-		if (timer >= 0) {
-			timer-=Time.deltaTime;
-		}
+	
 	//	Debug.Log (this + "  " + isKick);
 		if(checkAnimation){
 			bool ok = false;

@@ -61,8 +61,18 @@ public class BaseWeapon : DestroyableNetworkObject {
     /// </summary>
     public float pumpCoef;
     protected float _pumpCoef;
-   
-
+    /// <summary>
+    ///  Temp Target for guidance system
+    /// </summary>
+	protected Transform guidanceTarget= null;
+	/// <summary>
+    ///  Can be lock on friendly target
+    /// </summary>
+	public bool isFriendlyGuide;
+	/// <summary>
+    ///  One shoot pump do you need pump every shot;
+    /// </summary>
+	public bool oneShootPump =false;	
     /// <summary>
     /// After Pump Finish action
     /// </summary>
@@ -312,10 +322,11 @@ public class BaseWeapon : DestroyableNetworkObject {
                     }
                     else
                     {
-						_pumpCoef += deltaTime*pumpCoef;
+						
                         switch (prefiretype)
                         {
                             case PREFIRETYPE.Salvo:
+								Pumping();
                                 if (curAmmo == 0 && alredyGunedAmmo == 0) {
                                     ReloadStart();
                                 }
@@ -330,20 +341,37 @@ public class BaseWeapon : DestroyableNetworkObject {
                                }
 
                                 break;
+							case PREFIRETYPE.Guidance:
+								if(guidanceTarget==owner.curLookTarget){
+									Pumping();
+								}else{
+									if(guidanceTarget==null){
+										Pawn target = owner.curLookTarget.GetComponent<Pawn>();
+										if(target!=null&&(isFriendlyGuide||target.team!=owner.team)){
+											guidanceTarget= target;
+										}									
+									}
+								}
+							break;
 							default:
-								  if (curAmmo == 0) {
+								Pumping();
+								if (curAmmo == 0) {
                                     ReloadStart();
                                 }
                                
 								break;
                          }
-                        _pumpAmount += deltaTime;
+                     
                     }
                 }
                 break;
         }
 		_randShootCoef-=randCoolingEffect*deltaTime;
      
+	}
+	private void Pumping(){
+		_pumpCoef += deltaTime*pumpCoef;
+	    _pumpAmount += deltaTime;
 	}
 
     private void ShootTick()
@@ -367,7 +395,7 @@ public class BaseWeapon : DestroyableNetworkObject {
     }
 	public virtual void StartFire(){
 		isShooting = true;
-
+	
 	}
     public virtual void StartPumping()
     {
@@ -392,7 +420,7 @@ public class BaseWeapon : DestroyableNetworkObject {
             case PREFIRETYPE.Spooling:
 
                 break;
-            default:
+			default:
                 Fire();
                 break;
         }
@@ -569,6 +597,9 @@ public class BaseWeapon : DestroyableNetworkObject {
                 _waitForRelease = true;
                 break;
         }
+		if(oneShootPump){
+			_pumpCoef=0;
+		}
 
     }
 
@@ -611,6 +642,14 @@ public class BaseWeapon : DestroyableNetworkObject {
 			break;
 			
 		}
+		
+		switch (prefiretype)
+        {
+            case PREFIRETYPE.Guidance:
+			guidanceTarget = null;
+
+			default;
+        }
 	}
 
 	public virtual void ChangeWeaponStatus(bool status){
@@ -656,18 +695,11 @@ public class BaseWeapon : DestroyableNetworkObject {
 		}
 		if(prefiretype==PREFIRETYPE.ChargedAccuracy){
 			effAimRandCoef-= _pumpCoef;
-			_pumpCoef=0;
+			
 		}
 		return effAimRandCoef;
 	}
-	/// <summary>
-    /// Return target from owner;
-    /// </summary>
-	protected Transform GetGuidanceTarget(){
-		Transform target  = owner.curLookTarget;
 	
-		return target;
-	}
 	protected virtual void GenerateProjectile(){
 		Vector3 startPoint  = muzzlePoint.position+muzzleOffset;
 		Quaternion startRotation = getAimRotation();
@@ -694,8 +726,9 @@ public class BaseWeapon : DestroyableNetworkObject {
 			break;
 			case PREFIRETYPE.Guidance:
 				if(_pumpCoef>=1.0f){
-					Transform target = GetGuidanceTarget();
-				
+					Transform target = 	guidanceTarget;
+					guidanceTarget = null;
+					
 					if(target!=null){
 						projScript.target = target;
 						viewId = target.GetComponent<FoxView>().viewID;

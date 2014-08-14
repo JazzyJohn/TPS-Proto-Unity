@@ -110,6 +110,17 @@ public class BaseProjectile : MonoBehaviour
 
     void Start()
     {
+		switch (attraction)
+        {
+          
+            case ATTRACTION.Homing:
+            case ATTRACTION.LaserGuidance:
+				if(target==null){
+					attraction =ATTRACTION.NoAttraction;
+				}
+			break;
+			
+		}
         ProjectileManager.instance.AddProject(projId, this);
         aSource = GetComponent<AudioSource>();
         sControl = new soundControl(aSource);//создаем обьект контроллера звука и передаем указатель на источник
@@ -119,7 +130,7 @@ public class BaseProjectile : MonoBehaviour
         startPosition = mTransform.position;
         mRigidBody = rigidbody;
         mRigidBody.velocity = mTransform.TransformDirection(Vector3.forward * startImpulse);
-
+		
         RaycastHit hit;
         float distance = mTransform.InverseTransformDirection(mRigidBody.velocity).z * 0.1f;
         if (replication)

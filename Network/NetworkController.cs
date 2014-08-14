@@ -155,7 +155,9 @@ public class NetworkController : MonoBehaviour {
         while(lateEvents.Count>0){
             OnExtensionResponse(lateEvents.Dequeue());
         }
-        _smartFox.ProcessEvents();
+		if(_smartFox!=null){
+			_smartFox.ProcessEvents();
+		}
         
 	}
     string UID = "";
@@ -176,8 +178,9 @@ public class NetworkController : MonoBehaviour {
 	}
     void OnApplicationQuit()
     {
+		_smartFox.Disconnect();
         UnsubscribeDelegates();
-        _smartFox.Disconnect();
+       
     }
     //SMARTFOX LOGIC
 
@@ -289,7 +292,7 @@ public class NetworkController : MonoBehaviour {
                              }
                          }
                      }
-                
+					
 
                     //TODO Think maybe faster would be to sort it?
                     foreach (SFSObject dtIt in dt.GetSFSArray("views"))
@@ -311,6 +314,18 @@ public class NetworkController : MonoBehaviour {
                         }
 
                     }
+					//Delete scene view that was deleted before player join
+				    foreach (int id in dt.GetIntArray("deleteSceneView"))
+                    {
+							 FoxView view = GetView(id);
+							 if(view!=null){
+								DestroyableNetworkObject obj =view.GetComponent<DestroyableNetworkObject>();
+								if(obj!=null){
+									obj.KillMe();
+								
+								}
+							}
+					}
                     if(dt.ContainsKey("Master")&&dt.GetBool("Master")){
                         HandleMasterStart(dt);
                     }
@@ -1022,6 +1037,19 @@ public class NetworkController : MonoBehaviour {
 
         data.PutClass("model", model);
         ExtensionRequest request = new ExtensionRequest("updateConquestPoint", data, serverHolder.gameRoom);
+        smartFox.Send(request);
+    
+    }
+	/// <summary>
+    /// deleteSceneView request to server
+    /// </summary>	
+
+    public void DeleteSceneViewRequest(int id)
+    {
+        ISFSObject data = new SFSObject();
+
+        data.PutInt("id", id);
+        ExtensionRequest request = new ExtensionRequest("deleteSceneView", data, serverHolder.gameRoom);
         smartFox.Send(request);
     
     }

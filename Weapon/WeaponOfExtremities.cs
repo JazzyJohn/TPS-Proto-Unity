@@ -38,7 +38,7 @@ public class WeaponOfExtremities : MonoBehaviour {
 			if (Attack.isKick) 
 			{
 				//Attack.isKick=false;
-				if(Attack.timer<=0)
+				if(!Attack.IsPlaying())
 				{
 					Kick(Attack);
 					
@@ -73,12 +73,8 @@ public class WeaponOfExtremities : MonoBehaviour {
 
 	void Kick(HTHHitter Attack)
 	{
-		if (!Attack.CanShoot ()) 
-		{
-			return;		
-		}
-     
-		Attack.timer = Attack.KDTime;
+	
+		
 		switch (Attack.AttakType) 
 		{
 		case HTHHitter.KickType.Aim:

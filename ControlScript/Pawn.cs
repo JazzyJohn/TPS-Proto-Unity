@@ -181,9 +181,7 @@ public class Pawn : DamagebleObject {
 
 	public float wallRunSpeed;
 
-	public const float  WALL_TIME_UP=1.5f;
-
-	public const float  WALL_TIME_SIDE=3.0f;
+	public float aiVelocityChangeMax = 1.0f;
 
 	public float groundSprintSpeed;
 
@@ -1847,8 +1845,12 @@ public class Pawn : DamagebleObject {
             nextMovement.y = velocity.y;
         }*/
        // nextMovement = nextMovement;// -Vector3.up * gravity + pushingForce / rigidbody.mass;
-		Vector3 velocityChange = (nextMovement - velocity);
-	
+	   if(isAi){
+			Vector3 velocityChange =Vector3.ClampMagnitude((nextMovement - velocity),aiVelocityChangeMax);
+		}else{
+			Vector3 velocityChange = (nextMovement - velocity);
+		}
+		
 		switch (characterState) {
 			case CharacterState.Idle:
 			case CharacterState.Running:

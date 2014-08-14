@@ -136,7 +136,11 @@ public class FoxView : MonoBehaviour {
 		NetworkController.Instance.PawnKnockOutRequest(viewID);
 	}
 	public void Destroy(){
-		NetworkController.Instance.DeleteViewRequest(viewID);
+		if(isSceneView){
+			NetworkController.Instance.DeleteSceneViewRequest(viewID);
+		}else{
+			NetworkController.Instance.DeleteViewRequest(viewID);
+		}
 	}
 	public void Detonate(){
 		NetworkController.Instance.DetonateRequest(viewID);

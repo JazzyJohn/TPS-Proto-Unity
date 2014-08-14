@@ -366,9 +366,7 @@ public class SettingGUI : MonoBehaviour {
 		graphicSetting.TextureScroll.value = 1f;
 		graphicSetting.ShadowScroll.value = 1f;
 		graphicSetting.LighningScroll.value = 1f;
-		volumes.VolumeScroll.value = 1f;
-		volumes.SoundFxScroll.value = 1f;
-		volumes.MusicScroll.value = 1f;
+		
 	}
 
 	IEnumerator SetDefoltGraphic(int i)
@@ -440,25 +438,40 @@ public class SettingGUI : MonoBehaviour {
 			AllResolution.Add(res.width + "x" + res.height);
 		}
 		graphicSetting.ResolutionScroll.numberOfSteps = AllResolution.Count;
+		RestoreGrahicSettingInMenu();
 		if(PlayerPrefs.GetString("SaveSetting", "no") == "yes")
 		{
 			//Загрузка настроек
 			graphicSetting.ResolutionScroll.value = PlayerPrefs.GetFloat("Resolution");
-			graphicSetting.TextureScroll.value = PlayerPrefs.GetFloat("TextureQuality");
-			graphicSetting.ShadowScroll.value = PlayerPrefs.GetFloat("ShadowQuality");
-			graphicSetting.LighningScroll.value = PlayerPrefs.GetFloat("LighningQuality");
 			volumes.VolumeScroll.value = PlayerPrefs.GetFloat("OverallVolume");
 			volumes.SoundFxScroll.value = PlayerPrefs.GetFloat("SoundFX");
 			volumes.MusicScroll.value = PlayerPrefs.GetFloat("Music");
 			StartCoroutine(SetDefoltGraphic(1));
+		}else{
+			volumes.VolumeScroll.value = 1f;
+			volumes.SoundFxScroll.value = 1f;
+			volumes.MusicScroll.value = 1f;
+		}
+	
+        ShowControl();
+	}
+	
+	public void RestoreGrahicSettingInMenu(){
+		if(PlayerPrefs.GetString("SaveSetting", "no") == "yes")
+		{
+			//Загрузка настроек
+		
+			graphicSetting.TextureScroll.value = PlayerPrefs.GetFloat("TextureQuality");
+			graphicSetting.ShadowScroll.value = PlayerPrefs.GetFloat("ShadowQuality");
+			graphicSetting.LighningScroll.value = PlayerPrefs.GetFloat("LighningQuality");
 		}
 		else
 		{
 			DefaultGraphic();
 			StartCoroutine(SetDefoltGraphic(0));
 		}
-        ShowControl();
 	}
+	
 	
 	// Update is called once per frame
 	void Update () {

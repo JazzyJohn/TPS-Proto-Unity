@@ -69,7 +69,7 @@ public class AIMovementState : AIState
 			return Vector3.zero;
 		}else{
 			addForce= addForce/neighborCount;
-            addForce = addForce - controlledPawn.myTransform.position;
+            //addForce = addForce - controlledPawn.myTransform.position;
 			addForce = addForce*(-1);
 			return addForce.normalized;
 		}
