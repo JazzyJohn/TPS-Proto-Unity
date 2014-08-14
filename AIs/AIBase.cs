@@ -78,7 +78,10 @@ public class AIBase : MonoBehaviour
 
 	}
 	public void KickFinish(){
-		_currentState.KickFinish();
+        if (_currentState != null)
+        {
+            _currentState.KickFinish();
+        }
 	
 	}
 	void InitState(){

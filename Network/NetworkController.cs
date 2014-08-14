@@ -318,9 +318,12 @@ public class NetworkController : MonoBehaviour {
 				    foreach (int id in dt.GetIntArray("deleteSceneView"))
                     {
 							 FoxView view = GetView(id);
+                             Debug.Log("ALREDY DESTROY ID" + id);
 							 if(view!=null){
 								DestroyableNetworkObject obj =view.GetComponent<DestroyableNetworkObject>();
+                                 
 								if(obj!=null){
+                                    Debug.Log("ALREDY DESTROY" + obj);
 									obj.KillMe();
 								
 								}
@@ -1281,8 +1284,22 @@ public class NetworkController : MonoBehaviour {
 
     public void HandleSimplePrefabSpawn(ISFSObject dt)
     {
-        SimpleNetModel model = (SimpleNetModel)dt.GetClass("model");
-        GameObject go = RemoteInstantiateNetPrefab(model.type, model.position.GetVector(), model.rotation.GetQuat(), model.id);
+        SimpleNetModel model = dt.GetClass("model") as SimpleNetModel;
+        if (model != null)
+        {
+            GameObject go = RemoteInstantiateNetPrefab(model.type, model.position.GetVector(), model.rotation.GetQuat(), model.id);
+            return;
+        }
+       
+       SimpleDestroyableModel destrModel = dt.GetClass("model") as SimpleDestroyableModel;
+       if (model != null)
+       {
+           FoxView view = GetView(destrModel.id);
+           if (view != null)
+           {
+               view.GetComponent<DestroyableNetworkObject>().SetHealth(destrModel.health);
+           }
+       }
 
 
     }	

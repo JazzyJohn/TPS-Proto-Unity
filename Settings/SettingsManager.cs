@@ -79,7 +79,49 @@ public class SettingsManager: MonoBehaviour{
 		  MusicHolder.SetVolume(((float) value)/100.0f);
 		}
 	}
-	
+    public const int LowFps = 30;
+
+    public const int HighFps = 60;
+
+    private float timer;
+
+    public const float TIMECHECK = 5.0f;
+    public void CheckSetting(int fps)
+    {
+        if (GameRule.instance == null || !GameRule.instance.start)
+        {
+            return;
+        }
+        if (fps < LowFps || fps > HighFps)
+        {
+            if (timer == 0)
+            {
+                timer = Time.time;
+            }
+        }
+        else
+        {
+            timer = 0;
+        }
+
+        if (timer != 0 && timer + TIMECHECK < Time.time)
+        {
+            timer = 0;
+            if (fps < LowFps)
+            {
+                QualitySettings.DecreaseLevel();
+                PlayerPrefs.SetFloat("GraphicQuality", QualitySettings.GetQualityLevel()); 
+            }
+
+            if (fps > HighFps)
+            {
+                QualitySettings.IncreaseLevel();
+                PlayerPrefs.SetFloat("GraphicQuality", QualitySettings.GetQualityLevel()); 
+            }
+        }
+
+
+    }
 	
 	
 	

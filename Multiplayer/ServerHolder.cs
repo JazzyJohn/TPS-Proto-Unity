@@ -306,6 +306,11 @@ public class ServerHolder : MonoBehaviour
             {
                 CreateNewRoom(DefaultGameMode);
             }
+            if (GUILayout.Button("Войти в комнату", GUILayout.Width(150), GUILayout.Height(25)))
+            {
+                JoinRoom(allRooms[0]);
+            }
+
                 
             GUILayout.EndHorizontal();
 

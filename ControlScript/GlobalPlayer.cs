@@ -102,7 +102,7 @@ public class GlobalPlayer : MonoBehaviour {
     }
     public void Start()
     {
-        if (Application.platform == RuntimePlatform.WindowsEditor)
+        if (Application.platform == RuntimePlatform.WindowsEditor||Application.platform ==  RuntimePlatform.WindowsPlayer)
         {
             SetUid(UID);
         }

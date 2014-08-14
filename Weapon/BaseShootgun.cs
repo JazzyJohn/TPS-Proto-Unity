@@ -23,7 +23,7 @@ public class BaseShootgun : BaseWeapon {
             case PREFIRETYPE.Guidance:
                 if (_pumpCoef >= 1.0f)
                 {
-                     target = GetGuidanceTarget();
+                    target = guidanceTarget;
                      if (target != null)
                      {
                          viewId = target.GetComponent<FoxView>().viewID;

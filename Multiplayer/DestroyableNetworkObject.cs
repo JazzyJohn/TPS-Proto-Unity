@@ -33,4 +33,9 @@ public class DestroyableNetworkObject : MonoBehaviour {
 			Destroy(gameObject);
 	}
 
+
+    public virtual void SetHealth(float p)
+    {
+     
+    }
 }

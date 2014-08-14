@@ -24,6 +24,11 @@ public class JuggerFight_PVPGameRule : GameRule {
             {
                 baseObj.StartBase();
             }
+            JuggerWall[] tempWalls = FindObjectsOfType<JuggerWall>();
+            foreach (JuggerWall wall in tempWalls)
+            {
+                wall.StartWall();
+            }
         }
 
 

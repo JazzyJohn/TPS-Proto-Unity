@@ -28,7 +28,6 @@ public class AIBattleJugger : AIMovementState
         {
             if (Target != null)
             {
-
                 if (IsInWeaponRange())
                 {
                     Attack();
@@ -95,7 +94,7 @@ public class AIBattleJugger : AIMovementState
 
             waiting = true;
         }
-        NetworkController.Instance.NextRouteRequest(nextTarget);
+       // NetworkController.Instance.NextRouteRequest(nextTarget);
     }
     public void ReCreateRoute(int[] route)
     {
@@ -209,7 +208,8 @@ public class AIBattleJugger : AIMovementState
     {
 	   float weaponDistance =controlledPawn.OptimalDistance(isMelee);
 
-       return AIAgentComponent.FlatDifference(Target.position, controlledPawn.myTransform.position).sqrMagnitude + controlledPawn.GetSize()*2 < weaponDistance * weaponDistance;
+       Debug.Log(AIAgentComponent.FlatDifference(Target.position, controlledPawn.myTransform.position).sqrMagnitude - controlledPawn.GetSize() * controlledPawn.GetSize());
+       return AIAgentComponent.FlatDifference(Target.position, controlledPawn.myTransform.position).sqrMagnitude - controlledPawn.GetSize() * controlledPawn.GetSize() < weaponDistance * weaponDistance;
 	}
 
    

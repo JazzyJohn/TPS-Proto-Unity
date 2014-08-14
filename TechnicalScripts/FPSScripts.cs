@@ -61,6 +61,7 @@ public class FPSScripts : MonoBehaviour
 			timeleft = updateInterval;
 			accum = 0.0F;
 			frames = 0;
+            SettingsManager.instance.CheckSetting((int)fps);
 		}
 	}
 }

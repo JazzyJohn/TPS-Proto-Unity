@@ -126,7 +126,7 @@ public class HTHHitter : MonoBehaviour {
 			{
 				if(!wasDamage){
 					hits = Physics.RaycastAll(myTransform.position, 	myTransform.forward, 2.0f);
-					///Debug.DrawRay(myTransform.position,myTransform.forward*2.0f,Color.red,5.0f);
+					//Debug.DrawRay(myTransform.position,myTransform.forward*2.0f,Color.red,5.0f);
 					foreach(RaycastHit hit in hits)
 					{
 						onBulletHit(hit);
@@ -136,7 +136,7 @@ public class HTHHitter : MonoBehaviour {
 					}
 
 					hits = Physics.SphereCastAll(myTransform.position,radiusOfImpact, myTransform.forward, 2.0f);
-					//Debug.DrawLine(transform.position,transform.position+owner.gameObject.transform.forward*1.0f,Color.red,5.0f);
+					//Debug.DrawLine(transform.position,transform.position+owner.gameObject.transform.forward*1.0f,Color.yellow,5.0f);
 					foreach(RaycastHit hit in hits)
 					{
 						onBulletHit(hit);

@@ -348,7 +348,7 @@ public class BaseWeapon : DestroyableNetworkObject {
 									if(guidanceTarget==null){
 										Pawn target = owner.curLookTarget.GetComponent<Pawn>();
 										if(target!=null&&(isFriendlyGuide||target.team!=owner.team)){
-											guidanceTarget= target;
+                                            guidanceTarget = owner.curLookTarget;
 										}									
 									}
 								}
@@ -370,8 +370,8 @@ public class BaseWeapon : DestroyableNetworkObject {
      
 	}
 	private void Pumping(){
-		_pumpCoef += deltaTime*pumpCoef;
-	    _pumpAmount += deltaTime;
+		_pumpCoef += Time.deltaTime*pumpCoef;
+        _pumpAmount += Time.deltaTime;
 	}
 
     private void ShootTick()
@@ -648,7 +648,7 @@ public class BaseWeapon : DestroyableNetworkObject {
             case PREFIRETYPE.Guidance:
 			guidanceTarget = null;
 
-			default;
+            break;
         }
 	}
 

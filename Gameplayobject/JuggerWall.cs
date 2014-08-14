@@ -23,11 +23,11 @@ public class JuggerWall : DamagebleObject {
         model = new SimpleDestroyableModel();
     }
 
-    public void StartBase(){
+    public void StartWall(){
 
 
 
-        foxView.UpdateSimpleDestroyableObject(model);
+        foxView.UpdateSimpleDestroyableObject(GetModel());
     }
 
     public SimpleDestroyableModel GetModel()
@@ -35,6 +35,10 @@ public class JuggerWall : DamagebleObject {
         model.health = health;
         model.id  = foxView.viewID;
         return model;
+    }
+    public override void SetHealth(float p)
+    {
+        health = p;
     }
 
     public override void Damage(BaseDamage damage, GameObject killer)

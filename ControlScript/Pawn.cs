@@ -1845,10 +1845,11 @@ public class Pawn : DamagebleObject {
             nextMovement.y = velocity.y;
         }*/
        // nextMovement = nextMovement;// -Vector3.up * gravity + pushingForce / rigidbody.mass;
+        Vector3 velocityChange;
 	   if(isAi){
-			Vector3 velocityChange =Vector3.ClampMagnitude((nextMovement - velocity),aiVelocityChangeMax);
+			velocityChange =Vector3.ClampMagnitude((nextMovement - velocity),aiVelocityChangeMax);
 		}else{
-			Vector3 velocityChange = (nextMovement - velocity);
+			velocityChange = (nextMovement - velocity);
 		}
 		
 		switch (characterState) {

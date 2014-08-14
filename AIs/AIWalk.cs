@@ -18,7 +18,7 @@ public class AIWalk : AIMovementState
 	
 	protected float _lastTimeAttack=0.0f;
 	
-	protected static float coolDown = 1.0f;
+	protected static float coolDown = 4.0f;
 	
 	protected static int maxAttackers = 2;
 
@@ -50,6 +50,7 @@ public class AIWalk : AIMovementState
         {
             _enemy.attackers.Remove(controlledPawn);
         }
+      
         state = nextstate;
 	
 	}
@@ -82,14 +83,19 @@ public class AIWalk : AIMovementState
                                 _pathCoef = pathCoef;
 								StopAvoid();
 								StopStrafe();
+                                
 							}else{
 							//else strafe around;
 								_pathCoef =0.0f;
 								StopAvoid();
+                               
 								StartStrafe(_enemy.myTransform);
 							}
 						}else{
 							//strafe around;
+                            _pathCoef = 0.0f;
+                            StopAvoid();
+                          
 							StartStrafe(_enemy.myTransform);
 						}
 					break;
@@ -177,6 +183,7 @@ public class AIWalk : AIMovementState
 	protected override void Attack(){
 		attacking=true;
         _lastTimeAttack = Time.time;
+        _enemy.attackers.Add(controlledPawn);
         hasPermission = false;
 		base.Attack();
 	}
@@ -206,6 +213,8 @@ public class AIWalk : AIMovementState
 		StopStrafe();
         StopAttack();
         _enemy.attackers.Remove(controlledPawn);
+        _enemy = null;
+        controlledPawn.enemy = null;
         base.EndState();
     }
 	public void FixedUpdate(){

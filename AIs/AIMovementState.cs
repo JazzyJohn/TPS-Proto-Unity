@@ -55,12 +55,16 @@ public class AIMovementState : AIState
 			foreach(Pawn pawn in list){
 					
 				if(ShoudAvoid(pawn)){
-					Vector3 distance = (pawn.myTransform.position -controlledPawn.myTransform.position);
-                    if (distance.sqrMagnitude <= avoidnessRadius)
+                    if (pawn != null && pawn.myTransform != null)
                     {
-                        addForce += distance;
-						neighborCount++;
-					}
+                        Vector3 distance = (pawn.myTransform.position - controlledPawn.myTransform.position);
+                        if (distance.sqrMagnitude <= avoidnessRadius)
+                        {
+                            addForce += distance;
+                            neighborCount++;
+                        }
+                    }
+					
 				}
 			}				
 		}
@@ -79,7 +83,7 @@ public class AIMovementState : AIState
         Debug.DrawRay(controlledPawn.myTransform.position, AvoidOneTarget() * _avoidCoef, Color.blue);
         Debug.DrawRay(controlledPawn.myTransform.position, StrafeOneTarget() * _strafeCoef, Color.green);
         Debug.DrawRay(controlledPawn.myTransform.position, agent.GetTranslate()  * _pathCoef, Color.red);
-		return Vector3.ClampMagnitude(agent.GetTranslate()*_pathCoef + DynamicAwoidness()*_separationCoef+AvoidOneTarget()*_avoidCoef +StrafeOneTarget()*_strafeCoef,stateSpeed );
+		return (agent.GetTranslate()*_pathCoef + DynamicAwoidness()*_separationCoef+AvoidOneTarget()*_avoidCoef +StrafeOneTarget()*_strafeCoef).normalized*stateSpeed;
 		
 	}
 	public Vector3 AvoidOneTarget(){
