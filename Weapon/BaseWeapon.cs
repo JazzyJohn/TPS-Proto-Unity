@@ -787,7 +787,7 @@ public class BaseWeapon : DestroyableNetworkObject {
 		Vector3 normalDirection  = owner.getAimRotation(weaponRange)-muzzlePoint.position;
 		normalDirection =normalDirection + randVec.normalized * normalDirection.magnitude * aimRandCoef / 100;*/
 
-		return Quaternion.LookRotation(owner.getAimRotation() -muzzlePoint.position);
+		return Quaternion.LookRotation(owner.getAimpointForWeapon(projectilePrefab.startImpulse) -muzzlePoint.position);
 		
 
 	}

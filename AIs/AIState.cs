@@ -290,23 +290,7 @@ public class AIState : MonoBehaviour {
         }
 
     }
-	protected virtual void DecideTacktick(){
 	
-			if(controlledPawn.naturalWeapon!=null){
-				if(controlledPawn.CurWeapon==null){
-					isMelee= true;
-					return;
-				}
-				if(controlledPawn.CurWeapon.weaponRange>_distanceToTarget*2){
-					isMelee= true;
-				}
-
-			
-			}
-			isMelee = false;
-			isMelee = false;
-	
-	}
 	protected virtual void Attack(){
 		if(controlledPawn.CurWeapon!=null&&!isMelee){
 			controlledPawn.StartFire();

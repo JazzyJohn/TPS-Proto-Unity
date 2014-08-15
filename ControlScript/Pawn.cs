@@ -343,6 +343,8 @@ public class Pawn : DamagebleObject {
 
     public float updateTimer = 0.0f;
 	
+	protected Vector3 replicatedVelocity;
+	
 	//DYNAMIC OCLUSION SECTION
 	public float lastNetUpdate = 0;
 	
@@ -466,7 +468,13 @@ public class Pawn : DamagebleObject {
     public Collider GetCollider() {
         return myCollider;
     }
-
+	public Vector3 GetVelocity(){
+		if(foxView.isMine){
+			return _rb.velocity;
+		}else{
+			return replicatedVelocity;
+		}
+	}
 	public virtual void AfterSpawnAction(){
 		 ivnMan.GenerateWeaponStart();
 	
@@ -1193,8 +1201,19 @@ public class Pawn : DamagebleObject {
 	public void SetAiRotation(Vector3 Target){
 		aiAimRotation = Target;
 	}
+	public Vector3 getAimpointForWeapon(float speed){
+		if(foxView.isMine){
+			if(isAi){
+				return enemy.myTransform+(enemy.myTransform-myTransform.position).magnitude/speed*enemy.GetVelocity();
+			}else{
+				return aimRotation;
+			}
+		}else{
+			return aimRotation;
+		}
 	
-	public virtual Vector3 getAimRotation(){
+	}
+	public virtual void getAimRotation(){
 		
 		if(foxView.isMine){
 			if(isAi){
@@ -1209,7 +1228,7 @@ public class Pawn : DamagebleObject {
 					aimRotation =Vector3.Lerp( aimRotation,enemy.myTransform.position,Time.deltaTime*10);
 					curLookTarget=enemy.myTransform;
 				}
-			
+				
 			}else{
                 if (cameraController == null) {
                     return aimRotation;
@@ -1268,9 +1287,7 @@ public class Pawn : DamagebleObject {
 				
 			}
 			
-			return aimRotation;
-		}else{
-			return aimRotation;
+			
 		}
 	}
 	public bool IsBadSpot(Vector3 spot){
@@ -2464,13 +2481,17 @@ public class Pawn : DamagebleObject {
     {
 		nextState = (CharacterState) pawn.characterState;
 		wallState = (WallState) pawn.wallState;
+		Vector3 oldPos = correctPlayerPos;
 		correctPlayerPos = pawn.position.MakeVector(correctPlayerPos);
 		correctPlayerRot = pawn.rotation.MakeQuaternion(correctPlayerRot);
 		aimRotation = pawn.aimRotation.MakeVector(aimRotation);
        
         team = pawn.team;
         health = pawn.health;
+		replicatedVelocity =correctPlayerPos -oldPos;
+		float oldTime =lastNetUpdate;
         lastNetUpdate = Time.time;
+		replicatedVelocity = replicatedVelocity/(oldTime-lastNetUpdate);
 		RestartReplicationVisibilite();
     }
 	//For that object that far from us we turn off gameobject on remote machine

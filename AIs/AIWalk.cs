@@ -28,100 +28,185 @@ public class AIWalk : AIMovementState
 
     public bool CirleAttack = false;
 	
+	public float meleeChance = 0.5f;
+	
+	private float _timeLastDecide = 0.0f;
+	
+	public static float TacticDelay = 20.0f;
+	
 	public void UpdateState(){
-          BattleState nextstate;
-		if(_distanceToTarget>DangerRadius){
-           nextstate = BattleState.Inclosing;
-		
+        BattleState nextstate;
+		if(isMelee){
+			if(_distanceToTarget>DangerRadius){
+			   DecideTacktick();
+			   nextstate = BattleState.Inclosing;
+			
+			}else{
+				if( IsInWeaponRange()){
+					if (attacking)
+					{
+					   
+						nextstate = BattleState.Attacking;
+					}else{
+						nextstate = BattleState.WaitForAttack;
+					}
+				}else{
+					nextstate = BattleState.InDangerArea;
+				}
+			}
+			if (state == BattleState.Attacking && nextstate != BattleState.Attacking)
+			{
+				_enemy.attackers.Remove(controlledPawn);
+			}
 		}else{
 			if( IsInWeaponRange()){
-                if (attacking)
-                {
-                   
-                    nextstate = BattleState.Attacking;
+				if(_distanceToTarget<DangerRadius){
+					if(_enemy.attackers.Count>=maxAttackers/2){
+						nextstate = BattleState.InDangerArea;
+					}else{
+						nextstate = BattleState.InDangerArea;
+						DecideTacktick();
+					}
 				}else{
-                    nextstate = BattleState.WaitForAttack;
+					nextstate = BattleState.Attacking;
 				}
 			}else{
-                nextstate = BattleState.InDangerArea;
+			   nextstate = BattleState.Inclosing;
 			}
+		
 		}
-        if (state == BattleState.Attacking && nextstate != BattleState.Attacking)
-        {
-            _enemy.attackers.Remove(controlledPawn);
-        }
+	
       
         state = nextstate;
 	
 	}
+	protected  void DecideTacktick(){
+		if(_timeLastDecide+TacticDelay<Time.time){
+			return;
+		}
+		_timeLastDecide =Time.time;
+		
+		if(controlledPawn.naturalWeapon!=null){
+			if(controlledPawn.CurWeapon==null){
+				if(!isMelee){
+					controlledPawn.ToggleAim(false);
+				}
+				isMelee= true;
+				return;
+			}
+			
+			float melee =Random.value;
+			if(melee<meleeChance){
+				if(!isMelee){
+					controlledPawn.ToggleAim(false);
+				}
+				isMelee = true;
+			}else{
+				_enemy.attackers.Remove(controlledPawn);
+				if(!isMelee){
+					controlledPawn.ToggleAim(true);
+				}
+				isMelee= false;
+			}
+			return;
+		
+		
+		}
+		isMelee = false;
 	
+	}
 	public override void Tick()
     {
         if (DirectVisibility(out _distanceToTarget))
         {
             //code to animation attack
-			DecideTacktick();
+			
            // Debug.Log("Shot");
-            if (isMelee && CirleAttack)
+            if (CirleAttack)
             {
+				
+				
                 isMoving = true;
                 agent.SetTarget(_enemy.myTransform.position, true);
 				UpdateState();
-				switch(state){
-					case BattleState.Inclosing:
-					//move Close to enemy
-						_pathCoef=pathCoef;
-						StopAvoid();
-						StopStrafe();
-					break;
-					case BattleState.InDangerArea:
-					
-						//If we can attack
-						if(_lastTimeAttack+coolDown<Time.time){
-							//If amount of attackers small move close
-							if(_enemy.attackers.Count<maxAttackers){
-                                _pathCoef = pathCoef;
-								StopAvoid();
-								StopStrafe();
-                                
+				if(isMelee){
+				
+					switch(state){
+						case BattleState.Inclosing:
+						//move Close to enemy
+							_pathCoef=pathCoef;
+							StopAvoid();
+							StopStrafe();
+						break;
+						case BattleState.InDangerArea:
+						
+							//If we can attack
+							if(_lastTimeAttack+coolDown<Time.time){
+								//If amount of attackers small move close
+								if(_enemy.attackers.Count<maxAttackers){
+									_pathCoef = pathCoef;
+									StopAvoid();
+									StopStrafe();
+									
+								}else{
+								//else strafe around;
+									_pathCoef =0.0f;
+									StopAvoid();
+								   
+									StartStrafe(_enemy.myTransform);
+								}
 							}else{
-							//else strafe around;
-								_pathCoef =0.0f;
+								//strafe around;
+								_pathCoef = 0.0f;
 								StopAvoid();
-                               
+							  
 								StartStrafe(_enemy.myTransform);
 							}
-						}else{
-							//strafe around;
-                            _pathCoef = 0.0f;
-                            StopAvoid();
-                          
+						break;
+						case BattleState.WaitForAttack:
+								//if we after last attack move away
+								AskForPermisssion();
+								Debug.Log("My permission " + hasPermission);
+								//if we got permission  start attack
+								if(hasPermission){
+									Attack();	
+									
+								}else{
+									//Else avoid
+									_pathCoef =0.0f;
+									StopStrafe();
+									StartAvoid(_enemy.myTransform);
+								}
+							
+							
+						break;
+						case BattleState.Attacking:
+						_pathCoef = pathCoef;
+							StopAvoid();
+							StopStrafe();
+						break;
+					
+					}
+				}else{
+					switch(state){
+						case BattleState.Inclosing:
+							//move Close to enemy
+							_pathCoef=pathCoef;
+							StopAvoid();
+							StopStrafe();
+							break;	
+						case BattleState.Attacking:
+							_pathCoef = 0.0f;
+							StopAvoid();
+							Attack();	
 							StartStrafe(_enemy.myTransform);
-						}
-					break;
-					case BattleState.WaitForAttack:
-							//if we after last attack move away
-							AskForPermisssion();
-                            Debug.Log("My permission " + hasPermission);
-							//if we got permission  start attack
-							if(hasPermission){
-								Attack();	
-								
-							}else{
-								//Else avoid
-								_pathCoef =0.0f;
-								StopStrafe();
-								StartAvoid(_enemy.myTransform);
-							}
-						
-						
-					break;
-					case BattleState.Attacking:
-                    _pathCoef = pathCoef;
-						StopAvoid();
-						StopStrafe();
-					break;
-				
+						break;
+						case BattleState.InDangerArea:
+							StartAvoid(_enemy.myTransform);
+							_pathCoef = 0.0f;
+							StopStrafe();
+						break;
+					}						
 				}
 			
 			
