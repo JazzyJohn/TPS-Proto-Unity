@@ -117,6 +117,8 @@ public class BaseWeapon : DestroyableNetworkObject {
 	public float maxRandEffect;
 
 	public GameObject projectilePrefab;
+
+    private BaseProjectile projectileClass;
 	
 	public GameObject pickupPrefabPrefab;
 
@@ -183,6 +185,7 @@ public class BaseWeapon : DestroyableNetworkObject {
 
 	void Awake(){
 		foxView = GetComponent<FoxView>();
+        projectileClass = projectilePrefab.GetComponent<BaseProjectile>();
 	}
 	
 	// Use this for initialization
@@ -787,7 +790,7 @@ public class BaseWeapon : DestroyableNetworkObject {
 		Vector3 normalDirection  = owner.getAimRotation(weaponRange)-muzzlePoint.position;
 		normalDirection =normalDirection + randVec.normalized * normalDirection.magnitude * aimRandCoef / 100;*/
 
-		return Quaternion.LookRotation(owner.getAimpointForWeapon(projectilePrefab.startImpulse) -muzzlePoint.position);
+        return Quaternion.LookRotation(owner.getAimpointForWeapon(projectileClass.startImpulse) - muzzlePoint.position);
 		
 
 	}

@@ -108,6 +108,7 @@ public class AIWalk : AIMovementState
 				}
 				isMelee= false;
 			}
+            Debug.Log("is melee" + isMelee);
 			return;
 		
 		

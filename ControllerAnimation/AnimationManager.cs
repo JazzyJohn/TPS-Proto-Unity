@@ -337,10 +337,10 @@ public class AnimationManager : MonoBehaviour
 		transform.parent.SendMessage ("WeaponShoot", SendMessageOptions.DontRequireReceiver);
 	}
 	public void StartShootAniamtion(string animName){
-		animator.SetTrigger (animName);
+		animator.SetBool (animName,true);
 	}
 	public void StopShootAniamtion(string animName){
-		animator.SetTrigger (animName+"_end");
+        animator.SetBool(animName,false);
 	}
     public void KnockOut() {
         DollOn();

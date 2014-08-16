@@ -1204,7 +1204,7 @@ public class Pawn : DamagebleObject {
 	public Vector3 getAimpointForWeapon(float speed){
 		if(foxView.isMine){
 			if(isAi){
-				return enemy.myTransform+(enemy.myTransform-myTransform.position).magnitude/speed*enemy.GetVelocity();
+				return enemy.myTransform.position+(enemy.myTransform.position-myTransform.position).magnitude/speed*enemy.GetVelocity();
 			}else{
 				return aimRotation;
 			}
@@ -1231,11 +1231,11 @@ public class Pawn : DamagebleObject {
 				
 			}else{
                 if (cameraController == null) {
-                    return aimRotation;
+                   
                 }
 				if(cameraController.enabled ==false){
 					aimRotation= myTransform.position +myTransform.forward*50;
-					return aimRotation;
+					
 				}
 				Camera maincam = Camera.main;
 				Ray centerRay= maincam.ViewportPointToRay(new Vector3(.5f, 0.5f, 1f));
