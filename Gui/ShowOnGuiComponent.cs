@@ -16,6 +16,8 @@ public class ShowOnGuiComponent : MonoBehaviour {
 	
 	public string spriteName;
 	
+	public bool isShow= true;
+	
 	public void Awake(){
 		myTransform = transform;
 		allShowOnGui.Add(this);
@@ -35,5 +37,11 @@ public class ShowOnGuiComponent : MonoBehaviour {
 		return title;
 	}
 
+	public void Show(){
+		isShow = true;
+	}
+	public void Hide(){
+		isShow = false;
+	}
 
 }

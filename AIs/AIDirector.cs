@@ -16,7 +16,19 @@ public class AIDirector : MonoBehaviour {
 	
 	private bool start = false;
 	
+	public List<int> activeSwarm = new List<int> ();
 	
+	protected void Awake(){
+		if (swarms.Length == 0)
+        {
+            swarms = FindObjectsOfType<AISwarm>();
+        }
+		for(int i = 0;i<swarms.Length;i++){
+			if(swarms[i].isActive){
+				activeSwarm.Add(i);		
+			}
+		}
+	}
 
 	public virtual void StartDirector(){
         if (swarms.Length == 0)
@@ -25,9 +37,14 @@ public class AIDirector : MonoBehaviour {
         }
 		for(int i = 0;i<swarms.Length;i++){
 			swarms[i].Init(i);
-			
+			if(activeSwarm.Contains(i)){
+				swarms[i].isActive   = true;
+			}else{
+				swarms[i].isActive   = false;
+			}
 			
 		}
+
 		start = true;
 		selfRespawns = FindObjectsOfType<SelfSpawnPoint> ();
     }
@@ -40,10 +57,10 @@ public class AIDirector : MonoBehaviour {
 		if(start){
 			_directorTick+=Time.deltaTime;
 			if(_directorTick>directorTick){
-                swarms.Remove(null);
+                
                 _directorTick = 0;
 				foreach(AISwarm swarm in swarms){
-                    swarm.SwarmTick(directorTick);
+					swarm.SwarmTick(directorTick);					
 				}
 				
 				foreach (SelfSpawnPoint go in selfRespawns) {
@@ -57,9 +74,29 @@ public class AIDirector : MonoBehaviour {
 		}
 	
 	}
-
-
-
+	public int ActivateSwarm(int id){
+		activeSwarm.Add(id);
+		NetworkController.Instance.SwarmUpdateRequest(activeSwarm);
+	}
+	public int DeactivateSwarm(int id){
+		activeSwarm.Remove(id);
+		NetworkController.Instance.SwarmUpdateRequest(activeSwarm);
+	}
+	public void UpdateSwarm(int[]  ids){
+		activeSwarm.Clear();
+		foreach(int id in ids){
+			activeSwarm.Add(id);			
+		}
+		for(int i = 0;i<swarms.Length;i++){
+			swarms[i].Init(i);
+			if(activeSwarm.Contains(i)){
+				swarms[i].isActive   = true;
+			}else{
+				swarms[i].isActive   = false;
+			}
+			
+		}
+	}
 	private static AIDirector s_Instance = null;
 	
 	public static AIDirector instance {

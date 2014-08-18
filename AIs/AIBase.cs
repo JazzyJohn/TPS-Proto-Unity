@@ -46,7 +46,7 @@ public class AIBase : MonoBehaviour
 
 	public Transform[] patrolPoints;
 
-    public void OnDestroy(){
+    public void Death(){
         if (aiSwarm != null) {
             aiSwarm.AgentKilled(this);
         }

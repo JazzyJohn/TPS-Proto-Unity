@@ -13,7 +13,7 @@ public class AISwarm_SimpleWave : AISwarm
 
     public override void DecideCheck() {
         if (_alreadySpawn >= maxSpawnCount) {
-            isActive = false;
+           DeActivate();
         }
     }
     public override void AfterSpawnAction(AIBase ai)
@@ -29,4 +29,8 @@ public class AISwarm_SimpleWave : AISwarm
             SendMessage("SwarmEnd", SendMessageOptions.DontRequireReceiver);
         }
     }
+	public override  void DrawCheck(){
+		base. DrawCheck();
+		guiComponent. SetTitle((needToKill-_alredyDead)+"/"+needToKill);
+	}
 }

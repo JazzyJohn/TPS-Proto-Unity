@@ -33,7 +33,7 @@ public class AISwarm:MonoBehaviour
 
     public bool isActive = false;
 
-    
+    public ShowOnGuiComponent guiComponent;
 
     protected List<Transform> avaiblePoints = new List<Transform>();
 
@@ -91,11 +91,22 @@ public class AISwarm:MonoBehaviour
         }
         DecideCheck();
     }
+	void Update(){
+		DrawCheck();
+	}
+	public virtual void DrawCheck(){
+		if(isActive){
+			guiComponent.Show()
+		}else{
+			guiComponent.Hide()
+		}
+	}
     public virtual void Init(int i)
     {
 
         aiGroup = i;
         ReloadList();
+		
     }
     public virtual void DecideCheck() { 
             
@@ -118,7 +129,13 @@ public class AISwarm:MonoBehaviour
     public virtual void Activate() {
         Debug.Log("Activate");
         isActive = true;
+		AIDirector.instance.ActivateSwarm(aiGroup);
     }
+	public virtual void   DeActivate(){
+		Debug.Log("DeActivate");
+        isActive = true;
+		AIDirector.instance.DeactivateSwarm(aiGroup);
+	}
     public bool IsEnemy(int enemyGroup)
     {
         foreach (int enemy in enemyIndex)

@@ -1,3 +1,4 @@
+
 using UnityEngine;
 using System.Collections;
 
@@ -332,6 +333,9 @@ public class NetworkController : MonoBehaviour {
                     if(dt.ContainsKey("Master")&&dt.GetBool("Master")){
                         HandleMasterStart(dt);
                     }
+					if(dt.ContainsKey("swarmIds")){
+					   AIDirector.instance.UpdateSwarm(dt.GetIntArray("swarmIds"));
+					}
                 
                     break;
                 case "updatePlayerInfo":
@@ -428,6 +432,9 @@ public class NetworkController : MonoBehaviour {
                 case "updateSimpleDestroyableObject":
                     HandleUpdateSimpleDestroyableObject(dt);
                     break;
+				case "swarmUpdate":
+					HandleSwarmUpdate(dt);
+					break;
 
             }
         }
@@ -1056,7 +1063,19 @@ public class NetworkController : MonoBehaviour {
         smartFox.Send(request);
     
     }
+	/// <summary>
+    /// swarmUpdate request to server
+    /// </summary>	
 
+    public void SwarmUpdateRequest(List<int> ids)
+    {
+        ISFSObject data = new SFSObject();
+
+        data.PutIntArray("ids", ids);
+        ExtensionRequest request = new ExtensionRequest("swarmUpdate", data, serverHolder.gameRoom);
+        smartFox.Send(request);
+    
+    }
 
 
 
@@ -1423,6 +1442,16 @@ public class NetworkController : MonoBehaviour {
         target.UpdateFromModel(model);
 
     }
+	/// <summary>
+    ///handle  swarmUpdate request to server
+    /// </summary>	
+
+    public void HandleSwarmUpdate(ISFSObject dt)
+    {
+        AIDirector.instance.UpdateSwarm(dt.GetIntArray("ids"));
+    
+    }
+
 
 }
 

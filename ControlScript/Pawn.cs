@@ -636,6 +636,9 @@ public class Pawn : DamagebleObject {
                 player.PawnDead(killerPlayer, killerPawn);
             }
         }
+		if(isAi){
+			mainAi.Death();
+		}
 
 
         PawnKill();
