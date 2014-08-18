@@ -2,136 +2,131 @@
 using System.Collections.Generic;
 using System.Threading;
 
-public enum Action { Atack = 0, Patrolling = 1, Sleep = 2, Wait = 3 }
-
-public struct AIActionStruct {
-	public int id;
-	public Action eAction;
-	public AIActionStruct (int id, Action action) {
-		this.id = id;
-		this.eAction = action;
-	}
-}
+public enum Action { Atack = 0, Patrolling = 1, Sleep = 2, RunOut = 3 }
 
 public class AISubconscious : MonoBehaviour {
 	public AISensors sensor;
-	public AIActions action;
-	public AICharacteristics characteristics;
+	public AIAction[] actions;
 	AIConscious consious;
-	Transform CurrentTarget;
-	float CurrentTargetPrioritet;
-	AIActionStruct CurrentAction;
-	List<Transform> Targets = new List<Transform>();
-	List<float> TargetPrioritet = new List<float>();
-	float[] ActionPrioritet;
-	int ActionCount = 4;
 
 	void Start()
 	{
-		consious.aiAction = action;
+		sensor.owner = GetComponent<Pawn> ();
 	}
 
 	void Update()
 	{
-		Targets.Clear ();
-		TargetPrioritet.Clear ();
-		ActionPrioritet = new float[ActionCount];
-		if (sensor.sCommand.Enable) CommandSensorHandler ();
-		if (sensor.sCharacteristic.Enable) CharacteristicSensorHandler ();
-		if (sensor.sSkin.Enable) SkinSensorHandler ();
-		if (sensor.sEye.Enable) EyeSensorHandler ();
-		if (sensor.sTime.Enable) TimeSensorHandler ();
+
 	}
 
 	void NextAction()
 	{
 		float PrioritetMax = 0;
 		int NextActionID = 0;
-		for (int i = 0; i < ActionCount; i++) {
-			float Prioritet = ActionPrioritet[i];
+		AIAction[] FullActions = GetFullActions ();
+		for (int i = 0; i < FullActions.Length; i++) {
+			float Prioritet = FullActions[i].GetPrioritet(sensor.SensorParametrs);
 			if (Prioritet >= PrioritetMax) {
 				PrioritetMax = Prioritet;
 				NextActionID = i;
 			}
 		}
-		if (consious.Waiting > 0) {
-			int ID = 0;
-			AIActionStruct NewAction = new AIActionStruct(ID, (Action)NextActionID);
-//			if (CurrentAction != NewAction)
-			if ((Action)NextActionID == Action.Atack) {
-				UpdateTargetMaxPrioritet ();
-			}
+		if (consious.Waiting <= 0) {
+			consious.aiAction = FullActions[NextActionID];
 		}
 	}
 
-	void SkinSensorHandler()
+	AIAction[] GetFullActions()
 	{
-
-	}
-	
-	void EyeSensorHandler()
-	{
-		Vector3 Pos = transform.position;
-		Collider[] targets = Physics.OverlapSphere (Pos, sensor.sEye.SeeRange - sensor.sEye.SeeRange * characteristics.Attentiveness * 0.01f);
-		if (targets.Length != 0) {
-			RaycastHit hit;
-			for (int i = 0; i < targets.Length; i++) {
-				Transform Target = targets [i].transform;
-				float Distance = Vector3.Distance (Pos, Target.position);
-				if (!Physics.Raycast (Pos, Target.position - Pos, out hit, Distance) && hit.collider.GetComponent<Pawn> () == null) {
-					float SeePrioritet = sensor.sEye.SeeConstant * (Distance / sensor.sEye.SeeRange);
-					if (!Targets.Contains (Target)) {
-						TargetPrioritet.Add(SeePrioritet);
-						Targets.Add(Target);
-					}
-					else TargetPrioritet[Targets.IndexOf(Target)] += SeePrioritet;
-				}
-			}
+		if (!sensor.SensorParametrs.ContainsKey ("CommandActions")) return actions;
+		else {
+			AIAction[] CommandActions = (AIAction[])sensor.SensorParametrs["CommandActions"];
+			CommandActions.AddRange(actions);
+			return CommandActions;
 		}
 	}
 
 	void Processing ()
 	{
-		if (action.attack.Length != 0) {
-			bool CanAttack = false;
-			foreach (AIActions.Attack Attack in action.attack)
-				if (Attack.calldown <= 0) CanAttack = true;
-			if (CanAttack){
-				ActionPrioritet[(int)Action.Atack] = 90;
-				for (int i = 0; i < Targets.Count; i++) {
-					int PrioritetAttack = 0;
-					float Distance = Vector3.Distance(transform.position, Targets[i].position);
-					foreach (AIActions.Attack Attack in action.attack)
-						if (Attack.calldown <= 0 && Distance <= Attack.Distance && Attack.Prioritet >= PrioritetAttack) PrioritetAttack = Attack.Prioritet;
-					TargetPrioritet[i] += PrioritetAttack;
-				}
-			}
-			else ActionPrioritet[(int)Action.Atack] = 0;
-		}
-		if (Targets.Count == 0) ActionPrioritet [(int)Action.Patrolling] = 90f;
 
 	}
 
-	void UpdateTargetMaxPrioritet()
+}
+
+[System.Serializable]
+public class AISensors {
+	public bool SkinSensorEnable = true;
+	public SkinSensor sSkin;
+
+	public bool EyeSensorEnable = true;
+	public EyeSensor sEye;
+
+	public bool TimeSensorEnable = true;
+	public TimeSensor sTime;
+
+	public bool CommandEnable = true;
+	public CommandSensor sCommand;
+
+	public bool CharacteristicSensorEnable = true;
+	public CharacteristicSensor sCharacteristic;
+
+	public Dictionary<string, object> SensorParametrs = new Dictionary<string, object>();
+	
+	public Pawn owner;
+
+	public void Scan()
 	{
-		float PrioritetMax = 0;
-		int TargetIndex = 0;
-		for (int i = 0; i < TargetPrioritet.Count; i++) {
-			if (TargetPrioritet[i] >= PrioritetMax){
-				PrioritetMax = TargetPrioritet[i];
-				TargetIndex = i;
-			}
-		}
-		if (PrioritetMax > CurrentTargetPrioritet) {
-			CurrentTarget = Targets [TargetIndex];
-			CurrentTargetPrioritet = TargetPrioritet [TargetIndex];
+		SensorParametrs.Clear ();
+		if (CommandEnable) CommandSensorHandler ();
+		if (CharacteristicSensorEnable) CharacteristicSensorHandler ();
+		if (SkinSensorEnable) SkinSensorHandler ();
+		if (EyeSensorEnable) EyeSensorHandler ();
+		if (TimeSensorEnable) TimeSensorHandler ();
+	}
+
+	[System.Serializable]
+	public class SkinSensor {
+		public void GetTargets ()
+		{
+			
 		}
 	}
 
-	void CurrentTargetClear()
+	void SkinSensorHandler()
 	{
-		CurrentTarget = null;
-		CurrentTargetPrioritet = 0;
+		
+	}
+
+	[System.Serializable]
+	public class EyeSensor {
+		public float SeeRange = 10f;
+		public float SeeConstantPrioritet = 50f;
+
+		public Transform[] GetTargets (Pawn owner)
+		{
+			return new Transform[0];
+		}
+	}
+
+	void EyeSensorHandler()
+	{
+		Transform[] Targets = sEye.GetTargets (owner);
+		float[] TargetsPrioritet = new float[Targets.Length];
+		Vector3 Pos = owner.transform.position;
+		for (int i = 0; i < TargetsPrioritet.Length; i++) {
+			float Distance = Vector3.Distance(Targets[i].position, Pos);
+			TargetsPrioritet[i] += sEye.SeeConstantPrioritet * Distance / sEye.SeeRange;
+		}
+		UpdateDictionaryParametrs ("SeeTargetsPrioritet", TargetsPrioritet);
+		UpdateDictionaryParametrs ("SeeTargets", Targets);
+	}
+
+	[System.Serializable]
+	public class TimeSensor {
+		public void GetTime ()
+		{
+			
+		}
 	}
 
 	void TimeSensorHandler()
@@ -139,118 +134,53 @@ public class AISubconscious : MonoBehaviour {
 		
 	}
 
+	[System.Serializable]
+	public class CommandSensor {
+		public bool Command;
+		public AIAction NewAIAction;
+		public void GetCommand (AIAction NewAIAction)
+		{
+			this.NewAIAction = NewAIAction;
+			Command = true;
+		}
+	}
+
 	void CommandSensorHandler()
 	{
-		
+		if (sCommand.Command) {
+			if (SensorParametrs.ContainsKey ("CommandActions")) {
+				List<AIAction> CommandActions = (List<AIAction>) SensorParametrs ["CommandActions"];
+				CommandActions.Add (sCommand.NewAIAction);
+				SensorParametrs ["CommandActions"] = CommandActions;
+			} else {
+				UpdateDictionaryParametrs ("CommandActions", new List<AIAction> { sCommand.NewAIAction });
+			}
+		}
+	}
+
+	[System.Serializable]
+	public class CharacteristicSensor {
+		public float Cheerfulness = 100f; //Бодрость
+		public float Courage = 100f; //Смелость  
+		public float Attentiveness = 100; //Внимательность
+
+		public void UpdateCharacteristic(float time)
+		{
+			Cheerfulness -= time * 0.5f;
+		}
 	}
 	
 	void CharacteristicSensorHandler()
 	{
-		characteristics.Cheerfulness -= Time.deltaTime * 0.5f;
-		ActionPrioritet [(int)Action.Sleep] = 100f - characteristics.Cheerfulness;
+		sCharacteristic.UpdateCharacteristic (Time.deltaTime);
+		UpdateDictionaryParametrs ("Cheerfulness", sCharacteristic.Cheerfulness);
+		UpdateDictionaryParametrs ("Courage", sCharacteristic.Courage);
+		UpdateDictionaryParametrs ("Attentiveness", sCharacteristic.Attentiveness);
 	}
-}
 
-[System.Serializable]
-public class AISensors {
-	public SkinSensor sSkin;
-	public EyeSensor sEye;
-	public TimeSensor sTime;
-	public CommandSensor sCommand;
-	public CharacteristicSensor sCharacteristic;
-	
-	[System.Serializable]
-	public class SkinSensor {
-		public bool Enable = true;
-	}
-	
-	[System.Serializable]
-	public class EyeSensor {
-		public bool Enable = true;
-		public float SeeRange = 10f;
-		public float SeeConstant = 50f;
-	}
-	
-	[System.Serializable]
-	public class TimeSensor {
-		public bool Enable = true;
-	}
-	
-	[System.Serializable]
-	public class CommandSensor {
-		public bool Enable = true;
-	}
-	
-	[System.Serializable]
-	public class CharacteristicSensor {
-		public bool Enable = true;
-	}
-}
-
-public class AICharacteristics {
-	public float Cheerfulness = 100f; //Бодрость
-//	public float Courage = 100f; //Смелость  
-	public float Attentiveness = 100; //Внимательность
-}
-
-public class AIConscious : MonoBehaviour {
-
-	AIActionStruct aiActionStruct;
-	public AIActions aiAction;
-
-	public float Waiting = 0;
-
-	void Update()
+	void UpdateDictionaryParametrs(string Key, object newObject)
 	{
-		if (Waiting > 0) Waiting -= Time.deltaTime; 
-		foreach (AIActions.Attack Attack in aiAction.attack)
-			Attack.CalldownDown ();
-		if (aiActionStruct.eAction == Action.Wait) {
-			
-		} 
-		else if (aiActionStruct.eAction == Action.Patrolling) {
-			
-		}
-		else if (aiActionStruct.eAction == Action.Sleep) {
-			
-		}
-	}
-	
-	public void SwichAction (AIActions NewAction)
-	{
-		aiAction = NewAction;
-	}
-	
-}
-
-[System.Serializable]
-public class AIActions {
-	
-	public Patrolling[] patrolling;
-	public Attack[] attack;
-	
-	[System.Serializable]
-	public class Patrolling {
-		
-	}
-	
-	[System.Serializable]
-	public class Attack {
-		public int Prioritet;
-		public float Distance;
-		[HideInInspector]
-		public float calldown;
-		public void CalldownDown()
-		{
-			if (calldown > 0) calldown -= Time.deltaTime;
-		}
-	}
-	
-	public class Sleep {
-		
-	}
-
-	public class Wait {
-		
+		if (!SensorParametrs.ContainsKey (Key)) SensorParametrs.Add (Key, newObject);
+		else SensorParametrs [Key] = newObject;
 	}
 }
