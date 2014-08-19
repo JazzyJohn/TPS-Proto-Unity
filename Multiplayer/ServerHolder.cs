@@ -101,7 +101,11 @@ public class ServerHolder : MonoBehaviour
         
       
       Sfs2X.Entities.Room room = (Sfs2X.Entities.Room)evt.Params["room"];
+	  if(!room.IsGame){
+			return;
+	  }
       NetworkController.Instance.pause = true;
+	  
       gameRoom = room;
 	
       if (room == null)
@@ -478,6 +482,13 @@ public class ServerHolder : MonoBehaviour
             }
 			NetworkController.Instance.MasterViewUpdate();
         }
+		ChatHolder[] chats = FindObjectsOfType<ChatHolder> ();
+		foreach(Chatholder chat in chats){
+			if(chat.isGameChat){
+				chat.myRoom = gameRoom;
+				break;
+			}
+		}
       //  NetworkController.Instance.SpawnPlayer( Vector3.zero, Quaternion.identity);
 	
 	}

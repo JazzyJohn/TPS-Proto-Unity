@@ -171,7 +171,9 @@ public class NetworkController : MonoBehaviour {
         }
     }
 	public void Login(string username){
-        _smartFox.Send(new LoginRequest(username, "", zone));
+		ISFSObject data = new SFSObject();
+        data.PutUtfString("playerName", GlobalPlayer.instance.PlayerName);
+        _smartFox.Send(new LoginRequest(username, "", zone,data));
 
     }
 	private void UnsubscribeDelegates() {
@@ -235,6 +237,8 @@ public class NetworkController : MonoBehaviour {
         {
             // Startup up UDP
             Debug.Log("Login ok");
+			  List<UserVariable> userVars = new List<UserVariable>();
+	
             smartFox.InitUDP(serverName, serverPort);
         }
     }
@@ -418,11 +422,9 @@ public class NetworkController : MonoBehaviour {
                 case "pawnDiedByKill":
                     HandlePawnDiedByKill(dt);
                     break;
-
 				case "newMaster":
 					HandleMasterStart(dt);
 					break;
-
                 case "playerLeave":
                     HandlePlayerLeave(dt);
                     break;
@@ -1076,8 +1078,26 @@ public class NetworkController : MonoBehaviour {
         smartFox.Send(request);
     
     }
+	/// <summary>
+    /// remoteDamageOnPawn request to server
+    /// </summary>	
 
+    public void RemoteDamageOnPawnRequest(BaseDamageModel model,int pawnId)
+    {
+        ISFSObject data = new SFSObject();
+     
+     	data.PutClass("model", model);
+		data.PutInt("pawnId", pawnId);
+        ExtensionRequest request = new ExtensionRequest("remoteDamageOnPawn", data, serverHolder.gameRoom);
+        smartFox.Send(request);
+    }
 
+	
+	
+	
+	
+	
+	
 
 
 
@@ -1449,6 +1469,16 @@ public class NetworkController : MonoBehaviour {
     public void HandleSwarmUpdate(ISFSObject dt)
     {
         AIDirector.instance.UpdateSwarm(dt.GetIntArray("ids"));
+    
+    }
+	/// <summary>
+    ///handle  remoteDamageOnPawn request to server
+    /// </summary>	
+
+    public void HandleRemoteDamageOnPawn(ISFSObject dt)
+    {
+		Pawn pawn = GetView(dt.GetInt("pawnId")).pawn;
+		pawn.LowerHealth((BaseDamageModel)dt.GetClass("model"));
     
     }
 

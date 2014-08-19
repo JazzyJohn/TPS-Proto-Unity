@@ -169,6 +169,36 @@ namespace nstuff.juggerfall.extension.models
 			return MakeQuaternion(quat);
 		}
 	}
+	[Serializable]
+    public class BaseDamageModel : SerializableSFSType
+    {
+		public float Damage;
+		public float pushForce;
+		public bool knockOut;
+		public Vector3Model pushDirection;
+		public Vector3Model hitPosition;
+		public bool isContinius;
+		
+		public BaseDamageModel(BaseDamage damage){
+			this.Damage =damage.Damage;
+			this.pushForce= damage.pushForce;
+			this.knockOut= damage.knockOut;
+			this.isContinius= damage.isContinius;
+			this.pushDirection= new Vector3Model(damage.pushDirection);
+			this.hitPosition= new Vector3Model(damage.hitPosition);
+		}	
+		public BaseDamage GetDamage(){
+			damage.Damage = Damage
+			damage.pushForce =pushForce;
+			damage.knockOut = knockOut;
+			damage.isContinius= isContinius;
+			damage.pushDirection=damage.pushDirection.GetVector();
+			damage.hitPosition= damage.hitPosition.GetVector();
+			return damage;
+		}	
+    }
+	
+	
     [Serializable]
     public class GameRuleModel : SerializableSFSType
     {

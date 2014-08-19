@@ -6,17 +6,20 @@ using System.Collections.Generic;
 public class ChatHolder : MonoBehaviour {
 
 
-
-	private int roomId;
-
+	public bool isMain;
+	
+	public bool isGameChat;
+	
 	public string roomName;
+	
+	public Room myRoom
 
 	[Serializable]
 	public  struct ChatMessage{
 		public string message;
-		public string uid;
+		
 		public string playerName;
-		public int team;
+		
 		
 	}
 
@@ -33,8 +36,17 @@ public class ChatHolder : MonoBehaviour {
 	private bool closeChat = true;
 	// Use this for initialization
 	void Start(){
-		
+		if( NetworkController.smartFox!=null){
+			NetworkController.smartFox.AddEventListener(SFSEvent.ROOM_JOIN, OnJoinRoom);
+			NetworkController.smartFox.AddEventListener(SFSEvent.PUBLIC_MESSAGE, OnPublicMessage);
+		}
 		//scrollPos.y = 1000000;
+	}
+	public void Init(){
+		if( NetworkController.smartFox!=null){
+			NetworkController.smartFox.AddEventListener(SFSEvent.ROOM_JOIN, OnJoinRoom);
+			NetworkController.smartFox.AddEventListener(SFSEvent.PUBLIC_MESSAGE, OnPublicMessage);
+		}
 	}
 	public void SetPlayer (Player newPlayer) {
 		localPlayer = newPlayer;
@@ -57,6 +69,41 @@ public class ChatHolder : MonoBehaviour {
 		}
 
 
+	}
+	public void OnJoinRoom(BaseEvent evt) {
+
+        
+      
+      Sfs2X.Entities.Room room = (Sfs2X.Entities.Room)evt.Params["room"];
+	  if(room.Name ==roomName)[
+		myRoom = room;
+	  }
+	
+	
+	}
+	
+	public void OnPublicMessage(BaseEvent evt) {
+
+
+		string message = (string)evt.Params["message"];
+		User sender = (User)evt.Params["sender"];
+		if(Params.Contains["room"]){
+			Sfs2X.Entities.Room room = (Sfs2X.Entities.Room)evt.Params["room"];
+			if(room==myRoom){
+				RPCAddToChat(message,sender.GetVariable("playerName"));
+			}
+		}else{
+			if(isMain){
+				
+				RPCAddToChat(message,sender.GetVariable("playerName"));
+			}
+		}
+		Sfs2X.Entities.Room room = (Sfs2X.Entities.Room)evt.Params["room"];
+		if(room.Name ==roomName)[
+			myRoom = room;
+		}
+	
+	
 	}
 	// Update is called once per frame
 	public void DrawChatBox () {
@@ -107,16 +154,18 @@ public class ChatHolder : MonoBehaviour {
 	}
 
 	void AddMessage(string Message){
-
-		//photonview.RPC("RPCAddToChat",PhotonTargets.All,Message, localPlayer.team, localPlayer.GetUid (), localPlayer.GetName());
+		if(isMain){
+			NetworkController.smartFox.send( new PublicMessageRequest(Message) );
+		}else{
+			NetworkController.smartFox.send( new PublicMessageRequest(Message) ,myRoom);
+		}
 	}
-	[RPC]
-	public void RPCAddToChat(string message,int team,string uid,string name){
+
+	public void RPCAddToChat(string message,string name){
 		ChatMessage mess = new ChatMessage ();
 		mess.message = message;
 		mess.playerName = name;
-		mess.uid = uid;
-		mess.team = team;
+		
 
 		tempMessages.Enqueue (mess);
 

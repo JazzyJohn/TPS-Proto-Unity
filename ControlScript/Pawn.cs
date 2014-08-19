@@ -580,7 +580,40 @@ public class Pawn : DamagebleObject {
 		//Debug.Log ("DAMAGE");
 		base.Damage(damage,killer);
 	}
+	//For network purpose 
+	public void LowerHealth(BaseDamageModel damageModel,GameObject killer){
+		damage = damageModel.GetDamage();
+		Pawn killerPawn =killer.GetComponent<Pawn> ();
+		if (killerPawn != null)
+        {
 
+
+            DamagerEntry entry = damagers.Find(delegate(DamagerEntry searchentry) { return searchentry.pawn == killerPawn; });
+
+            if (entry == null)
+            {
+                entry = new DamagerEntry(killerPawn);
+                damagers.Add(entry);
+            }
+            entry.forgetTime = Time.time + ASSIT_FORGET_TIME;
+            entry.amount += damage.Damage;
+            entry.lastHitDirection = damage.pushDirection;
+        }
+		if (isAi) {
+			mainAi.WasHitBy(killer);
+
+		}
+        if (canBeKnockOut) {
+            if (damage.knockOut) {
+                StartCoroutine(KnockOut());
+            }
+        
+        }
+		
+		//Debug.Log ("DAMAGE");
+		base.Damage(damage,killer);
+	}
+		
 	public void Heal(float damage,GameObject Healler){
 		int maxHealth =charMan.GetIntChar(CharacteristicList.MAXHEALTH);
 		health += damage;
