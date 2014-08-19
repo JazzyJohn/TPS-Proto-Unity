@@ -437,6 +437,9 @@ public class NetworkController : MonoBehaviour {
 				case "swarmUpdate":
 					HandleSwarmUpdate(dt);
 					break;
+				case "remoteDamageOnPawn":
+					HandleRemoteDamageOnPawn(dt);
+					break
 
             }
         }
