@@ -134,8 +134,8 @@ public class AIState : MonoBehaviour {
 	protected float
 				_distanceToTarget,
 				_angleRange;
-				
-	protected bool isMelee= false;
+
+    public bool isMelee = false;
 
     public AIBase aibase;
 

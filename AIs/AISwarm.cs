@@ -48,6 +48,11 @@ public class AISwarm:MonoBehaviour
         }
 
     }
+
+    protected void Awake()
+    {
+        guiComponent = GetComponent<ShowOnGuiComponent>();
+    }
     public Transform[] GetPointOfInterest(int count)
     {
         if (pointOfInterest.Count < count) {
@@ -86,6 +91,7 @@ public class AISwarm:MonoBehaviour
                     ai.Init(aiGroup, this, i);
                     
                     AfterSpawnAction(ai);
+                    
                 }
             }
         }
@@ -95,17 +101,24 @@ public class AISwarm:MonoBehaviour
 		DrawCheck();
 	}
 	public virtual void DrawCheck(){
-		if(isActive){
-			guiComponent.Show()
-		}else{
-			guiComponent.Hide()
-		}
+        if (guiComponent != null)
+        {
+            if (isActive)
+            {
+                guiComponent.Show();
+            }
+            else
+            {
+                guiComponent.Hide();
+            }
+        }
 	}
     public virtual void Init(int i)
     {
 
         aiGroup = i;
         ReloadList();
+        
 		
     }
     public virtual void DecideCheck() { 
@@ -133,7 +146,7 @@ public class AISwarm:MonoBehaviour
     }
 	public virtual void   DeActivate(){
 		Debug.Log("DeActivate");
-        isActive = true;
+        isActive = false;
 		AIDirector.instance.DeactivateSwarm(aiGroup);
 	}
     public bool IsEnemy(int enemyGroup)

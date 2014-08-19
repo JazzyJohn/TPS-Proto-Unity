@@ -13,6 +13,7 @@ using System.Collections.Generic;
 using Sfs2X.Protocol.Serialization;
 using System.Reflection;
 using nstuff.juggerfall.extension.models;
+using Sfs2X.Entities.Variables;
 
 public enum RPCTransitTargetType
 {
@@ -237,7 +238,7 @@ public class NetworkController : MonoBehaviour {
         {
             // Startup up UDP
             Debug.Log("Login ok");
-			  List<UserVariable> userVars = new List<UserVariable>();
+			List<UserVariable> userVars = new List<UserVariable>();
 	
             smartFox.InitUDP(serverName, serverPort);
         }
@@ -439,7 +440,7 @@ public class NetworkController : MonoBehaviour {
 					break;
 				case "remoteDamageOnPawn":
 					HandleRemoteDamageOnPawn(dt);
-					break
+                    break;
 
             }
         }
@@ -1076,7 +1077,7 @@ public class NetworkController : MonoBehaviour {
     {
         ISFSObject data = new SFSObject();
 
-        data.PutIntArray("ids", ids);
+        data.PutIntArray("ids", ids.ToArray());
         ExtensionRequest request = new ExtensionRequest("swarmUpdate", data, serverHolder.gameRoom);
         smartFox.Send(request);
     
@@ -1085,12 +1086,13 @@ public class NetworkController : MonoBehaviour {
     /// remoteDamageOnPawn request to server
     /// </summary>	
 
-    public void RemoteDamageOnPawnRequest(BaseDamageModel model,int pawnId)
+    public void RemoteDamageOnPawnRequest(BaseDamageModel model,int pawnId,int killerId)
     {
         ISFSObject data = new SFSObject();
      
      	data.PutClass("model", model);
 		data.PutInt("pawnId", pawnId);
+        data.PutInt("killerId", killerId);
         ExtensionRequest request = new ExtensionRequest("remoteDamageOnPawn", data, serverHolder.gameRoom);
         smartFox.Send(request);
     }
@@ -1481,7 +1483,9 @@ public class NetworkController : MonoBehaviour {
     public void HandleRemoteDamageOnPawn(ISFSObject dt)
     {
 		Pawn pawn = GetView(dt.GetInt("pawnId")).pawn;
-		pawn.LowerHealth((BaseDamageModel)dt.GetClass("model"));
+        GameObject killer = GetView(dt.GetInt("killerId")).gameObject;
+
+        pawn.LowerHealth((BaseDamageModel)dt.GetClass("model"), killer);
     
     }
 

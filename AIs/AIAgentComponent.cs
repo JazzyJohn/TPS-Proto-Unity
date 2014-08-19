@@ -383,8 +383,8 @@ public class AIAgentComponent : MonoBehaviour {
                         {
                             Vector3 offset = new Vector3(0, 0.1f, 0);
                             Gizmos.color = gizmoColorPath;
-                            Gizmos.DrawLine(myTransform.position + offset, path.corners[0] + offset);
-                            for (int i = 1; i < path.corners.Length; i++)
+                            Gizmos.DrawLine(myTransform.position + offset, path.corners[curCorner] + offset);
+                            for (int i = curCorner+1; i < path.corners.Length; i++)
                             {
 
                                 Gizmos.DrawLine(path.corners[i - 1] + offset, path.corners[i] + offset);

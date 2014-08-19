@@ -468,7 +468,7 @@ public class ServerHolder : MonoBehaviour
 		yield return new WaitForEndOfFrame();
 		GameObject menu =Instantiate (loader.playerHud, Vector3.zero, Quaternion.identity) as GameObject;
 		Camera.main.GetComponent<PlayerMainGui> ().enabled = true;
-		menu.transform.parent = Camera.main.transform;
+		//menu.transform.parent = Camera.main.transform;
         menu.transform.localPosition = Vector3.zero;
         menu.transform.localRotation = Quaternion.identity;
         Debug.Log("SPawn");
@@ -483,7 +483,7 @@ public class ServerHolder : MonoBehaviour
 			NetworkController.Instance.MasterViewUpdate();
         }
 		ChatHolder[] chats = FindObjectsOfType<ChatHolder> ();
-		foreach(Chatholder chat in chats){
+		foreach(ChatHolder chat in chats){
 			if(chat.isGameChat){
 				chat.myRoom = gameRoom;
 				break;

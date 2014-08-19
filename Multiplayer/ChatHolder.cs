@@ -2,6 +2,10 @@
 using System;
 using System.Collections;
 using System.Collections.Generic;
+using Sfs2X.Core;
+using Sfs2X.Entities;
+using Sfs2X.Requests;
+using Sfs2X.Entities.Data;
 
 public class ChatHolder : MonoBehaviour {
 
@@ -11,8 +15,8 @@ public class ChatHolder : MonoBehaviour {
 	public bool isGameChat;
 	
 	public string roomName;
-	
-	public Room myRoom
+
+    public Room myRoom;
 
 	[Serializable]
 	public  struct ChatMessage{
@@ -75,7 +79,7 @@ public class ChatHolder : MonoBehaviour {
         
       
       Sfs2X.Entities.Room room = (Sfs2X.Entities.Room)evt.Params["room"];
-	  if(room.Name ==roomName)[
+	  if(room.Name ==roomName){
 		myRoom = room;
 	  }
 	
@@ -87,21 +91,18 @@ public class ChatHolder : MonoBehaviour {
 
 		string message = (string)evt.Params["message"];
 		User sender = (User)evt.Params["sender"];
-		if(Params.Contains["room"]){
+		if(evt.Params.Contains("room")){
 			Sfs2X.Entities.Room room = (Sfs2X.Entities.Room)evt.Params["room"];
 			if(room==myRoom){
-				RPCAddToChat(message,sender.GetVariable("playerName"));
+				RPCAddToChat(message,sender.GetVariable("playerName").GetStringValue());
 			}
 		}else{
 			if(isMain){
 				
-				RPCAddToChat(message,sender.GetVariable("playerName"));
+				RPCAddToChat(message,sender.GetVariable("playerName").GetStringValue());
 			}
 		}
-		Sfs2X.Entities.Room room = (Sfs2X.Entities.Room)evt.Params["room"];
-		if(room.Name ==roomName)[
-			myRoom = room;
-		}
+		
 	
 	
 	}
@@ -127,16 +128,17 @@ public class ChatHolder : MonoBehaviour {
 
 
 		if (needChat) {
-			GUI.SetNextControlName("ChatField"+roomId);
+            GUI.SetNextControlName("ChatField" + roomName);
 			chatInput = GUILayout.TextField(chatInput);
-			GUI.FocusControl("ChatField"+roomId);
+            GUI.FocusControl("ChatField" + roomName);
 		}
 
 		Event e = Event.current;
 		if (e.keyCode == KeyCode.Return) {
-	
-		
-			if(GUI.GetNameOfFocusedControl()=="ChatField"+roomId){
+
+
+            if (GUI.GetNameOfFocusedControl() == "ChatField" + roomName)
+            {
 				needChat= false;
 				GUI.FocusControl("");
 				if(chatInput!=""){
@@ -155,9 +157,9 @@ public class ChatHolder : MonoBehaviour {
 
 	void AddMessage(string Message){
 		if(isMain){
-			NetworkController.smartFox.send( new PublicMessageRequest(Message) );
+			NetworkController.smartFox.Send ( new PublicMessageRequest(Message) );
 		}else{
-			NetworkController.smartFox.send( new PublicMessageRequest(Message) ,myRoom);
+            NetworkController.smartFox.Send(new PublicMessageRequest(Message,new SFSObject(), myRoom));
 		}
 	}
 

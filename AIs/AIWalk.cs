@@ -79,8 +79,8 @@ public class AIWalk : AIMovementState
       
         state = nextstate;
 	
-	}
-	protected  void DecideTacktick(){
+	}   
+	protected void DecideTacktick(){
 		if(_timeLastDecide+TacticDelay<Time.time){
 			return;
 		}
@@ -98,12 +98,14 @@ public class AIWalk : AIMovementState
 			float melee =Random.value;
 			if(melee<meleeChance){
 				if(!isMelee){
+                    StopAttack();
 					controlledPawn.ToggleAim(false);
 				}
 				isMelee = true;
 			}else{
 				_enemy.attackers.Remove(controlledPawn);
 				if(!isMelee){
+                    StopAttack();
 					controlledPawn.ToggleAim(true);
 				}
 				isMelee= false;
@@ -191,6 +193,7 @@ public class AIWalk : AIMovementState
 				}else{
 					switch(state){
 						case BattleState.Inclosing:
+                            StopAttack();
 							//move Close to enemy
 							_pathCoef=pathCoef;
 							StopAvoid();
@@ -206,6 +209,7 @@ public class AIWalk : AIMovementState
 							StartAvoid(_enemy.myTransform);
 							_pathCoef = 0.0f;
 							StopStrafe();
+                            Attack();
 						break;
 					}						
 				}
@@ -267,10 +271,13 @@ public class AIWalk : AIMovementState
 
     }
 	protected override void Attack(){
-		attacking=true;
-        _lastTimeAttack = Time.time;
-        _enemy.attackers.Add(controlledPawn);
-        hasPermission = false;
+        if (isMelee)
+        {
+            attacking = true;
+            _lastTimeAttack = Time.time;
+            _enemy.attackers.Add(controlledPawn);
+            hasPermission = false;
+        }
 		base.Attack();
 	}
 	protected override void StopAttack(){

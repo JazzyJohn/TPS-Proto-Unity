@@ -8,6 +8,8 @@ public class PlayerMainGui : MonoBehaviour {
 
 	public float crosshairHeight;
 
+	public HUDText P1Hud;
+
 	public float crosshairWidth;
 
 	public Player LocalPlayer;
@@ -37,6 +39,7 @@ public class PlayerMainGui : MonoBehaviour {
 	public float messageDelay=1.0f;
 	public class GUIMessage{
 		public float destroyTime;
+        public HUDText.Entry entry;
 		public Vector3 worldPoint;
 		public Texture icon= null;
 		public string text="";
@@ -137,7 +140,8 @@ public class PlayerMainGui : MonoBehaviour {
 	void Start () {
 		MainCamera = Camera.main;
 		
-	
+	if(GameObject.Find("P1"))
+			P1Hud = GameObject.Find("Player_HUD_text").GetComponent<HUDText>();
         
 
 	
@@ -154,13 +158,13 @@ public class PlayerMainGui : MonoBehaviour {
 			holder.SetPlayer(newPlayer);	
 		}
 
-		stat =  GetComponentInChildren<Statistic>(); //Статистика (+)
+		stat =  Transform.FindObjectOfType<Statistic>(); //Статистика (+)
         stat.SetLocalPalyer(newPlayer);
 
-		hud = GetComponentInChildren<PlayerHudNgui> ();
+		hud = Transform.FindObjectOfType<PlayerHudNgui> ();
 		hud.SetLocalPlayer(LocalPlayer);
-        respawnMenu = GetComponentInChildren<SelectPlayerGUI>();
-        pausegui = GetComponentInChildren<PauseMenu>();
+		respawnMenu = Transform.FindObjectOfType<SelectPlayerGUI>();
+		pausegui = Transform.FindObjectOfType<PauseMenu>();
        
         respawnMenu.SetLocalPlayer(LocalPlayer);
 		ChageState(GUIState.Respawn);
@@ -332,7 +336,8 @@ public class PlayerMainGui : MonoBehaviour {
 		//Message Section
 		//GUI.skin = messageSkin;
 		while (guiMessages.Count>0&&guiMessages.Peek().destroyTime<Time.time) {
-				guiMessages.Dequeue ();
+
+            P1Hud.Delete(guiMessages.Dequeue().entry);
 		}
 		//		Debug.Log (guiMessages.Count);
 		foreach (GUIMessage guiMessage in guiMessages) {
@@ -348,16 +353,7 @@ public class PlayerMainGui : MonoBehaviour {
 				
 				break;
 				default:
-							Vector3 Position = MainCamera.WorldToScreenPoint (guiMessage.worldPoint);
-							if(Position.z<0){
-								continue;
-							}
-							size = guiMessage.getMessageSize (this);
-							Rect messRect = new Rect (Position.x - size / 2, screenY - Position.y, size, size);
-				
-						
-						GUI.Label (messRect, guiMessage.text,messStyle);
-						
+               
 				break;
 				}
 		}
@@ -367,23 +363,26 @@ public class PlayerMainGui : MonoBehaviour {
         {
 
 
-            Vector3 Position = MainCamera.WorldToScreenPoint(component.myTransform.position );
-            if (Position.z < 0)
-            {
-                continue;
-            }
+         
             float size = MarkSize;
 
-            Rect mark = new Rect(Position.x - size / 2, Screen.height - Position.y, size, size);
+            
             string publicName = component.GetTitle();
+            if (component.hudentry == null)
+            {
+                component.hudentry =P1Hud.Add(publicName, Color.red, component.myTransform.position,true);
+            }
+            component.hudentry.isShow = component.isShow;
+           // 
+            component.hudentry.label.text = publicName;
             if (component.team == LocalPlayer.team)
             {
 
-                GUI.Label(mark, publicName , AliaMark);
+                component.hudentry.label.color = Color.green;
             }
             else
             {
-                GUI.Label(mark, publicName, EnemyMark);
+                component.hudentry.label.color = Color.red;
             }
 
         }
@@ -637,6 +636,9 @@ public class PlayerMainGui : MonoBehaviour {
 		message.text = text;
 		message.worldPoint = worldPoint;
 		message.type = type;
+		float damage = 0f;
+		
+        message.entry = P1Hud.Add(message.text, Color.red,  message.worldPoint,false);
 		guiMessages.Enqueue(message);
 	}
 	public void AddMessage(string text, MessageType type ){

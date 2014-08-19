@@ -188,12 +188,13 @@ namespace nstuff.juggerfall.extension.models
 			this.hitPosition= new Vector3Model(damage.hitPosition);
 		}	
 		public BaseDamage GetDamage(){
-			damage.Damage = Damage
+            BaseDamage damage = new BaseDamage();
+            damage.Damage = Damage;
 			damage.pushForce =pushForce;
 			damage.knockOut = knockOut;
 			damage.isContinius= isContinius;
-			damage.pushDirection=damage.pushDirection.GetVector();
-			damage.hitPosition= damage.hitPosition.GetVector();
+			damage.pushDirection=pushDirection.GetVector();
+			damage.hitPosition= hitPosition.GetVector();
 			return damage;
 		}	
     }

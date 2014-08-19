@@ -17,6 +17,9 @@ public class BaseDamage{
 	public bool sendMessage= true;
 	[HideInInspector] 
 	public bool isContinius =false;
+    public BaseDamage()
+    {
+    }
 	public BaseDamage(BaseDamage old){
 		Damage = old.Damage;
 		isVsArmor = old.isVsArmor;

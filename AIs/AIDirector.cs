@@ -74,11 +74,13 @@ public class AIDirector : MonoBehaviour {
 		}
 	
 	}
-	public int ActivateSwarm(int id){
+    public void ActivateSwarm(int id)
+    {
 		activeSwarm.Add(id);
 		NetworkController.Instance.SwarmUpdateRequest(activeSwarm);
 	}
-	public int DeactivateSwarm(int id){
+    public void DeactivateSwarm(int id)
+    {
 		activeSwarm.Remove(id);
 		NetworkController.Instance.SwarmUpdateRequest(activeSwarm);
 	}

@@ -15,12 +15,15 @@ public class ShowOnGuiComponent : MonoBehaviour {
 	private string title;
 	
 	public string spriteName;
+
+    public HUDText.Entry hudentry;
 	
 	public bool isShow= true;
 	
 	public void Awake(){
 		myTransform = transform;
 		allShowOnGui.Add(this);
+        title = baseTitle + " " ;
 	}
 	void OnDestroy(){
 		allShowOnGui.Remove(this);

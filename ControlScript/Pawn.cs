@@ -582,7 +582,7 @@ public class Pawn : DamagebleObject {
 	}
 	//For network purpose 
 	public void LowerHealth(BaseDamageModel damageModel,GameObject killer){
-		damage = damageModel.GetDamage();
+		BaseDamage damage = damageModel.GetDamage();
 		Pawn killerPawn =killer.GetComponent<Pawn> ();
 		if (killerPawn != null)
         {
