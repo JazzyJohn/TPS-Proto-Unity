@@ -6,6 +6,15 @@ public class RobotPawn : Pawn {
 	public float ActivationTime=2.0f;
 	public Transform playerExitPositon;
 	public bool isPilotIn = false;
+	public bool isMutual;
+	public bool isEmpty =true;
+	
+	protected void Awake(){
+		base.Awake();
+		if(isMutual){
+			PlayerMainGui.instance.Annonce(AnnonceType.JUGGERREADY);
+		}
+	}
 	//Player get in robot
 	public new void  Activate(){
 		((RobotAnimationManager)animator).Activation();
@@ -17,6 +26,7 @@ public class RobotPawn : Pawn {
         GetComponent<PlayerCamera>().enabled = true;
         GetComponent<PlayerCamera>().Reset();
 		StartCoroutine(WaitBeforeActive(ActivationTime));
+		
 	}
 	public override void Damage(BaseDamage damage,GameObject killer){
 		float reduce =  charMan.GetFloatChar(CharacteristicList.JUGGER_DAMAGE_REDUCE);
@@ -59,7 +69,11 @@ public class RobotPawn : Pawn {
 		//Debug.Log ("ROBOT");
 	}
 
-
+	public void OnDestoy(){
+		if(isMutual){
+			PlayerMainGui.instance.Annonce(AnnonceType.JUGGERKILL);
+		}
+	}
 	public override void  AfterSpawnAction(){
 		characterState = CharacterState.Jumping;
 	

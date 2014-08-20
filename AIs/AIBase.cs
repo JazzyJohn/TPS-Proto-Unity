@@ -70,7 +70,7 @@ public class AIBase : MonoBehaviour
 		this.homeIndex =homeindex;
 		AIDirector.instance.swarms[aiGroup].RemoteAdd(this);
 	}
-	public void WasHitBy(GameObject killer){
+	public void WasHitBy(GameObject killer,float amount){
 		Pawn killerPawn = killer.GetComponent<Pawn> ();
 		if (killerPawn != null) {
 			_currentState.WasHitBy(killerPawn);
@@ -187,6 +187,15 @@ public class AIBase : MonoBehaviour
    }
    public Pawn GetPawn(){
 		return controlledPawn;
+   }
+   
+   public void SetEnemy(Pawn enemy){
+		if(aiSwarm!=null){
+			aiSwarm.NewEnemy(enemy)
+		}
+   }
+   public void EnemyFromSwarm(Pawn enemy){
+		_currentState.EnemyFromSwarm(enemy);
    }
 }
 

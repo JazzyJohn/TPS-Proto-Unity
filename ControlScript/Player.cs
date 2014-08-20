@@ -275,7 +275,9 @@ public class Player : MonoBehaviour {
 					useTarget= null;
                     if (InputManager.instance.GetButtonDown("Use"))
                     {
-						ExitBot();
+						if(!robotPawn.isMutual){
+							ExitBot();
+						}
 					}
 					
 				}else {
@@ -290,14 +292,22 @@ public class Player : MonoBehaviour {
 						}
 
 					if(currentPawn.curLookTarget!=null){
+						if(InputManager.instance.GetButtonDown("Use")){
+							useTarget = currentPawn.curLookTarget.GetComponent<UseObject>();
 
-						useTarget = currentPawn.curLookTarget.GetComponent<UseObject>();
+							if (useTarget != null && (currentPawn.myTransform.position - useTarget.myTransform.position).sqrMagnitude < SQUERED_RADIUS_OF_ACTION )
+							{
+								useTarget.Use(currentPawn);
 
-                        if (useTarget != null && (currentPawn.myTransform.position - useTarget.myTransform.position).sqrMagnitude < SQUERED_RADIUS_OF_ACTION && InputManager.instance.GetButtonDown("Use"))
-                        {
-							useTarget.Use(currentPawn);
-
+							}
+						
+							RobotPawn robot = currentPawn.curLookTarget.GetComponent<RobotPawn>();
+							if(!inBot&&robot!=null&&robot.isEmpty&&robot.isMutual&&(currentPawn.myTransform.position-robotPawn.myTransform.position).sqrMagnitude<SQUERED_RADIUS_OF_ACTION*2.0){
+								EnterBot(robot);
+							
+							}
 						}
+						
 					}else{
 						useTarget= null;
 					}
@@ -527,9 +537,16 @@ public class Player : MonoBehaviour {
 		currentPawn.DeActivate();
 		currentPawn.transform.parent = robotPawn.transform;
 		robotPawn.Activate ();
-
-	
-
+	}
+	public void EnterBot(RobotPawn robot){
+		NetworkController.Instance.EnterRobotRequest(robot.foxView.viewID);
+	}
+	public void EnterBotSuccess(RobotPawn robot){
+		inBot=true;
+		robotPawn=robot;
+		currentPawn.DeActivate();
+		currentPawn.transform.parent = robotPawn.transform;
+		robotPawn.Activate ();
 	}
 	public void ExitBot(){
 		//robotTimer=robotTime;

@@ -12,7 +12,6 @@ public class AIWalk : AIMovementState
 	protected bool isMoving = true;
 	
 	public float DangerRadius;
-	
 
 	public BattleState state;
 	
@@ -350,5 +349,43 @@ public class AIWalk : AIMovementState
     {
         return pawn.team == controlledPawn.team;
     }
+	 protected override Pawn SelectTarget()
+    {
+        //select target by distance
+        //but i have mind select by argo
+		int curTargetPrior = controlledPawn.seenDistance;
+		if (_enemy != null&&targetVisible) {
+			curTargetPrior-=controlledPawn.seenDistance*0.9;
+		}
+		Pawn target = null;
+        
+		
+		
+		foreach (Pawn pawn in _pawnArray)
+		{
+           
+			if(!IsEnemy(pawn)){
+				continue;
+			}
+			Vector3 myPos = controlledPawn.myTransform.position; // моя позиция
+			Vector3 targetPos = pawn.myTransform.position; // позиция цели
+			Vector3 myFacingNormal = controlledPawn.myTransform.forward; //направление взгляда нашей турели
+			Vector3 toTarget = (targetPos - myPos);
+			toTarget.Normalize();
+			
+			float angle = Mathf.Acos(Vector3.Dot(myFacingNormal, toTarget)) * 180 / 3.141596f;
+			
+			if (angle <= _angleRange / 2)
+			{
+				if(curTargetPrior>toTarget.sqrMagnitude){
+					curTargetPrior =toTarget.sqrMagnitude;
+				    target = pawn;
+				}
+            
+               
+			}
 
+		}
+		return target;
+    }
 }

@@ -134,6 +134,8 @@ public class AIState : MonoBehaviour {
 	protected float
 				_distanceToTarget,
 				_angleRange;
+				
+	public bool targetVisible= false;
 
     public bool isMelee = false;
 
@@ -172,9 +174,19 @@ public class AIState : MonoBehaviour {
 
 	
 	public virtual void SetEnemy(Pawn enemy){
+		if(_enemy != enemy){
+			aibase.SetEnemy(enemy);
+		}
 		_enemy = enemy;
 		controlledPawn.enemy = enemy;
-
+		targetVisible = true;
+	}
+	
+	public virtual void EnemyFromSwarm(Pawn enemy){
+		if(_enemy==null||_enemy.isDead){
+			_enemy = enemy;
+			controlledPawn.enemy = enemy;
+		}
 	}
 	public void LostEnemy(){
 		_enemy = null;
@@ -198,6 +210,9 @@ public class AIState : MonoBehaviour {
 	
 	public virtual void WasHitBy(Pawn killer){
 		if (_enemy != null) {
+			if(!targetVisible){
+				SetEnemy(killer);
+			}
 			return;
 		}
 		SetEnemy(killer);
@@ -214,7 +229,7 @@ public class AIState : MonoBehaviour {
 	public virtual void EndState(){
 	
 	}
-    protected Pawn SelectTarget()
+    protected virtual Pawn SelectTarget()
     {
         //select target by distance
         //but i have mind select by argo
@@ -230,9 +245,9 @@ public class AIState : MonoBehaviour {
 			if(!IsEnemy(pawn)){
 				continue;
 			}
-			Vector3 myPos = transform.position; // моя позиция
-			Vector3 targetPos = pawn.transform.position; // позиция цели
-			Vector3 myFacingNormal = transform.forward; //направление взгляда нашей турели
+			Vector3 myPos = controlledPawn.myTransform.position; // моя позиция
+			Vector3 targetPos = pawn.myTransform.position; // позиция цели
+			Vector3 myFacingNormal = controlledPawn.myTransform.forward; //направление взгляда нашей турели
 			Vector3 toTarget = (targetPos - myPos);
 			toTarget.Normalize();
 			
@@ -240,18 +255,9 @@ public class AIState : MonoBehaviour {
 			
 			if (angle <= _angleRange / 2)
 			{
-				Vector3 direction = (pawn.transform.position - transform.position);
-				float rangeDistance = direction.magnitude;
-				direction.y += 0.3f;
-				direction.Normalize();
-                foreach (RaycastHit hit in Physics.RaycastAll(controlledPawn.myTransform.position, direction, rangeDistance))
-                {
-                    if (hit.transform == pawn.transform)
-                    {
-                        target = pawn;
-                        break;
-                    }
-                }
+				
+                target = pawn;
+                     
 			}
 
 		}
@@ -263,6 +269,7 @@ public class AIState : MonoBehaviour {
         RaycastHit hit = new RaycastHit();
 		Pawn target = SelectTarget ();
 		if (target == null) {
+			targetVisible= false;
 			return false;
 		}
 
@@ -274,11 +281,13 @@ public class AIState : MonoBehaviour {
             {
                 distance = hit.distance;
                 SetEnemy(target);
+				targetVisible =true;
                 return true;
             }
             else
             {
-                distance = hit.distance;
+                distance = hit.distance 
+				targetVisible =false;
                 return false;
             }
         }
@@ -286,6 +295,7 @@ public class AIState : MonoBehaviour {
         {
             distance = (target.myTransform.position - controlledPawn.myTransform.position).magnitude;
             SetEnemy(target);
+			targetVisible = true;
             return true;
         }
 

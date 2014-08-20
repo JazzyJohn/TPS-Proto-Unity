@@ -19,5 +19,29 @@ public class Hunt_PVPGameRule : PVPGameRule {
                 teamScore[i] = (int)pvpmodel.teamScore[i];
             }
         }
-
+		
+		public void LastWave(){
+			if(NetworkController.IsMaster()){
+				NetworkController.Instance.LastWaveRequest();
+			}
+		}
+	
+	public void NextWave(int wave){
+		switch(wave){
+			case 1:
+				PlayerMainGui.instance.Annonce(AnnonceType.WAVEFINISHONE);
+			break;
+			case 2:
+				PlayerMainGui.instance.Annonce(AnnonceType.WAVEFINISHTWO);
+			break;
+			case 3:
+				PlayerMainGui.instance.Annonce(AnnonceType.WAVEFINISHTHREE);
+			break;
+		}
+	
+	}
+	public void LastWave(){
+		PlayerMainGui.instance.Annonce(AnnonceType.SWARMCLEAR);
+	}
+	
 }

@@ -382,10 +382,13 @@ public class ServerHolder : MonoBehaviour
 				gameRule = new SFSRoomVariable("ruleClass", "nstuff.juggerfall.extension.gamerule.HuntGameRule");
                 settings.Variables.Add(new SFSRoomVariable("teamCount", 2));
                 maxTime = new SFSRoomVariable("maxTime", 0);
-                maxScore = new SFSRoomVariable("maxScore", 50);
+                maxScore = new SFSRoomVariable("maxScore", 5000);
+				ISFSObject data = new SFSObject();
+				data.PutClass("huntTable",GlobalGameSetting.instance.GetHuntScoreTable());				
+				gameVar = new SFSRoomVariable("gameVar", data);
 			break;
         }
-
+		
         settings.Variables.Add(maxScore);
         settings.Variables.Add(maxTime);
         settings.GroupId = "games";

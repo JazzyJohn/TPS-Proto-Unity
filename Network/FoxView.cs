@@ -55,6 +55,13 @@ public class FoxView : MonoBehaviour {
           
         }
     }
+	
+	public void IsOnMasterControll(){
+		if(isSceneView&&pawn!=null){
+			return pawn.player==null;
+		}
+		return isSceneView;
+	}
     void Awake(){
 		pawn = GetComponent<Pawn>();
 		weapon = GetComponent<BaseWeapon>();

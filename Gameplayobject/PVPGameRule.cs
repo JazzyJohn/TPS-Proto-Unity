@@ -7,7 +7,7 @@ public class PVPGameRule : GameRule {
 		protected int[] teamKill;
 		
 		
-		
+		public AnnonceType type;
 		
 
 		
@@ -25,7 +25,7 @@ public class PVPGameRule : GameRule {
 				
 		}
 
-        public AnnonceType type;
+      
         public void Annonce() {
             if (teamScore[0] > teamScore[1] && type!=AnnonceType.INTERGRALEAD)
             {

@@ -93,9 +93,9 @@ public class NetworkController : MonoBehaviour {
 	
 	}
 
-    public bool IsMaster()
+    public static bool IsMaster()
     {
-        return NetworkController.smartFox.MySelf.ContainsVariable("Master") && NetworkController.smartFox.MySelf.GetVariable("Master").GetBoolValue();
+        return smartFox.MySelf.ContainsVariable("Master") && smartFox.MySelf.GetVariable("Master").GetBoolValue();
     }
 
    
@@ -441,6 +441,9 @@ public class NetworkController : MonoBehaviour {
 				case "remoteDamageOnPawn":
 					HandleRemoteDamageOnPawn(dt);
                     break;
+				case "enterRobot":
+					HandleEnterRobot(dt);
+					break;
 
             }
         }
@@ -1096,10 +1099,48 @@ public class NetworkController : MonoBehaviour {
         ExtensionRequest request = new ExtensionRequest("remoteDamageOnPawn", data, serverHolder.gameRoom);
         smartFox.Send(request);
     }
+	/// <summary>
+    /// enterRobot request to server
+    /// </summary>	
 
-	
-	
-	
+    public void EnterRobotRequest(int robotId)
+    {
+        ISFSObject data = new SFSObject();
+		data.PutInt("robotId", robotId);
+		
+        ExtensionRequest request = new ExtensionRequest("enterRobot", data, serverHolder.gameRoom);
+		if(smartFox.MySelf.ContainsVariable("Master") && NetworkController.smartFox.MySelf.GetVariable("Master").GetBoolValue()){
+			data.PutInt("userId", smartFox.MySelf.GetId());
+			HandleEnterRobot(data);		
+		}else{
+			smartFox.Send(request);
+		}
+    }
+	/// <summary>
+    /// bossHit request to server
+    /// </summary>	
+
+    public void BossHitRequest(float damage,int pawnId)
+    {
+        ISFSObject data = new SFSObject();
+		data.PutInt("pawnId", pawnId);
+		data.PutFloat("damage", damage);
+        ExtensionRequest request = new ExtensionRequest("bossHit", data, serverHolder.gameRoom);
+		smartFox.Send(request);
+
+    }
+	/// <summary>
+    /// lastWave request to server
+    /// </summary>	
+
+    public void LastWaveRequest()
+    {
+      
+		ExtensionRequest request = new ExtensionRequest("lastWave", new SFSObject(), serverHolder.gameRoom);
+		smartFox.Send(request);
+
+    }
+
 	
 	
 	
@@ -1488,7 +1529,43 @@ public class NetworkController : MonoBehaviour {
         pawn.LowerHealth((BaseDamageModel)dt.GetClass("model"), killer);
     
     }
+	/// <summary>
+    ///handle enterRobot request to server
+    /// </summary>	
 
+    public void  HandleEnterRobot(ISFSObject dt)
+    {
+        ISFSObject data = new SFSObject();
+		RobotPawn pawn = (RobotPawn) GetView(dt.GetInt("robotId")).pawn;
+		if(pawn.isEmpty){
+			pawn.isEmpty = false;
+			ExtensionRequest request = new ExtensionRequest("enterRobotSuccess", data, serverHolder.gameRoom);
+			smartFox.Send(request);
+		}
+		
+    }
+	/// <summary>
+    ///handle enterRobotSuccess request to server
+    /// </summary>	
+
+    public void  HandleEnterRobotSuccess(ISFSObject dt)
+    {
+        ISFSObject data = new SFSObject();
+		RobotPawn pawn = (RobotPawn) GetView(dt.GetInt("robotId")).pawn;
+		pawn.isEmpty = false;
+		Player player  = GetPlayer(dt.GetInt("userId"));
+		player.AfterSpawnSetting(pawn,new int[]{});	
+		if(smartfox.MySelf.GetId()==dt.GetInt("userId")){
+			pawn.SetMine(true);
+			player.EnterBotSuccess(pawn);
+		}	
+		if(player.team==1){
+			PlayerMainGui.instance.Annonce(AnnonceType.INTEGRATAKEJUGGER);
+		}else{
+			PlayerMainGui.instance.Annonce(AnnonceType.RESTAKEJUGGER);
+		}
+		
+    }
 
 }
 

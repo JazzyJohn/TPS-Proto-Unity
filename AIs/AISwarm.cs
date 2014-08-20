@@ -186,4 +186,10 @@ public class AISwarm:MonoBehaviour
 			aiBase.GetPawn().RemoveBuff(characteristic,value);
 		}
 	}
+	public void NewEnemy(Pawn enemy){
+		foreach (AIBase aiBase in allPawn)
+        {
+			aiBase.GetPawn().EnemyFromSwarm(enemy);
+		}
+	}
 }

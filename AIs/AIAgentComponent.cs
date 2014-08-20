@@ -29,6 +29,9 @@ public class AIAgentComponent : MonoBehaviour {
 	protected Transform myTransform;
 	protected bool validPath;
 	
+	protected float stepHeight;
+	protected float jumpHeightl;
+	
 	private float radius = 0.5f;
 	private float height = 1;
 	public float size;
@@ -114,7 +117,11 @@ public class AIAgentComponent : MonoBehaviour {
 				agent.jumpHeight = controlledPawn.jumpHeight;
 				agent.stepHeight = controlledPawn.stepHeight;
 				break;
+			case PathType.NATIVE:
+				jumpHeight = controlledPawn.jumpHeight;
+				stepHeight = controlledPawn.stepHeight;
 			
+			break;
 			}
 	
 	}
@@ -246,7 +253,7 @@ public class AIAgentComponent : MonoBehaviour {
 
 
 
-			while(path.corners.Length>curCorner &&IsRiched(path.corners[curCorner],myTransform.position,size)){
+			while(path.corners.Length>curCorner &&IsRiched(path.corners[curCorner],myTransform.position,size/2)){
 				curCorner++;
 			}
 
@@ -266,7 +273,7 @@ public class AIAgentComponent : MonoBehaviour {
 			//Move towards the waypoint.
 			Vector3 direction=(point-myTransform.position).normalized;
 		
-		
+			needJump = (point.y-myTransform.position.y)>stepHeight;
 	
 			resultTranslate  =direction * Mathf.Min(dist, pawnSpeed * Time.deltaTime)/Time.deltaTime;
 	
@@ -281,7 +288,7 @@ public class AIAgentComponent : MonoBehaviour {
 			//resultRotation = transform.rotation;
 			//If the agent arrive to waypoint position, delete waypoint from the path.
 
-			if(IsRiched(path.corners[curCorner],myTransform.position,size)){
+			if(IsRiched(path.corners[curCorner],myTransform.position,size/2)){
 					curCorner++;
 			}
 			

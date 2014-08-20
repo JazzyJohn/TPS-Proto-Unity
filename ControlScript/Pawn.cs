@@ -46,6 +46,7 @@ public class DamagerEntry
     }
 
 }
+
 public class Pawn : DamagebleObject {
 
 
@@ -351,6 +352,10 @@ public class Pawn : DamagebleObject {
 	private bool isLocalVisible =true;
 	
 	public static float MAXRENDERDISTANCE = 250000.0f;
+	
+	//Some special event handler(like damage on boss that we mast send to server)
+	
+	public SpecialEventsHandler eventHandler;
 
 	protected void Awake(){
 		myTransform = transform;
@@ -567,7 +572,7 @@ public class Pawn : DamagebleObject {
             entry.lastHitDirection = damage.pushDirection;
         }
 		if (isAi) {
-			mainAi.WasHitBy(killer);
+			mainAi.WasHitBy(killer,damage.Damage);
 
 		}
         if (canBeKnockOut) {
@@ -576,7 +581,9 @@ public class Pawn : DamagebleObject {
             }
         
         }
-		
+		if(eventHandler!=null){
+			eventHandler.Damage(killer,damage.Damage);
+		}
 		//Debug.Log ("DAMAGE");
 		base.Damage(damage,killer);
 	}
@@ -600,7 +607,7 @@ public class Pawn : DamagebleObject {
             entry.lastHitDirection = damage.pushDirection;
         }
 		if (isAi) {
-			mainAi.WasHitBy(killer);
+			mainAi.WasHitBy(killer,damage.Damage);
 
 		}
         if (canBeKnockOut) {
@@ -609,7 +616,9 @@ public class Pawn : DamagebleObject {
             }
         
         }
-		
+		if(eventHandler!=null){
+			eventHandler.Damage(killer,damage.Damage);
+		}
 		//Debug.Log ("DAMAGE");
 		base.Damage(damage,killer);
 	}
