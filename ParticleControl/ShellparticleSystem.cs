@@ -13,7 +13,7 @@ public class ShellparticleSystem : MonoBehaviour
 	public void Play(Collider owner)
 	{
 		//Создаем гильзу
-		GameObject shellObject = Instantiate (shellPrefab, transform.position, Quaternion.Euler(new Vector3(0, 0, 90))) as GameObject;
+		GameObject shellObject =shellPrefab.Spawn(transform.position, Quaternion.Euler(new Vector3(0, 0, 90)));
 
 		//Устанавливаем текущую угловую скорость, скорость движения
 		//transform.TransformDirection используется для конвертации координат

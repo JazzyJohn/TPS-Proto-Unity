@@ -4,16 +4,24 @@ using System.Collections;
 using System.Collections.Generic;
 
 
+
 public class GlobalGameSetting : MonoBehaviour{
 	
 	protected Hashtable huntTable =new Hashtable();
+	
+	
+	protected Dictionary<string, List<float>> AISettings = new Dictionary<string, List<float>>();;
+	
 	
 	void Awake(){
 		TextAsset xml = Resources.Load("huntTable") as TextAsset;
 		XmlDocument xmlDoc = new XmlDocument();
 		xmlDoc.LoadXml(XML);
 		ParseHuntTable(xmlDoc);
-
+		xml = Resources.Load("aiTable") as TextAsset;
+		xmlDoc = new XmlDocument();
+		xmlDoc.LoadXml(XML);
+		ParseAiTable(xmlDoc);
 	
 	
 	}
@@ -25,14 +33,40 @@ public class GlobalGameSetting : MonoBehaviour{
 	
 		int i = 0;
 		foreach (XmlNode node in xmlDoc.SelectNodes("hunttable/onecreature")) {
-			huntTable.add(node.electSingleNode("name").InnerText,int.Parse(node.electSingleNode("score").InnerText));
+			huntTable.add(node.SelectSingleNode("name").InnerText,int.Parse(node.SelectSingleNode("score").InnerText));
+		}
+	}
+	private void ParseAiTable(mlDocument xmlDoc){
+		
+		
+		//Parse Stuct Info First
+		
+	
+		int i = 0;
+		foreach (XmlNode node in xmlDoc.SelectNodes("aitable/settings")) {
+			List<float> list  = new List<float>();
+			foreach(XmlNode valNode in node.SelectNodes("values")){
+				list.Add(float.Parse(valNode.InnerText);
+			}
+			AISettings.add(node.electSingleNode("name").InnerText,list);
 		}
 	}
 	public Hashtable GetHuntScoreTable(){
 		return huntTable;
 	}
 
-
+	public float GetAiSettings(string name,int type,float defValue){
+		if(AISettings.Contains(name)&&AISettings[name].Count>type){	
+			return AISettings[name][type];		
+		}
+		return defValue;
+	}
+	public int GetAiSettings(string name,int type,int defValue){
+		if(AISettings.Contains(name)&&AISettings[name].Count>type){	
+			return (int)AISettings[name][type];		
+		}
+		return defValue;
+	}
 	private static GlobalGameSetting s_Instance = null;
 	
 	public static GlobalGameSetting instance {

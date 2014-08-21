@@ -138,6 +138,10 @@ public class AISwarm:MonoBehaviour
     }
     public virtual void AgentKilled(AIBase ai) { 
 		allPawn.Remove(ai);
+		foreach (AIBase aiBase in allPawn)
+        {
+			aiBase.AllyKill();
+		}
     }
     public virtual void Activate() {
         Debug.Log("Activate");
@@ -189,7 +193,7 @@ public class AISwarm:MonoBehaviour
 	public void NewEnemy(Pawn enemy){
 		foreach (AIBase aiBase in allPawn)
         {
-			aiBase.GetPawn().EnemyFromSwarm(enemy);
+			aiBase.EnemyFromSwarm(enemy);
 		}
 	}
 }

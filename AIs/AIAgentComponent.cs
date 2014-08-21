@@ -253,7 +253,7 @@ public class AIAgentComponent : MonoBehaviour {
 
 
 
-			while(path.corners.Length>curCorner &&IsRiched(path.corners[curCorner],myTransform.position,size/2)){
+			while(path.corners.Length>curCorner &&IsRiched(path.corners[curCorner],myTransform.position,size)){
 				curCorner++;
 			}
 
@@ -288,7 +288,7 @@ public class AIAgentComponent : MonoBehaviour {
 			//resultRotation = transform.rotation;
 			//If the agent arrive to waypoint position, delete waypoint from the path.
 
-			if(IsRiched(path.corners[curCorner],myTransform.position,size/2)){
+			if(IsRiched(path.corners[curCorner],myTransform.position,size)){
 					curCorner++;
 			}
 			
@@ -299,14 +299,19 @@ public class AIAgentComponent : MonoBehaviour {
 	
 	public static bool IsRiched(Vector3 point,Vector3 target,float inputSize){
 		//Debug.Log(Mathf.Abs (agent.pivot.transform.position.y - point.y) +"   " +"   "+size);
+			if((point.y-agent.pivot.transform.position.y)>stepHeight){
+				if((point-target).sqrMagnitude<inputSize*inputSize){
+					return true;
+				}
+			}else{
+				Vector3 flatPoint= point,flatPostion  =  target;
+				flatPostion.y =0;
+				flatPoint.y=0;
+			
+				if((flatPoint-flatPostion).sqrMagnitude<inputSize*inputSize){
+					return true;
 
-			Vector3 flatPoint= point,flatPostion  =  target;
-			flatPostion.y =0;
-			flatPoint.y=0;
-		
-			if((flatPoint-flatPostion).sqrMagnitude<inputSize*inputSize){
-				return true;
-
+				}
 			}
 		
 		return false;

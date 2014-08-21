@@ -704,10 +704,12 @@ public class Pawn : DamagebleObject {
 		
 	}
     public  void PawnKill(){
+	
         ActualKillMe();
     }
 
 	protected override void ActualKillMe(){
+		AITargetManаger.DeadPawn(this);
         isDead = true;
 		characterState = CharacterState.Dead;
 		DamagerEntry last = RetrunLastDamager();

@@ -46,10 +46,17 @@ public class AIBase : MonoBehaviour
 
 	public Transform[] patrolPoints;
 
+	public Dictionary<string,int> cahcedDataForTick= new Dictionary<string,int>();
+	
+	
     public void Death(){
         if (aiSwarm != null) {
             aiSwarm.AgentKilled(this);
         }
+	
+		if(controlledPawn.enemy!=null){
+			AITargetManаger.RemoveAttacker(controlledPawn,controlledPawn.enemy);
+		}
     }
 
 	public void Init(int aiGroup,AISwarm aiSwarm,int homeIndex){

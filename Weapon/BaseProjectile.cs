@@ -111,7 +111,15 @@ public class BaseProjectile : MonoBehaviour
 
     public float trajectoryCoef;
 
-    void Start()
+	void Awake(){
+		aSource = GetComponent<AudioSource>();	
+		sControl = new soundControl(aSource);//создаем обьект контроллера звука и передаем указатель на источник
+        sControl.playClip(reactiveEngineSound);
+		mTransform = transform;
+		mRigidBody = rigidbody;
+	}
+	
+    void OnEnable()
     {
 		switch (attraction)
         {
@@ -125,13 +133,11 @@ public class BaseProjectile : MonoBehaviour
 			
 		}
         ProjectileManager.instance.AddProject(projId, this);
-        aSource = GetComponent<AudioSource>();
-        sControl = new soundControl(aSource);//создаем обьект контроллера звука и передаем указатель на источник
-        sControl.playClip(reactiveEngineSound);
-
-        mTransform = transform;
+ 
+      
+       
         startPosition = mTransform.position;
-        mRigidBody = rigidbody;
+
         mRigidBody.velocity = mTransform.TransformDirection(Vector3.forward * startImpulse);
 		
         RaycastHit hit;
@@ -386,7 +392,7 @@ public class BaseProjectile : MonoBehaviour
                     used = true;
                     if (hitParticle != null)
                     {
-                        Instantiate(hitParticle, hit.point, Quaternion.LookRotation(hit.normal));
+                        hitParticle.Spawn( hit.point, Quaternion.LookRotation(hit.normal));
                     }
                     ExplosionDamage(exploPosition);
                  
@@ -474,7 +480,7 @@ public class BaseProjectile : MonoBehaviour
             {
                 ProjectileManager.instance.InvokeRPC("Detonate", projId, Position);
             }
-            Destroy(gameObject, 0.1f);
+            Invoke("DeActivate", 0.1f);
                 return;
         }
         sControl.stopSound();//останавливаем звук реактивного двигателя
@@ -519,7 +525,7 @@ public class BaseProjectile : MonoBehaviour
         {
             if (hitParticle != null)
             {
-                Instantiate(hitParticle, Position, mTransform.rotation);
+                hitParticle.Spawn( Position, mTransform.rotation);
             }
 
         }
@@ -527,6 +533,12 @@ public class BaseProjectile : MonoBehaviour
         {
             ProjectileManager.instance.InvokeRPC("Detonate", projId, Position);
         }
-        Destroy(gameObject, 0.1f);
+        Invoke("DeActivate", 0.1f);
     }
+	public void DeActivate(){
+		gameObject.Recycle();
+	}
+	public OnDisable(){
+		CancelInvoke();
+	}
 }

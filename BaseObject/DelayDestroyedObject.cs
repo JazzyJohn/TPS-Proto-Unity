@@ -6,9 +6,15 @@ public class DelayDestroyedObject : MonoBehaviour {
 
 	public float timeLimit=10.0f;
 	
-	void Start () {
-		Destroy(gameObject,timeLimit);
-		
+	void OnEnable()
+	{
+		  Invoke("DeActivate", timeLimit);
 	}
-
+	void OnDisable()
+	{
+		CancelInvoke();
+	}
+	public void DeActivate(){
+		gameObject.Recycle();
+	}
 }

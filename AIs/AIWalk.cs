@@ -3,11 +3,17 @@ using System.Collections;
 
 public enum  BattleState {Inclosing, InDangerArea,WaitForAttack,Attacking}
 
+public enum BattleCircleDensity{ Normal,Swarm,Lonely}
+
+public enum BattleCircleAttackSpeed{ Normal,Fast,Slow}
+
 public class AIWalk : AIMovementState
 {
 	private float _lostTimer;
 
 	public float lostTime=5.0f;
+	
+	public float timeStart;
 	
 	protected bool isMoving = true;
 	
@@ -32,6 +38,21 @@ public class AIWalk : AIMovementState
 	private float _timeLastDecide = 0.0f;
 	
 	public static float TacticDelay = 20.0f;
+	
+	public AISkillManager skillmanager;
+	
+	public BattleCircleDensity density;
+	
+	public BattleCircleAttackSpeed speed;
+	
+	public int enemyCount=0;
+	
+	public Awake(){
+		AISkillManager = GetComponent<AISkillManager>();
+		maxAttackers =GlobalGameSetting.GetAiSettings("maxAttackers",(int)density,maxAttackers);
+		coolDown =GlobalGameSetting.GetAiSettings("coolDown",(int)speed,coolDown);
+	}
+	
 	
 	public void UpdateState(){
         BattleState nextstate;
@@ -128,92 +149,96 @@ public class AIWalk : AIMovementState
             {
 				
 				
-                isMoving = true;
-                agent.SetTarget(_enemy.myTransform.position, true);
-				UpdateState();
-				if(isMelee){
-				
-					switch(state){
-						case BattleState.Inclosing:
-						//move Close to enemy
-							_pathCoef=pathCoef;
-							StopAvoid();
-							StopStrafe();
-						break;
-						case BattleState.InDangerArea:
-						
-							//If we can attack
-							if(_lastTimeAttack+coolDown<Time.time){
-								//If amount of attackers small move close
-								if(_enemy.attackers.Count<maxAttackers){
-									_pathCoef = pathCoef;
-									StopAvoid();
-									StopStrafe();
-									
+               
+				if(SkillUse()){
+					isMoving = false;
+				}else{
+					isMoving = true;
+                    agent.SetTarget(_enemy.myTransform.position, true);
+					UpdateState();
+					if(isMelee){
+					
+						switch(state){
+							case BattleState.Inclosing:
+							//move Close to enemy
+								_pathCoef=pathCoef;
+								StopAvoid();
+								StopStrafe();
+							break;
+							case BattleState.InDangerArea:
+							
+								//If we can attack
+								if(_lastTimeAttack+coolDown<Time.time){
+									//If amount of attackers small move close
+									if(_enemy.attackers.Count<maxAttackers){
+										_pathCoef = pathCoef;
+										StopAvoid();
+										StopStrafe();
+										
+									}else{
+									//else strafe around;
+										_pathCoef =0.0f;
+										StopAvoid();
+									   
+										StartStrafe(_enemy.myTransform);
+									}
 								}else{
-								//else strafe around;
-									_pathCoef =0.0f;
+									//strafe around;
+									_pathCoef = 0.0f;
 									StopAvoid();
-								   
+								  
 									StartStrafe(_enemy.myTransform);
 								}
-							}else{
-								//strafe around;
+							break;
+							case BattleState.WaitForAttack:
+									//if we after last attack move away
+									AskForPermisssion();
+									Debug.Log("My permission " + hasPermission);
+									//if we got permission  start attack
+									if(hasPermission){
+										Attack();	
+										
+									}else{
+										//Else avoid
+										_pathCoef =0.0f;
+										StopStrafe();
+										StartAvoid(_enemy.myTransform);
+									}
+								
+								
+							break;
+							case BattleState.Attacking:
+							_pathCoef = pathCoef;
+								StopAvoid();
+								StopStrafe();
+							break;
+						
+						}
+					}else{
+						switch(state){
+							case BattleState.Inclosing:
+								StopAttack();
+								//move Close to enemy
+								_pathCoef=pathCoef;
+								StopAvoid();
+								StopStrafe();
+								break;	
+							case BattleState.Attacking:
 								_pathCoef = 0.0f;
 								StopAvoid();
-							  
+								Attack();	
 								StartStrafe(_enemy.myTransform);
-							}
-						break;
-						case BattleState.WaitForAttack:
-								//if we after last attack move away
-								AskForPermisssion();
-								Debug.Log("My permission " + hasPermission);
-								//if we got permission  start attack
-								if(hasPermission){
-									Attack();	
-									
-								}else{
-									//Else avoid
-									_pathCoef =0.0f;
-									StopStrafe();
-									StartAvoid(_enemy.myTransform);
-								}
-							
-							
-						break;
-						case BattleState.Attacking:
-						_pathCoef = pathCoef;
-							StopAvoid();
-							StopStrafe();
-						break;
-					
+							break;
+							case BattleState.InDangerArea:
+								StartAvoid(_enemy.myTransform);
+								_pathCoef = 0.0f;
+								StopStrafe();
+								Attack();
+							break;
+						}						
 					}
-				}else{
-					switch(state){
-						case BattleState.Inclosing:
-                            StopAttack();
-							//move Close to enemy
-							_pathCoef=pathCoef;
-							StopAvoid();
-							StopStrafe();
-							break;	
-						case BattleState.Attacking:
-							_pathCoef = 0.0f;
-							StopAvoid();
-							Attack();	
-							StartStrafe(_enemy.myTransform);
-						break;
-						case BattleState.InDangerArea:
-							StartAvoid(_enemy.myTransform);
-							_pathCoef = 0.0f;
-							StopStrafe();
-                            Attack();
-						break;
-					}						
+				
 				}
-			
-			
 			}else{
 			
 				   if(IsInWeaponRange()){
@@ -252,7 +277,62 @@ public class AIWalk : AIMovementState
 
 			}
         }
+		aibase.cahcedDataForTick["ALLY_COUNT"]=AITargetManаger.GetAttackersCount(_enemy);
+		aibase.cahcedDataForTick["ALLY_KILL"] = 0;
     }
+	
+	public bool SkillUse(){
+		if(skillmanager==null){
+			return false;
+		}	
+		if(skillmanager.IsActive()){
+			return true;
+		}
+		foreach(SkillTrigger skilltrigger in skillmanager.allSkill){
+			if(skilltrigger.skill.Available()){
+				switch(skilltrigger.type){
+					case SkillTriggerType.ENEMY_SEE:
+						if(_enemy!=null){
+							skillmanager.Use(skilltrigger.skill,enemy);
+							return true;
+						}
+					break;
+					case SkillTriggerType.ENEMY_COUNT:
+						if(enemyCount>skilltrigger.count){
+							skillmanager.Use(skilltrigger.skill,enemy);
+							return true;
+						}
+					break;
+					case SkillTriggerType.HEALTH_LEFT:
+						if(controlledPawn.health<skilltrigger.count){
+							skillmanager.Use(skilltrigger.skill,enemy);
+							return true;
+						}
+					break;
+					case SkillTriggerType.TIME_PASS:
+						if(Time.time-timeStart>skilltrigger.count){
+							skillmanager.Use(skilltrigger.skill,enemy);
+							return true;
+						}
+					break;
+					case SkillTriggerType.ALLY_COUNT:
+						if(AITargetManаger.GetAttackersCount(_enemy)>skilltrigger.count){
+							skillmanager.Use(skilltrigger.skill,enemy);
+							return true;
+						}
+					break;
+					case SkillTriggerType.ALLY_KILL:
+						if(aibase.cahcedDataForTick["ALLY_KILL"]>0){
+							skillmanager.Use(skilltrigger.skill,enemy);
+							return true;
+						}
+					break;
+				}
+			}
+		}
+		return false;
+		
+	}
 	public override void KickFinish(){
         if (CirleAttack)
         {
@@ -295,8 +375,9 @@ public class AIWalk : AIMovementState
 		stateSpeed =controlledPawn.groundRunSpeed;
 		agent.SetSpeed(controlledPawn.groundRunSpeed);
 		agent.ParsePawn (controlledPawn);
-	
-
+		aibase.cahcedDataForTick["ALLY_COUNT"]=AITargetManаger.GetAttackersCount(_enemy);
+		aibase.cahcedDataForTick["ALLY_KILL"] = 0;
+		timeStart = Time.time;
 		base.StartState ();
 	}
     public override void EndState()
@@ -360,13 +441,14 @@ public class AIWalk : AIMovementState
 		Pawn target = null;
         
 		
-		
+		enemyCount=0;
 		foreach (Pawn pawn in _pawnArray)
 		{
            
 			if(!IsEnemy(pawn)){
 				continue;
 			}
+			enemyCount++;
 			Vector3 myPos = controlledPawn.myTransform.position; // моя позиция
 			Vector3 targetPos = pawn.myTransform.position; // позиция цели
 			Vector3 myFacingNormal = controlledPawn.myTransform.forward; //направление взгляда нашей турели
@@ -388,4 +470,7 @@ public class AIWalk : AIMovementState
 		}
 		return target;
     }
+	public override void AllyKill(){
+		aibase.cahcedDataForTick["ALLY_KILL"] = 1;
+	}
 }

@@ -38,7 +38,7 @@ public class BaseShootgun : BaseWeapon {
 				if (effAimRandCoef > 0) {
 						startRotation = Quaternion.Euler (startRotation.eulerAngles + new Vector3 (Random.Range (-1 * effAimRandCoef, 1 * effAimRandCoef), Random.Range (-1 * effAimRandCoef, 1 * effAimRandCoef), Random.Range (-1 * effAimRandCoef, 1 * effAimRandCoef)));
 				}
-				proj = Instantiate (projectilePrefab, startPoint, startRotation) as GameObject;
+				proj =projectilePrefab.Spawn(startPoint, startRotation);
                 BaseProjectile projScript = proj.GetComponent<BaseProjectile>();
                 if ( target != null)
                 {

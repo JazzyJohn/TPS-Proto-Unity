@@ -176,6 +176,7 @@ public class AIState : MonoBehaviour {
 	public virtual void SetEnemy(Pawn enemy){
 		if(_enemy != enemy){
 			aibase.SetEnemy(enemy);
+			AITargetManаger.AddAttacker(_enemy,controlledPawn);
 		}
 		_enemy = enemy;
 		controlledPawn.enemy = enemy;
@@ -188,10 +189,14 @@ public class AIState : MonoBehaviour {
 			controlledPawn.enemy = enemy;
 		}
 	}
+	public  virtual void AllyKill(){
+	
+	}
 	public void LostEnemy(){
+		AITargetManаger.RemoveAttacker(_enemy,controlledPawn);
 		_enemy = null;
 		controlledPawn.enemy = null;
-
+		
 	}
 	public virtual bool IsEnemy(Pawn target){
 		if(isAgressive){

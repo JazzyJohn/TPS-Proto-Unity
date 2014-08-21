@@ -714,7 +714,7 @@ public class BaseWeapon : DestroyableNetworkObject {
 		}
        // Debug.DrawLine(transform.position, startPoint, Color.red,10 );
    
-		proj=Instantiate(projectilePrefab,startPoint,startRotation) as GameObject;
+		proj=projectilePrefab.Spawn(startPoint,startRotation);
         //Debug.DrawLine(transform.position,proj.transform.position, Color.blue, 10);
 		BaseProjectile projScript =proj.GetComponent<BaseProjectile>();
 		float power=0;
@@ -776,7 +776,7 @@ public class BaseWeapon : DestroyableNetworkObject {
 	}
 	protected BaseProjectile GenerateProjectileRep(Vector3 startPoint,Quaternion startRotation,double timeShoot){
 
-		GameObject proj=Instantiate(projectilePrefab,startPoint,startRotation) as GameObject;
+		GameObject proj=projectilePrefab.Spawn(startPoint,startRotation);
 		BaseProjectile projScript = proj.GetComponent<BaseProjectile>();
         projScript.lateTime = timeShoot;
 

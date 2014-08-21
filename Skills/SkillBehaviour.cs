@@ -174,6 +174,12 @@ public class SkillBehaviour : MonoBehaviour
 			
 		}		
 	}
+	public bool Available(){
+		return !isUse&&_coolDown>=coolDown;
+	}
+	public bool Activate(){
+		return inUse;
+	}
     public void UnUse()
     {
         isUse = false;
