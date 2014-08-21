@@ -8,6 +8,7 @@ using Sfs2X.Entities;
 using Sfs2X.Entities.Variables;
 using Sfs2X.Requests;
 using Sfs2X.Logging;
+using Sfs2X.Entities.Data;
 
 
 public enum GAMEMODE { PVP, PVE,RUNNER, PVPJUGGERFIGHT,PVPHUNT};
@@ -83,6 +84,7 @@ public class ServerHolder : MonoBehaviour
         NetworkController.smartFox.AddEventListener(SFSEvent.USER_ENTER_ROOM, OnUserEnterRoom);
         NetworkController.smartFox.AddEventListener(SFSEvent.USER_EXIT_ROOM, OnUserLeaveRoom);
         NetworkController.smartFox.AddEventListener(SFSEvent.ROOM_ADD, OnRoomAdded);
+        NetworkController.smartFox.AddEventListener(SFSEvent.ROOM_CREATION_ERROR, OnRoomError);
         NetworkController.smartFox.AddEventListener(SFSEvent.ROOM_REMOVE, OnRoomDeleted);
        
         SetupRoomList();
@@ -183,7 +185,11 @@ public class ServerHolder : MonoBehaviour
 	public void OnRoomDeleted(BaseEvent evt) { //Room room) {
 		SetupRoomList();
 	}
-
+    public void OnRoomError(BaseEvent evt)
+    { //Room room) {
+        Debug.Log(evt.Params["errorMessage"]);
+    }
+    
     //SMART FOX LOGIC;
     public void RoomNewName(GAMEMODE mode) {
         switch(mode){
@@ -383,12 +389,16 @@ public class ServerHolder : MonoBehaviour
                 settings.Variables.Add(new SFSRoomVariable("teamCount", 2));
                 maxTime = new SFSRoomVariable("maxTime", 0);
                 maxScore = new SFSRoomVariable("maxScore", 5000);
-				ISFSObject data = new SFSObject();
-				data.PutClass("huntTable",GlobalGameSetting.instance.GetHuntScoreTable());				
-				gameVar = new SFSRoomVariable("gameVar", data);
+                SFSObject data = new SFSObject();
+               // Debug.Log(GlobalGameSetting.instance.GetHuntScoreTable());
+				//data.Put("huntTable",new SFSDataWrapper(5,GlobalGameSetting.instance.GetHuntScoreTable()));				
+             
+				settings.Variables.Add(new SFSRoomVariable("gameVar", data,5));
+                Debug.Log(data);
+               
 			break;
         }
-		
+     
         settings.Variables.Add(maxScore);
         settings.Variables.Add(maxTime);
         settings.GroupId = "games";
@@ -513,7 +523,7 @@ public class ServerHolder : MonoBehaviour
 		if (mainMenu != null) {
 				Destroy (mainMenu.gameObject);
 		}
-		
+        AITargetManager.Reload();
 	
 	}
 

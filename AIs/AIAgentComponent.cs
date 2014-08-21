@@ -30,7 +30,7 @@ public class AIAgentComponent : MonoBehaviour {
 	protected bool validPath;
 	
 	protected float stepHeight;
-	protected float jumpHeightl;
+	protected float jumpHeight;
 	
 	private float radius = 0.5f;
 	private float height = 1;
@@ -163,8 +163,7 @@ public class AIAgentComponent : MonoBehaviour {
 				if(agent.path.Count>0){
 					bool walkable = true;
 					//Check if exist some dynamic obstacle in our path.
-					int stepsCount = 0;
-					
+				
 				
 					if(walkable){
 						//Smooth path
@@ -297,9 +296,10 @@ public class AIAgentComponent : MonoBehaviour {
 
 	
 	
-	public static bool IsRiched(Vector3 point,Vector3 target,float inputSize){
+	public bool IsRiched(Vector3 point,Vector3 target,float inputSize){
 		//Debug.Log(Mathf.Abs (agent.pivot.transform.position.y - point.y) +"   " +"   "+size);
-			if((point.y-agent.pivot.transform.position.y)>stepHeight){
+            if ((point.y - target.y) < stepHeight)
+            {
 				if((point-target).sqrMagnitude<inputSize*inputSize){
 					return true;
 				}

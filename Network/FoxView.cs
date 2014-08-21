@@ -56,7 +56,7 @@ public class FoxView : MonoBehaviour {
         }
     }
 	
-	public void IsOnMasterControll(){
+	public bool IsOnMasterControll(){
 		if(isSceneView&&pawn!=null){
 			return pawn.player==null;
 		}

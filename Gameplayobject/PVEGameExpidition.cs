@@ -41,7 +41,7 @@ public class PVEGameExpidition : GameRule {
     }
     public void Arrived(){
         isArrived = true;
-        if(NetworkController.Instance.IsMaster()){
+        if(NetworkController.IsMaster()){
             NetworkController.Instance.GameRuleArrivedRequest();
         }
     }

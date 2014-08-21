@@ -36,7 +36,7 @@ public float respawnTime= 10.0f;
 	}
 	
 	void OnMasterClientSwitched(){
-		spawnedObject = FindObjectOfType<RobotPawn>();
+		spawnedObject = FindObjectOfType<RobotPawn>().gameObject;
 	
 	}
 	

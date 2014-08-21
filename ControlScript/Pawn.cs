@@ -709,7 +709,7 @@ public class Pawn : DamagebleObject {
     }
 
 	protected override void ActualKillMe(){
-		AITargetManаger.DeadPawn(this);
+		AITargetManager.DeadPawn(this);
         isDead = true;
 		characterState = CharacterState.Dead;
 		DamagerEntry last = RetrunLastDamager();

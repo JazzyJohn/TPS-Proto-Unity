@@ -19,7 +19,7 @@ public class AIPatrol : AIMovementState
             return;
         }
 	//	Debug.Log (Vector3.Distance (patrolPoints [step].position, controlledPawn.myTransform.position)+"  "+agent.size);
-		if (AIAgentComponent.IsRiched(patrolPoints [step].position, controlledPawn.myTransform.position,agent.size)||agent.IsPathBad()) {
+		if (agent.IsRiched(patrolPoints [step].position, controlledPawn.myTransform.position,agent.size)||agent.IsPathBad()) {
 			NextPoint();
 		}
 			

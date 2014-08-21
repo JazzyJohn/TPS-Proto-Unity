@@ -68,8 +68,8 @@ public class AISwarm_QuantizeWave : AISwarm
 		_alreadyDead =0;
 		_alreadySpawn = 0;
 		_curWave++;
-		HuntGameRule huntGameRule = GameRule.instance as HuntGameRule;
-		if(_curWave>=needToKill.Lenght){
+        Hunt_PVPGameRule huntGameRule = GameRule.instance as Hunt_PVPGameRule;
+		if(_curWave>=needToKill.Length){
 			SendMessage("SwarmEnd", SendMessageOptions.DontRequireReceiver);
 			if(huntGameRule!=null){
 				huntGameRule.LastWave();

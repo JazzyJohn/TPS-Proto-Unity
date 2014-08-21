@@ -46,7 +46,7 @@ public class AIVipRoute : AIState {
 
     public override void Tick()
     {
-        if (AIAgentComponent.IsRiched(curPoint.GiveTarget().position, controlledPawn.myTransform.position, agent.size))
+        if (agent.IsRiched(curPoint.GiveTarget().position, controlledPawn.myTransform.position, agent.size))
         {
             NextPoint();
         }

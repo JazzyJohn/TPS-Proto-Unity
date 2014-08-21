@@ -47,10 +47,11 @@ public class AIWalk : AIMovementState
 	
 	public int enemyCount=0;
 	
-	public Awake(){
-		AISkillManager = GetComponent<AISkillManager>();
-		maxAttackers =GlobalGameSetting.GetAiSettings("maxAttackers",(int)density,maxAttackers);
-		coolDown =GlobalGameSetting.GetAiSettings("coolDown",(int)speed,coolDown);
+	public void Awake(){
+        base.Awake();
+        AISkillManager skillmanager  = GetComponent<AISkillManager>();
+		maxAttackers =GlobalGameSetting.instance. GetAiSettings("maxAttackers",(int)density,maxAttackers);
+        coolDown = GlobalGameSetting.instance.GetAiSettings("coolDown", (int)speed, coolDown);
 	}
 	
 	
@@ -277,7 +278,7 @@ public class AIWalk : AIMovementState
 
 			}
         }
-		aibase.cahcedDataForTick["ALLY_COUNT"]=AITargetManаger.GetAttackersCount(_enemy);
+        aibase.cahcedDataForTick["ALLY_COUNT"] = AITargetManager.GetAttackersCount(_enemy);
 		aibase.cahcedDataForTick["ALLY_KILL"] = 0;
     }
 	
@@ -288,42 +289,44 @@ public class AIWalk : AIMovementState
 		if(skillmanager.IsActive()){
 			return true;
 		}
-		foreach(SkillTrigger skilltrigger in skillmanager.allSkill){
+        foreach (AISkillManager.SkillTrigger skilltrigger in skillmanager.allSkills)
+        {
 			if(skilltrigger.skill.Available()){
 				switch(skilltrigger.type){
 					case SkillTriggerType.ENEMY_SEE:
 						if(_enemy!=null){
-							skillmanager.Use(skilltrigger.skill,enemy);
+							skillmanager.Use(skilltrigger.skill,_enemy);
 							return true;
 						}
 					break;
 					case SkillTriggerType.ENEMY_COUNT:
 						if(enemyCount>skilltrigger.count){
-							skillmanager.Use(skilltrigger.skill,enemy);
+                            skillmanager.Use(skilltrigger.skill, _enemy);
 							return true;
 						}
 					break;
 					case SkillTriggerType.HEALTH_LEFT:
 						if(controlledPawn.health<skilltrigger.count){
-							skillmanager.Use(skilltrigger.skill,enemy);
+                            skillmanager.Use(skilltrigger.skill, _enemy);
 							return true;
 						}
 					break;
 					case SkillTriggerType.TIME_PASS:
 						if(Time.time-timeStart>skilltrigger.count){
-							skillmanager.Use(skilltrigger.skill,enemy);
+                            skillmanager.Use(skilltrigger.skill, _enemy);
 							return true;
 						}
 					break;
 					case SkillTriggerType.ALLY_COUNT:
-						if(AITargetManаger.GetAttackersCount(_enemy)>skilltrigger.count){
-							skillmanager.Use(skilltrigger.skill,enemy);
+                    if (AITargetManager.GetAttackersCount(_enemy) > skilltrigger.count)
+                    {
+                            skillmanager.Use(skilltrigger.skill, _enemy);
 							return true;
 						}
 					break;
 					case SkillTriggerType.ALLY_KILL:
 						if(aibase.cahcedDataForTick["ALLY_KILL"]>0){
-							skillmanager.Use(skilltrigger.skill,enemy);
+                            skillmanager.Use(skilltrigger.skill, _enemy);
 							return true;
 						}
 					break;
@@ -359,6 +362,12 @@ public class AIWalk : AIMovementState
         }
 		base.Attack();
 	}
+    public virtual void LostEnemy()
+    {
+        _enemy.attackers.Remove(controlledPawn);
+         base.LostEnemy();
+
+    }
 	protected override void StopAttack(){
 		attacking=false;
 		
@@ -375,7 +384,7 @@ public class AIWalk : AIMovementState
 		stateSpeed =controlledPawn.groundRunSpeed;
 		agent.SetSpeed(controlledPawn.groundRunSpeed);
 		agent.ParsePawn (controlledPawn);
-		aibase.cahcedDataForTick["ALLY_COUNT"]=AITargetManаger.GetAttackersCount(_enemy);
+        aibase.cahcedDataForTick["ALLY_COUNT"] = AITargetManager.GetAttackersCount(_enemy);
 		aibase.cahcedDataForTick["ALLY_KILL"] = 0;
 		timeStart = Time.time;
 		base.StartState ();
@@ -385,8 +394,10 @@ public class AIWalk : AIMovementState
 		StopAvoid();
 		StopStrafe();
         StopAttack();
-        _enemy.attackers.Remove(controlledPawn);
-        _enemy = null;
+        if (_enemy != null) {
+            _enemy.attackers.Remove(controlledPawn);
+            _enemy = null;
+        }
         controlledPawn.enemy = null;
         base.EndState();
     }
@@ -434,11 +445,13 @@ public class AIWalk : AIMovementState
     {
         //select target by distance
         //but i have mind select by argo
-		int curTargetPrior = controlledPawn.seenDistance;
+		float curTargetPrior =controlledPawn.seenDistance;
+        Pawn target = null;
 		if (_enemy != null&&targetVisible) {
-			curTargetPrior-=controlledPawn.seenDistance*0.9;
+            curTargetPrior -= (controlledPawn.seenDistance * 0.9f);
+            target = _enemy;
 		}
-		Pawn target = null;
+		
         
 		
 		enemyCount=0;

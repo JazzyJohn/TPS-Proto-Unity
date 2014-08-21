@@ -176,7 +176,7 @@ public class AIState : MonoBehaviour {
 	public virtual void SetEnemy(Pawn enemy){
 		if(_enemy != enemy){
 			aibase.SetEnemy(enemy);
-			AITargetManаger.AddAttacker(_enemy,controlledPawn);
+            AITargetManager.AddAttacker(_enemy, controlledPawn);
 		}
 		_enemy = enemy;
 		controlledPawn.enemy = enemy;
@@ -192,8 +192,9 @@ public class AIState : MonoBehaviour {
 	public  virtual void AllyKill(){
 	
 	}
-	public void LostEnemy(){
-		AITargetManаger.RemoveAttacker(_enemy,controlledPawn);
+    public virtual void LostEnemy()
+    {
+        AITargetManager.RemoveAttacker(_enemy, controlledPawn);
 		_enemy = null;
 		controlledPawn.enemy = null;
 		
@@ -291,7 +292,7 @@ public class AIState : MonoBehaviour {
             }
             else
             {
-                distance = hit.distance 
+                distance = hit.distance;
 				targetVisible =false;
                 return false;
             }

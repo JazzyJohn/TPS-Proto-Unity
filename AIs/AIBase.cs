@@ -55,7 +55,7 @@ public class AIBase : MonoBehaviour
         }
 	
 		if(controlledPawn.enemy!=null){
-			AITargetManаger.RemoveAttacker(controlledPawn,controlledPawn.enemy);
+            AITargetManager.RemoveAttacker(controlledPawn, controlledPawn.enemy);
 		}
     }
 
@@ -198,11 +198,16 @@ public class AIBase : MonoBehaviour
    
    public void SetEnemy(Pawn enemy){
 		if(aiSwarm!=null){
-			aiSwarm.NewEnemy(enemy)
+            aiSwarm.NewEnemy(enemy);
 		}
    }
    public void EnemyFromSwarm(Pawn enemy){
 		_currentState.EnemyFromSwarm(enemy);
+   }
+
+   public void AllyKill()
+   {
+       _currentState.AllyKill();
    }
 }
 

@@ -55,7 +55,7 @@ public class AIBattleJugger : AIMovementState
         {
 
             DirectVisibility(out _distanceToTarget);
-            if (AIAgentComponent.IsRiched(curPoint.GiveTarget().position, controlledPawn.myTransform.position, agent.size))
+            if (agent.IsRiched(curPoint.GiveTarget().position, controlledPawn.myTransform.position, agent.size))
             {
                 NextPoint();
             }

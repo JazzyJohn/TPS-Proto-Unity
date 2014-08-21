@@ -40,7 +40,7 @@ public class Hunt_PVPGameRule : PVPGameRule {
 		}
 	
 	}
-	public void LastWave(){
+	public void LastWaveAnonce(){
 		PlayerMainGui.instance.Annonce(AnnonceType.SWARMCLEAR);
 	}
 	

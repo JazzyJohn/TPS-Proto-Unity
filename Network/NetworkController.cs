@@ -366,7 +366,7 @@ public class NetworkController : MonoBehaviour {
 					
 					}
 					break;
-				case "pawnChangeShootAnimStateRequest":
+				case "pawnChangeShootAnimState":
 					HandlePawnChangeShootAnimState(dt);
 					break;
 				case "pawnStartKick":
@@ -681,7 +681,7 @@ public class NetworkController : MonoBehaviour {
     }
 	
     /// <summary>
-    /// pawnChangeShootAnimStateRequest request to server
+    /// pawnChangeShootAnimState request to server
     /// </summary>	
     public void PawnChangeShootAnimStateRequest(int id,string animName,bool state)
     {
@@ -690,7 +690,7 @@ public class NetworkController : MonoBehaviour {
         data.PutInt("id", id);
 		data.PutBool("state", state);
 		data.PutUtfString("animName", animName);
-        ExtensionRequest request = new ExtensionRequest("pawnChangeShootAnimStateRequest", data, serverHolder.gameRoom);
+        ExtensionRequest request = new ExtensionRequest("pawnChangeShootAnimState", data, serverHolder.gameRoom);
         smartFox.Send(request);
 
     }
@@ -1110,7 +1110,7 @@ public class NetworkController : MonoBehaviour {
 		
         ExtensionRequest request = new ExtensionRequest("enterRobot", data, serverHolder.gameRoom);
 		if(smartFox.MySelf.ContainsVariable("Master") && NetworkController.smartFox.MySelf.GetVariable("Master").GetBoolValue()){
-			data.PutInt("userId", smartFox.MySelf.GetId());
+			data.PutInt("userId", smartFox.MySelf.Id);
 			HandleEnterRobot(data);		
 		}else{
 			smartFox.Send(request);
@@ -1555,8 +1555,8 @@ public class NetworkController : MonoBehaviour {
 		pawn.isEmpty = false;
 		Player player  = GetPlayer(dt.GetInt("userId"));
 		player.AfterSpawnSetting(pawn,new int[]{});	
-		if(smartfox.MySelf.GetId()==dt.GetInt("userId")){
-			pawn.SetMine(true);
+		if(_smartFox.MySelf.Id==dt.GetInt("userId")){
+			pawn.foxView.SetMine(true);
 			player.EnterBotSuccess(pawn);
 		}	
 		if(player.team==1){

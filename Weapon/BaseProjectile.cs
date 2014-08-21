@@ -111,6 +111,8 @@ public class BaseProjectile : MonoBehaviour
 
     public float trajectoryCoef;
 
+    public bool shouldInit= false;
+
 	void Awake(){
 		aSource = GetComponent<AudioSource>();	
 		sControl = new soundControl(aSource);//создаем обьект контроллера звука и передаем указатель на источник
@@ -121,6 +123,11 @@ public class BaseProjectile : MonoBehaviour
 	
     void OnEnable()
     {
+        shouldInit=true;
+        used = false;
+    }
+    void Init(){
+        shouldInit = false;
 		switch (attraction)
         {
           
@@ -167,7 +174,10 @@ public class BaseProjectile : MonoBehaviour
 
     protected void Update()
     {
-		
+        if (shouldInit)
+        {
+            Init();
+        }
         RaycastHit hit;
 
         switch (attraction)
@@ -488,7 +498,7 @@ public class BaseProjectile : MonoBehaviour
         //Debug.Log(splashRadius);
         Collider[] hitColliders = Physics.OverlapSphere(Position, splashRadius);
    
-        RaycastHit[] hits;
+        
         for (int i = 0; i < hitColliders.Length; i++)
         {
 
@@ -537,8 +547,9 @@ public class BaseProjectile : MonoBehaviour
     }
 	public void DeActivate(){
 		gameObject.Recycle();
+        shouldInit = false;
 	}
-	public OnDisable(){
+	public void OnDisable(){
 		CancelInvoke();
 	}
 }

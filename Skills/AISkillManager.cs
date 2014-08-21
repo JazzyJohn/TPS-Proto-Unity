@@ -17,11 +17,13 @@ public class AISkillManager : MonoBehaviour
 	private SkillBehaviour activeSkill;
 		
 	public bool IsActive(){
-		if(activeskill!=null){
-			if(activeskill.Activate()){
+        if (activeSkill != null)
+        {
+            if (activeSkill.IsActivating())
+            {
 				return true;
 			}else{
-				activeskill = null;
+                activeSkill = null;
 				return false;
 			}
 		}
