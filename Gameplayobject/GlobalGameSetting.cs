@@ -13,15 +13,18 @@ public class GlobalGameSetting : MonoBehaviour{
 	
 	protected Dictionary<string, List<float>> AISettings = new Dictionary<string, List<float>>();
 	
+	public const string MAX_ATTACKERS ="maxAttackers";
+	
+	public const string COOL_DOWN ="coolDown";
 	
 	void Awake(){
-		TextAsset xml = Resources.Load("huntTable") as TextAsset;
+		TextAsset xml = Resources.Load("GameSetting") as TextAsset;
 		XmlDocument xmlDoc = new XmlDocument();
 		xmlDoc.LoadXml(xml.text);
 		ParseHuntTable(xmlDoc);
-		xml = Resources.Load("aiTable") as TextAsset;
-		xmlDoc = new XmlDocument();
-		xmlDoc.LoadXml(xml.text);
+		//xml = Resources.Load("aiTable") as TextAsset;
+		//xmlDoc = new XmlDocument();
+		//xmlDoc.LoadXml(xml.text);
 		ParseAiTable(xmlDoc);
 	
 	

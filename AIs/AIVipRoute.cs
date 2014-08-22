@@ -85,8 +85,8 @@ public class AIVipRoute : AIState {
         base.StartState();
 
     }
-    public void FixedUpdate()
-    {
+	protected void FixedUpdate(){
+		base.FixedUpdate();
         if (waiting)
         {
             _waitTimer += Time.fixedDeltaTime;

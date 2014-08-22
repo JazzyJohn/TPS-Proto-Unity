@@ -50,8 +50,8 @@ public class AIWalk : AIMovementState
 	public void Awake(){
         base.Awake();
         AISkillManager skillmanager  = GetComponent<AISkillManager>();
-		maxAttackers =GlobalGameSetting.instance. GetAiSettings("maxAttackers",(int)density,maxAttackers);
-        coolDown = GlobalGameSetting.instance.GetAiSettings("coolDown", (int)speed, coolDown);
+		maxAttackers =GlobalGameSetting.instance. GetAiSettings(GlobalGameSetting.MAX_ATTACKERS,(int)density,maxAttackers);
+        coolDown = GlobalGameSetting.instance.GetAiSettings(GlobalGameSetting.COOL_DOWN, (int)speed, coolDown);
 	}
 	
 	
@@ -150,20 +150,20 @@ public class AIWalk : AIMovementState
             {
 				
 				
-               
+               _pathCoef =0.0f;
 				if(SkillUse()){
 					isMoving = false;
 				}else{
 					isMoving = true;
-                    agent.SetTarget(_enemy.myTransform.position, true);
+                   
 					UpdateState();
 					if(isMelee){
 					
 						switch(state){
 							case BattleState.Inclosing:
 							//move Close to enemy
-								_pathCoef=pathCoef;
-								StopAvoid();
+								StartFollow(_enemy.myTransform);
+						
 								StopStrafe();
 							break;
 							case BattleState.InDangerArea:
@@ -172,21 +172,21 @@ public class AIWalk : AIMovementState
 								if(_lastTimeAttack+coolDown<Time.time){
 									//If amount of attackers small move close
 									if(_enemy.attackers.Count<maxAttackers){
-										_pathCoef = pathCoef;
-										StopAvoid();
+										StartFollow(_enemy.myTransform);
+									
 										StopStrafe();
 										
 									}else{
 									//else strafe around;
-										_pathCoef =0.0f;
-										StopAvoid();
+										
+										StopAvoidFollow();
 									   
 										StartStrafe(_enemy.myTransform);
 									}
 								}else{
 									//strafe around;
-									_pathCoef = 0.0f;
-									StopAvoid();
+									
+									StopAvoidFollow();
 								  
 									StartStrafe(_enemy.myTransform);
 								}
@@ -201,7 +201,7 @@ public class AIWalk : AIMovementState
 										
 									}else{
 										//Else avoid
-										_pathCoef =0.0f;
+									
 										StopStrafe();
 										StartAvoid(_enemy.myTransform);
 									}
@@ -209,8 +209,8 @@ public class AIWalk : AIMovementState
 								
 							break;
 							case BattleState.Attacking:
-							_pathCoef = pathCoef;
-								StopAvoid();
+								StartFollow(_enemy.myTransform);
+								
 								StopStrafe();
 							break;
 						
@@ -220,19 +220,19 @@ public class AIWalk : AIMovementState
 							case BattleState.Inclosing:
 								StopAttack();
 								//move Close to enemy
-								_pathCoef=pathCoef;
-								StopAvoid();
+								
+								StartFollow(_enemy.myTransform);
 								StopStrafe();
 								break;	
 							case BattleState.Attacking:
-								_pathCoef = 0.0f;
-								StopAvoid();
+								
+								StopAvoidFollow();
 								Attack();	
 								StartStrafe(_enemy.myTransform);
 							break;
 							case BattleState.InDangerArea:
 								StartAvoid(_enemy.myTransform);
-								_pathCoef = 0.0f;
+								
 								StopStrafe();
 								Attack();
 							break;
@@ -265,8 +265,9 @@ public class AIWalk : AIMovementState
         }
         else
         {
+			NormalMovement();
 			if(_enemy!= null){
-			
+				agent.SetTarget(_enemy.myTransform.position, true);
 				//Debug.Log(Time.deltaTime+" "+_lostTimer+" "+lostTime);
 				_lostTimer+=AIBase.TickPause;
 				if(_lostTimer>lostTime){
@@ -380,7 +381,7 @@ public class AIWalk : AIMovementState
 	}
 	public override void StartState(){
 		agent = GetComponent<AIAgentComponent>();
-		Debug.Log ("BATTLE");
+		
 		stateSpeed =controlledPawn.groundRunSpeed;
 		agent.SetSpeed(controlledPawn.groundRunSpeed);
 		agent.ParsePawn (controlledPawn);
@@ -389,11 +390,10 @@ public class AIWalk : AIMovementState
 		timeStart = Time.time;
 		base.StartState ();
 	}
+	
     public override void EndState()
     {
-		StopAvoid();
-		StopStrafe();
-        StopAttack();
+		NormalMovement();
         if (_enemy != null) {
             _enemy.attackers.Remove(controlledPawn);
             _enemy = null;
@@ -401,7 +401,8 @@ public class AIWalk : AIMovementState
         controlledPawn.enemy = null;
         base.EndState();
     }
-	public void FixedUpdate(){
+	protected void FixedUpdate(){
+		base.FixedUpdate();
 		if (_enemy != null&&isMoving) {
             bool needJump = agent.needJump;
 			agent.WalkUpdate ();

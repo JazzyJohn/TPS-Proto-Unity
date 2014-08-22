@@ -9,9 +9,10 @@ public class DestroyableNetworkObject : MonoBehaviour {
  
 		yield return new WaitForSeconds(0.2f);
        // Debug.Log("RPC KILL ME REQUEST" + this);
-      
-		foxView.Destroy();	
-		KillMe();
+		if(foxView!=null){
+			foxView.Destroy();	
+			KillMe();
+		}
 
 	}
     public void StartCoroutineRequestKillMe()
@@ -19,8 +20,10 @@ public class DestroyableNetworkObject : MonoBehaviour {
         StartCoroutine(CoroutineRequestKillMe());
     }
 	public void RequestKillMe(){
-       foxView.Destroy();	
-		KillMe();
+		if(foxView!=null){
+			foxView.Destroy();	
+			KillMe();
+		}
 	}
 	
 	public void KillMe(){

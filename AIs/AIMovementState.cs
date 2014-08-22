@@ -4,12 +4,15 @@ using System.Collections.Generic;
 
 public class AIMovementState : AIState
 {
-
+	public const MAX_AHEAD  =2.0f;
+	
 	protected  AIAgentComponent agent;
 	
-	public Transform avoid;
+	protected Transform avoid;
 	
-	public Transform strafe;
+	protected Transform strafe;
+	
+	protected RaycastHit colliTarget;
 	
 	public float avoidCoef = 1.0f;
 
@@ -20,6 +23,10 @@ public class AIMovementState : AIState
 	public float pathCoef=1.0f;
 	
 	public float strafeCoef = 1.0f;
+	
+	public float collAvoidCoef = 1.0f;
+	
+	protected float _collAvoidCoef;
 	
 	protected float _avoidCoef;
 	
@@ -37,12 +44,23 @@ public class AIMovementState : AIState
 		_separationCoef =separationCoef;
 		_pathCoef  = pathCoef;
         _strafeCoef = strafeCoef;
+		_collAvoidCoef =collAvoidCoef;
 		
 	}
 	protected float stateSpeed;
 
 	public virtual bool ShoudAvoid(Pawn pawn){
 		return  !IsEnemy(pawn);
+	}
+	protected void FixedUpdate(){
+		 RaycastHit hitInfo;
+		 Vector3 velocity = controledPawn.GetVelocity()*MAX_AHEAD;
+		 if(SphereCast(controledPawn.myTransform.position, controlledPawn.GetSize ()/2,velocity.normalized,  hitInfo,  velocity.magnitude*MAX_AHEAD, agent.dynamicObstacleLayer)){
+			colliTarget =hitInfo;
+		 
+		 }else{
+			colliTarget = null;
+		 }
 	}
 	public Vector3 DynamicAwoidness(){
         int neighborCount = 0;
@@ -83,7 +101,10 @@ public class AIMovementState : AIState
         Debug.DrawRay(controlledPawn.myTransform.position, AvoidOneTarget() * _avoidCoef, Color.blue);
         Debug.DrawRay(controlledPawn.myTransform.position, StrafeOneTarget() * _strafeCoef, Color.green);
         Debug.DrawRay(controlledPawn.myTransform.position, agent.GetTranslate()  * _pathCoef, Color.red);
-		return (agent.GetTranslate()*_pathCoef + DynamicAwoidness()*_separationCoef+AvoidOneTarget()*_avoidCoef +StrafeOneTarget()*_strafeCoef).normalized*stateSpeed;
+		Debug.DrawRay(controlledPawn.myTransform.position, agent.CollisionAvoidness()  * _collAvoidCoef, Color.yellow);
+		Vector3 result = (agent.GetTranslate()*_pathCoef + DynamicAwoidness()*_separationCoef+AvoidOneTarget()*_avoidCoef +StrafeOneTarget()*_strafeCoef+CollisionAvoidness()*_collAvoidCoef).normalized;
+		Debug.DrawRay(controlledPawn.myTransform.position,result, Color.white);
+		return result*stateSpeed;
 		
 	}
 	public Vector3 AvoidOneTarget(){
@@ -121,8 +142,31 @@ public class AIMovementState : AIState
 		avoid= target;
 		_avoidCoef= avoidCoef;
 	}
-	public void StopAvoid(){
+	public void StartFollow(Transform target){
+		avoid= target;
+		_avoidCoef= -avoidCoef;
+	}
+	public void StopAvoidFollow(){
 		avoid=null;
 		_avoidCoef=0.0f;
+	}
+	public Vector3 CollisionAvoidness(){
+		if(colliTarget==null){
+			return Vector3.zero;
+		}
+		Vector3 ahead = controledPawn.myTransform.position + controledPawn.GetVelocity()*MAX_AHEAD;
+		Vector3 avoidForce= (ahead-colliTarget.point);
+		if(avoidForce.sqrMagnitude<size*size){
+			return avoidForce.normalized;
+		}else return Vector3.zero;
+	}
+	
+	public void NormalMovement(){
+		StopAvoid();
+		StopStrafe();
+        StopAttack();
+		_separationCoef =separationCoef;
+		_pathCoef  = pathCoef;
+      	_collAvoidCoef =collAvoidCoef;
 	}
 }

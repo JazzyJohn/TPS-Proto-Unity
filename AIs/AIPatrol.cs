@@ -50,8 +50,9 @@ public class AIPatrol : AIMovementState
 		base.StartState ();
 		
 	}
-	public void FixedUpdate(){
-
+	protected void FixedUpdate(){
+		base.FixedUpdate();
+		
         if (patrolPoints[step] == null)
         {
             return;

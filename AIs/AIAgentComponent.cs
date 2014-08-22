@@ -15,7 +15,7 @@ public class AIAgentComponent : MonoBehaviour {
 	private int stepsToCheck = 6;
 	public bool smoothPath = true; 
 	
-	private LayerMask dynamicObstacleLayer;
+	
 	private LayerMask agentLayer;
 
 	private Node nodeWithAgent;
@@ -23,6 +23,8 @@ public class AIAgentComponent : MonoBehaviour {
 	private bool aceleration = false;
 	public bool needJump = false;
 	//NATIVE
+	public LayerMask obstacleMask;
+    public LayerMask dynamicObstacleLayer;
 	protected float pawnSpeed;
 	protected NavMeshPath path;
 	protected int curCorner;
@@ -42,6 +44,8 @@ public class AIAgentComponent : MonoBehaviour {
 
 	protected Vector3 resultTranslate;
 	protected Quaternion resultRotation;
+	
+	public bool recalc= false;
 	void Awake(){
 		if(PathfindingEngine.Instance==null){
             type = PathType.NATIVE;
@@ -85,7 +89,7 @@ public class AIAgentComponent : MonoBehaviour {
 			}
 	}
 	public Vector3 GetTranslate(){
-		return resultTranslate;
+		return resultTranslate.normalized;
 	}
 	public Quaternion GetRotation(){
 		return resultRotation;
@@ -129,7 +133,7 @@ public class AIAgentComponent : MonoBehaviour {
 	public void SetTarget(Vector3 newTarget,bool forced = false){
 
 		if (forced) {
-			if((newTarget -target).sqrMagnitude>4.0f||agent.path.Count>5){
+			if((newTarget -target).sqrMagnitude>4.0f||agent.path.Count>5||recalc){
 					ForcedSetTarget(newTarget);
 			}
 				
@@ -140,6 +144,7 @@ public class AIAgentComponent : MonoBehaviour {
 		}
 	}
 	public void ForcedSetTarget(Vector3 newTarget){
+		recalc= false;
 		target= newTarget;
 		switch(type){
 			case PathType.PATHFINDINGENGINE:
@@ -249,15 +254,23 @@ public class AIAgentComponent : MonoBehaviour {
 	
 		if(path.corners.Length>curCorner ){
 			
-
-
-
+			
 			while(path.corners.Length>curCorner &&IsRiched(path.corners[curCorner],myTransform.position,size)){
 				curCorner++;
+			}
+			Vector3 distance = path.corners[curCorner] -myTransform.position;
+			if(Physics.Raycast(myTransform.position, distance.normalized,distance.magnitude, obstacleMask){
+				curCorner--;
+				if(curCorner<0){
+					ForcedSetTarget(target);
+					return;
+				}
+			
 			}
 
             if (path.corners.Length <= curCorner)
             {
+				recalc =true;
                 return;
             }
            // Debug.Log(nextStep + "  " + agent.path[0] + "  " + agent.path.Count);

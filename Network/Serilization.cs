@@ -275,7 +275,16 @@ namespace nstuff.juggerfall.extension.models
 		public int owner;
 		
 	}
-	
+	[Serializable]
+    public class GameSettingModel  : SerializableSFSType{
+		public int teamCount;
+
+		public int maxTime;
+		
+		public int maxScore;
+		
+		public Hashtable huntTable;
+	}
 	
 	
 }

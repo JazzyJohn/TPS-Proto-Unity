@@ -11,11 +11,22 @@ public class AISkillManager : MonoBehaviour
 		public int count  =0;
 		public SkillBehaviour skill;
 	}
-	
+
 	public SkillTrigger[] allSkills;
 		
 	private SkillBehaviour activeSkill;
+
+	private Pawn owner;
+	
+	void Awake(){
+		owner=  GetComponent<Pawn>();
+	
+		foreach(SkillTrigger trigger in allSkills){
+			trigger.skill.Init(owner);
+		}
 		
+	}
+	
 	public bool IsActive(){
         if (activeSkill != null)
         {
@@ -30,6 +41,20 @@ public class AISkillManager : MonoBehaviour
 		return false;
 	}
 	public void Use(SkillBehaviour skill,Pawn enemy){
-	
+		activeSkill=skill;
+		switch(skill.type){
+				case TargetType.SELF:
+				case TargetType.GROUPOFPAWN_BYSELF:	
+					 Use(owner);
+                    break;
+				case TargetType.PAWN:
+				case TargetType.GROUPOFPAWN_BYPAWN:
+					 Use(enemy);			
+				break;
+				case TargetType.POINT:
+				case TargetType.GROUPOFPAWN_BYPOINT:
+					Use(enemy.myTransform.position);	
+				break;				
+			}
 	}
 }

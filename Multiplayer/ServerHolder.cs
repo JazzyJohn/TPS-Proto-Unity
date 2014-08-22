@@ -354,53 +354,53 @@ public class ServerHolder : MonoBehaviour
         bool isVisible = true;
         int roomCnt = newRoomMaxPlayers;
         RoomSettings settings = new RoomSettings(newRoomName);
-        RoomVariable gameRule = null, maxScore = null, maxTime=null;
+        RoomVariable gameRule = null;
         settings.MaxVariables = 10;
+		GameSettingModel setting = new GameSettingModel();
         switch (mode)
         {
             case GAMEMODE.PVE:
                 roomCnt = newPVERoomMaxPlayers;
-                 gameRule =new SFSRoomVariable("ruleClass", "nstuff.juggerfall.extension.gamerule.PVEGameRule");
-                 settings.Variables.Add(new SFSRoomVariable("teamCount", 2));
-                 maxTime =new SFSRoomVariable("maxTime", 0);
-                maxScore =new SFSRoomVariable("maxScore",0);
+                gameRule =new SFSRoomVariable("ruleClass", "nstuff.juggerfall.extension.gamerule.PVEGameRule");
+                setting.teamCount = 2;
+                setting.maxTime =0;
+                setting.maxScore= 0;
                 break;
             case GAMEMODE.RUNNER:
                 roomCnt = newRunnerRoomMaxPlayers;
                 isVisible = false;
                 gameRule = new SFSRoomVariable("ruleClass", "nstuff.juggerfall.extension.gamerule.RunnerGameRule");
-                 maxTime =new SFSRoomVariable("maxTime", 0);
-                maxScore =new SFSRoomVariable("maxScore",0);
+                setting.maxTime =0;
+                setting.maxScore= 0;
                 break;
             case GAMEMODE.PVP:
                 gameRule = new SFSRoomVariable("ruleClass", "nstuff.juggerfall.extension.gamerule.PVPGameRule");
-                settings.Variables.Add(new SFSRoomVariable("teamCount", 2));
-                maxTime =new SFSRoomVariable("maxTime", 0);
-                maxScore =new SFSRoomVariable("maxScore", 25);
+                setting.teamCount = 2;
+                setting.maxTime =0;
+                setting.maxScore= 25;
                 break;
             case GAMEMODE.PVPJUGGERFIGHT:
                 gameRule = new SFSRoomVariable("ruleClass", "nstuff.juggerfall.extension.gamerule.PVPJuggerFightGameRule");
-                settings.Variables.Add(new SFSRoomVariable("teamCount", 2));
-                maxTime = new SFSRoomVariable("maxTime", 0);
-                maxScore = new SFSRoomVariable("maxScore", 25);
+                 setting.teamCount = 2;
+                setting.maxTime =0;
+                setting.maxScore= 25;
                 break;
 			case GAMEMODE.PVPHUNT:
 				gameRule = new SFSRoomVariable("ruleClass", "nstuff.juggerfall.extension.gamerule.HuntGameRule");
-                settings.Variables.Add(new SFSRoomVariable("teamCount", 2));
-                maxTime = new SFSRoomVariable("maxTime", 0);
-                maxScore = new SFSRoomVariable("maxScore", 5000);
-                SFSObject data = new SFSObject();
+                setting.teamCount = 2;
+                setting.maxTime =0;
+                setting.maxScore= 500;
+            
                // Debug.Log(GlobalGameSetting.instance.GetHuntScoreTable());
 				//data.Put("huntTable",new SFSDataWrapper(5,GlobalGameSetting.instance.GetHuntScoreTable()));				
              
-				settings.Variables.Add(new SFSRoomVariable("gameVar", data,5));
-                Debug.Log(data);
+				
                
 			break;
         }
-     
-        settings.Variables.Add(maxScore);
-        settings.Variables.Add(maxTime);
+        SFSObject data = new SFSObject();
+		data.PutClass("gameSetting",setting);
+        settings.Variables.Add(new SFSRoomVariable("gameVar", data));
         settings.GroupId = "games";
         settings.IsGame = true;
         RoomVariable mapVar = new SFSRoomVariable("map", map);
