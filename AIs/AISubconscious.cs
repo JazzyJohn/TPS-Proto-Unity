@@ -2,8 +2,6 @@
 using System.Collections.Generic;
 using System.Threading;
 
-public enum Action { Atack = 0, Patrolling = 1, Sleep = 2, RunOut = 3 }
-
 public class AISubconscious : MonoBehaviour {
 	public AISensors sensor;
 	public AIAction[] actions;
@@ -11,12 +9,20 @@ public class AISubconscious : MonoBehaviour {
 
 	void Start()
 	{
-		sensor.owner = GetComponent<Pawn> ();
+		sensor.owner = GetComponent<AIBase> ();
+		sensor.Scan ();
+		NextAction ();
 	}
 
 	void Update()
 	{
-
+		if (!consious.aiAction.Interfere()) return;
+		if (consious.aiAction.DeactivateSensor().Length != 0)
+		{
+			sensor.ScanLimited (consious.aiAction.DeactivateSensor());
+		}
+		else sensor.Scan ();
+		NextAction ();
 	}
 
 	void NextAction()
@@ -31,9 +37,7 @@ public class AISubconscious : MonoBehaviour {
 				NextActionID = i;
 			}
 		}
-		if (consious.Waiting <= 0) {
-			consious.aiAction = FullActions[NextActionID];
-		}
+		if (consious.aiAction.GetPrioritet() < PrioritetMax) consious.aiAction = FullActions[NextActionID];k
 	}
 
 	AIAction[] GetFullActions()
@@ -52,6 +56,8 @@ public class AISubconscious : MonoBehaviour {
 	}
 
 }
+
+public enum Sensor { skin, eye, time, command, characteristic }
 
 [System.Serializable]
 public class AISensors {
@@ -72,9 +78,9 @@ public class AISensors {
 
 	public Dictionary<string, object> SensorParametrs = new Dictionary<string, object>();
 	
-	public Pawn owner;
+	public AIBase owner;
 
-	public void Scan()
+	public void Scan ()
 	{
 		SensorParametrs.Clear ();
 		if (CommandEnable) CommandSensorHandler ();
@@ -84,41 +90,42 @@ public class AISensors {
 		if (TimeSensorEnable) TimeSensorHandler ();
 	}
 
+	public void ScanLimited (Sensor[] Deactivated)
+	{
+		SensorParametrs.Clear ();
+		if (!Deactivated.Contains(Sensor.command) && CommandEnable) CommandSensorHandler ();
+		if (!Deactivated.Contains(Sensor.characteristic) && CharacteristicSensorEnable) CharacteristicSensorHandler ();
+		if (!Deactivated.Contains(Sensor.skin) && SkinSensorEnable) SkinSensorHandler ();
+		if (!Deactivated.Contains(Sensor.eye) && EyeSensorEnable) EyeSensorHandler ();
+		if (!Deactivated.Contains(Sensor.time) && TimeSensorEnable) TimeSensorHandler ();
+	}
+
 	[System.Serializable]
 	public class SkinSensor {
-		public void GetTargets ()
-		{
-			
-		}
+
 	}
 
 	void SkinSensorHandler()
 	{
-		
+
 	}
 
 	[System.Serializable]
 	public class EyeSensor {
-		public float SeeRange = 10f;
-		public float SeeConstantPrioritet = 50f;
 
-		public Transform[] GetTargets (Pawn owner)
-		{
-			return new Transform[0];
-		}
 	}
 
 	void EyeSensorHandler()
 	{
-		Transform[] Targets = sEye.GetTargets (owner);
-		float[] TargetsPrioritet = new float[Targets.Length];
-		Vector3 Pos = owner.transform.position;
-		for (int i = 0; i < TargetsPrioritet.Length; i++) {
-			float Distance = Vector3.Distance(Targets[i].position, Pos);
-			TargetsPrioritet[i] += sEye.SeeConstantPrioritet * Distance / sEye.SeeRange;
-		}
-		UpdateDictionaryParametrs ("SeeTargetsPrioritet", TargetsPrioritet);
-		UpdateDictionaryParametrs ("SeeTargets", Targets);
+//		GameObject[] PlayerInRadius = owner.GetPlayerInRadius ();
+//		float[] TargetsPrioritet = new float[PlayerInRadius.Length];
+//		Vector3 Pos = owner.transform.position;
+//		for (int i = 0; i < TargetsPrioritet.Length; i++) {
+//			float Distance = Vector3.Distance(Targets[i].position, Pos);
+//			TargetsPrioritet[i] += sEye.SeeConstantPrioritet * Distance / sEye.SeeRange;
+//		}
+//		UpdateDictionaryParametrs ("SeeTargetsPrioritet", TargetsPrioritet);
+//		UpdateDictionaryParametrs ("SeeTargets", Targets);
 	}
 
 	[System.Serializable]
@@ -183,4 +190,5 @@ public class AISensors {
 		if (!SensorParametrs.ContainsKey (Key)) SensorParametrs.Add (Key, newObject);
 		else SensorParametrs [Key] = newObject;
 	}
+
 }
