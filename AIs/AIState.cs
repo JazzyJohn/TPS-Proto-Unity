@@ -105,13 +105,15 @@ public class AIState : MonoBehaviour {
 		
 	}	
 	public class TimedTrigger:AITrigger{
-		public float timeStart;
+		
 		public TimedTrigger(){
-			timeStart = Time.time;
+			
 		}
 		public bool isTriggered(AIState owner, Params[] parametrs){
+          
             float delay = parametrs[0].value;
-			if (delay+timeStart<Time.time) {
+            if (delay + owner.timeStart < Time.time)
+            {
 				return true;
 			} else {
 				return false;
@@ -142,7 +144,8 @@ public class AIState : MonoBehaviour {
     public AIBase aibase;
 
     public bool IsDebug = false;
-	
+
+    public float timeStart;
 	public Pawn[] PawnList
 	{
 		set
@@ -230,7 +233,7 @@ public class AIState : MonoBehaviour {
 		}
 		
 		_enemy = controlledPawn.enemy;
-		
+        timeStart = Time.time;
 	}
 	public virtual void EndState(){
 	
@@ -309,6 +312,7 @@ public class AIState : MonoBehaviour {
 	
 	protected virtual void Attack(){
 		if(controlledPawn.CurWeapon!=null&&!isMelee){
+            Debug.Log("shoot");
 			controlledPawn.StartFire();
 			return;
 		}
@@ -316,6 +320,7 @@ public class AIState : MonoBehaviour {
 	}
 	protected virtual void StopAttack(){
 		if(controlledPawn.CurWeapon!=null&&!isMelee){
+            Debug.Log("stop shoot");
 			controlledPawn.StopFire();
 		}
 		controlledPawn.StopKick();

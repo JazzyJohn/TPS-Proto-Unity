@@ -258,21 +258,24 @@ public class AIAgentComponent : MonoBehaviour {
 			while(path.corners.Length>curCorner &&IsRiched(path.corners[curCorner],myTransform.position,size)){
 				curCorner++;
 			}
-			Vector3 distance = path.corners[curCorner] -myTransform.position;
-			if(Physics.Raycast(myTransform.position, distance.normalized,distance.magnitude, obstacleMask){
-				curCorner--;
-				if(curCorner<0){
-					ForcedSetTarget(target);
-					return;
-				}
-			
-			}
-
+		
             if (path.corners.Length <= curCorner)
             {
 				recalc =true;
                 return;
             }
+          /*Vector3 distance = path.corners[curCorner] - myTransform.position;
+           if (distance.y==0&&Physics.Raycast(myTransform.position, distance.normalized, distance.magnitude, obstacleMask))
+            {
+                curCorner--;
+                if (curCorner < 0)
+                {
+                    ForcedSetTarget(target);
+                    return;
+                }
+
+            }
+            */
            // Debug.Log(nextStep + "  " + agent.path[0] + "  " + agent.path.Count);
 		
 			//Get the next waypoint...
@@ -284,8 +287,8 @@ public class AIAgentComponent : MonoBehaviour {
 			float dist=Vector3.Distance(myTransform.position, point);
 			//Move towards the waypoint.
 			Vector3 direction=(point-myTransform.position).normalized;
-		
-			needJump = (point.y-myTransform.position.y)>stepHeight;
+        
+            //Debug.Log((point.y - myTransform.position.y) + "  " + stepHeight);
 	
 			resultTranslate  =direction * Mathf.Min(dist, pawnSpeed * Time.deltaTime)/Time.deltaTime;
 	

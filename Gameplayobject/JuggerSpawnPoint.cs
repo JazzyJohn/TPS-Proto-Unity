@@ -1,8 +1,8 @@
 using UnityEngine;
 using System.Collections;
 
-public class JuggerSpawnPoint : ObjectSpawnPoint {
-public float respawnTime= 10.0f;
+public class JuggerSpawnPoint : MonoBehaviour {
+    public float respawnTime= 10.0f;
 
 	private float respawnTimer = 0.0f;
 
@@ -12,11 +12,11 @@ public float respawnTime= 10.0f;
 	// Use this for initialization
 	void Awake() {
        
-		respawnTimer = respawnTime;
+		respawnTimer = 0;
 	}
 	// Update is called once per frame
 	void Update () {
-        if (spawnedObject == null&&NetworkController.IsMaster())
+        if (GameRule.instance.start&& spawnedObject == null&&NetworkController.IsMaster())
 		{
 			
 			

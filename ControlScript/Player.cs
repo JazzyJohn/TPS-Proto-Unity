@@ -302,7 +302,8 @@ public class Player : MonoBehaviour {
 							}
 						
 							RobotPawn robot = currentPawn.curLookTarget.GetComponent<RobotPawn>();
-							if(!inBot&&robot!=null&&robot.isEmpty&&robot.isMutual&&(currentPawn.myTransform.position-robotPawn.myTransform.position).sqrMagnitude<SQUERED_RADIUS_OF_ACTION*2.0){
+                            if (!inBot && robot != null && robot.isEmpty && robot.isMutual && (currentPawn.myTransform.position - robot.myTransform.position).sqrMagnitude < SQUERED_RADIUS_OF_ACTION * 2.0)
+                            {
 								EnterBot(robot);
 							
 							}
@@ -544,6 +545,7 @@ public class Player : MonoBehaviour {
 	public void EnterBotSuccess(RobotPawn robot){
 		inBot=true;
 		robotPawn=robot;
+        robotPawn.MySelfEnter();
 		currentPawn.DeActivate();
 		currentPawn.transform.parent = robotPawn.transform;
 		robotPawn.Activate ();

@@ -444,6 +444,12 @@ public class NetworkController : MonoBehaviour {
 				case "enterRobot":
 					HandleEnterRobot(dt);
 					break;
+                case "enterRobotSuccess":
+                    HandleEnterRobotSuccess(dt);
+                    break;
+                case "customAnimStart":
+                    HandleCustomAnimStar(dt);
+                    break;
 
             }
         }
@@ -1107,7 +1113,7 @@ public class NetworkController : MonoBehaviour {
     {
         ISFSObject data = new SFSObject();
 		data.PutInt("robotId", robotId);
-		
+        Debug.Log("enter");
         ExtensionRequest request = new ExtensionRequest("enterRobot", data, serverHolder.gameRoom);
 		if(smartFox.MySelf.ContainsVariable("Master") && NetworkController.smartFox.MySelf.GetVariable("Master").GetBoolValue()){
 			data.PutInt("userId", smartFox.MySelf.Id);
@@ -1140,7 +1146,19 @@ public class NetworkController : MonoBehaviour {
 		smartFox.Send(request);
 
     }
+    /// <summary>
+    /// customAnimStart request to server
+    /// </summary>	
 
+    public void CustomAnimStartRequest(int pawnId,string animName)
+    {
+        ISFSObject data = new SFSObject();
+        data.PutInt("pawnId", pawnId);
+        data.PutUtfString("anim", animName);
+        ExtensionRequest request = new ExtensionRequest("customAnimStart", data, serverHolder.gameRoom);
+		smartFox.Send(request);
+
+    }
 	
 	
 	
@@ -1535,11 +1553,12 @@ public class NetworkController : MonoBehaviour {
 
     public void  HandleEnterRobot(ISFSObject dt)
     {
-        ISFSObject data = new SFSObject();
+       
 		RobotPawn pawn = (RobotPawn) GetView(dt.GetInt("robotId")).pawn;
 		if(pawn.isEmpty){
 			pawn.isEmpty = false;
-			ExtensionRequest request = new ExtensionRequest("enterRobotSuccess", data, serverHolder.gameRoom);
+            ExtensionRequest request = new ExtensionRequest("enterRobotSuccess", dt, serverHolder.gameRoom);
+          
 			smartFox.Send(request);
 		}
 		
@@ -1557,14 +1576,34 @@ public class NetworkController : MonoBehaviour {
 		player.AfterSpawnSetting(pawn,new int[]{});	
 		if(_smartFox.MySelf.Id==dt.GetInt("userId")){
 			pawn.foxView.SetMine(true);
+            Debug.Log("enterRobotSuccess");
 			player.EnterBotSuccess(pawn);
-		}	
+        }
+        else
+        {
+            pawn.foxView.SetMine(false);
+            pawn.AnotherEnter();
+        }	
 		if(player.team==1){
 			PlayerMainGui.instance.Annonce(AnnonceType.INTEGRATAKEJUGGER);
 		}else{
 			PlayerMainGui.instance.Annonce(AnnonceType.RESTAKEJUGGER);
 		}
 		
+    }
+
+
+    /// <summary>
+    /// handle customAnimStart  request to server
+    /// </summary>	
+
+    public void HandleCustomAnimStar(ISFSObject dt)
+    {
+        ISFSObject data = new SFSObject();
+        GetView(dt.GetInt("pawnId")).pawn.PlayCustomAnimRemote(dt.GetUtfString("anim"));
+       
+    
+
     }
 
 }

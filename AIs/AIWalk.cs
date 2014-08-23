@@ -13,8 +13,6 @@ public class AIWalk : AIMovementState
 
 	public float lostTime=5.0f;
 	
-	public float timeStart;
-	
 	protected bool isMoving = true;
 	
 	public float DangerRadius;
@@ -35,7 +33,7 @@ public class AIWalk : AIMovementState
 	
 	public float meleeChance = 0.5f;
 	
-	private float _timeLastDecide = 0.0f;
+	private float _timeLastDecide = 20.0f;
 	
 	public static float TacticDelay = 20.0f;
 	
@@ -96,8 +94,8 @@ public class AIWalk : AIMovementState
 			}
 		
 		}
-	
-      
+
+        controlledPawn.ToggleAim(!isMelee);
         state = nextstate;
 	
 	}   
@@ -109,9 +107,8 @@ public class AIWalk : AIMovementState
 		
 		if(controlledPawn.naturalWeapon!=null){
 			if(controlledPawn.CurWeapon==null){
-				if(!isMelee){
-					controlledPawn.ToggleAim(false);
-				}
+				
+				
 				isMelee= true;
 				return;
 			}
@@ -120,18 +117,20 @@ public class AIWalk : AIMovementState
 			if(melee<meleeChance){
 				if(!isMelee){
                     StopAttack();
-					controlledPawn.ToggleAim(false);
+					
 				}
+               
 				isMelee = true;
 			}else{
 				_enemy.attackers.Remove(controlledPawn);
-				if(!isMelee){
+				if(isMelee){
                     StopAttack();
-					controlledPawn.ToggleAim(true);
+					
 				}
+               
 				isMelee= false;
 			}
-            Debug.Log("is melee" + isMelee);
+            Debug.Log("I decide melee" + isMelee);
 			return;
 		
 		
@@ -218,7 +217,7 @@ public class AIWalk : AIMovementState
 					}else{
 						switch(state){
 							case BattleState.Inclosing:
-								StopAttack();
+								//StopAttack();
 								//move Close to enemy
 								
 								StartFollow(_enemy.myTransform);
@@ -387,7 +386,7 @@ public class AIWalk : AIMovementState
 		agent.ParsePawn (controlledPawn);
         aibase.cahcedDataForTick["ALLY_COUNT"] = AITargetManager.GetAttackersCount(_enemy);
 		aibase.cahcedDataForTick["ALLY_KILL"] = 0;
-		timeStart = Time.time;
+       
 		base.StartState ();
 	}
 	

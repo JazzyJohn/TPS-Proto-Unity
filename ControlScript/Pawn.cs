@@ -152,7 +152,7 @@ public class Pawn : DamagebleObject {
 
 	private const float  FORCE_MULIPLIER=10.0f;
 
-	private float distToGround;
+    protected float distToGround;
 
 	public float stepHeight;
 
@@ -162,7 +162,7 @@ public class Pawn : DamagebleObject {
 
 	protected float size;
 
-	private CapsuleCollider capsule;
+    protected CapsuleCollider capsule;
 
 	public bool canWallRun;
 
@@ -313,7 +313,7 @@ public class Pawn : DamagebleObject {
 	private float lastPainSound =-10.0f;
 	protected soundControl sControl;//глобальный обьект контроллера звука
 
-	private bool isSpawn=false;//флаг респавна
+    protected bool isSpawn = false;//флаг респавна
 
 
 	//FOR killcamera size offset; Like robot always big;
@@ -374,6 +374,7 @@ public class Pawn : DamagebleObject {
         charMan = GetComponent<CharacteristicManager>();
         charMan.Init();
         skillManager = GetComponent<SkillManager>();
+        sControl = new soundControl(aSource);//создаем обьект контроллера звука
 	}
 
 
@@ -389,7 +390,7 @@ public class Pawn : DamagebleObject {
     public virtual void StartPawn()
     {
         Debug.Log("Start PAwn");
-        sControl = new soundControl(aSource);//создаем обьект контроллера звука
+      
         _canWallRun = canWallRun;
         //проигрываем звук респавна
         sControl.playClip(spawnSound);
@@ -405,7 +406,7 @@ public class Pawn : DamagebleObject {
 
             Destroy(GetComponent<ThirdPersonController>());
             Destroy(GetComponent<PlayerCamera>());
-            Destroy(GetComponent<MouseLook>());
+        
             GetComponent<Rigidbody>().isKinematic = true;
             //ivnMan.Init ();
         }
@@ -1039,8 +1040,8 @@ public class Pawn : DamagebleObject {
 
             }
 
-			if(canMove&&!isDead){
-
+			if(canMove&&!isDead&&shouldRotate()){
+                    
 					//if(aimRotation.sqrMagnitude==0){
 					getAimRotation();
 					/*}else{
@@ -1102,6 +1103,11 @@ public class Pawn : DamagebleObject {
 
 		
 	}
+
+    public virtual bool shouldRotate()
+    {
+        return true;
+    }
     public void SendNetUpdate() {
         updateTimer += Time.deltaTime;
         if (updateTimer > updateDelay&&!isDead)
@@ -1911,7 +1917,14 @@ public class Pawn : DamagebleObject {
        // nextMovement = nextMovement;// -Vector3.up * gravity + pushingForce / rigidbody.mass;
         Vector3 velocityChange;
 	   if(isAi){
-			velocityChange =Vector3.ClampMagnitude((nextMovement - velocity),aiVelocityChangeMax);
+           if (nextState == CharacterState.Jumping)
+           {
+               velocityChange = (nextMovement - velocity);
+           }
+           else
+           {
+               velocityChange = Vector3.ClampMagnitude((nextMovement - velocity), aiVelocityChangeMax);
+           }
 		}else{
 			velocityChange = (nextMovement - velocity);
 		}
@@ -2505,7 +2518,10 @@ public class Pawn : DamagebleObject {
         isActive = true;
 	}
 
-
+    public void PlayCustomAnimRemote(string name)
+    {
+        animator.SetSome(name);	
+    }
 
     public PawnModel GetSerilizedData()
     {

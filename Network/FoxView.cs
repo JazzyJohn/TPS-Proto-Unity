@@ -225,8 +225,11 @@ public class FoxView : MonoBehaviour {
     {
 		NetworkController.Instance.UpdateConquestPointRequest(model);
 	}
-	
-	
+
+    public void CustomAnimStart(string animName)
+    {
+        NetworkController.Instance.CustomAnimStartRequest(viewID, animName);
+    }
 	
 	
 }

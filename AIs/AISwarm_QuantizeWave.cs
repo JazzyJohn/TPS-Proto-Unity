@@ -53,26 +53,33 @@ public class AISwarm_QuantizeWave : AISwarm
 		base.AgentKilled(ai);
         _alreadyDead++;
         if (_alreadyDead >= maxSpawnCount[_curWave] || _alreadyDead >= needToKill[_curWave]) {
-            
-            NextWave();
+
+            NextSwarmWave();
         }
     }
 	public override  void DrawCheck(){
+       
 		base. DrawCheck();
+        if (!isActive)
+        {
+            return;
+        }
         if (guiComponent != null)
         {
             guiComponent.SetTitle((needToKill[_curWave] - _alreadyDead) + "/" + needToKill[_curWave]);
         }
 	}
-	public void   NextWave(){
+    public void NextSwarmWave()
+    {
 		_alreadyDead =0;
 		_alreadySpawn = 0;
 		_curWave++;
+        Debug.Log(_curWave +" "+ needToKill.Length);
         Hunt_PVPGameRule huntGameRule = GameRule.instance as Hunt_PVPGameRule;
 		if(_curWave>=needToKill.Length){
 			SendMessage("SwarmEnd", SendMessageOptions.DontRequireReceiver);
 			if(huntGameRule!=null){
-				huntGameRule.LastWave();
+                huntGameRule.LastWaveAnonce();
 			}
 			DeActivate();
 		}else{

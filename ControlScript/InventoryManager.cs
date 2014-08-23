@@ -84,7 +84,7 @@ public class InventoryManager : MonoBehaviour {
 	
 	//AMMO BAG SECTION
 	//Generate bas bag of all ammo
-	void GenerateBag(){
+	protected void GenerateBag(){
 		AmmoBag[] allTypeInGame = PlayerManager.instance.AllTypeInGame;
 		allAmmo = new AmmoBag[allTypeInGame.Length];
 		for(int i = 0;i<allTypeInGame.Length;i++){

@@ -8,7 +8,74 @@ public class RobotPawn : Pawn {
 	public bool isPilotIn = false;
 	public bool isMutual;
 	public bool isEmpty =true;
-	
+
+
+    public override void StartPawn()
+    {
+        Debug.Log("Start PAwn");
+      
+        _canWallRun = canWallRun;
+        //проигрываем звук респавна
+        sControl.playClip(spawnSound);
+        isActive = true;
+        if (emitter != null)
+        {
+            emitter.Emit();//запускаем эмиттер
+            isSpawn = true;//отключаем движения и повреждения
+        }
+
+       
+        cameraController = GetComponent<PlayerCamera>();
+       
+        naturalWeapon = GetComponent<WeaponOfExtremities>();
+        mainAi = GetComponent<AIBase>();
+
+        isAi = mainAi != null;
+        if (isAi)
+        {
+            if (foxView.isMine)
+            {
+                mainAi.StartAI();
+
+                foxView.SetAI(mainAi.aiGroup, mainAi.homeIndex);
+
+            }
+        }
+        GetSize();
+
+        correctPlayerPos = transform.position;
+
+        ivnMan.Init();
+        centerOffset = capsule.bounds.center - myTransform.position;
+        headOffset = centerOffset;
+        headOffset.y = capsule.bounds.max.y - myTransform.position.y;
+
+        distToGround = capsule.height / 2 - capsule.center.y;
+
+        health = charMan.GetIntChar(CharacteristicList.MAXHEALTH);
+       
+
+        if (isAi)
+        {
+            ivnMan.Init();
+            AfterSpawnAction();
+        }
+        //Debug.Log (distToGround);
+
+    }
+
+    public void AnotherEnter()
+    {
+        Destroy(GetComponent<ThirdPersonController>());
+        Destroy(GetComponent<PlayerCamera>());
+
+        GetComponent<Rigidbody>().isKinematic = true;
+    }
+    public void MySelfEnter()
+    {
+
+    }
+
 	protected void Awake(){
 		base.Awake();
 		if(isMutual){
@@ -106,7 +173,10 @@ public class RobotPawn : Pawn {
 		}
 		base.UpdateAnimator();
 	}
-	
+    public override bool shouldRotate()
+    {
+        return isPilotIn;
+    }
 	public override void ChangeDefaultWeapon(int myId){
 
 	}

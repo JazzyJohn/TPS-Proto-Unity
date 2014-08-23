@@ -11,6 +11,7 @@ public class AIPatrol : AIMovementState
 
 	public int step=0;
 	
+
 	public override void Tick()
 	{
 		DirectVisibility (out _distanceToTarget);
@@ -19,7 +20,7 @@ public class AIPatrol : AIMovementState
             return;
         }
 	//	Debug.Log (Vector3.Distance (patrolPoints [step].position, controlledPawn.myTransform.position)+"  "+agent.size);
-		if (agent.IsRiched(patrolPoints [step].position, controlledPawn.myTransform.position,agent.size)||agent.IsPathBad()) {
+		if (agent.IsRiched(patrolPoints [step].position, controlledPawn.myTransform.position,agent.size*2)||agent.IsPathBad()) {
 			NextPoint();
 		}
 			
@@ -52,16 +53,17 @@ public class AIPatrol : AIMovementState
 	}
 	protected void FixedUpdate(){
 		base.FixedUpdate();
-		
+     
         if (patrolPoints[step] == null)
         {
             return;
         }
-			bool needJump = agent.needJump;
+        
 			agent.WalkUpdate ();
            // Debug.Log("Jump" + needJump + agent.needJump);
-			needJump = !needJump&&agent.needJump;
+          
             Vector3 translateVect = GetSteeringForce();
+            needJump = CheckJump(translateVect  );
 			if (!needJump) {
                 controlledPawn.Movement(translateVect, CharacterState.Walking);
 

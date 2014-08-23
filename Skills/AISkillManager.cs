@@ -44,16 +44,16 @@ public class AISkillManager : MonoBehaviour
 		activeSkill=skill;
 		switch(skill.type){
 				case TargetType.SELF:
-				case TargetType.GROUPOFPAWN_BYSELF:	
-					 Use(owner);
+				case TargetType.GROUPOFPAWN_BYSELF:
+                    activeSkill.Use(owner);
                     break;
 				case TargetType.PAWN:
 				case TargetType.GROUPOFPAWN_BYPAWN:
-					 Use(enemy);			
+                    activeSkill.Use(enemy);			
 				break;
 				case TargetType.POINT:
 				case TargetType.GROUPOFPAWN_BYPOINT:
-					Use(enemy.myTransform.position);	
+                    activeSkill.Use(enemy.myTransform.position);	
 				break;				
 			}
 	}

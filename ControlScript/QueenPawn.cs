@@ -6,7 +6,8 @@ using System.Collections.Generic;
 public class QueenPawn : Pawn {
 
 	public void StartEggLay(){
-		animator.SetSome("StartEgg");		
+        foxView.CustomAnimStart("Egg");
+		animator.SetSome("Egg");		
 	}
 
 }

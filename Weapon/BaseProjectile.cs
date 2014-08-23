@@ -125,6 +125,7 @@ public class BaseProjectile : MonoBehaviour
     {
         shouldInit=true;
         used = false;
+        mRigidBody.velocity = Vector3.zero;
     }
     void Init(){
         shouldInit = false;
@@ -161,6 +162,7 @@ public class BaseProjectile : MonoBehaviour
          
         }
 		//Debug.Log("id " + projId+ " position " + mTransform.position + " rotation "+ mTransform.rotation);
+   
         if (replication)
         {
             //Debug.Log((float)(PhotonNetwork.time - lateTime));

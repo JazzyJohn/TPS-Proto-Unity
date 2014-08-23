@@ -9,6 +9,7 @@ using Sfs2X.Entities.Variables;
 using Sfs2X.Requests;
 using Sfs2X.Logging;
 using Sfs2X.Entities.Data;
+using nstuff.juggerfall.extension.models;
 
 
 public enum GAMEMODE { PVP, PVE,RUNNER, PVPJUGGERFIGHT,PVPHUNT};
