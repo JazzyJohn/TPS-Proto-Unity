@@ -50,13 +50,11 @@ public class MainMenuGUI : MonoBehaviour {
         _playerInfo.Player = FindObjectOfType<GlobalPlayer>();
 		//Получение с сервера комнат
 		Server = _playerInfo.Player.GetComponent<ServerHolder>();
-        if (PhotonNetwork.inRoom)
-        {
-            Server.LeaveRoom();
-        }
+        
 
 		if (Server.allRooms != null) {
-						foreach (RoomInfo room in Server.allRooms) {
+            foreach (RoomData room in Server.allRooms)
+            {
 								GameObject NewRoom = Instantiate (_RoomsNgui.ShablonRoom) as GameObject;
 								NewRoom.transform.parent = _RoomsNgui.AllRoom.transform;
 								NewRoom.name = room.name;
@@ -92,10 +90,11 @@ public class MainMenuGUI : MonoBehaviour {
 		if (ActivBut != null) {
 						switch (ActivBut.GetComponent<AnyRoom> ()._TypeRoom) {
 						case AnyRoom.TypeRoom.JoinRoom:
-								foreach (RoomInfo room in Server.allRooms) {
+                                foreach (RoomData room in Server.allRooms)
+                                {
 										if (room.name == ActivBut.name && room.playerCount < Server.newRoomMaxPlayers) {
 												//PhotonNetwork.JoinRoom (room.name);
-												Server.JoinRoom(room.name);
+												Server.JoinRoom(room);
 												HideAllPanel();
 												_RoomsNgui.Loading.alpha = 1f;
                                                 _PanelsNgui.SliderPanel.alpha = 1f;
@@ -106,8 +105,8 @@ public class MainMenuGUI : MonoBehaviour {
 						}
 
 		} else {
-			if(Server.allRooms.Length>0){
-				Server.JoinRoom();
+			if(Server.allRooms.Count>0){
+                Server.JoinRoom(Server.allRooms[UnityEngine.Random.Range(0,Server.allRooms.Count)]);
 				HideAllPanel();
 				_RoomsNgui.Loading.alpha = 1f;
                 _PanelsNgui.SliderPanel.alpha = 1f;
@@ -188,7 +187,7 @@ public class MainMenuGUI : MonoBehaviour {
 
 	public void RefreshRoom() // Обновления списка комнат
 	{
-		foreach(RoomInfo room in Server.allRooms)
+        foreach (RoomData room in Server.allRooms)
 		{
 			if (!Rooms.ContainsValue(room.name))
 			{

@@ -182,7 +182,7 @@ public class LevelingManager : MonoBehaviour, LocalPlayerListener,GameListener{
 	//Event Section
 	private Player myPlayer;
 	public void EventAppear(Player target){
-		if (target.GetView ().isMine) {
+		if (target.isMine) {
 			myPlayer = target;
 			
 		}

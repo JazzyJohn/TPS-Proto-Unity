@@ -1,12 +1,13 @@
 using UnityEngine;
 using System.Collections;
+using nstuff.juggerfall.extension.models;
 
 public class PVPGameRule : GameRule {
 
 		protected int[] teamKill;
 		
-		protected int[] teamScore;
 		
+		public AnnonceType type;
 		
 
 		
@@ -18,31 +19,13 @@ public class PVPGameRule : GameRule {
 		}
 
 		void Update(){
-			if (FinalStage ()&&curStage==0) {
-				curStage=1;
-			}
-			if (isGameEnded) {
-
-				restartTimer+= Time.deltaTime;				
-				if(restartTimer>restartTime&&!lvlChanging){
-					lvlChanging= true;
-					FindObjectOfType<ServerHolder>().LoadNextMap();
-				}
-			}else	if (!PhotonNetwork.isMasterClient) {
-				return;
-			}else if(IsGameEnded()){
-				IsLvlChanging= true;
-				isGameEnded=true;
-				photonView.RPC("GameEnded",PhotonTargets.All);
-					//PhotonNetwork.automaticallySyncScene = true;
-					//PhotonNetwork.LoadLevel(NextMap());
 			
-			}
             Annonce();
-			timer+= Time.deltaTime;			
+            base.Update();
+				
 		}
 
-        public AnnonceType type;
+      
         public void Annonce() {
             if (teamScore[0] > teamScore[1] && type!=AnnonceType.INTERGRALEAD)
             {
@@ -73,46 +56,25 @@ public class PVPGameRule : GameRule {
 			return Application.loadedLevelName;
 		}
 		
-		public override void Kill(int team){
-			photonView.RPC("RPCKill",PhotonTargets.MasterClient,team);
+		/*public override void Kill(int team){
+            ActuakKillCount(team);
 		}
-		[RPC]
-		public  void RPCKill(int team){
-			//0 for neutral creature so lower teamIndex by 1
-			ActuakKillCount(team);
-		}
+		
 		public virtual void ActuakKillCount(int team){
 			teamKill[team-1]++;
 		}
 		//For ticket system like in Battlefield
         public override void Spawn(int team)
         {
-			photonView.RPC("RPCSpawn",PhotonTargets.MasterClient,team);
-		}
-		[RPC]
-		public  void RPCSpawn(int team){
 			ActuakSpawnCount(team);
 		}
+		
 		public virtual void ActuakSpawnCount(int team){
 			
 
 		}
-		
-		public void OnPhotonSerializeView(PhotonStream stream, PhotonMessageInfo info)
-		{
-				if (stream.isWriting) {
-					for(int i=0;i<teamScore.Length;i++){
-						stream.SendNext(teamScore[i]);
-					}
-				} else {
-					for(int i=0;i<teamScore.Length;i++){
-					teamScore[i] =(int) stream.ReceiveNext();
-					}
-
-
-				}
-
-		}
+		*/
+	
 		public override int Winner(){
 			int maxScore = 0;
 			int winner = 0;
@@ -126,7 +88,7 @@ public class PVPGameRule : GameRule {
 		}
 		
 		
-		[RPC]
+	
 		public void GameEnded(){
 			//PhotonNetwork.automaticallySyncScene = true;
 			
@@ -144,4 +106,18 @@ public class PVPGameRule : GameRule {
 			}
 			return false;
 		}
+        public override void SetFromModel(GameRuleModel model)
+        {
+            PVPGameRuleModel pvpmodel = (PVPGameRuleModel)model;
+            if (!isGameEnded && pvpmodel.isGameEnded)
+            {
+                GameEnded();
+                isGameEnded = true;
+            }
+            for (int i = 0; i < pvpmodel.teamKill.Count; i++)
+            {
+                teamKill[i] = (int)pvpmodel.teamKill[i];
+                teamScore[i] = (int)pvpmodel.teamScore[i];
+            }
+        }
 }

@@ -214,6 +214,7 @@ public class ItemManager : MonoBehaviour {
                     {
                         effect = new Effect<bool>(bool.Parse(value));
                     }
+					effect.initalEffect = true;
                     effect.type = (EffectType)System.Enum.Parse(typeof(EffectType), nodeEffect.SelectSingleNode("effecttype").InnerText);
                     add.addEffect = effect;
                     entry.listOfEffect.Add(add);

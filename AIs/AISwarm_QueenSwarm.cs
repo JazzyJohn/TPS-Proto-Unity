@@ -18,22 +18,26 @@ public class AISwarm_QueenSwarm : AISwarm
 
        
 		AISpawnPoint respawn = respawns[(int)(UnityEngine.Random.value * respawns.Length)];
-		GameObject obj = PhotonNetwork.InstantiateSceneObject(queenPawn,respawn.transform.position,respawn.transform.rotation, 0, null) as GameObject;
+		
+		 GameObject obj =  NetworkController.Instance.PawnSpawnRequest(queenPawn, respawn.transform.position, respawn.transform.rotation, true, new int[0],true);
+                 
 		obj.GetComponent<Pawn>().SetTeam(0);
 		AIBase ai = obj.GetComponent<AIBase>();
         ai.Init(aiGroup, this, -1);
         AfterSpawnAction(ai);
 		base.Init(i);
     }
-	public override void SwarmTick()
+	public override void SwarmTick(float delta)
     {
         if (isActive && Bots.Length > 0)
         {
             for (int i = 0; i < eggs.Count; i++)
             {
               
-                    GameObject obj = PhotonNetwork.InstantiateSceneObject(Bots[(int)(UnityEngine.Random.value * Bots.Length)],eggs[i].position,eggs[i].rotation, 0, null) as GameObject;
-                    //	GameObject obj = PhotonNetwork.Instantiate (Bots[(int)(UnityEngine.Random.value*Bots.Length)].name, go.transform.position, go.transform.rotation, 0,null) as GameObject;
+                   // GameObject obj = PhotonNetwork.InstantiateSceneObject(Bots[(int)(UnityEngine.Random.value * Bots.Length)],eggs[i].position,eggs[i].rotation, 0, null) as GameObject;
+					GameObject obj =  NetworkController.Instance.PawnSpawnRequest(Bots[(int)(UnityEngine.Random.value * Bots.Length)], eggs[i].position,eggs[i].rotation, true, new int[0],true);
+                                  
+				 //	GameObject obj = PhotonNetwork.Instantiate (Bots[(int)(UnityEngine.Random.value*Bots.Length)].name, go.transform.position, go.transform.rotation, 0,null) as GameObject;
                     // go.Spawned(obj.GetComponent<Pawn>());
 					obj.GetComponent<Pawn>().SetTeam(0);
                     //  Debug.Log("Group before set" + this.aiGroup + "  " + aiGroup);

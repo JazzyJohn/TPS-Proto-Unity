@@ -9,9 +9,9 @@ public class TurretSkill : SkillBehaviour
 	public string turret;
 
 	protected override void ActualUse(Vector3 target){
-        if (photonView.isMine)
+        if (foxView.isMine)
         {
-            Pawn _turret = PhotonNetwork.Instantiate(turret, target + Vector3.up * 2, owner.myTransform.rotation, 0).GetComponent<Pawn>();
+            Pawn _turret =NetworkController.Instance.PawnSpawnRequest(turret, target + Vector3.up * 2, owner.myTransform.rotation, true,new int[0],false).GetComponent<Pawn>();
             _turret.SetTeam(owner.team);
             _turret.player = owner.player;
         }

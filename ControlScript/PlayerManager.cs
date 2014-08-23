@@ -18,6 +18,8 @@ public class PlayerManager : MonoBehaviour {
 	private int curTeam =1;
 
 	public int MaxTeam = 2;
+	
+	public Player LocalPlayer;
 
 	public bool frendlyFire =false;
 
@@ -37,39 +39,36 @@ public class PlayerManager : MonoBehaviour {
                 s_Instance =  FindObjectOfType(typeof (PlayerManager)) as PlayerManager;
             }
  
-            // If it is still null, create a new instance
-            if (s_Instance == null) {
-                GameObject obj = new GameObject("PlayerManager");
-                s_Instance = obj.AddComponent(typeof (PlayerManager)) as PlayerManager;
-               
-            }
+            
  
             return s_Instance;
         }
     }
- 
+    public void Awake(){
+        version = FindObjectOfType<ServerHolder>().version;
+    }
     // Ensure that the instance is destroyed when the game is stopped in the editor.
     void OnApplicationQuit() {
         s_Instance = null;
     }
  
     // Add the rest of the code here...
-    public Pawn SpawmPlayer(String newPalyerClass,int team) {
+    public Pawn SpawmPlayer(String newPalyerClass,int team,int[] stims) {
 		Pawn localPlayer;
 		Transform targetPos = GetSpamPosition (team);
 
 
-		localPlayer =(Pawn) PhotonNetwork.Instantiate (newPalyerClass, targetPos.position, targetPos.rotation, 0).GetComponent<Pawn>();
+        localPlayer = (Pawn)NetworkController.Instance.PawnSpawnRequest(newPalyerClass, targetPos.position, targetPos.rotation, false, stims,false).GetComponent<Pawn>();
 
 		return localPlayer;
     }
 	
 
-    public Pawn SpawmPlayer(Pawn newPalyerClass, Vector3 position,Quaternion rotation ) {
+    public Pawn SpawmBot(Pawn newPalyerClass, Vector3 position,Quaternion rotation ,int[] stims) {
 		Pawn localPlayer;
 	
 
-		localPlayer =(Pawn) PhotonNetwork.Instantiate (newPalyerClass.name,position,rotation,0).GetComponent<Pawn>();
+		localPlayer =NetworkController.Instance.PawnSpawnRequest(newPalyerClass.name,position,rotation, false, stims,false).GetComponent<Pawn>();
 		
 		return localPlayer;
     }
@@ -109,14 +108,25 @@ public class PlayerManager : MonoBehaviour {
 		return cachedPawns;
 	}
 	public void addPlayer(Player target){
+		if(target.playerView.isMine){
+			LocalPlayer= target;
+		}
 		cachedPlayers.Add (target);
 	}
 	public List<Player> FindAllPlayer(){
 		return cachedPlayers;
 
 	}
- 
- }
+
+
+    public void ClearAll()
+    {
+        foreach(Player player in cachedPlayers){
+            Destroy(player.gameObject);
+        }
+      
+    }
+}
 	
 
 

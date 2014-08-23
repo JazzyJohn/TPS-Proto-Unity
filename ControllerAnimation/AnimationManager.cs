@@ -264,7 +264,7 @@ public class AnimationManager : MonoBehaviour
 	}
 	//toogle aiming state
 	public void ToggleAim(bool aim){
-//		animator.SetBool("AIM", aim);
+		animator.SetBool("AIM", aim);
 	}
 	//Setting is that pull long or short
 	public void SetLong(bool longPull){
@@ -337,10 +337,10 @@ public class AnimationManager : MonoBehaviour
 		transform.parent.SendMessage ("WeaponShoot", SendMessageOptions.DontRequireReceiver);
 	}
 	public void StartShootAniamtion(string animName){
-		animator.SetTrigger (animName);
+		animator.SetBool (animName,true);
 	}
 	public void StopShootAniamtion(string animName){
-		animator.SetTrigger (animName+"_end");
+        animator.SetBool(animName,false);
 	}
     public void KnockOut() {
         DollOn();
@@ -350,7 +350,7 @@ public class AnimationManager : MonoBehaviour
          animator.enabled = false;
          if (raggdollRoot != null)
          {
-             raggdollRoot.enabled = true;
+             raggdollRoot.Start();
          }
     }
     public void DollOff()
@@ -360,7 +360,7 @@ public class AnimationManager : MonoBehaviour
         aimPos.IKTurnOn();
         if (raggdollRoot != null)
         {
-            raggdollRoot.enabled = false;
+            raggdollRoot.Stop();
         }
     }
     public void StandUp()

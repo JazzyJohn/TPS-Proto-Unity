@@ -1,8 +1,26 @@
 ﻿using UnityEngine;
+using System;
 using System.Collections;
+using System.Collections.Generic;
+using Sfs2X;
+using Sfs2X.Core;
+using Sfs2X.Entities;
+using Sfs2X.Entities.Variables;
+using Sfs2X.Requests;
+using Sfs2X.Logging;
+using Sfs2X.Entities.Data;
 
-public enum GAMEMODE { PVP, PVE,RUNNER };
-	
+
+public enum GAMEMODE { PVP, PVE,RUNNER, PVPJUGGERFIGHT,PVPHUNT};
+
+public class RoomData
+{
+    public string name;
+    public int id;
+    public int playerCount;
+    public int maxPlayers;
+}
+
 public class ServerHolder : MonoBehaviour 
 {
 	public bool shouldLoad = true;
@@ -22,7 +40,24 @@ public class ServerHolder : MonoBehaviour
     public int newRunnerRoomMaxPlayers;
 	private const float FLOAT_COEF =100.0f;
 
-	public RoomInfo[] allRooms;
+    public GAMEMODE DefaultGameMode;
+
+    public List<RoomData> allRooms = new List<RoomData>();
+    
+    private  Sfs2X.Entities.Room _gameRoom;
+    
+    public Sfs2X.Entities.Room gameRoom{
+        get { 
+            if(_gameRoom==null){
+                _gameRoom = NetworkController.smartFox.LastJoinedRoom;
+            }
+            return _gameRoom;
+        }   
+        set{
+            _gameRoom = value;
+        }
+    }
+
 	public string version;
 	public struct LoadProgress{
 		public int allLoader;
@@ -30,50 +65,155 @@ public class ServerHolder : MonoBehaviour
 		public float curLoader;
 		
 	}
+
+    public string ExtName = "fps";  // The server extension we work with
+    public string ExtClass = "dk.fullcontrol.fps.FpsExtension"; // The class name of the extension
+ 
+
 	public static LoadProgress progress= new LoadProgress();
 
 
 	// Use this for initialization
-	void Start()
+    public void Connect()
 	{
 
-		if (PhotonNetwork.inRoom) {
-			if(PhotonNetwork.isMasterClient){
-				FindObjectOfType<PVPGameRule> ().StartGame ();
 
-			}
-			Camera.main.GetComponent<PlayerMainGui> ().enabled = true;
+        NetworkController.smartFox.AddEventListener(SFSEvent.PUBLIC_MESSAGE, OnPublicMessage);
+        NetworkController.smartFox.AddEventListener(SFSEvent.ROOM_JOIN, OnJoinRoom);
+        NetworkController.smartFox.AddEventListener(SFSEvent.ROOM_CREATION_ERROR, OnCreateRoomError);
+        NetworkController.smartFox.AddEventListener(SFSEvent.USER_ENTER_ROOM, OnUserEnterRoom);
+        NetworkController.smartFox.AddEventListener(SFSEvent.USER_EXIT_ROOM, OnUserLeaveRoom);
+        NetworkController.smartFox.AddEventListener(SFSEvent.ROOM_ADD, OnRoomAdded);
+        NetworkController.smartFox.AddEventListener(SFSEvent.ROOM_CREATION_ERROR, OnRoomError);
+        NetworkController.smartFox.AddEventListener(SFSEvent.ROOM_REMOVE, OnRoomDeleted);
+       
+        SetupRoomList();
 
-			PhotonNetwork.Instantiate ("Player", Vector3.zero, Quaternion.identity, 0);
+	}
+      
+    //SMART FOX LOGIC
+    void OnPublicMessage(BaseEvent evt) {
+		string message = (string)evt.Params["message"];
+		User sender = (User)evt.Params["sender"];
+	
+	}
 
-		} else {
-			PhotonNetwork.autoJoinLobby = true;
-			PhotonNetwork.ConnectUsingSettings(version);
-            
-			allRooms = PhotonNetwork.GetRoomList();
-			
-			newRoomName = "Test PVP chamber " + Random.Range(100, 999);
-		}
+	void OnJoinRoom(BaseEvent evt) {
+
+        
+      
+      Sfs2X.Entities.Room room = (Sfs2X.Entities.Room)evt.Params["room"];
+	  if(!room.IsGame){
+			return;
+	  }
+      NetworkController.Instance.pause = true;
+	  
+      gameRoom = room;
+	
+      if (room == null)
+      {
+          return; 
+      }
+    	// If we joined a game room, then we either created it (and auto joined) or manually selected a game to join
+      if (shouldLoad)
+      {
+
+          StartCoroutine(LoadMap(room.GetVariable("map").GetStringValue()));
+          
+      }
+      else
+      {
+          FinishLoad();
+      }
+
+	}
+
+	public void OnCreateRoomError(BaseEvent evt) {
+		string error = (string)evt.Params["error"];
+		Debug.Log("Room creation error; the following error occurred: " + error);
+	}
+
+	public void OnUserEnterRoom(BaseEvent evt) {
+		User user = (User)evt.Params["user"];
 		
 	}
 
+	private void OnUserLeaveRoom(BaseEvent evt) {
+		User user = (User)evt.Params["user"];
+		
+	}
+
+	/*
+    * Handle a new room in the room list
+    */
+	public void OnRoomAdded(BaseEvent evt) { //Room room) {
+        Sfs2X.Entities.Room room = (Sfs2X.Entities.Room)evt.Params["room"];
+       
+		// Update view (only if room is game)
+		if ( room.IsGame ) {
+			SetupRoomList();
+		}
+	}
+
+
+    private void SetupRoomList()
+    {
+        List<Sfs2X.Entities.Room> roomList = NetworkController.smartFox.RoomManager.GetRoomListFromGroup("games");
+        allRooms = new List<RoomData>();
+        foreach (Sfs2X.Entities.Room room in roomList)
+        {
+            // Show only game rooms
+            if (!room.IsGame || room.IsHidden || room.IsPasswordProtected)
+            {
+                continue;
+            }
+            RoomData roomData = new RoomData();
+            roomData.id = room.Id;
+            roomData.name = room.Name;
+            roomData.playerCount = room.UserCount;
+            roomData.maxPlayers = room.MaxUsers;
+            allRooms.Add(roomData);
+            ///Debug.Log("Room id: " + room.Id + " has name: " + room.Name +"map" +room.GetVariable("map").GetStringValue());
+
+        }
+
+    }
+
+	/*
+	* Handle a room that was removed
+	*/
+	public void OnRoomDeleted(BaseEvent evt) { //Room room) {
+		SetupRoomList();
+	}
+    public void OnRoomError(BaseEvent evt)
+    { //Room room) {
+        Debug.Log(evt.Params["errorMessage"]);
+    }
+    
+    //SMART FOX LOGIC;
     public void RoomNewName(GAMEMODE mode) {
         switch(mode){
             case GAMEMODE.PVE:
-                newRoomName = "Test PVE chamber " + Random.Range(100, 999);
+                newRoomName = "Test PVE chamber " + UnityEngine.Random.Range(100, 999);
                 break;
             case GAMEMODE.PVP:
-                newRoomName = "Test PVP chamber " + Random.Range(100, 999);
+                newRoomName = "Test PVP chamber " + UnityEngine.Random.Range(100, 999);
                 break;
             case GAMEMODE.RUNNER:
-                newRoomName = "Runner chamber " + Random.Range(100, 999);
+                newRoomName = "Runner chamber " + UnityEngine.Random.Range(100, 999);
+                break;
+            case GAMEMODE.PVPJUGGERFIGHT:
+                 newRoomName = "Jugger Fight chamber " + UnityEngine.Random.Range(100, 999);
+                break;
+			case GAMEMODE.PVPHUNT:
+                 newRoomName = "Hunt chamber " + UnityEngine.Random.Range(100, 999);
                 break;
        
         }
     }
 	void Update()
 	{
-		float updateRate = 3;
+		/*float updateRate = 3;
 		float nextUpdateTime = 0;
 		
 		if (!PhotonNetwork.connected)
@@ -87,305 +227,214 @@ public class ServerHolder : MonoBehaviour
 				PhotonNetwork.ConnectUsingSettings(version);
 				nextUpdateTime += updateRate;
 			}
-		}
+		}*/
+        SetupRoomList();
 	}
 	
 	void OnReceivedRoomList()
 	{
-		allRooms = PhotonNetwork.GetRoomList();
+		//allRooms = PhotonNetwork.GetRoomList();
 		//print ("Обновлен список комнат. Сейчас их " + allRooms.Length + ".");
 	}
 	
 	void OnReceivedRoomListUpdate()
 	{
-		allRooms = PhotonNetwork.GetRoomList();
+		//allRooms = PhotonNetwork.GetRoomList();
 		//print ("Обновлен список комнат. Сейчас их " + allRooms.Length + ".");
 	}
 	
 	void OnGUI()
 	{
-
-		if(!shouldLoad){
-			if (!PhotonNetwork.inRoom && PhotonNetwork.connected)
-			{
-				float screenX = Screen.width, screenY = Screen.height;
-				RoomInfo[] availableRooms = allRooms;
+        if (!shouldLoad && gameRoom == null)
+        {
+            ShowConnectMenu();
+        }
+        /*if(!shouldLoad){
+            if (!PhotonNetwork.inRoom && PhotonNetwork.connected)
+            {
+                float screenX = Screen.width, screenY = Screen.height;
+            //	RoomInfo[] availableRooms = allRooms;
 				
-				float slotsizeX = screenX / 5;
-				float slotsizeY = screenY / (availableRooms.Length + 1);
+                float slotsizeX = screenX / 5;
+                float slotsizeY = screenY / (availableRooms.Length + 1);
 
-				GUILayout.BeginArea(new Rect (Screen.width  - 400, Screen.height - 230, 400, 230), "Соединение", GUI.skin.GetStyle("window"));
-				ShowConnectMenu ();
-				GUILayout.EndArea();
-			}
+                GUILayout.BeginArea(new Rect (Screen.width  - 400, Screen.height - 230, 400, 230), "Соединение", GUI.skin.GetStyle("window"));
+                ShowConnectMenu ();
+                GUILayout.EndArea();
+            }
 
-		/*	else if (PhotonNetwork.connected)
-			{
-		<<<<<<< HEAD
-				RoomOptions options = new RoomOptions ();
-				options.maxPlayers = 10;
-				PhotonNetwork.CreateRoom("My Room",options,null);
-			}
-			void OnCreatedRoom()
-			{
-				FindObjectOfType<PVPGameRule> ().StartGame ();
-		=======
-				GUILayout.FlexibleSpace();
-				GUILayout.BeginHorizontal();
+        /*	else if (PhotonNetwork.connected)
+            {
+        <<<<<<< HEAD
+                RoomOptions options = new RoomOptions ();
+                options.maxPlayers = 10;
+                PhotonNetwork.CreateRoom("My Room",options,null);
+            }
+            void OnCreatedRoom()
+            {
+                FindObjectOfType<PVPGameRule> ().StartGame ();
+        =======
+                GUILayout.FlexibleSpace();
+                GUILayout.BeginHorizontal();
 				
-				if (GUILayout.Button("Покинуть комнату", GUILayout.Width (130), GUILayout.Height (25)))
-				{
-					PhotonNetwork.LeaveRoom();
-					createRoom = false;
-				}
+                if (GUILayout.Button("Покинуть комнату", GUILayout.Width (130), GUILayout.Height (25)))
+                {
+                    PhotonNetwork.LeaveRoom();
+                    createRoom = false;
+                }
 				
-				GUILayout.EndHorizontal();
-		>>>>>>> pr/6
-			}
+                GUILayout.EndHorizontal();
+        >>>>>>> pr/6
+            }
 
-			
-		*/
-			GUILayout.Label(PhotonNetwork.connectionStateDetailed.ToString());
-
-			if(connectingToRoom)
-			{
-				
-				GUI.Box(new Rect(Screen.width / 2 - 100, Screen.height / 2 - 20, 200, 40), "Загрузка карты... " + LoadProcent().ToString("0.0") +"%");
-			}
-
-		}
-	}
-	
-
-	
-	void ShowConnectMenu()
-	{
-				GUILayout.Space (10);
-
-		if (!PhotonNetwork.inRoom)
-		{
-
-			if (!createRoom)
-			{
-				scroll = GUILayout.BeginScrollView(scroll, GUILayout.Width(200), GUILayout.Height(150));
-
-				
-								if (allRooms.Length > 0) {
-										foreach (RoomInfo room in allRooms) {
-												GUILayout.BeginHorizontal ("box");
-												GUILayout.Label (room.name +"  "+  room.playerCount + " / " +room.maxPlayers, GUILayout.Width (150));
-												GUILayout.FlexibleSpace ();
-					
-												if( room.playerCount<newRoomMaxPlayers){
-													if (GUILayout.Button ("Войти", GUILayout.Width (100))) {
-																
-																				
-															PhotonNetwork.JoinRoom (room.name);
-															connectingToRoom = true;
-													}
-												}
-												GUILayout.EndHorizontal ();
-										}
-								}
-				
-								if (allRooms.Length == 0)
-										GUILayout.Label ("Нет доступных комнат.");
-				
-								GUILayout.EndScrollView ();
-								GUILayout.Space (5);
-				
-								GUILayout.FlexibleSpace ();
-								GUILayout.BeginHorizontal ();
-								GUILayout.FlexibleSpace ();
-				
-								if (GUILayout.Button ("Создать комнату", GUILayout.Width (150), GUILayout.Height (25)))
-										createRoom = true;
-				
-								GUILayout.EndHorizontal ();
-						} else {
-								GUILayout.BeginHorizontal ();
-								GUILayout.Label ("Создание новой комнаты.", GUILayout.Width (130));
-								GUILayout.EndHorizontal ();
-				
-								GUILayout.BeginHorizontal ();
-								GUILayout.Label ("Название комнаты: ", GUILayout.Width (130));
-								newRoomName = GUILayout.TextField (newRoomName, 30, GUILayout.Height (25));
-								GUILayout.EndHorizontal ();
-				
-								GUILayout.FlexibleSpace ();
-				
-								GUILayout.BeginHorizontal ();
-				
-
-						if (GUILayout.Button("Отмена", GUILayout.Width (150), GUILayout.Height (25)))
-							createRoom = false;
-						GUILayout.FlexibleSpace ();
-						if (GUILayout.Button("Создать", GUILayout.Width (150), GUILayout.Height (25)))
-						{
-							ExitGames.Client.Photon.Hashtable customProps = new ExitGames.Client.Photon.Hashtable();
-                            customProps["MapName"] = map;
-							string[] exposedProps = new string[customProps.Count];
-							exposedProps[0] = "MapName";
-
-							PhotonNetwork.CreateRoom(newRoomName, true, true, newRoomMaxPlayers, customProps, exposedProps);
-						}
-
-				
-								GUILayout.EndHorizontal ();
-				
-
-			
-						}
-				}
-
-
-		}
 		
-	public void JoinRoom(string room = ""){
-			if(room==""){
-				PhotonNetwork.JoinRandomRoom();
-			}else{
-									
-				PhotonNetwork.JoinRoom (room);
-			}
-			connectingToRoom = true;
+		
+            GUILayout.Label(PhotonNetwork.connectionStateDetailed.ToString());
+
+            if(connectingToRoom)
+            {
+				
+                GUI.Box(new Rect(Screen.width / 2 - 100, Screen.height / 2 - 20, 200, 40), "Загрузка карты... " + LoadProcent().ToString("0.0") +"%");
+            }
+
+        }	*/
+    }
+
+
+
+    void ShowConnectMenu()
+    {
+
+
+        if (!createRoom)
+        {
+
+            GUILayout.Space(5);
+
+            GUILayout.FlexibleSpace();
+            GUILayout.BeginHorizontal();
+            GUILayout.FlexibleSpace();
+
+            if (GUILayout.Button("Создать комнату", GUILayout.Width(150), GUILayout.Height(25)))
+            {
+                CreateNewRoom(DefaultGameMode);
+            }
+            if (GUILayout.Button("Войти в комнату", GUILayout.Width(150), GUILayout.Height(25)))
+            {
+                JoinRoom(allRooms[0]);
+            }
+
+                
+            GUILayout.EndHorizontal();
+
+
+
+
+        }
+    }
+		
+	public void JoinRoom(RoomData room){
+
+        NetworkController.smartFox.Send(new JoinRoomRequest(room.id));
 	}
 
-    public void LeaveRoom() {
-        Debug.Log("LeaveTRoom");
-        PhotonNetwork.LeaveRoom();
-        PhotonNetwork.autoJoinLobby = true;
-        PhotonNetwork.ConnectUsingSettings(version);
-    }
+  
 	public void CreateNewRoom(GAMEMODE mode) //Создание комноты (+)
 	{
         if (map == "")
         {
             return;
         }
-		ExitGames.Client.Photon.Hashtable customProps = new ExitGames.Client.Photon.Hashtable();
+		/*ExitGames.Client.Photon.Hashtable customProps = new ExitGames.Client.Photon.Hashtable();
         customProps["MapName"] = map;
 		string[] exposedProps = new string[customProps.Count];
 		exposedProps[0] = "MapName";
-        int roomCnt = newRoomMaxPlayers;
+       
+        */
         bool isVisible = true;
+        int roomCnt = newRoomMaxPlayers;
+        RoomSettings settings = new RoomSettings(newRoomName);
+        RoomVariable gameRule = null;
+        settings.MaxVariables = 10;
+		GameSettingModel setting = new GameSettingModel();
         switch (mode)
         {
             case GAMEMODE.PVE:
                 roomCnt = newPVERoomMaxPlayers;
+                gameRule =new SFSRoomVariable("ruleClass", "nstuff.juggerfall.extension.gamerule.PVEGameRule");
+                setting.teamCount = 2;
+                setting.maxTime =0;
+                setting.maxScore= 0;
                 break;
             case GAMEMODE.RUNNER:
                 roomCnt = newRunnerRoomMaxPlayers;
                 isVisible = false;
+                gameRule = new SFSRoomVariable("ruleClass", "nstuff.juggerfall.extension.gamerule.RunnerGameRule");
+                setting.maxTime =0;
+                setting.maxScore= 0;
                 break;
+            case GAMEMODE.PVP:
+                gameRule = new SFSRoomVariable("ruleClass", "nstuff.juggerfall.extension.gamerule.PVPGameRule");
+                setting.teamCount = 2;
+                setting.maxTime =0;
+                setting.maxScore= 25;
+                break;
+            case GAMEMODE.PVPJUGGERFIGHT:
+                gameRule = new SFSRoomVariable("ruleClass", "nstuff.juggerfall.extension.gamerule.PVPJuggerFightGameRule");
+                 setting.teamCount = 2;
+                setting.maxTime =0;
+                setting.maxScore= 25;
+                break;
+			case GAMEMODE.PVPHUNT:
+				gameRule = new SFSRoomVariable("ruleClass", "nstuff.juggerfall.extension.gamerule.HuntGameRule");
+                setting.teamCount = 2;
+                setting.maxTime =0;
+                setting.maxScore= 500;
+            
+               // Debug.Log(GlobalGameSetting.instance.GetHuntScoreTable());
+				//data.Put("huntTable",new SFSDataWrapper(5,GlobalGameSetting.instance.GetHuntScoreTable()));				
+             
+				
+               
+			break;
         }
+        SFSObject data = new SFSObject();
+		data.PutClass("gameSetting",setting);
+        settings.Variables.Add(new SFSRoomVariable("gameVar", data));
+        settings.GroupId = "games";
+        settings.IsGame = true;
+        RoomVariable mapVar = new SFSRoomVariable("map", map);
+        settings.Variables.Add(mapVar);
+        RoomVariable visVar = new SFSRoomVariable("visible", isVisible);
+        settings.Variables.Add(visVar);
+        settings.Variables.Add(gameRule);
+        settings.MaxUsers =(short)roomCnt;
+        settings.MaxSpectators = 0;
+        settings.Extension = new RoomExtension(ExtName, ExtClass);
+        NetworkController.smartFox.Send(new CreateRoomRequest(settings, true, NetworkController.smartFox.LastJoinedRoom));
 
- 
-
-            PhotonNetwork.CreateRoom(newRoomName, isVisible, true, roomCnt, customProps, exposedProps);
-       
+      
 	}
 
-	public void LoadNextMap(){
-		connectingToRoom = true;
-        PhotonNetwork.isMessageQueueRunning = false;
-        Debug.Log("LOAD"+this);
-        if (PhotonNetwork.offlineMode)
-        {
-        
-            StartCoroutine(LoadMap(map));
-        }
-        else
-        {
-            StartCoroutine(LoadMap((string)PhotonNetwork.room.customProperties["MapName"]));
-        }
-	}
-	void OnJoinedLobby()
-	{
-		print ("Мы в лобби.");
-		
-	}
 	
-	void OnConnectedToPhoton()
-	{
-		print ("Мы подключились к Photon.");
-		
-		if (PhotonNetwork.room != null)
-			PhotonNetwork.LeaveRoom();
-		
-		connectingToRoom = false;
-	}
-	void OnFailedToConnectToPhoton(DisconnectCause cause){
-		PhotonNetwork.offlineMode = true;
-	
-	}
-	
-	void OnPhotonJoinRoomFailed()
-	{
-		connectingToRoom = false;
-		FindObjectOfType<MainMenuGUI> ().CreateRoom ();
-		print ("Не удалось подключиться к комнате.");
-	}
-	
-	void OnPhotonCreateRoomFailed()
-	{
-		connectingToRoom = false;
-		FindObjectOfType<MainMenuGUI> ().ShowRoomList ();
-		print ("Не удалось создать комнату.");
-	}
-	
-	void OnPhotonJoinRandomJoinFailed()
-	{
-		connectingToRoom = false;
-		FindObjectOfType<MainMenuGUI> ().ShowRoomList ();
-		print ("Не удалось подключиться к случайной комнате.");
-	}
-	
-	void OnJoinedRoom()
-	{
-		print("Удалось подключиться к комнате " + PhotonNetwork.room.name);
-		PhotonNetwork.isMessageQueueRunning = false;
-		progress.allLoader=0;
-		progress.finishedLoader=0;
-		progress.curLoader=0;
-		connectingToRoom = true;
-		if (shouldLoad) {
-            if (PhotonNetwork.offlineMode)
-            {
-                StartCoroutine(LoadMap(map));
-            }
-            else
-            {
-                StartCoroutine(LoadMap((string)PhotonNetwork.room.customProperties["MapName"]));
-            }
-		} else {
-			FinishLoad ();
-		}
+    public void LoadNextMap(string map)
+    {
 
-		/*Camera.main.GetComponent<PlayerMainGui> ().enabled = true;
-		PhotonNetwork.Instantiate ("Player",Vector3.zero,Quaternion.identity,0);
-		if (PhotonNetwork.isMasterClient) {
-			FindObjectOfType<PVPGameRule> ().StartGame ();
-		}*/
-
-
-
-	}
-
+        StartCoroutine(LoadMap(map,true));
+    }
+	
 	public float LoadProcent() {
 		if(progress.allLoader==0){
 			return 0f;
 		}
 		return ((float)progress.finishedLoader)/progress.allLoader*100f +progress.curLoader/progress.allLoader;
 	}
-	IEnumerator LoadMap (string mapName)
+	IEnumerator LoadMap (string mapName,bool next =false)
 	{
 		AsyncOperation async;
 
 		connectingToRoom = true;
-		PhotonNetwork.DestroyPlayerObjects 	( PhotonNetwork.player);
-		
-
+        
 		
 		yield return new WaitForSeconds(1);
 	
@@ -425,62 +474,66 @@ public class ServerHolder : MonoBehaviour
 		while(itemCoroutineEnumerator.MoveNext())
 			yield return itemCoroutineEnumerator.Current;
 
-			
-		PhotonResourceWrapper.TryToReload();
-		PhotonNetwork.isMessageQueueRunning = true;
 
+
+      
 		FinishLoad ();
 		yield return new WaitForEndOfFrame();
 		GameObject menu =Instantiate (loader.playerHud, Vector3.zero, Quaternion.identity) as GameObject;
 		Camera.main.GetComponent<PlayerMainGui> ().enabled = true;
-		menu.transform.parent = Camera.main.transform;
+		//menu.transform.parent = Camera.main.transform;
         menu.transform.localPosition = Vector3.zero;
         menu.transform.localRotation = Quaternion.identity;
-		PhotonNetwork.Instantiate ("Player",Vector3.zero,Quaternion.identity,0);
+        Debug.Log("SPawn");
+        NetworkController.Instance.pause = false;
+        if (next)
+        {
+            Player[] allPlayer = FindObjectsOfType<Player>();
+            foreach (Player player in allPlayer)
+            {
+                player.Restart();
+            }
+			NetworkController.Instance.MasterViewUpdate();
+        }
+		ChatHolder[] chats = FindObjectsOfType<ChatHolder> ();
+		foreach(ChatHolder chat in chats){
+			if(chat.isGameChat){
+				chat.myRoom = gameRoom;
+				break;
+			}
+		}
+      //  NetworkController.Instance.SpawnPlayer( Vector3.zero, Quaternion.identity);
 	
 	}
 	public void FinishLoad(){
 		if(!shouldLoad){
-			Camera.main.GetComponent<PlayerMainGui> ().enabled = true;
-			PhotonNetwork.Instantiate ("Player",Vector3.zero,Quaternion.identity,0);
+            MapDownloader loader = FindObjectOfType<MapDownloader>();
+            GameObject menu = Instantiate(loader.playerHud, Vector3.zero, Quaternion.identity) as GameObject;
+
+            menu.transform.parent = Camera.main.transform;
+            menu.transform.localPosition = Vector3.zero;
+            menu.transform.localRotation = Quaternion.identity;
+            Camera.main.GetComponent<PlayerMainGui>().enabled = true;
+
+            NetworkController.Instance.pause = false;
 		}
 		connectingToRoom = false;
-		if (PhotonNetwork.isMasterClient) 
-		{
-			FindObjectOfType<GameRule> ().StartGame ();
-		}
+		
 		MainMenuGUI mainMenu = FindObjectOfType<MainMenuGUI> ();
 		if (mainMenu != null) {
 				Destroy (mainMenu.gameObject);
 		}
-		
+        AITargetManager.Reload();
 	
 	}
 
-	public static Vector3 ReadVectorFromShort(PhotonStream stream){
-		Vector3 newPosition = Vector3.zero;
-	//Debug.Log (stream.ReceiveNext ());
-	newPosition.x = ((int)stream.ReceiveNext())/FLOAT_COEF;
-	//Debug.Log (newPosition.x);
-    newPosition.y = ((int)stream.ReceiveNext()) / FLOAT_COEF;
-    newPosition.z = ((int)stream.ReceiveNext()) / FLOAT_COEF;
-		return newPosition;
-	}
-	public static void WriteVectorToShort(PhotonStream stream,Vector3 vect){
-
-        stream.SendNext((int)(vect.x * FLOAT_COEF));
-        stream.SendNext((int)(vect.y * FLOAT_COEF));
-        stream.SendNext((int)(vect.z * FLOAT_COEF));
-		
-	}
-	void OnMasterClientSwitched( PhotonPlayer newMaster )
-	{
-		//TODO: director fix
 	
-		if (PhotonNetwork.isMasterClient) {
-			FindObjectOfType<GameRule> ().StartGame ();	
-		}
-	}
+
+
+
+
+
+
 
 
 }

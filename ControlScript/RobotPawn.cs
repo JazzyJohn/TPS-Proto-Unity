@@ -6,16 +6,27 @@ public class RobotPawn : Pawn {
 	public float ActivationTime=2.0f;
 	public Transform playerExitPositon;
 	public bool isPilotIn = false;
+	public bool isMutual;
+	public bool isEmpty =true;
+	
+	protected void Awake(){
+		base.Awake();
+		if(isMutual){
+			PlayerMainGui.instance.Annonce(AnnonceType.JUGGERREADY);
+		}
+	}
 	//Player get in robot
 	public new void  Activate(){
 		((RobotAnimationManager)animator).Activation();
 		_rb.constraints = RigidbodyConstraints.FreezeRotation;
 		isPilotIn = true;
+        foxView.InPilotChange(isPilotIn);
 		isActive = false;
 		characterState=CharacterState.Activate;
         GetComponent<PlayerCamera>().enabled = true;
         GetComponent<PlayerCamera>().Reset();
 		StartCoroutine(WaitBeforeActive(ActivationTime));
+		
 	}
 	public override void Damage(BaseDamage damage,GameObject killer){
 		float reduce =  charMan.GetFloatChar(CharacteristicList.JUGGER_DAMAGE_REDUCE);
@@ -39,7 +50,7 @@ public class RobotPawn : Pawn {
 			for (int i =0; i<myTransform.childCount; i++) {
 				myTransform.GetChild(i).gameObject.SetActive(true);
 			}
-			photonView.RPC("RPCActivate",PhotonTargets.OthersBuffered);
+            foxView.Activate();
 		}
 		//base.Activate();
 	}
@@ -47,6 +58,7 @@ public class RobotPawn : Pawn {
 	public new void  DeActivate(){
 		characterState=CharacterState.DeActivate;
 		isPilotIn = false;
+        foxView.InPilotChange(isPilotIn);
 		((RobotAnimationManager)animator).DeActivation();
 		GetComponent<ThirdPersonController>().enabled = false;
         GetComponent<PlayerCamera>().enabled = false;
@@ -57,7 +69,11 @@ public class RobotPawn : Pawn {
 		//Debug.Log ("ROBOT");
 	}
 
-
+	public void OnDestoy(){
+		if(isMutual){
+			PlayerMainGui.instance.Annonce(AnnonceType.JUGGERKILL);
+		}
+	}
 	public override void  AfterSpawnAction(){
 		characterState = CharacterState.Jumping;
 	
@@ -74,7 +90,7 @@ public class RobotPawn : Pawn {
 	protected override void UpdateAnimator(){
 		//Debug.Log (isGrounded);
 		if (animator != null && animator.gameObject.activeSelf) {
-			if(!photonView.isMine){
+			if(!foxView.isMine){
 
 				RobotAnimationManager roboanim =(RobotAnimationManager)animator;
 				if(!roboanim.isActive()&&isPilotIn){
@@ -90,31 +106,9 @@ public class RobotPawn : Pawn {
 		}
 		base.UpdateAnimator();
 	}
-	//NetworkSection
-	public new void OnPhotonSerializeView(PhotonStream stream, PhotonMessageInfo info)
-	{
-
-		base.OnPhotonSerializeView (stream,info);
-		//Debug.Log (this);
-		if (stream.isWriting)
-		{
-
-
-			stream.SendNext(isPilotIn);
-			//stream.SendNext(netIsGround);
-			//stream.SendNext(animator.GetJump());
-			
-		}
-		else
-		{
-
-			isPilotIn =(bool)stream.ReceiveNext();
-			//isGrounded =(bool) stream.ReceiveNext();
-			//animator.ApllyJump((bool)stream.ReceiveNext());
-			//Debug.Log (wallState);
-		}
-	}
+	
 	public override void ChangeDefaultWeapon(int myId){
 
 	}
+
 }

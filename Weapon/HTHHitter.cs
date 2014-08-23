@@ -37,18 +37,12 @@ public class HTHHitter : MonoBehaviour {
 
 	[HideInInspector]
 	public bool isKick;
-	[HideInInspector]
-	public float timer;
+	
+	private bool checkAnimation=false;
+
 
 	private bool wasDamage = false;
 
-	public bool CanShoot ()
-	{
-		if (timer<=0f)
-			return true;
-		else
-			return false;
-	}
 
 	// Use this for initialization
 	void Start () 
@@ -65,33 +59,48 @@ public class HTHHitter : MonoBehaviour {
 		myTransform = transform;
 	}
 
-	public void Luke_I_am_your_father(WeaponOfExtremities Darth_Vader,Pawn  owner1)
+    public void SetOwner(WeaponOfExtremities weapon, Pawn owner)
 	{
-		WeaponControl=Darth_Vader;
-		owner = owner1;
+        WeaponControl = weapon;
+		this.owner = owner;
 
 		anim = owner.animator.animator;
 
 	}
+	public void StartKick(){
+       
+		isKick= true;
+		checkAnimation= true;
+	}
+	
 	public void StopKick(){
 		isKick= false;
-		wasDamage = false;
+		
 
 	}
 	
+	public void AttackFinish(){
+		if(KickPlay){
+            WeaponControl.KickFinish();
+			checkAnimation=false;
+			wasDamage = false;
+		}
+		KickPlay = false;		
+		
+	
+	}
+	public bool IsPlaying(){
+		return checkAnimation;
+	}
 
 	// Update is called once per frame
 	void Update () 
 	{
-		if (timer >= 0) {
-			timer-=Time.deltaTime;
-		}
+	
 	//	Debug.Log (this + "  " + isKick);
-		KickPlay = false;
-		if (isKick&&anim != null)
-		{
+		if(checkAnimation){
 			bool ok = false;
-			
+				
 			for(int i = 0; i< anim.layerCount; i++)
 			{
 				int CurAnim = anim.GetCurrentAnimatorStateInfo(i).nameHash;
@@ -107,30 +116,31 @@ public class HTHHitter : MonoBehaviour {
 			
 			if (!ok)
 			{
-				KickPlay = false;
-				wasDamage = false;
+				AttackFinish();
+				
 			}
-		}
-		//Debug.Log (this + "  " + KickPlay);
-		RaycastHit[] hits;
-		if (KickPlay)
-		{
-			if(!wasDamage){
-				hits = Physics.RaycastAll(myTransform.position, 	myTransform.forward, 2.0f);
-			    //Debug.DrawRay(myTransform.position,myTransform.forward*2.0f,Color.red,5.0f);
-				foreach(RaycastHit hit in hits)
-				{
-					onBulletHit(hit);
-				}
-				if(wasDamage){
-					return;
-				}
+			
+			//Debug.Log (this + "  " + KickPlay);
+			RaycastHit[] hits;
+			if (KickPlay)
+			{
+				if(!wasDamage){
+					hits = Physics.RaycastAll(myTransform.position, 	myTransform.forward, 2.0f);
+					//Debug.DrawRay(myTransform.position,myTransform.forward*2.0f,Color.red,5.0f);
+					foreach(RaycastHit hit in hits)
+					{
+						onBulletHit(hit);
+					}
+					if(wasDamage){
+						return;
+					}
 
-				hits = Physics.SphereCastAll(myTransform.position,radiusOfImpact, myTransform.forward, 2.0f);
-				//Debug.DrawLine(transform.position,transform.position+owner.gameObject.transform.forward*1.0f,Color.red,5.0f);
-				foreach(RaycastHit hit in hits)
-				{
-					onBulletHit(hit);
+					hits = Physics.SphereCastAll(myTransform.position,radiusOfImpact, myTransform.forward, 2.0f);
+					//Debug.DrawLine(transform.position,transform.position+owner.gameObject.transform.forward*1.0f,Color.yellow,5.0f);
+					foreach(RaycastHit hit in hits)
+					{
+						onBulletHit(hit);
+					}
 				}
 			}
 		}

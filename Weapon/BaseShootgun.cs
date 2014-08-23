@@ -23,10 +23,10 @@ public class BaseShootgun : BaseWeapon {
             case PREFIRETYPE.Guidance:
                 if (_pumpCoef >= 1.0f)
                 {
-                     target = GetGuidanceTarget();
+                    target = guidanceTarget;
                      if (target != null)
                      {
-                         viewId = target.GetComponent<PhotonView>().viewID;
+                         viewId = target.GetComponent<FoxView>().viewID;
                      }
                     
                 }
@@ -38,7 +38,7 @@ public class BaseShootgun : BaseWeapon {
 				if (effAimRandCoef > 0) {
 						startRotation = Quaternion.Euler (startRotation.eulerAngles + new Vector3 (Random.Range (-1 * effAimRandCoef, 1 * effAimRandCoef), Random.Range (-1 * effAimRandCoef, 1 * effAimRandCoef), Random.Range (-1 * effAimRandCoef, 1 * effAimRandCoef)));
 				}
-				proj = Instantiate (projectilePrefab, startPoint, startRotation) as GameObject;
+				proj =projectilePrefab.Spawn(startPoint, startRotation);
                 BaseProjectile projScript = proj.GetComponent<BaseProjectile>();
                 if ( target != null)
                 {
@@ -48,8 +48,8 @@ public class BaseShootgun : BaseWeapon {
                
                 projScript.projId = ProjectileManager.instance.GetNextId();
                 projScript.replication = false;
-				if (photonView.isMine) {
-                    SendShoot(startPoint, startRotation, power, range, viewId, projScript.projId);
+				if (foxView.isMine) {
+                    foxView.SendShoot(startPoint, startRotation, power, range, viewId, projScript.projId);
 				}
 				
                
@@ -58,18 +58,5 @@ public class BaseShootgun : BaseWeapon {
 		}
 	}
 
-	protected override void ReplicationGenerate (){
-		if(shootsToSpawn.Count>0){
-			sControl.playClip (fireSound);
-			if (rifleParticleController != null) {
-				rifleParticleController.CreateShootFlame ();
-			}
-		}
-		while(shootsToSpawn.Count>0){
-			ShootData spawnShoot = shootsToSpawn.Dequeue();
-			
-			GenerateProjectileRep(spawnShoot.position,spawnShoot.direction,spawnShoot.timeShoot);
 
-		}
-	}
 }

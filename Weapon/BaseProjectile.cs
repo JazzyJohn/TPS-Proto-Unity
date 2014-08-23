@@ -17,6 +17,9 @@ public class BaseDamage{
 	public bool sendMessage= true;
 	[HideInInspector] 
 	public bool isContinius =false;
+    public BaseDamage()
+    {
+    }
 	public BaseDamage(BaseDamage old){
 		Damage = old.Damage;
 		isVsArmor = old.isVsArmor;
@@ -108,25 +111,50 @@ public class BaseProjectile : MonoBehaviour
 
     public float trajectoryCoef;
 
-    void Start()
-    {
-        ProjectileManager.instance.AddProject(projId, this);
-        aSource = GetComponent<AudioSource>();
-        sControl = new soundControl(aSource);//создаем обьект контроллера звука и передаем указатель на источник
+    public bool shouldInit= false;
+
+	void Awake(){
+		aSource = GetComponent<AudioSource>();	
+		sControl = new soundControl(aSource);//создаем обьект контроллера звука и передаем указатель на источник
         sControl.playClip(reactiveEngineSound);
-
-        mTransform = transform;
+		mTransform = transform;
+		mRigidBody = rigidbody;
+	}
+	
+    void OnEnable()
+    {
+        shouldInit=true;
+        used = false;
+    }
+    void Init(){
+        shouldInit = false;
+		switch (attraction)
+        {
+          
+            case ATTRACTION.Homing:
+            case ATTRACTION.LaserGuidance:
+				if(target==null){
+					attraction =ATTRACTION.NoAttraction;
+				}
+			break;
+			
+		}
+        ProjectileManager.instance.AddProject(projId, this);
+ 
+      
+       
         startPosition = mTransform.position;
-        mRigidBody = rigidbody;
-        mRigidBody.velocity = mTransform.TransformDirection(Vector3.forward * startImpulse);
 
+        mRigidBody.velocity = mTransform.TransformDirection(Vector3.forward * startImpulse);
+		
         RaycastHit hit;
         float distance = mTransform.InverseTransformDirection(mRigidBody.velocity).z * 0.1f;
         if (replication)
         {
-            distance += (float)(PhotonNetwork.time - lateTime) /1000f* mRigidBody.velocity.magnitude;
+            distance += (float)(TimeManager.Instance.NetworkTime - lateTime) /1000f* mRigidBody.velocity.magnitude;
         }
-        if (Physics.Raycast(mTransform.position, mRigidBody.velocity.normalized, out hit, distance))
+
+        if (distance>0&&Physics.Raycast(mTransform.position, mRigidBody.velocity.normalized, out hit, distance))
         {
 
                 onBulletHit(hit);
@@ -136,7 +164,7 @@ public class BaseProjectile : MonoBehaviour
         if (replication)
         {
             //Debug.Log((float)(PhotonNetwork.time - lateTime));
-            transform.Translate(mRigidBody.velocity * (float)(PhotonNetwork.time - lateTime) / 1000f);
+            transform.Translate(mRigidBody.velocity * (float)(TimeManager.Instance.NetworkTime - lateTime) / 1000f);
         }
 	//	Debug.Log("id " + projId+ " position " + mTransform.position + " rotation "+ mTransform.rotation);
         mRigidBody.useGravity = false;
@@ -146,7 +174,10 @@ public class BaseProjectile : MonoBehaviour
 
     protected void Update()
     {
-		
+        if (shouldInit)
+        {
+            Init();
+        }
         RaycastHit hit;
 
         switch (attraction)
@@ -371,7 +402,7 @@ public class BaseProjectile : MonoBehaviour
                     used = true;
                     if (hitParticle != null)
                     {
-                        Instantiate(hitParticle, hit.point, Quaternion.LookRotation(hit.normal));
+                        hitParticle.Spawn( hit.point, Quaternion.LookRotation(hit.normal));
                     }
                     ExplosionDamage(exploPosition);
                  
@@ -459,7 +490,7 @@ public class BaseProjectile : MonoBehaviour
             {
                 ProjectileManager.instance.InvokeRPC("Detonate", projId, Position);
             }
-            Destroy(gameObject, 0.1f);
+            Invoke("DeActivate", 0.1f);
                 return;
         }
         sControl.stopSound();//останавливаем звук реактивного двигателя
@@ -467,7 +498,7 @@ public class BaseProjectile : MonoBehaviour
         //Debug.Log(splashRadius);
         Collider[] hitColliders = Physics.OverlapSphere(Position, splashRadius);
    
-        RaycastHit[] hits;
+        
         for (int i = 0; i < hitColliders.Length; i++)
         {
 
@@ -504,7 +535,7 @@ public class BaseProjectile : MonoBehaviour
         {
             if (hitParticle != null)
             {
-                Instantiate(hitParticle, Position, mTransform.rotation);
+                hitParticle.Spawn( Position, mTransform.rotation);
             }
 
         }
@@ -512,6 +543,13 @@ public class BaseProjectile : MonoBehaviour
         {
             ProjectileManager.instance.InvokeRPC("Detonate", projId, Position);
         }
-        Destroy(gameObject, 0.1f);
+        Invoke("DeActivate", 0.1f);
     }
+	public void DeActivate(){
+		gameObject.Recycle();
+        shouldInit = false;
+	}
+	public void OnDisable(){
+		CancelInvoke();
+	}
 }

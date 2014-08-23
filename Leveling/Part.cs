@@ -82,7 +82,7 @@ public class PreSpawner
 	public void Spawn(){
 		for (int i = 0; i < SpawnPoints.Length; i++) {
 			GameObject RandomPrefab = Prefabs[UnityEngine.Random.Range(0, Prefabs.Length)];
-            Transform RandomPrefabSpawned = PhotonNetwork.InstantiateSceneObject(RandomPrefab.name, SpawnPoints[i].position, SpawnPoints[i].rotation, 0, null).transform;
+            Transform RandomPrefabSpawned = NetworkController.Instance.SimplePrefabSpawn(RandomPrefab.name, SpawnPoints[i].position, SpawnPoints[i].rotation).transform;
 			SpawnedPrefabs.Add(new TransformPrefab(RandomPrefab, RandomPrefabSpawned));
 		}
 	}

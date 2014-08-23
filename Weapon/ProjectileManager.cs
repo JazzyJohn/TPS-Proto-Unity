@@ -2,6 +2,8 @@
 using System;
 using System.Collections.Generic;
 using System.Reflection;
+using Sfs2X.Entities.Data;
+using nstuff.juggerfall.extension.models;
 
 class ProjectileManager: MonoBehaviour
 {
@@ -36,17 +38,17 @@ class ProjectileManager: MonoBehaviour
 
     private Dictionary<int, BaseProjectile> allProjectile =new Dictionary<int, BaseProjectile>();
 
-    public PhotonView photonView;
+
 
     void Awake() {
-        photonView = GetComponent<PhotonView>();
-        nextId =MAXPERPLAYER * (PhotonNetwork.player.ID+1);
+
+        nextId =MAXPERPLAYER * (NetworkController.smartFox.MySelf.Id+1);
         maxId = nextId + MAXPERPLAYER;
         minId = nextId;
     }
     public int GetNextId() {
         if(nextId>=maxId){
-            nextId =MAXPERPLAYER * (PhotonNetwork.player.ID+1);
+            nextId = MAXPERPLAYER * (NetworkController.smartFox.MySelf.Id + 1);
         }
         for (int i = nextId+1; i < maxId; i++) {
             if (!allProjectile.ContainsKey(i)) {
@@ -68,21 +70,49 @@ class ProjectileManager: MonoBehaviour
     public void AddProject(int id,BaseProjectile projectile) {
         allProjectile[id] = projectile;
     }
-    public void InvokeRPC(params object[] theObjects)
+    
+    public void InvokeRPC(string name, int projid,Vector3 position)
     {
-		
-        photonView.RPC("RPCInvoke", PhotonTargets.All, theObjects);
+        ISFSObject data = new SFSObject();
+        data.PutUtfString("name", name);
+        data.PutInt("projid", projid);
+        data.PutClass("position", new Vector3Model(position));
+        NetworkController.Instance.InvokeProjectileCallRequest(data);
     }
-    [RPC]
-    public void RPCInvoke(params object[] theObjects)
+    public void InvokeRPC(string name, int projid, Vector3 position, int count)
     {
+        ISFSObject data = new SFSObject();
+        data.PutUtfString("name", name);
+        data.PutInt("projid", projid);
+        data.PutInt("count", count);
+        data.PutClass("position", new Vector3Model(position));
+        NetworkController.Instance.InvokeProjectileCallRequest(data);
        
-		string function = (string)theObjects[0];
-		int id = (int)theObjects[1];
-		object[] addParams  = new object[theObjects.Length-2];
-		for(int i = 2; i<theObjects.Length;i++){
-			addParams[i-2] = theObjects[i];
-		}
+    }
+    public void InvokeRPC(string name, int projid, int count)
+    {
+        ISFSObject data = new SFSObject();
+        data.PutUtfString("name", name);
+        data.PutInt("projid", projid);
+        data.PutInt("count", count);
+        NetworkController.Instance.InvokeProjectileCallRequest(data);
+    }
+  
+    public void RemoteInvoke(ISFSObject data)
+    {
+
+        string function = data.GetUtfString("name");
+        int id = data.GetInt("projid");
+     
+		object[] addParams  = new object[   data.Size()-2];
+        int i = 0;
+		if(data.ContainsKey("positon")){
+            addParams[i++] = ((Vector3Model)data.GetClass("position")).GetVector();
+        }
+        if (data.ContainsKey("count"))
+        {
+            addParams[i++] = data.GetInt("count");
+        }
         if (allProjectile.ContainsKey(id)) {
             BaseProjectile proj = allProjectile[id];
             Type thisType = proj.GetType();
@@ -93,9 +123,5 @@ class ProjectileManager: MonoBehaviour
         }
     
     }
-    public void OnPhotonSerializeView(PhotonStream stream, PhotonMessageInfo info)
-	{
-
-	}
-
+    
 }

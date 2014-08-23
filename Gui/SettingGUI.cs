@@ -153,6 +153,7 @@ public class SettingGUI : MonoBehaviour {
      
 		HideAllSettingsPanel();
 		video.alpha = 1f;
+        CheckVideo();
 	}
 
 	public void FullScreen() // На весь экран
@@ -233,99 +234,76 @@ public class SettingGUI : MonoBehaviour {
 		string value = (ScrollArg.value * 100f).ToString("0");
 		IntArg.text = value;
 	}
+    
 
 	public void SetGraphic(UILabel ValueLabel, UIScrollBar ScrollValue, string Setting) //Настройки графики (текст)
 	{
-		
-		int arg1 = Mathf.RoundToInt(ScrollValue.value*(ScrollValue.numberOfSteps-1));
-		
-		if(Setting != "Resolution")
-			switch(arg1)
-		{
-			case 0:
-			switch(Setting)
-			{
-			case "Graphic":
-				graphicSetting.Texture.text = "Low";
-				graphicSetting.Shadow.text = "Low";
-				graphicSetting.Lighning.text = "Low";
-				graphicSetting.TextureScroll.value = 0f;
-				graphicSetting.ShadowScroll.value = 0f;
-				graphicSetting.LighningScroll.value = 0f;
-				break;
-			default:
-				
-				ValueLabel.text = "Low";
-				break;
-			}
-			break;
-			case 1:
-			switch(Setting)
-			{
-			case "Graphic":
-				graphicSetting.Texture.text = "Medium";
-				graphicSetting.Shadow.text = "Medium";
-				graphicSetting.Lighning.text = "Medium";
-				graphicSetting.TextureScroll.value = 0.5f;
-				graphicSetting.ShadowScroll.value = 0.5f;
-				graphicSetting.LighningScroll.value = 0.5f;
-				break;
-			default:
-				ValueLabel.text = "Medium";
-				break;
-			}
-			break;
-			case 2:
-			switch(Setting)
-			{
-			case "Graphic":
-				graphicSetting.Texture.text = "High";
-				graphicSetting.Shadow.text = "High";
-				graphicSetting.Lighning.text = "High";
-				graphicSetting.TextureScroll.value = 1f;
-				graphicSetting.ShadowScroll.value = 1f;
-				graphicSetting.LighningScroll.value = 1f;
-				break;
-			default:
-				ValueLabel.text = "High";
-				break;
-			}
-			break;
-		}
-		else
-			ValueLabel.text = AllResolution[arg1];
-		
-		if (graphicSetting.Lighning.text != graphicSetting.Texture.text 
-		    || graphicSetting.Shadow.text != graphicSetting.Texture.text
-		    || graphicSetting.Lighning.text != graphicSetting.Shadow.text)
-		{
-			graphicSetting.Graphic.text = "Optional";
-			graphicSetting.GraphicScroll.value = 1f;
-		}
-		else if (graphicSetting.Texture.text == "Low" && graphicSetting.Shadow.text == "Low"
-		         && graphicSetting.Lighning.text == "Low" && graphicSetting.GraphicScroll.value != 0f)
-		{
-			graphicSetting.Graphic.text = "Low";
-			graphicSetting.GraphicScroll.value = 0f;
-		}
-		else if (graphicSetting.Texture.text == "Medium" && graphicSetting.Shadow.text == "Medium"
-		         && graphicSetting.Lighning.text == "Medium" && graphicSetting.GraphicScroll.value != 1/3)
-		{
-			graphicSetting.Graphic.text = "Medium";
-			graphicSetting.GraphicScroll.value = 1f/3;
-		}
-		else if (graphicSetting.Texture.text == "High" && graphicSetting.Shadow.text == "High"
-		         && graphicSetting.Lighning.text == "High" && graphicSetting.GraphicScroll.value != 1/3*2)
-		{
-			graphicSetting.Graphic.text = "High";
-			graphicSetting.GraphicScroll.value = 1f/3*2;
-		}
+
+        int arg1 = Mathf.RoundToInt(ScrollValue.value * (ScrollValue.numberOfSteps-1));
+      
+      
+        if (Setting != "Resolution")
+        {
+            
+                switch (Setting)
+                {
+                    case "Graphic":
+                      if (ScrollValue.value != 1)
+                        {
+                            graphicSetting.Texture.text = QualitySettings.names[arg1];
+                            graphicSetting.Shadow.text = QualitySettings.names[arg1];
+                            graphicSetting.Lighning.text = QualitySettings.names[arg1];
+                            graphicSetting.TextureScroll.value = ((float)arg1) / (graphicSetting.TextureScroll.numberOfSteps-1);
+                            graphicSetting.ShadowScroll.value = ((float)arg1) / (graphicSetting.ShadowScroll.numberOfSteps-1);
+                            graphicSetting.LighningScroll.value = ((float)arg1) / (graphicSetting.LighningScroll.numberOfSteps-1);
+                        }
+                        break;
+                        
+                    default:
+
+                       
+                        ValueLabel.text = QualitySettings.names[arg1];
+                        break;
+
+                }
+                    if (graphicSetting.Lighning.text == graphicSetting.Texture.text
+                    && graphicSetting.Shadow.text == graphicSetting.Texture.text)
+                {
+                    int index = 0;
+                    for (int i = 0; i < QualitySettings.names.Length; i++)
+                    {
+                        if (QualitySettings.names[i] == graphicSetting.Texture.text)
+                        {
+                            index = i;
+                        }
+
+                    }
+                    graphicSetting.Graphic.text = QualitySettings.names[index];
+                    Debug.Log(((float)index) / (graphicSetting.GraphicScroll.numberOfSteps) + " " + QualitySettings.names[index]);
+                    graphicSetting.GraphicScroll.value =( (float)index) / (graphicSetting.GraphicScroll.numberOfSteps-1);
+
+                } 
+       
+                else {
+                    graphicSetting.Graphic.text = "Optional";
+                    graphicSetting.GraphicScroll.value = 1f;
+                }
+            
+        }else{
+            Debug.Log( AllResolution[arg1]);
+            ValueLabel.text = AllResolution[arg1];
+        }
+
+        
+        
 	}
 
 	public void SaveGraphicSetting()
 	{
 		PlayerPrefs.SetFloat("Resolution", graphicSetting.ResolutionScroll.value);
 		PlayerPrefs.SetString("ResolutionValue", graphicSetting.Resolution.text);
+        int arg1 = Mathf.RoundToInt(graphicSetting.GraphicScroll.value * (graphicSetting.GraphicScroll.numberOfSteps - 1));
+        PlayerPrefs.SetFloat("GraphicQuality", arg1);
 		PlayerPrefs.SetFloat("TextureQuality", graphicSetting.TextureScroll.value);
 		PlayerPrefs.SetFloat("ShadowQuality", graphicSetting.ShadowScroll.value);
 		PlayerPrefs.SetFloat("LighningQuality", graphicSetting.LighningScroll.value);
@@ -344,18 +322,10 @@ public class SettingGUI : MonoBehaviour {
 		else
 			x_y = graphicSetting.Resolution.text.Split('x');
 		Screen.SetResolution(int.Parse(x_y[0]), int.Parse(x_y[1]), Screen.fullScreen);
-		switch(graphicSetting.Texture.text)
-		{
-		case "Low":
-			QualitySettings.SetQualityLevel((int)QualityLevel.Fast);
-			break;
-		case "Medium":
-			QualitySettings.SetQualityLevel((int)QualityLevel.Good);
-			break;
-		case "High":
-			QualitySettings.SetQualityLevel((int)QualityLevel.Fantastic);
-			break;
-		}
+
+        int arg1 = Mathf.RoundToInt(graphicSetting.GraphicScroll.value * (graphicSetting.GraphicScroll.numberOfSteps - 1));
+        QualitySettings.SetQualityLevel(arg1);
+	
         AudioListener.volume = volumes.SoundFxScroll.value * volumes.VolumeScroll.value;
         MusicHolder.SetVolume(volumes.MusicScroll.value * volumes.VolumeScroll.value);
 	}
@@ -366,9 +336,7 @@ public class SettingGUI : MonoBehaviour {
 		graphicSetting.TextureScroll.value = 1f;
 		graphicSetting.ShadowScroll.value = 1f;
 		graphicSetting.LighningScroll.value = 1f;
-		volumes.VolumeScroll.value = 1f;
-		volumes.SoundFxScroll.value = 1f;
-		volumes.MusicScroll.value = 1f;
+		
 	}
 
 	IEnumerator SetDefoltGraphic(int i)
@@ -439,26 +407,52 @@ public class SettingGUI : MonoBehaviour {
 		{
 			AllResolution.Add(res.width + "x" + res.height);
 		}
+        
 		graphicSetting.ResolutionScroll.numberOfSteps = AllResolution.Count;
+        graphicSetting.GraphicScroll.numberOfSteps = QualitySettings.names.Length+1;
+        graphicSetting.TextureScroll.numberOfSteps = QualitySettings.names.Length;
+        graphicSetting.ShadowScroll.numberOfSteps = QualitySettings.names.Length;
+        graphicSetting.LighningScroll.numberOfSteps = QualitySettings.names.Length;
+       
+        CheckVideo();
+        ShowControl();
+	}
+    void CheckVideo()
+    {
+        RestoreGrahicSettingInMenu();
+        if (PlayerPrefs.GetString("SaveSetting2", "no") == "yes")
+        {
+            //Загрузка настроек
+            graphicSetting.ResolutionScroll.value = PlayerPrefs.GetFloat("Resolution");
+            volumes.VolumeScroll.value = PlayerPrefs.GetFloat("OverallVolume");
+            volumes.SoundFxScroll.value = PlayerPrefs.GetFloat("SoundFX");
+            volumes.MusicScroll.value = PlayerPrefs.GetFloat("Music");
+            StartCoroutine(SetDefoltGraphic(1));
+        }
+        else
+        {
+            volumes.VolumeScroll.value = 1f;
+            volumes.SoundFxScroll.value = 1f;
+            volumes.MusicScroll.value = 1f;
+        }
+
+    }
+	public void RestoreGrahicSettingInMenu(){
 		if(PlayerPrefs.GetString("SaveSetting", "no") == "yes")
 		{
 			//Загрузка настроек
-			graphicSetting.ResolutionScroll.value = PlayerPrefs.GetFloat("Resolution");
+            graphicSetting.GraphicScroll.value = PlayerPrefs.GetFloat("GraphicQuality") / (graphicSetting.GraphicScroll.numberOfSteps - 1);
 			graphicSetting.TextureScroll.value = PlayerPrefs.GetFloat("TextureQuality");
 			graphicSetting.ShadowScroll.value = PlayerPrefs.GetFloat("ShadowQuality");
 			graphicSetting.LighningScroll.value = PlayerPrefs.GetFloat("LighningQuality");
-			volumes.VolumeScroll.value = PlayerPrefs.GetFloat("OverallVolume");
-			volumes.SoundFxScroll.value = PlayerPrefs.GetFloat("SoundFX");
-			volumes.MusicScroll.value = PlayerPrefs.GetFloat("Music");
-			StartCoroutine(SetDefoltGraphic(1));
 		}
 		else
 		{
 			DefaultGraphic();
 			StartCoroutine(SetDefoltGraphic(0));
 		}
-        ShowControl();
 	}
+	
 	
 	// Update is called once per frame
 	void Update () {

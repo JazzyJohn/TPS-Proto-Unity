@@ -46,29 +46,7 @@ public class ContiniusGun : BaseWeapon
 		AOECollider.GetComponent<BoxCollider>().size = colliderDisableSize;
 		base.ReleaseFire();
 	}
-	public void OnPhotonSerializeView(PhotonStream stream, PhotonMessageInfo info)
-	{
-		if (stream.isWriting)
-		{
-			// We own this player: send the others our data
-			stream.SendNext(isShooting);
-
-			///stream.SendNext(transform.rotation);
-			
-		}
-		else
-		{
-			// Network player, receive data
-			bool newIsShooting = (bool) stream.ReceiveNext();
-			if(newIsShooting&&!isShooting){
-				StartFire();
-			}else if(!newIsShooting&&isShooting){
-				StopFire();
-			}
-			//this.transform.rotation = (Quaternion) stream.ReceiveNext();
-			
-		}
-	}
+	
 	public override void AimFix(){
 		Vector3 aimTarget =owner.getCachedAimRotation ();
 		//Debug.Log ((aimTarget - muzzlePoint.position).normalized);

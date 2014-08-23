@@ -1,51 +1,16 @@
 ﻿using UnityEngine;
 using System.Collections;
 using System.Collections.Generic;
+using nstuff.juggerfall.extension.models;
 
 
 
 
 public class BaseWeapon : DestroyableNetworkObject {
-	protected class ShootData{
-		public double timeShoot;
-		public Quaternion  direction;
-		public Vector3 position;
-		public float power;
-		public float range;
-		public int viewId;
-        public int projId;
-		public void PhotonSerialization(PhotonStream stream){
-            stream.SendNext(projId);
-            stream.SendNext (power);
-
-			stream.SendNext( range);
-			stream.SendNext( viewId);
-			stream.SendNext (timeShoot);
-
-            	stream.SendNext (direction.eulerAngles);
-                stream.SendNext(position);
-		}
-		public void PhotonDeserialization(PhotonStream stream){
-            projId = (int)stream.ReceiveNext();
-			power= (float)stream.ReceiveNext ();
-			range= (float)stream.ReceiveNext ();
-            viewId = (int)stream.ReceiveNext();
-			timeShoot = (double)stream.ReceiveNext ();
-
-            Vector3 euler = (Vector3)stream.ReceiveNext();
-            direction = Quaternion.Euler(euler);
-            position = (Vector3)stream.ReceiveNext();
-		}
-
-       
-    }
-
+	
 	private static LayerMask layer = -123909;
 	
-	private Queue<ShootData> shootsToSend = new Queue<ShootData>();
-
-	protected Queue<ShootData> shootsToSpawn = new Queue<ShootData>();
-
+	
 	public enum AMUNITONTYPE{SIMPLEHIT, PROJECTILE, RAY, HTHWEAPON, AOE};
 
 	public AMUNITONTYPE amunitionType;
@@ -96,8 +61,18 @@ public class BaseWeapon : DestroyableNetworkObject {
     /// </summary>
     public float pumpCoef;
     protected float _pumpCoef;
-   
-
+    /// <summary>
+    ///  Temp Target for guidance system
+    /// </summary>
+	protected Transform guidanceTarget= null;
+	/// <summary>
+    ///  Can be lock on friendly target
+    /// </summary>
+	public bool isFriendlyGuide;
+	/// <summary>
+    ///  One shoot pump do you need pump every shot;
+    /// </summary>
+	public bool oneShootPump =false;	
     /// <summary>
     /// After Pump Finish action
     /// </summary>
@@ -142,6 +117,8 @@ public class BaseWeapon : DestroyableNetworkObject {
 	public float maxRandEffect;
 
 	public GameObject projectilePrefab;
+
+    private BaseProjectile projectileClass;
 	
 	public GameObject pickupPrefabPrefab;
 
@@ -206,7 +183,11 @@ public class BaseWeapon : DestroyableNetworkObject {
 	//ID for MySqlBAse
 	public int SQLId;
 
-
+	void Awake(){
+		foxView = GetComponent<FoxView>();
+        projectileClass = projectilePrefab.GetComponent<BaseProjectile>();
+	}
+	
 	// Use this for initialization
 	protected void Start () {
 		aSource = GetComponent<AudioSource> ();
@@ -221,10 +202,10 @@ public class BaseWeapon : DestroyableNetworkObject {
 		}
 		
 		curTransform = transform;
-		photonView = GetComponent<PhotonView>();
+	
 		rifleParticleController = GetComponentInChildren<RifleParticleController>();
 	
-		if (rifleParticleController != null&&photonView.isMine) {
+		if (rifleParticleController != null&&foxView.isMine) {
 			rifleParticleController.SetOwner (owner.collider);
 		}
 	}
@@ -233,8 +214,8 @@ public class BaseWeapon : DestroyableNetworkObject {
 		if (curTransform == null) {
 			curTransform = transform;		
 		}
-		if (photonView == null) {
-			photonView = GetComponent<PhotonView>();
+		if (foxView == null) {
+			foxView = GetComponent<FoxView>();
 		}
 		owner = inowner;
 
@@ -242,21 +223,22 @@ public class BaseWeapon : DestroyableNetworkObject {
 		curTransform.localPosition = Offset;
 		//Debug.Log (name + weaponRotator);
 		curTransform.localRotation = weaponRotator;
-		if (photonView.isMine) {
-			photonView.RPC("AttachWeaponRep",PhotonTargets.OthersBuffered,inowner.photonView.viewID);
-		}
+        
+		//RemoteAttachWeapon(inowner);
+		
+		
 	}
 
-	[RPC]
-	public void AttachWeaponRep(int viewid){
+	public void RemoteAttachWeapon(Pawn newowner){
 		if (curTransform == null) {
 			curTransform = transform;		
 		}
-		owner =PhotonView.Find (viewid).GetComponent<Pawn>();
+		owner =newowner;
 		if (owner == null) {
 			//Destroy(photonView);
 			Debug.Log ("DestoroyATTACHEs");
 			Destroy(gameObject);
+            return;
 		}
 		owner.setWeapon (this);
 		if (rifleParticleController != null) {
@@ -275,10 +257,7 @@ public class BaseWeapon : DestroyableNetworkObject {
 
 		}
 		//AimFix ();
-		if (!photonView.isMine) {
-			ReplicationGenerate ();
-			return;
-		}
+		
 
 		if(isReload){
 			if(reloadTimer<0){
@@ -346,10 +325,11 @@ public class BaseWeapon : DestroyableNetworkObject {
                     }
                     else
                     {
-						_pumpCoef += deltaTime*pumpCoef;
+						
                         switch (prefiretype)
                         {
                             case PREFIRETYPE.Salvo:
+								Pumping();
                                 if (curAmmo == 0 && alredyGunedAmmo == 0) {
                                     ReloadStart();
                                 }
@@ -364,20 +344,37 @@ public class BaseWeapon : DestroyableNetworkObject {
                                }
 
                                 break;
+							case PREFIRETYPE.Guidance:
+								if(guidanceTarget==owner.curLookTarget){
+									Pumping();
+								}else{
+									if(guidanceTarget==null){
+										Pawn target = owner.curLookTarget.GetComponent<Pawn>();
+										if(target!=null&&(isFriendlyGuide||target.team!=owner.team)){
+                                            guidanceTarget = owner.curLookTarget;
+										}									
+									}
+								}
+							break;
 							default:
-								  if (curAmmo == 0) {
+								Pumping();
+								if (curAmmo == 0) {
                                     ReloadStart();
                                 }
                                
 								break;
                          }
-                        _pumpAmount += deltaTime;
+                     
                     }
                 }
                 break;
         }
 		_randShootCoef-=randCoolingEffect*deltaTime;
      
+	}
+	private void Pumping(){
+		_pumpCoef += Time.deltaTime*pumpCoef;
+        _pumpAmount += Time.deltaTime;
 	}
 
     private void ShootTick()
@@ -401,7 +398,7 @@ public class BaseWeapon : DestroyableNetworkObject {
     }
 	public virtual void StartFire(){
 		isShooting = true;
-
+	
 	}
     public virtual void StartPumping()
     {
@@ -426,7 +423,7 @@ public class BaseWeapon : DestroyableNetworkObject {
             case PREFIRETYPE.Spooling:
 
                 break;
-            default:
+			default:
                 Fire();
                 break;
         }
@@ -603,6 +600,9 @@ public class BaseWeapon : DestroyableNetworkObject {
                 _waitForRelease = true;
                 break;
         }
+		if(oneShootPump){
+			_pumpCoef=0;
+		}
 
     }
 
@@ -645,6 +645,14 @@ public class BaseWeapon : DestroyableNetworkObject {
 			break;
 			
 		}
+		
+		switch (prefiretype)
+        {
+            case PREFIRETYPE.Guidance:
+			guidanceTarget = null;
+
+            break;
+        }
 	}
 
 	public virtual void ChangeWeaponStatus(bool status){
@@ -690,18 +698,11 @@ public class BaseWeapon : DestroyableNetworkObject {
 		}
 		if(prefiretype==PREFIRETYPE.ChargedAccuracy){
 			effAimRandCoef-= _pumpCoef;
-			_pumpCoef=0;
+			
 		}
 		return effAimRandCoef;
 	}
-	/// <summary>
-    /// Return target from owner;
-    /// </summary>
-	protected Transform GetGuidanceTarget(){
-		Transform target  = owner.curLookTarget;
 	
-		return target;
-	}
 	protected virtual void GenerateProjectile(){
 		Vector3 startPoint  = muzzlePoint.position+muzzleOffset;
 		Quaternion startRotation = getAimRotation();
@@ -713,7 +714,7 @@ public class BaseWeapon : DestroyableNetworkObject {
 		}
        // Debug.DrawLine(transform.position, startPoint, Color.red,10 );
    
-		proj=Instantiate(projectilePrefab,startPoint,startRotation) as GameObject;
+		proj=projectilePrefab.Spawn(startPoint,startRotation);
         //Debug.DrawLine(transform.position,proj.transform.position, Color.blue, 10);
 		BaseProjectile projScript =proj.GetComponent<BaseProjectile>();
 		float power=0;
@@ -728,11 +729,12 @@ public class BaseWeapon : DestroyableNetworkObject {
 			break;
 			case PREFIRETYPE.Guidance:
 				if(_pumpCoef>=1.0f){
-					Transform target = GetGuidanceTarget();
-				
+					Transform target = 	guidanceTarget;
+					guidanceTarget = null;
+					
 					if(target!=null){
 						projScript.target = target;
-						viewId = target.GetComponent<PhotonView>().viewID;
+						viewId = target.GetComponent<FoxView>().viewID;
 
 					}
 				}
@@ -741,8 +743,8 @@ public class BaseWeapon : DestroyableNetworkObject {
      
         projScript.projId = ProjectileManager.instance.GetNextId();
         projScript.replication = false;
-		if (photonView.isMine) {
-            SendShoot(startPoint, startRotation, power, range, viewId, projScript.projId);
+		if (foxView.isMine) {
+            foxView.SendShoot(startPoint, startRotation, power, range, viewId, projScript.projId);
 		}
 		
 		
@@ -751,36 +753,30 @@ public class BaseWeapon : DestroyableNetworkObject {
 		projScript.damage.Damage+=power;
 		projScript.range+=range;
 	}
-	protected virtual void ReplicationGenerate (){
-		if(shootsToSpawn.Count>0){
-				sControl.playClip (fireSound);
-				owner.shootEffect();
-		}
-		while(shootsToSpawn.Count>0){
-			ShootData spawnShoot = shootsToSpawn.Dequeue();
-			
-			BaseProjectile  proj = GenerateProjectileRep(spawnShoot.position,spawnShoot.direction,spawnShoot.timeShoot);
+	public virtual void RemoteGenerate (Vector3 position, Quaternion rotation, float power, float range, int viewId, int projId,double timeShoot){
+
+        BaseProjectile proj = GenerateProjectileRep(position, rotation, timeShoot);
 			if (rifleParticleController != null) {
 				rifleParticleController.CreateShootFlame ();
 			}
-            proj.projId = spawnShoot.projId;
-			proj.damage.Damage+=spawnShoot.power;
-			proj.range+=spawnShoot.range;
+            proj.projId = projId;
+			proj.damage.Damage+=power;
+			proj.range+=range;
 			switch(prefiretype){
 				case PREFIRETYPE.Guidance:
-					if(spawnShoot.viewId!=0){
-						Transform target =PhotonView.Find(spawnShoot.viewId).GetComponent<Transform>();
+					if(viewId!=0){
+						Transform target =NetworkController.GetView(viewId).GetComponent<Transform>();
 				
 					
 						proj.target = target;
 					}
 				break;
 			}
-		}
+		
 	}
 	protected BaseProjectile GenerateProjectileRep(Vector3 startPoint,Quaternion startRotation,double timeShoot){
 
-		GameObject proj=Instantiate(projectilePrefab,startPoint,startRotation) as GameObject;
+		GameObject proj=projectilePrefab.Spawn(startPoint,startRotation);
 		BaseProjectile projScript = proj.GetComponent<BaseProjectile>();
         projScript.lateTime = timeShoot;
 
@@ -789,58 +785,30 @@ public class BaseWeapon : DestroyableNetworkObject {
 		return projScript;
 	}
 
-    protected void SendShoot(Vector3 position, Quaternion rotation, float power, float range, int viewId, int projId)
-    {
-		ShootData send = new ShootData ();
-		send.position = position;
-		send.direction = rotation;
-		send.power = power;
-		send.range = range;
-        send.viewId = viewId;
-        send.projId = projId;
-		send.timeShoot = PhotonNetwork.time;
-		shootsToSend.Enqueue (send);
-	}
 	protected Quaternion getAimRotation(){
 		/*Vector3 randVec = Random.onUnitSphere;
 		Vector3 normalDirection  = owner.getAimRotation(weaponRange)-muzzlePoint.position;
 		normalDirection =normalDirection + randVec.normalized * normalDirection.magnitude * aimRandCoef / 100;*/
 
-		return Quaternion.LookRotation(owner.getAimRotation() -muzzlePoint.position);
+        return Quaternion.LookRotation(owner.getAimpointForWeapon(projectileClass.startImpulse) - muzzlePoint.position);
 		
 
 	}
 	
-	public void OnPhotonSerializeView(PhotonStream stream, PhotonMessageInfo info)
-	{
-		if (stream.isWriting)
-		{
-			// We own this player: send the others our data
-			stream.SendNext(shootsToSend.Count);
-			while(shootsToSend.Count>0){
-				shootsToSend.Dequeue().PhotonSerialization(stream);
-			}
-			//stream.SendNext(transform.rotation);
-
-		}
-		else
-		{
-			// Network player, receive data
-			int shootCount = (int) stream.ReceiveNext();
-			for(int i=0;i<shootCount;i++){
-				ShootData data = new ShootData();
-				data.PhotonDeserialization(stream);
-				shootsToSpawn.Enqueue(data);
-			}
-			//this.transform.rotation = (Quaternion) stream.ReceiveNext();
-
-		}
-	}
+	
 	public float MuzzleOffset(){
 
 		return (muzzlePoint.position + muzzleOffset - curTransform.position).sqrMagnitude;
 	}
+    WeaponModel sirWep = new WeaponModel();
+    public WeaponModel GetSerilizedData()
+    {
+        sirWep.id = foxView.viewID;
+		return sirWep;
+	}
+    public void NetUpdate(WeaponModel model)
+    {
 
-   
+    }
   
 }

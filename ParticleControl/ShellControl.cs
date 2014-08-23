@@ -6,7 +6,7 @@ public class ShellControl : MonoBehaviour {
 	float createTime =0.0f;
 	public float colliderTimeOut = 0.5f;
 	// Use this for initialization
-	void Awake () {
+	void OnEnable () {
 		createTime = Time.time;
 	}
 	
@@ -14,7 +14,7 @@ public class ShellControl : MonoBehaviour {
 	void Update () {
 		if (createTime + 0.5f < Time.time) {
 			collider.enabled = true;
-			Destroy(this);
+			enabled= false;
 		}
 	}
 }

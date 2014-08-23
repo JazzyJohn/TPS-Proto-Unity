@@ -3,20 +3,16 @@ using System.Collections;
 
 public class DestroyableNetworkObject : MonoBehaviour {
 
-	public PhotonView photonView;
+	public FoxView foxView;
 
 	public IEnumerator CoroutineRequestKillMe(){
  
 		yield return new WaitForSeconds(0.2f);
        // Debug.Log("RPC KILL ME REQUEST" + this);
-        if (photonView.isSceneView)
-        {
-            photonView.RPC("KillMe",PhotonTargets.MasterClient);
-        }
-        else
-        {
-            photonView.RPC("KillMe", photonView.owner);
-        }
+		if(foxView!=null){
+			foxView.Destroy();	
+			KillMe();
+		}
 
 	}
     public void StartCoroutineRequestKillMe()
@@ -24,17 +20,12 @@ public class DestroyableNetworkObject : MonoBehaviour {
         StartCoroutine(CoroutineRequestKillMe());
     }
 	public void RequestKillMe(){
-        if (photonView.isSceneView)
-        {
-            photonView.RPC("KillMe", PhotonTargets.MasterClient);
-        }
-        else
-        {
-            photonView.RPC("KillMe", photonView.owner);
-        }
-		
+		if(foxView!=null){
+			foxView.Destroy();	
+			KillMe();
+		}
 	}
-	[RPC]
+	
 	public void KillMe(){
 		
         ActualKillMe();
@@ -42,7 +33,12 @@ public class DestroyableNetworkObject : MonoBehaviour {
 			
 	}
 	protected virtual void ActualKillMe(){
-			PhotonNetwork.Destroy(gameObject);
+			Destroy(gameObject);
 	}
 
+
+    public virtual void SetHealth(float p)
+    {
+     
+    }
 }

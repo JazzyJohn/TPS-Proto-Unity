@@ -26,10 +26,11 @@ public class UseObject : DestroyableNetworkObject {
 		}
 		if(ActualUse(target)){
 			if(isOneUse){
-				if(!photonView.isMine){
+				if(!foxView.isMine){
 					RequestKillMe();
 				}else{
-					PhotonNetwork.Destroy(photonView);
+                    foxView.Destroy();
+                    Destroy(gameObject);
 				}
 			}
 			coolDownTimer=coolDownTime;
@@ -37,7 +38,7 @@ public class UseObject : DestroyableNetworkObject {
 	
 	}
 	protected void Awake () {
-		photonView = GetComponent<PhotonView> ();
+        foxView = GetComponent<FoxView>();
 		myTransform = transform;
 	}
 	protected void Start(){
@@ -65,7 +66,4 @@ public class UseObject : DestroyableNetworkObject {
 		}
 	}
 	//NetworkSection
-	public void OnPhotonSerializeView(PhotonStream stream, PhotonMessageInfo info)
-	{
-	}
 }

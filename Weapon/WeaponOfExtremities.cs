@@ -4,27 +4,7 @@ using System.Collections.Generic;
 
 public class WeaponOfExtremities : MonoBehaviour {
 
-	class ShootData{
-		public double timeShoot;
-		public Quaternion  direction;
-		public Vector3 position;
-		public void PhotonSerialization(PhotonStream stream){
-			stream.SendNext (timeShoot);
-			
-			stream.SendNext( direction);
-			ServerHolder.WriteVectorToShort (stream, position);
-		}
-		public void PhotonDeserialization(PhotonStream stream){
-			timeShoot = (double)stream.ReceiveNext ();
-			direction = (Quaternion)stream.ReceiveNext ();
-			position = ServerHolder.ReadVectorFromShort (stream);
-		}
-	}
-
-	private Queue<ShootData> shootsToSend = new Queue<ShootData>();
 	
-	private Queue<ShootData> shootsToSpawn = new Queue<ShootData>();
-
 	public Pawn owner;
 
     public bool isKicking = false;
@@ -45,7 +25,7 @@ public class WeaponOfExtremities : MonoBehaviour {
 		for (int i = 0; i < this.GetComponentsInChildren<HTHHitter>().Length; i++)
 		{
 			Weapon.Add(this.GetComponentsInChildren<HTHHitter>()[i]);
-			Weapon[i].Luke_I_am_your_father(this, owner);
+			Weapon[i].SetOwner(this, owner);
 		}
 	}
 
@@ -58,10 +38,10 @@ public class WeaponOfExtremities : MonoBehaviour {
 			if (Attack.isKick) 
 			{
 				//Attack.isKick=false;
-				if(Attack.timer<=0)
+				if(!Attack.IsPlaying())
 				{
 					Kick(Attack);
-					Attack.timer = Attack.KDTime;
+					
 				}
 			}
 		}
@@ -75,10 +55,11 @@ public class WeaponOfExtremities : MonoBehaviour {
         if (!Attack.OnMove) {
             owner.StopMovement();
         }
-		Attack.isKick = true;
+      
+		Kick(Attack);
         isKicking = true;
 	}
-
+	
 	public virtual void StopKick()
 	{
         owner.StartMovement();
@@ -92,16 +73,19 @@ public class WeaponOfExtremities : MonoBehaviour {
 
 	void Kick(HTHHitter Attack)
 	{
-		if (!Attack.CanShoot ()) 
-		{
-			return;		
-		}
-
+	
+		
 		switch (Attack.AttakType) 
 		{
 		case HTHHitter.KickType.Aim:
 			owner.animator.StartAttackAnim(Attack.NameAttack);
 			break;
 		}
+       
+		Attack.StartKick();
+	}
+    public virtual void KickFinish()
+	{
+		owner.KickFinish();
 	}
 }

@@ -7,7 +7,7 @@ public class AIDirector_Expedition : AIDirector {
 
     public override void StartDirector()
     {
-
+        Debug.Log("Director Start");
         VipPawn.StartPawn();
         base.StartDirector();
 

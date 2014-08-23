@@ -1,57 +1,1571 @@
+
 using UnityEngine;
 using System.Collections;
 
 using System;
-using SmartFoxClientAPI;
-using SmartFoxClientAPI.Data
+using Sfs2X;
+using Sfs2X.Core;
+using Sfs2X.Entities;
+using Sfs2X.Entities.Data;
+using Sfs2X.Requests;
+using Sfs2X.Logging;
+using System.Collections.Generic;
+using Sfs2X.Protocol.Serialization;
+using System.Reflection;
+using nstuff.juggerfall.extension.models;
+using Sfs2X.Entities.Variables;
 
+public enum RPCTransitTargetType
+{
+    OTHER,
+    MASTER,
+    ALL
+}
 
 public class NetworkController : MonoBehaviour {
-	public static int MAX_VIEW_IDS;
-	
-	private static SmartFoxClient smartFoxClient;
-	
-	public static SmartFoxClient GetClient() {
-		return SmartFox.Connection;
+	public static int MAX_VIEW_IDS = 1000;
+
+
+    private static Dictionary<int, FoxView> foxViewList = new Dictionary<int, FoxView>();
+    static int lastUsedViewSubId = 0;  // each player only needs to remember it's own (!) last used subId to speed up assignment
+    static int lastUsedViewSubIdStatic = 0;  // per room, the master is able to instantiate GOs. the subId for this must be unique too
+   
+
+    public string serverName = "127.0.0.1";
+    public int serverPort = 9933;
+    public int udpPort = 9934;
+    public string zone = "BasicJugger";
+    public bool debug = true;
+    public bool pause = false;
+
+    private static NetworkController instance;
+    public static NetworkController Instance
+    {
+        get
+        {
+            return instance;
+        }
+    }
+
+    public static SmartFox smartFox
+    {
+        get
+        {
+            if (instance != null)
+            {
+                return instance._smartFox;
+            }
+            return null;
+        }
+    }
+    private SmartFox _smartFox;  // The reference to SFS client
+
+	public static SmartFox GetClient() {
+        return  SmartFoxConnection.Connection;
 	}
+
+    public ServerHolder serverHolder;
 	
-	#region Events
+	public static FoxView GetView(int id){
+		if(foxViewList.	ContainsKey(id)){
+			return foxViewList[id];
+		}
+		return null;
+	}
+	public static void ClearView(int id){
+		foxViewList.Remove(id);
+	}
+	public void MasterViewUpdate(){
+		foreach(FoxView view in foxViewList.Values){
+            
+            if (view.isSceneView)
+            {
+                Debug.Log("MasterViewUpdate" + view);
+                if (view.viewID == 0)
+                {
+                    NetworkController.RegisterSceneView(view);
+                }
+                view.SetMine(true);
+                view.SendMessage("OnMasterClientSwitched", SendMessageOptions.DontRequireReceiver);
+            }
+            
+       }
 	
-	public static bool started = false;
+	}
+
+    public static bool IsMaster()
+    {
+        return smartFox.MySelf.ContainsVariable("Master") && smartFox.MySelf.GetVariable("Master").GetBoolValue();
+    }
+
+   
+		// We start working from here
+    void Awake()
+    {
+        if (instance != null)
+        {
+            return;
+
+        }
+        instance = this;
+        Application.runInBackground = true; // Let the application be running whyle the window is not active.
+        // In a webplayer (or editor in webplayer mode) we need to setup security policy negotiation with the server first
+        if (Application.isWebPlayer || Application.isEditor)
+        {
+            if (!Security.PrefetchSocketPolicy(serverName, serverPort, 500))
+            {
+                Debug.LogError("Security Exception. Policy file load failed!");
+            }
+        }
+        DefaultSFSDataSerializer.RunningAssembly = Assembly.GetExecutingAssembly(); 
+        Connect();
+    }
+    public void Connect(){
+        if (SmartFoxConnection.IsInitialized)
+        {
+            _smartFox = SmartFoxConnection.Connection;
+        }
+        else
+        {
+            _smartFox = new SmartFox(debug);
+        }
+     
+        if (!_smartFox.IsConnected)
+        {
+
+            // Register callback delegate
+
+
+               Debug.Log("startFoxCOnnection");
+          
+            _smartFox.AddEventListener(SFSEvent.CONNECTION, OnConnection);
+            _smartFox.AddEventListener(SFSEvent.CONNECTION_LOST, OnConnectionLost);
+            _smartFox.AddEventListener(SFSEvent.LOGIN, OnLogin);
+            _smartFox.AddEventListener(SFSEvent.UDP_INIT, OnUdpInit);
+            _smartFox.AddEventListener(SFSEvent.EXTENSION_RESPONSE, OnExtensionResponse);
+            _smartFox.AddLogListener(LogLevel.DEBUG, OnDebugMessage);
+            _smartFox.Connect(serverName, serverPort);
+        }
+	}
+    	
+	// This is needed to handle server events in queued mode
+	void FixedUpdate() {
+        if (pause)
+        {
+            return;
+        }
+        while(lateEvents.Count>0){
+            OnExtensionResponse(lateEvents.Dequeue());
+        }
+		if(_smartFox!=null){
+			_smartFox.ProcessEvents();
+		}
+        
+	}
+    string UID = "";
+    public void SetLogin(string username)
+    {
+        UID = username;
+        if (_smartFox.IsConnected)
+        {
+            Login(username);
+        }
+    }
+	public void Login(string username){
+		ISFSObject data = new SFSObject();
+        data.PutUtfString("playerName", GlobalPlayer.instance.PlayerName);
+        _smartFox.Send(new LoginRequest(username, "", zone,data));
+
+    }
+	private void UnsubscribeDelegates() {
+        _smartFox.RemoveAllEventListeners();
+	}
+    void OnApplicationQuit()
+    {
+		_smartFox.Disconnect();
+        UnsubscribeDelegates();
+       
+    }
+    //SMARTFOX LOGIC
+
+    /************
+    * Callbacks from the SFS API
+     ************/
+
+    public void OnConnection(BaseEvent evt)
+    {
+        bool success = (bool)evt.Params["success"];
+        string error = (string)evt.Params["error"];
+
+        Debug.Log("On Connection callback got: " + success + " (error : <" + error + ">)");
+
+      
+        if (success)
+        {
+            SmartFoxConnection.Connection = _smartFox;
+        }
+        Debug.Log(UID);
+        if (UID!="")
+        {
+            Login(UID);
+        }
+       
+    }
+
+    public void OnConnectionLost(BaseEvent evt)
+    {
+        
+        UnsubscribeDelegates();
+        this.Connect();
+    }
+
+    public void OnDebugMessage(BaseEvent evt)
+    {
+        string message = (string)evt.Params["message"];
+        Debug.Log("[SFS DEBUG] " + message);
+    }
+
+    public void OnLogin(BaseEvent evt)
+    {
+        bool success = true;
+        if (evt.Params.Contains("success") && !(bool)evt.Params["success"])
+        {
+            // Login failed - lets display the error message sent to us
+ 
+            Debug.Log("Login error: " + (string)evt.Params["errorMessage"]);
+        }
+        else
+        {
+            // Startup up UDP
+            Debug.Log("Login ok");
+			List<UserVariable> userVars = new List<UserVariable>();
 	
-	private void SubscribeEvents() {
-		SFSEvent.onJoinRoom += OnJoinRoom;
-		SFSEvent.onUserEnterRoom += OnUserEnterRoom;
-		SFSEvent.onUserLeaveRoom += OnUserLeaveRoom;
-		SFSEvent.onObjectReceived += OnObjectReceived;
-		SFSEvent.onPublicMessage += OnPublicMessage;
+            smartFox.InitUDP(serverName, serverPort);
+        }
+    }
+
+    public void OnUdpInit(BaseEvent evt)
+    {
+        if (evt.Params.Contains("success") && !(bool)evt.Params["success"])
+        {
+      
+            Debug.Log("UDP error: " + (string)evt.Params["errorMessage"]);
+        }
+        else
+        {
+            Debug.Log("UDP ok");
+
+            // On to the lobby
+            serverHolder = GetComponent<ServerHolder>();
+            serverHolder.Connect();
+
+        }
+    }
+
+    private Queue<BaseEvent> lateEvents = new Queue<BaseEvent>();
+    private void OnExtensionResponse(BaseEvent evt)
+    {
+        if (pause)
+        {
+            lateEvents.Enqueue(evt);
+            return;
+        }
+        try
+        {
+            string cmd = (string)evt.Params["cmd"];
+            ISFSObject dt = (SFSObject)evt.Params["params"];
+           
+            switch (cmd)
+            {
+                case "getTime":
+                    long time = dt.GetLong("t");
+		            TimeManager.Instance.Synchronize(Convert.ToDouble(time));
+                    break;
+            
+                case "playersSpawm":
+
+                    foreach (PlayerModel player in dt.GetSFSArray("owners"))
+                    {
+                         if (player.userId != _smartFox.MySelf.Id)
+                         {
+                             if (PlayerView.allPlayer.ContainsKey(player.userId))
+                             {
+                                 PlayerView.allPlayer[player.userId].NetUpdate(player);
+                             }
+                             else
+                             {
+                                 SpawnPlayer(player);
+                             }
+                         }
+                     }
+					
+
+                    //TODO Think maybe faster would be to sort it?
+                    foreach (SFSObject dtIt in dt.GetSFSArray("views"))
+                    {
+                        if (dtIt.ContainsKey("pawn"))
+                        {
+                            HandlePawnSpawn(dtIt);
+                        }else if (dtIt.ContainsKey("model"))
+                        {
+                            HandleSimplePrefabSpawn(dtIt);
+                        }
+                       
+                    }
+                    foreach (SFSObject dtIt in dt.GetSFSArray("views"))
+                    {
+                        if (dtIt.ContainsKey("weapon"))
+                        {
+                            HandleWeaponSpawn(dtIt);
+                        }
+
+                    }
+					//Delete scene view that was deleted before player join
+				    foreach (int id in dt.GetIntArray("deleteSceneView"))
+                    {
+							 FoxView view = GetView(id);
+                             Debug.Log("ALREDY DESTROY ID" + id);
+							 if(view!=null){
+								DestroyableNetworkObject obj =view.GetComponent<DestroyableNetworkObject>();
+                                 
+								if(obj!=null){
+                                    Debug.Log("ALREDY DESTROY" + obj);
+									obj.KillMe();
+								
+								}
+							}
+					}
+                    if(dt.ContainsKey("Master")&&dt.GetBool("Master")){
+                        HandleMasterStart(dt);
+                    }
+					if(dt.ContainsKey("swarmIds")){
+					   AIDirector.instance.UpdateSwarm(dt.GetIntArray("swarmIds"));
+					}
+                
+                    break;
+                case "updatePlayerInfo":
+                    {
+                        PlayerModel player = (PlayerModel)dt.GetClass("player");
+                        Debug.Log("updatePlayerInfo team" + player.team);
+                        if (PlayerView.allPlayer.ContainsKey(player.userId))
+                        {
+                            PlayerView.allPlayer[player.userId].NetUpdate(player);
+                        }
+                        else
+                        {
+                            SpawnPlayer(player);
+                        }
+
+
+                    }
+
+                    break;
+				case "pawnSpawn":
+					{
+						HandlePawnSpawn(dt);
+					
+					}
+					break;
+				case "pawnChangeShootAnimState":
+					HandlePawnChangeShootAnimState(dt);
+					break;
+				case "pawnStartKick":
+					HandlePawnKick(dt);
+					break;
+				case "pawnActiveState":
+					HandlePawnActiveState(dt);
+					break;
+				case "pawnUpdate":
+					HandlePawnUpdate(dt);
+					break;
+				case "pawnTaunt":
+					HandlePawnTaunt(dt);
+					break;
+				case "pawnKnockOut":
+					HandlePawnKnockOut(dt);
+					break;
+				case "deleteView":
+					HandleDeleteView(dt);
+					break;
+				case "weaponSpawn":
+					HandleWeaponSpawn(dt);
+					break;
+				case "weaponShoot":
+					HanldeWeaponShoot(dt);
+					break;
+				case "pawnSkillCastEffect":
+					HandlePawnSkillCastEffect(dt);
+					break;
+				case "pawnSkillActivate":
+					HandleSkillActivate(dt);
+					break;
+				case "pawnDetonate":
+					HandlePawnDetonate(dt);
+					break;
+				case "pawnSetAIRequest":
+					HandleSetAIRequest(dt);
+					break;
+                case "invokeProjectileCall":
+                    HandleInvokeProjectileCall(dt);
+                    break;
+                case "simplePrefabSpawn":
+                    HandleSimplePrefabSpawn(dt);
+                    break;
+                case "gameStart":
+                    HandleGameStart();
+                    break;
+                case "gameUpdate":
+                    HandleGameUpdate(dt);
+                    break;
+                case "nextMap":
+                    HandleNextMap(dt);
+                    break;
+                case "pawnDiedByKill":
+                    HandlePawnDiedByKill(dt);
+                    break;
+				case "newMaster":
+					HandleMasterStart(dt);
+					break;
+                case "playerLeave":
+                    HandlePlayerLeave(dt);
+                    break;
+                case "pawnInPilotChange":
+                    HandlePawnInPilotChange(dt);
+                    break;
+                case "updateSimpleDestroyableObject":
+                    HandleUpdateSimpleDestroyableObject(dt);
+                    break;
+				case "swarmUpdate":
+					HandleSwarmUpdate(dt);
+					break;
+				case "remoteDamageOnPawn":
+					HandleRemoteDamageOnPawn(dt);
+                    break;
+				case "enterRobot":
+					HandleEnterRobot(dt);
+					break;
+
+            }
+        }
+        catch (Exception e)
+        {
+            Debug.Log("Exception handling response: " + e.Message + " >>> " + e.StackTrace);
+        }
+
+    }
+ 
+    public Player GetPlayer(int uid){
+		 if (!PlayerView.allPlayer.ContainsKey(uid))
+		{
+			SpawnPlayer(uid);
+		}
+			
+		return PlayerView.allPlayer[uid].GetComponent<Player>();
+	}
+
+
+    private GameObject InstantiateNetPrefab(string prefab, Vector3 vector3, Quaternion quaternion, ISFSObject data,bool Scene)
+    {
+        GameObject newObject = _SpawnPrefab(prefab,vector3,quaternion);
+        if (newObject == null)
+        {
+            return null;
+        }
+        
+        FoxView view =  newObject.GetComponent<FoxView>();
+        if (!Scene)
+        {
+			view.viewID = AllocateViewID(_smartFox.MySelf.Id);
+		}else{
+			view.viewID = AllocateViewID(0);
+		}
+        foxViewList.Add(view.viewID, view);
+        return newObject;
+    }
+	 private GameObject RemoteInstantiateNetPrefab(string prefab, Vector3 vector3, Quaternion quaternion, int viewId)
+    {
+		if(foxViewList.ContainsKey(viewId)){
+			return foxViewList[viewId].gameObject;
+			
+		}
+        GameObject newObject = _SpawnPrefab(prefab,vector3,quaternion);
+        if (newObject == null)
+        {
+            return null;
+        }
+        FoxView view =  newObject.GetComponent<FoxView>();
+		
+		view.viewID =viewId;
+
+        foxViewList.Add(view.viewID, view);
+        return newObject;
     }
 	
-	private void UnsubscribeEvents() {
-		SFSEvent.onJoinRoom -= OnJoinRoom;
-		SFSEvent.onUserEnterRoom -= OnUserEnterRoom;
-		SFSEvent.onUserLeaveRoom -= OnUserLeaveRoom;
-		SFSEvent.onObjectReceived -= OnObjectReceived;
-		SFSEvent.onPublicMessage -= OnPublicMessage;
-	}
+    private GameObject _SpawnPrefab(string prefabName, Vector3 vector3, Quaternion quaternion)
+    {
+        GameObject resourceGameObject = null;
+        if (PhotonResourceWrapper.allobject.ContainsKey(prefabName))
+        {
+            resourceGameObject = PhotonResourceWrapper.allobject[prefabName];
+        }
+        else
+        {
+
+            
+                resourceGameObject = (GameObject)Resources.Load(prefabName, typeof(GameObject));
+            
+          
+
+        }
+        if (Application.isEditor)
+        {
+            GameObject tempprefab = (GameObject)Resources.Load(prefabName, typeof(GameObject));
+            if (tempprefab != null)
+            {
+                resourceGameObject = tempprefab;
+
+            }
+        }
+        if (resourceGameObject==null)
+        {
+            Debug.LogError("FoxNetwork error: Could not Instantiate the prefab [" + prefabName + "]. Please verify you have this gameobject in a Resources folder.");
+            return null;
+        }
+       return  Instantiate(resourceGameObject, vector3, quaternion) as GameObject;
+    }
+    public  static void RegisterSceneView(FoxView view)
+    {
+          
+        view.viewID = AllocateViewID(0);
+        foxViewList.Add(view.viewID, view);
+    }
+
+    // use 0 for scene-targetPhotonView-ids
+    // returns viewID (combined owner and sub id)
+    private static int AllocateViewID(int ownerId)
+    {
+        if (ownerId == 0)
+        {
+            // we look up a fresh subId for the owner "room" (mind the "sub" in subId)
+            int newSubId = lastUsedViewSubIdStatic;
+            int newViewId;
+            int ownerIdOffset = ownerId * MAX_VIEW_IDS;
+            for (int i = 1; i < MAX_VIEW_IDS; i++)
+            {
+                newSubId = (newSubId + 1) % MAX_VIEW_IDS;
+                if (newSubId == 0)
+                {
+                    continue;   // avoid using subID 0
+                }
+
+                newViewId = newSubId + ownerIdOffset;
+                if (!foxViewList.ContainsKey(newViewId))
+                {
+                    lastUsedViewSubIdStatic = newSubId;
+                    return newViewId;
+                }
+            }
+
+            // this is the error case: we didn't find any (!) free subId for this user
+            throw new Exception(string.Format("AllocateViewID() failed. Room (user {0}) is out of subIds, as all room viewIDs are used.", ownerId));
+        }
+        else
+        {
+            // we look up a fresh SUBid for the owner
+            int newSubId = lastUsedViewSubId;
+            int newViewId;
+            int ownerIdOffset = ownerId * MAX_VIEW_IDS;
+            for (int i = 1; i < MAX_VIEW_IDS; i++)
+            {
+                newSubId = (newSubId + 1) % MAX_VIEW_IDS;
+                if (newSubId == 0)
+                {
+                    continue;   // avoid using subID 0
+                }
+
+                newViewId = newSubId + ownerIdOffset;
+                if (!foxViewList.ContainsKey(newViewId) )
+                {
+                    lastUsedViewSubId = newSubId;
+                    return newViewId;
+                }
+            }
+
+            throw new Exception(string.Format("AllocateViewID() failed. User {0} is out of subIds, as all viewIDs are used.", ownerId));
+        }
+    }
 	
-	void FixedUpdate() {
-		if (started) {
-			smartFoxClient.ProcessEventQueue();
+	  /// <summary>
+    /// Spawn current player object
+    /// </summary>	
+    public void SpawnPlayer(PlayerModel player)
+    {
+
+        Debug.Log( "CREATE PLAYER " + player.userId );
+        GameObject newObject = _SpawnPrefab("Player", Vector3.zero, Quaternion.identity);
+        PlayerView view = newObject.GetComponent<PlayerView>();
+        view.SetId(player.userId);
+        view.NetUpdate(player);
+
+    }
+	 public void SpawnPlayer(int uid)
+    {
+
+        Debug.Log("CREATE PLAYER " + uid);
+        GameObject newObject = _SpawnPrefab("Player", Vector3.zero, Quaternion.identity);
+        PlayerView view = newObject.GetComponent<PlayerView>();
+        view.SetId(uid);
+        
+    }
+	
+
+    //REQUEST SECTION
+
+    /// <summary>
+    /// Request the current server time. Used for time synchronization
+    /// </summary>	
+    public void TimeSyncRequest()
+    {
+        Sfs2X.Entities.Room room = _smartFox.LastJoinedRoom;
+        ExtensionRequest request = new ExtensionRequest("getTime", new SFSObject(), room);
+        smartFox.Send(request);
+    }
+  
+    /// <summary>
+    /// setNameUID request to server
+    /// </summary>	
+    public void SetNameUIDRequest(string uid, string name)
+    {
+        ISFSObject data = new SFSObject();
+        data.PutUtfString("uid", uid);
+        data.PutUtfString("name", name);
+        ExtensionRequest request = new ExtensionRequest("setNameUID", data, serverHolder.gameRoom);
+        smartFox.Send(request);
+
+
+    }
+       /// <summary>
+    /// setTeam request to server
+    /// </summary>	
+    public void SetTeamRequest(int team)
+    {
+        ISFSObject data = new SFSObject();
+
+        data.PutInt("team", team);
+        ExtensionRequest request = new ExtensionRequest("setTeam", data, serverHolder.gameRoom);
+        smartFox.Send(request);
+
+
+    }
+
+    /// <summary>
+    /// pawnSpawn request to server
+    /// </summary>	
+    public GameObject PawnSpawnRequest(string prefab, Vector3 vector3,Quaternion quaternion,bool isAI,int[] stims,bool scene)
+    {
+        ISFSObject data = new SFSObject();
+       
+        data.PutBool("Scene", scene);
+        data.PutBool("isAI", isAI);
+		data.PutIntArray("stims", stims);
+        GameObject go = InstantiateNetPrefab(prefab, vector3, quaternion, data,isAI);
+        PawnModel pawn = go.GetComponent<Pawn>().GetSerilizedData();
+		pawn.type = prefab;
+        data.PutClass("pawn",pawn);
+        Debug.Log(serverHolder.gameRoom);
+        ExtensionRequest request = new ExtensionRequest("pawnSpawn", data, serverHolder.gameRoom);
+        smartFox.Send(request);
+        return go;
+
+
+    }
+	
+    /// <summary>
+    /// pawnChangeShootAnimState request to server
+    /// </summary>	
+    public void PawnChangeShootAnimStateRequest(int id,string animName,bool state)
+    {
+         ISFSObject data = new SFSObject();
+
+        data.PutInt("id", id);
+		data.PutBool("state", state);
+		data.PutUtfString("animName", animName);
+        ExtensionRequest request = new ExtensionRequest("pawnChangeShootAnimState", data, serverHolder.gameRoom);
+        smartFox.Send(request);
+
+    }
+	/// <summary>
+    /// pawnStartKick request to server
+    /// </summary>	
+    public void PawnKickRequest(int id, int kick, bool state)
+    {
+        ISFSObject data = new SFSObject();
+
+        data.PutInt("id", id);
+        data.PutBool("state", state);
+        data.PutInt("kick", kick);
+        ExtensionRequest request = new ExtensionRequest("pawnStartKick", data, serverHolder.gameRoom);
+        smartFox.Send(request);
+    }
+    /// <summary>
+    /// pawnActiveState request to server
+    /// </summary>	
+    public void PawnActiveStateRequest(int id,bool state)
+    {
+         ISFSObject data = new SFSObject();
+
+        data.PutInt("id", id);
+		data.PutBool("active", state);
+	    ExtensionRequest request = new ExtensionRequest("pawnActiveState", data, serverHolder.gameRoom);
+        smartFox.Send(request);
+
+    }
+    /// <summary>
+    /// pawnUpdate request to server
+    /// </summary>	
+    public void PawnUpdateRequest(PawnModel pawn)
+    {
+        ISFSObject data = new SFSObject();
+     
+     	data.PutClass("pawn", pawn);
+	    ExtensionRequest request = new ExtensionRequest("pawnUpdate", data, serverHolder.gameRoom,true);
+        smartFox.Send(request);
+
+    }
+	/// <summary>
+    /// pawnTaunt request to server
+    /// </summary>	
+    public void PawnTauntRequest(int id,string animName)
+    {
+        ISFSObject data = new SFSObject();
+     
+     	data.PutInt("id", id);
+		data.PutUtfString("animName", animName);
+	    ExtensionRequest request = new ExtensionRequest("pawnTaunt", data, serverHolder.gameRoom);
+        smartFox.Send(request);
+
+    }
+	/// <summary>
+    /// pawnKnockOut request to server
+    /// </summary>	
+    public void PawnKnockOutRequest(int id)
+    {
+        ISFSObject data = new SFSObject();
+     
+     	data.PutInt("id", id);
+	    ExtensionRequest request = new ExtensionRequest("pawnKnockOut", data, serverHolder.gameRoom);
+        smartFox.Send(request);
+
+    }
+	/// <summary>
+    /// deleteView request to server
+    /// </summary>	
+    public void DeleteViewRequest(int id)
+    {
+        ISFSObject data = new SFSObject();
+        Debug.Log("DeleteView Request");
+     	data.PutInt("id", id);
+	    ExtensionRequest request = new ExtensionRequest("deleteView", data, serverHolder.gameRoom);
+        smartFox.Send(request);
+
+    }
+	/// <summary>
+    /// weaponSpawn request to server
+    /// </summary>	
+	
+	public GameObject WeaponSpawn(string prefab, Vector3 vector3,Quaternion quaternion,bool isAI,int pawnId)
+    {
+        ISFSObject data = new SFSObject();
+
+       
+        GameObject go = InstantiateNetPrefab(prefab, vector3, quaternion, data,isAI);
+        WeaponModel weapon = go.GetComponent<BaseWeapon>().GetSerilizedData();
+		weapon.type = prefab;
+        data.PutClass("weapon",weapon);
+		data.PutInt("pawnId",pawnId);
+        ExtensionRequest request = new ExtensionRequest("weaponSpawn", data, serverHolder.gameRoom);
+        smartFox.Send(request);
+        return go;
+
+
+    }
+	/// <summary>
+    /// weaponShoot request to server
+    /// </summary>	
+
+    public void WeaponShootRequest(ISFSObject data)
+    {
+        ExtensionRequest request = new ExtensionRequest("weaponShoot", data, serverHolder.gameRoom);
+        smartFox.Send(request);
+
+
+    }
+	/// <summary>
+    /// pawnSkillCastEffect request to server
+    /// </summary>	
+
+    public void SkillCastEffectRequest(int id,string name)
+    {
+		ISFSObject data = new SFSObject();
+     
+     	data.PutInt("id", id);
+		data.PutUtfString("name", name);
+        ExtensionRequest request = new ExtensionRequest("pawnSkillCastEffect", data, serverHolder.gameRoom);
+        smartFox.Send(request);
+
+
+    }
+			
+	/// <summary>
+    /// pawnSkillActivate request to server
+    /// </summary>	
+
+    public void SkillActivateRequest(ISFSObject data)
+    {
+        ExtensionRequest request = new ExtensionRequest("pawnSkillActivate", data, serverHolder.gameRoom);
+        smartFox.Send(request);
+
+
+    }	
+		
+	/// <summary>
+    /// pawnDetonate request to server
+    /// </summary>	
+
+    public void DetonateRequest(int id)
+    {
+		ISFSObject data = new SFSObject();
+     
+     	data.PutInt("id", id);
+        ExtensionRequest request = new ExtensionRequest("pawnDetonate", data, serverHolder.gameRoom);
+        smartFox.Send(request);
+
+
+    }		
+	/// <summary>
+    /// pawnSetAI request to server
+    /// </summary>	
+
+    public void SetAIRequest(int id,int group, int home)
+    {
+		ISFSObject data = new SFSObject();
+     
+     	data.PutInt("id", id);
+		data.PutInt("group", group);
+		data.PutInt("home", home);
+        ExtensionRequest request = new ExtensionRequest("pawnSetAI", data, serverHolder.gameRoom);
+        smartFox.Send(request);
+
+
+    }
+    /// <summary>
+    /// invokeProjectileCall request to server
+    /// </summary>	
+
+    public void InvokeProjectileCallRequest(ISFSObject data)
+    {
+        ExtensionRequest request = new ExtensionRequest("invokeProjectileCall", data, serverHolder.gameRoom);
+        smartFox.Send(request);
+
+    }		
+	  /// <summary>
+    /// simplePrefabSpawn request to server
+    /// </summary>	
+
+    public GameObject  SimplePrefabSpawn(string prefab, Vector3 vector3, Quaternion quaternion)
+    {
+        ISFSObject data = new SFSObject();
+        GameObject go = InstantiateNetPrefab(prefab, vector3, quaternion, data, true);
+        SimpleNetModel model = new SimpleNetModel();
+        model.id = go.GetComponent<FoxView>().viewID;
+        model.type = prefab;
+        model.position.WriteVector(vector3);
+        model.rotation.WriteQuat(quaternion);
+        data.PutClass("model", model);
+        ExtensionRequest request = new ExtensionRequest("simplePrefabSpawn", data, serverHolder.gameRoom);
+        smartFox.Send(request);
+        return go;
+
+    }	
+      /// <summary>
+    /// pawnDiedByKill request to server
+    /// </summary>	
+
+    public void PawnDiedByKillRequest(int id, int player)
+    {
+
+        ISFSObject data = new SFSObject();
+        data.PutInt("viewId", id);
+        data.PutInt("player", player);
+        ExtensionRequest request = new ExtensionRequest("pawnDiedByKill", data, serverHolder.gameRoom);
+        smartFox.Send(request);
+    }
+	/// <summary>
+    /// vipSpawned request to server
+    /// </summary>	
+
+    public void VipSpawnedRequest(PawnModel pawn)
+    {
+        ISFSObject data = new SFSObject();
+     
+     	data.PutClass("pawn", pawn);
+        ExtensionRequest request = new ExtensionRequest("vipSpawned", data, serverHolder.gameRoom);
+        smartFox.Send(request);
+    }
+	/// <summary>
+    /// registerSceneView request to server
+    /// </summary>	
+
+    public void RegisterSceneViewRequest(SimpleNetModel model)
+    {
+        ISFSObject data = new SFSObject();
+     
+     	data.PutClass("model", model);
+        ExtensionRequest request = new ExtensionRequest("registerSceneView", data, serverHolder.gameRoom);
+        smartFox.Send(request);
+    }
+	/// <summary>
+    /// nextRoom request to server
+    /// </summary>	
+
+    public void NextRoomRequest()
+    {
+        ISFSObject data = new SFSObject();
+     
+		ExtensionRequest request = new ExtensionRequest("nextRoom", data, serverHolder.gameRoom);
+        smartFox.Send(request);
+    }		
+	/// <summary>
+    /// nextRoute request to server
+    /// </summary>	
+
+    public void NextRouteRequest(int nextRoute)
+    {
+        ISFSObject data = new SFSObject();
+		data.PutInt("nextRoute",nextRoute);
+		ExtensionRequest request = new ExtensionRequest("nextRoute", data, serverHolder.gameRoom);
+        smartFox.Send(request);
+    }		
+
+	/// <summary>
+    /// gameRuleArrived request to server
+    /// </summary>	
+
+    public void GameRuleArrivedRequest()
+    {
+        ISFSObject data = new SFSObject();
+
+        ExtensionRequest request = new ExtensionRequest("gameRuleArrived", data, serverHolder.gameRoom);
+        smartFox.Send(request);
+    }		
+	/// <summary>
+    /// leaveRoom request to server
+    /// </summary>	
+
+    public void LeaveRoomReuqest()
+    {
+      
+
+        LeaveRoomRequest request = new LeaveRoomRequest(serverHolder.gameRoom);
+        PlayerManager.instance.ClearAll();
+        PlayerView.allPlayer.Clear();
+        smartFox.Send(request);
+    }
+    /// <summary>
+    /// pawnInPilotChange request to server
+    /// </summary>	
+
+
+    public void InPilotChangeRequest(int id, bool isPilotIn)
+    {
+         ISFSObject data = new SFSObject();
+
+        data.PutInt("id", id);
+        data.PutBool("isPilotIn", isPilotIn);
+        ExtensionRequest request = new ExtensionRequest("pawnInPilotChange", data, serverHolder.gameRoom);
+        smartFox.Send(request);
+    }
+    /// <summary>
+    /// pawnBattleJuggerSpawn request to server
+    /// </summary>	
+    public GameObject BattleJuggerSpawnRequest(string prefab, Vector3 vector3, Quaternion quaternion, int[] stims)
+    {
+        ISFSObject data = new SFSObject();
+
+        data.PutBool("Scene", true);
+        data.PutIntArray("stims", stims);
+        GameObject go = InstantiateNetPrefab(prefab, vector3, quaternion, data, true);
+        PawnModel pawn = go.GetComponent<Pawn>().GetSerilizedData();
+        pawn.type = prefab;
+        data.PutClass("pawn", pawn);
+        Debug.Log(serverHolder.gameRoom);
+        ExtensionRequest request = new ExtensionRequest("pawnBattleJuggerSpawn", data, serverHolder.gameRoom);
+        smartFox.Send(request);
+        return go;
+
+
+    }
+
+    /// <summary>
+    /// baseSpawned request to server
+    /// </summary>	
+
+    public void BaseSpawnedRequest(BaseModel model)
+    {
+        ISFSObject data = new SFSObject();
+
+        data.PutClass("model", model);
+        ExtensionRequest request = new ExtensionRequest("baseSpawned", data, serverHolder.gameRoom);
+        Debug.Log("BaseSpawnedRequest");
+        smartFox.Send(request);
+    }
+    /// <summary>
+    /// gameRuleDamageBase request to server
+    /// </summary>	
+
+    public void BaseDamageRequest(int team,int damage)
+    {
+        ISFSObject data = new SFSObject();
+
+        data.PutInt("team", team);
+        data.PutInt("damage", damage);
+        ExtensionRequest request = new ExtensionRequest("gameRuleDamageBase", data, serverHolder.gameRoom);
+       
+        smartFox.Send(request);
+    }
+    /// <summary>
+    /// updateSimpleDestroyableObject request to server
+    /// </summary>	
+
+    public void UpdateSimpleDestroyableObjectRequest(SimpleDestroyableModel model)
+    {
+        ISFSObject data = new SFSObject();
+
+        data.PutClass("model", model);
+        ExtensionRequest request = new ExtensionRequest("updateSimpleDestroyableObject", data, serverHolder.gameRoom);
+        smartFox.Send(request);
+    
+    }
+	/// <summary>
+    /// updateConquestPoint request to server
+    /// </summary>	
+
+    public void UpdateConquestPointRequest(ConquestPointModel model)
+    {
+        ISFSObject data = new SFSObject();
+
+        data.PutClass("model", model);
+        ExtensionRequest request = new ExtensionRequest("updateConquestPoint", data, serverHolder.gameRoom);
+        smartFox.Send(request);
+    
+    }
+	/// <summary>
+    /// deleteSceneView request to server
+    /// </summary>	
+
+    public void DeleteSceneViewRequest(int id)
+    {
+        ISFSObject data = new SFSObject();
+
+        data.PutInt("id", id);
+        ExtensionRequest request = new ExtensionRequest("deleteSceneView", data, serverHolder.gameRoom);
+        smartFox.Send(request);
+    
+    }
+	/// <summary>
+    /// swarmUpdate request to server
+    /// </summary>	
+
+    public void SwarmUpdateRequest(List<int> ids)
+    {
+        ISFSObject data = new SFSObject();
+
+        data.PutIntArray("ids", ids.ToArray());
+        ExtensionRequest request = new ExtensionRequest("swarmUpdate", data, serverHolder.gameRoom);
+        smartFox.Send(request);
+    
+    }
+	/// <summary>
+    /// remoteDamageOnPawn request to server
+    /// </summary>	
+
+    public void RemoteDamageOnPawnRequest(BaseDamageModel model,int pawnId,int killerId)
+    {
+        ISFSObject data = new SFSObject();
+     
+     	data.PutClass("model", model);
+		data.PutInt("pawnId", pawnId);
+        data.PutInt("killerId", killerId);
+        ExtensionRequest request = new ExtensionRequest("remoteDamageOnPawn", data, serverHolder.gameRoom);
+        smartFox.Send(request);
+    }
+	/// <summary>
+    /// enterRobot request to server
+    /// </summary>	
+
+    public void EnterRobotRequest(int robotId)
+    {
+        ISFSObject data = new SFSObject();
+		data.PutInt("robotId", robotId);
+		
+        ExtensionRequest request = new ExtensionRequest("enterRobot", data, serverHolder.gameRoom);
+		if(smartFox.MySelf.ContainsVariable("Master") && NetworkController.smartFox.MySelf.GetVariable("Master").GetBoolValue()){
+			data.PutInt("userId", smartFox.MySelf.Id);
+			HandleEnterRobot(data);		
+		}else{
+			smartFox.Send(request);
 		}
-	}
+    }
+	/// <summary>
+    /// bossHit request to server
+    /// </summary>	
+
+    public void BossHitRequest(float damage,int pawnId)
+    {
+        ISFSObject data = new SFSObject();
+		data.PutInt("pawnId", pawnId);
+		data.PutFloat("damage", damage);
+        ExtensionRequest request = new ExtensionRequest("bossHit", data, serverHolder.gameRoom);
+		smartFox.Send(request);
+
+    }
+	/// <summary>
+    /// lastWave request to server
+    /// </summary>	
+
+    public void LastWaveRequest()
+    {
+      
+		ExtensionRequest request = new ExtensionRequest("lastWave", new SFSObject(), serverHolder.gameRoom);
+		smartFox.Send(request);
+
+    }
+
 	
-	#endregion Events
-		// We start working from here
-	void Awake() {
-		Application.runInBackground = true; // Let the application be running whyle the window is not active.
-		smartFoxClient = GetClient();
-		if (smartFoxClient==null) {
-			Application.LoadLevel("login");
-			return;
+	
+	
+
+
+
+    //Handler SECTION
+	/// <summary>
+    /// handle pawnSpawn  from Server
+    /// </summary>	
+	
+	public void HandlePawnSpawn(ISFSObject dt )
+    {
+        PawnModel sirPawn = (PawnModel)dt.GetClass("pawn");
+        Debug.Log("Pawn Spawn" + sirPawn.type);
+		GameObject go =RemoteInstantiateNetPrefab(sirPawn.type, Vector3.zero,Quaternion.identity,sirPawn.id);
+        Pawn pawn = go.GetComponent<Pawn>();
+		if(dt.ContainsKey("ownerId")){
+		    Player player  = GetPlayer(dt.GetInt("ownerId"));
+		  
+			if(dt.GetBool("isAI")){
+				player.AISpawnSetting(pawn,dt.GetIntArray("stims"));	
+			}else{
+				player.AfterSpawnSetting(pawn,dt.GetIntArray("stims"));	
+			}
+        }
+		pawn.NetUpdate(sirPawn);
+		 
+		 
+	}
+	/// <summary>
+    /// handle pawnChangeShootAnimState(  from Server
+    /// </summary>	
+	
+	public void HandlePawnChangeShootAnimState(ISFSObject dt )
+    {
+			
+		Pawn pawn = GetView(dt.GetInt("id")).pawn;
+		if(dt.GetBool("state")){
+			pawn.StartShootAnimation(dt.GetUtfString("animName"));
+		}else{
+			pawn.StopShootAnimation(dt.GetUtfString("animName"));
+		}
+		 
+	}
+	/// <summary>
+    /// handle pawnStartKick  from Server
+    /// </summary>	
+	
+	public void HandlePawnKick(ISFSObject dt )
+    {
+			
+		Pawn pawn = GetView(dt.GetInt("id")).pawn;
+		if(dt.GetBool("state")){
+			pawn.Kick(dt.GetInt("kick"));
+		}else{
+			pawn.StopKick();
+		}
+		 
+	}
+	/// <summary>
+    /// handle pawnActiveState  from Server
+    /// </summary>	
+	
+	public void HandlePawnActiveState(ISFSObject dt )
+    {
+			
+		Pawn pawn = GetView(dt.GetInt("id")).pawn;
+		if(dt.GetBool("active")){
+			pawn.RemoteActivate();
+		}else{
+			pawn.RemoteDeActivate();
+		}
+		 
+	}
+	/// <summary>
+    /// handle pawnUpdate  from Server
+    /// </summary>	
+	
+	public void HandlePawnUpdate(ISFSObject dt )
+    {
+		PawnModel pawnModel = (PawnModel)dt.GetClass("pawn");
+        FoxView view = GetView(pawnModel.id);
+        if (view != null)
+        {
+            Pawn pawn = view.pawn;
+            pawn.NetUpdate(pawnModel);
+        }
+        else
+        {
+            Debug.Log("NOT FOUND" + pawnModel.id);
+        }
+		 
+	}
+	/// <summary>
+    /// handle pawnTaunt  from Server
+    /// </summary>	
+	
+	public void HandlePawnTaunt(ISFSObject dt )
+    {
+		Pawn pawn = GetView(dt.GetInt("id")).pawn;
+		pawn.RemotePlayTaunt(dt.GetUtfString("animName"));
+		 
+	}
+	/// <summary>
+    /// handle pawnKnockOut  from Server
+    /// </summary>	
+	
+	public void HandlePawnKnockOut(ISFSObject dt )
+    {
+		Pawn pawn = GetView(dt.GetInt("id")).pawn;
+		pawn.StartKnockOut();
+		 
+	}	
+	/// <summary>
+    /// handle deleteView  from Server
+    /// </summary>	
+	
+	public void HandleDeleteView(ISFSObject dt )
+    {
+		DestroyableNetworkObject obj = GetView(dt.GetInt("id")).GetComponent<DestroyableNetworkObject>();
+		
+		obj.KillMe();
+		 
+	}	
+	/// <summary>
+    /// handle weaponSpawn  from Server
+    /// </summary>	
+	
+	public void HandleWeaponSpawn(ISFSObject dt )
+    {
+		WeaponModel sirWeapon = (WeaponModel)dt.GetClass("weapon");
+		GameObject go =RemoteInstantiateNetPrefab(sirWeapon.type, Vector3.zero,Quaternion.identity,sirWeapon.id);
+		BaseWeapon weapon = go.GetComponent<BaseWeapon>();
+		weapon.NetUpdate(sirWeapon);
+		Pawn pawn  =  GetView(dt.GetInt("pawnId")).pawn;
+        Debug.Log("PAwn" + pawn + " View" + GetView(dt.GetInt("pawnId")) + "ID" + dt.GetInt("pawnId"));
+		weapon.RemoteAttachWeapon(pawn);
+	
+		
+		 
+	}	
+	/// <summary>
+    /// handle weaponShoot  from Server
+    /// </summary>	
+	
+	
+	public void HanldeWeaponShoot(ISFSObject dt )
+    {
+		BaseWeapon weapon = GetView(dt.GetInt("id")).weapon;
+		
+		weapon.RemoteGenerate(((Vector3Model)dt.GetClass("position")).GetVector(),
+								((QuaternionModel)dt.GetClass("direction")).GetQuat(),
+								dt.GetFloat("power"),dt.GetFloat("range"),dt.GetInt("viewId"),dt.GetInt("projId"),dt.GetDouble("timeShoot"));
+								
+	}	
+	/// <summary>
+    /// handle pawnSkillCastEffect  from Server
+    /// </summary>	
+	
+	public void HandlePawnSkillCastEffect(ISFSObject dt )
+    {
+		Pawn pawn = GetView(dt.GetInt("id")).pawn;
+		pawn.skillManager.GetSkill(dt.GetUtfString(name)).CasterVisualEffect();
+		 
+	}
+	/// <summary>
+    /// handle pawnSkillActivate  from Server
+    /// </summary>	
+	
+	public void HandleSkillActivate(ISFSObject dt )
+    {
+		Pawn pawn = GetView(dt.GetInt("id")).pawn;
+		SkillBehaviour skill =pawn.skillManager.GetSkill(dt.GetUtfString(name));
+			switch(skill.type){
+				case TargetType.SELF:
+				case TargetType.GROUPOFPAWN_BYSELF:	
+					skill.RemoteActivateSkill();
+                    break;
+				case TargetType.PAWN:
+				case TargetType.GROUPOFPAWN_BYPAWN:
+					skill.RemoteActivateSkill(dt.GetInt("viewId"));
+				break;
+				case TargetType.POINT:
+				case TargetType.GROUPOFPAWN_BYPOINT:	
+					skill.RemoteActivateSkill(((Vector3Model)dt.GetClass("position")).GetVector());											
+				break;				
+			}
+		
+		 
+	}
+	/// <summary>
+    /// handle pawnDetonate  from Server
+    /// </summary>	
+	
+	public void HandlePawnDetonate(ISFSObject dt )
+    {
+		SuicidePawn pawn = GetView(dt.GetInt("id")).pawn as SuicidePawn;
+		pawn.RemoteDetonate();
+		 
+	}
+	/// <summary>
+    /// handle pawnSetAI  from Server
+    /// </summary>	
+	
+	public void HandleSetAIRequest(ISFSObject dt)
+    {
+	
+		 GetView(dt.GetInt("id")).pawn.RemoteSetAI(dt.GetInt("group"),dt.GetInt("home"));
+		 
+	}
+    /// <summary>
+    /// handle invokeProjectileCall  from Server
+    /// </summary>	
+
+    public void HandleInvokeProjectileCall(ISFSObject dt)
+    {
+
+        ProjectileManager.instance.RemoteInvoke(dt);
+
+    }
+
+    /// <summary>
+    ///handle  simplePrefabSpawn  from server
+    /// </summary>	
+
+    public void HandleSimplePrefabSpawn(ISFSObject dt)
+    {
+        SimpleNetModel model = dt.GetClass("model") as SimpleNetModel;
+        if (model != null)
+        {
+            GameObject go = RemoteInstantiateNetPrefab(model.type, model.position.GetVector(), model.rotation.GetQuat(), model.id);
+            return;
+        }
+       
+       SimpleDestroyableModel destrModel = dt.GetClass("model") as SimpleDestroyableModel;
+       if (model != null)
+       {
+           FoxView view = GetView(destrModel.id);
+           if (view != null)
+           {
+               view.GetComponent<DestroyableNetworkObject>().SetHealth(destrModel.health);
+           }
+       }
+
+
+    }	
+
+    /// <summary>
+    ///handle  gameStart  from server
+    /// </summary>	
+
+    public void HandleGameStart()
+    {
+       Debug.Log("GAME START");
+        GameRule.instance.StartGame();
+        TimeManager.Instance.Init();
+    }	
+
+    /// <summary>
+    ///handle masterStart  from server
+    /// </summary>	
+	
+    public void HandleMasterStart(ISFSObject dt)
+    {
+        Debug.Log("master");
+		GameRule.instance.ReadMasterInfo(dt);
+		MasterViewUpdate();      
+
+    }	
+    /// <summary>
+    ///handle gameUpdate  from server
+    /// </summary>	
+
+    public void HandleGameUpdate(ISFSObject dt)
+    {
+        Debug.Log("gameeUPDATE");
+        GameRuleModel model = (GameRuleModel)dt.GetClass("game");
+        GameRule.instance.SetFromModel(model);
+
+    }	
+      /// <summary>
+    ///handle nextMap  from server
+    /// </summary>	
+
+    public void HandleNextMap(ISFSObject dt)
+    {
+
+        string map=   dt.GetUtfString("map");
+        serverHolder.LoadNextMap(map);
+
+    }	
+      /// <summary>
+    ///handle pawnDiedByKill  from server
+    /// </summary>	
+
+    public void HandlePawnDiedByKill(ISFSObject dt)
+    {
+        Debug.Log("PAWN DIED");
+        Pawn pawn = GetView(dt.GetInt("viewId")).pawn;
+        pawn.PawnKill();
+        int player = dt.GetInt("player");
+        if(player==_smartFox.MySelf.Id){
+              GetPlayer(player).PawnKill(pawn.player,pawn.myTransform.position);
+
+            
+        }
+
+       
+
+    }
+    /// <summary>
+    ///handle playerLeave  from server
+    /// </summary>	
+
+    public void HandlePlayerLeave(ISFSObject dt)
+    {
+      
+        int playerID =dt.GetInt("playerId");
+        Destroy(PlayerView.allPlayer[playerID].gameObject);
+        PlayerView.allPlayer.Remove(playerID);
+        foreach (int viewId in dt.GetSFSArray("views"))
+        {
+            FoxView view = GetView(viewId);
+            if (view != null)
+            {
+                Destroy(view.gameObject);
+            }   
+        }
+
+    }
+    /// <summary>
+    /// handle pawnInPilotChange  from Server
+    /// </summary>	
+
+    public void HandlePawnInPilotChange(ISFSObject dt)
+    {
+
+        RobotPawn pawn = GetView(dt.GetInt("id")).pawn as RobotPawn;
+        pawn.isPilotIn = dt.GetBool("isPilotIn");
+
+    }
+     /// <summary>
+    /// handle updateSimpleDestroyableObject from Server
+    /// </summary>	
+
+    public void HandleUpdateSimpleDestroyableObject(ISFSObject dt)
+    {
+
+        SimpleDestroyableModel model = (SimpleDestroyableModel)dt.GetClass("model");
+        DamagebleObject target = GetView(model.id).GetComponent<DamagebleObject>();
+        target.health = model.id;
+
+    }
+    
+	/// <summary>
+    /// handle updateConquestPoint from Server
+    /// </summary>	
+
+    public void HandleUpdateConquestPoint(ISFSObject dt)
+    {
+
+        ConquestPointModel model = (ConquestPointModel)dt.GetClass("model");
+        ConquestPoint target = GetView(model.id).conquestPoint;
+        target.UpdateFromModel(model);
+
+    }
+	/// <summary>
+    ///handle  swarmUpdate request to server
+    /// </summary>	
+
+    public void HandleSwarmUpdate(ISFSObject dt)
+    {
+        AIDirector.instance.UpdateSwarm(dt.GetIntArray("ids"));
+    
+    }
+	/// <summary>
+    ///handle  remoteDamageOnPawn request to server
+    /// </summary>	
+
+    public void HandleRemoteDamageOnPawn(ISFSObject dt)
+    {
+		Pawn pawn = GetView(dt.GetInt("pawnId")).pawn;
+        GameObject killer = GetView(dt.GetInt("killerId")).gameObject;
+
+        pawn.LowerHealth((BaseDamageModel)dt.GetClass("model"), killer);
+    
+    }
+	/// <summary>
+    ///handle enterRobot request to server
+    /// </summary>	
+
+    public void  HandleEnterRobot(ISFSObject dt)
+    {
+        ISFSObject data = new SFSObject();
+		RobotPawn pawn = (RobotPawn) GetView(dt.GetInt("robotId")).pawn;
+		if(pawn.isEmpty){
+			pawn.isEmpty = false;
+			ExtensionRequest request = new ExtensionRequest("enterRobotSuccess", data, serverHolder.gameRoom);
+			smartFox.Send(request);
+		}
+		
+    }
+	/// <summary>
+    ///handle enterRobotSuccess request to server
+    /// </summary>	
+
+    public void  HandleEnterRobotSuccess(ISFSObject dt)
+    {
+        ISFSObject data = new SFSObject();
+		RobotPawn pawn = (RobotPawn) GetView(dt.GetInt("robotId")).pawn;
+		pawn.isEmpty = false;
+		Player player  = GetPlayer(dt.GetInt("userId"));
+		player.AfterSpawnSetting(pawn,new int[]{});	
+		if(_smartFox.MySelf.Id==dt.GetInt("userId")){
+			pawn.foxView.SetMine(true);
+			player.EnterBotSuccess(pawn);
 		}	
-		SubscribeEvents();
-		started = true;
-	}
-	
+		if(player.team==1){
+			PlayerMainGui.instance.Annonce(AnnonceType.INTEGRATAKEJUGGER);
+		}else{
+			PlayerMainGui.instance.Annonce(AnnonceType.RESTAKEJUGGER);
+		}
+		
+    }
+
 }
+

@@ -8,7 +8,8 @@ public class AIDirectrorTrigger : MonoBehaviour
         PlayerEnter,
         Destroy,
         ObjectArrived,
-        AISwarmEnd
+        AISwarmEnd,
+		ConquestEvents
     }
 
     public TRIGGERTYPE type;
@@ -34,6 +35,7 @@ public class AIDirectrorTrigger : MonoBehaviour
                     Pawn pawn = other.GetComponent<Pawn>();
                     if (pawn != null && !pawn.isAi)
                     {
+                        Debug.Log("EVENT");
                         EventDelegate.Execute(onEvent);
                     }
                 break;
@@ -55,13 +57,19 @@ public class AIDirectrorTrigger : MonoBehaviour
         }
 
     }
-	// Use this for initialization
-	void Start () {
+	 public void StartUse(int owner)
+    {
+        if (type == TRIGGERTYPE.ConquestEvents) {
+            EventDelegate.Execute(onEvent);
+        }
+
+    }
+	 public void StopUse(int owner)
+    {
+        if (type == TRIGGERTYPE.ConquestEvents) {
+            EventDelegate.Execute(onEvent);
+        }
+
+    }
 	
-	}
-	
-	// Update is called once per frame
-	void Update () {
-	
-	}
 }

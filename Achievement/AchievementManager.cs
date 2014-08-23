@@ -22,7 +22,7 @@ public class Achievement{
 	public Texture2D textureIcon;
 	public bool isDone = false;
 	public override string ToString(){
-		return name + " " + description + " " + achievementId + " " + achivParams.ToStringFull ();
+		return name + " " + description + " " + achievementId + " " + achivParams.ToString();
 	}
 	public virtual bool CheckDone(){
 		bool lIsDone = true;
@@ -227,7 +227,7 @@ public class AchievementManager : MonoBehaviour, LocalPlayerListener{
 	public Vector3 wallRunningStartPosition;
 
 	public void EventAppear(Player target){
-		if (target.GetView ().isMine) {
+		if (target.isMine) {
 			myPlayer = target;
 			
 

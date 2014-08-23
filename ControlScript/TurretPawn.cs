@@ -17,11 +17,12 @@ public class TurretPawn : Pawn {
 	}
 	void Update () {
 		//Debug.Log (photonView.isSceneView);
-		if (!isActive) {
+		if (!isActive&&!isDead) {
 			return;		
 		}
 //		Debug.Log (characterState);
-		if (photonView.isMine||(isAi &&PhotonNetwork.isMasterClient)) {
+        if (foxView.isMine)
+        {
 
 				UpdateSeenList();
 
@@ -37,7 +38,7 @@ public class TurretPawn : Pawn {
 			//TODO: TEMP SOLUTION BEFORE NORMAL BONE ORIENTATION
 			
 			//animator.SetFloat("Pitch",pitchAngle);
-
+			 SendNetUpdate();
 		} else {
 			ReplicatePosition();
 

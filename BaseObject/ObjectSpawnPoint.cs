@@ -11,12 +11,12 @@ public class ObjectSpawnPoint : MonoBehaviour {
 	
 	private bool sendAv= false;
 
-    protected PhotonView myView;
+    protected FoxView myView;
 
 	protected GameObject spawnedObject;
 	// Use this for initialization
-	void Awake() { 
-		myView = GetComponent<PhotonView>(); 
+	void Awake() {
+        myView = GetComponent<FoxView>(); 
 		respawnTimer = respawnTime;
 	}
 
@@ -34,7 +34,7 @@ public class ObjectSpawnPoint : MonoBehaviour {
 
 	// Update is called once per frame
 	void Update () {
-            if (!isAvalable && spawnedObject == null && PhotonNetwork.isMasterClient)
+        if (!isAvalable && spawnedObject == null && myView.isMine)
             {
 				
 				
@@ -48,16 +48,7 @@ public class ObjectSpawnPoint : MonoBehaviour {
                 }
             }
 	}	
-	public void OnPhotonSerializeView(PhotonStream stream, PhotonMessageInfo info)
-	{
-		if (stream.isWriting)
-		{
-		}else
-		{
-		
-		}
-		
-	}
+	
 
 	
 	

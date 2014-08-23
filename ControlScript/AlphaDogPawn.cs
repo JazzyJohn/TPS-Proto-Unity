@@ -8,68 +8,6 @@ public class AlphaDogPawn : Pawn {
 	
 
 
-	public override Vector3 getAimRotation()
-	{
-
-		if(photonView.isMine){
-			if(isAi){
-				if(enemy==null){
-					aimRotation =myTransform.position+myTransform.forward*10;
-				}else{
-					aimRotation =Vector3.Lerp( aimRotation,enemy.myTransform.position,Time.deltaTime*10);
-				}
-			}else{
-				if(cameraController.enabled ==false){
-					aimRotation= myTransform.position +myTransform.forward*50;
-					return aimRotation;
-				}
-				Camera maincam = Camera.main;
-				Ray centerRay= maincam.ViewportPointToRay(new Vector3(.5f, 0.5f, 1f));
-				
-				Vector3 targetpoint = Vector3.zero;
-				bool wasHit = false;
-				float magnitude = aimRange;
-				float range=aimRange;
-				foreach( RaycastHit hitInfo  in Physics.RaycastAll(centerRay, aimRange))				
-				{
-					if(hitInfo.collider==myCollider)
-					{
-						continue;
-					}
-					
-					//
-					//Debug.DrawRay(centerRay.origin,centerRay.direction);
-					targetpoint =hitInfo.point;
-					range =(targetpoint-centerRay.origin).magnitude;
-					if(range<magnitude){
-						magnitude=range;
-					}else{
-						continue;
-					}
-					wasHit= true;
-					curLookTarget= hitInfo.transform;
-					//Debug.Log (curLookTarget);
-				}
-				
-				if(!wasHit){
-					//Debug.Log("NO HIT");
-					curLookTarget= null;
-					targetpoint = maincam.transform.forward*aimRange +maincam.ViewportToWorldPoint(new Vector3(.5f, 0.5f, 1f));
-				}else{
-					//Debug.Log(range.ToString()+(cameraController.normalOffset.magnitude+5));
-					if(magnitude<cameraController.normalOffset.magnitude+1){
-						targetpoint =maincam.transform.forward*aimRange +maincam.ViewportToWorldPoint(new Vector3(.5f, 0.5f, 1f));
-					}
-				}
-				aimRotation=targetpoint; 
-				
-			}
-			
-			return aimRotation;
-		}else{
-			return aimRotation;
-		}
-	}
 
 	// Update is called once per frame
 	void FixedUpdate () 
@@ -86,7 +24,8 @@ public class AlphaDogPawn : Pawn {
 		//
 
 		if (animator != null && animator.gameObject.activeSelf) {
-			if (photonView.isMine) {
+            if (foxView.isMine)
+            {
 				
 				
 				strafe = CalculateStarfe();
@@ -158,16 +97,6 @@ public class AlphaDogPawn : Pawn {
 	}
 
 	
-	//For Players
-	public override void ToggleAim(bool value)
-	{
-		if (value) {
-						Kick (0);
-		}
-	}
-	public override void StartFire(){
-		Kick (1);
-	}
-
+	
 	
 }

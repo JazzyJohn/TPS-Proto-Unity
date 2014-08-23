@@ -17,19 +17,17 @@ class AnimationRelatedWeapon: BaseWeapon {
 			RequestKillMe();
 
 		}
-		//AimFix ();
-		if (!photonView.isMine) {
-			ReplicationGenerate ();
-			return;
-		}
-
+	
 		
 	}
-	public virtual void StartFire(){
+	public override void StartFire(){
+        base.StartFire();
 		owner.StartShootAnimation(animatioName);
 
 	}
-	public virtual void StopFire(){
+    public override void StopFire()
+    {
+        base.StopFire();
 		owner.StopShootAnimation(animatioName);
 	}
 }

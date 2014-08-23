@@ -21,7 +21,7 @@ public class SuicidePawn : Pawn {
 				if(enemy!=null){
 					if(AIAgentComponent.FlatDifference(enemy.myTransform.position,myTransform.position).sqrMagnitude<detonateRadius*detonateRadius/4){
 						Detonate();
-						StartCoroutine (CoroutineRequestKillMe ());
+						//StartCoroutine (CoroutineRequestKillMe ());
 					}
 				}
 		}
@@ -34,21 +34,25 @@ public class SuicidePawn : Pawn {
 		}
 
 		Detonate ();
-		base.KillIt(killer);
+	//	base.KillIt(killer);
 		
 	}
     protected override void ActualKillMe()
     {
-        PhotonNetwork.Destroy(gameObject);
+       Destroy(gameObject);
     }
 	void Detonate(){
 		if(!isDetonate){
-			photonView.RPC("RPCDetonate",PhotonTargets.All);
+            //TODO: DETONATE
+           // foxView.RPC("RPCDetonate", PhotonTargets.All);
+		   foxView.Detonate();
+		   RemoteDetonate();
+		   Destroy(gameObject);
 		}
 
 	}
-	[RPC]
-	void RPCDetonate(){
+	
+	public void RemoteDetonate(){
 		if(isDetonate){
 			return;
 		}

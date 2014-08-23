@@ -1,9 +1,9 @@
 ﻿using UnityEngine;
 using System.Collections;
 using System.Collections.Generic;
-	
 
-public enum AITriggerType {SeeEnemy,LostEnemy,SpecificFinish,TimedChange};
+
+public enum AITriggerType { SeeEnemy, LostEnemy, SpecificFinish, TimedChange, DeadEnemy };
 public interface AITrigger
 {
 	bool isTriggered (AIState owner, Params[] parametrs);
@@ -34,6 +34,9 @@ public class AIState : MonoBehaviour {
 			case AITriggerType.LostEnemy:
 				trigger = new LostEnemyTrigger();
 				break;
+            case AITriggerType.DeadEnemy:
+                trigger = new EnemyDeadTrigger();
+                break;
 			case AITriggerType.SpecificFinish:
 				trigger = new SpecificFinish();
 				break;
@@ -72,7 +75,23 @@ public class AIState : MonoBehaviour {
 			
 		}
 		
-	}	
+	}
+    public class EnemyDeadTrigger : AITrigger
+    {
+        public bool isTriggered(AIState owner, Params[] parametrs)
+        {
+            if (owner._enemy == null || owner._enemy.isDead)
+            {
+                return true;
+            }
+            else
+            {
+                return false;
+            }
+
+        }
+
+    }	
 	public class SpecificFinish:AITrigger{
 		public bool isTriggered(AIState owner, Params[] parametrs){
             if (owner.IsSpecificFinish())
@@ -101,6 +120,7 @@ public class AIState : MonoBehaviour {
 		}
 		
 	}	
+
 	public  Pawn controlledPawn;
 
 	protected Pawn _enemy;
@@ -115,9 +135,13 @@ public class AIState : MonoBehaviour {
 				_distanceToTarget,
 				_angleRange;
 				
-	protected bool isMelee= false;
+	public bool targetVisible= false;
+
+    public bool isMelee = false;
 
     public AIBase aibase;
+
+    public bool IsDebug = false;
 	
 	public Pawn[] PawnList
 	{
@@ -138,7 +162,7 @@ public class AIState : MonoBehaviour {
 	}
 
 	// Use this for initialization
-	void Awake () {
+	protected void Awake () {
         aibase = GetComponent<AIBase>();
         enabled = false;
 	}
@@ -150,14 +174,30 @@ public class AIState : MonoBehaviour {
 
 	
 	public virtual void SetEnemy(Pawn enemy){
+		if(_enemy != enemy){
+			aibase.SetEnemy(enemy);
+            AITargetManager.AddAttacker(_enemy, controlledPawn);
+		}
 		_enemy = enemy;
 		controlledPawn.enemy = enemy;
-
+		targetVisible = true;
 	}
-	public void LostEnemy(){
+	
+	public virtual void EnemyFromSwarm(Pawn enemy){
+		if(_enemy==null||_enemy.isDead){
+			_enemy = enemy;
+			controlledPawn.enemy = enemy;
+		}
+	}
+	public  virtual void AllyKill(){
+	
+	}
+    public virtual void LostEnemy()
+    {
+        AITargetManager.RemoveAttacker(_enemy, controlledPawn);
 		_enemy = null;
 		controlledPawn.enemy = null;
-
+		
 	}
 	public virtual bool IsEnemy(Pawn target){
 		if(isAgressive){
@@ -176,6 +216,9 @@ public class AIState : MonoBehaviour {
 	
 	public virtual void WasHitBy(Pawn killer){
 		if (_enemy != null) {
+			if(!targetVisible){
+				SetEnemy(killer);
+			}
 			return;
 		}
 		SetEnemy(killer);
@@ -192,7 +235,7 @@ public class AIState : MonoBehaviour {
 	public virtual void EndState(){
 	
 	}
-    protected Pawn SelectTarget()
+    protected virtual Pawn SelectTarget()
     {
         //select target by distance
         //but i have mind select by argo
@@ -200,16 +243,17 @@ public class AIState : MonoBehaviour {
 			return _enemy;
 		}
 		Pawn target = null;
-//		Debug.Log (_pawnArray);
+       
+		
 		foreach (Pawn pawn in _pawnArray)
 		{
-            //Debug.Log("ENEMY? ME" + controlledPawn + "YOu" + pawn);
+           
 			if(!IsEnemy(pawn)){
 				continue;
 			}
-			Vector3 myPos = transform.position; // моя позиция
-			Vector3 targetPos = pawn.transform.position; // позиция цели
-			Vector3 myFacingNormal = transform.forward; //направление взгляда нашей турели
+			Vector3 myPos = controlledPawn.myTransform.position; // моя позиция
+			Vector3 targetPos = pawn.myTransform.position; // позиция цели
+			Vector3 myFacingNormal = controlledPawn.myTransform.forward; //направление взгляда нашей турели
 			Vector3 toTarget = (targetPos - myPos);
 			toTarget.Normalize();
 			
@@ -217,16 +261,9 @@ public class AIState : MonoBehaviour {
 			
 			if (angle <= _angleRange / 2)
 			{
-				Vector3 direction = (pawn.transform.position - transform.position);
-				float rangeDistance = direction.magnitude;
-				direction.y += 0.3f;
-				direction.Normalize();
-				foreach (RaycastHit hit in Physics.RaycastAll(transform.position, direction, rangeDistance))
-					if (hit.transform == pawn.transform)
-				{
-					target = pawn;
-					break;
-				}
+				
+                target = pawn;
+                     
 			}
 
 		}
@@ -238,41 +275,38 @@ public class AIState : MonoBehaviour {
         RaycastHit hit = new RaycastHit();
 		Pawn target = SelectTarget ();
 		if (target == null) {
+			targetVisible= false;
 			return false;
 		}
 
-		if (Physics.Linecast (transform.position, target.myTransform.position, out hit))
-			if (hit.collider == target.collider) {
-				distance = hit.distance;
-				SetEnemy(target);
-				return true;
-			}
+      //  Debug.Log("SELECTED TARGET" + target);
+        if (Physics.Linecast(controlledPawn.myTransform.position, target.myTransform.position, out hit,controlledPawn.seenlist)){
+
+           // Debug.Log("SELECTED TARGET" + hit.collider);
+            if (hit.collider == target.collider)
+            {
+                distance = hit.distance;
+                SetEnemy(target);
+				targetVisible =true;
+                return true;
+            }
             else
             {
                 distance = hit.distance;
+				targetVisible =false;
                 return false;
             }
+        }
         else
-            return false;
+        {
+            distance = (target.myTransform.position - controlledPawn.myTransform.position).magnitude;
+            SetEnemy(target);
+			targetVisible = true;
+            return true;
+        }
 
     }
-	protected virtual void DecideTacktick(){
 	
-			if(controlledPawn.naturalWeapon!=null){
-				if(controlledPawn.CurWeapon==null){
-					isMelee= true;
-					return;
-				}
-				if(controlledPawn.CurWeapon.weaponRange>_distanceToTarget*2){
-					isMelee= true;
-				}
-
-			
-			}
-			isMelee = false;
-			isMelee = false;
-	
-	}
 	protected virtual void Attack(){
 		if(controlledPawn.CurWeapon!=null&&!isMelee){
 			controlledPawn.StartFire();
@@ -288,11 +322,13 @@ public class AIState : MonoBehaviour {
 	}
 	protected virtual bool IsInWeaponRange(){
 	   float weaponDistance =controlledPawn.OptimalDistance(isMelee);
-
-       return AIAgentComponent.FlatDifference(_enemy.myTransform.position, controlledPawn.myTransform.position).sqrMagnitude - _enemy.GetSize() - controlledPawn.GetSize() < weaponDistance * weaponDistance;
+       return AIAgentComponent.FlatDifference(_enemy.myTransform.position, controlledPawn.myTransform.position).sqrMagnitude - _enemy.GetSize()*_enemy.GetSize() - controlledPawn.GetSize()*controlledPawn.GetSize() < weaponDistance * weaponDistance;
 	}
 	public virtual bool IsSpecificFinish(){
 		return false;
 	}
-    
+	public virtual void KickFinish(){
+	
+	
+	}
 }

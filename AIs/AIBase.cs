@@ -46,10 +46,17 @@ public class AIBase : MonoBehaviour
 
 	public Transform[] patrolPoints;
 
-    public void OnDestroy(){
+	public Dictionary<string,int> cahcedDataForTick= new Dictionary<string,int>();
+	
+	
+    public void Death(){
         if (aiSwarm != null) {
-            aiSwarm.AgentKilled();
+            aiSwarm.AgentKilled(this);
         }
+	
+		if(controlledPawn.enemy!=null){
+            AITargetManager.RemoveAttacker(controlledPawn, controlledPawn.enemy);
+		}
     }
 
 	public void Init(int aiGroup,AISwarm aiSwarm,int homeIndex){
@@ -64,13 +71,25 @@ public class AIBase : MonoBehaviour
 			this.aiSwarm.respawns[homeIndex].SpawnedSet(controlledPawn);
 		}
 	}
-	
-	public void WasHitBy(GameObject killer){
+	public void RemoteInit(int group, int homeindex){
+	   controlledPawn = GetComponent<Pawn>();
+		aiGroup= group;
+		this.homeIndex =homeindex;
+		AIDirector.instance.swarms[aiGroup].RemoteAdd(this);
+	}
+	public void WasHitBy(GameObject killer,float amount){
 		Pawn killerPawn = killer.GetComponent<Pawn> ();
 		if (killerPawn != null) {
 			_currentState.WasHitBy(killerPawn);
 		}
 
+	}
+	public void KickFinish(){
+        if (_currentState != null)
+        {
+            _currentState.KickFinish();
+        }
+	
 	}
 	void InitState(){
 		//Debug.Log (_currentState.GetType ().Name);
@@ -91,6 +110,22 @@ public class AIBase : MonoBehaviour
 			((AIPatrol)_currentState).patrolPoints = patrolPoints;
 		}
 			break;
+        case "AIBattleJugger":
+            {
+
+                _currentState.controlledPawn = controlledPawn;
+
+                
+                patrolPoints = aiSwarm.GetRoutePoint();
+             
+                _currentState.AngleRange = AngleRange;
+                ((AIBattleJugger)_currentState).GeneratePath(patrolPoints);
+            }
+            break;
+         
+
+
+            break;
 			//case AIType.Rusher:
 			//    {
 			//        _rusher = gameObject.AddComponent<AIRusher>();
@@ -156,6 +191,23 @@ public class AIBase : MonoBehaviour
    public AISwarm GetAISwarm()
    {
        return aiSwarm;
+   }
+   public Pawn GetPawn(){
+		return controlledPawn;
+   }
+   
+   public void SetEnemy(Pawn enemy){
+		if(aiSwarm!=null){
+            aiSwarm.NewEnemy(enemy);
+		}
+   }
+   public void EnemyFromSwarm(Pawn enemy){
+		_currentState.EnemyFromSwarm(enemy);
+   }
+
+   public void AllyKill()
+   {
+       _currentState.AllyKill();
    }
 }
 

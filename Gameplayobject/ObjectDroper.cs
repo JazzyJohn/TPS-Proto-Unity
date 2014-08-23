@@ -5,9 +5,9 @@ public class ObjectDroper : MonoBehaviour {
 
 	public GameObject[] objectList;
 	void OnDestroy() {
-		if (PhotonNetwork.isMasterClient&&!GameRule.IsLvlChanging) {
+		if (NetworkController.IsMaster()&&!GameRule.IsLvlChanging) {
 			if(objectList.Length>0){
-				PhotonNetwork.Instantiate(objectList[(int)(UnityEngine.Random.value*objectList.Length)].name,transform.position,transform.rotation,0);
+                NetworkController.Instance.SimplePrefabSpawn(objectList[(int)(UnityEngine.Random.value * objectList.Length)].name, transform.position, transform.rotation);
 			}
 			
 		}

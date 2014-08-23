@@ -2,6 +2,7 @@
 using System.Collections;
 using System.Collections.Generic;
 using System;
+using nstuff.juggerfall.extension.models;
 
 [Serializable]
 public class RoomScenarioEntry{
@@ -43,6 +44,7 @@ public class RunnerGameRule : GameRule {
     public void NextRoom()
     {
         EventHolder.instance.FireEvent(typeof(GameListener), "EventRoomFinished");
+        NetworkController.Instance.NextRoomRequest();
         roomCnt++;
     }
     void Update()
@@ -55,14 +57,14 @@ public class RunnerGameRule : GameRule {
             if (restartTimer > restartTime && !lvlChanging)
             {
                 lvlChanging = true;
-                FindObjectOfType<ServerHolder>().LoadNextMap();
+          
             }
         }
         
     }
      public override void PlayerDeath()
     {
-        Debug.Log("Palyer Death");
+        
 		EventHolder.instance.FireEvent(typeof(GameListener), "EventRestart");
         isGameEnded = true;
     }
@@ -89,4 +91,18 @@ public class RunnerGameRule : GameRule {
             typeDictionary[typeSetting.type] = typeSetting.weidth;
         }
     }
+	public override void SetFromModel(GameRuleModel model)
+	{
+		RunnerGameRuleModel runnermodel = (RunnerGameRuleModel)model;
+		if (!isGameEnded && runnermodel.isGameEnded)
+		{
+			
+			isGameEnded = true;
+		}
+        for (int i = 0; i < runnermodel.teamScore.Count; i++)
+		{
+		  
+			teamScore[i] = (int)runnermodel.teamScore[i];
+		}
+	}
 }

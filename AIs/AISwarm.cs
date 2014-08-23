@@ -2,6 +2,18 @@
 using System.Collections;
 using System.Collections.Generic;
 
+public class AISwarmBuff{
+	public int characteristic;
+	public object value;
+    
+    public AISwarmBuff(int characteristic, object value)
+    {
+        // TODO: Complete member initialization
+        this.characteristic = characteristic;
+        this.value = value;
+    }
+}
+
 public class AISwarm:MonoBehaviour
 {
 
@@ -12,11 +24,16 @@ public class AISwarm:MonoBehaviour
     public int[] enemyIndex;
 
     public List<Transform> pointOfInterest;
+	
+	public List<AISwarmBuff> allBuffs = new List<AISwarmBuff>();
+	
+	public List<AIBase> allPawn;
 
     public int aiGroup;
 
     public bool isActive = false;
 
+    public ShowOnGuiComponent guiComponent;
 
     protected List<Transform> avaiblePoints = new List<Transform>();
 
@@ -30,6 +47,11 @@ public class AISwarm:MonoBehaviour
             }
         }
 
+    }
+
+    protected void Awake()
+    {
+        guiComponent = GetComponent<ShowOnGuiComponent>();
     }
     public Transform[] GetPointOfInterest(int count)
     {
@@ -50,7 +72,7 @@ public class AISwarm:MonoBehaviour
         return returnTransform;
     }
 
-    public virtual void SwarmTick()
+    public virtual void SwarmTick(float delta)
     {
         if (isActive && Bots.Length > 0)
         {
@@ -59,36 +81,78 @@ public class AISwarm:MonoBehaviour
                 AISpawnPoint go = respawns[i];
                 if (go.IsAvalable())
                 {
-                    GameObject obj = PhotonNetwork.InstantiateSceneObject(Bots[(int)(UnityEngine.Random.value * Bots.Length)], go.transform.position, go.transform.rotation, 0, null) as GameObject;
+                    GameObject obj = NetworkController.Instance.PawnSpawnRequest(Bots[(int)(UnityEngine.Random.value * Bots.Length)], go.transform.position, go.transform.rotation, true, new int[0],true);
                     //	GameObject obj = PhotonNetwork.Instantiate (Bots[(int)(UnityEngine.Random.value*Bots.Length)].name, go.transform.position, go.transform.rotation, 0,null) as GameObject;
-                    go.Spawned(obj.GetComponent<Pawn>());
+                    Pawn pawn =obj.GetComponent<Pawn>();
+                    go.Spawned(pawn);
+                 
                     //  Debug.Log("Group before set" + this.aiGroup + "  " + aiGroup);
                     AIBase ai = obj.GetComponent<AIBase>();
                     ai.Init(aiGroup, this, i);
+                    
                     AfterSpawnAction(ai);
+                    
                 }
             }
         }
         DecideCheck();
     }
+	void Update(){
+		DrawCheck();
+	}
+	public virtual void DrawCheck(){
+        if (guiComponent != null)
+        {
+            if (isActive)
+            {
+                guiComponent.Show();
+            }
+            else
+            {
+                guiComponent.Hide();
+            }
+        }
+	}
     public virtual void Init(int i)
     {
 
         aiGroup = i;
         ReloadList();
+        
+		
     }
     public virtual void DecideCheck() { 
             
     }
+	public void RemoteAdd(AIBase ai){
+		allPawn.Add(ai);
+		foreach(AISwarmBuff buff in allBuffs){
+            ai.GetPawn().AddBuff(buff.characteristic, buff.value);
+		}
+	}
     public virtual void AfterSpawnAction(AIBase ai) { 
-    
+		allPawn.Add(ai);
+		foreach(AISwarmBuff buff in allBuffs){
+            ai.GetPawn().AddBuff(buff.characteristic, buff.value);
+		}
     }
-    public virtual void AgentKilled() { 
-    
+    public virtual void AgentKilled(AIBase ai) { 
+		allPawn.Remove(ai);
+		foreach (AIBase aiBase in allPawn)
+        {
+			aiBase.AllyKill();
+		}
     }
     public virtual void Activate() {
+        Debug.Log("Activate");
         isActive = true;
+		AIDirector.instance.ActivateSwarm(aiGroup);
     }
+	public virtual void   DeActivate(){
+		Debug.Log("DeActivate");
+        isActive = false;
+		AIDirector.instance.DeactivateSwarm(aiGroup);
+	}
     public bool IsEnemy(int enemyGroup)
     {
         foreach (int enemy in enemyIndex)
@@ -101,4 +165,35 @@ public class AISwarm:MonoBehaviour
         }
         return false;
     }
+
+    public Transform[] GetRoutePoint()
+    {
+        return pointOfInterest.ToArray();
+    }
+	
+	public void AddBuffOnAll(int characteristic, object value){
+		allBuffs.Add(new AISwarmBuff(characteristic,value));
+      
+      
+        foreach (AIBase aiBase in allPawn)
+        {
+			aiBase.GetPawn().AddBuff(characteristic,value);
+		}
+	}
+	public void RemoveBuffOnAll(int characteristic, object value){
+		allBuffs.RemoveAt(allBuffs.FindIndex( delegate(AISwarmBuff eff) {
+                return eff.characteristic == characteristic&&value.Equals(eff.value) ;
+               
+			}));
+        foreach (AIBase aiBase in allPawn)
+        {
+			aiBase.GetPawn().RemoveBuff(characteristic,value);
+		}
+	}
+	public void NewEnemy(Pawn enemy){
+		foreach (AIBase aiBase in allPawn)
+        {
+			aiBase.EnemyFromSwarm(enemy);
+		}
+	}
 }

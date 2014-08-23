@@ -19,7 +19,7 @@ public class AnyRoom : MonoBehaviour {
 	void Start () {
 		Server = FindObjectOfType<ServerHolder> ();
 	}
-	
+   
 	// Update is called once per frame
 	void FixedUpdate () 
 	{
@@ -27,7 +27,7 @@ public class AnyRoom : MonoBehaviour {
 		{
 			have = false;
 			if(Server.allRooms!=null){
-				foreach(RoomInfo room in Server.allRooms)
+				foreach(RoomData room in Server.allRooms)
 				{
 					if(gameObject.name == room.name)
 					{
