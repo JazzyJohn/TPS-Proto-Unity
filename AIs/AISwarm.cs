@@ -1,6 +1,8 @@
 ﻿using UnityEngine;
 using System.Collections;
 using System.Collections.Generic;
+using Sfs2X.Entities.Data;
+using nstuff.juggerfall.extension.models;
 
 public class AISwarmBuff{
 	public int characteristic;
@@ -19,9 +21,11 @@ public class AISwarm:MonoBehaviour
 
     public string[] Bots;
 
-    public AISpawnPoint[] respawns;
+    public Transform[] respawns;
 
     public int[] enemyIndex;
+
+    public int timeDelay;
 
     public List<Transform> pointOfInterest;
 	
@@ -72,31 +76,6 @@ public class AISwarm:MonoBehaviour
         return returnTransform;
     }
 
-    public virtual void SwarmTick(float delta)
-    {
-        if (isActive && Bots.Length > 0)
-        {
-            for (int i = 0; i < respawns.Length; i++)
-            {
-                AISpawnPoint go = respawns[i];
-                if (go.IsAvalable())
-                {
-                    GameObject obj = NetworkController.Instance.PawnSpawnRequest(Bots[(int)(UnityEngine.Random.value * Bots.Length)], go.transform.position, go.transform.rotation, true, new int[0],true);
-                    //	GameObject obj = PhotonNetwork.Instantiate (Bots[(int)(UnityEngine.Random.value*Bots.Length)].name, go.transform.position, go.transform.rotation, 0,null) as GameObject;
-                    Pawn pawn =obj.GetComponent<Pawn>();
-                    go.Spawned(pawn);
-                 
-                    //  Debug.Log("Group before set" + this.aiGroup + "  " + aiGroup);
-                    AIBase ai = obj.GetComponent<AIBase>();
-                    ai.Init(aiGroup, this, i);
-                    
-                    AfterSpawnAction(ai);
-                    
-                }
-            }
-        }
-        DecideCheck();
-    }
 	void Update(){
 		DrawCheck();
 	}
@@ -146,12 +125,13 @@ public class AISwarm:MonoBehaviour
     public virtual void Activate() {
         Debug.Log("Activate");
         isActive = true;
-		AIDirector.instance.ActivateSwarm(aiGroup);
+		
     }
 	public virtual void   DeActivate(){
-		Debug.Log("DeActivate");
+	//	Debug.Log("DeActivate");
         isActive = false;
-		AIDirector.instance.DeactivateSwarm(aiGroup);
+        SendMessage("SwarmEnd", SendMessageOptions.DontRequireReceiver);
+		
 	}
     public bool IsEnemy(int enemyGroup)
     {
@@ -196,4 +176,46 @@ public class AISwarm:MonoBehaviour
 			aiBase.EnemyFromSwarm(enemy);
 		}
 	}
+
+    public void ChangeState(bool state)
+    {
+        if (state)
+        {
+            Activate();
+        }
+        else
+        {
+            DeActivate();
+        }
+    }
+
+    public void SpawnBot(string prefabName, int point, Vector3 position)
+    {
+
+        GameObject obj = NetworkController.Instance.PawnForSwarmSpawnRequest(prefabName, position, respawns[point].transform.rotation, new int[0], aiGroup, point);
+        Pawn pawn = obj.GetComponent<Pawn>();
+        pawn.SetTeam(0);
+
+        AIBase ai = obj.GetComponent<AIBase>();
+        ai.Init(aiGroup, this, point);
+        AfterSpawnAction(ai);
+    }
+
+    public virtual  void SendData(ISFSObject swarmSend)
+    {
+        ISFSArray points = new SFSArray();
+        foreach (Transform respawn in respawns)
+        {
+            points.AddClass(new Vector3Model(respawn.position));
+        }
+        swarmSend.PutLong("timeDelay",timeDelay);
+        swarmSend.PutSFSArray("points", points);
+        swarmSend.PutUtfStringArray("bots", Bots);
+        swarmSend.PutUtfString("class", this.GetType().Name);
+    }
+
+    public virtual void ReadData(ISFSObject iSFSObject)
+    {
+        isActive = iSFSObject.GetBool("active");
+    }
 }

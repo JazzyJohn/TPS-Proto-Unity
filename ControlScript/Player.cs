@@ -521,12 +521,19 @@ public class Player : MonoBehaviour {
 	}
 	
 	public void DamagePawn(BaseDamage damage){
+        if (!playerView.isMine)
+        {
+            return;
+        }
 		if (damage.sendMessage) {
 	        PlayerMainGui.instance.AddMessage(damage.Damage.ToString("0.0"), damage.hitPosition, PlayerMainGui.MessageType.DMG_TEXT);
 		}
 	}
     public void DamagePawn(String damage, Vector3 position){
-     
+        if (!playerView.isMine)
+        {
+            return;
+        }
 		PlayerMainGui.instance.AddMessage(damage, position, PlayerMainGui.MessageType.DMG_TEXT);
 			
 	}

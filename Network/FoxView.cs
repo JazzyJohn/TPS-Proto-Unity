@@ -150,12 +150,10 @@ public class FoxView : MonoBehaviour {
 			NetworkController.Instance.DeleteViewRequest(viewID);
 		}
 	}
-	public void Detonate(){
-		NetworkController.Instance.DetonateRequest(viewID);
-	}
-	public void SetAI(int group,int home){
-		NetworkController.Instance.SetAIRequest(viewID,group,home);
-	}
+    public void Detonate()
+    {
+        NetworkController.Instance.DetonateRequest(viewID);
+    }
     public void SendShoot(Vector3 position, Quaternion rotation, float power, float range, int viewId, int projId)
     {
 		
@@ -166,8 +164,9 @@ public class FoxView : MonoBehaviour {
 		data.PutFloat("power", power);
 		data.PutFloat("range", range);
         data.PutInt("viewId", viewId);
-        data.PutInt("projId", projId);	
-	    data.PutDouble("timeShoot", TimeManager.Instance.NetworkTime);
+        data.PutInt("projId", projId);
+        data.PutDouble("timeShoot", TimeManager.Instance.NetworkTime/1000);
+       
 		data.PutInt("id", viewID);	
 		NetworkController.Instance.WeaponShootRequest(data);
 	}

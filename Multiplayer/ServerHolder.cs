@@ -495,6 +495,7 @@ public class ServerHolder : MonoBehaviour
                 player.Restart();
             }
 			NetworkController.Instance.MasterViewUpdate();
+            NetworkController.Instance.SendMapData();
         }
 		ChatHolder[] chats = FindObjectsOfType<ChatHolder> ();
 		foreach(ChatHolder chat in chats){

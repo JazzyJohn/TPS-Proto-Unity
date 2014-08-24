@@ -123,11 +123,11 @@ public class BaseProjectile : MonoBehaviour
 	
     void OnEnable()
     {
-        shouldInit=true;
+      
         used = false;
         mRigidBody.velocity = Vector3.zero;
     }
-    void Init(){
+   public void Init(){
         shouldInit = false;
 		switch (attraction)
         {
@@ -152,7 +152,7 @@ public class BaseProjectile : MonoBehaviour
         float distance = mTransform.InverseTransformDirection(mRigidBody.velocity).z * 0.1f;
         if (replication)
         {
-            distance += (float)(TimeManager.Instance.NetworkTime - lateTime) /1000f* mRigidBody.velocity.magnitude;
+            distance += (float)(TimeManager.Instance.NetworkTime / 1000 - lateTime) * mRigidBody.velocity.magnitude;
         }
 
         if (distance>0&&Physics.Raycast(mTransform.position, mRigidBody.velocity.normalized, out hit, distance))
@@ -165,8 +165,8 @@ public class BaseProjectile : MonoBehaviour
    
         if (replication)
         {
-            //Debug.Log((float)(PhotonNetwork.time - lateTime));
-            transform.Translate(mRigidBody.velocity * (float)(TimeManager.Instance.NetworkTime - lateTime) / 1000f);
+           // Debug.Log(lateTime + " " + TimeManager.Instance.NetworkTime / 1000);
+           // transform.Translate(mRigidBody.velocity * (float)(TimeManager.Instance.NetworkTime/1000 - lateTime));
         }
 	//	Debug.Log("id " + projId+ " position " + mTransform.position + " rotation "+ mTransform.rotation);
         mRigidBody.useGravity = false;
@@ -176,10 +176,7 @@ public class BaseProjectile : MonoBehaviour
 
     protected void Update()
     {
-        if (shouldInit)
-        {
-            Init();
-        }
+        
         RaycastHit hit;
 
         switch (attraction)
@@ -549,7 +546,7 @@ public class BaseProjectile : MonoBehaviour
     }
 	public void DeActivate(){
 		gameObject.Recycle();
-        shouldInit = false;
+        
 	}
 	public void OnDisable(){
 		CancelInvoke();

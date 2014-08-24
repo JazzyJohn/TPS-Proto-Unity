@@ -186,6 +186,10 @@ public class BaseWeapon : DestroyableNetworkObject {
 	void Awake(){
 		foxView = GetComponent<FoxView>();
         projectileClass = projectilePrefab.GetComponent<BaseProjectile>();
+        if (projectileClass.CountPooled() == 0)
+        {
+            projectileClass.CreatePool(50);
+        }
 	}
 	
 	// Use this for initialization
@@ -752,9 +756,11 @@ public class BaseWeapon : DestroyableNetworkObject {
 		projScript.owner = owner.gameObject;
 		projScript.damage.Damage+=power;
 		projScript.range+=range;
+        projScript.Init();
 	}
-	public virtual void RemoteGenerate (Vector3 position, Quaternion rotation, float power, float range, int viewId, int projId,double timeShoot){
-
+    public virtual void RemoteGenerate(Vector3 position, Quaternion rotation, float power, float range, int viewId, int projId, double timeShoot)
+    {
+        
         BaseProjectile proj = GenerateProjectileRep(position, rotation, timeShoot);
 			if (rifleParticleController != null) {
 				rifleParticleController.CreateShootFlame ();
@@ -772,9 +778,12 @@ public class BaseWeapon : DestroyableNetworkObject {
 					}
 				break;
 			}
+            proj.Init();
+
 		
 	}
-	protected BaseProjectile GenerateProjectileRep(Vector3 startPoint,Quaternion startRotation,double timeShoot){
+    protected BaseProjectile GenerateProjectileRep(Vector3 startPoint, Quaternion startRotation, double timeShoot)
+    {
 
 		GameObject proj=projectilePrefab.Spawn(startPoint,startRotation);
 		BaseProjectile projScript = proj.GetComponent<BaseProjectile>();

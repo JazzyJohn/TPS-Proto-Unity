@@ -37,7 +37,7 @@ public class RobotPawn : Pawn {
             {
                 mainAi.StartAI();
 
-                foxView.SetAI(mainAi.aiGroup, mainAi.homeIndex);
+              
 
             }
         }
@@ -68,12 +68,12 @@ public class RobotPawn : Pawn {
     {
         Destroy(GetComponent<ThirdPersonController>());
         Destroy(GetComponent<PlayerCamera>());
-
+        Destroy(GetComponent<ShowOnGuiComponent>());
         GetComponent<Rigidbody>().isKinematic = true;
     }
     public void MySelfEnter()
     {
-
+        Destroy(GetComponent<ShowOnGuiComponent>());    
     }
 
 	protected void Awake(){

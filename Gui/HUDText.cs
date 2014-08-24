@@ -29,8 +29,10 @@ public class HUDText : MonoBehaviour
 		public UILabel label;		// Label on the game object
         public Vector3 startpos;
         public bool isShow= true;
+        public string defSpriteName;
       
 		public Transform Perfab;
+        
 		public PerfabMessageInfo PerfabInfo;
 
 		public float movementStart { get { return time + stay; } }
@@ -61,6 +63,8 @@ public class HUDText : MonoBehaviour
 
 
 	public UIFont font;
+
+    public string[] arrowName;
 
 	/// <summary>
 	/// Effect applied to the text.
@@ -109,11 +113,13 @@ public class HUDText : MonoBehaviour
 		Entry ne = new Entry();
 		ne.time = Time.realtimeSinceStartup;
 		ne.Perfab = (Instantiate(Resources.Load<GameObject>("GUIPerfab/"+namePerfab))as GameObject).transform;
+       
 		ne.Perfab.parent = mTrans;
 		ne.Perfab.name = counter.ToString();
 		ne.PerfabInfo = ne.Perfab.GetComponent<PerfabMessageInfo>();
 		ne.Type = TypeMessage.Perfab;
-
+        ne.label = ne.PerfabInfo.Label;
+        ne.Sprite = ne.PerfabInfo.Sprite;
 		mList.Add(ne);
 		++counter;
 		return ne;
@@ -331,16 +337,20 @@ public class HUDText : MonoBehaviour
 		
 		Entry ne = Create(NamePerfab);
 		ne.Perfab.position = uiCamera.ViewportToWorldPoint(Camera.main.WorldToViewportPoint(pos));
-		pos = mTrans.localPosition;
-		pos.x = Mathf.FloorToInt(pos.x);
-		pos.y = Mathf.FloorToInt(pos.y);
-		pos.z = 0f;
-		mTrans.localPosition = pos;
+		
 		ne.startpos = pos;
+        pos = mTrans.localPosition;
+        pos.x = Mathf.FloorToInt(pos.x);
+        pos.y = Mathf.FloorToInt(pos.y);
+        pos.z = 0f;
+        mTrans.localPosition = pos;
 		ne.constant = constant;
-
-		if(ne.PerfabInfo.OnSprite)
-			ne.PerfabInfo.Sprite.spriteName = NameSprite;
+        ne.Perfab.localRotation = Quaternion.identity;
+        if (ne.PerfabInfo.OnSprite)
+        {
+            ne.PerfabInfo.Sprite.spriteName = NameSprite;
+            ne.defSpriteName = NameSprite;
+        }
 		if(ne.PerfabInfo.OnLabel)
 			ne.PerfabInfo.Label.text = Text;
 
@@ -414,10 +424,19 @@ public class HUDText : MonoBehaviour
 			float currentTime = time - ent.movementStart;
             Vector3 pos = ent.startpos;
             //Debug.Log("vector" + Camera.main.WorldToViewportPoint(pos));
+            Vector3 viewport = Camera.main.WorldToViewportPoint(pos);
 			switch(ent.Type)
 			{
 			case TypeMessage.Texts:
-				ent.label.transform.position =  uiCamera.ViewportToWorldPoint(Camera.main.WorldToViewportPoint(pos));
+                    if (ent.isShow && viewport.z > 0)
+                {
+                    ent.label.enabled = true;
+                }
+                else
+                {
+                    ent.label.enabled = false;
+                }
+                    ent.label.transform.position = uiCamera.ViewportToWorldPoint(viewport);
 				if (!ent.constant)
 				{
 					ent.offset = offsetCurve.Evaluate(currentTime);
@@ -426,9 +445,45 @@ public class HUDText : MonoBehaviour
 				float s_Text = scaleCurve.Evaluate(time - ent.time);
 				if (s_Text < 0.001f) s_Text = 0.001f;
 				ent.label.cachedTransform.localScale = new Vector3(s_Text, s_Text, s_Text);
+               
 				break;
 			case TypeMessage.Sprites:
-				ent.Sprite.transform.position =  uiCamera.ViewportToWorldPoint(Camera.main.WorldToViewportPoint(pos));
+                if (ent.isShow && viewport.z > 0)
+                {
+                    if (ent.Sprite.spriteName != ent.defSpriteName)
+                    {
+                        ent.Sprite.spriteName = ent.defSpriteName;
+                    }
+                    ent.Sprite.enabled = true;
+                }
+                else
+                {
+                    if (ent.isShow)
+                    {
+                        if (ent.isShow && viewport.x > 0.5)
+                        {
+                            if (ent.Sprite.spriteName != arrowName[0])
+                            {
+                                ent.Sprite.spriteName = arrowName[0];
+                            }
+                        }
+                        else
+                        {
+                            if (ent.Sprite.spriteName != arrowName[1])
+                            {
+                                ent.Sprite.spriteName = arrowName[1];
+                            }
+                        }
+                        viewport = NormalizeOffScreen(viewport);
+                        ent.Sprite.enabled = true;
+                    }
+                    else
+                    {
+                        ent.Sprite.enabled = false;
+                    }
+
+                }
+                ent.Sprite.transform.position = uiCamera.ViewportToWorldPoint(viewport);
 				if (!ent.constant)
 				{
 					ent.offset = offsetCurve.Evaluate(currentTime);
@@ -437,9 +492,46 @@ public class HUDText : MonoBehaviour
 				float s_Sprite = scaleCurve.Evaluate(time - ent.time);
 				if (s_Sprite < 0.001f) s_Sprite = 0.001f;
 				ent.Sprite.cachedTransform.localScale = new Vector3(s_Sprite, s_Sprite, s_Sprite);
+             
 				break;
 			case TypeMessage.Perfab:
-				ent.Perfab.position =  uiCamera.ViewportToWorldPoint(Camera.main.WorldToViewportPoint(pos));
+                if (ent.isShow && viewport.z > 0)
+                {
+                    if (ent.Sprite.spriteName != ent.defSpriteName)
+                    {
+                        ent.Sprite.spriteName = ent.defSpriteName;
+                    }
+                    ent.Sprite.enabled = true;
+                    ent.label.enabled = true;
+                }
+                else
+                {
+                    if (ent.isShow)
+                    {
+                        if (ent.isShow && viewport.x < 0.5)
+                        {
+                            if (ent.Sprite.spriteName != arrowName[0])
+                            {
+                                ent.Sprite.spriteName = arrowName[0];
+                            }
+                        }
+                        else
+                        {
+                            if (ent.Sprite.spriteName != arrowName[1])
+                            {
+                                ent.Sprite.spriteName = arrowName[1];
+                            }
+                        }
+                        viewport = NormalizeOffScreen(viewport);
+                        ent.Sprite.enabled = true;
+                    }
+                    else
+                    {
+                        ent.Sprite.enabled = false;
+                    }
+                    ent.label.enabled = false;
+                }
+                ent.Perfab.position = uiCamera.ViewportToWorldPoint(viewport);
 				if (!ent.constant)
 				{
 					ent.offset = offsetCurve.Evaluate(currentTime);
@@ -451,9 +543,10 @@ public class HUDText : MonoBehaviour
 				float s_Perfab = scaleCurve.Evaluate(time - ent.time);
 				if (s_Perfab < 0.001f) s_Perfab = 0.001f;
 				ent.Perfab.localScale = new Vector3(s_Perfab, s_Perfab, s_Perfab);
+               
 				break;
 			}
-            
+           
             pos = mTrans.localPosition;
             pos.x = Mathf.FloorToInt(pos.x);
             pos.y = Mathf.FloorToInt(pos.y);
@@ -475,4 +568,19 @@ public class HUDText : MonoBehaviour
 			
 		}
 	}
+
+    private Vector3 NormalizeOffScreen(Vector3 viewport)
+    {
+        if (viewport.x < 0.5)
+        {
+            viewport.x = 0.9f;
+
+        }
+        else
+        {
+            viewport.x = 0.1f;
+        }
+        viewport.z = 10.0f;
+        return viewport;
+    }
 }

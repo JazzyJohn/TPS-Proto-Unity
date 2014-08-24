@@ -7,6 +7,7 @@ public class AIQueenEgg : AIState
 	bool isLayed = false;
     public string eggPrefab;
 	public Transform CloackPoint;
+    public int eggDelay;
 	public override void StartState(){
 		isLayed = false;
         controlledPawn.Movement(Vector3.zero, CharacterState.Idle);
@@ -20,8 +21,9 @@ public class AIQueenEgg : AIState
 	public void CreateEgg(){
         if (NetworkController.IsMaster())
         {
-            GameObject egg = NetworkController.Instance.SimplePrefabSpawn(eggPrefab, CloackPoint.position, CloackPoint.rotation);
-            ((AISwarm_QueenSwarm)aibase.GetAISwarm()).AddEgg(egg.transform);
+
+            GameObject egg = NetworkController.Instance.QuuenEggSpawn(eggPrefab, CloackPoint.position, CloackPoint.rotation, aibase.aiGroup,eggDelay);
+          
         }
 	}
 

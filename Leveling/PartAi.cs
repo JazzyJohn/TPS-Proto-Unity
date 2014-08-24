@@ -6,7 +6,7 @@ public class PartAi : Part {
 	 public override void Started(){
          base.Started();
          AISwarms = PartTransform.GetComponentsInChildren<AISwarm>();
-         foreach (AISwarm Ai in AISwarms)
+        /* foreach (AISwarm Ai in AISwarms)
         {
             Ai.respawns = new AISpawnPoint[Spawner.SpawnedPrefabs.Count];
             for(int i =0;i<Ai.respawns.Length;i++)
@@ -14,7 +14,7 @@ public class PartAi : Part {
                 Ai.respawns[i] = Spawner.SpawnedPrefabs[i].GameObj.GetComponent<AISpawnPoint>();
             }
             Ai.Init(Numb);
-        }
+        }*/
 	}
 
     

@@ -425,7 +425,6 @@ public class Pawn : DamagebleObject {
             {
                 mainAi.StartAI();
 				
-				foxView.SetAI(mainAi.aiGroup,mainAi.homeIndex);
 				
             }
         }
@@ -679,10 +678,7 @@ public class Pawn : DamagebleObject {
                 player.PawnDead(killerPlayer, killerPawn);
             }
         }
-		if(isAi){
-			mainAi.Death();
-		}
-
+		
 
         PawnKill();
 
@@ -705,7 +701,11 @@ public class Pawn : DamagebleObject {
 		
 	}
     public  void PawnKill(){
-	
+        if (isAi)
+        {
+            mainAi.Death();
+        }
+
         ActualKillMe();
     }
 
@@ -1369,6 +1369,7 @@ public class Pawn : DamagebleObject {
 		if (value&&(characterState == CharacterState.WallRunning || characterState == CharacterState.Sprinting)) {
 			return;
 		}
+     
 		isAiming = value;
 		animator.ToggleAim (value);
 		if (cameraController != null) {
@@ -2531,6 +2532,7 @@ public class Pawn : DamagebleObject {
 		serPawn.characterState =(int)characterState;
         serPawn.active = isActive;
 		serPawn.isDead =isDead;
+        serPawn.isAiming = isAiming;
 		serPawn.position.WriteVector(transform.position);
 		serPawn.aimRotation.WriteVector(aimRotation);
 		serPawn.rotation.WriteQuat(transform.rotation);
@@ -2548,7 +2550,7 @@ public class Pawn : DamagebleObject {
 		correctPlayerPos = pawn.position.MakeVector(correctPlayerPos);
 		correctPlayerRot = pawn.rotation.MakeQuaternion(correctPlayerRot);
 		aimRotation = pawn.aimRotation.MakeVector(aimRotation);
-       
+        ToggleAim(pawn.isAiming);
         team = pawn.team;
         health = pawn.health;
 		replicatedVelocity =correctPlayerPos -oldPos;

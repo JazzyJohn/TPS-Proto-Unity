@@ -370,7 +370,15 @@ public class PlayerMainGui : MonoBehaviour {
             string publicName = component.GetTitle();
             if (component.hudentry == null)
             {
-                component.hudentry =P1Hud.Add(publicName, Color.red, component.myTransform.position,true);
+                if (component.spriteName == "")
+                {
+                    component.hudentry = P1Hud.Add(publicName, Color.red, component.myTransform.position, true);
+                }
+                else
+                {
+                    component.hudentry = P1Hud.Add("Standart(sprite and text)", component.spriteName, publicName, component.myTransform.position, true);
+                }
+            
             }
             component.hudentry.isShow = component.isShow;
            // 

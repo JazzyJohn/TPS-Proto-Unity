@@ -67,14 +67,14 @@ public class AIBase : MonoBehaviour
         //Debug.Log("Group after set" + this.aiGroup + "  " + aiGroup);
 		this.aiSwarm=aiSwarm;
 		this.homeIndex = homeIndex;
-		if(homeIndex!=-1){
-			this.aiSwarm.respawns[homeIndex].SpawnedSet(controlledPawn);
-		}
+		
 	}
 	public void RemoteInit(int group, int homeindex){
+        Debug.Log("Remote Ai");
 	   controlledPawn = GetComponent<Pawn>();
 		aiGroup= group;
 		this.homeIndex =homeindex;
+        this.aiSwarm = AIDirector.instance.swarms[aiGroup];
 		AIDirector.instance.swarms[aiGroup].RemoteAdd(this);
 	}
 	public void WasHitBy(GameObject killer,float amount){
@@ -207,7 +207,10 @@ public class AIBase : MonoBehaviour
 
    public void AllyKill()
    {
-       _currentState.AllyKill();
+       if (_currentState != null)
+       {
+           _currentState.AllyKill();
+       }
    }
 }
 

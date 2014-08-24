@@ -143,6 +143,7 @@ public class NetworkController : MonoBehaviour {
             _smartFox.AddEventListener(SFSEvent.LOGIN, OnLogin);
             _smartFox.AddEventListener(SFSEvent.UDP_INIT, OnUdpInit);
             _smartFox.AddEventListener(SFSEvent.EXTENSION_RESPONSE, OnExtensionResponse);
+            _smartFox.AddEventListener(SFSEvent.USER_VARIABLES_UPDATE, OnVariablesUpdate);
             _smartFox.AddLogListener(LogLevel.DEBUG, OnDebugMessage);
             _smartFox.Connect(serverName, serverPort);
         }
@@ -261,6 +262,10 @@ public class NetworkController : MonoBehaviour {
 
         }
     }
+    public void OnVariablesUpdate(BaseEvent evt)
+    {
+     //   evt.Params["user"];
+    }
 
     private Queue<BaseEvent> lateEvents = new Queue<BaseEvent>();
     private void OnExtensionResponse(BaseEvent evt)
@@ -337,10 +342,12 @@ public class NetworkController : MonoBehaviour {
 					}
                     if(dt.ContainsKey("Master")&&dt.GetBool("Master")){
                         HandleMasterStart(dt);
+                        SendMapData();
                     }
-					if(dt.ContainsKey("swarmIds")){
-					   AIDirector.instance.UpdateSwarm(dt.GetIntArray("swarmIds"));
-					}
+                    if (dt.ContainsKey("swarms"))
+                    {
+                        ReadMapData(dt);
+                    }
                 
                     break;
                 case "updatePlayerInfo":
@@ -402,9 +409,7 @@ public class NetworkController : MonoBehaviour {
 				case "pawnDetonate":
 					HandlePawnDetonate(dt);
 					break;
-				case "pawnSetAIRequest":
-					HandleSetAIRequest(dt);
-					break;
+				
                 case "invokeProjectileCall":
                     HandleInvokeProjectileCall(dt);
                     break;
@@ -435,9 +440,6 @@ public class NetworkController : MonoBehaviour {
                 case "updateSimpleDestroyableObject":
                     HandleUpdateSimpleDestroyableObject(dt);
                     break;
-				case "swarmUpdate":
-					HandleSwarmUpdate(dt);
-					break;
 				case "remoteDamageOnPawn":
 					HandleRemoteDamageOnPawn(dt);
                     break;
@@ -450,6 +452,16 @@ public class NetworkController : MonoBehaviour {
                 case "customAnimStart":
                     HandleCustomAnimStar(dt);
                     break;
+                case "AISwarmUpdate":
+                    HandleAISwarmUpdate(dt);
+                    break;
+                case "AINextWave":
+                    HandleAINextWave(dt);
+                    break;
+                case "AISpawnBot":
+                    HandleAISpawnBot(dt);
+                    break;
+
 
             }
         }
@@ -623,7 +635,19 @@ public class NetworkController : MonoBehaviour {
         view.SetId(uid);
         
     }
-	
+
+
+     public void SendMapData()
+     {
+         ISFSObject data = new SFSObject();
+         AIDirector.instance.SendData(data);
+         ExtensionRequest request = new ExtensionRequest("mapData", data, serverHolder.gameRoom);
+         smartFox.Send(request);
+     }
+     public void ReadMapData(ISFSObject data)
+     {
+         AIDirector.instance.ReadData(data);
+     }
 
     //REQUEST SECTION
 
@@ -685,7 +709,29 @@ public class NetworkController : MonoBehaviour {
 
 
     }
-	
+    /// <summary>
+    /// pawnSpawn request to server
+    /// </summary>	
+    public GameObject PawnForSwarmSpawnRequest(string prefab, Vector3 vector3, Quaternion quaternion, int[] stims,int swarm,int home)
+    {
+        ISFSObject data = new SFSObject();
+
+        data.PutBool("Scene", true);
+        data.PutBool("isAI", true);
+        data.PutIntArray("stims", stims);
+        GameObject go = InstantiateNetPrefab(prefab, vector3, quaternion, data, true);
+        PawnModel pawn = go.GetComponent<Pawn>().GetSerilizedData();
+        pawn.type = prefab;
+        data.PutClass("pawn", pawn);
+        data.PutInt("group", swarm);
+        data.PutInt("home", home);
+        Debug.Log(serverHolder.gameRoom);
+        ExtensionRequest request = new ExtensionRequest("pawnSpawn", data, serverHolder.gameRoom);
+        smartFox.Send(request);
+        return go;
+
+
+    }
     /// <summary>
     /// pawnChangeShootAnimState request to server
     /// </summary>	
@@ -848,22 +894,8 @@ public class NetworkController : MonoBehaviour {
 
 
     }		
-	/// <summary>
-    /// pawnSetAI request to server
-    /// </summary>	
-
-    public void SetAIRequest(int id,int group, int home)
-    {
-		ISFSObject data = new SFSObject();
-     
-     	data.PutInt("id", id);
-		data.PutInt("group", group);
-		data.PutInt("home", home);
-        ExtensionRequest request = new ExtensionRequest("pawnSetAI", data, serverHolder.gameRoom);
-        smartFox.Send(request);
-
-
-    }
+	
+   
     /// <summary>
     /// invokeProjectileCall request to server
     /// </summary>	
@@ -878,9 +910,15 @@ public class NetworkController : MonoBehaviour {
     /// simplePrefabSpawn request to server
     /// </summary>	
 
-    public GameObject  SimplePrefabSpawn(string prefab, Vector3 vector3, Quaternion quaternion)
+    /*
+     * type is descriptor for logic on server 0 mean no logic
+     * 
+     * */
+
+    public enum PREFABTYPE { SIMPLE, EGG };
+    public GameObject SimplePrefabSpawn(string prefab, Vector3 vector3, Quaternion quaternion,ISFSObject data, PREFABTYPE type = PREFABTYPE.SIMPLE )
     {
-        ISFSObject data = new SFSObject();
+      
         GameObject go = InstantiateNetPrefab(prefab, vector3, quaternion, data, true);
         SimpleNetModel model = new SimpleNetModel();
         model.id = go.GetComponent<FoxView>().viewID;
@@ -888,9 +926,27 @@ public class NetworkController : MonoBehaviour {
         model.position.WriteVector(vector3);
         model.rotation.WriteQuat(quaternion);
         data.PutClass("model", model);
+        data.PutInt("preftype", (int)type);
         ExtensionRequest request = new ExtensionRequest("simplePrefabSpawn", data, serverHolder.gameRoom);
         smartFox.Send(request);
         return go;
+
+    }
+
+    public GameObject SimplePrefabSpawn(string prefab, Vector3 vector3, Quaternion quaternion, PREFABTYPE type = PREFABTYPE.SIMPLE )
+    {
+        ISFSObject data = new SFSObject();
+        return SimplePrefabSpawn(prefab, vector3, quaternion, data,type);
+
+    }
+
+
+    public GameObject QuuenEggSpawn(string prefab, Vector3 vector3, Quaternion quaternion, int spawnId,long delay)
+    {
+        ISFSObject data = new SFSObject();
+        data.PutInt("spawnid",spawnId);
+        data.PutLong("delay", delay);
+        return SimplePrefabSpawn(prefab, vector3, quaternion, data, PREFABTYPE.EGG);
 
     }	
       /// <summary>
@@ -1078,19 +1134,7 @@ public class NetworkController : MonoBehaviour {
         smartFox.Send(request);
     
     }
-	/// <summary>
-    /// swarmUpdate request to server
-    /// </summary>	
-
-    public void SwarmUpdateRequest(List<int> ids)
-    {
-        ISFSObject data = new SFSObject();
-
-        data.PutIntArray("ids", ids.ToArray());
-        ExtensionRequest request = new ExtensionRequest("swarmUpdate", data, serverHolder.gameRoom);
-        smartFox.Send(request);
-    
-    }
+	
 	/// <summary>
     /// remoteDamageOnPawn request to server
     /// </summary>	
@@ -1179,11 +1223,18 @@ public class NetworkController : MonoBehaviour {
 		if(dt.ContainsKey("ownerId")){
 		    Player player  = GetPlayer(dt.GetInt("ownerId"));
 		  
-			if(dt.GetBool("isAI")){
+			if(dt.ContainsKey("isAI")&&dt.GetBool("isAI")){
 				player.AISpawnSetting(pawn,dt.GetIntArray("stims"));	
 			}else{
 				player.AfterSpawnSetting(pawn,dt.GetIntArray("stims"));	
 			}
+        }
+        else
+        {
+            if (dt.ContainsKey("isAI") && dt.GetBool("isAI"))
+            {
+                pawn.RemoteSetAI(dt.GetInt("group"), dt.GetInt("home"));
+            }
         }
 		pawn.NetUpdate(sirPawn);
 		 
@@ -1295,7 +1346,7 @@ public class NetworkController : MonoBehaviour {
 		BaseWeapon weapon = go.GetComponent<BaseWeapon>();
 		weapon.NetUpdate(sirWeapon);
 		Pawn pawn  =  GetView(dt.GetInt("pawnId")).pawn;
-        Debug.Log("PAwn" + pawn + " View" + GetView(dt.GetInt("pawnId")) + "ID" + dt.GetInt("pawnId"));
+      //  Debug.Log("PAwn" + pawn + " View" + GetView(dt.GetInt("pawnId")) + "ID" + dt.GetInt("pawnId"));
 		weapon.RemoteAttachWeapon(pawn);
 	
 		
@@ -1360,16 +1411,7 @@ public class NetworkController : MonoBehaviour {
 		pawn.RemoteDetonate();
 		 
 	}
-	/// <summary>
-    /// handle pawnSetAI  from Server
-    /// </summary>	
 	
-	public void HandleSetAIRequest(ISFSObject dt)
-    {
-	
-		 GetView(dt.GetInt("id")).pawn.RemoteSetAI(dt.GetInt("group"),dt.GetInt("home"));
-		 
-	}
     /// <summary>
     /// handle invokeProjectileCall  from Server
     /// </summary>	
@@ -1526,15 +1568,7 @@ public class NetworkController : MonoBehaviour {
         target.UpdateFromModel(model);
 
     }
-	/// <summary>
-    ///handle  swarmUpdate request to server
-    /// </summary>	
-
-    public void HandleSwarmUpdate(ISFSObject dt)
-    {
-        AIDirector.instance.UpdateSwarm(dt.GetIntArray("ids"));
-    
-    }
+	
 	/// <summary>
     ///handle  remoteDamageOnPawn request to server
     /// </summary>	
@@ -1589,6 +1623,7 @@ public class NetworkController : MonoBehaviour {
 		}else{
 			PlayerMainGui.instance.Annonce(AnnonceType.RESTAKEJUGGER);
 		}
+        
 		
     }
 
@@ -1603,6 +1638,48 @@ public class NetworkController : MonoBehaviour {
         GetView(dt.GetInt("pawnId")).pawn.PlayCustomAnimRemote(dt.GetUtfString("anim"));
        
     
+
+    }
+
+    /// <summary>
+    /// handle AISwarmUpdate  request to server
+    /// </summary>	
+
+
+    public void HandleAISwarmUpdate(ISFSObject dt)
+    {
+        ISFSObject data = new SFSObject();
+        AIDirector.instance.RemoteStateChange(dt.GetInt("swarmId"),dt.GetBool("isActive"));
+       
+    
+
+    }
+      /// <summary>
+    /// handle AINextWave  request to server
+    /// </summary>	
+
+
+    public void HandleAINextWave(ISFSObject dt)
+    {
+        ISFSObject data = new SFSObject();
+       AISwarm_QuantizeWave swarm = AIDirector.instance.swarms[dt.GetInt("swarmId")] as AISwarm_QuantizeWave;
+       if (swarm != null)
+       {
+           swarm.NextSwarmWave();
+       }
+    
+
+    }
+     /// <summary>
+    /// handle AINextWave  request to server
+    /// </summary>	
+
+
+    public void HandleAISpawnBot(ISFSObject dt)
+    {
+        ISFSObject data = new SFSObject();
+        AIDirector.instance.swarms[dt.GetInt("swarmId")].SpawnBot(dt.GetUtfString("prefabName"), dt.GetInt("id"), ((Vector3Model)dt.GetClass("position")).GetVector());
+      
 
     }
 

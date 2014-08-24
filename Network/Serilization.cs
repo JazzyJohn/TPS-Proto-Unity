@@ -49,7 +49,9 @@ namespace nstuff.juggerfall.extension.models
         public bool active;
 		
 	    public bool isDead;
-		
+
+        public bool isAiming;
+
 		public float health;
 		
 		public Vector3Model position  = new Vector3Model();
