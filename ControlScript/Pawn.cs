@@ -1734,7 +1734,7 @@ public class Pawn : DamagebleObject {
 
                 if (state == CharacterState.Jumping || state == CharacterState.DoubleJump)
 				{
-					_rb.velocity = myTransform.up*movement.y  +leftH.normal*movement.y;
+					_rb.velocity = myTransform.up*movement.y  +WallJumpDirection(leftH.normal)*movement.y;
 					StartCoroutine( WallJump(1f)); // Exclude if not needed
 				}
 			}
@@ -1756,7 +1756,7 @@ public class Pawn : DamagebleObject {
 
                 if (state == CharacterState.Jumping || state == CharacterState.DoubleJump)
 				{
-					_rb.velocity = myTransform.up*movement.y  +rightH.normal*movement.y;
+					_rb.velocity = myTransform.up*movement.y  +WallJumpDirection(rightH.normal)*movement.y;
 					StartCoroutine( WallJump(1f)); // Exclude if not needed
 				}
 			}
@@ -1830,6 +1830,19 @@ public class Pawn : DamagebleObject {
 		yield return new WaitForSeconds (sec);
 		_canWallRun = true;
 	}
+	public Vector3 WallJumpDirection(Vector3 wallNormal){
+		Vector3 direction = aimRotation - myTransform.position;
+		if(Vector3.Dot(wallNormal, direction)<0){
+			return wallNormal;
+		}else{
+			if(direction.y<0){
+				direction.y = 0;
+			}
+			return direction.normalized;
+		}
+	}
+	
+	
 	//TODO ADD STEP CHECK WITH RAYS
 	void OnCollisionStay(Collision collisionInfo) {
 		if (lastJumpTime + 0.1f > Time.time) {

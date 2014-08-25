@@ -17,6 +17,8 @@ public class GlobalGameSetting : MonoBehaviour{
 	
 	public const string COOL_DOWN ="coolDown";
 	
+	public const string ABOVE_MELEE_MODIFICATOR ="aboveMelleMod";
+	
 	void Awake(){
 		TextAsset xml = Resources.Load("GameSetting") as TextAsset;
 		XmlDocument xmlDoc = new XmlDocument();
@@ -71,6 +73,10 @@ public class GlobalGameSetting : MonoBehaviour{
 			return (int)AISettings[name][type];		
 		}
 		return defValue;
+	}
+	
+	public float GetAiSettings(string name,float defValue){
+		return GetAiSettings(name,0,defValue);
 	}
 	private static GlobalGameSetting s_Instance = null;
 	

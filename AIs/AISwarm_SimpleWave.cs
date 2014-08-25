@@ -19,4 +19,17 @@ public class AISwarm_SimpleWave : AISwarm
             guiComponent.SetTitle((needToKill - _alredyDead) + "/" + needToKill);
         }
 	}
+	
+	 public override void SendData(ISFSObject swarmSend)
+    {
+        base.SendData(swarmSend);
+        swarmSend.PutInt("maxSpawnCount", maxSpawnCount);
+        swarmSend.PutInt("needToKill", needToKill);
+       
+    }
+    public override void ReadData(ISFSObject iSFSObject)
+    {
+        _alreadyDead = iSFSObject.GetInt("alreadyDead");
+        
+    }
 }

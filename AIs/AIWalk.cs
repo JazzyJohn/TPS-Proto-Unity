@@ -36,6 +36,8 @@ public class AIWalk : AIMovementState
 	private float _timeLastDecide = 20.0f;
 	
 	public static float TacticDelay = 20.0f;
+	//Lower melee chance if target above pawn;	
+	public static float aboveMeleeMod =-0.5f;
 	
 	public AISkillManager skillmanager;
 	
@@ -45,11 +47,18 @@ public class AIWalk : AIMovementState
 	
 	public int enemyCount=0;
 	
+	public bool enemyAbove=false;
+	
+	protected float _lastJumpTime = 0.0f;
+	
+	public float jumpDelay = 10.0f;
+	
 	public void Awake(){
         base.Awake();
         AISkillManager skillmanager  = GetComponent<AISkillManager>();
 		maxAttackers =GlobalGameSetting.instance. GetAiSettings(GlobalGameSetting.MAX_ATTACKERS,(int)density,maxAttackers);
         coolDown = GlobalGameSetting.instance.GetAiSettings(GlobalGameSetting.COOL_DOWN, (int)speed, coolDown);
+		aboveMeleeMod=GlobalGameSetting.instance. GetAiSettings(GlobalGameSetting.MAX_ATTACKERS,aboveMeleeMod);
 	}
 	
 	
@@ -99,10 +108,14 @@ public class AIWalk : AIMovementState
         state = nextstate;
 	
 	}   
-	protected void DecideTacktick(){
+	protected void DecideTacktick(float addToMelee=0.0f){
 		if(_timeLastDecide+TacticDelay<Time.time){
 			return;
 		}
+		DecideTacktick(addToMelee);
+	}
+	protected void DecideTacktickTimeLess(float addToMelee=0.0f){
+		
 		_timeLastDecide =Time.time;
 		
 		if(controlledPawn.naturalWeapon!=null){
@@ -114,7 +127,7 @@ public class AIWalk : AIMovementState
 			}
 			
 			float melee =Random.value;
-			if(melee<meleeChance){
+			if(melee<(meleeChance+addToMelee)){
 				if(!isMelee){
                     StopAttack();
 					
@@ -156,8 +169,14 @@ public class AIWalk : AIMovementState
 					isMoving = true;
                    
 					UpdateState();
-					if(isMelee){
+					newEnemyAbove = (_enemy.myTransform.y - controlledPawn.mytransform.y)>controlledPawn.jumpHeight;
+					if(enemyAbove!=newEnemyAbove){
+						enemyAbove=newEnemyAbove;
+						DecideTacktickTimeLess(aboveMeleeMod);
+					}
 					
+					if(isMelee){
+						
 						switch(state){
 							case BattleState.Inclosing:
 							//move Close to enemy
@@ -403,21 +422,22 @@ public class AIWalk : AIMovementState
 	protected void FixedUpdate(){
 		base.FixedUpdate();
 		if (_enemy != null&&isMoving) {
-            bool needJump = agent.needJump;
+           
 			agent.WalkUpdate ();
 			//Debug.Log(agent.GetTranslate());
-            needJump = !needJump && agent.needJump;
+           
 			Vector3 translateVect =  GetSteeringForce();
-			
+			needJump = CheckJump(translateVect  );
 			if(translateVect.sqrMagnitude<0.1f){
 				controlledPawn.Movement (Vector3.zero,CharacterState.Idle);
 
 			}else{
-                if (!needJump)
+                if (needJump||JumpToEnemy())
                 {
-					controlledPawn.Movement (translateVect,CharacterState.Running);
-				} else {
 					controlledPawn.Movement (translateVect +controlledPawn.JumpVector(), CharacterState.Jumping);
+					
+				} else {
+					controlledPawn.Movement (translateVect,CharacterState.Running);
 				}
 			}
 
@@ -428,7 +448,22 @@ public class AIWalk : AIMovementState
 		}
 		
 	}
-
+		
+	public bool JumpToEnemy(){
+		if(enemyAbove){
+			//If (Melee in Attack)  
+			 
+			if(isMelee&&(state==BattleState.Attacking||state==BattleState.WaitForAttack)){
+				if(_lastJumpTime + jumpDelay<Time.time){
+					return true;
+				}else{
+					return false;
+				}
+			}
+		}else{
+			return false;
+		}
+	}
 	public override void SetEnemy(Pawn enemy){
 		if (_enemy != enemy) {
 				controlledPawn.PlayTaunt ();
