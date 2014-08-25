@@ -38,6 +38,8 @@ public class AIWalk : AIMovementState
 	public static float TacticDelay = 20.0f;
 	//Lower melee chance if target above pawn;	
 	public static float aboveMeleeMod =-0.5f;
+	//Height after which pawn try to jump to enemy
+	public float aboveHeight=1.0f;
 	
 	public AISkillManager skillmanager;
 	
@@ -169,7 +171,7 @@ public class AIWalk : AIMovementState
 					isMoving = true;
                    
 					UpdateState();
-					newEnemyAbove = (_enemy.myTransform.y - controlledPawn.mytransform.y)>controlledPawn.jumpHeight;
+					newEnemyAbove = (_enemy.myTransform.y - controlledPawn.mytransform.y)>aboveHeight;
 					if(enemyAbove!=newEnemyAbove){
 						enemyAbove=newEnemyAbove;
 						DecideTacktickTimeLess(aboveMeleeMod);
@@ -423,7 +425,7 @@ public class AIWalk : AIMovementState
 		base.FixedUpdate();
 		if (_enemy != null&&isMoving) {
            
-			agent.WalkUpdate ();
+			//agent.WalkUpdate ();
 			//Debug.Log(agent.GetTranslate());
            
 			Vector3 translateVect =  GetSteeringForce();
@@ -455,6 +457,7 @@ public class AIWalk : AIMovementState
 			 
 			if(isMelee&&(state==BattleState.Attacking||state==BattleState.WaitForAttack)){
 				if(_lastJumpTime + jumpDelay<Time.time){
+					_lastJumpTime = Time.time;
 					return true;
 				}else{
 					return false;

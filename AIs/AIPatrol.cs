@@ -59,7 +59,7 @@ public class AIPatrol : AIMovementState
             return;
         }
         
-			agent.WalkUpdate ();
+			//agent.WalkUpdate ();
            // Debug.Log("Jump" + needJump + agent.needJump);
           
             Vector3 translateVect = GetSteeringForce();

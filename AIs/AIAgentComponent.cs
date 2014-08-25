@@ -94,6 +94,9 @@ public class AIAgentComponent : MonoBehaviour {
 	public Quaternion GetRotation(){
 		return resultRotation;
 	}
+	public Vector3 GetFinishPoint(){
+		return target;
+	}
 	public Vector3 GetTarget(){
 		switch(type){
 			case PathType.PATHFINDINGENGINE:

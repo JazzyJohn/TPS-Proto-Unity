@@ -110,11 +110,23 @@ public class AIMovementState : AIState
         Debug.DrawRay(controlledPawn.myTransform.position, StrafeOneTarget() * _strafeCoef, Color.green);
         Debug.DrawRay(controlledPawn.myTransform.position, agent.GetTranslate()  * _pathCoef, Color.red);
 	    Debug.DrawRay(controlledPawn.myTransform.position, CollisionAvoidness()  * _collAvoidCoef, Color.yellow);
-		Vector3 result = (agent.GetTranslate()*_pathCoef + DynamicAwoidness()*_separationCoef+AvoidOneTarget()*_avoidCoef +StrafeOneTarget()*_strafeCoef+CollisionAvoidness()*_collAvoidCoef).normalized;
+		Vector3 result = (PathFollow()*_pathCoef + DynamicAwoidness()*_separationCoef+AvoidOneTarget()*_avoidCoef +StrafeOneTarget()*_strafeCoef+CollisionAvoidness()*_collAvoidCoef).normalized;
 		Debug.DrawRay(controlledPawn.myTransform.position,result, Color.white);
 		return result*stateSpeed;
 		
 	}
+	public Vector3 PathFollow(){
+		if(_pathCoef==0){
+			return Vector3.zero;
+		}
+		agent.WalkUpdate();
+		Vector3 result = agent.GetTranslate();
+		if(result.sqrMagnitude==0){
+			result= (agent.GetFinishPoint()-controlledPawn.myTransform.position).normalized;
+		}
+		return result;
+	}
+	
 	public Vector3 AvoidOneTarget(){
 		if(avoid==null){
 			return Vector3.zero;
