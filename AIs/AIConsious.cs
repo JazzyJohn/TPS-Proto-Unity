@@ -2,8 +2,9 @@ using UnityEngine;
 using System.Collections;
 
 public class AIConscious : MonoBehaviour {
-	
-	AIAction aiAction;
+
+	[HideInInspector]
+	public AIAction aiAction;
 
 	void Update()
 	{

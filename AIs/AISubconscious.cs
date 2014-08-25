@@ -1,6 +1,7 @@
 ﻿using UnityEngine;
 using System.Collections.Generic;
-using System.Threading;
+
+public enum eSensorParams { Cheerfulness, Courage, Attentiveness, CommandActions, SeeTargetsPrioritet, SeeTargets, WorldTime }
 
 public class AISubconscious : MonoBehaviour {
 	public AISensors sensor;
@@ -10,6 +11,7 @@ public class AISubconscious : MonoBehaviour {
 	void Start()
 	{
 		sensor.owner = GetComponent<AIBase> ();
+		sensor._Pawn = GetComponent<Pawn> ();
 		sensor.Scan ();
 		NextAction ();
 	}
@@ -37,7 +39,7 @@ public class AISubconscious : MonoBehaviour {
 				NextActionID = i;
 			}
 		}
-		if (consious.aiAction.GetPrioritet() < PrioritetMax) consious.aiAction = FullActions[NextActionID];k
+		if (consious.aiAction.GetPrioritet() < PrioritetMax) consious.aiAction = FullActions[NextActionID];
 	}
 
 	AIAction[] GetFullActions()
@@ -49,12 +51,7 @@ public class AISubconscious : MonoBehaviour {
 			return CommandActions;
 		}
 	}
-
-	void Processing ()
-	{
-
-	}
-
+	
 }
 
 public enum Sensor { skin, eye, time, command, characteristic }
@@ -76,9 +73,11 @@ public class AISensors {
 	public bool CharacteristicSensorEnable = true;
 	public CharacteristicSensor sCharacteristic;
 
-	public Dictionary<string, object> SensorParametrs = new Dictionary<string, object>();
+	public Dictionary<int, object> SensorParametrs = new Dictionary<int, object>();
 	
 	public AIBase owner;
+
+	public Pawn _Pawn;
 
 	public void Scan ()
 	{
@@ -117,51 +116,57 @@ public class AISensors {
 
 	void EyeSensorHandler()
 	{
-//		GameObject[] PlayerInRadius = owner.GetPlayerInRadius ();
-//		float[] TargetsPrioritet = new float[PlayerInRadius.Length];
-//		Vector3 Pos = owner.transform.position;
-//		for (int i = 0; i < TargetsPrioritet.Length; i++) {
-//			float Distance = Vector3.Distance(Targets[i].position, Pos);
-//			TargetsPrioritet[i] += sEye.SeeConstantPrioritet * Distance / sEye.SeeRange;
-//		}
-//		UpdateDictionaryParametrs ("SeeTargetsPrioritet", TargetsPrioritet);
-//		UpdateDictionaryParametrs ("SeeTargets", Targets);
+		Pawn[] Targets = _Pawn.getAllSeenPawn ().ToArray ();
+		UpdateDictionaryParametrs ((int)eSensorParams.SeeTargets, Targets);
 	}
 
 	[System.Serializable]
 	public class TimeSensor {
-		public void GetTime ()
+		public TimeModule _Time;
+		public WorldTime GetTime ()
 		{
-			
+			return _Time.GetTime ();
 		}
 	}
 
 	void TimeSensorHandler()
 	{
-		
+		UpdateDictionaryParametrs ((int)eSensorParams.WorldTime, sTime.GetTime());
 	}
 
 	[System.Serializable]
 	public class CommandSensor {
-		public bool Command;
-		public AIAction NewAIAction;
-		public void GetCommand (AIAction NewAIAction)
+		bool Command;
+		List<AIAction> NewAIAction = new List<AIAction>();
+
+		public void NewCommand (AIAction NewAIAction)
 		{
-			this.NewAIAction = NewAIAction;
+			if (!Command) this.NewAIAction.Clear ();
+			if (!this.NewAIAction.Contains(NewAIAction)) this.NewAIAction.Add (NewAIAction);
 			Command = true;
+		}
+
+		public List<AIAction> GetCommand ()
+		{
+			return NewAIAction;
+		}
+
+		public bool IsReady 
+		{
+			set {
+				Command = value;
+			}
+			get {
+				return Command;
+			}
 		}
 	}
 
 	void CommandSensorHandler()
 	{
-		if (sCommand.Command) {
-			if (SensorParametrs.ContainsKey ("CommandActions")) {
-				List<AIAction> CommandActions = (List<AIAction>) SensorParametrs ["CommandActions"];
-				CommandActions.Add (sCommand.NewAIAction);
-				SensorParametrs ["CommandActions"] = CommandActions;
-			} else {
-				UpdateDictionaryParametrs ("CommandActions", new List<AIAction> { sCommand.NewAIAction });
-			}
+		if (sCommand.IsReady) {
+			UpdateDictionaryParametrs ((int)eSensorParams.CommandActions, sCommand.GetCommand);
+			sCommand = false;
 		}
 	}
 
@@ -173,16 +178,16 @@ public class AISensors {
 
 		public void UpdateCharacteristic(float time)
 		{
-			Cheerfulness -= time * 0.5f;
+			if (Cheerfulness > 0) Cheerfulness -= time * 0.5f;
 		}
 	}
 	
 	void CharacteristicSensorHandler()
 	{
 		sCharacteristic.UpdateCharacteristic (Time.deltaTime);
-		UpdateDictionaryParametrs ("Cheerfulness", sCharacteristic.Cheerfulness);
-		UpdateDictionaryParametrs ("Courage", sCharacteristic.Courage);
-		UpdateDictionaryParametrs ("Attentiveness", sCharacteristic.Attentiveness);
+		UpdateDictionaryParametrs ((int)eSensorParams.Cheerfulness, sCharacteristic.Cheerfulness);
+		UpdateDictionaryParametrs ((int)eSensorParams.Courage, sCharacteristic.Courage);
+		UpdateDictionaryParametrs ((int)eSensorParams.Attentiveness, sCharacteristic.Attentiveness);
 	}
 
 	void UpdateDictionaryParametrs(string Key, object newObject)
