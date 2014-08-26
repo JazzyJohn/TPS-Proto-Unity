@@ -510,7 +510,7 @@ public class BaseProjectile : MonoBehaviour
            // Debug.Log( hitColliders[i]);
             if (!Physics.Raycast(Position, (hitColliders[i].transform.position - Position).normalized,out hitInfo,  distance, explosionLayerBlock))
            {
-               Debug.Log(hitInfo.collider + "==" + hitColliders[i]);
+               //Debug.Log(hitInfo.collider + "==" + hitColliders[i]);
                
            
                 DamagebleObject obj = hitColliders[i].GetComponent<DamagebleObject>();

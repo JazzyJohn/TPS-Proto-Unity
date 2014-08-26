@@ -1,5 +1,6 @@
 ﻿using UnityEngine;
 using System.Collections;
+using Sfs2X.Entities.Data;
 
 public class AISwarm_SimpleWave : AISwarm
 {
@@ -9,14 +10,14 @@ public class AISwarm_SimpleWave : AISwarm
 
     private int _alreadySpawn;
 
-    private int _alredyDead;
+    private int _alreadyDead;
 
    
 	public override  void DrawCheck(){
 		base. DrawCheck();
         if (guiComponent != null)
         {
-            guiComponent.SetTitle((needToKill - _alredyDead) + "/" + needToKill);
+            guiComponent.SetTitle((needToKill - _alreadyDead) + "/" + needToKill);
         }
 	}
 	

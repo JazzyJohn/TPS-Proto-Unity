@@ -312,7 +312,7 @@ public class AIState : MonoBehaviour {
 	
 	protected virtual void Attack(){
 		if(controlledPawn.CurWeapon!=null&&!isMelee){
-            Debug.Log("shoot");
+          //  Debug.Log("shoot");
 			controlledPawn.StartFire();
 			return;
 		}
@@ -320,7 +320,7 @@ public class AIState : MonoBehaviour {
 	}
 	protected virtual void StopAttack(){
 		if(controlledPawn.CurWeapon!=null&&!isMelee){
-            Debug.Log("stop shoot");
+            //Debug.Log("stop shoot");
 			controlledPawn.StopFire();
 		}
 		controlledPawn.StopKick();

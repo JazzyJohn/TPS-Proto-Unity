@@ -114,7 +114,7 @@ public class AIWalk : AIMovementState
 		if(_timeLastDecide+TacticDelay<Time.time){
 			return;
 		}
-		DecideTacktick(addToMelee);
+        DecideTacktickTimeLess(addToMelee);
 	}
 	protected void DecideTacktickTimeLess(float addToMelee=0.0f){
 		
@@ -145,7 +145,7 @@ public class AIWalk : AIMovementState
                
 				isMelee= false;
 			}
-            Debug.Log("I decide melee" + isMelee);
+            //Debug.Log("I decide melee" + isMelee);
 			return;
 		
 		
@@ -171,7 +171,7 @@ public class AIWalk : AIMovementState
 					isMoving = true;
                    
 					UpdateState();
-					newEnemyAbove = (_enemy.myTransform.y - controlledPawn.mytransform.y)>aboveHeight;
+                    bool newEnemyAbove = (_enemy.myTransform.position.y - controlledPawn.myTransform.position.y) > aboveHeight;
 					if(enemyAbove!=newEnemyAbove){
 						enemyAbove=newEnemyAbove;
 						DecideTacktickTimeLess(aboveMeleeMod);
@@ -214,7 +214,7 @@ public class AIWalk : AIMovementState
 							case BattleState.WaitForAttack:
 									//if we after last attack move away
 									AskForPermisssion();
-									Debug.Log("My permission " + hasPermission);
+									//Debug.Log("My permission " + hasPermission);
 									//if we got permission  start attack
 									if(hasPermission){
 										Attack();	
@@ -462,7 +462,11 @@ public class AIWalk : AIMovementState
 				}else{
 					return false;
 				}
-			}
+            }
+            else
+            {
+                return false;
+            }
 		}else{
 			return false;
 		}

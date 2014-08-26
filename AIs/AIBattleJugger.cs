@@ -111,8 +111,7 @@ public class AIBattleJugger : AIMovementState
     public override void StartState()
     {
         agent = GetComponent<AIAgentComponent>();
-        //Debug.Log (agent);
-        Debug.Log("start state");
+         
 		stateSpeed =controlledPawn.groundWalkSpeed;
         agent.SetTarget(curPoint.GiveTarget().position);
         agent.SetSpeed(controlledPawn.groundWalkSpeed);
@@ -208,7 +207,7 @@ public class AIBattleJugger : AIMovementState
     {
 	   float weaponDistance =controlledPawn.OptimalDistance(isMelee);
 
-       Debug.Log(AIAgentComponent.FlatDifference(Target.position, controlledPawn.myTransform.position).sqrMagnitude - controlledPawn.GetSize() * controlledPawn.GetSize());
+    
        return AIAgentComponent.FlatDifference(Target.position, controlledPawn.myTransform.position).sqrMagnitude - controlledPawn.GetSize() * controlledPawn.GetSize() < weaponDistance * weaponDistance;
 	}
 
