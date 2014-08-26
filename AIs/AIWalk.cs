@@ -429,7 +429,7 @@ public class AIWalk : AIMovementState
 			//Debug.Log(agent.GetTranslate());
            
 			Vector3 translateVect =  GetSteeringForce();
-			needJump = CheckJump(translateVect  );
+			
 			if(translateVect.sqrMagnitude<0.1f){
 				controlledPawn.Movement (Vector3.zero,CharacterState.Idle);
 
@@ -465,10 +465,16 @@ public class AIWalk : AIMovementState
             }
             else
             {
-                return false;
+				needJump = CheckJump(translateVect  );
+                return needJump;
             }
 		}else{
-			return false;
+			if(isMelee&&(state==BattleState.Attacking||state==BattleState.WaitForAttack)){
+				return true;
+			}else{
+				needJump = CheckJump(translateVect  );
+                return needJump;
+			}
 		}
 	}
 	public override void SetEnemy(Pawn enemy){
