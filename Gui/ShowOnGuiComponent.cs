@@ -27,6 +27,7 @@ public class ShowOnGuiComponent : MonoBehaviour {
 	}
 	void OnDestroy(){
 		allShowOnGui.Remove(this);
+		PlayerMainGui.instance.RemoveMessage(hudentry);
 	}
 	
 	public void SetTitle(string text){
@@ -46,5 +47,6 @@ public class ShowOnGuiComponent : MonoBehaviour {
 	public void Hide(){
 		isShow = false;
 	}
+	
 
 }

@@ -195,20 +195,19 @@ public class HUDText : MonoBehaviour
 	public void Delete (Entry ent)
 	{
 		mList.Remove(ent);
-		mUnused.Add(ent);
+	
 		switch(ent.Type)
 		{
 		case TypeMessage.Texts:
+			mUnused.Add(ent);
 			NGUITools.SetActive(ent.label.gameObject, false);
 			break;
 		case TypeMessage.Sprites:
+			mUnused.Add(ent);
 			NGUITools.SetActive(ent.Sprite.gameObject, false);
 			break;
 		case TypeMessage.Perfab:
-			if (ent.PerfabInfo.OnLabel)
-				NGUITools.SetActive(ent.PerfabInfo.Label.gameObject, false);
-			if (ent.PerfabInfo.OnSprite)
-				NGUITools.SetActive(ent.PerfabInfo.Sprite.gameObject, false);
+			Destroy(ent.Perfab.gameObject);
 			break;
 		}
 	}

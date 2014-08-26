@@ -666,6 +666,9 @@ public class PlayerMainGui : MonoBehaviour {
 		message.type = type;
 		guiMessages.Enqueue(message);
 	}
+	public void RemoveMessage(HUDText.Entry entry){
+		P1Hud.Delete(entry);
+	}
 	public static string GetFormatedTime(float input){
 		int seconds;
 		int minutes;
