@@ -10,6 +10,10 @@ public class BaseDamage{
 	public float pushForce;
     public bool knockOut= false;
 	[HideInInspector] 
+	public bool splash=false;
+	[HideInInspector] 
+	public bool weapon= false;
+	[HideInInspector] 
 	public Vector3 pushDirection;
 	[HideInInspector] 
 	public Vector3 hitPosition;
@@ -17,6 +21,8 @@ public class BaseDamage{
 	public bool sendMessage= true;
 	[HideInInspector] 
 	public bool isContinius =false;
+	
+	
     public BaseDamage()
     {
     }
@@ -25,6 +31,8 @@ public class BaseDamage{
 		isVsArmor = old.isVsArmor;
 		pushForce = old.pushForce;
         knockOut = old.knockOut;
+		splash = old.splash;
+		weapon= old.weapon
 	}
 
 }
@@ -142,8 +150,8 @@ public class BaseProjectile : MonoBehaviour
 		}
         ProjectileManager.instance.AddProject(projId, this);
  
-      
-       
+        damage.splash = splashRadius>0;
+		
         startPosition = mTransform.position;
 
         mRigidBody.velocity = mTransform.TransformDirection(Vector3.forward * startImpulse);

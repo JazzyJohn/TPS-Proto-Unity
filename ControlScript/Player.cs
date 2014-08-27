@@ -185,6 +185,10 @@ public class Player : MonoBehaviour {
        
 
 	}
+	public int[] GetBuffs(){
+		
+		return activeSteampacks.Concat(PassiveSkillManager.instance.GetSkill(selected)).ToArray();
+	}
 	void Update(){
         if (!playerView.isMine)
         {
@@ -200,11 +204,11 @@ public class Player : MonoBehaviour {
 //			Debug.Log ("Dead");
 			if(respawnTimer<=0&&isStarted){
 				respawnTimer=respawnTime;
-				currentPawn =PlayerManager.instance.SpawmPlayer(PlayerManager.instance.pawnName[selected],team,activeSteampacks.ToArray());
+				currentPawn =PlayerManager.instance.SpawmPlayer(PlayerManager.instance.pawnName[selected],team,GetBuffs());
 				currentPawn.ChangeDefaultWeapon(Choice._Player);
 				ItemManager.instance.SaveItemForSlot();
 				//PVPGameRule.instance.Spawn(team);
-				AfterSpawnSetting(currentPawn,activeSteampacks.ToArray());
+				AfterSpawnSetting(currentPawn,GetBuffs());
 				prefabBot =PlayerManager.instance.avaibleBots[selectedBot];
 				prefabGhostBot =PlayerManager.instance.ghostsBots[selectedBot];
 

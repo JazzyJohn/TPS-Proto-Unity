@@ -10,6 +10,9 @@ public class BaseWeapon : DestroyableNetworkObject {
 	
 	private static LayerMask layer = -123909;
 	
+	public enum DESCRIPTIONTYPE{NONE,MACHINE_GUN,ROCKET_LAUNCHER};
+	
+	public DESCRIPTIONTYPE descriptionType;
 	
 	public enum AMUNITONTYPE{SIMPLEHIT, PROJECTILE, RAY, HTHWEAPON, AOE};
 
@@ -163,8 +166,6 @@ public class BaseWeapon : DestroyableNetworkObject {
 	
 	public Texture2D HUDIcon;
 	
-	public float recoilMod;
-
 	public bool init = false;
 
 	public const float MAXDIFFERENCEINANGLE=0.7f;
@@ -229,8 +230,26 @@ public class BaseWeapon : DestroyableNetworkObject {
 		curTransform.localRotation = weaponRotator;
         
 		//RemoteAttachWeapon(inowner);
-		
-		
+		reloadTime =reloadTime*owner.GetPercentValue(RELOAD_SPEED);
+		fireInterval=fireInterval*owner.GetPercentValue(FIRE_RATE);
+	
+		float recoilmod = owner.GetValue(RECOIL_ALL);	
+		switch(descriptionType){
+			
+				
+			
+			case MACHINE_GUN:
+				recoilmod+=owner.GetValue(RECOIL_MACHINEGUN);	
+			break;
+			case ROCKET_LAUNCHER:
+				recoilmod+=owner.GetValue(RECOIL_ROCKET);	
+			break;
+		}
+		recoilmod =((float)recoilmod)/100f+1f;
+		normalRandCoef=normalRandCoef*recoilmod;
+		aimRandCoef = aimRandCoef*recoilmod;
+		damageAmount.Damage = damageAmount.Damage*owner.GetPercentValue(DAMAGE_ALL);
+		damageAmount.weapon= true;
 	}
 
 	public void RemoteAttachWeapon(Pawn newowner){

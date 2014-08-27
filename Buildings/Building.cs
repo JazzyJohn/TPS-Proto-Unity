@@ -14,6 +14,7 @@ public class Building : DamagebleObject {
     {
         health = startHealth;
         onGui = GetComponent<ShowOnGuiComponent>();
+		foxView= GetCompoennt<FoxView>();
     }
 
     public void SetOwner(Player p)

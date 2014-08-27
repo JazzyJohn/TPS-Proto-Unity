@@ -22,6 +22,21 @@ public enum CharacteristicList{
 		
 		PLAYER_JUGGER_TIME,
 		PLAYER_JUGGER_KILL_BONUS
+		
+		//PASSIVESKILL SECTION
+		RELOAD_SPEED,
+		RECOIL_ALL,
+		RECOIL_MACHINEGUN,
+		RECOIL_ROCKET,
+		FIRE_RATE,
+		
+		DAMAGE_ALL,
+		DAMAGE_REDUCE_SPLASH,
+		DAMAGE_REDUCE_GUN,
+		DAMAGE_REDUCE_ALL,
+		
+		
+		
 }
 public class BaseEffect{
 	public int timeEnd=-1;

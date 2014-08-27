@@ -41,6 +41,8 @@ public class StatisticHandler : MonoBehaviour {
 	public static string LOAD_MONEY_REWARD = "loadmoneyreward";
 	
 	public static string SYNC_MONEY_REWARD = "syncmoneyreward";
+	
+	public static string SPEND_SKILL_POINT = "spendskillpoint";
 
     public static string STATISTIC_PHP = "http://juggerfall.com/";
 

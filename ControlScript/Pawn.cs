@@ -441,6 +441,7 @@ public class Pawn : DamagebleObject {
         distToGround = capsule.height / 2 - capsule.center.y;
       
         health = charMan.GetIntChar(CharacteristicList.MAXHEALTH);
+		SpeedInit();
         if (canJump)
         {
             jetPackCharge = charMan.GetFloatChar(CharacteristicList.JETPACKCHARGE);
@@ -463,7 +464,19 @@ public class Pawn : DamagebleObject {
 		charMan.AddList(player.GetCharacteristick());
 	
 	}
-	
+	public void SpeedInit(){
+		wallRunSpeed=wallRunSpeed*GetPercentValue(SPEED);
+		
+		groundSprintSpeed=groundSprintSpeed*GetPercentValue(SPEED);
+
+		groundRunSpeed=groundRunSpeed*GetPercentValue(SPEED);
+
+		flySpeed=flySpeed*GetPercentValue(SPEED);
+
+		groundWalkSpeed=groundWalkSpeed*GetPercentValue(SPEED);
+
+		jumpHeight=groundWalkSpeed*GetPercentValue(JUMPHEIGHT);
+	}
 	public float GetSize ()
 	{
 		if(size==0){
@@ -510,10 +523,21 @@ public class Pawn : DamagebleObject {
 		if (isSpawn||killer==null||!isActive) {//если только респавнились, то повреждений не получаем
 			return;
 		}
+		
+		
+		float allPrecent  =GetValue(DAMAGE_REDUCE_ALL);
+		if(damage.weapon){
+			allPrecent  +=GetValue(DAMAGE_REDUCE_GUN);
+		}
+		if(damage.splash){
+			allPrecent  +=GetValue(DAMAGE_REDUCE_SPLASH);
+		}
+		damage.Damage = ((float)allPrecent)/100f +1f;
 		bool isVs =( damage.isVsArmor && charMan.GetBoolChar (CharacteristicList.ARMOR))||( !damage.isVsArmor && !charMan.GetBoolChar (CharacteristicList.ARMOR));
 		if (!isVs) {
 			damage.Damage*=0.5f;		
 		}
+		
 		//вопли при попадании
 		//выбираются случайно из массива. Звучат не прерываясь при следующем вызове
         if (lastPainSound + 1.0f < Time.time && painSoundsArray.Length>0)
@@ -2536,7 +2560,13 @@ public class Pawn : DamagebleObject {
    		charMan.RemoveEffect(characteristic,value);
    
    }
-  
+	public int GetValue(CharacteristicList characteristic){
+		return charMan.GetIntChar(characteristic);
+	}
+	
+	public float GetPercentValue(){
+		return 1f +((float)charMan.GetIntChar(characteristic))/100f;
+	}
   //END OF BUFF SECTION
   
   
