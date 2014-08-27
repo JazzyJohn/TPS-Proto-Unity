@@ -105,13 +105,13 @@ public class AIMovementState : AIState
 		}
 	}
     public Vector3 GetSteeringForce(){
-        Debug.DrawRay(controlledPawn.myTransform.position, DynamicAwoidness() * _separationCoef, Color.black);
+        /*Debug.DrawRay(controlledPawn.myTransform.position, DynamicAwoidness() * _separationCoef, Color.black);
         Debug.DrawRay(controlledPawn.myTransform.position, AvoidOneTarget() * _avoidCoef, Color.blue);
         Debug.DrawRay(controlledPawn.myTransform.position, StrafeOneTarget() * _strafeCoef, Color.green);
         Debug.DrawRay(controlledPawn.myTransform.position, agent.GetTranslate()  * _pathCoef, Color.red);
-	    Debug.DrawRay(controlledPawn.myTransform.position, CollisionAvoidness()  * _collAvoidCoef, Color.yellow);
+	    Debug.DrawRay(controlledPawn.myTransform.position, CollisionAvoidness()  * _collAvoidCoef, Color.yellow);*/
 		Vector3 result = (PathFollow()*_pathCoef + DynamicAwoidness()*_separationCoef+AvoidOneTarget()*_avoidCoef +StrafeOneTarget()*_strafeCoef+CollisionAvoidness()*_collAvoidCoef).normalized;
-		Debug.DrawRay(controlledPawn.myTransform.position,result, Color.white);
+		//Debug.DrawRay(controlledPawn.myTransform.position,result, Color.white);
 		return result*stateSpeed;
 		
 	}
@@ -195,7 +195,12 @@ public class AIMovementState : AIState
     public bool CheckJump(Vector3 translate)
     {
         translate.y=0;
-      
+       /* RaycastHit hit;
+        bool result = 
+        if (result)
+        {
+            Debug.Log(hit.collider.gameObject);
+        }*/
         return Physics.Raycast(controlledPawn.myTransform.position + Vector3.up * controlledPawn.stepHeight, translate.normalized, controlledPawn.GetSize() , agent.obstacleMask);
     }
 }

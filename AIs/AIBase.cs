@@ -70,8 +70,7 @@ public class AIBase : MonoBehaviour
 		
 	}
 	public void RemoteInit(int group, int homeindex){
-        Debug.Log("Remote Ai");
-	   controlledPawn = GetComponent<Pawn>();
+        controlledPawn = GetComponent<Pawn>();
 		aiGroup= group;
 		this.homeIndex =homeindex;
         this.aiSwarm = AIDirector.instance.swarms[aiGroup];
@@ -92,8 +91,7 @@ public class AIBase : MonoBehaviour
 	
 	}
 	void InitState(){
-		//Debug.Log (_currentState.GetType ().Name);
-        _currentState.controlledPawn = controlledPawn;
+		_currentState.controlledPawn = controlledPawn;
         _currentState.AngleRange = AngleRange;	
 		switch (_currentState.GetType().Name){
 

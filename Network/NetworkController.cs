@@ -915,8 +915,8 @@ public class NetworkController : MonoBehaviour {
      * 
      * */
 
-    public enum PREFABTYPE { SIMPLE, EGG };
-    public GameObject SimplePrefabSpawn(string prefab, Vector3 vector3, Quaternion quaternion,ISFSObject data, PREFABTYPE type = PREFABTYPE.SIMPLE )
+    public enum PREFABTYPE { SIMPLE, EGG,PLAYERBUILDING };
+    public GameObject SimplePrefabSpawn(string prefab, Vector3 vector3, Quaternion quaternion, ISFSObject data, bool isScene, PREFABTYPE type = PREFABTYPE.SIMPLE)
     {
       
         GameObject go = InstantiateNetPrefab(prefab, vector3, quaternion, data, true);
@@ -932,7 +932,12 @@ public class NetworkController : MonoBehaviour {
         return go;
 
     }
+    public GameObject SimplePrefabSpawn(string prefab, Vector3 vector3, Quaternion quaternion, ISFSObject data, PREFABTYPE type = PREFABTYPE.SIMPLE)
+    {
 
+        return SimplePrefabSpawn(prefab, vector3, quaternion, data, true, type);
+
+    }
     public GameObject SimplePrefabSpawn(string prefab, Vector3 vector3, Quaternion quaternion, PREFABTYPE type = PREFABTYPE.SIMPLE )
     {
         ISFSObject data = new SFSObject();
@@ -1433,6 +1438,12 @@ public class NetworkController : MonoBehaviour {
         if (model != null)
         {
             GameObject go = RemoteInstantiateNetPrefab(model.type, model.position.GetVector(), model.rotation.GetQuat(), model.id);
+            switch ((PREFABTYPE)dt.GetInt("preftype"))
+            {
+                case PREFABTYPE.PLAYERBUILDING:
+                    go.GetComponent<Building>().SetOwner( GetPlayer(dt.GetInt("ownerId")));
+                    break;
+            }
             return;
         }
        

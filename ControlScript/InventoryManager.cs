@@ -19,7 +19,7 @@ public class InventoryManager : MonoBehaviour {
 	
 			public  AMMOTYPE type;
 			
-			public int amount;
+			public float amount;
 			
 			public int maxSize;
 
@@ -107,7 +107,7 @@ public class InventoryManager : MonoBehaviour {
 	public virtual int GetAmmo(AMMOTYPE ammo){
 		for(int i=0;i<allAmmo.Length;i++){
 			if(allAmmo[i].type ==ammo){
-				return allAmmo[i].amount;
+                return (int)allAmmo[i].amount;
 			}
 		}
 		return 0;
@@ -120,7 +120,7 @@ public class InventoryManager : MonoBehaviour {
 					allAmmo[i].amount-=amount;
 				
 				}else{
-					amount =allAmmo[i].amount;
+					amount =(int)allAmmo[i].amount;
 					allAmmo[i].amount=0;
 				
 				}
@@ -142,7 +142,23 @@ public class InventoryManager : MonoBehaviour {
 		}
 		
 	}
-	
+
+    public virtual void AddAmmoAll(float percent)
+    {
+        for (int i = 0; i < allAmmo.Length; i++)
+        {
+
+            //Debug.Log(((float)allAmmo[i].maxSize) * percent/100);
+                allAmmo[i].amount +=((float)allAmmo[i].maxSize) * percent/100;
+                if (allAmmo[i].amount > allAmmo[i].maxSize)
+                {
+                    allAmmo[i].amount = allAmmo[i].maxSize;
+                  
+                }
+            
+        }
+
+    }
 	
 	//AMMO BAG SECTION END
 	

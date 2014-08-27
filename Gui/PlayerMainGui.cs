@@ -378,9 +378,10 @@ public class PlayerMainGui : MonoBehaviour {
                 {
                     component.hudentry = P1Hud.Add("Standart(sprite and text)", component.spriteName, publicName, component.myTransform.position, true);
                 }
+                component.hudentry.withArrow = component.withArrow;
             
             }
-            component.hudentry.isShow = component.isShow;
+            component.hudentry.isShow = component.isShow && (component.showAnotherTeam || component.team==0||LocalPlayer.team==component.team);
            // 
             component.hudentry.label.text = publicName;
             if (component.team == LocalPlayer.team)

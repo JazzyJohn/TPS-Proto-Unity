@@ -375,6 +375,7 @@ public class Pawn : DamagebleObject {
         charMan.Init();
         skillManager = GetComponent<SkillManager>();
         sControl = new soundControl(aSource);//создаем обьект контроллера звука
+        weaponRenderer = GetComponentInChildren<Renderer>();
 	}
 
 
@@ -632,6 +633,21 @@ public class Pawn : DamagebleObject {
 
 	}
 
+    public void OverHeal(float hp, float maxModifier)
+    {
+        int maxHealth =(int)(((float)charMan.GetIntChar(CharacteristicList.MAXHEALTH))*maxModifier);
+        health +=hp;
+        if (health>maxHealth)
+        {
+            health = maxHealth;
+        }
+    }
+
+    public bool IsMaxHP()
+    {
+        int maxHealth = charMan.GetIntChar(CharacteristicList.MAXHEALTH);
+        return maxHealth <= health;
+    }
     public void SetTeam(int team)
     {
         this.team = team;
@@ -966,7 +982,8 @@ public class Pawn : DamagebleObject {
 		}
 
 	}
-    void LateUpdate() {
+    protected void LateUpdate()
+    {
 		
 
 	}
@@ -1236,6 +1253,9 @@ public class Pawn : DamagebleObject {
 				animator.SetWeaponType(CurWeapon.animType);
 			}
 			weaponOffset = CurWeapon.MuzzleOffset();
+           
+            weaponRenderer = CurWeapon.GetComponentInChildren<Renderer>();
+            if (invisible) MakeWeaponInvisible();
 		}
 	}
 	public void ChangeWeapon(int weaponIndex){
@@ -1380,6 +1400,11 @@ public class Pawn : DamagebleObject {
 		return ivnMan.GetAmmo (CurWeapon.ammoType);
 
 	}
+
+    public void AddAmmo(float p)
+    {
+        ivnMan.AddAmmoAll(p);
+    }
 	public bool IsShooting(){
 		if (CurWeapon == null) {
 			return false;
@@ -2600,4 +2625,63 @@ public class Pawn : DamagebleObject {
 			myTransform.GetChild(i).gameObject.SetActive(false);
 		}
 	}
+
+
+
+    //Invsibilite Section;
+    public void SetInvisible(bool p)
+    {
+        foreach (Renderer rend in GetComponentsInChildren<Renderer>())
+        {
+            rend.enabled = p;
+        }
+    }
+    private Renderer mainRenderer;
+    
+    private Renderer weaponRenderer;
+
+    private bool invisible= false;
+    public void SetMaterial()
+    {
+        foreach (Material mat in mainRenderer.materials)
+        {
+             Color trans =mat.color;
+            trans.a =0.1f;
+            mat.color = trans;
+        }
+        invisible = true;
+        if (weaponRenderer != null)
+        {
+            foreach (Material mat in weaponRenderer.materials)
+            {
+                Color trans = mat.color;
+                trans.a = 0.1f;
+                mat.color = trans;
+            }
+        }
+    }
+
+    public void SetNormalMaterial()
+    {
+        foreach (Material mat in mainRenderer.materials)
+        {
+            Color trans = mat.color;
+            trans.a = 0.1f;
+            mat.color = trans;
+        }
+        invisible = false;
+        MakeWeaponInvisible();
+    }
+    void MakeWeaponInvisible()
+    {
+        if (weaponRenderer != null)
+        {
+            foreach (Material mat in weaponRenderer.materials)
+            {
+                Color trans = mat.color;
+                trans.a = 1f;
+                mat.color = trans;
+            }
+        }
+    }
 }

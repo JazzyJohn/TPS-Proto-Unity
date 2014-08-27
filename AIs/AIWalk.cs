@@ -434,7 +434,7 @@ public class AIWalk : AIMovementState
 				controlledPawn.Movement (Vector3.zero,CharacterState.Idle);
 
 			}else{
-                if (needJump||JumpToEnemy())
+                if ( JumpToEnemy(translateVect))
                 {
 					controlledPawn.Movement (translateVect +controlledPawn.JumpVector(), CharacterState.Jumping);
 					
@@ -450,10 +450,11 @@ public class AIWalk : AIMovementState
 		}
 		
 	}
-		
-	public bool JumpToEnemy(){
+
+    public bool JumpToEnemy(Vector3 translateVect)
+    {
 		if(enemyAbove){
-			//If (Melee in Attack)  
+			//If (Melee in At tack)  
 			 
 			if(isMelee&&(state==BattleState.Attacking||state==BattleState.WaitForAttack)){
 				if(_lastJumpTime + jumpDelay<Time.time){
@@ -465,14 +466,14 @@ public class AIWalk : AIMovementState
             }
             else
             {
-				needJump = CheckJump(translateVect  );
+				needJump = CheckJump(translateVect);
                 return needJump;
             }
 		}else{
 			if(isMelee&&(state==BattleState.Attacking||state==BattleState.WaitForAttack)){
-				return true;
+                return false;
 			}else{
-				needJump = CheckJump(translateVect  );
+				needJump = CheckJump(translateVect);
                 return needJump;
 			}
 		}

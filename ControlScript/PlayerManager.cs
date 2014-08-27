@@ -74,6 +74,20 @@ public class PlayerManager : MonoBehaviour {
     }
 
 	public Transform GetSpamPosition(int team){
+
+        List<DispenserSpawn> listDist = new List<DispenserSpawn>();
+        DispenserSpawn[] disspamPoints = FindObjectsOfType<DispenserSpawn>();
+        for (int i = 0; i < disspamPoints.Length; i++)
+        {
+            if (disspamPoints[i].team == 0 || team == disspamPoints[i].team)
+            {
+                listDist.Add(disspamPoints[i]);
+            }
+        }
+        if (listDist.Count > 0)
+        {
+            return listDist[(int)(UnityEngine.Random.value * listDist.Count)].spawnTransform;
+        }
 		List<SpawnPoint> list  = new List<SpawnPoint>();
 		SpawnPoint[] spamPoints = FindObjectsOfType <SpawnPoint>();
 		for(int i=0; i<spamPoints.Length;i++){

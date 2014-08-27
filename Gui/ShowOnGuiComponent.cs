@@ -17,9 +17,12 @@ public class ShowOnGuiComponent : MonoBehaviour {
 	public string spriteName;
 
     public HUDText.Entry hudentry;
+
+    public bool withArrow = true;
 	
 	public bool isShow= true;
-	
+
+    public bool showAnotherTeam = true;
 	public void Awake(){
 		myTransform = transform;
 		allShowOnGui.Add(this);
@@ -27,7 +30,10 @@ public class ShowOnGuiComponent : MonoBehaviour {
 	}
 	void OnDestroy(){
 		allShowOnGui.Remove(this);
-		PlayerMainGui.instance.RemoveMessage(hudentry);
+        if (PlayerMainGui.instance != null)
+        {
+            PlayerMainGui.instance.RemoveMessage(hudentry);
+        }
 	}
 	
 	public void SetTitle(string text){

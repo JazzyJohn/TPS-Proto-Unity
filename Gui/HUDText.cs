@@ -29,6 +29,7 @@ public class HUDText : MonoBehaviour
 		public UILabel label;		// Label on the game object
         public Vector3 startpos;
         public bool isShow= true;
+        public bool withArrow = false;
         public string defSpriteName;
       
 		public Transform Perfab;
@@ -505,7 +506,7 @@ public class HUDText : MonoBehaviour
                 }
                 else
                 {
-                    if (ent.isShow)
+                    if (ent.isShow && ent.withArrow)
                     {
                         if (ent.isShow && viewport.x < 0.5)
                         {

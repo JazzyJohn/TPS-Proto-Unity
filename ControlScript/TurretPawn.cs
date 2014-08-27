@@ -45,11 +45,17 @@ public class TurretPawn : Pawn {
 			
 
 		}
-		if(headTransform!=null){
-			headTransform.rotation=Quaternion.LookRotation(aimRotation-myTransform.position)* startRotation ; 
-		}
+		
 		//		Debug.Log (characterState);
 		UpdateAnimator ();
 		DpsCheck ();
 	}
+    void LateUpdate()
+    {
+        base.LateUpdate();
+        if (headTransform != null)
+        {
+           // headTransform.rotation = Quaternion.LookRotation(aimRotation - myTransform.position) * startRotation;
+        }
+    }
 }
