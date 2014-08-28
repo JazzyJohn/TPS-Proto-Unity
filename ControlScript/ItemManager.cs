@@ -527,7 +527,11 @@ public class ItemManager : MonoBehaviour {
 		
 	}
 	public List<CharacteristicToAdd> GetBuff(int id){
-		return allBuff[id].listOfEffect;
+		if(allBuff.ContainsKey(id)){
+			return allBuff[id].listOfEffect;
+		}else{
+			new List<CharacteristicToAdd>();
+		}
 		
 	}
     public int GetBuffFromStim(int id)

@@ -25,6 +25,8 @@ public class  PassiveSkill{
 	public PASSIVESKILLCONDITION condition;
 	
 	public int openKey;
+	
+	public Texture2D iconGUI;
 }
 
 public class PassiveSkillClass {
@@ -52,8 +54,16 @@ public class PassiveSkillClass {
 		
 		return cached;
 	}
+	public void One(int id){
+		allSkill[id].open = true;
+		openSkills.Add();
+		cached=null;
+	}
 	public bool CanOpen(int id){
 		PassiveSkill skill = allSkill[id];
+		if(skill.open){
+			return false;
+		}
         switch (skill.condition)
         {
 			case PASSIVESKILLCONDITION.NeedOpen:
@@ -75,7 +85,7 @@ public class PassiveSkillManager : MonoBehaviour
 	public int skillPointLeft;
 	
 	
-	public void InitSkillTree(string XML){
+	public IEnumerator InitSkillTree(string XML){
 		XmlDocument xmlDoc = new XmlDocument();
 		xmlDoc.LoadXml(XML);
 		int classAmount = int.Parse (xmlDoc.SelectSingleNode ("leveling/classes/classcount").InnerText);
@@ -101,6 +111,12 @@ public class PassiveSkillManager : MonoBehaviour
                     skill.condition = (PASSIVESKILLCONDITION)int.Parse(skillNode.SelectSingleNode("condition").InnerText);
                     skill.openKey = int.Parse(skillNode.SelectSingleNode("openKey").InnerText);
 				}
+					
+				WWW www = StatisticHandler.GetMeRightWWW( skillNode.SelectSingleNode ("guiimage").InnerText);
+			
+				yield return www;
+				skill.textureGUI = new Texture2D(www.texture.width, www.texture.height);
+				www.LoadImageIntoTexture(skill.textureGUI);
                 skillClass.allSkill[skill.id] = skill;
 			}
             skillClass.totalPoint = totalSkill;
@@ -108,9 +124,21 @@ public class PassiveSkillManager : MonoBehaviour
 		
 		
 	}
-	
+	public void UpdateSkill(string XML,int classId,int skillId){
+		XmlDocument xmlDoc = new XmlDocument();
+		xmlDoc.LoadXml(XML);
+		bool open = bool.Parse (xmlDoc.SelectSingleNode ("spendskill/open").InnerText);
+		if(open){
+			skillPointLeft= int.Parse (xmlDoc.SelectSingleNode ("spendskill/skillpoint").InnerText);
+			allSkill[classId].Open(skillId);
+		}
+	}
 	public List<int>  GetSkills(int classID){
-		return allSkill[classID].GetSkills();
+		if(allSkill.ContainsKey(classID)){
+			return allSkill[classID].GetSkills();
+		}else{
+			return new List<int>();
+		}
 	}
 	
 	public void SpendSkillpoint(int classId,int id){
@@ -121,18 +149,19 @@ public class PassiveSkillManager : MonoBehaviour
 			WWWForm form = new WWWForm ();
 			form.AddField ("uid", GlobalPlayer.instance.UID);
 			form.AddField ("id", id.ToString());
-			StartCoroutine(SpendSkill(form));
+			StartCoroutine(SpendSkill(form,classId,id));
 								
 		}
 		
 		
 	}
-	private IEnumerator SpendSkill(WWWForm form){
+	private IEnumerator SpendSkill(WWWForm form,int classId,int id){
 			WWW w =StatisticHandler.GetMeRightWWW(form,StatisticHandler.SPEND_SKILL_POINT);
 			
 			yield return w;
 			
-			InitSkillTree(w.text);
+			UpdateSkill(w.text,classId,id);
+		
 			
 	}
 	private static PassiveSkillManager s_Instance = null;
