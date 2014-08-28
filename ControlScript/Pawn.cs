@@ -439,8 +439,8 @@ public class Pawn : DamagebleObject {
         headOffset.y = capsule.bounds.max.y - myTransform.position.y;
 
         distToGround = capsule.height / 2 - capsule.center.y;
-      
-        health = charMan.GetIntChar(CharacteristicList.MAXHEALTH);
+
+        health = GetMaxHealth();
 		SpeedInit();
         if (canJump)
         {
@@ -464,18 +464,23 @@ public class Pawn : DamagebleObject {
 		charMan.AddList(player.GetCharacteristick());
 	
 	}
+    public  int GetMaxHealth()
+    {
+         return (int)(((float)charMan.GetIntChar(CharacteristicList.MAXHEALTH))* GetPercentValue(CharacteristicList.MAXHEALTH_PERCENT));
+       
+    }
 	public void SpeedInit(){
-		wallRunSpeed=wallRunSpeed*GetPercentValue(SPEED);
-		
-		groundSprintSpeed=groundSprintSpeed*GetPercentValue(SPEED);
+        wallRunSpeed = wallRunSpeed * GetPercentValue(CharacteristicList.SPEED);
 
-		groundRunSpeed=groundRunSpeed*GetPercentValue(SPEED);
+        groundSprintSpeed = groundSprintSpeed * GetPercentValue(CharacteristicList.SPEED);
 
-		flySpeed=flySpeed*GetPercentValue(SPEED);
+        groundRunSpeed = groundRunSpeed * GetPercentValue(CharacteristicList.SPEED);
 
-		groundWalkSpeed=groundWalkSpeed*GetPercentValue(SPEED);
+        flySpeed = flySpeed * GetPercentValue(CharacteristicList.SPEED);
 
-		jumpHeight=groundWalkSpeed*GetPercentValue(JUMPHEIGHT);
+        groundWalkSpeed = groundWalkSpeed * GetPercentValue(CharacteristicList.SPEED);
+
+        jumpHeight = groundWalkSpeed * GetPercentValue(CharacteristicList.JUMPHEIGHT);
 	}
 	public float GetSize ()
 	{
@@ -523,16 +528,16 @@ public class Pawn : DamagebleObject {
 		if (isSpawn||killer==null||!isActive) {//если только респавнились, то повреждений не получаем
 			return;
 		}
-		
-		
-		float allPrecent  =GetValue(DAMAGE_REDUCE_ALL);
+
+
+        float allPrecent = GetValue(CharacteristicList.DAMAGE_REDUCE_ALL);
 		if(damage.weapon){
-			allPrecent  +=GetValue(DAMAGE_REDUCE_GUN);
+            allPrecent += GetValue(CharacteristicList.DAMAGE_REDUCE_GUN);
 		}
 		if(damage.splash){
-			allPrecent  +=GetValue(DAMAGE_REDUCE_SPLASH);
+            allPrecent += GetValue(CharacteristicList.DAMAGE_REDUCE_SPLASH);
 		}
-		damage.Damage = ((float)allPrecent)/100f +1f;
+        damage.Damage = damage.Damage*(((float)allPrecent) / 100f + 1f);
 		bool isVs =( damage.isVsArmor && charMan.GetBoolChar (CharacteristicList.ARMOR))||( !damage.isVsArmor && !charMan.GetBoolChar (CharacteristicList.ARMOR));
 		if (!isVs) {
 			damage.Damage*=0.5f;		
@@ -649,7 +654,7 @@ public class Pawn : DamagebleObject {
 	}
 		
 	public void Heal(float damage,GameObject Healler){
-		int maxHealth =charMan.GetIntChar(CharacteristicList.MAXHEALTH);
+        int maxHealth = GetMaxHealth();
 		health += damage;
 		if (maxHealth < health) {
 			health=maxHealth;		
@@ -659,7 +664,7 @@ public class Pawn : DamagebleObject {
 
     public void OverHeal(float hp, float maxModifier)
     {
-        int maxHealth =(int)(((float)charMan.GetIntChar(CharacteristicList.MAXHEALTH))*maxModifier);
+        int maxHealth =(int)(((float)GetMaxHealth())*maxModifier);
         health +=hp;
         if (health>maxHealth)
         {
@@ -1439,7 +1444,7 @@ public class Pawn : DamagebleObject {
 		if (CurWeapon == null) {
 			return 0;
 		}
-		return CurWeapon.recoilMod;
+		return 0;
 	}
 	public void HasShoot(){
 		if (cameraController != null) {
@@ -2563,8 +2568,9 @@ public class Pawn : DamagebleObject {
 	public int GetValue(CharacteristicList characteristic){
 		return charMan.GetIntChar(characteristic);
 	}
-	
-	public float GetPercentValue(){
+
+    public float GetPercentValue(CharacteristicList characteristic)
+    {
 		return 1f +((float)charMan.GetIntChar(characteristic))/100f;
 	}
   //END OF BUFF SECTION

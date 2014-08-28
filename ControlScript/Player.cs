@@ -96,6 +96,10 @@ public class Player : MonoBehaviour {
 
     private List<int> activeSteampacks = new List<int>();
 
+    private List<int> activeBuff = new List<int>();
+
+    public DamagebleObject building;
+
 	public bool isPlayerFriend(string playerId)
 	{
 	 	foreach (string id in friendsInfo) 
@@ -186,8 +190,14 @@ public class Player : MonoBehaviour {
 
 	}
 	public int[] GetBuffs(){
-		
-		return activeSteampacks.Concat(PassiveSkillManager.instance.GetSkill(selected)).ToArray();
+		List <int> allbuff = new List<int>();
+        allbuff.AddRange(PassiveSkillManager.instance.GetSkills(selected));
+        foreach (int stimId in activeSteampacks)
+        {
+            allbuff.Add(ItemManager.instance.GetBuffFromStim(stimId));
+        }
+     
+		return allbuff.ToArray();
 	}
 	void Update(){
         if (!playerView.isMine)
@@ -644,11 +654,11 @@ public class Player : MonoBehaviour {
 		}
 	
 	}
-	public void AISpawnSetting(Pawn pawn,   int[] steampacks){
+	public void AISpawnSetting(Pawn pawn,   int[] buffs){
 		pawn.player = this;
         pawn.team = this.team;
 	}
-    public void AfterSpawnSetting(Pawn pawn,   int[] steampacks)
+    public void AfterSpawnSetting(Pawn pawn, int[] buffs)
     {
 
        PawnType type =PawnType.PAWN;
@@ -667,13 +677,15 @@ public class Player : MonoBehaviour {
                         charMan.Init();
 					}
                     charMan.DeathUpdate();
-                    List<int> activeSteampacks = new List<int>();
+                    activeSteampacks = new List<int>();
 
 
-                    foreach (int steampack in steampacks)
-                    {
-                        ActualUseOfSteampack(steampack);
-                    }
+                  
+                }
+                foreach (int buff in buffs)
+                {
+
+                    ActualUseOfBuff(buff);
                 }
                 currentPawn = pawn;
 
@@ -701,15 +713,18 @@ public class Player : MonoBehaviour {
     /// </summary>
 	public void ActivateStimpack(int id){
 		if(ItemManager.instance.TryUseStim(id)){
-			ActualUseOfSteampack(id);
+			  activeSteampacks.Add(id);
 		}
 	
 	}
-	
-	private void ActualUseOfSteampack(int id){
-        activeSteampacks.Add(id);
-		charMan.AddList(ItemManager.instance.GetStimPack(id));
+
+    private void ActualUseOfBuff(int id)
+    {
+        Debug.Log("BUFF ADd"+id);
+        charMan.AddList( ItemManager.instance.GetBuff(id));
 	}
+
+   
 	
 	public List<CharacteristicToAdd>  GetCharacteristick(){
 		return charMan.GetCharacteristick();	

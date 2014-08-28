@@ -300,7 +300,7 @@ public class HUDText : MonoBehaviour
 		
 		
 		//if (isNumeric) ne.label.text = (val < 0f ? Mathf.RoundToInt(ne.val).ToString() : "+" + Mathf.RoundToInt(ne.val));
-            Debug.Log( (string)obj);
+        //    Debug.Log( (string)obj);
 		ne.label.text = (string)obj;
 		
 		// Sort the list

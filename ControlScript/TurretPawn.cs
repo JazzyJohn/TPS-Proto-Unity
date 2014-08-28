@@ -4,13 +4,8 @@ using System.Collections;
 public class TurretPawn : Pawn {
 
 	public Transform headTransform;
-	private Quaternion startRotation;
+    public Quaternion startRotation;
 
-    public override void StartPawn()
-    {
-		base.StartPawn ();
-		startRotation =Quaternion.Inverse( myTransform.rotation)* headTransform.rotation;
-	}
 
 	public void FixedUpdate () {
 
@@ -55,7 +50,7 @@ public class TurretPawn : Pawn {
         base.LateUpdate();
         if (headTransform != null)
         {
-           // headTransform.rotation = Quaternion.LookRotation(aimRotation - myTransform.position) * startRotation;
+            headTransform.rotation = Quaternion.LookRotation(aimRotation - myTransform.position) * startRotation;
         }
     }
 }

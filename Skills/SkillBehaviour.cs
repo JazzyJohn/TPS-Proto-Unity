@@ -37,6 +37,7 @@ public class SkillBehaviour : MonoBehaviour
 	public void Init(Pawn owner){
 		this.owner = owner;
         foxView = GetComponent<FoxView>();
+        _coolDown = coolDown;
 	}
 	
 	public void Update(){

@@ -9,7 +9,7 @@ public class DispenserAmmo : Building
     void OnTriggerStay(Collider other)
     {
         Pawn pawn = other.GetComponent<Pawn>();
-        if (pawn!=null&&pawn.foxView.isMine)
+        if (pawn!=null&&pawn.foxView.isMine&&!pawn.isAi)
         {
             pawn.AddAmmo(ammoRate * Time.fixedDeltaTime);
         }

@@ -33,6 +33,8 @@ public class BaseWeapon : DestroyableNetworkObject {
     public FIRETYPE firetype;
 
 	public float fireInterval;
+
+    private float lastShootTime;
     
     /// <summary>
     /// For SemiAuto ANd BoltAmmo
@@ -184,6 +186,8 @@ public class BaseWeapon : DestroyableNetworkObject {
 	//ID for MySqlBAse
 	public int SQLId;
 
+
+   
 	void Awake(){
 		foxView = GetComponent<FoxView>();
         projectileClass = projectilePrefab.GetComponent<BaseProjectile>();
@@ -230,25 +234,25 @@ public class BaseWeapon : DestroyableNetworkObject {
 		curTransform.localRotation = weaponRotator;
         
 		//RemoteAttachWeapon(inowner);
-		reloadTime =reloadTime*owner.GetPercentValue(RELOAD_SPEED);
-		fireInterval=fireInterval*owner.GetPercentValue(FIRE_RATE);
-	
-		float recoilmod = owner.GetValue(RECOIL_ALL);	
+		reloadTime =reloadTime*owner.GetPercentValue(CharacteristicList.RELOAD_SPEED);
+        fireInterval = fireInterval * owner.GetPercentValue(CharacteristicList.FIRE_RATE);
+
+        float recoilmod = owner.GetValue(CharacteristicList.RECOIL_ALL);	
 		switch(descriptionType){
 			
 				
 			
-			case MACHINE_GUN:
-				recoilmod+=owner.GetValue(RECOIL_MACHINEGUN);	
+			case DESCRIPTIONTYPE.MACHINE_GUN:
+                recoilmod += owner.GetValue(CharacteristicList.RECOIL_MACHINEGUN);	
 			break;
-			case ROCKET_LAUNCHER:
-				recoilmod+=owner.GetValue(RECOIL_ROCKET);	
+            case DESCRIPTIONTYPE.ROCKET_LAUNCHER:
+            recoilmod += owner.GetValue(CharacteristicList.RECOIL_ROCKET);	
 			break;
 		}
 		recoilmod =((float)recoilmod)/100f+1f;
 		normalRandCoef=normalRandCoef*recoilmod;
 		aimRandCoef = aimRandCoef*recoilmod;
-		damageAmount.Damage = damageAmount.Damage*owner.GetPercentValue(DAMAGE_ALL);
+        damageAmount.Damage = damageAmount.Damage * owner.GetPercentValue(CharacteristicList.DAMAGE_ALL);
 		damageAmount.weapon= true;
 	}
 
@@ -269,7 +273,34 @@ public class BaseWeapon : DestroyableNetworkObject {
 		}
 		init = true;
 	}
+    void Update()
+    {
+        if (foxView.isMine)
+        {
+            if (isShooting)
+            {
+                owner.animator.StartShootAniamtion("shooting");
+            }
+            else
+            {
+                owner.animator.StopShootAniamtion("shooting");
 
+            }
+            
+        }
+        else
+        {
+            if (lastShootTime + 0.5f < Time.time)
+            {
+                owner.animator.StopShootAniamtion("shooting");
+            }else
+            {
+                owner.animator.StartShootAniamtion("shooting");
+            }
+
+        }
+
+    }
 	// Update is called once per frame
 	void FixedUpdate () {
         UpdateWeapon(Time.fixedDeltaTime);
@@ -777,9 +808,10 @@ public class BaseWeapon : DestroyableNetworkObject {
 		projScript.range+=range;
         projScript.Init();
 	}
+  
     public virtual void RemoteGenerate(Vector3 position, Quaternion rotation, float power, float range, int viewId, int projId, double timeShoot)
     {
-        
+        lastShootTime = Time.time;
         BaseProjectile proj = GenerateProjectileRep(position, rotation, timeShoot);
 			if (rifleParticleController != null) {
 				rifleParticleController.CreateShootFlame ();

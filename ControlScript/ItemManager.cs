@@ -54,14 +54,21 @@ public class StimPack{
     public int normalPrice;
 
 	public bool active = false;
-	
-	public List<CharacteristicToAdd> listOfEffect = new List<CharacteristicToAdd> ();
+
+    public int buffId;
 	
 	public Texture2D textureGUI;
 
 	public string name;
 
     public string mysqlId;
+}
+
+public class Buff
+{
+
+    public List<CharacteristicToAdd> listOfEffect = new List<CharacteristicToAdd>();
+	
 }
 public class ItemManager : MonoBehaviour {
 
@@ -76,6 +83,8 @@ public class ItemManager : MonoBehaviour {
 	
 	
 	public List<StimPack> stimPackDictionary = new List<StimPack>();
+
+    public Dictionary<int, Buff> allBuff = new Dictionary<int, Buff>();
 	private string UID ="";
 	
 	public void Init(string uid){
@@ -194,31 +203,7 @@ public class ItemManager : MonoBehaviour {
                 entry.goldPrice = int.Parse(node.SelectSingleNode("goldPrice").InnerText);
                 entry.normalPrice = int.Parse(node.SelectSingleNode("normalPrice").InnerText);
                 entry.mysqlId = node.SelectSingleNode("mysqlId").InnerText;
-                foreach (XmlNode nodeEffect in node.SelectNodes("effect"))
-                {
-                    CharacteristicToAdd add = new CharacteristicToAdd();
-                    add.characteristic = (CharacteristicList)System.Enum.Parse(typeof(CharacteristicList), nodeEffect.SelectSingleNode("characteristic").InnerText);
-                    string type = nodeEffect.SelectSingleNode("type").InnerText;
-                    string value = nodeEffect.SelectSingleNode("value").InnerText;
-                    BaseEffect effect = null;
-                    if (type == "float")
-                    {
-
-                        effect = new Effect<float>(float.Parse(value));
-                    }
-                    else if (type == "int")
-                    {
-                        effect = new Effect<int>(int.Parse(value));
-                    }
-                    else
-                    {
-                        effect = new Effect<bool>(bool.Parse(value));
-                    }
-					effect.initalEffect = true;
-                    effect.type = (EffectType)System.Enum.Parse(typeof(EffectType), nodeEffect.SelectSingleNode("effecttype").InnerText);
-                    add.addEffect = effect;
-                    entry.listOfEffect.Add(add);
-                }
+                entry.buffId = int.Parse(node.SelectSingleNode("buffId").InnerText);
 
                 WWW www = StatisticHandler.GetMeRightWWW(node.SelectSingleNode("textureGUIName").InnerText);
 
@@ -230,6 +215,44 @@ public class ItemManager : MonoBehaviour {
             }
 		
 		}
+        XmlNodeList buffs = xmlDoc.SelectNodes("items/buff");
+        foreach (XmlNode nodeBuff in buffs)
+        {
+            int id = int.Parse(nodeBuff.SelectSingleNode("buffId").InnerText);
+            Buff buff;
+            if (allBuff.ContainsKey(id))
+            {
+                buff = allBuff[id];
+            }else{
+                buff = new Buff();
+                allBuff[id] = buff;
+            }
+          
+            CharacteristicToAdd add = new CharacteristicToAdd();
+            add.characteristic = (CharacteristicList)System.Enum.Parse(typeof(CharacteristicList), nodeBuff.SelectSingleNode("characteristic").InnerText);
+            string type = nodeBuff.SelectSingleNode("type").InnerText;
+            string value = nodeBuff.SelectSingleNode("value").InnerText;
+            BaseEffect effect = null;
+            if (type == "float")
+            {
+
+                effect = new Effect<float>(float.Parse(value));
+            }
+            else if (type == "int")
+            {
+                effect = new Effect<int>(int.Parse(value));
+            }
+            else
+            {
+                effect = new Effect<bool>(bool.Parse(value));
+            }
+            effect.initalEffect = true;
+            effect.type = (EffectType)System.Enum.Parse(typeof(EffectType), nodeBuff.SelectSingleNode("effecttype").InnerText);
+            add.addEffect = effect;
+            buff.listOfEffect.Add(add);
+            
+           
+        }
 
 		foreach (XmlNode node in xmlDoc.SelectNodes("items/default")) {
 			int index = int.Parse (node.SelectSingleNode ("weaponId").InnerText);
@@ -242,6 +265,7 @@ public class ItemManager : MonoBehaviour {
 				Choice.SetChoiceRobot(gameSlot,gameClass,index);
 			}
 		}
+      
 		
 	}	
 	public void SetNewWeapon(BaseWeapon prefab){
@@ -249,7 +273,7 @@ public class ItemManager : MonoBehaviour {
 		weaponPrefabsListbyId [prefab.SQLId] = prefab;
 		//weaponPrefabsListbyId[prefab.SQLId].HUDIcon = weaponIndexTable[prefab.SQLId].textureGUI;
 	}
-	protected static GameClassEnum gameClassPase(string text){
+	public static GameClassEnum gameClassPase(string text){
 		switch (text) {
 			case "ENGINEER":
 				return  GameClassEnum.ENGINEER;
@@ -502,10 +526,14 @@ public class ItemManager : MonoBehaviour {
 		return false;
 		
 	}
-	public List<CharacteristicToAdd> GetStimPack(int id){
-		return stimPackDictionary[id].listOfEffect;
+	public List<CharacteristicToAdd> GetBuff(int id){
+		return allBuff[id].listOfEffect;
 		
 	}
+    public int GetBuffFromStim(int id)
+    {
+        return stimPackDictionary[id].buffId;
+    }
     public void RestartStimPack() {
         foreach (StimPack stim in stimPackDictionary)
         {

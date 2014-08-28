@@ -3,14 +3,14 @@ using System;
 
 using System.Collections;
 using System.Collections.Generic;
+using System.Xml;
 
 
-public enum PASSIVESKILLCONDITION{NeedOpen,NeedSkillPoint}
+public enum PASSIVESKILLCONDITION{NeedOpen,NeedSkillPoint};
 
-public PassiveSkill{
-	public PassiveSkill(int buff,int id,int lvl,bool open ){
-			this.buff =buff;
-			this.id = id;
+public class  PassiveSkill{
+	public PassiveSkill(){
+			
 			
 	}
 	
@@ -28,7 +28,7 @@ public PassiveSkill{
 }
 
 public class PassiveSkillClass {
-	public Dicrionary<int,PassiveSkill> allSkill = new Dicrionary<int,PassiveSkill>() ;
+    public Dictionary<int, PassiveSkill> allSkill = new Dictionary<int, PassiveSkill>();
 	
 	public List<int> openSkills  = new List<int>();
 	
@@ -47,16 +47,17 @@ public class PassiveSkillClass {
 		foreach(int key  in openSkills)
 		{
 			PassiveSkill skill = allSkill[key];
-			cached.add(skill.buff);			
+			cached.Add(skill.buff);			
 		}
 		
 		return cached;
 	}
 	public bool CanOpen(int id){
 		PassiveSkill skill = allSkill[id];
-		switch(){
+        switch (skill.condition)
+        {
 			case PASSIVESKILLCONDITION.NeedOpen:
-				return openKey.Contains(skill.openKey);
+                return openSkills.Contains(skill.openKey);
 			break;
 			case PASSIVESKILLCONDITION.NeedSkillPoint:
 				return totalPoint>=skill.openKey;
@@ -78,30 +79,31 @@ public class PassiveSkillManager : MonoBehaviour
 		XmlDocument xmlDoc = new XmlDocument();
 		xmlDoc.LoadXml(XML);
 		int classAmount = int.Parse (xmlDoc.SelectSingleNode ("leveling/classes/classcount").InnerText);
-		skillPointLeft= int.Parse (xmlDoc.SelectSingleNode ("leveling/skillpoint").InnerText);
+		skillPointLeft= int.Parse (xmlDoc.SelectSingleNode ("leveling/player/skillpoint").InnerText);
 		allSkill = new PassiveSkillClass[classAmount];
 		int i =0;
 		
 		foreach (XmlNode classNode in xmlDoc.SelectNodes("leveling/passiveskill/class")) {
-			PassiveSkillClass skillClass =new PassiveSkillClass(branchAmount,lvlAmount);
+			PassiveSkillClass skillClass =new PassiveSkillClass();
 			allSkill[i++]=skillClass;
 			int totalSkill=0;
-			foreach (XmlNode skillNode in xmlDoc.SelectNodes("skill")) {
+            foreach (XmlNode skillNode in classNode.SelectNodes("skill"))
+            {
 				PassiveSkill skill = new PassiveSkill();
-				skill.id = int.Parse(skillnode.SelectSingleNode ("id").InnerText);
-				skill.buff = int.Parse(skillnode.SelectSingleNode ("buff").InnerText);
-				skill.lvl = int.Parse(skillnode.SelectSingleNode ("lvl").InnerText);
-				skill.open = bool.Parse(skillnode.SelectSingleNode ("open").InnerText);
+                skill.id = int.Parse(skillNode.SelectSingleNode("id").InnerText);
+                skill.buff = int.Parse(skillNode.SelectSingleNode("buff").InnerText);
+                skill.lvl = int.Parse(skillNode.SelectSingleNode("lvl").InnerText);
+                skill.open = bool.Parse(skillNode.SelectSingleNode("open").InnerText);
 				if(skill.open){
 					totalSkill+=	skill.lvl;
 					skillClass.openSkills.Add(skill.id);
 				}else{
-					skill.condition = (PASSIVESKILLCONDITION)int.Parse(skillnode.SelectSingleNode ("condition").InnerText);
-					skill.openKey = int.Parse(skillnode.SelectSingleNode ("openKey").InnerText);
+                    skill.condition = (PASSIVESKILLCONDITION)int.Parse(skillNode.SelectSingleNode("condition").InnerText);
+                    skill.openKey = int.Parse(skillNode.SelectSingleNode("openKey").InnerText);
 				}
-			
+                skillClass.allSkill[skill.id] = skill;
 			}
-			skillClass.totalPoint=totalPoint;
+            skillClass.totalPoint = totalSkill;
 		}
 		
 		
@@ -111,15 +113,15 @@ public class PassiveSkillManager : MonoBehaviour
 		return allSkill[classID].GetSkills();
 	}
 	
-	public void SpendSkillpoint(int id){
-		if(allSkill[classId].lvl<skillPointLeft){
+	public void SpendSkillpoint(int classId,int id){
+		if(1>skillPointLeft){
 			return;
 		}
-		if(allSkill[classId].CanOpen(branch,lvl){
+		if(allSkill[classId].CanOpen(id)){
 			WWWForm form = new WWWForm ();
 			form.AddField ("uid", GlobalPlayer.instance.UID);
 			form.AddField ("id", id.ToString());
-			StartCoroutine(SpendSkill(form)):
+			StartCoroutine(SpendSkill(form));
 								
 		}
 		
@@ -130,7 +132,7 @@ public class PassiveSkillManager : MonoBehaviour
 			
 			yield return w;
 			
-			InitSkillTree(w);
+			InitSkillTree(w.text);
 			
 	}
 	private static PassiveSkillManager s_Instance = null;

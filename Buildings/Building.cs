@@ -13,14 +13,14 @@ public class Building : DamagebleObject {
     protected void Awake()
     {
         health = startHealth;
-        onGui = GetComponent<ShowOnGuiComponent>();
-		foxView= GetCompoennt<FoxView>();
+        foxView= GetComponent<FoxView>();
     }
 
     public void SetOwner(Player p)
     {
         team = p.team;
         player = p;
+        onGui.team = team;
     }
 
     public override void KillIt(GameObject killer)

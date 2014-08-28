@@ -32,7 +32,7 @@ public class BaseDamage{
 		pushForce = old.pushForce;
         knockOut = old.knockOut;
 		splash = old.splash;
-		weapon= old.weapon
+        weapon = old.weapon;
 	}
 
 }
