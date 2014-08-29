@@ -12,6 +12,9 @@ public class SkillManager : MonoBehaviour
 		}
 		
 	}
+	public SkillBehaviour GetSkill(int i){
+		return allskill[i];
+	}
 	
 	public void ActivateSkill(int i){
       

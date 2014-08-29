@@ -24,16 +24,16 @@ public class TimeManager : MonoBehaviour {
 	private float timeBeforeSync = 0;
 	private bool synchronized = false;
 		
-	private double lastServerTime = 0;
-	private double lastLocalTime = 0;
+	private long lastServerTime = 0;
+	private long lastLocalTime = 0;
 	
 	private bool running = false;
 	
-	public double averagePing = 0;
+	public long averagePing = 0;
 	private int pingCount = 0;
 	
 	private readonly int averagePingCount = 10;
-	private double[] pingValues;
+	private long[] pingValues;
 	private int pingValueIndex;
 
 	void Awake() {
@@ -42,7 +42,7 @@ public class TimeManager : MonoBehaviour {
 	}
 	
 	public void Init() {
-		pingValues = new double[averagePingCount];
+		pingValues = new long[averagePingCount];
 		pingCount = 0;
 		pingValueIndex = 0;
 		running = true;
@@ -56,14 +56,14 @@ public class TimeManager : MonoBehaviour {
         ExtensionRequest request = new ExtensionRequest("getTime", new SFSObject(), room);
         NetworkController.smartFox.Send(request);
     }	
-	public void Synchronize(double timeValue) {
+	public void Synchronize(long timeValue) {
 		// Measure the ping in milliseconds
-		double ping = (Time.time - timeBeforeSync)*1000;
+		long ping = (Time.time - timeBeforeSync)*1000;
 		CalculateAveragePing(ping);
 				
 		// Take the time passed between server sends response and we get it 
 		// as half of the average ping value
-		double timePassed = averagePing / 2.0f;
+		long timePassed = averagePing / 2.0f;
 		lastServerTime = timeValue + timePassed;
 		lastLocalTime = Time.time;
 		
@@ -86,27 +86,27 @@ public class TimeManager : MonoBehaviour {
 	/// <summary>
 	/// Network time in msecs
 	/// </summary>
-	public double NetworkTime {
+	public long NetworkTime {
 		get {
 			// Taking server timestamp + time passed locally since the last server time received			
 			return (Time.time - lastLocalTime)*1000 + lastServerTime;
 		}
 	}
 			
-	public double AveragePing {
+	public long AveragePing {
 		get {
 			return averagePing;
 		}
 	}
 	
 	
-	private void CalculateAveragePing(double ping) {
+	private void CalculateAveragePing(long ping) {
 		pingValues[pingValueIndex] = ping;
 		pingValueIndex++;
 		if (pingValueIndex >= averagePingCount) pingValueIndex = 0;
 		if (pingCount < averagePingCount) pingCount++;
 					
-		double pingSum = 0;
+		long pingSum = 0;
 		for (int i=0; i<pingCount; i++) {
 			pingSum += pingValues[i];
 		}

@@ -92,6 +92,8 @@ public class PlayerMainGui : MonoBehaviour {
 		public float reloadTime=0;
 		public float jetPackCharge= 0;
         public float pumpCoef = 0;
+		public string skill="";
+		public bool skillready;
 	       
 	}
 	public class LevelStats{

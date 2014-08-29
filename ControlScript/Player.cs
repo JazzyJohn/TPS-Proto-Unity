@@ -70,6 +70,8 @@ public class Player : MonoBehaviour {
 
 	private bool isDead=true;
 
+	private  PlayerMainGui.PlayerStats stats = new PlayerMainGui.PlayerStats ();
+	
 	private bool canSpamBot = true;
 
     public PlayerView playerView;
@@ -585,8 +587,8 @@ public class Player : MonoBehaviour {
 		return isDead;
 
 	}
+
 	public PlayerMainGui.PlayerStats GetPlayerStats(){
-		PlayerMainGui.PlayerStats stats = new PlayerMainGui.PlayerStats ();
 		stats.robotTime = GetRobotTimer();
 		Pawn curPawn = null;
 		if (inBot) {
@@ -598,6 +600,11 @@ public class Player : MonoBehaviour {
 		}
 		if (curPawn != null) {
 			stats.health = curPawn.health;
+			SkillBehaviour skill = currentPawn.GetMainSkill();
+			if(skill!=null){
+				stats.skill = skill.spriteName
+				stats.skillready  =skill.Available();
+			}
 			if(curPawn.CurWeapon!=null){
 			
 				stats.gun  = curPawn.CurWeapon;

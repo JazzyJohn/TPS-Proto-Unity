@@ -34,6 +34,8 @@ public class SkillBehaviour : MonoBehaviour
 
     protected FoxView foxView;
 	
+	public string spriteName;
+	
 	public void Init(Pawn owner){
 		this.owner = owner;
         foxView = GetComponent<FoxView>();

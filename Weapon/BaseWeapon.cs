@@ -557,8 +557,37 @@ public class BaseWeapon : DestroyableNetworkObject {
 	}
     public float PumpCoef()
     {
-        return _pumpAmount / pumpAmount * 100.0f;
+        return _pumpAmount;
     }
+	
+	public bool AfterActing(){
+		if(afterPumpAction!=AFTERPUMPACTION.Wait){
+			return _pumpAmount>=pumpAmount;
+		}
+		return false;
+	
+	}
+	
+	public bool PumpIsActing(){
+		switch (prefiretype)
+        {
+            case PREFIRETYPE.Normal:
+				return false;
+		    case PREFIRETYPE.ChargedPower:
+			case PREFIRETYPE.ChargedAccuracy:
+			case PREFIRETYPE.Guidance:
+			case PREFIRETYPE.ChargedRange:
+			case PREFIRETYPE.Salvo:
+				return _pumpCoef>=1.0f;
+                break;
+			 case PREFIRETYPE.Spooling:
+				return _pumpAmount>=pumpAmount;
+                break;
+			default:
+               	return false;
+                break;
+        }
+	}
 	//temporary function to fix wrong aiming
 	public virtual void AimFix(){
 
@@ -738,7 +767,7 @@ public class BaseWeapon : DestroyableNetworkObject {
 	/// <summary>
     /// Generate random distribution coef for projectile
     /// </summary>
-	protected float GetRandomeDirectionCoef(){
+	public float GetRandomeDirectionCoef(){
 		float effAimRandCoef = _randShootCoef;
 		if (owner.isAiming) {
 			effAimRandCoef+=aimRandCoef;
@@ -809,7 +838,7 @@ public class BaseWeapon : DestroyableNetworkObject {
         projScript.Init();
 	}
   
-    public virtual void RemoteGenerate(Vector3 position, Quaternion rotation, float power, float range, int viewId, int projId, double timeShoot)
+    public virtual void RemoteGenerate(Vector3 position, Quaternion rotation, float power, float range, int viewId, int projId, long timeShoot)
     {
         lastShootTime = Time.time;
         BaseProjectile proj = GenerateProjectileRep(position, rotation, timeShoot);

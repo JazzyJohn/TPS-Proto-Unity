@@ -283,8 +283,8 @@ public class NetworkController : MonoBehaviour {
             switch (cmd)
             {
                 case "getTime":
-                    long time = dt.GetLong("t");
-		            TimeManager.Instance.Synchronize(Convert.ToDouble(time));
+                   
+		            TimeManager.Instance.Synchronize(dt.GetLong("t"));
                     break;
             
                 case "playersSpawm":
@@ -844,6 +844,8 @@ public class NetworkController : MonoBehaviour {
 	/// <summary>
     /// weaponShoot request to server
     /// </summary>	
+	
+
 
     public void WeaponShootRequest(ISFSObject data)
     {
@@ -1368,7 +1370,7 @@ public class NetworkController : MonoBehaviour {
 		
 		weapon.RemoteGenerate(((Vector3Model)dt.GetClass("position")).GetVector(),
 								((QuaternionModel)dt.GetClass("direction")).GetQuat(),
-								dt.GetFloat("power"),dt.GetFloat("range"),dt.GetInt("viewId"),dt.GetInt("projId"),dt.GetDouble("timeShoot"));
+								dt.GetFloat("power"),dt.GetFloat("range"),dt.GetInt("viewId"),dt.GetInt("projId"),dt.GetLong("timeShoot"));
 								
 	}	
 	/// <summary>

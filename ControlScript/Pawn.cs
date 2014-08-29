@@ -1560,7 +1560,13 @@ public class Pawn : DamagebleObject {
             skillManager.DeActivateSkill(i);
         }
     }
-	
+	public SkillBehaviour GetMainSkill(){
+		if (skillManager != null)
+        {
+            skillManager.GetSkill(0);
+        }
+		return null;
+	}
 	//END WEAPON SECTION
 	void OnCollisionEnter(Collision collision) {
 		//Debug.Log ("COLLISION ENTER PAWN " + this + collision);

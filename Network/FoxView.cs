@@ -158,14 +158,14 @@ public class FoxView : MonoBehaviour {
     {
 		
 		ISFSObject data = new SFSObject();
-     
+		
      	data.PutClass("position",new Vector3Model(position));
 		data.PutClass("direction",new QuaternionModel(rotation));
 		data.PutFloat("power", power);
 		data.PutFloat("range", range);
         data.PutInt("viewId", viewId);
         data.PutInt("projId", projId);
-        data.PutDouble("timeShoot", TimeManager.Instance.NetworkTime/1000);
+        data.PutLong("timeShoot", TimeManager.Instance.NetworkTime/1E+3);
        
 		data.PutInt("id", viewID);	
 		NetworkController.Instance.WeaponShootRequest(data);

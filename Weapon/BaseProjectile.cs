@@ -44,7 +44,7 @@ public class BaseProjectile : MonoBehaviour
 
     public int projId;
     public bool replication = true;
-    public double lateTime;
+    public long lateTime;
     public BaseDamage damage;
     public float startImpulse;
     public GameObject owner;
@@ -160,7 +160,7 @@ public class BaseProjectile : MonoBehaviour
         float distance = mTransform.InverseTransformDirection(mRigidBody.velocity).z * 0.1f;
         if (replication)
         {
-            distance += (float)(TimeManager.Instance.NetworkTime / 1000 - lateTime) * mRigidBody.velocity.magnitude;
+            distance += (float)(TimeManager.Instance.NetworkTime  - lateTime) * mRigidBody.velocity.magnitude;
         }
 
         if (distance>0&&Physics.Raycast(mTransform.position, mRigidBody.velocity.normalized, out hit, distance))
@@ -169,12 +169,12 @@ public class BaseProjectile : MonoBehaviour
                 onBulletHit(hit);
          
         }
-		//Debug.Log("id " + projId+ " position " + mTransform.position + " rotation "+ mTransform.rotation);
+	//Debug.Log("id " + projId+ " position " + mTransform.position + " rotation "+ mTransform.rotation);
    
         if (replication)
         {
-           // Debug.Log(lateTime + " " + TimeManager.Instance.NetworkTime / 1000);
-           // transform.Translate(mRigidBody.velocity * (float)(TimeManager.Instance.NetworkTime/1000 - lateTime));
+            Debug.Log(lateTime + " " + TimeManager.Instance.NetworkTime);
+         //  transform.Translate(mRigidBody.velocity * (float)((TimeManager.Instance.NetworkTim - lateTime)/1E+3));
         }
 	//	Debug.Log("id " + projId+ " position " + mTransform.position + " rotation "+ mTransform.rotation);
         mRigidBody.useGravity = false;

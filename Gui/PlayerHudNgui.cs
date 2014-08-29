@@ -71,6 +71,7 @@ public class PlayerHudNgui : MonoBehaviour {
 		public string gunName="";
 			
      */
+	public CrosshairBehaviour crosshair;
 
     public enum HudState
     {
@@ -131,6 +132,8 @@ public class PlayerHudNgui : MonoBehaviour {
 
             if (RedTeamScore) RedTeamScore.text = gamestats.score[0].ToString();
             if (BlueTeamScore) BlueTeamScore.text = gamestats.score[1].ToString();
+			
+			CrosHair
         }
     }
     public void SetLocalPlayer(Player player)
