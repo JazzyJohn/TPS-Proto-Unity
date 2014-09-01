@@ -165,7 +165,7 @@ public class FoxView : MonoBehaviour {
 		data.PutFloat("range", range);
         data.PutInt("viewId", viewId);
         data.PutInt("projId", projId);
-        data.PutLong("timeShoot", TimeManager.Instance.NetworkTime/1E+3);
+        data.PutLong("timeShoot", TimeManager.Instance.NetworkTime);
        
 		data.PutInt("id", viewID);	
 		NetworkController.Instance.WeaponShootRequest(data);

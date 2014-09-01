@@ -48,7 +48,7 @@ public class TurretPawn : Pawn {
     void LateUpdate()
     {
         base.LateUpdate();
-        if (headTransform != null)
+        if (headTransform != null&&!isDead)
         {
             headTransform.rotation = Quaternion.LookRotation(aimRotation - myTransform.position) * startRotation;
         }

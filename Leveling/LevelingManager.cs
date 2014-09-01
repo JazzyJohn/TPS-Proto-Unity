@@ -123,7 +123,7 @@ public class LevelingManager : MonoBehaviour, LocalPlayerListener,GameListener{
 					classLvl[i]= int.Parse(node.SelectSingleNode("lvl").InnerText);
 					classExp[i++]= int.Parse(node.SelectSingleNode("exp").InnerText);
 		}
-        StartCouroutine(PassiveSkillManager.instance.InitSkillTree(XML));
+        StartCoroutine(PassiveSkillManager.instance.InitSkillTree(XML));
 		isLoaded = true;
 	}
 	//adding exp to current

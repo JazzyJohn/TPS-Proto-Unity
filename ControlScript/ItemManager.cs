@@ -530,7 +530,7 @@ public class ItemManager : MonoBehaviour {
 		if(allBuff.ContainsKey(id)){
 			return allBuff[id].listOfEffect;
 		}else{
-			new List<CharacteristicToAdd>();
+			return new List<CharacteristicToAdd>();
 		}
 		
 	}

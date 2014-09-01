@@ -601,10 +601,10 @@ public class Player : MonoBehaviour {
 		if (curPawn != null) {
 			stats.health = curPawn.health;
 			SkillBehaviour skill = currentPawn.GetMainSkill();
-			if(skill!=null){
-				stats.skill = skill.spriteName
-				stats.skillready  =skill.Available();
-			}
+		
+                stats.skill = skill;
+				
+		
 			if(curPawn.CurWeapon!=null){
 			
 				stats.gun  = curPawn.CurWeapon;
@@ -613,7 +613,7 @@ public class Player : MonoBehaviour {
                 stats.pumpCoef = curPawn.CurWeapon.PumpCoef();
 				
 			}
-			stats.jetPackCharge  = curPawn.GetJetPackCharges();
+            stats.jetPackCharge = curPawn.GetJetPackCharges() / curPawn.GetMaxJetPack() ;
 		}
 
 		

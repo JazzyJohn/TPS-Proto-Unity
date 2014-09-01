@@ -123,7 +123,7 @@ public class BaseWeapon : DestroyableNetworkObject {
 
 	public GameObject projectilePrefab;
 
-    private BaseProjectile projectileClass;
+    public BaseProjectile projectileClass;
 	
 	public GameObject pickupPrefabPrefab;
 
@@ -320,15 +320,16 @@ public class BaseWeapon : DestroyableNetworkObject {
             reloadTimer -= deltaTime;
 			return;
 		}
+        if (fireTimer >= 0)
+        {
+            fireTimer -= deltaTime;
+        }
         switch(prefiretype){
             case PREFIRETYPE.Normal:
 		        if (isShooting) {
                     ShootTick();
 		        }
-                if (fireTimer >= 0)
-                {
-                    fireTimer -= deltaTime;
-                }
+              
 
                 break;
             default:
@@ -371,10 +372,7 @@ public class BaseWeapon : DestroyableNetworkObject {
                                     break;
                             }
                         }
-                        if (fireTimer >= 0)
-                        {
-                            fireTimer -=deltaTime;
-                        }
+                       
 
                     }
                     else
@@ -409,6 +407,7 @@ public class BaseWeapon : DestroyableNetworkObject {
 										}									
 									}
 								}
+                                Debug.Log(guidanceTarget);
 							break;
 							default:
 								Pumping();
@@ -423,7 +422,10 @@ public class BaseWeapon : DestroyableNetworkObject {
                 }
                 break;
         }
-		_randShootCoef-=randCoolingEffect*deltaTime;
+        if (_randShootCoef > 0)
+        {
+            _randShootCoef -= randCoolingEffect * deltaTime;
+        }
      
 	}
 	private void Pumping(){
@@ -478,7 +480,11 @@ public class BaseWeapon : DestroyableNetworkObject {
 
                 break;
 			default:
-                Fire();
+                if (fireTimer <= 0)
+                {
+                    fireTimer = fireInterval;
+                    Fire(true);
+                }
                 break;
         }
 		isShooting = false;
@@ -490,6 +496,7 @@ public class BaseWeapon : DestroyableNetworkObject {
         if (!isPumping) {
             _pumpCoef = 0.0f;
             _pumpAmount = 0.0f;
+            guidanceTarget = null;
         }
 
     }
@@ -562,7 +569,7 @@ public class BaseWeapon : DestroyableNetworkObject {
 	
 	public bool AfterActing(){
 		if(afterPumpAction!=AFTERPUMPACTION.Wait){
-			return _pumpAmount>=pumpAmount;
+			return _pumpAmount>=pumpAmount&&!isShooting;
 		}
 		return false;
 	
@@ -575,13 +582,18 @@ public class BaseWeapon : DestroyableNetworkObject {
 				return false;
 		    case PREFIRETYPE.ChargedPower:
 			case PREFIRETYPE.ChargedAccuracy:
-			case PREFIRETYPE.Guidance:
+			
 			case PREFIRETYPE.ChargedRange:
+                return _pumpCoef >= 1.0f;
+                break;
 			case PREFIRETYPE.Salvo:
-				return _pumpCoef>=1.0f;
+                return _pumpAmount / pumpCoef >= 1.0f;
                 break;
 			 case PREFIRETYPE.Spooling:
 				return _pumpAmount>=pumpAmount;
+                break;
+             case PREFIRETYPE.Guidance:
+                return _pumpAmount >= pumpAmount;
                 break;
 			default:
                	return false;
@@ -592,7 +604,7 @@ public class BaseWeapon : DestroyableNetworkObject {
 	public virtual void AimFix(){
 
 	}
-	protected void Fire(){
+	protected void Fire(bool fromReload = false){
 		if (!CanShoot ()) {
 			return;		
 		}
@@ -604,9 +616,11 @@ public class BaseWeapon : DestroyableNetworkObject {
 		}else{
             if (alredyGunedAmmo <= 0)
             {
-                if (clipSize > 0)
+                if (clipSize > 0 )
                 {
-                    ReloadStart();
+                    if (!fromReload) { 
+                        ReloadStart();
+                    }
                     return;
                 }
             }
@@ -645,6 +659,7 @@ public class BaseWeapon : DestroyableNetworkObject {
 
     private void ActualFire()
     {
+       // Debug.Log("fire");
         switch (amunitionType)
         {
             case AMUNITONTYPE.SIMPLEHIT:
@@ -685,6 +700,7 @@ public class BaseWeapon : DestroyableNetworkObject {
         }
 		if(oneShootPump){
 			_pumpCoef=0;
+            guidanceTarget = null;
 		}
 
     }
@@ -729,13 +745,6 @@ public class BaseWeapon : DestroyableNetworkObject {
 			
 		}
 		
-		switch (prefiretype)
-        {
-            case PREFIRETYPE.Guidance:
-			guidanceTarget = null;
-
-            break;
-        }
 	}
 
 	public virtual void ChangeWeaponStatus(bool status){
@@ -783,6 +792,10 @@ public class BaseWeapon : DestroyableNetworkObject {
 			effAimRandCoef-= _pumpCoef;
 			
 		}
+        if (effAimRandCoef < 0)
+        {
+            effAimRandCoef = 0;
+        }
 		return effAimRandCoef;
 	}
 	
@@ -813,12 +826,16 @@ public class BaseWeapon : DestroyableNetworkObject {
 			case PREFIRETYPE.Guidance:
 				if(_pumpCoef>=1.0f){
 					Transform target = 	guidanceTarget;
-					guidanceTarget = null;
+                    
 					
 					if(target!=null){
 						projScript.target = target;
 						viewId = target.GetComponent<FoxView>().viewID;
-
+                        Pawn targPawn = target.GetComponent<Pawn>();
+                        if(targPawn!=null){
+                           // Debug.Log(targPawn.headOffset);
+                            projScript.targetOffset = targPawn.headOffset/2;
+                        }
 					}
 				}
 			break;
@@ -855,6 +872,12 @@ public class BaseWeapon : DestroyableNetworkObject {
 				
 					
 						proj.target = target;
+                        Pawn targPawn = target.GetComponent<Pawn>();
+                        if (targPawn != null)
+                        {
+                            //Debug.Log(targPawn.headOffset);
+                            proj.targetOffset = targPawn.headOffset / 2;
+                        }
 					}
 				break;
 			}
@@ -862,7 +885,7 @@ public class BaseWeapon : DestroyableNetworkObject {
 
 		
 	}
-    protected BaseProjectile GenerateProjectileRep(Vector3 startPoint, Quaternion startRotation, double timeShoot)
+    protected BaseProjectile GenerateProjectileRep(Vector3 startPoint, Quaternion startRotation, long timeShoot)
     {
 
 		GameObject proj=projectilePrefab.Spawn(startPoint,startRotation);

@@ -14,6 +14,7 @@ using Sfs2X.Protocol.Serialization;
 using System.Reflection;
 using nstuff.juggerfall.extension.models;
 using Sfs2X.Entities.Variables;
+using System.Threading;
 
 public enum RPCTransitTargetType
 {
@@ -145,6 +146,8 @@ public class NetworkController : MonoBehaviour {
             _smartFox.AddEventListener(SFSEvent.EXTENSION_RESPONSE, OnExtensionResponse);
             _smartFox.AddEventListener(SFSEvent.USER_VARIABLES_UPDATE, OnVariablesUpdate);
             _smartFox.AddLogListener(LogLevel.DEBUG, OnDebugMessage);
+          /*  myThread = new Thread(new ThreadStart(this.SendLoop));
+            myThread.Start();	*/	
             _smartFox.Connect(serverName, serverPort);
         }
 	}
@@ -185,7 +188,10 @@ public class NetworkController : MonoBehaviour {
     {
 		_smartFox.Disconnect();
         UnsubscribeDelegates();
-       
+        /*if (myThread != null)
+        {
+            myThread.Abort();
+        }*/
     }
     //SMARTFOX LOGIC
 
@@ -204,13 +210,19 @@ public class NetworkController : MonoBehaviour {
         if (success)
         {
             SmartFoxConnection.Connection = _smartFox;
-        }
-        Debug.Log(UID);
-        if (UID!="")
-        {
-            Login(UID);
-        }
+            Debug.Log(UID);
+            if (UID != "")
+            {
+                Login(UID);
+            }
        
+        }
+        else
+        {
+            UnsubscribeDelegates();
+            this.Connect();
+        }
+        
     }
 
     public void OnConnectionLost(BaseEvent evt)
@@ -772,15 +784,38 @@ public class NetworkController : MonoBehaviour {
         smartFox.Send(request);
 
     }
+    /*ConcurrentQueue<ExtensionRequest> outQueue = new ConcurrentQueue<ExtensionRequest>();
+
+    private Thread myThread;
+
+    private void SendLoop()
+    {
+        while (true)
+        {
+            //Debug.Log (incomeQueue.Count	);
+            while (outQueue.Count > 0)
+            {
+                ExtensionRequest mess = outQueue.Dequeue();
+                Debug.Log("SEND");
+                smartFox.Send(mess);
+            }
+           
+            //	
+
+            Thread.Sleep(10);
+        }
+    }*/
     /// <summary>
     /// pawnUpdate request to server
     /// </summary>	
     public void PawnUpdateRequest(PawnModel pawn)
     {
         ISFSObject data = new SFSObject();
+      
      
      	data.PutClass("pawn", pawn);
 	    ExtensionRequest request = new ExtensionRequest("pawnUpdate", data, serverHolder.gameRoom,true);
+        //outQueue.Enqueue(request);
         smartFox.Send(request);
 
     }
@@ -815,7 +850,7 @@ public class NetworkController : MonoBehaviour {
     public void DeleteViewRequest(int id)
     {
         ISFSObject data = new SFSObject();
-        Debug.Log("DeleteView Request");
+        //Debug.Log("DeleteView Request");
      	data.PutInt("id", id);
 	    ExtensionRequest request = new ExtensionRequest("deleteView", data, serverHolder.gameRoom);
         smartFox.Send(request);

@@ -27,6 +27,16 @@ public class Building : DamagebleObject {
     {
         RequestKillMe();
     }
+    public override void Damage(BaseDamage damage, GameObject killer)
+    {
+        Pawn killerPawn = killer.GetComponent<Pawn>();
+        if (killerPawn != null && killerPawn.team != 0 && killerPawn.team == team && !PlayerManager.instance.frendlyFire )
+        {
+
+            return;
+        }
+        base.Damage(damage, killer);
+    }
     void Update()
     {
         if (destructableObject) { 

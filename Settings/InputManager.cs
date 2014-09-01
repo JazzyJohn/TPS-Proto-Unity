@@ -91,6 +91,10 @@ public class InputManager{
 	public float GetSensitivity(){
 		return mouseSensitivity;
 	}
+
+    public string  KeyName(string name){
+        return keyMap[name].ToString();
+    }
 	 private static InputManager s_Instance = null;
 
     // This defines a static instance property that attempts to find the manager object in the scene and

@@ -47,8 +47,10 @@ public class BaseProjectile : MonoBehaviour
     public long lateTime;
     public BaseDamage damage;
     public float startImpulse;
+    private float curSpeed;
     public GameObject owner;
     public Transform target;
+    public Vector3 targetOffset; 
     public float range;
     public float minDamageRange;
     static float minimunProcent = 0.1f;
@@ -105,11 +107,13 @@ public class BaseProjectile : MonoBehaviour
     /// <summary>
     /// Define is attraction of projectile
     /// </summary>
-    public enum ATTRACTION { NoAttraction, Gravitation, Target, LaserGuidance, Homing }
+    public enum ATTRACTION { NoAttraction, Target, LaserGuidance, Homing }
 
     public ATTRACTION attraction;
 
     public float attractionCoef;
+
+    private float _attractionCoef;
     /// <summary>
     /// Define is trajectory of projectile
     /// </summary>
@@ -137,10 +141,12 @@ public class BaseProjectile : MonoBehaviour
     }
    public void Init(){
         shouldInit = false;
+
 		switch (attraction)
         {
           
             case ATTRACTION.Homing:
+            case ATTRACTION.Target:
             case ATTRACTION.LaserGuidance:
 				if(target==null){
 					attraction =ATTRACTION.NoAttraction;
@@ -149,12 +155,13 @@ public class BaseProjectile : MonoBehaviour
 			
 		}
         ProjectileManager.instance.AddProject(projId, this);
- 
+        _attractionCoef = attractionCoef;
         damage.splash = splashRadius>0;
 		
         startPosition = mTransform.position;
 
         mRigidBody.velocity = mTransform.TransformDirection(Vector3.forward * startImpulse);
+        curSpeed = startImpulse;
 		
         RaycastHit hit;
         float distance = mTransform.InverseTransformDirection(mRigidBody.velocity).z * 0.1f;
@@ -177,32 +184,54 @@ public class BaseProjectile : MonoBehaviour
          //  transform.Translate(mRigidBody.velocity * (float)((TimeManager.Instance.NetworkTim - lateTime)/1E+3));
         }
 	//	Debug.Log("id " + projId+ " position " + mTransform.position + " rotation "+ mTransform.rotation);
-        mRigidBody.useGravity = false;
+       // mRigidBody.useGravity = false;
     }
    
 
 
-    protected void Update()
+    protected void FixedUpdate()
     {
         
         RaycastHit hit;
-
+        switch (speedChange)
+        {
+            case SPEEDCHANGE.Acceleration:
+                curSpeed += Time.deltaTime * speedChangeCoef;
+                break;
+            case SPEEDCHANGE.Deceleration:
+                curSpeed -= Time.deltaTime * speedChangeCoef;
+                break;
+        }
+        Vector3 result = Vector3.zero;
         switch (attraction)
         {
             case ATTRACTION.Target:
-                mRigidBody.AddForce((target.position - mTransform.position).normalized * attractionCoef, ForceMode.Acceleration);
+                //Debug.Log(targetOffset);
+                Vector3 preVel = ((target.position + targetOffset) - mTransform.position);
+                _attractionCoef += _attractionCoef * trajectoryCoef*Time.fixedDeltaTime;
+                preVel = Vector3.Cross(preVel, mTransform.up) + preVel.normalized * _attractionCoef;
+                result = Vector3.Lerp(mRigidBody.velocity, preVel.normalized * curSpeed, Time.deltaTime * trajectoryCoef) - mRigidBody.velocity;
+               // Quaternion rotation = Quaternion.LookRotation(((target.position + targetOffset) - mTransform.position).normalized);
+               // mRigidBody.velocity = rotation * mRigidBody.velocity;
                 break;
             case ATTRACTION.Homing:
             case ATTRACTION.LaserGuidance:
-                Quaternion rotation = Quaternion.LookRotation((target.position - mTransform.position).normalized);
-                mRigidBody.velocity = rotation * mRigidBody.velocity;
+
+
+                result = Vector3.Lerp(mRigidBody.velocity, ((target.position + targetOffset) - mTransform.position).normalized * curSpeed, Time.deltaTime * _attractionCoef) - mRigidBody.velocity;
                 break;
-            case ATTRACTION.Gravitation:
-
-                mRigidBody.AddForce(new Vector3(0, -Pawn.gravity * rigidbody.mass * attractionCoef, 0));
+            case ATTRACTION.NoAttraction:
+               
+                result = mRigidBody.velocity.normalized * curSpeed - mRigidBody.velocity;
                 break;
+           
 
 
+        }
+        if (result.sqrMagnitude!=0)
+        {
+            mRigidBody.AddForce(result, ForceMode.VelocityChange);
+          
         }
         mTransform.rotation = Quaternion.LookRotation(mRigidBody.velocity);
         if (Physics.Raycast(transform.position, mRigidBody.velocity.normalized, out hit, mRigidBody.velocity.magnitude*0.1f))
@@ -213,15 +242,7 @@ public class BaseProjectile : MonoBehaviour
             
         }
 
-        switch (speedChange)
-        {
-            case SPEEDCHANGE.Acceleration:
-                mRigidBody.AddForce(mRigidBody.velocity.normalized * Time.deltaTime * speedChangeCoef, ForceMode.Acceleration);
-                break;
-            case SPEEDCHANGE.Deceleration:
-                mRigidBody.AddForce(mRigidBody.velocity.normalized * Time.deltaTime * speedChangeCoef, ForceMode.Acceleration);
-                break;
-        }
+    
         switch (trajectory)
         {
             case TRAJECTORY.Corkscrew:
@@ -419,18 +440,17 @@ public class BaseProjectile : MonoBehaviour
                     {
                         proojHitCnt++;
 
-                        mRigidBody.velocity = mRigidBody.velocity + 2 * Vector3.Project(mRigidBody.velocity, hit.normal);
+                        mRigidBody.velocity = mRigidBody.velocity - 2 * Vector3.Project(mRigidBody.velocity, hit.normal);
 
                         ProjectileManager.instance.InvokeRPC("NewVelocity", projId, mRigidBody.velocity, proojHitCnt);
                     }
-                    else
+                    
+                    if (proojHitCnt >= projHitMax)
                     {
-                        if (proojHitCnt >= projHitMax)
-                        {
-                            ExplosionDamage(exploPosition);
+                        ExplosionDamage(exploPosition);
                             
-                        }
                     }
+                    
                     break;
                 case HITEFFECT.Penetration:
                     if (!replication)
@@ -438,16 +458,15 @@ public class BaseProjectile : MonoBehaviour
                         proojHitCnt++;
                         ProjectileManager.instance.InvokeRPC("NewHitCount", projId, proojHitCnt);
                     }
-                    else
+                    
+                    if (proojHitCnt >= projHitMax)
                     {
-                        if (proojHitCnt >= projHitMax)
-                        {
 
-                            ExplosionDamage(exploPosition);
+                        ExplosionDamage(exploPosition);
                             
                           
-                        }
                     }
+                   
                     break;
                 case HITEFFECT.Cluster:
                     //TODO CLASTER LOGIC:

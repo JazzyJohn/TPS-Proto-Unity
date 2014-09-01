@@ -4,13 +4,9 @@ using System.Collections.Generic;
 
 
 public class PlayerMainGui : MonoBehaviour {
-	public Texture crosshair;
-
-	public float crosshairHeight;
 
 	public HUDText P1Hud;
 
-	public float crosshairWidth;
 
 	public Player LocalPlayer;
 
@@ -92,8 +88,8 @@ public class PlayerMainGui : MonoBehaviour {
 		public float reloadTime=0;
 		public float jetPackCharge= 0;
         public float pumpCoef = 0;
-		public string skill="";
-		public bool skillready;
+		public SkillBehaviour skill;
+		
 	       
 	}
 	public class LevelStats{
@@ -492,8 +488,7 @@ public class PlayerMainGui : MonoBehaviour {
 	void MainHud(){
 		float screenX = Screen.width, screenY = Screen.height;
 		//Screen.lockCursor = true;
-		Rect crosrect = new Rect ((screenX - crosshairWidth) / 2, (screenY - crosshairHeight) / 2, crosshairWidth, crosshairHeight);
-		GUI.Label (crosrect, crosshair);
+		
 		hud.Activate();
 		/*Pawn myPawn = LocalPlayer.GetCurrentPawn ();
 
@@ -619,7 +614,7 @@ public class PlayerMainGui : MonoBehaviour {
 	}
 
 	void DedicatedDraw(){
-		float screenX = Screen.width, screenY = Screen.height;
+		/*float screenX = Screen.width, screenY = Screen.height;
         GameStats gamestats = GameRule.instance.GetStats();
 		Rect rectforName = new Rect ((screenX - crosshairWidth * 10) / 2, crosshairHeight, crosshairWidth * 10, crosshairHeight);
 		GUI.Label (rectforName, FormTeamName (1) + gamestats.score [0] + "|" + gamestats.maxScore + " |" + FormTeamName (2) + gamestats.score [1]);
@@ -631,7 +626,7 @@ public class PlayerMainGui : MonoBehaviour {
 			GUI.Label (messRect, players [i].GetName () +"    Kill:"+players [i].Score.Kill +"    Death:"+players [i].Score.Death +"    Assist:"+players [i].Score.Assist);
 			
 			
-		}
+		}*/
 
 	}
 	

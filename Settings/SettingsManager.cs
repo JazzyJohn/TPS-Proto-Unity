@@ -88,7 +88,7 @@ public class SettingsManager: MonoBehaviour{
     public const float TIMECHECK = 5.0f;
     public void CheckSetting(int fps)
     {
-        if (GameRule.instance == null || !GameRule.instance.start)
+       /* if (GameRule.instance == null || !GameRule.instance.start)
         {
             return;
         }
@@ -118,7 +118,7 @@ public class SettingsManager: MonoBehaviour{
                 QualitySettings.IncreaseLevel();
                 PlayerPrefs.SetFloat("GraphicQuality", QualitySettings.GetQualityLevel()); 
             }
-        }
+        }*/
 
 
     }

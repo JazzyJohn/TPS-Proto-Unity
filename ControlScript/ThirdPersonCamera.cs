@@ -99,7 +99,7 @@ public class ThirdPersonCamera : PlayerCamera
 		return Mathf.Abs(b - a);
 	}
 	
-	void  Apply ( Transform dummyTarget ,   Vector3 dummyCenter  ){
+	void  Apply (   ){
 		// Early out if we don't have a target
 		/*if (!controller)
 			return;
@@ -297,7 +297,7 @@ public class ThirdPersonCamera : PlayerCamera
 			Camera.main.fieldOfView =startFov;
 			
 		}
-		Apply (transform, Vector3.zero);
+		Apply ();
 	}
 	
     protected 	override void  Cut ( Transform dummyTarget ,   Vector3 dummyCenter  ){
@@ -310,7 +310,7 @@ public class ThirdPersonCamera : PlayerCamera
 		heightSmoothLag = 0.001f;
 		
 		snap = true;
-		Apply (transform, Vector3.zero);
+		Apply ();
 		
 		heightSmoothLag = oldHeightSmooth;
 		snapMaxSpeed = oldSnapMaxSpeed;

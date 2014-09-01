@@ -25,7 +25,7 @@ public class TimeManager : MonoBehaviour {
 	private bool synchronized = false;
 		
 	private long lastServerTime = 0;
-	private long lastLocalTime = 0;
+	private double lastLocalTime = 0;
 	
 	private bool running = false;
 	
@@ -58,14 +58,14 @@ public class TimeManager : MonoBehaviour {
     }	
 	public void Synchronize(long timeValue) {
 		// Measure the ping in milliseconds
-		long ping = (Time.time - timeBeforeSync)*1000;
+		long ping =(long) (Time.time - timeBeforeSync)*1000;
 		CalculateAveragePing(ping);
 				
 		// Take the time passed between server sends response and we get it 
 		// as half of the average ping value
-		long timePassed = averagePing / 2.0f;
+		long timePassed = averagePing / 2;
 		lastServerTime = timeValue + timePassed;
-		lastLocalTime = Time.time;
+        lastLocalTime = Time.time;
 		
 		synchronized = true;	
 	}
@@ -89,7 +89,7 @@ public class TimeManager : MonoBehaviour {
 	public long NetworkTime {
 		get {
 			// Taking server timestamp + time passed locally since the last server time received			
-			return (Time.time - lastLocalTime)*1000 + lastServerTime;
+			return ((long)(Time.time - lastLocalTime)*1000 )+ lastServerTime;
 		}
 	}
 			

@@ -1563,7 +1563,7 @@ public class Pawn : DamagebleObject {
 	public SkillBehaviour GetMainSkill(){
 		if (skillManager != null)
         {
-            skillManager.GetSkill(0);
+            return skillManager.GetSkill(0);
         }
 		return null;
 	}
@@ -2259,6 +2259,11 @@ public class Pawn : DamagebleObject {
 		return jetPackCharge;
 	
 	}
+    public float GetMaxJetPack()
+    {
+        return charMan.GetFloatChar(CharacteristicList.JETPACKCHARGE);
+    }
+
 	public void DidLand(){
 
 		//Debug.Log ("LAND");

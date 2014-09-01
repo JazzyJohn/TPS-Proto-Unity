@@ -54,9 +54,9 @@ public class PassiveSkillClass {
 		
 		return cached;
 	}
-	public void One(int id){
+	public void Open(int id){
 		allSkill[id].open = true;
-		openSkills.Add();
+        openSkills.Add(id);
 		cached=null;
 	}
 	public bool CanOpen(int id){
@@ -115,8 +115,8 @@ public class PassiveSkillManager : MonoBehaviour
 				WWW www = StatisticHandler.GetMeRightWWW( skillNode.SelectSingleNode ("guiimage").InnerText);
 			
 				yield return www;
-				skill.textureGUI = new Texture2D(www.texture.width, www.texture.height);
-				www.LoadImageIntoTexture(skill.textureGUI);
+                skill.iconGUI = new Texture2D(www.texture.width, www.texture.height);
+                www.LoadImageIntoTexture(skill.iconGUI);
                 skillClass.allSkill[skill.id] = skill;
 			}
             skillClass.totalPoint = totalSkill;
@@ -134,7 +134,7 @@ public class PassiveSkillManager : MonoBehaviour
 		}
 	}
 	public List<int>  GetSkills(int classID){
-		if(allSkill.ContainsKey(classID)){
+		if(allSkill.Length>classID){
 			return allSkill[classID].GetSkills();
 		}else{
 			return new List<int>();

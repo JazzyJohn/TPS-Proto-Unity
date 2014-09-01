@@ -26,7 +26,7 @@ public enum AnnonceType
 public class PlayerHudNgui : MonoBehaviour {
 
     private Player LocalPlayer;
-    PlayerMainGui.PlayerStats Stats= null;
+    public PlayerMainGui.PlayerStats Stats= null;
     
 
 
@@ -132,8 +132,8 @@ public class PlayerHudNgui : MonoBehaviour {
 
             if (RedTeamScore) RedTeamScore.text = gamestats.score[0].ToString();
             if (BlueTeamScore) BlueTeamScore.text = gamestats.score[1].ToString();
-			
-			CrosHair
+
+            crosshair.UpdateCrosshair(Stats);
         }
     }
     public void SetLocalPlayer(Player player)
