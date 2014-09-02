@@ -8,6 +8,8 @@ using nstuff.juggerfall.extension.models;
 
 
 public class FoxView : MonoBehaviour {
+	private static ISFSArray sendProj =null;
+
 	public Pawn pawn;
 	
 	public BaseWeapon weapon;
@@ -168,7 +170,11 @@ public class FoxView : MonoBehaviour {
         data.PutLong("timeShoot", TimeManager.Instance.NetworkTime);
        
 		data.PutInt("id", viewID);	
-		NetworkController.Instance.WeaponShootRequest(data);
+		if(sendProj==null){
+			sendProj = new SFSArray();
+		}
+		sendProj.addSFSObject(sendProj);
+		//NetworkController.Instance.WeaponShootRequest(data);
 	}
 	public void SkillCastEffect(string name){
         NetworkController.Instance.SkillCastEffectRequest(viewID, name);
@@ -230,5 +236,14 @@ public class FoxView : MonoBehaviour {
         NetworkController.Instance.CustomAnimStartRequest(viewID, animName);
     }
 	
+	public static void  SendShoot(){
+		if(sendProj==null){
+			return;
+		}
+		ISFSObject data = new SFSObject();
+		data.PutSFSArray("shoots",sendProj);
+		sendProj= null;
+		NetworkController.Instance.WeaponShootRequest(data);
+	}
 	
 }

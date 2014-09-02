@@ -166,6 +166,9 @@ public class NetworkController : MonoBehaviour {
 		}
         
 	}
+	public void Update(){
+		FoxView.SendShoot();
+	}
     string UID = "";
     public void SetLogin(string username)
     {
@@ -1399,13 +1402,18 @@ public class NetworkController : MonoBehaviour {
     /// </summary>	
 	
 	
-	public void HanldeWeaponShoot(ISFSObject dt )
+	public void HanldeWeaponShoot(ISFSObject allDt )
     {
-		BaseWeapon weapon = GetView(dt.GetInt("id")).weapon;
+		ISFSArray shoots = allDt.getSFSArray("shoots");
+		foreach (SFSObject dt in shoots)
+		{  
+			BaseWeapon weapon = GetView(dt.GetInt("id")).weapon;
 		
-		weapon.RemoteGenerate(((Vector3Model)dt.GetClass("position")).GetVector(),
+			weapon.RemoteGenerate(((Vector3Model)dt.GetClass("position")).GetVector(),
 								((QuaternionModel)dt.GetClass("direction")).GetQuat(),
 								dt.GetFloat("power"),dt.GetFloat("range"),dt.GetInt("viewId"),dt.GetInt("projId"),dt.GetLong("timeShoot"));
+		}
+		
 								
 	}	
 	/// <summary>

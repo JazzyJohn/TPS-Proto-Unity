@@ -49,12 +49,15 @@ public class BaseShootgun : BaseWeapon {
                 projScript.projId = ProjectileManager.instance.GetNextId();
                 projScript.replication = false;
 				if (foxView.isMine) {
-                    foxView.SendShoot(startPoint, startRotation, power, range, viewId, projScript.projId);
+                    foxView.PrepareShoot(startPoint, startRotation, power, range, viewId, projScript.projId);
 				}
 				
                
 				projScript.damage = new BaseDamage (damageAmount);
 				projScript.owner = owner.gameObject;
+				projScript.damage.Damage+=power;
+				projScript.range+=range;
+				projScript.Init();
 		}
 	}
 

@@ -275,6 +275,7 @@ public class BaseWeapon : DestroyableNetworkObject {
 	}
     void Update()
     {
+		
         if (foxView.isMine)
         {
             if (isShooting)
@@ -707,7 +708,7 @@ public class BaseWeapon : DestroyableNetworkObject {
 
     public virtual void AfterShootLogic()
     {
-
+		
     }
 	public virtual bool CanShoot (){
         if (_waitForRelease)
@@ -844,7 +845,7 @@ public class BaseWeapon : DestroyableNetworkObject {
         projScript.projId = ProjectileManager.instance.GetNextId();
         projScript.replication = false;
 		if (foxView.isMine) {
-            foxView.SendShoot(startPoint, startRotation, power, range, viewId, projScript.projId);
+            foxView.PrepareShoot(startPoint, startRotation, power, range, viewId, projScript.projId);
 		}
 		
 		
