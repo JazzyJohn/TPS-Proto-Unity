@@ -57,8 +57,20 @@ public class PlayerHudNgui : MonoBehaviour {
     public UILabel BlueTeamScore;
 
 	public UIPanel hudpanel;
-
-    public string[] annonceSprites;
+	[System.Serializable]
+	public class OneAnnonce{
+		public  string sprite;
+		
+		public int priority;
+		
+	}
+    public OneAnnonce[] annonceSprites;
+	
+	public int curAnnonce;
+	
+	public UISprite annonce;
+    
+	public UITweener annonceTweener;
 
     /*
         public float robotTime=0;
@@ -153,14 +165,18 @@ public class PlayerHudNgui : MonoBehaviour {
             hudpanel.enabled = false;
         }
 	}
-    public UISprite annonce;
-    public UITweener annonceTweener;
+
     public void Annonce(AnnonceType type)
     {
         if (annonce.enabled == false) {
             annonce.enabled = true;
-        }
-        annonce.spriteName = annonceSprites[(int)type];
+        }else{
+			if(annonceSprites[curAnnonce].priority>annonceSprites[(int)type].priority){
+				return;
+			}
+		}
+		curAnnonce =(int)type;
+        annonce.spriteName = annonceSprites[curAnnonce].sprite;
         annonceTweener.tweenFactor = 0.0f;
         annonceTweener.PlayForward();
 

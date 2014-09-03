@@ -79,7 +79,7 @@ public class NetworkController : MonoBehaviour {
 	public void MasterViewUpdate(){
 		foreach(FoxView view in foxViewList.Values){
             
-            if (view.isSceneView)
+            if (view.IsOnMasterControll())
             {
                 Debug.Log("MasterViewUpdate" + view);
                 if (view.viewID == 0)
@@ -145,6 +145,7 @@ public class NetworkController : MonoBehaviour {
             _smartFox.AddEventListener(SFSEvent.UDP_INIT, OnUdpInit);
             _smartFox.AddEventListener(SFSEvent.EXTENSION_RESPONSE, OnExtensionResponse);
             _smartFox.AddEventListener(SFSEvent.USER_VARIABLES_UPDATE, OnVariablesUpdate);
+			_smartFox.AddEventListener(SFSEvent.USER_EXIT_ROOM, HandlePlayerLeaveEvent);
             _smartFox.AddLogListener(LogLevel.DEBUG, OnDebugMessage);
           /*  myThread = new Thread(new ThreadStart(this.SendLoop));
             myThread.Start();	*/	
@@ -1574,8 +1575,12 @@ public class NetworkController : MonoBehaviour {
 
     public void HandlePlayerLeave(ISFSObject dt)
     {
-      
+		
         int playerID =dt.GetInt("playerId");
+		Debug.Log("PLAYER LEAVE"+playerID);
+		if (!PlayerView.allPlayer.ContainsKey(playerID)){
+			return;
+		}
         Destroy(PlayerView.allPlayer[playerID].gameObject);
         PlayerView.allPlayer.Remove(playerID);
         foreach (int viewId in dt.GetSFSArray("views"))
@@ -1587,7 +1592,37 @@ public class NetworkController : MonoBehaviour {
             }   
         }
 
+
     }
+	  /// <summary>
+    ///handle player leave by std Event;
+    /// </summary>	
+
+    public void HandlePlayerLeaveEvent(BaseEvent evt) 
+    {
+		Room room = (Room)evt.Params["room"];
+		User user = (User)evt.Params["user"];
+		if(room.Id!=serverHolder.gameRoom.Id){
+			return;
+		}
+		
+        int playerID =user.GetPlayerId();
+		Debug.Log("PLAYER LEAVE"+playerID);
+		if (!PlayerView.allPlayer.ContainsKey(playerID)){
+			return;
+		}
+		//
+        Destroy(PlayerView.allPlayer[playerID].gameObject);
+   
+       	foreach(FoxView view in foxViewList.Values){
+			if(view.IsOwner(playerID)){
+				Destroy(view.gameObject);
+			}
+		}
+
+    }
+	
+	
     /// <summary>
     /// handle pawnInPilotChange  from Server
     /// </summary>	
@@ -1674,6 +1709,7 @@ public class NetworkController : MonoBehaviour {
             pawn.foxView.SetMine(false);
             pawn.AnotherEnter();
         }	
+		pawn.foxView.SetOwner(dt.GetInt("userId"));
 		if(player.team==1){
 			PlayerMainGui.instance.Annonce(AnnonceType.INTEGRATAKEJUGGER);
 		}else{

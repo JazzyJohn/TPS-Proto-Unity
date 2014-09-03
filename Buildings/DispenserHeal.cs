@@ -3,9 +3,9 @@ using System.Collections;
 
 public class DispenserHeal : Building
 {
-    public float healthRate;
+    public float healthRate=10.0f;
 
-    public float overHealMax;
+    public float overHealMax=1.5f;
 
     public GameObject go;
 

@@ -79,7 +79,14 @@ public class FoxView : MonoBehaviour {
 			SimpleNetModel view= new SimpleNetModel();
             view.id = viewID;
 			NetworkController.Instance.RegisterSceneViewRequest(view);
-		} 		
+		} 
+	
+	}
+	public void SetOwner(int ownerId){
+		this.ownerId = ownerId;
+	}
+	public bool IsOwner(int ownerId){
+		return this.ownerId == ownerId;
 	}
     /*
 	public void UDP(SFSObject data)

@@ -674,7 +674,7 @@ public class Pawn : DamagebleObject {
 
     public bool IsMaxHP()
     {
-        int maxHealth = charMan.GetIntChar(CharacteristicList.MAXHEALTH);
+        int maxHealth =GetMaxHealth();
         return maxHealth <= health;
     }
     public void SetTeam(int team)
@@ -1126,9 +1126,7 @@ public class Pawn : DamagebleObject {
 
 
 			}
-			//TODO: TEMP SOLUTION BEFORE NORMAL BONE ORIENTATION
 			
-			//animator.SetFloat("Pitch",pitchAngle);
             SendNetUpdate();
 			if(isAi){
 				CheckVisibilite();
@@ -1220,7 +1218,7 @@ public class Pawn : DamagebleObject {
 	public void ReplicatePosition(){
         if (Time.time - lastNetUpdate > 2.0f)
         {
-			StopReplicationVisibilite();
+			//StopLocalVisibilite();
 		}
 		if (initialReplication) {
 			myTransform.position = correctPlayerPos;
@@ -2594,7 +2592,7 @@ public class Pawn : DamagebleObject {
         if (isAi) {
 			mainAi.StartAI();
             
-            RestartReplicationVisibilite();
+           RestartLocalVisibilite();
 		}
     }
 	
@@ -2642,21 +2640,12 @@ public class Pawn : DamagebleObject {
 		float oldTime =lastNetUpdate;
         lastNetUpdate = Time.time;
 		replicatedVelocity = replicatedVelocity/(oldTime-lastNetUpdate);
-		RestartReplicationVisibilite();
+		RestartLocalVisibilite();
     }
-	//For that object that far from us we turn off gameobject on remote machine
-	public void RestartReplicationVisibilite(){
-        if (!gameObject.activeSelf)
-        {
-			gameObject.SetActive(true);
-		}
-	}
-	//For that object that close to us we turn on gameobject on remote machine
-	public void StopReplicationVisibilite(){
-		gameObject.SetActive(false);
-	}
 
-	//For Local machine we turn off render but leave logic and movement 
+	
+
+	//For machine we turn off render but leave logic and movement 
 	public void RestartLocalVisibilite(){
 		if(!isLocalVisible){
 			for (int i =0; i<myTransform.childCount; i++) {
@@ -2665,7 +2654,7 @@ public class Pawn : DamagebleObject {
 			isLocalVisible =true;
 		}
 	}
-	//For Local machine we turn on render 
+	//For machine we turn on render 
 	public void StopLocalVisibilite(){
         isLocalVisible = false;
 		for (int i =0; i<myTransform.childCount; i++) {

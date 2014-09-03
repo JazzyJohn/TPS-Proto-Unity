@@ -287,6 +287,9 @@ public class ThirdPersonCamera : PlayerCamera
 	}
 
 	void  LateUpdate (){
+		if(!_pawn.foxView.isMine){
+			return;
+		}
 		if (_pawn.IsSprinting ()&&!closeFOV) {
 			closeFOV=true;
 			Camera.main.fieldOfView =sprintFov;
