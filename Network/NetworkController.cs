@@ -477,6 +477,9 @@ public class NetworkController : MonoBehaviour {
                 case "AISpawnBot":
                     HandleAISpawnBot(dt);
                     break;
+				case "changeWeaponShootState":
+					HandleChangeWeaponShootState(dt);
+					break;
 
 
             }
@@ -1249,10 +1252,27 @@ public class NetworkController : MonoBehaviour {
 		smartFox.Send(request);
 
     }
+	 /// <summary>
+    /// changeWeaponShootState request to server
+    /// </summary>	
+
+    public void ChangeWeaponShootStateRequest(int weaponId,bool state)
+    {
+        ISFSObject data = new SFSObject();
+        data.PutInt("id", weaponId);
+        data.PutBool("state", state);
+        ExtensionRequest request = new ExtensionRequest("changeWeaponShootState", data, serverHolder.gameRoom);
+		smartFox.Send(request);
+
+    }
 	
 	
 	
 
+	
+	
+	
+	
 
 
     //Handler SECTION
@@ -1773,6 +1793,18 @@ public class NetworkController : MonoBehaviour {
         AIDirector.instance.swarms[dt.GetInt("swarmId")].SpawnBot(dt.GetUtfString("prefabName"), dt.GetInt("id"), ((Vector3Model)dt.GetClass("position")).GetVector());
       
 
+    }
+	 /// <summary>
+    /// handle changeWeaponShootState  request to server
+    /// </summary>	
+    public void HandleChangeWeaponShootState(ISFSObject dt)
+    {
+        BaseWeapon weapon = GetView(dt.GetInt("id")).weapon;
+		if(dt.GetBool("state")){
+			weapon.StartFire();
+		}else{
+			weapon.StopFire();
+		}
     }
 
 }

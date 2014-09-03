@@ -241,7 +241,12 @@ public class FoxView : MonoBehaviour {
     public void CustomAnimStart(string animName)
     {
         NetworkController.Instance.CustomAnimStartRequest(viewID, animName);
+
     }
+	
+	public void ChangeWeaponShootState(bool state){
+		  NetworkController.Instance.ChangeWeaponShootStateRequest(viewID, state);
+	}
 	
 	public static void  SendShoot(){
 		if(sendProj==null){

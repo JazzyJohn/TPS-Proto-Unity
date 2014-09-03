@@ -38,6 +38,9 @@ public class ContiniusGun : BaseWeapon
 		sControl.playFullClip (fireSound);
 		rifleParticleController.StartFlame ();
 		AOECollider.GetComponent<BoxCollider>().size = colliderUnableSize;
+		if(foxView.isMine){
+			foxView.ChangeWeaponShootState(true);
+		}
 	}
 	public override void StopFire(){
 		base.isShooting = false;
@@ -45,6 +48,9 @@ public class ContiniusGun : BaseWeapon
 		rifleParticleController.StopFlame ();
 		AOECollider.GetComponent<BoxCollider>().size = colliderDisableSize;
 		base.ReleaseFire();
+		if(foxView.isMine){
+			foxView.ChangeWeaponShootState(false);
+		}
 	}
 	
 	public override void AimFix(){

@@ -369,6 +369,7 @@ public class BaseWeapon : DestroyableNetworkObject {
                                 case AFTERPUMPACTION.Damage:
                                     BaseDamage selfdamage = new BaseDamage(damageAmount);
                                     selfdamage.Damage = deltaTime*afterPumpCoef;
+									selfdamage.sendMessage= false;
                                     owner.Damage(selfdamage, owner.gameObject);
                                     break;
                             }

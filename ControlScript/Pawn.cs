@@ -548,7 +548,8 @@ public class Pawn : DamagebleObject {
         if (lastPainSound + 1.0f < Time.time && painSoundsArray.Length>0)
         {
 			lastPainSound =Time.time;
-						sControl.playClipsRandom (painSoundsArray);
+			sControl.playClipsRandom (painSoundsArray);
+			 AddEffect(damage.hitPositio
 		}
 		
 
