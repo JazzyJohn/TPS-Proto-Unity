@@ -18,8 +18,16 @@ public class AISwarm_QuantizeWave : AISwarm
         base.AgentKilled(ai);
         _alreadyDead++; 
     }
-   
-  
+
+    public override void DeActivate()
+    {
+        base.DeActivate();
+        Hunt_PVPGameRule rule = GameRule.instance as Hunt_PVPGameRule;
+        if (rule != null)
+        {
+            rule.LastWaveAnonce();
+        }
+    }
 	public override  void DrawCheck(){
        
 		base. DrawCheck();
@@ -38,7 +46,11 @@ public class AISwarm_QuantizeWave : AISwarm
         _curWave++;
         _alreadyDead = 0;
 		SendMessage("NextWave", SendMessageOptions.DontRequireReceiver);
-		
+        Hunt_PVPGameRule rule=  GameRule.instance as Hunt_PVPGameRule;
+        if (rule != null)
+        {
+            rule.NextWave(_curWave);
+        }
 	}
     public override void SendData(ISFSObject swarmSend)
     {

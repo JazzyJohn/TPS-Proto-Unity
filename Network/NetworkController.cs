@@ -1425,7 +1425,7 @@ public class NetworkController : MonoBehaviour {
 	
 	public void HanldeWeaponShoot(ISFSObject allDt )
     {
-		ISFSArray shoots = allDt.getSFSArray("shoots");
+		ISFSArray shoots = allDt.GetSFSArray("shoots");
 		foreach (SFSObject dt in shoots)
 		{  
 			BaseWeapon weapon = GetView(dt.GetInt("id")).weapon;
@@ -1534,7 +1534,7 @@ public class NetworkController : MonoBehaviour {
     {
        Debug.Log("GAME START");
         GameRule.instance.StartGame();
-        TimeManager.Instance.Init();
+      
     }	
 
     /// <summary>
@@ -1625,8 +1625,8 @@ public class NetworkController : MonoBehaviour {
 		if(room.Id!=serverHolder.gameRoom.Id){
 			return;
 		}
-		
-        int playerID =user.GetPlayerId();
+
+        int playerID = user.Id;
 		Debug.Log("PLAYER LEAVE"+playerID);
 		if (!PlayerView.allPlayer.ContainsKey(playerID)){
 			return;

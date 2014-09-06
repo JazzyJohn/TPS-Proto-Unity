@@ -6,7 +6,13 @@ public class TurretPawn : Pawn {
 	public Transform headTransform;
     public Quaternion startRotation;
 
+    public ShowOnGuiComponent guiMark;
 
+    protected void Awake()
+    {
+        this.guiMark = GetComponent<ShowOnGuiComponent>();
+        base.Awake();
+    }
 	public void FixedUpdate () {
 
 	}
@@ -50,6 +56,7 @@ public class TurretPawn : Pawn {
         base.LateUpdate();
         if (headTransform != null&&!isDead)
         {
+            guiMark.team = team;
             headTransform.rotation = Quaternion.LookRotation(aimRotation - myTransform.position) * startRotation;
         }
     }

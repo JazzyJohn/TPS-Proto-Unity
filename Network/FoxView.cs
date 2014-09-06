@@ -163,7 +163,7 @@ public class FoxView : MonoBehaviour {
     {
         NetworkController.Instance.DetonateRequest(viewID);
     }
-    public void SendShoot(Vector3 position, Quaternion rotation, float power, float range, int viewId, int projId)
+    public void PrepareShoot(Vector3 position, Quaternion rotation, float power, float range, int viewId, int projId)
     {
 		
 		ISFSObject data = new SFSObject();
@@ -180,7 +180,7 @@ public class FoxView : MonoBehaviour {
 		if(sendProj==null){
 			sendProj = new SFSArray();
 		}
-		sendProj.addSFSObject(sendProj);
+        sendProj.AddSFSObject(data);
 		//NetworkController.Instance.WeaponShootRequest(data);
 	}
 	public void SkillCastEffect(string name){

@@ -290,6 +290,7 @@ public class ThirdPersonCamera : PlayerCamera
 		if(!_pawn.foxView.isMine){
 			return;
 		}
+        Debug.Log("move me" + this);
 		if (_pawn.IsSprinting ()&&!closeFOV) {
 			closeFOV=true;
 			Camera.main.fieldOfView =sprintFov;

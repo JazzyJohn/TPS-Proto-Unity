@@ -45,6 +45,7 @@ public class TimeManager : MonoBehaviour {
 		pingValues = new long[averagePingCount];
 		pingCount = 0;
 		pingValueIndex = 0;
+        Debug.Log("timer");
 		running = true;
 	}
     /// <summary>
@@ -89,7 +90,7 @@ public class TimeManager : MonoBehaviour {
 	public long NetworkTime {
 		get {
 			// Taking server timestamp + time passed locally since the last server time received			
-			return ((long)(Time.time - lastLocalTime)*1000 )+ lastServerTime;
+            return (long)((Time.time - lastLocalTime) * 1000) + lastServerTime;
 		}
 	}
 			

@@ -25,7 +25,7 @@ public class PlayerCamera : MonoBehaviour {
         headOffset = centerOffset;
         headOffset.y = characterController.bounds.max.y - _target.position.y;
 
-        Cut(_target, centerOffset);
+        //Cut(_target, centerOffset);
     }
     protected virtual void Cut(Transform dummyTarget, Vector3 dummyCenter)
     {

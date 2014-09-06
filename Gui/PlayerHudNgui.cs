@@ -171,7 +171,9 @@ public class PlayerHudNgui : MonoBehaviour {
         if (annonce.enabled == false) {
             annonce.enabled = true;
         }else{
-			if(annonceSprites[curAnnonce].priority>annonceSprites[(int)type].priority){
+            if (annonceSprites[curAnnonce].priority > annonceSprites[(int)type].priority && annonce.alpha>0)
+            {
+                Debug.Log("return by priprity");
 				return;
 			}
 		}

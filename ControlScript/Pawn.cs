@@ -183,6 +183,8 @@ public class Pawn : DamagebleObject {
 	public float wallRunSpeed;
 
 	public float aiVelocityChangeMax = 1.0f;
+    
+    public float flyForwardSpeed;
 
 	public float groundSprintSpeed;
 
@@ -474,6 +476,8 @@ public class Pawn : DamagebleObject {
 
         groundSprintSpeed = groundSprintSpeed * GetPercentValue(CharacteristicList.SPEED);
 
+        flyForwardSpeed = flyForwardSpeed * GetPercentValue(CharacteristicList.SPEED);
+
         groundRunSpeed = groundRunSpeed * GetPercentValue(CharacteristicList.SPEED);
 
         flySpeed = flySpeed * GetPercentValue(CharacteristicList.SPEED);
@@ -549,7 +553,7 @@ public class Pawn : DamagebleObject {
         {
 			lastPainSound =Time.time;
 			sControl.playClipsRandom (painSoundsArray);
-			 AddEffect(damage.hitPositio
+			
 		}
 		
 
@@ -2108,8 +2112,8 @@ public class Pawn : DamagebleObject {
 		case CharacterState.DoubleJump:
           
             nextMovement = myTransform.forward;
-           
-            velocityChange = nextMovement.normalized * groundSprintSpeed+ Vector3.up*flySpeed - velocity;
+
+            velocityChange = nextMovement.normalized * flyForwardSpeed + Vector3.up * flySpeed - velocity;
 			animator.ApllyJump(true);						
 			animator.WallAnimation(false,false,false);
             rigidbody.AddForce(velocityChange, ForceMode.VelocityChange);

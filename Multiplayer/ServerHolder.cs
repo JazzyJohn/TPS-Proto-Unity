@@ -526,7 +526,7 @@ public class ServerHolder : MonoBehaviour
 				Destroy (mainMenu.gameObject);
 		}
         AITargetManager.Reload();
-	
+        TimeManager.Instance.Init();
 	}
 
 	
