@@ -1,7 +1,7 @@
 using UnityEngine;
 using System;
 using System.Collections.Generic;
-
+using Sfs2X.Entities.Data;
 
 public class PlayerManager : MonoBehaviour {
 
@@ -24,6 +24,11 @@ public class PlayerManager : MonoBehaviour {
 	public bool frendlyFire =false;
 
 	public string version = "0.0.8";
+	
+	  public float updateDelay = 0.1f;
+
+    public float updateTimer = 0.0f;
+
 	
 	public InventoryManager.AmmoBag[] AllTypeInGame;
     // s_Instance is used to cache the instance found in the scene so we don't have to look it up every time.
@@ -140,6 +145,31 @@ public class PlayerManager : MonoBehaviour {
         }
       
     }
+	public void Update(){
+		updateTimer += Time.deltaTime;
+        if (updateTimer > updateDelay&&!isDead)
+        {
+            updateTimer = 0.0f;
+            PawnUpdate();
+        }
+	}
+	 public void PawnUpdate(){
+	{
+		
+		ISFSObject data = new SFSObject();
+		ISFSArray pawnsArr = new SFSArray();
+		List<Pawn> pawns  =PlayerManager.instance.FindAllPawn();
+		foreach(Pawn pawn in paws){
+			if(pawn.needUpdate()){
+				pawnsArr.AddClass(pawn.GetSerilizedData());
+			}
+		}
+		if(pawnsArr.Size()==0){
+			return;
+		}
+		data.PutSFSArray("pawns",pawnsArr);
+		NetworkController.Instance.PawnUpdateRequest(data);
+	}
 }
 	
 

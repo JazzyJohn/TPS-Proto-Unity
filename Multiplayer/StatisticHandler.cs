@@ -43,6 +43,8 @@ public class StatisticHandler : MonoBehaviour {
 	public static string SYNC_MONEY_REWARD = "syncmoneyreward";
 	
 	public static string SPEND_SKILL_POINT = "spendskillpoint";
+	
+	public static string GLOBAL_ERROR_LOG = "globalerrorlog";
 
     public static string STATISTIC_PHP = "http://juggerfall.com/";
 
@@ -66,8 +68,25 @@ public class StatisticHandler : MonoBehaviour {
 			return s_Instance;
 		}
 	}
+	public void Awake(){
+	    if (Application.platform != RuntimePlatform.WindowsEditor&&Application.platform !=  RuntimePlatform.WindowsPlayer)
+        {
+		   Application.RegisterLogCallback(HandleLog);
+		}
 
+	
+	}
+	void HandleLog(string logString, string stackTrace, LogType type) {
+		if(type==LogType.Error||LogType.Exception){
+			WWWForm form = new WWWForm();
 
+			form.AddField("uid",GlobalPlayer.instance.GetUID());
+			form.AddField("time",Time.time);
+			form.AddField("logString",logString);
+			form.AddField("stackTrace",stackTrace);
+			StartCoroutine(SendForm (form,GLOBAL_ERROR_LOG));
+		}
+    }
 	public static void SendPlayerKillbyPlayer(string Uid,string Name, string KillerUid,string KillerName)
 	{
 		WWWForm form = new WWWForm();

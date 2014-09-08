@@ -21,13 +21,16 @@ class AnimationRelatedWeapon: BaseWeapon {
 		
 	}
 	public override void StartFire(){
-        base.StartFire();
-		owner.StartShootAnimation(animatioName);
-
+		if(!isShooting){
+			base.StartFire();
+			owner.StartShootAnimation(animatioName);
+		}
 	}
     public override void StopFire()
     {
-        base.StopFire();
-		owner.StopShootAnimation(animatioName);
+		if(isShooting){
+			base.StopFire();
+			owner.StopShootAnimation(animatioName);
+		}
 	}
 }

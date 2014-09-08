@@ -131,6 +131,7 @@ public class PrefabManager : MonoBehaviour {
         {
             bundle = AssetBundleManager.getAssetBundle(crossDomainesafeURL, version);
             Debug.Log("MyBundle" + bundle);
+			inProgress = false;
             yield return null;
         }
         else
@@ -214,6 +215,7 @@ public class PrefabManager : MonoBehaviour {
                 instantiated = true;
             }
         }
+		inProgress = false;
 	}
 
 }

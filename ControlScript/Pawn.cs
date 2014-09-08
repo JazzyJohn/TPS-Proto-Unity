@@ -341,10 +341,6 @@ public class Pawn : DamagebleObject {
 	//Serialization
 
     PawnModel serPawn = new PawnModel();
-
-    public static float updateDelay = 0.1f;
-
-    public float updateTimer = 0.0f;
 	
 	protected Vector3 replicatedVelocity;
 	
@@ -1158,13 +1154,16 @@ public class Pawn : DamagebleObject {
         return true;
     }
     public void SendNetUpdate() {
-        updateTimer += Time.deltaTime;
+     /*   updateTimer += Time.deltaTime;
         if (updateTimer > updateDelay&&!isDead)
         {
             updateTimer = 0.0f;
-            foxView.PawnUpdate(GetSerilizedData());
-        }
+           // foxView.PawnUpdate(GetSerilizedData());
+        }*/
     }
+	public bool NeedUpdate(){
+		return foxView.isMine&&!isDead
+	}
 	public void DpsCheck(){
 
 		
@@ -1498,11 +1497,11 @@ public class Pawn : DamagebleObject {
 	public void Kick(int i)
 	{
        
-		naturalWeapon.StartKick(AttackType[i]); 
+		
 //		Debug.Log ("ATtack");
 		//animator.SetSome("Any",true);
 		//((DogAnimationManager) animator).AnyDo();
-		if (foxView.isMine) {
+		if (naturalWeapon.StartKick(AttackType[i])&&foxView.isMine) {
 			foxView.StartKick(i);
 		}
 	}
@@ -1513,11 +1512,11 @@ public class Pawn : DamagebleObject {
         }
 		int i = (int)(UnityEngine.Random.value * AttackType.Count);
       
-		naturalWeapon.StartKick(AttackType[i]); 
+		
 
 		//animator.SetSome("Any",true);
 		//((DogAnimationManager) animator).AnyDo();
-		if (foxView.isMine) {
+		if (naturalWeapon.StartKick(AttackType[i])&&foxView.isMine) {
 				foxView.StartKick(i);
 		}
 	

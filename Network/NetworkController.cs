@@ -38,7 +38,8 @@ public class NetworkController : MonoBehaviour {
     public string zone = "BasicJugger";
     public bool debug = true;
     public bool pause = false;
-
+	
+  
     private static NetworkController instance;
     public static NetworkController Instance
     {
@@ -169,6 +170,7 @@ public class NetworkController : MonoBehaviour {
 	}
 	public void Update(){
 		FoxView.SendShoot();
+		
 	}
     string UID = "";
     public void SetLogin(string username)
@@ -486,7 +488,7 @@ public class NetworkController : MonoBehaviour {
         }
         catch (Exception e)
         {
-            Debug.Log("Exception handling response: " + e.Message + " >>> " + e.StackTrace);
+            Debug.LogError("Exception handling response: " + e.Message + " >>> " + e.StackTrace);
         }
 
     }
@@ -667,7 +669,7 @@ public class NetworkController : MonoBehaviour {
      {
          AIDirector.instance.ReadData(data);
      }
-
+   
     //REQUEST SECTION
 
     /// <summary>
@@ -676,7 +678,7 @@ public class NetworkController : MonoBehaviour {
     public void TimeSyncRequest()
     {
         Sfs2X.Entities.Room room = _smartFox.LastJoinedRoom;
-        ExtensionRequest request = new ExtensionRequest("getTime", new SFSObject(), room);
+        ExtensionRequest request = new ExtensionRequest("getTime", new SFSObject(), room,true);
         smartFox.Send(request);
     }
   
@@ -815,12 +817,9 @@ public class NetworkController : MonoBehaviour {
     /// <summary>
     /// pawnUpdate request to server
     /// </summary>	
-    public void PawnUpdateRequest(PawnModel pawn)
+    public void PawnUpdateRequest(  ISFSObject data)
     {
-        ISFSObject data = new SFSObject();
-      
      
-     	data.PutClass("pawn", pawn);
 	    ExtensionRequest request = new ExtensionRequest("pawnUpdate", data, serverHolder.gameRoom,true);
         //outQueue.Enqueue(request);
         smartFox.Send(request);
@@ -1355,20 +1354,22 @@ public class NetworkController : MonoBehaviour {
     /// handle pawnUpdate  from Server
     /// </summary>	
 	
-	public void HandlePawnUpdate(ISFSObject dt )
+	public void HandlePawnUpdate(ISFSObject allDt )
     {
-		PawnModel pawnModel = (PawnModel)dt.GetClass("pawn");
-        FoxView view = GetView(pawnModel.id);
-        if (view != null)
-        {
-            Pawn pawn = view.pawn;
-            pawn.NetUpdate(pawnModel);
-        }
-        else
-        {
-            Debug.Log("NOT FOUND" + pawnModel.id);
-        }
-		 
+		ISFSArray pawns = allDt.GetSFSArray("pawns");
+		foreach (PawnModel pawnModel in pawns)
+		{  
+		    FoxView view = GetView(pawnModel.id);
+			if (view != null)
+			{
+				Pawn pawn = view.pawn;
+				pawn.NetUpdate(pawnModel);
+			}
+			else
+			{
+				Debug.LogError("NOT FOUND" + pawnModel.id);
+			}
+		}
 	}
 	/// <summary>
     /// handle pawnTaunt  from Server

@@ -47,10 +47,10 @@ public class WeaponOfExtremities : MonoBehaviour {
 		}
 	}
 
-	public virtual void StartKick(HTHHitter Attack)
+	public virtual bool StartKick(HTHHitter Attack)
 	{
         if (isKicking) {
-            return;
+            return false;
         }
         if (!Attack.OnMove) {
             owner.StopMovement();
@@ -58,6 +58,7 @@ public class WeaponOfExtremities : MonoBehaviour {
       
 		Kick(Attack);
         isKicking = true;
+		return true;
 	}
 	
 	public virtual void StopKick()
