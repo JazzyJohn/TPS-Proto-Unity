@@ -8,6 +8,8 @@ public class MainMenuGUI : MonoBehaviour {
 	int numMessageOld;
 	private ServerHolder Server;
 
+	public MoveNGUICamer CamMove;
+
 	[HideInInspector] 
 	public GameObject ActivBut;
 	
@@ -51,22 +53,25 @@ public class MainMenuGUI : MonoBehaviour {
 		//Получение с сервера комнат
 		Server = _playerInfo.Player.GetComponent<ServerHolder>();
         
+		AddMessageToChat("Система", "Добро пожаловать !");
 
 		if (Server.allRooms != null) {
-            foreach (RoomData room in Server.allRooms)
-            {
-								GameObject NewRoom = Instantiate (_RoomsNgui.ShablonRoom) as GameObject;
-								NewRoom.transform.parent = _RoomsNgui.AllRoom.transform;
-								NewRoom.name = room.name;
-								NewRoom.GetComponent<AnyRoom> ().Name.text = room.name;
-								NewRoom.GetComponent<AnyRoom> ().shablon = false;
-								NewRoom.GetComponent<AnyRoom> ().SizeRoom.text = room.playerCount + " / " + room.maxPlayers;
-								NewRoom.transform.localScale = new Vector3 (1f, 1f, 1f);
+			foreach (RoomData room in Server.allRooms)
+			{
+				GameObject NewRoom = Instantiate (_RoomsNgui.ShablonRoom) as GameObject;
+				
+				NewRoom.transform.parent = _RoomsNgui.AllRoom.transform;
+				NewRoom.name = room.name;
+				NewRoom.GetComponent<AnyRoom> ().Name.text = room.name;
+				NewRoom.GetComponent<AnyRoom> ().shablon = false;
+				NewRoom.GetComponent<AnyRoom> ().SizeRoom.text = room.playerCount + " / " + room.maxPlayers;
+				NewRoom.transform.localScale = new Vector3 (1f, 1f, 1f);
+				NewRoom.transform.localPosition = new Vector3(0f, 0f, 0f);
 
-								_RoomsNgui.Grid.Reposition ();
-								_RoomsNgui.ScrollBar.barSize = 0;
-						}
-				}
+				_RoomsNgui.Grid.Reposition ();
+				_RoomsNgui.ScrollBar.barSize = 0;
+			}
+		}
 	}
 	public void HideAllPanel(){
 		foreach(UIRect panel in MainPanels){
@@ -86,32 +91,41 @@ public class MainMenuGUI : MonoBehaviour {
 
 	public void PlayBut() //Вход или создание новой комнаты
 	{
+		StartCoroutine(PausePlay());
+	}
+
+	public IEnumerator PausePlay()
+	{
+		yield return new WaitForSeconds(0.05f);
 		Debug.Log ("PLAY");
 		if (ActivBut != null) {
-						switch (ActivBut.GetComponent<AnyRoom> ()._TypeRoom) {
-						case AnyRoom.TypeRoom.JoinRoom:
-                                foreach (RoomData room in Server.allRooms)
-                                {
-										if (room.name == ActivBut.name && room.playerCount < Server.newRoomMaxPlayers) {
-												//PhotonNetwork.JoinRoom (room.name);
-												Server.JoinRoom(room);
-												HideAllPanel();
-												_RoomsNgui.Loading.alpha = 1f;
-                                                _PanelsNgui.SliderPanel.alpha = 1f;
-
-										}
-								}
-								break;
-						}
-
+			switch (ActivBut.GetComponent<AnyRoom> ()._TypeRoom) {
+			case AnyRoom.TypeRoom.JoinRoom:
+				foreach (RoomData room in Server.allRooms)
+				{
+					if (room.name == ActivBut.name && room.playerCount < Server.newRoomMaxPlayers) {
+						//PhotonNetwork.JoinRoom (room.name);
+						Server.JoinRoom(room);
+						HideAllPanel();
+						_RoomsNgui.Loading.alpha = 1f;
+						_PanelsNgui.SliderPanel.alpha = 1f;
+						
+					}
+				}
+				break;
+			case AnyRoom.TypeRoom.NewRoom:
+				CreateRoom();
+				break;
+			}
+			
 		} else {
 			if(Server.allRooms.Count>0){
-                Server.JoinRoom(Server.allRooms[UnityEngine.Random.Range(0,Server.allRooms.Count)]);
+				Server.JoinRoom(Server.allRooms[UnityEngine.Random.Range(0,Server.allRooms.Count)]);
 				HideAllPanel();
 				_RoomsNgui.Loading.alpha = 1f;
-                _PanelsNgui.SliderPanel.alpha = 1f;
+				_PanelsNgui.SliderPanel.alpha = 1f;
 			}else{
-			
+				
 				if (_RoomsNgui.CreateRoom.alpha >0f) {
 					HideAllPanel();
 					_PanelsNgui.SliderPanel.alpha= 1f;
@@ -121,11 +135,11 @@ public class MainMenuGUI : MonoBehaviour {
 				}
 				_RoomsNgui.NameNewRoom.value = Server.newRoomName;
 			}
-
-
+			
+			
 		}
-
 	}
+
 	public void CreateRoom(){
 		HideAllPanel ();
 		_RoomsNgui.CreateRoom.alpha = 1f;
@@ -171,6 +185,7 @@ public class MainMenuGUI : MonoBehaviour {
         {
             return;
         }
+		CamMove.enabled = false;
 		Server.newRoomName = _RoomsNgui.NameNewRoom.value;
 		HideAllPanel ();
 		_RoomsNgui.Loading.alpha = 1f;
@@ -200,12 +215,14 @@ public class MainMenuGUI : MonoBehaviour {
 				NewRoom.Name.text = room.name;
 				NewRoom.SizeRoom.text = room.playerCount + " / " + room.maxPlayers;
 				NewRoom.transform.localScale = new Vector3(1f, 1f, 1f);
+				NewRoom.transform.localPosition = new Vector3(0f, 0f, 0f);
 				
 				_RoomsNgui.Grid.Reposition();
 				_RoomsNgui.ScrollBar.barSize = 0;
 			}
 		}
 	}
+
 	public void ShowGameList(){
 
 	}
@@ -240,9 +257,11 @@ public class MainMenuGUI : MonoBehaviour {
 	}
 	public IEnumerator LateFrameResize(){
         yield return new WaitForSeconds(1.0f);
+		/* Чат
 		ChatComponent.ChatLabel.transform.localPosition = new Vector3(-180, -(ChatComponent.ChatPanel.GetViewSize().y/2)+20, 0f);
 		_PanelsNgui.slaiderPanel.ReSize ();
-        _PanelsNgui.mainpanel.Invalidate(true);
+      _PanelsNgui.mainpanel.Invalidate(true);
+      */
 	}
 
 	public void FullScreen() // На весь экран
@@ -265,17 +284,34 @@ public class MainMenuGUI : MonoBehaviour {
 		}
 	}
 
+	public void AddMessageToChat(string name, string message)//Добавление сообщения в чат
+	{
+		ChatComponent.NumMessage++;
+
+		if (_chat.Count > ChatComponent.MessageLimit)
+			_chat.Remove(_chat[0]);
+
+		Chat ChatMessage = new Chat();
+		ChatMessage.ID = (_chat.Count-1).ToString();
+		ChatMessage.MessageObj = Instantiate(ChatComponent.ChatShablon) as Transform;
+		ChatMessage.MessageObj.parent = ChatComponent.ChatZone;
+		ChatMessage.MessageObj.localPosition = new Vector3(0f, 0f, 0f);
+		ChatMessage.MessageObj.localEulerAngles = new Vector3(0f, 0f, 0f);
+		ChatMessage.MessageObj.localScale = new Vector3(1f, 1f, 1f);
+		ChatMessage.Message = ChatMessage.MessageObj.GetComponent<MessageNGUI_ForChat>();
+		ChatMessage.Message.NameText.text = name;
+		ChatMessage.Message.Text.text = message;
+		ChatMessage.Message.Obj1.alpha = 1f;
+		
+		_chat.Add(ChatMessage);
+
+		ChatComponent.ChatZone.GetComponent<UITable>().Reposition();
+		ChatComponent.ChatZone.parent.GetComponent<UIScrollView>().ResetPosition();
+	}
+
 	public void EnterText()// Ввод текста в чат
 	{
-		Chat ChatMessage = new Chat();
-		numMessage++;
-		if (numMessage > ChatComponent.MessageLimit)
-			_chat.Remove(_chat[0]);
-		ChatMessage.ID = numMessage.ToString();
-		ChatMessage.name = _playerInfo.playerName;
-		ChatMessage.Message = ChatComponent.TextInput.value;
-
-		_chat.Add(ChatMessage);
+		AddMessageToChat(_playerInfo.playerName, ChatComponent.TextInput.value);
 
 		ChatComponent.TextInput.value = null;
 	}
@@ -286,18 +322,8 @@ public class MainMenuGUI : MonoBehaviour {
 		_timer.timer+=Time.deltaTime;
 		if (_timer.timer>=_timer.TimeRefresh)
 		{
-			if(numMessageOld != numMessage)
-			{
-				string text="";
-				for(int i=0; i < _chat.Count; i++)
-				{
-					text += "[db9b27]"+_chat[i].name+": "+"[-]"+_chat[i].Message+"\n";
-				}
-				ChatComponent.ChatLabel.text = text;
-				_timer.timer=0;
-				numMessageOld = numMessage;
-			}
 			RefreshRoom();
+			_timer.timer = 0;
 		}
 
 		//TODO:LoadMap
@@ -313,14 +339,6 @@ public class MainMenuGUI : MonoBehaviour {
 
 	}
     
-
-	public void scroll() //СкролБар чата
-	{
-		ChatComponent.ChatPanel.transform.localPosition = new Vector3(0f, -(ChatComponent.ChatScrollBar.value*1600), 0f);
-	}
-
-
-
 	public void ShowRoomList(){
 
 		//Debug.Log (_RoomsNgui.RoomsFound.alpha);
@@ -336,8 +354,6 @@ public class MainMenuGUI : MonoBehaviour {
 	}
 	public void AddCoins(){
 		 _playerInfo.Player.AskJsForMagazine("gitp_5");
-	
-	
 	}
 
 }
@@ -347,11 +363,11 @@ public class MainMenuGUI : MonoBehaviour {
 [System.Serializable]
 public class Class1
 {
+	public int NumMessage = 0;
 	public int MessageLimit;
 	public UIInput TextInput;
-	public UILabel ChatLabel;
-	public UIPanel ChatPanel;
-	public UIScrollBar ChatScrollBar;
+	public Transform ChatZone;
+	public Transform ChatShablon;
 }
 
 [System.Serializable]
@@ -364,8 +380,9 @@ public class Class2
 public class Chat
 {
 	public string ID;
-	public string name;
-	public string Message;
+	public Transform MessageObj;
+	public MessageNGUI_ForChat Message;
+
 }
 
 [System.Serializable]

@@ -483,7 +483,17 @@ public class PlayerMainGui : MonoBehaviour {
 		Rect crosrect = new Rect ((screenX - TimerLabel) / 2, (screenY - TimerLabel) / 2, TimerLabel, TimerLabel);
         GUI.Label(crosrect, "WINNER: " + FormTeamName(  GameRule.instance.Winner()) + "");
 		crosrect = new Rect ((screenX - TimerLabel) / 2, (screenY - TimerLabel) / 2 +TimerLabel, TimerLabel, TimerLabel);
-        GUI.Label(crosrect, "NEXT ROUND IN  " + GameRule.instance.GetRestartTimer().ToString("0.0") + " sec.");
+        float restart = GameRule.instance.GetRestartTimer();
+        if (restart < 0)
+        {
+            GUI.Label(crosrect, "Prepare for loading");
+
+        }
+        else
+        {
+            GUI.Label(crosrect, "NEXT ROUND IN  " + GameRule.instance.GetRestartTimer().ToString("0.0") + " sec.");
+        }
+        
 	}
 	void MainHud(){
 		float screenX = Screen.width, screenY = Screen.height;
