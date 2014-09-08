@@ -107,7 +107,10 @@ public class PrefabManager : MonoBehaviour {
 	void Update(){
         if (inProgress && www!=null)
         {
-         
+			if(www.IsDisposed){
+				inProgress= false;
+				return;
+			}
                 ServerHolder.progress.curLoader = www.progress * 100f;
             
 		}

@@ -158,8 +158,8 @@ public class PlayerManager : MonoBehaviour {
 		
 		ISFSObject data = new SFSObject();
 		ISFSArray pawnsArr = new SFSArray();
-		List<Pawn> pawns  =PlayerManager.instance.FindAllPawn();
-		foreach(Pawn pawn in paws){
+	
+		foreach(Pawn pawn in cachedPawns){
 			if(pawn.needUpdate()){
 				pawnsArr.AddClass(pawn.GetSerilizedData());
 			}
