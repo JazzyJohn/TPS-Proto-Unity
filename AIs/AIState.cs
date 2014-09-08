@@ -282,10 +282,10 @@ public class AIState : MonoBehaviour {
 			return false;
 		}
 
-      //  Debug.Log("SELECTED TARGET" + target);
+       //  Debug.Log("SELECTED TARGET" + target);
         if (Physics.Linecast(controlledPawn.myTransform.position, target.myTransform.position, out hit,controlledPawn.seenlist)){
 
-           // Debug.Log("SELECTED TARGET" + hit.collider);
+          //  Debug.Log("SELECTED TARGET" + hit.collider);
             if (hit.collider == target.collider)
             {
                 distance = hit.distance;

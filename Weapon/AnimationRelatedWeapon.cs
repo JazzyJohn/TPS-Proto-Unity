@@ -28,9 +28,9 @@ class AnimationRelatedWeapon: BaseWeapon {
 	}
     public override void StopFire()
     {
-		if(isShooting){
-			base.StopFire();
-			owner.StopShootAnimation(animatioName);
-		}
+		
+		base.StopFire();
+		owner.StopShootAnimation(animatioName);
+		
 	}
 }

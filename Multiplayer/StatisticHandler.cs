@@ -69,22 +69,24 @@ public class StatisticHandler : MonoBehaviour {
 		}
 	}
 	public void Awake(){
-	    if (Application.platform != RuntimePlatform.WindowsEditor&&Application.platform !=  RuntimePlatform.WindowsPlayer)
-        {
+	   if (Application.platform != RuntimePlatform.WindowsEditor&&Application.platform !=  RuntimePlatform.WindowsPlayer)
+       {
 		   Application.RegisterLogCallback(HandleLog);
-		}
+	   }
 
 	
 	}
 	void HandleLog(string logString, string stackTrace, LogType type) {
-		if(type==LogType.Error||LogType.Exception){
+        if (type == LogType.Error || type == LogType.Exception)
+        {
 			WWWForm form = new WWWForm();
 
 			form.AddField("uid",GlobalPlayer.instance.GetUID());
-			form.AddField("time",Time.time);
+			form.AddField("time",Time.time.ToString());
 			form.AddField("logString",logString);
 			form.AddField("stackTrace",stackTrace);
 			StartCoroutine(SendForm (form,GLOBAL_ERROR_LOG));
+            Debug.Log("SENDform");
 		}
     }
 	public static void SendPlayerKillbyPlayer(string Uid,string Name, string KillerUid,string KillerName)

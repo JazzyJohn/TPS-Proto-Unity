@@ -819,20 +819,23 @@ public class Pawn : DamagebleObject {
             }
             Vector3 distance = (allPawn[i].myTransform.position - myTransform.position);
 
-            if (distance.sqrMagnitude < seenDistance)
+            if (distance.sqrMagnitude < seenDistance )
             {
                 RaycastHit hitInfo;
                 Vector3 normalDist = distance.normalized;
                 Vector3 startpoint = myTransform.position + normalDist * Mathf.Max(capsule.radius, capsule.height);
-
-                if (allPawn[i].team != team && Physics.Raycast(startpoint, normalDist, out hitInfo, seenDistance,seenlist))
+                if (isAi)
+                {
+                    ///Debug.DrawRay(startpoint, normalDist * distance.magnitude);
+                }
+                if (allPawn[i].team != team && Physics.Raycast(startpoint, normalDist, out hitInfo, distance.magnitude, seenlist))
                 {
 
 
                     if (allPawn[i].myCollider != hitInfo.collider)
                     {
-                     
-                        //Debug.Log ("WALL"+hitInfo.collider);
+                      
+                       
                         continue;
                     }
                 }
@@ -1162,7 +1165,7 @@ public class Pawn : DamagebleObject {
         }*/
     }
 	public bool NeedUpdate(){
-		return foxView.isMine&&!isDead
+        return foxView.isMine && !isDead;
 	}
 	public void DpsCheck(){
 

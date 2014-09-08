@@ -105,15 +105,23 @@ public class PrefabManager : MonoBehaviour {
 		return objects.ToArray();
 	}
 	void Update(){
-        if (inProgress && www!=null)
+       try
         {
-			if(www.IsDisposed){
-				inProgress= false;
-				return;
-			}
+            if (inProgress && www != null)
+            {
+
+
+
                 ServerHolder.progress.curLoader = www.progress * 100f;
-            
-		}
+
+            }
+        }
+        catch (Exception)
+        {
+
+            inProgress = false;
+        }
+
 	}
 	public void DownLoad()
 	{

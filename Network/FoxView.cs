@@ -8,6 +8,8 @@ using nstuff.juggerfall.extension.models;
 
 
 public class FoxView : MonoBehaviour {
+    public static int SCENE_OWNER_ID = -2;
+
 	private static ISFSArray sendProj =null;
 
 	public Pawn pawn;
@@ -41,7 +43,12 @@ public class FoxView : MonoBehaviour {
             this.ownerId = value / NetworkController.MAX_VIEW_IDS;
 
             this.subId = value % NetworkController.MAX_VIEW_IDS;
-            isSceneView = ownerId == 0;
+
+            if (this.ownerId<0)
+            {
+                this.ownerId--;
+            }
+            isSceneView = ownerId == SCENE_OWNER_ID;
             if (NetworkController.smartFox != null && NetworkController.smartFox.MySelf!=null)
             {
                 if (isSceneView)
@@ -143,7 +150,7 @@ public class FoxView : MonoBehaviour {
 
     public void PawnUpdate(PawnModel pawn)
     {
-		NetworkController.Instance.PawnUpdateRequest(pawn);
+	//	NetworkController.Instance.PawnUpdateRequest(pawn);
 	}
 	public void Taunt(string name){
 		NetworkController.Instance.PawnTauntRequest(viewID, name);

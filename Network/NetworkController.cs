@@ -516,7 +516,7 @@ public class NetworkController : MonoBehaviour {
         {
 			view.viewID = AllocateViewID(_smartFox.MySelf.Id);
 		}else{
-			view.viewID = AllocateViewID(0);
+            view.viewID = AllocateViewID(FoxView.SCENE_OWNER_ID);
 		}
         foxViewList.Add(view.viewID, view);
         return newObject;
@@ -574,8 +574,8 @@ public class NetworkController : MonoBehaviour {
     }
     public  static void RegisterSceneView(FoxView view)
     {
-          
-        view.viewID = AllocateViewID(0);
+
+        view.viewID = AllocateViewID(FoxView.SCENE_OWNER_ID);
         foxViewList.Add(view.viewID, view);
     }
 
@@ -583,7 +583,7 @@ public class NetworkController : MonoBehaviour {
     // returns viewID (combined owner and sub id)
     private static int AllocateViewID(int ownerId)
     {
-        if (ownerId == 0)
+        if (ownerId == FoxView.SCENE_OWNER_ID)
         {
             // we look up a fresh subId for the owner "room" (mind the "sub" in subId)
             int newSubId = lastUsedViewSubIdStatic;
@@ -1428,7 +1428,12 @@ public class NetworkController : MonoBehaviour {
     {
 		ISFSArray shoots = allDt.GetSFSArray("shoots");
 		foreach (SFSObject dt in shoots)
-		{  
+		{
+            FoxView view = GetView(dt.GetInt("id"));
+            if (view == null)
+            {
+                continue;
+            }
 			BaseWeapon weapon = GetView(dt.GetInt("id")).weapon;
 		
 			weapon.RemoteGenerate(((Vector3Model)dt.GetClass("position")).GetVector(),
@@ -1598,7 +1603,7 @@ public class NetworkController : MonoBehaviour {
     {
 		
         int playerID =dt.GetInt("playerId");
-		Debug.Log("PLAYER LEAVE"+playerID);
+		Debug.Log("PLAYER LEAVESERVER"+playerID);
 		if (!PlayerView.allPlayer.ContainsKey(playerID)){
 			return;
 		}

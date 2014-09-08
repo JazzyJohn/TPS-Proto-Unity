@@ -180,8 +180,8 @@ public class MainMenuGUI : MonoBehaviour {
 	public void StartBut() //Создать комнату
 	{
 
-       
-        if (Server.map == "")
+
+        if (Server.map == "" || Server.newRoomName=="")
         {
             return;
         }

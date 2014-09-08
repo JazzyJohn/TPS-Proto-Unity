@@ -147,20 +147,19 @@ public class PlayerManager : MonoBehaviour {
     }
 	public void Update(){
 		updateTimer += Time.deltaTime;
-        if (updateTimer > updateDelay&&!isDead)
+        if (updateTimer > updateDelay)
         {
             updateTimer = 0.0f;
             PawnUpdate();
         }
 	}
 	 public void PawnUpdate(){
-	{
 		
 		ISFSObject data = new SFSObject();
 		ISFSArray pawnsArr = new SFSArray();
 	
 		foreach(Pawn pawn in cachedPawns){
-			if(pawn.needUpdate()){
+			if(pawn.NeedUpdate()){
 				pawnsArr.AddClass(pawn.GetSerilizedData());
 			}
 		}
