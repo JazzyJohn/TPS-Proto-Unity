@@ -719,11 +719,10 @@ public class NetworkController : MonoBehaviour {
         data.PutBool("Scene", scene);
         data.PutBool("isAI", isAI);
 		data.PutIntArray("stims", stims);
-        GameObject go = InstantiateNetPrefab(prefab, vector3, quaternion, data,isAI);
+        GameObject go = InstantiateNetPrefab(prefab, vector3, quaternion, data,scene);
         PawnModel pawn = go.GetComponent<Pawn>().GetSerilizedData();
 		pawn.type = prefab;
         data.PutClass("pawn",pawn);
-        Debug.Log(serverHolder.gameRoom);
         ExtensionRequest request = new ExtensionRequest("pawnSpawn", data, serverHolder.gameRoom);
         smartFox.Send(request);
         return go;
@@ -1450,7 +1449,7 @@ public class NetworkController : MonoBehaviour {
 	public void HandlePawnSkillCastEffect(ISFSObject dt )
     {
 		Pawn pawn = GetView(dt.GetInt("id")).pawn;
-		pawn.skillManager.GetSkill(dt.GetUtfString(name)).CasterVisualEffect();
+		pawn.skillManager.GetSkill(dt.GetUtfString("name")).CasterVisualEffect();
 		 
 	}
 	/// <summary>
@@ -1460,7 +1459,7 @@ public class NetworkController : MonoBehaviour {
 	public void HandleSkillActivate(ISFSObject dt )
     {
 		Pawn pawn = GetView(dt.GetInt("id")).pawn;
-		SkillBehaviour skill =pawn.skillManager.GetSkill(dt.GetUtfString(name));
+		SkillBehaviour skill =pawn.skillManager.GetSkill(dt.GetUtfString("name"));
 			switch(skill.type){
 				case TargetType.SELF:
 				case TargetType.GROUPOFPAWN_BYSELF:	

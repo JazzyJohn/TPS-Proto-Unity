@@ -167,17 +167,8 @@ public class SettingGUI : MonoBehaviour {
 			FullScreen_Z = true;
 			break;
 		}
-
-		string[] x_y = new string[2];
-
-		x_y[0] = "1024";
-		x_y[1] = "768";
-
-		if (PlayerPrefs.GetString("ResolutionValue", "none") != "none")
-			x_y = PlayerPrefs.GetString("ResolutionValue").Split('x');
-		else if (graphicSetting.Resolution.text != null)
-			x_y = graphicSetting.Resolution.text.Split('x');
-		Screen.SetResolution(int.Parse(x_y[0]), int.Parse(x_y[1]), FullScreen_Z);
+		GlobalPlayer.FullScreen(FullScreen_Z);
+		
 
 		if(MainMenu != null && TypeSettingPanel != _TypeSettingPanel.MainMenu)
 			MainMenu.ReSize();

@@ -113,10 +113,22 @@ public class GlobalPlayer : MonoBehaviour {
 			if(Screen.fullScreen){
 				Screen.SetResolution(960, 600, false);
 			}else{
-				Screen.SetResolution( Screen.resolutions[ Screen.resolutions.Length-1].width,  Screen.resolutions[ Screen.resolutions.Length-1].height, true);
+				 FullScreen();
 			}
             ResizeCall();
 		}
+	}
+	public static FullScreen(bool FullScreen_Z= false){
+		string[] x_y = new string[2];
+
+		x_y[0] = Screen.resolutions[ Screen.resolutions.Length-1].width;
+		x_y[1] = Screen.resolutions[ Screen.resolutions.Length-1].height;
+
+		if (PlayerPrefs.GetString("ResolutionValue", "none") != "none")
+			x_y = PlayerPrefs.GetString("ResolutionValue").Split('x');
+		else if (graphicSetting.Resolution.text != null)
+			x_y = graphicSetting.Resolution.text.Split('x');
+		Screen.SetResolution(int.Parse(x_y[0]), int.Parse(x_y[1]), FullScreen_Z);
 	}
    public  static void ResizeCall()
     {
