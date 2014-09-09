@@ -35,6 +35,16 @@ public class MainMenuGUI : MonoBehaviour {
 
     public GAMEMODE gameMode = GAMEMODE.PVP;
 
+    public UIWidget loadingWidget;
+
+    public UIWidget allWWidget;
+
+    public void LoadingFinish()
+    {
+        Destroy(loadingWidget.gameObject);
+        allWWidget.alpha = 1.0f;
+    }
+
 	void Awake(){
 		HideAllPanel();
 		DontDestroyOnLoad(transform.gameObject);

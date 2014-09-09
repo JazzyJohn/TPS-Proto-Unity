@@ -180,7 +180,7 @@ public class BaseProjectile : MonoBehaviour
    
         if (replication)
         {
-            Debug.Log(lateTime + " " + TimeManager.Instance.NetworkTime);
+        //    Debug.Log(lateTime + " " + TimeManager.Instance.NetworkTime);
          //  transform.Translate(mRigidBody.velocity * (float)((TimeManager.Instance.NetworkTim - lateTime)/1E+3));
         }
 	//	Debug.Log("id " + projId+ " position " + mTransform.position + " rotation "+ mTransform.rotation);
@@ -572,8 +572,9 @@ public class BaseProjectile : MonoBehaviour
         Invoke("DeActivate", 0.1f);
     }
 	public void DeActivate(){
+        ProjectileManager.instance.RemoveProjectile(projId);
 		gameObject.Recycle();
-        
+       
 	}
 	public void OnDisable(){
 		CancelInvoke();

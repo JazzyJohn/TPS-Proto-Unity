@@ -53,8 +53,9 @@ public class AIBase : MonoBehaviour
         if (aiSwarm != null) {
             aiSwarm.AgentKilled(this);
         }
-	
-		if(controlledPawn.enemy!=null){
+
+        if (controlledPawn!=null&&controlledPawn.enemy != null)
+        {
             AITargetManager.RemoveAttacker(controlledPawn, controlledPawn.enemy);
 		}
     }

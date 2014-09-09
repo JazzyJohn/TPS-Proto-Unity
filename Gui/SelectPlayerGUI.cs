@@ -208,6 +208,7 @@ public class SelectPlayerGUI : MonoBehaviour {
                 break;
 
             case GAMEMODE.PVP:
+            case GAMEMODE.PVPHUNT:
                  int[] teamCount = new int[2];
                 List<Player> players = PlayerManager.instance.FindAllPlayer();
                 foreach (Player player in players)

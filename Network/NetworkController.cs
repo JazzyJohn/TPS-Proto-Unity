@@ -277,7 +277,11 @@ public class NetworkController : MonoBehaviour {
             // On to the lobby
             serverHolder = GetComponent<ServerHolder>();
             serverHolder.Connect();
-
+            MainMenuGUI menu = FindObjectOfType<MainMenuGUI>();
+            if (menu != null)
+            {
+                menu.LoadingFinish();
+            }
         }
     }
     public void OnVariablesUpdate(BaseEvent evt)
@@ -488,6 +492,7 @@ public class NetworkController : MonoBehaviour {
         }
         catch (Exception e)
         {
+           
             Debug.LogError("Exception handling response: " + e.Message + " >>> " + e.StackTrace);
         }
 
@@ -542,6 +547,10 @@ public class NetworkController : MonoBehaviour {
 	
     private GameObject _SpawnPrefab(string prefabName, Vector3 vector3, Quaternion quaternion)
     {
+        if (prefabName == "")
+        {
+            return null;
+        }
         GameObject resourceGameObject = null;
         if (PhotonResourceWrapper.allobject.ContainsKey(prefabName))
         {
@@ -1283,6 +1292,10 @@ public class NetworkController : MonoBehaviour {
         PawnModel sirPawn = (PawnModel)dt.GetClass("pawn");
         Debug.Log("Pawn Spawn" + sirPawn.type);
 		GameObject go =RemoteInstantiateNetPrefab(sirPawn.type, Vector3.zero,Quaternion.identity,sirPawn.id);
+        if (go == null)
+        {
+            return;
+        }
         Pawn pawn = go.GetComponent<Pawn>();
 		if(dt.ContainsKey("ownerId")){
 		    Player player  = GetPlayer(dt.GetInt("ownerId"));
@@ -1409,6 +1422,10 @@ public class NetworkController : MonoBehaviour {
     {
 		WeaponModel sirWeapon = (WeaponModel)dt.GetClass("weapon");
 		GameObject go =RemoteInstantiateNetPrefab(sirWeapon.type, Vector3.zero,Quaternion.identity,sirWeapon.id);
+        if (go == null)
+        {
+            return;
+        }
 		BaseWeapon weapon = go.GetComponent<BaseWeapon>();
 		weapon.NetUpdate(sirWeapon);
 		Pawn pawn  =  GetView(dt.GetInt("pawnId")).pawn;
@@ -1509,6 +1526,10 @@ public class NetworkController : MonoBehaviour {
         if (model != null)
         {
             GameObject go = RemoteInstantiateNetPrefab(model.type, model.position.GetVector(), model.rotation.GetQuat(), model.id);
+            if (go == null)
+            {
+                return;
+            }
             switch ((PREFABTYPE)dt.GetInt("preftype"))
             {
                 case PREFABTYPE.PLAYERBUILDING:
@@ -1731,6 +1752,7 @@ public class NetworkController : MonoBehaviour {
         }
         else
         {
+            Debug.Log("enterRobotSuccess");
             pawn.foxView.SetMine(false);
             pawn.AnotherEnter();
         }	

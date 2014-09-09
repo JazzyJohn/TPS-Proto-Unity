@@ -293,7 +293,11 @@ public class Player : MonoBehaviour {
                     {
 						if(!robotPawn.isMutual){
 							ExitBot();
-						}
+                        }
+                        else
+                        {
+                            DestroyBot();
+                        }
 					}
 					
 				}else {
@@ -583,6 +587,15 @@ public class Player : MonoBehaviour {
 		robotPawn.DeActivate();
 		
 	}
+    public void DestroyBot()
+    {
+        inBot = false;
+        currentPawn.myTransform.parent = null;
+        currentPawn.rigidbody.MovePosition(robotPawn.playerExitPositon.position);
+        currentPawn.myTransform.rotation = robotPawn.playerExitPositon.rotation;
+        currentPawn.Activate();
+        robotPawn.RequestKillMe();
+    }
 	public bool IsDead(){
 		return isDead;
 

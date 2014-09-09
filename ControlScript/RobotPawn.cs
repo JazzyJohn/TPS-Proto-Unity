@@ -1,6 +1,7 @@
 using UnityEngine;
 using System.Collections;
 using System.Collections.Generic;
+using nstuff.juggerfall.extension.models;
 
 public class RobotPawn : Pawn {
 	public float ActivationTime=2.0f;
@@ -61,7 +62,7 @@ public class RobotPawn : Pawn {
             AfterSpawnAction();
         }
         //Debug.Log (distToGround);
-
+       
     }
 
     public void AnotherEnter()
@@ -79,7 +80,16 @@ public class RobotPawn : Pawn {
 	protected void Awake(){
 		base.Awake();
 		if(isMutual){
-			PlayerMainGui.instance.Annonce(AnnonceType.JUGGERREADY);
+            try
+            {
+                PlayerMainGui.instance.Annonce(AnnonceType.JUGGERREADY);
+            }
+            catch (System.Exception)
+            {
+
+                Debug.LogError("exeption error");
+            }
+		
 		}
 	}
 	//Player get in robot
@@ -180,5 +190,32 @@ public class RobotPawn : Pawn {
 	public override void ChangeDefaultWeapon(int myId){
 
 	}
+    public override void NetUpdate(PawnModel pawn)
+    {
+        nextState = (CharacterState)pawn.characterState;
+        Vector3 oldPos = correctPlayerPos;
+        correctPlayerPos = pawn.position.MakeVector(correctPlayerPos);
+        correctPlayerRot = pawn.rotation.MakeQuaternion(correctPlayerRot);
+        aimRotation = pawn.aimRotation.MakeVector(aimRotation);
+        ToggleAim(pawn.isAiming);
+        team = pawn.team;
+        health = pawn.health;
+        replicatedVelocity = correctPlayerPos - oldPos;
+        float oldTime = lastNetUpdate;
+        lastNetUpdate = Time.time;
+        replicatedVelocity = replicatedVelocity / (oldTime - lastNetUpdate);
+        RestartLocalVisibilite();
+        if (pawn.active != isActive)
+        {
+            if (pawn.active)
+            {
+                Activate();
+            }
+            else
+            {
+                DeActivate();
+            }
+        }
+    }
 
 }

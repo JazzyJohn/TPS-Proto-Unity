@@ -380,6 +380,7 @@ public class PlayerMainGui : MonoBehaviour {
             
             }
             component.hudentry.isShow = component.isShow && (component.showAnotherTeam || component.team==0||LocalPlayer.team==component.team);
+            component.hudentry.startpos = component.myTransform.position;
            // 
             component.hudentry.label.text = publicName;
             if (component.team == LocalPlayer.team)
@@ -675,7 +676,11 @@ public class PlayerMainGui : MonoBehaviour {
 		guiMessages.Enqueue(message);
 	}
 	public void RemoveMessage(HUDText.Entry entry){
-		P1Hud.Delete(entry);
+        if (P1Hud != null)
+        {
+            P1Hud.Delete(entry);
+        }
+		
 	}
 	public static string GetFormatedTime(float input){
 		int seconds;

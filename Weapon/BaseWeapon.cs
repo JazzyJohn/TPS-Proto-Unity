@@ -196,7 +196,11 @@ public class BaseWeapon : DestroyableNetworkObject {
             projectileClass.CreatePool(50);
         }
 	}
-	
+
+    public Pawn GetOwner()
+    {
+        return owner;
+    }
 	// Use this for initialization
 	protected void Start () {
 		aSource = GetComponent<AudioSource> ();
@@ -924,5 +928,6 @@ public class BaseWeapon : DestroyableNetworkObject {
     {
 
     }
-  
+
+
 }

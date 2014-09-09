@@ -70,6 +70,9 @@ class ProjectileManager: MonoBehaviour
     public void AddProject(int id,BaseProjectile projectile) {
         allProjectile[id] = projectile;
     }
+    public void RemoveProjectile(int id){
+        allProjectile.Remove(id);
+    }
     
     public void InvokeRPC(string name, int projid,Vector3 position)
     {

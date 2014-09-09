@@ -22,6 +22,8 @@ public class FoxView : MonoBehaviour {
     
     private int  subId;
 
+    private int realId;
+
 	public bool isMine;
 	
 	public bool isSceneView;
@@ -34,11 +36,14 @@ public class FoxView : MonoBehaviour {
 	
 	public int viewID
     {
-        get { return ownerId * NetworkController.MAX_VIEW_IDS + subId; }
+        get {
+            return realId;
+           
+        }
         set
         {
             // if ID was 0 for an awakened PhotonView, the view should add itself into the networkingPeer.photonViewList after setup
-			
+            realId = value;
 
             this.ownerId = value / NetworkController.MAX_VIEW_IDS;
 
@@ -64,11 +69,19 @@ public class FoxView : MonoBehaviour {
           
         }
     }
+    public bool isChildScene()
+    {
+        return ownerId == SCENE_OWNER_ID && isSceneView;
+    }
 	
 	public bool IsOnMasterControll(){
 		if(isSceneView&&pawn!=null){
 			return pawn.player==null;
 		}
+        if (isSceneView && weapon != null)
+        {
+            return weapon.GetOwner().player == null;
+        }
 		return isSceneView;
 	}
     void Awake(){

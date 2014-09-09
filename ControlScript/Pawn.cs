@@ -747,7 +747,7 @@ public class Pawn : DamagebleObject {
 		
 	}
     public  void PawnKill(){
-        if (isAi)
+        if (isAi && mainAi!=null)
         {
             mainAi.Death();
         }
@@ -1675,7 +1675,7 @@ public class Pawn : DamagebleObject {
 		return 0.0f;		
 	}
 	protected float CalculateRepStarfe(){
-		Vector3 velocity =  correctPlayerPos-myTransform.position;
+        Vector3 velocity = replicatedVelocity;
 		return Vector3.Dot (myTransform.right, velocity.normalized);
 				
 	
@@ -2648,6 +2648,17 @@ public class Pawn : DamagebleObject {
         lastNetUpdate = Time.time;
 		replicatedVelocity = replicatedVelocity/(oldTime-lastNetUpdate);
 		RestartLocalVisibilite();
+        if (pawn.active != isActive)
+        {
+            if (pawn.active)
+            {
+                Activate();
+            }
+            else
+            {
+                DeActivate();
+            }
+        }
     }
 
 	

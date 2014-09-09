@@ -289,7 +289,7 @@ public class InventoryManager : MonoBehaviour {
 			return;
 		}
 		BaseWeapon firstWeapon;
-        if (owner.foxView.isSceneView)
+        if (owner.foxView.isChildScene())
         {
             firstWeapon = NetworkController.Instance.WeaponSpawn(prefabWeapon[newWeapon].name, transform.position, Quaternion.identity,true,owner.foxView.viewID).GetComponent<BaseWeapon>();
             //Debug.Log("Turret weapon spawn");
