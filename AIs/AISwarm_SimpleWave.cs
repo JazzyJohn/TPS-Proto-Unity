@@ -30,6 +30,7 @@ public class AISwarm_SimpleWave : AISwarm
     }
     public override void ReadData(ISFSObject iSFSObject)
     {
+        base.ReadData(iSFSObject);
         _alreadyDead = iSFSObject.GetInt("alreadyDead");
         
     }

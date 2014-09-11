@@ -23,6 +23,8 @@ public class ShowOnGuiComponent : MonoBehaviour {
 	public bool isShow= true;
 
     public bool showAnotherTeam = true;
+
+    public bool alwaysFriendly = false;
 	public void Awake(){
 		myTransform = transform;
 		allShowOnGui.Add(this);

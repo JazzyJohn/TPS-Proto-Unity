@@ -383,7 +383,7 @@ public class PlayerMainGui : MonoBehaviour {
             component.hudentry.startpos = component.myTransform.position;
            // 
             component.hudentry.label.text = publicName;
-            if (component.team == LocalPlayer.team)
+            if (component.team == LocalPlayer.team||component.alwaysFriendly)
             {
 
                 component.hudentry.label.color = Color.green;

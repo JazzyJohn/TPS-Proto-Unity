@@ -61,6 +61,7 @@ public class AISwarm_QuantizeWave : AISwarm
     }
     public override void ReadData(ISFSObject iSFSObject)
     {
+        base.ReadData(iSFSObject);
         _alreadyDead = iSFSObject.GetInt("alreadyDead");
         _curWave = iSFSObject.GetInt("curWave");
     }
