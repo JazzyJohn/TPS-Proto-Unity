@@ -6,7 +6,6 @@ public class TurretPawn : Pawn {
 	public Transform headTransform;
     public Quaternion startRotation;
 
-    public ShowOnGuiComponent guiMark;
 
     protected void Awake()
     {

@@ -55,6 +55,8 @@ public class ShowOnGuiComponent : MonoBehaviour {
 	public void Hide(){
 		isShow = false;
 	}
-	
+	public virtual void LocalPlayerSeeMe(int team,bool state){
+			
+	}
 
 }

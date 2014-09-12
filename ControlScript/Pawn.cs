@@ -324,6 +324,7 @@ public class Pawn : DamagebleObject {
 	
 	//Visual Components
 	
+	public ShowOnGuiComponent guiComponent;
 	
 	public string tauntAnimation = "";
 	
@@ -835,19 +836,34 @@ public class Pawn : DamagebleObject {
                     if (allPawn[i].myCollider != hitInfo.collider)
                     {
                       
-                       
+                        if(!isAi&&foxView.isMine){
+							allPawn[i].LocalPlayerSeeMe(team,false);
+						}
                         continue;
                     }
                 }
+ 
+                if(!isAi&&foxView.isMine){
+					allPawn[i].LocalPlayerSeeMe(team,true);
+				
+				}
              //   Debug.Log(this + "  " + allPawn[i]);
                 seenPawns.Add(allPawn[i]);
-            }
+            }else{
+				if(!isAi&&foxView.isMine){
+						allPawn[i].LocalPlayerSeeMe(team,false);
+				}				
+			}
         }
 		//If we already do something slow)) lets clean up damagers lists
 		damagers.RemoveAll (delegate(DamagerEntry v) {
 			return v.forgetTime <Time.time;
 		});
 
+	}
+	protected virtual void LocalPlayerSeeMe(int team,bool state){
+		
+		guiComponent.LocalPlayerSeeMe(team,state);
 	}
 	protected virtual void UpdateAnimator(){
 		float strafe = 0;
