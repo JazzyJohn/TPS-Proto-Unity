@@ -16,6 +16,8 @@ public class ShowOnGuiComponent : MonoBehaviour {
 	
 	public string spriteName;
 
+    public string prefabName = "Standart(sprite and text)";
+
     public HUDText.Entry hudentry;
 
     public bool withArrow = true;
@@ -55,7 +57,7 @@ public class ShowOnGuiComponent : MonoBehaviour {
 	public void Hide(){
 		isShow = false;
 	}
-	public virtual void LocalPlayerSeeMe(int team,bool state){
+	public virtual void LocalPlayerSeeMe(float distance,int team,bool state){
 			
 	}
 

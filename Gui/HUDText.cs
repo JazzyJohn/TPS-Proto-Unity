@@ -33,6 +33,7 @@ public class HUDText : MonoBehaviour
         public string defSpriteName;
       
 		public Transform Perfab;
+		public bool OnTarget = false;
         
 		public PerfabMessageInfo PerfabInfo;
 
@@ -114,8 +115,9 @@ public class HUDText : MonoBehaviour
 		Entry ne = new Entry();
 		ne.time = Time.realtimeSinceStartup;
 		ne.Perfab = (Instantiate(Resources.Load<GameObject>("GUIPerfab/"+namePerfab))as GameObject).transform;
-       
+
 		ne.Perfab.parent = mTrans;
+        
 		ne.Perfab.name = counter.ToString();
 		ne.PerfabInfo = ne.Perfab.GetComponent<PerfabMessageInfo>();
 		ne.Type = TypeMessage.Perfab;
@@ -166,7 +168,7 @@ public class HUDText : MonoBehaviour
 			ne.label = NGUITools.AddWidget<UILabel>(gameObject);
 			ne.label.name = counter.ToString();
 			ne.label.effectStyle = effect;
-			ne.label.font = font;
+			ne.label.bitmapFont = font;
 			ne.Type = TypeMessage.Texts;
 
 			ne.label.cachedTransform.localScale = new Vector3(0.01f, 0.01f, 0.01f);
@@ -225,23 +227,24 @@ public class HUDText : MonoBehaviour
 		gameCamera.gameObject.GetComponent<PlayerMainGui>().P1Hud = this;
 	}
 
+
+
 	
 	public Entry Add (object obj, Color c,  Vector3 pos,bool constant)
 	{
 		if (!enabled) return null;
 		
 		float time = Time.realtimeSinceStartup;
-		bool isNumeric = false;
-		float val = 0f;
+	   float val = 0f;
 		
 		if (obj is float)
 		{
-			isNumeric = true;
+			
 			val = (float)obj;
 		}
 		else if (obj is int)
 		{
-			isNumeric = true;
+			
 			val = (int)obj;
 		}
 		
@@ -348,11 +351,12 @@ public class HUDText : MonoBehaviour
         mTrans.localPosition = pos;
 		ne.constant = constant;
         ne.Perfab.localRotation = Quaternion.identity;
-        if (ne.PerfabInfo.OnSprite)
+        if (ne.PerfabInfo.OnSprite && NameSprite!="")
         {
             ne.PerfabInfo.Sprite.spriteName = NameSprite;
-            ne.defSpriteName = NameSprite;
+           
         }
+        ne.defSpriteName = ne.PerfabInfo.Sprite.spriteName  ;
 		if(ne.PerfabInfo.OnLabel)
 			ne.PerfabInfo.Label.text = Text;
 
@@ -406,7 +410,7 @@ public class HUDText : MonoBehaviour
 	/// Update the position of all labels, as well as update their size and alpha.
 	/// </summary>
 
-	void Update ()
+	public void ReDraw ()
 	{
 		float time = Time.realtimeSinceStartup;
 
@@ -497,14 +501,20 @@ public class HUDText : MonoBehaviour
              
 				break;
 			case TypeMessage.Perfab:
-                if (ent.isShow && viewport.z > 0)
+				if (ent.isShow && (viewport.z > 0 || ent.OnTarget))
                 {
                     if (ent.Sprite.spriteName != ent.defSpriteName)
                     {
                         ent.Sprite.spriteName = ent.defSpriteName;
                     }
-                    ent.Sprite.enabled = true;
-                    ent.label.enabled = true;
+					if(ent.PerfabInfo.OnSprite)
+                    	ent.Sprite.enabled = true;
+					if(ent.PerfabInfo.Label)
+                    	ent.label.enabled = true;
+                    if (ent.PerfabInfo.OnProgressBar)
+                    {
+                        ent.PerfabInfo.Foreground.enabled = true;
+                    }
                 }
                 else
                 {
@@ -527,11 +537,17 @@ public class HUDText : MonoBehaviour
                         viewport = NormalizeOffScreen(viewport);
                         ent.Sprite.enabled = true;
                     }
-                    else
+					else
                     {
-                        ent.Sprite.enabled = false;
+						if (ent.PerfabInfo.OnSprite)
+						{
+                        	ent.Sprite.enabled = false;
+							if(ent.PerfabInfo.OnProgressBar)
+								ent.PerfabInfo.Foreground.enabled = false;
+						}
                     }
-                    ent.label.enabled = false;
+					if (ent.PerfabInfo.OnLabel)
+                    	ent.label.enabled = false;
                 }
                 ent.Perfab.position = uiCamera.ViewportToWorldPoint(viewport);
 				if (!ent.constant)

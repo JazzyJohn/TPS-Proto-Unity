@@ -223,7 +223,7 @@ public class PlayerMainGui : MonoBehaviour {
             }
 		}
 		
-		
+		 Messagess();
 	
 	
 
@@ -323,7 +323,7 @@ public class PlayerMainGui : MonoBehaviour {
 				
 				}
 				
-			 Messagess();
+			
 			 
 			LabelSection();
 		
@@ -368,13 +368,14 @@ public class PlayerMainGui : MonoBehaviour {
             string publicName = component.GetTitle();
             if (component.hudentry == null)
             {
-                if (component.spriteName == "")
+                Debug.Log("createFor" + component);
+                if (component.prefabName == "")
                 {
                     component.hudentry = P1Hud.Add(publicName, Color.red, component.myTransform.position, true);
                 }
                 else
                 {
-                    component.hudentry = P1Hud.Add("Standart(sprite and text)", component.spriteName, publicName, component.myTransform.position, true);
+                    component.hudentry = P1Hud.Add(component.prefabName, component.spriteName, publicName, component.myTransform.position, true);
                 }
                 component.hudentry.withArrow = component.withArrow;
             
@@ -394,12 +395,12 @@ public class PlayerMainGui : MonoBehaviour {
             }
 
         }
-
+        P1Hud.ReDraw();
 		while (logMessages.Count>50) {
 				logMessages.Dequeue ();
 
 		}
-		if (showDebug) {
+		/*if (showDebug) {
 				GUI.BeginGroup (new Rect (0, Screen.height - 300, 400, 300));
 				int j = 0;
 				foreach (LogMess logMessage in logMessages) {
@@ -414,7 +415,7 @@ public class PlayerMainGui : MonoBehaviour {
 
 			chats[0].DrawChatBox();
 
-		}
+		}*/
 	}
 	void LabelSection(){
 		float screenX = Screen.width, screenY = Screen.height;
@@ -548,7 +549,7 @@ public class PlayerMainGui : MonoBehaviour {
 				
 			}
 		}	*/
-		Pawn robot = LocalPlayer.GetRobot ();
+		/*Pawn robot = LocalPlayer.GetRobot ();
 		List<Pawn> seenablePawn = LocalPlayer.GetCurrentPawn ().getAllSeenPawn ();
 		if (LocalPlayer.inBot) {
 			//Debug.Log("ROBOT");
@@ -646,6 +647,9 @@ public class PlayerMainGui : MonoBehaviour {
 	
 		
 	}
+
+
+
 	
 	public void AddMessage(string text,Vector3 worldPoint, MessageType type ){
 		GUIMessage message = new GUIMessage();
