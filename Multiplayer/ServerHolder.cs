@@ -485,8 +485,8 @@ public class ServerHolder : MonoBehaviour
 		//menu.transform.parent = Camera.main.transform;
         menu.transform.localPosition = Vector3.zero;
         menu.transform.localRotation = Quaternion.identity;
-        Debug.Log("SPawn");
-        NetworkController.Instance.pause = false;
+        Debug.Log("Compileted Load Map");
+        
         if (next)
         {
             Player[] allPlayer = FindObjectsOfType<Player>();
@@ -507,6 +507,7 @@ public class ServerHolder : MonoBehaviour
 				break;
 			}
 		}
+        NetworkController.Instance.pause = false;
       //  NetworkController.Instance.SpawnPlayer( Vector3.zero, Quaternion.identity);
 	
 	}

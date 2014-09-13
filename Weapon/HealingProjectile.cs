@@ -4,7 +4,7 @@ using System.Collections;
 public class HealingProjectile : BaseProjectile {
     public override void DamageLogic(DamagebleObject obj, BaseDamage inDamage)
     {
-        Pawn pawn = (Pawn)obj;
+        Pawn pawn = obj as Pawn;
         if (pawn != null)
         {
             if (pawn.team == owner.GetComponent<Pawn>().team)

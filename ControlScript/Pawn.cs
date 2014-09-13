@@ -481,7 +481,7 @@ public class Pawn : DamagebleObject
     public void Init()
     {
         charMan.AddList(player.GetCharacteristick());
-        if (foxView.isMine)
+        if (foxView.isMine && guiComponent!=null)
         {
             Destroy(guiComponent.gameObject);
         }
@@ -629,47 +629,63 @@ public class Pawn : DamagebleObject
 
 
             }
+            if (killerPawn != null)
+            {
 
+
+                DamagerEntry entry = damagers.Find(delegate(DamagerEntry searchentry) { return searchentry.pawn == killerPawn; });
+
+                if (entry == null)
+                {
+                    entry = new DamagerEntry(killerPawn);
+                    damagers.Add(entry);
+                }
+                entry.forgetTime = Time.time + ASSIT_FORGET_TIME;
+                entry.amount += damage.Damage;
+                entry.lastHitDirection = damage.pushDirection;
+            }
+            if (isAi)
+            {
+                mainAi.WasHitBy(killer, damage.Damage);
+
+            }
+            if (canBeKnockOut)
+            {
+                if (damage.knockOut)
+                {
+                    StartCoroutine(KnockOut());
+                }
+
+            }
+            if (eventHandler != null)
+            {
+                eventHandler.Damage(killer, damage.Damage);
+            }
         }
         else
         {
             lastHitDirection = damage.pushDirection;
-            return;
+           
         }
-        if (killerPawn != null)
+        if (killerPawn == null && foxView.isMine)
         {
-
-
-            DamagerEntry entry = damagers.Find(delegate(DamagerEntry searchentry) { return searchentry.pawn == killerPawn; });
-
-            if (entry == null)
+            base.Damage(damage, killer);
+        }
+        if (killerPawn != null && killerPawn.foxView.isMine)
+        {
+            if (foxView.isMine)
             {
-                entry = new DamagerEntry(killerPawn);
-                damagers.Add(entry);
+                base.Damage(damage, killer);
             }
-            entry.forgetTime = Time.time + ASSIT_FORGET_TIME;
-            entry.amount += damage.Damage;
-            entry.lastHitDirection = damage.pushDirection;
-        }
-        if (isAi)
-        {
-            mainAi.WasHitBy(killer, damage.Damage);
-
-        }
-        if (canBeKnockOut)
-        {
-            if (damage.knockOut)
+            else
             {
-                StartCoroutine(KnockOut());
+                foxView.LowerHPRequest(damage, killerPawn.foxView.viewID);
             }
-
+          
         }
-        if (eventHandler != null)
-        {
-            eventHandler.Damage(killer, damage.Damage);
-        }
+       
         //Debug.Log ("DAMAGE");
-        base.Damage(damage, killer);
+       
     }
     //For network purpose 
     public void LowerHealth(BaseDamageModel damageModel, GameObject killer)
@@ -714,6 +730,10 @@ public class Pawn : DamagebleObject
 
     public void Heal(float damage, GameObject Healler)
     {
+        if (isDead)
+        {
+            return;
+        }
         int maxHealth = GetMaxHealth();
         health += damage;
         if (maxHealth < health)
@@ -725,6 +745,10 @@ public class Pawn : DamagebleObject
 
     public void OverHeal(float hp, float maxModifier)
     {
+        if (isDead)
+        {
+            return;
+        }
         int maxHealth = (int)(((float)GetMaxHealth()) * maxModifier);
         health += hp;
         if (health > maxHealth)
@@ -825,6 +849,7 @@ public class Pawn : DamagebleObject
     {
         AITargetManager.DeadPawn(this);
         isDead = true;
+        health = 0;
         characterState = CharacterState.Dead;
         DamagerEntry last = RetrunLastDamager();
         StopKick();
@@ -1102,6 +1127,7 @@ public class Pawn : DamagebleObject
                         }
                         break;
                     case CharacterState.Dead:
+                       
                         if (characterState != CharacterState.Dead)
                         {
                             float angle = Vector3.Dot(lastHitDirection, myTransform.forward);
@@ -2997,12 +3023,12 @@ public class Pawn : DamagebleObject
         serPawn.team = team;
         serPawn.characterState = (int)characterState;
         serPawn.active = isActive;
-        serPawn.isDead = isDead;
         serPawn.isAiming = isAiming;
         serPawn.position.WriteVector(transform.position);
         serPawn.aimRotation.WriteVector(aimRotation);
         serPawn.rotation.WriteQuat(transform.rotation);
         serPawn.health = health;
+        serPawn.velocity.WriteVector(_rb.velocity);
         return serPawn;
     }
 
@@ -3013,6 +3039,7 @@ public class Pawn : DamagebleObject
         nextState = (CharacterState)pawn.characterState;
         wallState = (WallState)pawn.wallState;
         Vector3 oldPos = correctPlayerPos;
+
         correctPlayerPos = pawn.position.MakeVector(correctPlayerPos);
         correctPlayerRot = pawn.rotation.MakeQuaternion(correctPlayerRot);
         aimRotation = pawn.aimRotation.MakeVector(aimRotation);
@@ -3020,9 +3047,11 @@ public class Pawn : DamagebleObject
         team = pawn.team;
         health = pawn.health;
         replicatedVelocity = correctPlayerPos - oldPos;
+        
         float oldTime = lastNetUpdate;
         lastNetUpdate = Time.time;
-        replicatedVelocity = replicatedVelocity / (oldTime - lastNetUpdate);
+        replicatedVelocity = pawn.velocity.GetVector();
+        correctPlayerPos = correctPlayerPos+pawn.velocity.GetVector() * (oldTime - lastNetUpdate);
         RestartLocalVisibilite();
         if (pawn.active != isActive)
         {

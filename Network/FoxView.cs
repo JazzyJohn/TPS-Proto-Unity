@@ -277,5 +277,10 @@ public class FoxView : MonoBehaviour {
 		sendProj= null;
 		NetworkController.Instance.WeaponShootRequest(data);
 	}
+
+    public void LowerHPRequest(BaseDamage damage,int killerId)
+    {
+        NetworkController.Instance.RemoteDamageOnPawnRequest(new BaseDamageModel(damage), viewID,killerId);
+    }
 	
 }

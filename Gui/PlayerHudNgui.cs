@@ -173,7 +173,7 @@ public class PlayerHudNgui : MonoBehaviour {
         }else{
             if (annonceSprites[curAnnonce].priority > annonceSprites[(int)type].priority && annonce.alpha>0)
             {
-                Debug.Log("return by priprity");
+                //Debug.Log("return by priprity");
 				return;
 			}
 		}

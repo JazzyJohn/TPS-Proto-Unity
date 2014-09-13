@@ -205,17 +205,7 @@ public class RobotPawn : Pawn {
         lastNetUpdate = Time.time;
         replicatedVelocity = replicatedVelocity / (oldTime - lastNetUpdate);
         RestartLocalVisibilite();
-        if (pawn.active != isActive)
-        {
-            if (pawn.active)
-            {
-                Activate();
-            }
-            else
-            {
-                DeActivate();
-            }
-        }
+       
     }
 
 }

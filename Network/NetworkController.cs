@@ -145,6 +145,7 @@ public class NetworkController : MonoBehaviour {
             _smartFox.AddEventListener(SFSEvent.LOGIN, OnLogin);
             _smartFox.AddEventListener(SFSEvent.UDP_INIT, OnUdpInit);
             _smartFox.AddEventListener(SFSEvent.EXTENSION_RESPONSE, OnExtensionResponse);
+           
             _smartFox.AddEventListener(SFSEvent.USER_VARIABLES_UPDATE, OnVariablesUpdate);
 			_smartFox.AddEventListener(SFSEvent.USER_EXIT_ROOM, HandlePlayerLeaveEvent);
             _smartFox.AddLogListener(LogLevel.DEBUG, OnDebugMessage);
@@ -300,8 +301,8 @@ public class NetworkController : MonoBehaviour {
         try
         {
             string cmd = (string)evt.Params["cmd"];
+            
             ISFSObject dt = (SFSObject)evt.Params["params"];
-           
             switch (cmd)
             {
                 case "getTime":
@@ -462,7 +463,7 @@ public class NetworkController : MonoBehaviour {
                 case "updateSimpleDestroyableObject":
                     HandleUpdateSimpleDestroyableObject(dt);
                     break;
-				case "remoteDamageOnPawn":
+                case "remoteDamageOnPawn":
 					HandleRemoteDamageOnPawn(dt);
                     break;
 				case "enterRobot":
@@ -547,7 +548,7 @@ public class NetworkController : MonoBehaviour {
 	
     private GameObject _SpawnPrefab(string prefabName, Vector3 vector3, Quaternion quaternion)
     {
-        if (prefabName == "")
+        if (prefabName==null||prefabName == "")
         {
             return null;
         }

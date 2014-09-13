@@ -48,11 +48,11 @@ namespace nstuff.juggerfall.extension.models
 
         public bool active;
 		
-	    public bool isDead;
-
-        public bool isAiming;
+	    public bool isAiming;
 
 		public float health;
+
+        public Vector3Model velocity = new Vector3Model();
 		
 		public Vector3Model position  = new Vector3Model();
 		
@@ -174,15 +174,19 @@ namespace nstuff.juggerfall.extension.models
 	[Serializable]
     public class BaseDamageModel : SerializableSFSType
     {
-		public float Damage;
+        public float damage;
 		public float pushForce;
 		public bool knockOut;
 		public Vector3Model pushDirection;
 		public Vector3Model hitPosition;
 		public bool isContinius;
-		
+
+        public BaseDamageModel()
+        {
+
+        }
 		public BaseDamageModel(BaseDamage damage){
-			this.Damage =damage.Damage;
+			this.damage =damage.Damage;
 			this.pushForce= damage.pushForce;
 			this.knockOut= damage.knockOut;
 			this.isContinius= damage.isContinius;
@@ -190,14 +194,14 @@ namespace nstuff.juggerfall.extension.models
 			this.hitPosition= new Vector3Model(damage.hitPosition);
 		}	
 		public BaseDamage GetDamage(){
-            BaseDamage damage = new BaseDamage();
-            damage.Damage = Damage;
-			damage.pushForce =pushForce;
-			damage.knockOut = knockOut;
-			damage.isContinius= isContinius;
-			damage.pushDirection=pushDirection.GetVector();
-			damage.hitPosition= hitPosition.GetVector();
-			return damage;
+            BaseDamage damageClass = new BaseDamage();
+            damageClass.Damage = damage;
+            damageClass.pushForce = pushForce;
+            damageClass.knockOut = knockOut;
+            damageClass.isContinius = isContinius;
+            damageClass.pushDirection = pushDirection.GetVector();
+            damageClass.hitPosition = hitPosition.GetVector();
+            return damageClass;
 		}	
     }
 	

@@ -59,7 +59,7 @@ public class TimeManager : MonoBehaviour {
     }	
 	public void Synchronize(long timeValue) {
 		// Measure the ping in milliseconds
-		long ping =(long) (Time.time - timeBeforeSync)*1000;
+		long ping =(long)( (Time.time - timeBeforeSync)*1000.0f);
 		CalculateAveragePing(ping);
 				
 		// Take the time passed between server sends response and we get it 

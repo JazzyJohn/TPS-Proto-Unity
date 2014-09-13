@@ -14,7 +14,7 @@ public class PawnOnGuiComponent : ShowOnGuiComponent {
             return;
         }
         float width = startWidth -distance*sizeCoef;
-        Debug.Log((int)width);
+      //  Debug.Log((int)width);
         hudentry.PerfabInfo.Sprite.width = (int)width;
         if (pawn.team != team && pawn.team!=0)
         {

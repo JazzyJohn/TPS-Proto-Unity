@@ -516,6 +516,7 @@ public class Player : MonoBehaviour {
             //TODO: move text to config
             PlayerMainGui.instance.Annonce(AnnonceType.AIKILL);
             EventHolder.instance.FireEvent(typeof(LocalPlayerListener), "EventPawnKillAI", this);
+            StatisticHandler.SendPlayerKillNPC(UID, PlayerName);
 		}
 
 
@@ -561,12 +562,21 @@ public class Player : MonoBehaviour {
 		Score.Assist++;
 	}
 	public void EnterBot(){
+
+        if (robotPawn.isDead)
+        {
+            return;
+        }
 		inBot=true;
 		currentPawn.DeActivate();
 		currentPawn.transform.parent = robotPawn.transform;
 		robotPawn.Activate ();
 	}
 	public void EnterBot(RobotPawn robot){
+        if (robot.isDead)
+        {
+            return;
+        }
 		NetworkController.Instance.EnterRobotRequest(robot.foxView.viewID);
 	}
 	public void EnterBotSuccess(RobotPawn robot){

@@ -8,6 +8,8 @@ public class StatisticHandler : MonoBehaviour {
 
 	public static string KILLED_BY ="killedBy";
 
+    public static string KILL_NPC= "killNpc";
+
 	public static string ADD_USER ="addUser";
 
 	public static string LOAD_ACHIVE = "loadachive";
@@ -99,6 +101,14 @@ public class StatisticHandler : MonoBehaviour {
 		form.AddField("killername",KillerName);
 		StatisticHandler.instance.StartCoroutine(SendForm (form,KILLED_BY));
 	}
+    public static void SendPlayerKillNPC(string Uid, string Name)
+    {
+        WWWForm form = new WWWForm();
+
+        form.AddField("uid", Uid);
+        form.AddField("name", Name);
+        StatisticHandler.instance.StartCoroutine(SendForm(form, KILL_NPC));
+    }
 	public static void SendPlayerKillbyNPC(string Uid,string Name){
 		WWWForm form = new WWWForm ();
 	

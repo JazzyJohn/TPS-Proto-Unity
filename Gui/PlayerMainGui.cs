@@ -178,6 +178,9 @@ public class PlayerMainGui : MonoBehaviour {
 	void Update(){
         if (LocalPlayer == null)
         {
+            if(PlayerView.allPlayer.ContainsKey(NetworkController.smartFox.MySelf.Id)){
+                SetLocalPlayer( PlayerView.allPlayer[NetworkController.smartFox.MySelf.Id].observed);
+            }
             return;
         }
 		if (guiState == GUIState.Dedicated) {
@@ -368,7 +371,7 @@ public class PlayerMainGui : MonoBehaviour {
             string publicName = component.GetTitle();
             if (component.hudentry == null)
             {
-                Debug.Log("createFor" + component);
+                //Debug.Log("createFor" + component);
                 if (component.prefabName == "")
                 {
                     component.hudentry = P1Hud.Add(publicName, Color.red, component.myTransform.position, true);
