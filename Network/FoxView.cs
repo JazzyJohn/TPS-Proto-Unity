@@ -78,7 +78,7 @@ public class FoxView : MonoBehaviour {
 		if(isSceneView&&pawn!=null){
 			return pawn.player==null;
 		}
-        if (isSceneView && weapon != null)
+        if (isSceneView && weapon != null&&weapon.GetOwner()!=null)
         {
             return weapon.GetOwner().player == null;
         }

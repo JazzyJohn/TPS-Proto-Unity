@@ -34,6 +34,15 @@ public class GlobalPlayer : MonoBehaviour {
 			}
 		
 	}
+	void OnLevelWasLoaded(int level) {
+		if(UID!=0&&level==0){
+			MainMenuGUI menu = FindObjectOfType<MainMenuGUI>();
+            if (menu != null)
+            {
+                menu.LoadingFinish();
+            }	
+		}
+	}
 	public List<string> friendsInfo = new List<string>();
 
 	public string PlayerName="VK NAME";
@@ -113,7 +122,7 @@ public class GlobalPlayer : MonoBehaviour {
 			if(Screen.fullScreen){
 				Screen.SetResolution(960, 600, false);
 			}else{
-				 FullScreen();
+				 FullScreen(true);
 			}
             ResizeCall();
 		}

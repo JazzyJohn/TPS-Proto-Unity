@@ -22,6 +22,8 @@ public class SkillBehaviour : MonoBehaviour
 	
 	public float radius;
 	
+	public float distance;
+	
 	protected Pawn target;
 
     protected Vector3 targetPoint;
@@ -35,6 +37,8 @@ public class SkillBehaviour : MonoBehaviour
     protected FoxView foxView;
 	
 	public string spriteName;
+	
+	public LayerMask skilllayer = 1;
 	
 	public void Init(Pawn owner){
 		this.owner = owner;
@@ -140,27 +144,49 @@ public class SkillBehaviour : MonoBehaviour
 	public void Use(){
         Debug.Log("activate Skill");
 		if(_coolDown>=coolDown){
-			isUse = true;
-			CasterVisualEffect();
+	
 			switch(type){
 				case TargetType.SELF:
 				case TargetType.GROUPOFPAWN_BYSELF:	
 					target = owner;
+					isUse = true;
+					CasterVisualEffect();
                     break;
 				case TargetType.PAWN:
 				case TargetType.GROUPOFPAWN_BYPAWN:
 					target =owner.curLookTarget.GetComponent<Pawn>();				
+					isUse = true;
+					CasterVisualEffect();
 				break;
 				case TargetType.POINT:
 				case TargetType.GROUPOFPAWN_BYPOINT:
               
 					targetPoint =owner.getCachedAimRotation();
-                    Debug.Log("activate Skill" + targetPoint);
+					if(CheckAvailablePoint()){
+						isUse = true;
+						CasterVisualEffect();
+					}
+                   // Debug.Log("activate Skill" + targetPoint);
 				break;				
 			}
 		}		
 	}
+	public void CheckAvailablePoint(){
+		RaycastHit hitInfo;
+		Vector3 direction = owner.myTransform.position -targetPoint;
+		
+        if ( Physics.Raycast(owner.myTransform.position, direction.normalized, out hitInfo, distance, skilllayer)){
+			if(Vector3.Dot(hitInfo.normal,Vector3.up )<0.45){
+				targetPoint = hitInfo.point;
+			}else{
+				targetPoint-= direction*radius;
+			}	
+		}else{
+			targetPoint = owner.myTransform.position +direction*distance;
+		
+		}
 	
+	}
 	public void Use(Pawn pawn){
 		if(_coolDown>=coolDown){
 			isUse = true;
