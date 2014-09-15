@@ -198,7 +198,7 @@ public class HUDText : MonoBehaviour
 	public void Delete (Entry ent)
 	{
 		mList.Remove(ent);
-		if(ent.label==null||ent.label.gameObject==null){
+		if(ent==null||ent.label==null||ent.label.gameObject==null){
 			return;
 		}
 		switch(ent.Type)

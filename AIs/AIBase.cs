@@ -78,8 +78,11 @@ public class AIBase : MonoBehaviour
 		AIDirector.instance.swarms[aiGroup].RemoteAdd(this);
 	}
 	public void WasHitBy(GameObject killer,float amount){
+		if(killer==null){
+			return;
+		}
 		Pawn killerPawn = killer.GetComponent<Pawn> ();
-		if (killerPawn != null) {
+		if (killerPawn != null&&_currentState!=null) {
 			_currentState.WasHitBy(killerPawn);
 		}
 

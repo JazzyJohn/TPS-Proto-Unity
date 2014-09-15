@@ -331,37 +331,56 @@ public class NetworkController : MonoBehaviour {
                     //TODO Think maybe faster would be to sort it?
                     foreach (SFSObject dtIt in dt.GetSFSArray("views"))
                     {
-                        if (dtIt.ContainsKey("pawn"))
-                        {
-                            HandlePawnSpawn(dtIt);
-                        }else if (dtIt.ContainsKey("model"))
-                        {
-                            HandleSimplePrefabSpawn(dtIt);
-                        }
+						//Yes try catch is not best solution we mustn't rely on it. but this is our insurance that player can play anyhow further 
+						try{
+							if (dtIt.ContainsKey("pawn"))
+							{
+								HandlePawnSpawn(dtIt);
+							}else if (dtIt.ContainsKey("model"))
+							{
+								HandleSimplePrefabSpawn(dtIt);
+							}
+						} catch (Exception e)
+						{
+							  Debug.LogError("Exception handling playersSpawm in views section: " + e.Message + " >>> " + e.StackTrace);
+						
+						}
                        
                     }
                     foreach (SFSObject dtIt in dt.GetSFSArray("views"))
                     {
-                        if (dtIt.ContainsKey("weapon"))
-                        {
-                            HandleWeaponSpawn(dtIt);
-                        }
+						try{
+							if (dtIt.ContainsKey("weapon"))
+							{
+								HandleWeaponSpawn(dtIt);
+							}
+						} catch (Exception e)
+						{
+							  Debug.LogError("Exception handling playersSpawm in views section: " + e.Message + " >>> " + e.StackTrace);
+						
+						}
 
                     }
 					//Delete scene view that was deleted before player join
 				    foreach (int id in dt.GetIntArray("deleteSceneView"))
                     {
+						try{
 							 FoxView view = GetView(id);
-                             Debug.Log("ALREDY DESTROY ID" + id);
+                             //	Debug.Log("ALREDY DESTROY ID" + id);
 							 if(view!=null){
 								DestroyableNetworkObject obj =view.GetComponent<DestroyableNetworkObject>();
                                  
 								if(obj!=null){
-                                    Debug.Log("ALREDY DESTROY" + obj);
+                                    //Debug.Log("ALREDY DESTROY" + obj);
 									obj.KillMe();
 								
 								}
 							}
+						} catch (Exception e)
+						{
+							  Debug.LogError("Exception handling playersSpawm in delete views section: " + e.Message + " >>> " + e.StackTrace);
+						
+						}
 					}
                     if(dt.ContainsKey("Master")&&dt.GetBool("Master")){
                         HandleMasterStart(dt);
@@ -650,7 +669,7 @@ public class NetworkController : MonoBehaviour {
     public void SpawnPlayer(PlayerModel player)
     {
 
-        Debug.Log( "CREATE PLAYER " + player.userId );
+        //Debug.Log( "CREATE PLAYER " + player.userId );
         GameObject newObject = _SpawnPrefab("Player", Vector3.zero, Quaternion.identity);
         PlayerView view = newObject.GetComponent<PlayerView>();
         view.SetId(player.userId);
@@ -660,7 +679,7 @@ public class NetworkController : MonoBehaviour {
 	 public void SpawnPlayer(int uid)
     {
 
-        Debug.Log("CREATE PLAYER " + uid);
+        //Debug.Log("CREATE PLAYER " + uid);
         GameObject newObject = _SpawnPrefab("Player", Vector3.zero, Quaternion.identity);
         PlayerView view = newObject.GetComponent<PlayerView>();
         view.SetId(uid);
@@ -1117,7 +1136,7 @@ public class NetworkController : MonoBehaviour {
         PawnModel pawn = go.GetComponent<Pawn>().GetSerilizedData();
         pawn.type = prefab;
         data.PutClass("pawn", pawn);
-        Debug.Log(serverHolder.gameRoom);
+       // Debug.Log(serverHolder.gameRoom);
         ExtensionRequest request = new ExtensionRequest("pawnBattleJuggerSpawn", data, serverHolder.gameRoom);
         smartFox.Send(request);
         return go;
@@ -1135,7 +1154,7 @@ public class NetworkController : MonoBehaviour {
 
         data.PutClass("model", model);
         ExtensionRequest request = new ExtensionRequest("baseSpawned", data, serverHolder.gameRoom);
-        Debug.Log("BaseSpawnedRequest");
+        //Debug.Log("BaseSpawnedRequest");
         smartFox.Send(request);
     }
     /// <summary>
@@ -1214,7 +1233,7 @@ public class NetworkController : MonoBehaviour {
     {
         ISFSObject data = new SFSObject();
 		data.PutInt("robotId", robotId);
-        Debug.Log("enter");
+        //Debug.Log("enter");
         ExtensionRequest request = new ExtensionRequest("enterRobot", data, serverHolder.gameRoom);
 		if(smartFox.MySelf.ContainsVariable("Master") && NetworkController.smartFox.MySelf.GetVariable("Master").GetBoolValue()){
 			data.PutInt("userId", smartFox.MySelf.Id);
@@ -1291,7 +1310,7 @@ public class NetworkController : MonoBehaviour {
 	public void HandlePawnSpawn(ISFSObject dt )
     {
         PawnModel sirPawn = (PawnModel)dt.GetClass("pawn");
-        Debug.Log("Pawn Spawn" + sirPawn.type);
+        //Debug.Log("Pawn Spawn" + sirPawn.type);
 		GameObject go =RemoteInstantiateNetPrefab(sirPawn.type, Vector3.zero,Quaternion.identity,sirPawn.id);
         if (go == null)
         {
@@ -1559,7 +1578,7 @@ public class NetworkController : MonoBehaviour {
 
     public void HandleGameStart()
     {
-       Debug.Log("GAME START");
+       //Debug.Log("GAME START");
         GameRule.instance.StartGame();
       
     }	
@@ -1581,7 +1600,7 @@ public class NetworkController : MonoBehaviour {
 
     public void HandleGameUpdate(ISFSObject dt)
     {
-        Debug.Log("gameeUPDATE");
+        //Debug.Log("gameeUPDATE");
         GameRuleModel model = (GameRuleModel)dt.GetClass("game");
         GameRule.instance.SetFromModel(model);
 
@@ -1603,7 +1622,7 @@ public class NetworkController : MonoBehaviour {
 
     public void HandlePawnDiedByKill(ISFSObject dt)
     {
-        Debug.Log("PAWN DIED");
+        //Debug.Log("PAWN DIED");
         Pawn pawn = GetView(dt.GetInt("viewId")).pawn;
         pawn.PawnKill();
         int player = dt.GetInt("player");
@@ -1624,7 +1643,7 @@ public class NetworkController : MonoBehaviour {
     {
 		
         int playerID =dt.GetInt("playerId");
-		Debug.Log("PLAYER LEAVESERVER"+playerID);
+		//Debug.Log("PLAYER LEAVESERVER"+playerID);
 		if (!PlayerView.allPlayer.ContainsKey(playerID)){
 			return;
 		}
@@ -1654,7 +1673,7 @@ public class NetworkController : MonoBehaviour {
 		}
 
         int playerID = user.Id;
-		Debug.Log("PLAYER LEAVE"+playerID);
+		//Debug.Log("PLAYER LEAVE"+playerID);
 		if (!PlayerView.allPlayer.ContainsKey(playerID)){
 			return;
 		}
@@ -1748,12 +1767,12 @@ public class NetworkController : MonoBehaviour {
 		player.AfterSpawnSetting(pawn,new int[]{});	
 		if(_smartFox.MySelf.Id==dt.GetInt("userId")){
 			pawn.foxView.SetMine(true);
-            Debug.Log("enterRobotSuccess");
+            //Debug.Log("enterRobotSuccess");
 			player.EnterBotSuccess(pawn);
         }
         else
         {
-            Debug.Log("enterRobotSuccess");
+            //Debug.Log("enterRobotSuccess");
             pawn.foxView.SetMine(false);
             pawn.AnotherEnter();
         }	

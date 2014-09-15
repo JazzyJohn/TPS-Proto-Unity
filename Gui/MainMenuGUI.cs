@@ -41,7 +41,10 @@ public class MainMenuGUI : MonoBehaviour {
 
     public void LoadingFinish()
     {
-        Destroy(loadingWidget.gameObject);
+		if(loadingWidget){
+			Destroy(loadingWidget.gameObject);
+			loadingWidget=null;
+		}
         allWWidget.alpha = 1.0f;
     }
 

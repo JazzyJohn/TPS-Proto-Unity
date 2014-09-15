@@ -407,7 +407,7 @@ public class Pawn : DamagebleObject
 
     public virtual void StartPawn()
     {
-        Debug.Log("Start PAwn");
+        //Debug.Log("Start PAwn");
 
         _canWallRun = canWallRun;
         //проигрываем звук респавна
@@ -549,7 +549,7 @@ public class Pawn : DamagebleObject
         }
         if (idMain != -1)
         {
-            Debug.Log(ItemManager.instance.weaponPrefabsListbyId[idMain]);
+            //Debug.Log(ItemManager.instance.weaponPrefabsListbyId[idMain]);
             ivnMan.SetSlot(ItemManager.instance.weaponPrefabsListbyId[idMain]);
         }
         if (idExtra != -1)
@@ -1852,7 +1852,7 @@ public class Pawn : DamagebleObject
     }
     void OnTriggerEnter(Collider other)
     {
-        Debug.Log(other);
+        //Debug.Log(other);
 
         if (other.tag == "damageArea")
         {
@@ -2069,7 +2069,7 @@ public class Pawn : DamagebleObject
         bool frontW = Physics.Raycast(myTransform.position,
                                        myTransform.forward, out frontH, capsule.radius + 0.2f, wallRunLayers);
 
-        Debug.DrawLine(myTransform.position,
+        /*Debug.DrawLine(myTransform.position,
                         myTransform.position + (0.5f * myTransform.forward - myTransform.right).normalized * (capsule.radius + 0.2f));
 
         Debug.DrawLine(myTransform.position,
@@ -2077,7 +2077,7 @@ public class Pawn : DamagebleObject
 
         //Debug.DrawLine (myTransform.position,
         // myTransform.forward);
-
+*/
 
 
 

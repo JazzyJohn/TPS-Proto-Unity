@@ -750,7 +750,7 @@ public class Player : MonoBehaviour {
 
     private void ActualUseOfBuff(int id)
     {
-        Debug.Log("BUFF ADd"+id);
+       // Debug.Log("BUFF ADd"+id);
         charMan.AddList( ItemManager.instance.GetBuff(id));
 	}
 

@@ -131,6 +131,10 @@ public class ServerHolder : MonoBehaviour
 
 	public void OnCreateRoomError(BaseEvent evt) {
 		string error = (string)evt.Params["error"];
+		MainMenuGUI mainMenu = FindObjectOfType<MainMenuGUI> ();
+		if(mainMenu!=null)[
+			CreateRoom();
+		}
 		Debug.Log("Room creation error; the following error occurred: " + error);
 	}
 
