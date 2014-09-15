@@ -35,7 +35,7 @@ public class GlobalPlayer : MonoBehaviour {
 		
 	}
 	void OnLevelWasLoaded(int level) {
-		if(UID!=0&&level==0){
+		if(UID!=""&&level==0){
 			MainMenuGUI menu = FindObjectOfType<MainMenuGUI>();
             if (menu != null)
             {

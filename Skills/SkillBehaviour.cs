@@ -162,10 +162,10 @@ public class SkillBehaviour : MonoBehaviour
 				case TargetType.GROUPOFPAWN_BYPOINT:
               
 					targetPoint =owner.getCachedAimRotation();
-					if(CheckAvailablePoint()){
+					CheckAvailablePoint();
 						isUse = true;
 						CasterVisualEffect();
-					}
+					
                    // Debug.Log("activate Skill" + targetPoint);
 				break;				
 			}

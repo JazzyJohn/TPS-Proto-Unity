@@ -139,7 +139,7 @@ public class NetworkController : MonoBehaviour {
 
 
                Debug.Log("startFoxCOnnection");
-          
+            _smartFox.ThreadSafeMode = true;
             _smartFox.AddEventListener(SFSEvent.CONNECTION, OnConnection);
             _smartFox.AddEventListener(SFSEvent.CONNECTION_LOST, OnConnectionLost);
             _smartFox.AddEventListener(SFSEvent.LOGIN, OnLogin);
