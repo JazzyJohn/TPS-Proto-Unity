@@ -153,14 +153,24 @@ public class PlayerManager : MonoBehaviour {
             PawnUpdate();
         }
 	}
+	public int maxPawnSend = 5;
 	 public void PawnUpdate(){
 		
 		ISFSObject data = new SFSObject();
 		ISFSArray pawnsArr = new SFSArray();
-	
+		int packSize = 0;
 		foreach(Pawn pawn in cachedPawns){
 			if(pawn.NeedUpdate()){
 				pawnsArr.AddClass(pawn.GetSerilizedData());
+				packSize++;
+			}
+			
+			if(packSize>=maxPawnSend){
+				data.PutSFSArray("pawns",pawnsArr);
+				NetworkController.Instance.PawnUpdateRequest(data);
+				data = new SFSObject();
+				pawnsArr = new SFSArray();
+				packSize=0;
 			}
 		}
 		if(pawnsArr.Size()==0){
