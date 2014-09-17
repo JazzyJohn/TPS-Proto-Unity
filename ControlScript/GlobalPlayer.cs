@@ -17,18 +17,20 @@ public class GlobalPlayer : MonoBehaviour {
 			if(FindObjectsOfType<GlobalPlayer>().Length>1){
 				Destroy(gameObject);
 			}else{
-				switch(platformType){
-					case PLATFORMTYPE.VK:
+				if(Application.platform ==  RuntimePlatform.WindowsPlayer||Application.platform ==  RuntimePlatform.OSXWebPlayer){
+					switch(platformType){
+						case PLATFORMTYPE.VK:
+						
+							Application.ExternalCall ("SayMyName");
+						break;
+						case PLATFORMTYPE.FACEBOOK:
+							FB.Init(SetFaceBookInit, OnHideFaceBookUnity);
+							Application.ExternalCall ("SayMyName");
+						break;
+						
 					
-						Application.ExternalCall ("SayMyName");
-					break;
-					case PLATFORMTYPE.FACEBOOK:
-						FB.Init(SetFaceBookInit, OnHideFaceBookUnity);
-						Application.ExternalCall ("SayMyName");
-					break;
-				
+					}
 				}
-			
 				
 				DontDestroyOnLoad(transform.gameObject);
 			}
@@ -111,10 +113,21 @@ public class GlobalPlayer : MonoBehaviour {
     }
     public void Start()
     {
-        if (Application.platform == RuntimePlatform.WindowsEditor||Application.platform ==  RuntimePlatform.WindowsPlayer)
-        {
-            SetUid(UID);
-        }
+		switch(Application.platform){
+			case RuntimePlatform.WindowsEditor:
+				SetUid(UID);			
+			break;
+			case RuntimePlatform.WindowsPlayer:
+			case RuntimePlatform.OSXWebPlayer:
+			break;
+			default:
+				MainMenuGUI menu = FindObjectOfType<MainMenuGUI>();
+				if (menu != null)
+				{
+					menu.LoginPage();
+				}	
+			break;
+		}
     }
 
 	void Update(){
@@ -228,7 +241,7 @@ public class GlobalPlayer : MonoBehaviour {
 		StartCoroutine(ReloadStats());
 	}
 	
-	public void  SetName(String newname)
+	public void  SetName(string newname)
 	{
 		PlayerName = newname;
 	
@@ -247,4 +260,9 @@ public class GlobalPlayer : MonoBehaviour {
         FindObjectOfType<RewardManager>().Init(UID);
         NetworkController.Instance.SetLogin(UID);
 	}
+	public void FinishInnerLogin(string uid,string newname){
+		PlayerName = newname;
+		SetUid(uid)
+	}
+	
 }

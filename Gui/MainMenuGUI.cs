@@ -14,6 +14,8 @@ public class MainMenuGUI : MonoBehaviour {
 	public GameObject ActivBut;
 	
 	public RoomsNgui _RoomsNgui;
+	
+	public LoginPanel _LoginPanel;
 
 	public PanelsNgui _PanelsNgui;
 
@@ -41,7 +43,7 @@ public class MainMenuGUI : MonoBehaviour {
 
     public void LoadingFinish()
     {
-		if(loadingWidget){
+		if(loadingWidget!=null){
 			Destroy(loadingWidget.gameObject);
 			loadingWidget=null;
 		}
@@ -52,6 +54,7 @@ public class MainMenuGUI : MonoBehaviour {
 		HideAllPanel();
 		DontDestroyOnLoad(transform.gameObject);
 	}
+	
 
 	// Use this for initialization
 	void Start () 
@@ -161,7 +164,44 @@ public class MainMenuGUI : MonoBehaviour {
 		_RoomsNgui.NameNewRoom.value = Server.newRoomName;
 
 	}
-
+	public void LoginPage(){
+		allWWidget.alpha = 0.0f;
+		if(loadingWidget!=null){
+			loadingWidget.alpha=0.0f
+		}
+		_LoginPanel.mainPanel = 1.0f
+		if( PlayerPrefs.HasKey("login")){
+			_LoginPanel.emailField.value = PlayerPrefs.GetString("login");
+		}else{
+			_LoginPanel.login.alpha= 0.0f;
+			_LoginPanel.registration.alpha = 1.0f;
+		}
+	}
+	public void Login(UILabel login,UILabel password){
+		RegistrationAPI.instance.Login(login.value,password.value);
+	}
+	public void Registrate(UILabel login,UILabel password,UILabel repeatPassword,UILabel nick){
+		if(passwor.value!=repeatPassword.value){
+			_LoginPanel.regError.value="Пароли не совпадают";
+			return;
+		}
+		RegistrationAPI.instance.Registration(login.value,password.value,nick.value);
+	}
+	public void SetRegistarationError(string text){
+		_LoginPanel.regError.value=text;
+	}
+	public void SetLoginError(string text){
+		_LoginPanel.logError.value=text;
+	}
+	public void FinishLogin(){
+		allWWidget.alpha = 0.0f;
+		_LoginPanel.mainPanel = 0.0f
+		if(loadingWidget!=null){
+			loadingWidget.alpha=1.0f
+		}else{
+			allWWidget.alpha = 1.0f;
+		}
+	}
 	public void ToogleMode(int mode) {
 		if (_RoomsNgui.CreateRoom.alpha == 1.0f)
 		{
@@ -462,3 +502,16 @@ public class PanelsNgui
     public UIPanel mainpanel;
     public UIPanel settings;
 }
+[System.Serializable]
+public class LoginPanel
+{
+	public UIPanel mainPanel;
+	public UIWidget registration;
+	public UIWidget login;
+	public UIInput 	emailField;
+	public UILabel regError;
+	public UILabel logError;
+	
+	
+}
+

@@ -47,7 +47,11 @@ public class StatisticHandler : MonoBehaviour {
 	public static string SPEND_SKILL_POINT = "spendskillpoint";
 	
 	public static string GLOBAL_ERROR_LOG = "globalerrorlog";
+	
+	public static string REGISTRATION = "registration";
 
+	public static string REGISTRATION = "login";
+	
     public static string STATISTIC_PHP = "http://juggerfall.com/";
 
     public static string STATISTIC_PHP_HTTPS = "https://juggerfall.com/";
