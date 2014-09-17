@@ -177,6 +177,28 @@ public class MainMenuGUI : MonoBehaviour {
 			_LoginPanel.registration.alpha = 1.0f;
 		}
 	}
+    public void OpenEnterPage()
+    {
+        allWWidget.alpha = 0.0f;
+        if (loadingWidget != null)
+        {
+            loadingWidget.alpha = 0.0f;
+        }
+        _LoginPanel.mainPanel.alpha = 1.0f;
+        _LoginPanel.login.alpha = 1.0f;
+        _LoginPanel.registration.alpha = 0.0f;
+    }
+    public void OpenRegPage()
+    {
+        allWWidget.alpha = 0.0f;
+        if (loadingWidget != null)
+        {
+            loadingWidget.alpha = 0.0f;
+        }
+        _LoginPanel.mainPanel.alpha = 1.0f;
+        _LoginPanel.login.alpha = 0.0f;
+        _LoginPanel.registration.alpha = 1.0f;
+    }
 	public void Login(UILabel login,UILabel password){
         RegistrationAPI.instance.Login(login.text, password.text);
 	}

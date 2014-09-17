@@ -44,7 +44,7 @@ public class RegistrationAPI : MonoBehaviour{
 			XmlDocument xmlDoc = new XmlDocument();
 			xmlDoc.LoadXml(www.text);
 			if(xmlDoc.SelectSingleNode("registration/status").InnerText=="true"){
-				PlayerPrefs.SetString("login",xmlDoc.SelectSingleNode("registration/uid").InnerText);
+                PlayerPrefs.SetString("login", xmlDoc.SelectSingleNode("registration/login").InnerText);
 				GlobalPlayer.instance.FinishInnerLogin(xmlDoc.SelectSingleNode("registration/uid").InnerText,xmlDoc.SelectSingleNode("registration/nick").InnerText);
 				MainMenuGUI menu = FindObjectOfType<MainMenuGUI>();
 				if (menu != null)
@@ -73,10 +73,12 @@ public class RegistrationAPI : MonoBehaviour{
 			WWW www = StatisticHandler.GetMeRightWWW(form,StatisticHandler.LOGIN);
 			
 			yield return www;
+            Debug.Log(www.text);
 			XmlDocument xmlDoc = new XmlDocument();
 			xmlDoc.LoadXml(www.text);
+           
 			if(xmlDoc.SelectSingleNode("login/status").InnerText=="true"){
-                PlayerPrefs.SetString("login", xmlDoc.SelectSingleNode("login/uid").InnerText);
+                PlayerPrefs.SetString("login", xmlDoc.SelectSingleNode("login/login").InnerText);
 				GlobalPlayer.instance.FinishInnerLogin(xmlDoc.SelectSingleNode("login/uid").InnerText,xmlDoc.SelectSingleNode("login/nick").InnerText);
 				MainMenuGUI menu = FindObjectOfType<MainMenuGUI>();
 				if (menu != null)

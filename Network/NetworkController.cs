@@ -662,7 +662,18 @@ public class NetworkController : MonoBehaviour {
             throw new Exception(string.Format("AllocateViewID() failed. User {0} is out of subIds, as all viewIDs are used.", ownerId));
         }
     }
-	
+
+    /// <summary>
+    ///Prevent player form diconect in main menu
+    /// </summary>	
+
+    public void ConterIdleRequest()
+    {
+        ISFSObject data = new SFSObject();
+        AIDirector.instance.SendData(data);
+        ExtensionRequest request = new ExtensionRequest("conterIdle", data);
+        smartFox.Send(request);
+    }
 	  /// <summary>
     /// Spawn current player object
     /// </summary>	

@@ -17,7 +17,7 @@ public class GlobalPlayer : MonoBehaviour {
 			if(FindObjectsOfType<GlobalPlayer>().Length>1){
 				Destroy(gameObject);
 			}else{
-				if(Application.platform ==  RuntimePlatform.WindowsPlayer||Application.platform ==  RuntimePlatform.OSXWebPlayer){
+				
 					switch(platformType){
 						case PLATFORMTYPE.VK:
 						
@@ -30,7 +30,7 @@ public class GlobalPlayer : MonoBehaviour {
 						
 					
 					}
-				}
+				
 				
 				DontDestroyOnLoad(transform.gameObject);
 			}
@@ -56,6 +56,8 @@ public class GlobalPlayer : MonoBehaviour {
 	public int gold;
 	
 	public int cash;
+
+    public bool isDebug=false;
 	
 	public void SetFaceBookInit() {
 		if(FB.IsLoggedIn) {
@@ -114,18 +116,20 @@ public class GlobalPlayer : MonoBehaviour {
     public void Start()
     {
 		switch(Application.platform){
-		/*	case RuntimePlatform.WindowsEditor:
-				SetUid(UID);			
-			break;*/
-			case RuntimePlatform.WindowsPlayer:
+			
+			case RuntimePlatform.WindowsWebPlayer:
 			case RuntimePlatform.OSXWebPlayer:
 			break;
 			default:
-				MainMenuGUI menu = FindObjectOfType<MainMenuGUI>();
-				if (menu != null)
-				{
-					menu.LoginPage();
-				}	
+              if (isDebug){
+                  SetUid(UID);
+              }else{
+				    MainMenuGUI menu = FindObjectOfType<MainMenuGUI>();
+				    if (menu != null)
+				    {
+					    menu.LoginPage();
+				    }	
+              }
 			break;
 		}
     }
