@@ -114,9 +114,9 @@ public class GlobalPlayer : MonoBehaviour {
     public void Start()
     {
 		switch(Application.platform){
-			case RuntimePlatform.WindowsEditor:
+		/*	case RuntimePlatform.WindowsEditor:
 				SetUid(UID);			
-			break;
+			break;*/
 			case RuntimePlatform.WindowsPlayer:
 			case RuntimePlatform.OSXWebPlayer:
 			break;
@@ -262,7 +262,7 @@ public class GlobalPlayer : MonoBehaviour {
 	}
 	public void FinishInnerLogin(string uid,string newname){
 		PlayerName = newname;
-		SetUid(uid)
+        SetUid(uid);
 	}
 	
 }

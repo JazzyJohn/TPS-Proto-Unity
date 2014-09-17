@@ -50,7 +50,7 @@ public class StatisticHandler : MonoBehaviour {
 	
 	public static string REGISTRATION = "registration";
 
-	public static string REGISTRATION = "login";
+	public static string LOGIN = "login";
 	
     public static string STATISTIC_PHP = "http://juggerfall.com/";
 

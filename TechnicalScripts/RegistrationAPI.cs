@@ -1,5 +1,6 @@
 using UnityEngine;
 using System.Collections;
+using System.Xml;
 
 public class RegistrationAPI : MonoBehaviour{
 	private static RegistrationAPI s_Instance = null;
@@ -33,7 +34,7 @@ public class RegistrationAPI : MonoBehaviour{
 			form.AddField ("email", email);
 			form.AddField ("password", password);
 			form.AddField ("nick", nick);
-			StartCoroutine(SendRegForm(WWWForm form));
+			StartCoroutine(SendRegForm( form));
 
 	}
 	private IEnumerator SendRegForm(WWWForm form){
@@ -43,7 +44,7 @@ public class RegistrationAPI : MonoBehaviour{
 			XmlDocument xmlDoc = new XmlDocument();
 			xmlDoc.LoadXml(www.text);
 			if(xmlDoc.SelectSingleNode("registration/status").InnerText=="true"){
-				PlayerPrefs.SetKey("login",xmlDoc.SelectSingleNode("registration/uid").InnerText);
+				PlayerPrefs.SetString("login",xmlDoc.SelectSingleNode("registration/uid").InnerText);
 				GlobalPlayer.instance.FinishInnerLogin(xmlDoc.SelectSingleNode("registration/uid").InnerText,xmlDoc.SelectSingleNode("registration/nick").InnerText);
 				MainMenuGUI menu = FindObjectOfType<MainMenuGUI>();
 				if (menu != null)
@@ -54,7 +55,7 @@ public class RegistrationAPI : MonoBehaviour{
 				MainMenuGUI menu = FindObjectOfType<MainMenuGUI>();
 				if (menu != null)
 				{
-					menu.SetRegistarationError(xmlDoc.SelectSingleNode("registration/error"));
+					menu.SetRegistarationError(xmlDoc.SelectSingleNode("registration/error").InnerText);
 				}	
 			
 		
@@ -65,7 +66,7 @@ public class RegistrationAPI : MonoBehaviour{
 	
 			form.AddField ("email", email);
 			form.AddField ("password", password);
-			StartCoroutine(SendLoginForm(WWWForm form));
+			StartCoroutine(SendLoginForm( form));
 
 	}
 	private IEnumerator SendLoginForm(WWWForm form){
@@ -75,7 +76,7 @@ public class RegistrationAPI : MonoBehaviour{
 			XmlDocument xmlDoc = new XmlDocument();
 			xmlDoc.LoadXml(www.text);
 			if(xmlDoc.SelectSingleNode("login/status").InnerText=="true"){
-				PlayerPrefs.SetKey("login",xmlDoc.SelectSingleNode("login/uid").InnerText);
+                PlayerPrefs.SetString("login", xmlDoc.SelectSingleNode("login/uid").InnerText);
 				GlobalPlayer.instance.FinishInnerLogin(xmlDoc.SelectSingleNode("login/uid").InnerText,xmlDoc.SelectSingleNode("login/nick").InnerText);
 				MainMenuGUI menu = FindObjectOfType<MainMenuGUI>();
 				if (menu != null)
@@ -86,7 +87,7 @@ public class RegistrationAPI : MonoBehaviour{
 				MainMenuGUI menu = FindObjectOfType<MainMenuGUI>();
 				if (menu != null)
 				{
-					menu.SetLoginError(xmlDoc.SelectSingleNode("login/error"));
+                    menu.SetLoginError(xmlDoc.SelectSingleNode("login/error").InnerText);
 				}	
 			
 		

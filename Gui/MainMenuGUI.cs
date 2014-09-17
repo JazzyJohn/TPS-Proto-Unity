@@ -167,9 +167,9 @@ public class MainMenuGUI : MonoBehaviour {
 	public void LoginPage(){
 		allWWidget.alpha = 0.0f;
 		if(loadingWidget!=null){
-			loadingWidget.alpha=0.0f
+			loadingWidget.alpha=0.0f;
 		}
-		_LoginPanel.mainPanel = 1.0f
+        _LoginPanel.mainPanel.alpha = 1.0f;
 		if( PlayerPrefs.HasKey("login")){
 			_LoginPanel.emailField.value = PlayerPrefs.GetString("login");
 		}else{
@@ -178,26 +178,27 @@ public class MainMenuGUI : MonoBehaviour {
 		}
 	}
 	public void Login(UILabel login,UILabel password){
-		RegistrationAPI.instance.Login(login.value,password.value);
+        RegistrationAPI.instance.Login(login.text, password.text);
 	}
 	public void Registrate(UILabel login,UILabel password,UILabel repeatPassword,UILabel nick){
-		if(passwor.value!=repeatPassword.value){
-			_LoginPanel.regError.value="Пароли не совпадают";
+        if (password.text != repeatPassword.text)
+        {
+            _LoginPanel.regError.text = "Пароли не совпадают";
 			return;
 		}
-		RegistrationAPI.instance.Registration(login.value,password.value,nick.value);
+        RegistrationAPI.instance.Registration(login.text, password.text, nick.text);
 	}
 	public void SetRegistarationError(string text){
-		_LoginPanel.regError.value=text;
+        _LoginPanel.regError.text = text;
 	}
 	public void SetLoginError(string text){
-		_LoginPanel.logError.value=text;
+        _LoginPanel.logError.text = text;
 	}
 	public void FinishLogin(){
 		allWWidget.alpha = 0.0f;
-		_LoginPanel.mainPanel = 0.0f
+		_LoginPanel.mainPanel.alpha = 0.0f;
 		if(loadingWidget!=null){
-			loadingWidget.alpha=1.0f
+            loadingWidget.alpha = 1.0f;
 		}else{
 			allWWidget.alpha = 1.0f;
 		}
