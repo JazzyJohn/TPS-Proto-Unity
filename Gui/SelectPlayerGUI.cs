@@ -66,7 +66,7 @@ public class SelectPlayerGUI : MonoBehaviour {
         
         PrefabManager[] managers = FindObjectsOfType<PrefabManager>();
         foreach(PrefabManager manager in managers){
-            if(manager.typeOfObject=="Pawn"){
+            if(manager.isPawns){
                 playerManager=manager;
             }
         }

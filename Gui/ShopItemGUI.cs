@@ -4,13 +4,13 @@ using System.Collections;
 public class ShopItemGUI : MonoBehaviour {
 
 	public ShopGUI Shop;
-	public string id = "";
+    public ShopSlot item;
 	public UILabel Name;
-	public UILabel PraceKP;
-	public UILabel PraceGITP;
-	public UILabel Opisanie;
-	public UITexture Textura;
-	public UIWidget Box;
+	public UILabel PriceKP;
+	public UILabel PriceGITP;
+    public UILabel Description;
+	public UITexture Texture;
+    public UIWidget Box;
 
 	[HideInInspector]
 	public int numToItem;
@@ -27,6 +27,22 @@ public class ShopItemGUI : MonoBehaviour {
 
 	// Update is called once per frame
 	void Update () {
-	
+        if (item != null &&item.texture!=null&& Texture.mainTexture == null)
+        {
+            Texture.mainTexture= item.texture;
+        }
 	}
+
+    public void SetItem(ShopSlot _item)
+    {
+        item = _item;
+        Name.text = item.name;
+        PriceKP.text = item.cashCost + " KP";
+        PriceGITP.text = item.goldCost + " GITP";
+        Description.text = item.description;
+        Texture.mainTexture = null;
+        
+        
+    }
+        
 }

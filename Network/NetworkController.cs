@@ -258,6 +258,10 @@ public class NetworkController : MonoBehaviour {
         {
             // Startup up UDP
             Debug.Log("Login ok");
+            ConterIdleRequest req = FindObjectOfType<ConterIdleRequest>();
+            if (req != null) { 
+                req.enabled = true;
+            }
 			List<UserVariable> userVars = new List<UserVariable>();
 	
             smartFox.InitUDP(serverName, serverPort);
@@ -268,7 +272,7 @@ public class NetworkController : MonoBehaviour {
     {
         if (evt.Params.Contains("success") && !(bool)evt.Params["success"])
         {
-      
+            smartFox.InitUDP(serverName, serverPort);      
             Debug.Log("UDP error: " + (string)evt.Params["errorMessage"]);
         }
         else
@@ -670,7 +674,7 @@ public class NetworkController : MonoBehaviour {
     public void ConterIdleRequest()
     {
         ISFSObject data = new SFSObject();
-        AIDirector.instance.SendData(data);
+ 
         ExtensionRequest request = new ExtensionRequest("conterIdle", data);
         smartFox.Send(request);
     }

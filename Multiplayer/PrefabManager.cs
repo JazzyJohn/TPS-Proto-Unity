@@ -70,9 +70,17 @@ public class PrefabManager : MonoBehaviour {
 	public bool onStart = false;
 	public UnityEngine.Object[] prefabObjects;
 	public List<GameObject> objects = new List<GameObject>();
+    [System.Serializable]
+    public class InBundleData
+    {
+        public string type;
+        public string[] objects;
 
+    }
+
+    public InBundleData[] allObjects;
 	
-	public String typeOfObject =  "Pawn" ;
+	public bool isPawns = false;
 	
 	private bool inProgress;
 	private WWW www;
@@ -163,61 +171,86 @@ public class PrefabManager : MonoBehaviour {
                     //Debug.Log(bundle.mainAsset);
                     //prefabObjects = bundle.LoadAll();
 
-
-                    prefabObjects = bundle.LoadAll(Type.GetType(typeOfObject));
-                    AssetBundleManager.setAssetBundle(bundle, crossDomainesafeURL,version);
-
-                    //if(!sp) Debug.Log ("No sp");
-
-                    //Debug.Log (prefabObjects.Length);
-
-                    for (int i = 0; i < prefabObjects.Length; i++)
+                    foreach(InBundleData data in allObjects)
                     {
+                        Type type =Type.GetType(data.type);
+                        foreach (string obj in data.objects) {
+                            AssetBundleRequest request = bundle.LoadAsync(obj, type);
+                            yield return request;
+                            if (request.asset != null)
+                            {
+                                GameObject prefab = ((MonoBehaviour)request.asset).gameObject;
+                                if (!PhotonResourceWrapper.allobject.ContainsKey(prefab.name))
+                                {
+                                    PhotonResourceWrapper.allobject[prefab.name] = prefab;
+                                }
+                                switch (data.type)
+                                {
+                                    case "BaseWeapon":
+                                        //Debug.Log(prefab);
+                                        ItemManager.instance.SetNewWeapon(prefab.GetComponent<BaseWeapon>());
+                                        break;
 
 
-                        if (!prefabObjects[i])
-                        {
-                            Debug.Log("No prefabObj"); continue;
+                                }
+                            }
                         }
-
-
-                        //Debug.Log (prefabObjects[i]);
-                        //AssetDatabase.AddObjectToAsset(prefabObjects[i], "Assets/Resources/"+prefabObjects[i].name+".prefab");
-                        //Debug.Log(AssetDatabase.GetAssetPath(prefabObjects[i]));
-
-
-
-                        GameObject prefab = ((MonoBehaviour)prefabObjects[i]).gameObject;
-                        if (!PhotonResourceWrapper.allobject.ContainsKey(prefab.name))
+                             if (onStart)
                         {
-                            PhotonResourceWrapper.allobject[prefab.name] = prefab;
+                            switch (data.type)
+                            {
+                                case "BaseWeapon":
+                                    ItemManager.instance.ReoadItems();
+                                    break;
+                            }
                         }
-                        switch (typeOfObject)
-                        {
-                            case "BaseWeapon":
-                                //Debug.Log(prefab);
-                                ItemManager.instance.SetNewWeapon(prefab.GetComponent<BaseWeapon>());
-                                break;
-
-
-                        }
-                        //DestroyImmediate(obj);
-
-                        //GameObject photonObj = PhotonNetwork.Instantiate(obj.name,sp.transform.position,sp.transform.rotation,0,null) as GameObject;
 
                     }
+                    /*  prefabObjects = bundle.LoadAll(Type.GetType(typeOfObject));
+                      AssetBundleManager.setAssetBundle(bundle, crossDomainesafeURL,version);
 
+                      //if(!sp) Debug.Log ("No sp");
+
+                      //Debug.Log (prefabObjects.Length);
+
+                      for (int i = 0; i < prefabObjects.Length; i++)
+                      {
+
+
+                          if (!prefabObjects[i])
+                          {
+                              Debug.Log("No prefabObj"); continue;
+                          }
+
+
+                          //Debug.Log (prefabObjects[i]);
+                          //AssetDatabase.AddObjectToAsset(prefabObjects[i], "Assets/Resources/"+prefabObjects[i].name+".prefab");
+                          //Debug.Log(AssetDatabase.GetAssetPath(prefabObjects[i]));
+
+
+
+                          GameObject prefab = ((MonoBehaviour)prefabObjects[i]).gameObject;
+                          if (!PhotonResourceWrapper.allobject.ContainsKey(prefab.name))
+                          {
+                              PhotonResourceWrapper.allobject[prefab.name] = prefab;
+                          }
+                          switch (typeOfObject)
+                          {
+                              case "BaseWeapon":
+                                  //Debug.Log(prefab);
+                                  ItemManager.instance.SetNewWeapon(prefab.GetComponent<BaseWeapon>());
+                                  break;
+
+
+                          }
+                          //DestroyImmediate(obj);
+
+                          //GameObject photonObj = PhotonNetwork.Instantiate(obj.name,sp.transform.position,sp.transform.rotation,0,null) as GameObject;
+                    
+                      }
+                      */
                     //			Debug.Log (sp.transform.position);
-                    if (onStart)
-                    {
-                        switch (typeOfObject)
-                        {
-                            case "BaseWeapon":
-                                ItemManager.instance.ReoadItems();
-                                break;
-                        }
-                    }
-
+                   
                     www.Dispose();
                     //sbundle.Unload(false);
                 }

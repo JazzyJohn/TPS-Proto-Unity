@@ -22,11 +22,11 @@ public class StatisticHandler : MonoBehaviour {
 	
 	public static string RELOAD_STATS="returnAllStats";
 	
-	public static string LOAD_ITEMS = "loaditems";
+	public static string LOAD_ITEMS = "loaditemsnew";
 	
-	public static string LOAD_STIMS = "loadstims";
+	public static string LOAD_STIMS = "loadstimsnew";
 	
-	public static string LOAD_SHOP = "loadshop";
+	public static string LOAD_SHOP = "loadshopnew";
 	
 	public static string BUY_ITEM = "buyItem";
 

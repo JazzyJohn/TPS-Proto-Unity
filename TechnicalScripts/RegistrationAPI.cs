@@ -73,7 +73,7 @@ public class RegistrationAPI : MonoBehaviour{
 			WWW www = StatisticHandler.GetMeRightWWW(form,StatisticHandler.LOGIN);
 			
 			yield return www;
-            Debug.Log(www.text);
+          
 			XmlDocument xmlDoc = new XmlDocument();
 			xmlDoc.LoadXml(www.text);
            
