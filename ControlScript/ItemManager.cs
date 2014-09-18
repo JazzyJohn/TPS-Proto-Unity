@@ -471,23 +471,14 @@ public class ItemManager : MonoBehaviour {
 		isShopLoading = false;		
 	}
 	
-	public IEnumerator  BuyItem(string itemId,bool forGold){
+	public IEnumerator  BuyItem(string itemId){
 		WWWForm form = new WWWForm ();
 			
 		form.AddField ("uid", UID);
-		form.AddField ("game_item", itemId);
-		form.AddField ("forGold", forGold.ToString());
-		WWW w = null;
-		if (String.Compare(Application.absoluteURL, 0, "https", 0,5) != 0) {
-			
-			//Debug.Log ("STATS HTTP SEND" + StatisticHandler.STATISTIC_PHP_HTTPS + StatisticHandler.BUY_ITEM);
-			w = new WWW (StatisticHandler.STATISTIC_PHP + StatisticHandler.BUY_ITEM, form);
-		}
-		else{
-		//	Debug.Log ("STATS HTTPS SEND"+StatisticHandler.STATISTIC_PHP_HTTPS + StatisticHandler.BUY_ITEM);
-			w = new WWW (StatisticHandler.STATISTIC_PHP_HTTPS + StatisticHandler.BUY_ITEM, form);
-		}
-
+		form.AddField ("shop_item", itemId);
+	
+		WWW w =StatisticHandler.GetMeRightWWW(StatisticHandler.BUY_ITEM,form);
+	
 		yield return w;
       
 		
@@ -498,19 +489,8 @@ public class ItemManager : MonoBehaviour {
         
         form.AddField("uid", UID);
         form.AddField("game_item", string.Join(",", itemId));
-         WWW w = null;
-        if (String.Compare(Application.absoluteURL, 0, "https", 0, 5) != 0)
-        {
-
-            Debug.Log("STATS HTTP SEND" + StatisticHandler.STATISTIC_PHP_HTTPS + StatisticHandler.USE_ITEM);
-            w = new WWW(StatisticHandler.STATISTIC_PHP + StatisticHandler.USE_ITEM, form);
-        }
-        else
-        {
-            Debug.Log("STATS HTTPS SEND" + StatisticHandler.STATISTIC_PHP_HTTPS + StatisticHandler.USE_ITEM);
-            w = new WWW(StatisticHandler.STATISTIC_PHP_HTTPS + StatisticHandler.USE_ITEM, form);
-        }
-            
+        WWW w =StatisticHandler.GetMeRightWWW(StatisticHandler.USE_ITEM,form);
+      
         yield return w;
         Debug.Log(w.text);
 
