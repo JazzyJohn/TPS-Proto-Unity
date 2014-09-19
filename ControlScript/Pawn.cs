@@ -545,16 +545,16 @@ public class Pawn : DamagebleObject
         ivnMan.Init();
         if (idPersonal != -1)
         {
-            ivnMan.SetSlot(ItemManager.instance.weaponPrefabsListbyId[idPersonal]);
+            ivnMan.SetSlot(ItemManager.instance.GetWeaponprefabByID(idPersonal));
         }
         if (idMain != -1)
         {
             //Debug.Log(ItemManager.instance.weaponPrefabsListbyId[idMain]);
-            ivnMan.SetSlot(ItemManager.instance.weaponPrefabsListbyId[idMain]);
+            ivnMan.SetSlot(temManager.instance.GetWeaponprefabByID(idMain));
         }
         if (idExtra != -1)
         {
-            ivnMan.SetSlot(ItemManager.instance.weaponPrefabsListbyId[idExtra]);
+            ivnMan.SetSlot(temManager.instance.GetWeaponprefabByID(idExtra));
         }
         ivnMan.GenerateWeaponStart();
         if (idTaunt != -1)
@@ -2147,7 +2147,7 @@ public class Pawn : DamagebleObject
 
                 if (state == CharacterState.Jumping || state == CharacterState.DoubleJump)
                 {
-                    _rb.velocity = (myTransform.up + myTransform.forward * -1).normalized * movement.y;
+                    _rb.velocity = (myTransform.up + + WallJumpDirection(myTransform.forward * -1)).normalized * movement.y;
                     StartCoroutine(WallJump(1f)); // Exclude if not needed
                 }
             }
@@ -2498,6 +2498,7 @@ public class Pawn : DamagebleObject
                 if (!WallRun(nextMovement, nextState))
                 {
                     characterState = CharacterState.Jumping;
+					jetPackEnable= false;
                     animator.ApllyJump(true);
                     animator.WallAnimation(false, false, false);
                     if (characterState != CharacterState.DoubleJump)

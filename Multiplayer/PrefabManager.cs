@@ -206,6 +206,7 @@ public class PrefabManager : MonoBehaviour {
                         }
 
                     }
+					AssetBundleManager.setAssetBundle(bundle, crossDomainesafeURL,version);
                     /*  prefabObjects = bundle.LoadAll(Type.GetType(typeOfObject));
                       AssetBundleManager.setAssetBundle(bundle, crossDomainesafeURL,version);
 

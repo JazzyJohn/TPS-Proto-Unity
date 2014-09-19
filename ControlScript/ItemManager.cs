@@ -17,6 +17,10 @@ public class FromDBWeapon{
 	public Texture2D textureGUI;
 
 	public string name;
+	
+	public bool allowed;
+	
+	public List<InventorySlot> invitems = new List<InventorySlot>();
 }
 public class FromDBAnims{
 	public GameClassEnum  gameClass;
@@ -29,13 +33,14 @@ public class FromDBAnims{
 
 	public string name;
 
+	
 }
 public enum ShopSlotType
 {
     WEAPON, ARMOR, ETC
 }
-public class ShopSlot{
-    public GameClassEnum gameClass;
+public class SimpleSlot{
+ public GameClassEnum gameClass;
 
 	public string name;
 	
@@ -51,6 +56,12 @@ public class ShopSlot{
 
     public string model;
 	
+	public ShopSlotType type;
+}
+
+public class ShopSlot : SimpleSlot{
+   
+	
 	public string cashSlot;
 
     public string goldSlot;
@@ -59,9 +70,24 @@ public class ShopSlot{
 
     public int goldCost;
 	
-	public ShopSlotType type;
+	
 }
-
+public class InventorySlot  : SimpleSlot{
+   public bool personal;
+   
+   public int charge;
+   
+   public int timeEnd;
+   
+   public int modslot;
+   
+   public int ingamekey;
+   
+   public int maxcharge;
+   
+   public int gameId;
+   
+ }
 public class StimPack{
 	public int amount;
 
@@ -94,7 +120,7 @@ public class ItemManager : MonoBehaviour {
 
 
 	public Dictionary<int,FromDBWeapon>  weaponIndexTable = new Dictionary<int,FromDBWeapon>();
-
+	
 	public  Dictionary<int,FromDBAnims> animsIndexTable= new Dictionary<int,FromDBAnims>();
 	
 	
@@ -159,7 +185,7 @@ public class ItemManager : MonoBehaviour {
 			entry.gameClass =  gameClassPase(node.SelectSingleNode ("gameClass").InnerText);
 			entry.gameSlot =weaponPrefabsListbyId[entry.weaponId].slotType;
 			entry.name =weaponPrefabsListbyId[entry.weaponId].weaponName;
-
+			entry.allowed =true;
 			
 			WWW www = StatisticHandler.GetMeRightWWW( node.SelectSingleNode ("textureGUIName").InnerText);
 		
@@ -281,6 +307,7 @@ public class ItemManager : MonoBehaviour {
 				Choice.SetChoiceRobot(gameSlot,gameClass,index);
 			}
 		}
+		ParseInventory(string XML);
       
 		
 	}	
@@ -288,6 +315,9 @@ public class ItemManager : MonoBehaviour {
 		//Debug.Log (prefab);
 		weaponPrefabsListbyId [prefab.SQLId] = prefab;
 		//weaponPrefabsListbyId[prefab.SQLId].HUDIcon = weaponIndexTable[prefab.SQLId].textureGUI;
+	}
+	public BaseWeapon GetWeaponprefabByID(int id){
+		return weaponPrefabsListbyId [id] 
 	}
 	public static GameClassEnum gameClassPase(string text){
 		switch (text) {
@@ -374,7 +404,7 @@ public class ItemManager : MonoBehaviour {
 		}
 		int i = 0;
 		foreach(FromDBAnims entry  in animsIndexTable.Values){
-
+	
 			if(entry.animationType==AnimType.TAUNT&&(entry.gameClass ==MyANY||entry.gameClass==gameClass)){
 				GUIItem gui = new GUIItem();
 				gui.index = i++;
@@ -397,7 +427,9 @@ public class ItemManager : MonoBehaviour {
 			MyANY = GameClassEnum.ANYROBOT;
 		}
 		foreach(FromDBWeapon entry  in weaponIndexTable.Values){
-
+			if(!entry.allowed){
+				continue;
+			}
             if (entry.gameSlot ==gameSlot && (entry.gameClass == MyANY || entry.gameClass == gameClass))
             {
 				GUIItem gui = new GUIItem();
@@ -454,6 +486,11 @@ public class ItemManager : MonoBehaviour {
         }
 		
 	}
+	public void ClearShop(){
+		shopItems.Clear();
+		isShopLoading=false;
+	}
+	
 	public void  ParseShop(string XML){
 		XmlDocument xmlDoc = new XmlDocument();
 		xmlDoc.LoadXml(XML);
@@ -555,12 +592,12 @@ public class ItemManager : MonoBehaviour {
             }
         }
     }
-    public void LoadModel(ShopSlot slot)
+    public void LoadModel(SimpleSlot slot)
     {
         StartCoroutine(_LoadModel(slot));
                      
     }
-    IEnumerator _LoadModel(ShopSlot slot)
+    IEnumerator _LoadModel(SimpleSlot slot)
     {
         if (slot.loadModel == null)
         {
@@ -585,6 +622,7 @@ public class ItemManager : MonoBehaviour {
 
                     bundle = www.assetBundle;
                 }
+				 AssetBundleManager.setAssetBundle(bundle, crossDomainesafeURL,1);
 
             }
 
@@ -604,8 +642,22 @@ public class ItemManager : MonoBehaviour {
 		WWW w =StatisticHandler.GetMeRightWWW(form,StatisticHandler.BUY_ITEM);
 	
 		yield return w;
-      
+       
+		XmlDocument xmlDoc = new XmlDocument();
+		xmlDoc.LoadXml(w.text);
 		
+		if(xmlDoc.SelectSingleNode("error").InnerText=="0"){
+				
+			WWWForm form = new WWWForm ();
+			
+			form.AddField ("uid", UID);
+			
+			IEnumerator numenator = LoadItems (form);
+			
+			while(numenator.MoveNext()){
+				yield return numenator.Current;
+			}
+		}
 	}
     public IEnumerator UseItem(string[] itemId)
     {
@@ -616,11 +668,11 @@ public class ItemManager : MonoBehaviour {
         WWW w = StatisticHandler.GetMeRightWWW(form,StatisticHandler.USE_ITEM);
       
         yield return w;
-        Debug.Log(w.text);
+        ParseInventory(w.text);
 
     }
 	public bool TryUseStim(int id){
-        Debug.Log("use");
+        //Debug.Log("use");
 		if(!stimPackDictionary[id].active&& stimPackDictionary[id].amount  >0){
 			stimPackDictionary[id].active = true;
 			stimPackDictionary[id].amount --;
@@ -629,6 +681,22 @@ public class ItemManager : MonoBehaviour {
 		}
 		return false;
 		
+	}
+	public bool UseRepairKit(int itemId){
+		 StartCoroutine(_UseRepairKit(itemId));
+	
+	}
+	
+	IEnumerator _UseRepairKit(string id,string kit_id){
+		WWWForm form = new WWWForm();
+        
+        form.AddField("uid", UID);
+        form.AddField("game_item", id);
+		form.AddField("kit_id", kit_id);
+        WWW w = StatisticHandler.GetMeRightWWW(form,StatisticHandler.REPAIR_ITEM);
+      
+        yield return w;
+		ParseInventory(w.text);
 	}
 	public List<CharacteristicToAdd> GetBuff(int id){
 		if(allBuff.ContainsKey(id)){
@@ -651,6 +719,136 @@ public class ItemManager : MonoBehaviour {
     }
 	
 	//END SHOPING SECTION 
+	
+	
+	//INVENTORY SECTION 
+	
+	public Dictionary<string,InventorySlot> allitems = new <string,InventorySlot>();
+	
+    public Dictionary<ShopSlotType, List<InventorySlot>>  invItems = new Dictionary<ShopSlotType, List<InventorySlot> >();
+
+		
+	public void ParseInventory(w.text){
+		XmlDocument xmlDoc = new XmlDocument();
+		xmlDoc.LoadXml(XML);
+		
+		foreach (XmlNode node in xmlDoc.SelectNodes("inventory/item")) {
+			InventorySlot slot = null;
+			string id = node.SelectSingleNode("id").InnerText;
+			if(allitems.ContainsKey(id)){
+				slot  =allitems[id];
+				
+			}else{
+				InventorySlot slot = new InventorySlot();
+				 if (!invItems.ContainsKey(slot.type))
+				{
+					invItems[slot.type] = new List<ShopSlot>();
+				}
+				invItems[slot.type].Add(slot);
+				
+				slot.gameClass = (GameClassEnum)Enum.Parse(typeof(GameClassEnum), node.SelectSingleNode("class").InnerText);
+				slot.type = (ShopSlotType)Enum.Parse(typeof(ShopSlotType), node.SelectSingleNode("type").InnerText);
+				slot.id = id;
+				slot.gameId= int.Parse(node.SelectSingleNode("game_id").InnerText);
+				slot.timeEnd= int.Parse(node.SelectSingleNode("time_end").InnerText);
+				slot.modslot= int.Parse(node.SelectSingleNode("modslot").InnerText);
+				slot.ingamekey= int.Parse(node.SelectSingleNode("ingamekey").InnerText);
+				slot.maxcharge= int.Parse(node.SelectSingleNode("maxcharge").InnerText);
+				slot.name = node.SelectSingleNode("name").InnerText;
+				slot.description = node.SelectSingleNode("description").InnerText;
+				slot.shopicon = node.SelectSingleNode("shopicon").InnerText;
+				slot.model = node.SelectSingleNode("model").InnerText;
+			}
+			slot.charge= int.Parse(node.SelectSingleNode("charge").InnerText);
+			switch(slot.type){
+				case ShopSlotType.WEAPON:
+					weaponIndexTable[slot.ingamekey].invitems.Add(slot);
+					if(slot.charge==0){
+					
+						weaponIndexTable[slot.ingamekey].allowed = false;
+					}
+					break;
+				case ShopSlotType.ETC:
+				
+				
+					break;
+			}
+			
+            /*slot.gameClasses = new GameClassEnum[node.SelectNodes("items/weapon").Count];
+            int i=0;
+            foreach (XmlNode gameClass in node.SelectNodes("class")) {
+                    slot.gameClasses[i++]=	(GameClassEnum)int.Parse(gameClass.InnerText);			
+            }
+
+            WWW www = null;
+            if (String.Compare(Application.absoluteURL, 0, "https", 0,5) != 0) {
+				
+                Debug.Log ("STATS HTTP SEND" + StatisticHandler.STATISTIC_PHP_HTTPS + StatisticHandler.LOAD_SHOP);
+                www = new WWW (StatisticHandler.STATISTIC_PHP +  node.SelectSingleNode ("imageurl").InnerText);
+            }
+            else{
+                Debug.Log ("STATS HTTPS SEND"+StatisticHandler.STATISTIC_PHP_HTTPS + StatisticHandler.LOAD_ITEMS);
+                www = new WWW (StatisticHandler.STATISTIC_PHP_HTTPS +  node.SelectSingleNode ("imageurl").InnerText);
+            }*/
+
+
+
+			// wait until the download is done
+			/*yield return www;
+
+			// assign the downloaded image to the texture of the slot
+			www.LoadImageIntoTexture(slot.texture);*/
+          
+		}
+
+	
+	}
+		
+	public IEnumerator GenerateInvList(GameClassEnum gameClass,ShopSlotType type)
+    {
+        List<InventorySlot> result = new List<InventorySlot>();
+        if (!invItems.ContainsKey(type))
+        {
+            shop.OpenList(result);
+            yield return null;
+        }
+        else
+        {
+
+            List<InventorySlot> list = invItems[type];
+            if (list == null)
+            {
+                shop.OpenList(result);
+                yield return null;
+            }
+            else
+            {
+
+                foreach (InventorySlot slot in list)
+                {
+                    if (gameClass == slot.gameClass || slot.gameClass == GameClassEnum.ANY)
+                    {
+                        result.Add(slot);
+                    }
+                }
+                shop.OpenList(result);
+                foreach (InventorySlot slot in result)
+                {
+                    if (slot.texture == null)
+                    {
+                        WWW www = StatisticHandler.GetMeRightWWW(slot.shopicon);
+                       
+                        yield return www;
+                        slot.texture = new Texture2D(138, 58);
+                        www.LoadImageIntoTexture(slot.texture);
+                    }
+
+
+                }
+            }
+        }
+    }
+	//ENDINVENTORY SECTION
 	private static ItemManager s_Instance = null;
 	
 	public static ItemManager instance {

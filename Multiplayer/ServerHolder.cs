@@ -532,6 +532,7 @@ public class ServerHolder : MonoBehaviour
 		MainMenuGUI mainMenu = FindObjectOfType<MainMenuGUI> ();
 		if (mainMenu != null) {
 				Destroy (mainMenu.gameObject);
+				ItemManager.instance.ClearShop();
 		}
         AITargetManager.Reload();
         TimeManager.Instance.Init();

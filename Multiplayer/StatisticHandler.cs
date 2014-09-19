@@ -32,6 +32,8 @@ public class StatisticHandler : MonoBehaviour {
 
     public static string USE_ITEM = "useItem";
 	
+	public static string REPAIR_ITEM ="repairItem";
+	
 	public static string SAVE_ITEM = "saveitem";
 
 	public static string NEWS_ALL = "allnews";
