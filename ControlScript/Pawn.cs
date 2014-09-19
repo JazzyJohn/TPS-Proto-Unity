@@ -538,28 +538,28 @@ public class Pawn : DamagebleObject
     }
     public virtual void ChangeDefaultWeapon(int myId)
     {
-        int idPersonal = Choice._Personal[myId],
+        WeaponIndex idPersonal = Choice._Personal[myId],
         idMain = Choice._Main[myId],
         idExtra = Choice._Extra[myId],
         idTaunt = Choice._Taunt[myId];
         ivnMan.Init();
-        if (idPersonal != -1)
+        if (!idPersonal.IsSameIndex(WeaponIndex.Zero))
         {
             ivnMan.SetSlot(ItemManager.instance.GetWeaponprefabByID(idPersonal));
         }
-        if (idMain != -1)
+        if (!idMain.IsSameIndex(WeaponIndex.Zero))
         {
             //Debug.Log(ItemManager.instance.weaponPrefabsListbyId[idMain]);
-            ivnMan.SetSlot(temManager.instance.GetWeaponprefabByID(idMain));
+            ivnMan.SetSlot(ItemManager.instance.GetWeaponprefabByID(idMain));
         }
-        if (idExtra != -1)
+        if (!idExtra.IsSameIndex(WeaponIndex.Zero))
         {
-            ivnMan.SetSlot(temManager.instance.GetWeaponprefabByID(idExtra));
+            ivnMan.SetSlot(ItemManager.instance.GetWeaponprefabByID(idExtra));
         }
         ivnMan.GenerateWeaponStart();
-        if (idTaunt != -1)
+        if (!idTaunt.IsSameIndex(WeaponIndex.Zero))
         {
-            tauntAnimation = ItemManager.instance.animsIndexTable[idTaunt].animationId;
+            tauntAnimation = ItemManager.instance.animsIndexTable[idTaunt.prefabId].animationId;
         }
     }
     public override void Damage(BaseDamage damage, GameObject killer)
@@ -2147,7 +2147,7 @@ public class Pawn : DamagebleObject
 
                 if (state == CharacterState.Jumping || state == CharacterState.DoubleJump)
                 {
-                    _rb.velocity = (myTransform.up + + WallJumpDirection(myTransform.forward * -1)).normalized * movement.y;
+                    _rb.velocity = (myTransform.up  + WallJumpDirection(myTransform.forward * -1)).normalized * movement.y;
                     StartCoroutine(WallJump(1f)); // Exclude if not needed
                 }
             }

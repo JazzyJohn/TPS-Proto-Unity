@@ -475,9 +475,7 @@ public class ServerHolder : MonoBehaviour
 						progress.curLoader=0;
 				}
 		}
-		IEnumerator itemCoroutineEnumerator =ItemManager.instance.ReoadItemsSync();
-		while(itemCoroutineEnumerator.MoveNext())
-			yield return itemCoroutineEnumerator.Current;
+        ItemManager.instance.ConnectToPrefab();
 
 
 

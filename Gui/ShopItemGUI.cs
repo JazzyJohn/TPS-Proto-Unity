@@ -11,6 +11,7 @@ public class ShopItemGUI : MonoBehaviour {
     public UILabel Description;
 	public UITexture Texture;
     public UIWidget Box;
+    public UILabel loading;
 
 	[HideInInspector]
 	public int numToItem;
@@ -20,16 +21,12 @@ public class ShopItemGUI : MonoBehaviour {
 	
 	}
 
-	public void LoadInfo()
-	{
-		//Код загрузки инфы из xml
-	}
-
 	// Update is called once per frame
 	void Update () {
         if (item != null &&item.texture!=null&& Texture.mainTexture == null)
         {
             Texture.mainTexture= item.texture;
+            loading.alpha = 0.0f;
         }
 	}
 
@@ -41,7 +38,7 @@ public class ShopItemGUI : MonoBehaviour {
         PriceGITP.text = item.goldCost + " GITP";
         Description.text = item.description;
         Texture.mainTexture = null;
-        
+        loading.alpha = 1.0f;
         
     }
         

@@ -3,8 +3,57 @@ using System;
 using System.Xml;
 using System.Collections;
 using System.Collections.Generic;
-
-
+public struct WeaponIndex
+{
+    public int prefabId;
+    public string itemId;
+    public int gameClass;
+    public static WeaponIndex Zero = new WeaponIndex(-1,"");
+    public const char INDEX_SPLINTER = '_';
+    public WeaponIndex(int weaponId, string itemId)
+    {
+        this.prefabId = weaponId;
+        this.itemId = itemId;
+        gameClass = 0;
+    }
+    public WeaponIndex(string index)
+    {
+        string[] indexs = index.Split(INDEX_SPLINTER);
+        if (indexs.Length < 2)
+        {
+            this.prefabId = -1;
+            this.itemId = null;
+        }
+        else
+        {
+            this.prefabId = int.Parse(indexs[0]);
+            this.itemId = indexs[1];
+        }
+        gameClass = 0;
+    }
+    public override string ToString()
+    {
+        if (this.prefabId == -1)
+        {
+            return "-1";
+        }
+        else
+        {
+            return this.prefabId.ToString() + INDEX_SPLINTER + this.itemId;
+        }
+       
+    }
+    public bool IsSameIndex(WeaponIndex index){
+        if (index.prefabId == -1)
+        {
+            return index.prefabId == prefabId;
+        }
+        else
+        {
+            return index.prefabId == prefabId && itemId == index.itemId;
+        }
+    }
+}
 
 public class FromDBWeapon{
 	//I don't see use in some enormous key tables dictionary so weaponId is just index in weaponList.
@@ -18,9 +67,7 @@ public class FromDBWeapon{
 
 	public string name;
 	
-	public bool allowed;
-	
-	public List<InventorySlot> invitems = new List<InventorySlot>();
+
 }
 public class FromDBAnims{
 	public GameClassEnum  gameClass;
@@ -44,7 +91,7 @@ public class SimpleSlot{
 
 	public string name;
 	
-	public int id;
+	public string id;
 	
 	public string description;
 	
@@ -86,6 +133,8 @@ public class InventorySlot  : SimpleSlot{
    public int maxcharge;
    
    public int gameId;
+
+   public int gameType;
    
  }
 public class StimPack{
@@ -122,8 +171,8 @@ public class ItemManager : MonoBehaviour {
 	public Dictionary<int,FromDBWeapon>  weaponIndexTable = new Dictionary<int,FromDBWeapon>();
 	
 	public  Dictionary<int,FromDBAnims> animsIndexTable= new Dictionary<int,FromDBAnims>();
-	
-	
+
+    public List<WeaponIndex> cachedIndex = new List<WeaponIndex>();
 	public List<StimPack> stimPackDictionary = new List<StimPack>();
 
     public Dictionary<int, Buff> allBuff = new Dictionary<int, Buff>();
@@ -131,19 +180,46 @@ public class ItemManager : MonoBehaviour {
 	
 	public void Init(string uid){
 			UID = uid;
-			
+            WWWForm form = new WWWForm();
+
+            form.AddField("uid", UID);
+
+            StartCoroutine(LoadItems(form));
 	}
 
 
-	public void ReoadItems(){
-	
-		WWWForm form = new WWWForm ();
-			
-		form.AddField ("uid", UID);
-		
-		StartCoroutine(LoadItems (form));
-	}
-	public IEnumerator ReoadItemsSync(){
+    public void ConnectToPrefab()
+    {
+
+       
+        foreach (FromDBWeapon weapon in weaponIndexTable.Values)
+        {
+            weapon.gameSlot = weaponPrefabsListbyId[weapon.weaponId].slotType;
+            weapon.name = weaponPrefabsListbyId[weapon.weaponId].weaponName;
+            weaponPrefabsListbyId[weapon.weaponId].HUDIcon = weapon.textureGUI;
+        }
+        if (invItems.ContainsKey(ShopSlotType.WEAPON))
+        {
+            foreach (InventorySlot weapon in invItems[ShopSlotType.WEAPON])
+            {
+                weapon.gameType = (int)weaponPrefabsListbyId[weapon.ingamekey].slotType;
+                weaponPrefabsListbyId[weapon.ingamekey].HUDIcon = weapon.texture;
+            }
+
+        }
+        foreach (WeaponIndex index in cachedIndex)
+        {
+           
+            if (index.prefabId != -1)
+            {
+                int gameSlot = (int)weaponPrefabsListbyId[index.prefabId].slotType;
+                Choice.SetChoice(gameSlot, index.gameClass, index);
+                   
+            }
+        }
+       
+    }
+	public IEnumerator ReLoadItemsSync(){
 		
 		WWWForm form = new WWWForm ();
 		
@@ -183,9 +259,8 @@ public class ItemManager : MonoBehaviour {
 			FromDBWeapon entry = new FromDBWeapon();
 			entry.weaponId = int.Parse (node.SelectSingleNode ("weaponId").InnerText);
 			entry.gameClass =  gameClassPase(node.SelectSingleNode ("gameClass").InnerText);
-			entry.gameSlot =weaponPrefabsListbyId[entry.weaponId].slotType;
-			entry.name =weaponPrefabsListbyId[entry.weaponId].weaponName;
-			entry.allowed =true;
+			
+			
 			
 			WWW www = StatisticHandler.GetMeRightWWW( node.SelectSingleNode ("textureGUIName").InnerText);
 		
@@ -194,17 +269,17 @@ public class ItemManager : MonoBehaviour {
 			www.LoadImageIntoTexture(entry.textureGUI);
 		//	Debug.Log (entry.name + " " +entry.textureGUI + " " +entry.weaponId );
 			weaponIndexTable[entry.weaponId]=entry;	
-			weaponPrefabsListbyId[entry.weaponId].HUDIcon = entry.textureGUI;
+			
 			if(bool.Parse(node.SelectSingleNode ("default").InnerText)){
 				switch(entry.gameClass){
 					case GameClassEnum.ANY:
 			
 						for(int j=0;j<Choice._Personal.Length;j++){
-							Choice.SetChoice((int)entry.gameSlot, j, entry.weaponId);
+							Choice.SetChoice((int)entry.gameSlot, j, new WeaponIndex(entry.weaponId,null));
 						}
 					break;
 					default:
-						Choice.SetChoice((int)entry.gameSlot,(int)	entry.gameClass, entry.weaponId);
+                    Choice.SetChoice((int)entry.gameSlot, (int)entry.gameClass, new WeaponIndex(entry.weaponId, null));
 					break;
 
 				}
@@ -295,20 +370,22 @@ public class ItemManager : MonoBehaviour {
             
            
         }
-
+        cachedIndex.Clear();
 		foreach (XmlNode node in xmlDoc.SelectNodes("items/default")) {
-			int index = int.Parse (node.SelectSingleNode ("weaponId").InnerText);
-			int gameSlot =(int)weaponPrefabsListbyId[index].slotType;
-			int gameClass = int.Parse (node.SelectSingleNode ("gameClass").InnerText);
-			if(gameClass<=(int) GameClassEnum.ANY){
-				//Debug.Log (gameSlot +" "+ gameClass +" "+index);
-				Choice.SetChoice(gameSlot,gameClass,index);
-			}else{
-				Choice.SetChoiceRobot(gameSlot,gameClass,index);
-			}
+            WeaponIndex index = new WeaponIndex(node.SelectSingleNode("weaponId").InnerText);
+            index.gameClass = int.Parse(node.SelectSingleNode("gameClass").InnerText);
+           
+            cachedIndex.Add(index);
+           
 		}
-		ParseInventory(string XML);
-      
+		
+        IEnumerator numenator = ParseInventory(XML);
+
+        while (numenator.MoveNext())
+        {
+            yield return numenator.Current;
+        }
+
 		
 	}	
 	public void SetNewWeapon(BaseWeapon prefab){
@@ -316,8 +393,8 @@ public class ItemManager : MonoBehaviour {
 		weaponPrefabsListbyId [prefab.SQLId] = prefab;
 		//weaponPrefabsListbyId[prefab.SQLId].HUDIcon = weaponIndexTable[prefab.SQLId].textureGUI;
 	}
-	public BaseWeapon GetWeaponprefabByID(int id){
-		return weaponPrefabsListbyId [id] 
+	public BaseWeapon GetWeaponprefabByID(WeaponIndex index){
+        return weaponPrefabsListbyId[index.prefabId];
 	}
 	public static GameClassEnum gameClassPase(string text){
 		switch (text) {
@@ -361,15 +438,15 @@ public class ItemManager : MonoBehaviour {
 		form.AddField ("class", Choice._Player);
 		form.AddField ("robotclass", Choice._Robot);
 		for(int i = 0;i<4;i++){
-		
-				form.AddField ("default[]", Choice. ForGuiSlot(i));
+            Debug.Log(Choice.ForGuiSlot(i).ToString());
+				form.AddField ("default[]", Choice. ForGuiSlot(i).ToString());
 		}
 	
-		for(int i = 0;i<4;i++){
+	/*	for(int i = 0;i<4;i++){
 		
 			form.AddField ("defaultrobot[]", Choice. ForGuiSlotRobot(i));
 			
-		}
+		}*/
 
 		StatisticHandler.instance.StartCoroutine(StatisticHandler.SendForm (form,StatisticHandler.SAVE_ITEM));
 	
@@ -407,7 +484,7 @@ public class ItemManager : MonoBehaviour {
 	
 			if(entry.animationType==AnimType.TAUNT&&(entry.gameClass ==MyANY||entry.gameClass==gameClass)){
 				GUIItem gui = new GUIItem();
-				gui.index = i++;
+				gui.index = new WeaponIndex(i++,null);
 				gui.name= entry.name;
 				gui.texture = entry.textureGUI;
 
@@ -417,8 +494,8 @@ public class ItemManager : MonoBehaviour {
 		}
 		return weaponList;
 	}
-	
-	
+
+  
 	public List<GUIItem> GetWeaponForSlot(GameClassEnum gameClass, BaseWeapon.SLOTTYPE gameSlot){
 
         List<GUIItem> weaponList = new List<GUIItem>();
@@ -427,20 +504,50 @@ public class ItemManager : MonoBehaviour {
 			MyANY = GameClassEnum.ANYROBOT;
 		}
 		foreach(FromDBWeapon entry  in weaponIndexTable.Values){
-			if(!entry.allowed){
-				continue;
-			}
+			
             if (entry.gameSlot ==gameSlot && (entry.gameClass == MyANY || entry.gameClass == gameClass))
             {
 				GUIItem gui = new GUIItem();
-				gui.index = entry.weaponId;
+                gui.index = new WeaponIndex(entry.weaponId, null); ;
 				gui.name= entry.name;
 				gui.texture = entry.textureGUI;
+                gui.color = Color.white;
 
 				weaponList.Add(gui);
 			
 			}
 		}
+        List<InventorySlot> items = null;
+        if (invItems.ContainsKey(ShopSlotType.WEAPON))
+        {
+            items = invItems[ShopSlotType.WEAPON];
+        }
+        
+        if (items != null)
+        {
+            int intGameSlot = (int)gameSlot;
+            foreach (InventorySlot slot in items)
+            {
+
+                if (slot.gameType == intGameSlot && (slot.gameClass == GameClassEnum.ANY || slot.gameClass == gameClass))
+                {
+                    GUIItem gui = new GUIItem();
+                    gui.index = new WeaponIndex(slot.ingamekey, slot.id);
+                    if (slot.personal)
+                    {
+                        gui.color = Color.blue;
+                    }
+                    else
+                    {
+                        gui.color = Color.green;
+                    }
+                    gui.name = slot.name;
+                    gui.texture = slot.texture;
+                    weaponList.Add(gui);
+
+                }
+            }
+        }
 		return weaponList;
 	}
 	
@@ -499,7 +606,7 @@ public class ItemManager : MonoBehaviour {
 			ShopSlot slot = new ShopSlot();
             slot.gameClass = (GameClassEnum)Enum.Parse(typeof(GameClassEnum), node.SelectSingleNode("class").InnerText);
             slot.type = (ShopSlotType)Enum.Parse(typeof(ShopSlotType), node.SelectSingleNode("type").InnerText);
-            slot.id = int.Parse(node.SelectSingleNode("game_id").InnerText);
+            slot.id =node.SelectSingleNode("game_id").InnerText;
             slot.name = node.SelectSingleNode("name").InnerText;
             slot.description = node.SelectSingleNode("description").InnerText;
             slot.shopicon = node.SelectSingleNode("shopicon").InnerText;
@@ -633,7 +740,7 @@ public class ItemManager : MonoBehaviour {
         }
        
     }
-	public IEnumerator  BuyItem(string itemId){
+	public IEnumerator  BuyItem(string itemId,LotItemGUI gui){
 		WWWForm form = new WWWForm ();
 			
 		form.AddField ("uid", UID);
@@ -642,13 +749,13 @@ public class ItemManager : MonoBehaviour {
 		WWW w =StatisticHandler.GetMeRightWWW(form,StatisticHandler.BUY_ITEM);
 	
 		yield return w;
-       
+        Debug.Log(w.text);
 		XmlDocument xmlDoc = new XmlDocument();
 		xmlDoc.LoadXml(w.text);
 		
-		if(xmlDoc.SelectSingleNode("error").InnerText=="0"){
+		if(xmlDoc.SelectSingleNode("result/error").InnerText=="0"){
 				
-			WWWForm form = new WWWForm ();
+			form = new WWWForm ();
 			
 			form.AddField ("uid", UID);
 			
@@ -657,7 +764,23 @@ public class ItemManager : MonoBehaviour {
 			while(numenator.MoveNext()){
 				yield return numenator.Current;
 			}
-		}
+            numenator = GlobalPlayer.instance.ReloadStats();
+            while (numenator.MoveNext())
+            {
+                yield return numenator.Current;
+            }
+            if (gui != null)
+            {
+                gui.Shop.CloseLot();
+            }
+        }
+        else
+        {
+            if (gui != null)
+            {
+                gui.SetError(xmlDoc.SelectSingleNode("result/errortext").InnerText);
+            }
+        }
 	}
     public IEnumerator UseItem(string[] itemId)
     {
@@ -668,7 +791,13 @@ public class ItemManager : MonoBehaviour {
         WWW w = StatisticHandler.GetMeRightWWW(form,StatisticHandler.USE_ITEM);
       
         yield return w;
-        ParseInventory(w.text);
+
+        IEnumerator numenator = ParseInventory(w.text); 
+
+        while (numenator.MoveNext())
+        {
+            yield return numenator.Current;
+        }
 
     }
 	public bool TryUseStim(int id){
@@ -682,8 +811,8 @@ public class ItemManager : MonoBehaviour {
 		return false;
 		
 	}
-	public bool UseRepairKit(int itemId){
-		 StartCoroutine(_UseRepairKit(itemId));
+	public void UseRepairKit(string itemId,string kit_id){
+		 StartCoroutine(_UseRepairKit(itemId,kit_id));
 	
 	}
 	
@@ -696,7 +825,12 @@ public class ItemManager : MonoBehaviour {
         WWW w = StatisticHandler.GetMeRightWWW(form,StatisticHandler.REPAIR_ITEM);
       
         yield return w;
-		ParseInventory(w.text);
+        IEnumerator numenator = ParseInventory(w.text);
+
+        while (numenator.MoveNext())
+        {
+            yield return numenator.Current;
+        }
 	}
 	public List<CharacteristicToAdd> GetBuff(int id){
 		if(allBuff.ContainsKey(id)){
@@ -722,27 +856,35 @@ public class ItemManager : MonoBehaviour {
 	
 	
 	//INVENTORY SECTION 
-	
-	public Dictionary<string,InventorySlot> allitems = new <string,InventorySlot>();
+
+    public Dictionary<string, InventorySlot> allitems = new Dictionary<string, InventorySlot>();
 	
     public Dictionary<ShopSlotType, List<InventorySlot>>  invItems = new Dictionary<ShopSlotType, List<InventorySlot> >();
 
 		
-	public void ParseInventory(w.text){
+	public IEnumerator ParseInventory(String XML){
 		XmlDocument xmlDoc = new XmlDocument();
 		xmlDoc.LoadXml(XML);
-		
-		foreach (XmlNode node in xmlDoc.SelectNodes("inventory/item")) {
+        XmlNodeList list = xmlDoc.SelectNodes("items/inventory/item");
+        if (list.Count == 0)
+        {
+            list =  xmlDoc.SelectNodes("result/inventory/item");
+        }
+
+        foreach (XmlNode node in list)
+        {
+           
 			InventorySlot slot = null;
 			string id = node.SelectSingleNode("id").InnerText;
 			if(allitems.ContainsKey(id)){
 				slot  =allitems[id];
 				
 			}else{
-				InventorySlot slot = new InventorySlot();
-				 if (!invItems.ContainsKey(slot.type))
+				slot = new InventorySlot();
+                allitems[id] = slot;
+				if (!invItems.ContainsKey(slot.type))
 				{
-					invItems[slot.type] = new List<ShopSlot>();
+					invItems[slot.type] = new List<InventorySlot>();
 				}
 				invItems[slot.type].Add(slot);
 				
@@ -758,21 +900,16 @@ public class ItemManager : MonoBehaviour {
 				slot.description = node.SelectSingleNode("description").InnerText;
 				slot.shopicon = node.SelectSingleNode("shopicon").InnerText;
 				slot.model = node.SelectSingleNode("model").InnerText;
+                slot.personal = bool.Parse(node.SelectSingleNode("personal").InnerText);
+                WWW www = StatisticHandler.GetMeRightWWW(slot.shopicon);
+                       
+                yield return www;
+                slot.texture = new Texture2D(138, 58);
+                www.LoadImageIntoTexture(slot.texture);
+                    
 			}
 			slot.charge= int.Parse(node.SelectSingleNode("charge").InnerText);
-			switch(slot.type){
-				case ShopSlotType.WEAPON:
-					weaponIndexTable[slot.ingamekey].invitems.Add(slot);
-					if(slot.charge==0){
-					
-						weaponIndexTable[slot.ingamekey].allowed = false;
-					}
-					break;
-				case ShopSlotType.ETC:
-				
-				
-					break;
-			}
+		
 			
             /*slot.gameClasses = new GameClassEnum[node.SelectNodes("items/weapon").Count];
             int i=0;
@@ -809,7 +946,7 @@ public class ItemManager : MonoBehaviour {
         List<InventorySlot> result = new List<InventorySlot>();
         if (!invItems.ContainsKey(type))
         {
-            shop.OpenList(result);
+            //shop.OpenList(result);
             yield return null;
         }
         else
@@ -818,7 +955,7 @@ public class ItemManager : MonoBehaviour {
             List<InventorySlot> list = invItems[type];
             if (list == null)
             {
-                shop.OpenList(result);
+               // shop.OpenList(result);
                 yield return null;
             }
             else
@@ -831,7 +968,7 @@ public class ItemManager : MonoBehaviour {
                         result.Add(slot);
                     }
                 }
-                shop.OpenList(result);
+               // shop.OpenList(result);
                 foreach (InventorySlot slot in result)
                 {
                     if (slot.texture == null)

@@ -14,7 +14,8 @@ public class LotItemGUI : MonoBehaviour
     public Transform gun;
     public GameObject gunModel;
     public UIWidget Box;
-
+    public UILabel loading;
+    public UILabel buyLabel;
     [HideInInspector]
     public int numToItem;
 
@@ -39,6 +40,7 @@ public class LotItemGUI : MonoBehaviour
             gunModel.transform.rotation = Quaternion.identity;
             gunModel.transform.localScale = Vector3.one;
             gunModel.layer = gun.gameObject.layer;
+            loading.alpha = 0.0f;
            
         }
     }
@@ -50,15 +52,29 @@ public class LotItemGUI : MonoBehaviour
         PriceKP.text = item.cashCost + " KP";
         PriceGITP.text = item.goldCost + " GITP";
         Description.text = item.description;
+
+        if (gunModel != null)
+        {
+            Destroy(gunModel);
+        }
         gunModel = null;
         ItemManager.instance.LoadModel(item);
+        loading.alpha = 1.0f;
     }
     public void KPBuy()
     {
-        ItemManager.instance.BuyItem(item.cashSlot);
+        StartCoroutine( ItemManager.instance.BuyItem(item.cashSlot,this));
     }
     public void GITPBuy()
     {
-        ItemManager.instance.BuyItem(item.goldSlot);
+       StartCoroutine( ItemManager.instance.BuyItem(item.goldSlot,this));
+    }
+
+    public void SetError(string error)
+    {
+        buyLabel.text = error;
+        UITweener tweener = buyLabel.GetComponent<UITweener>();
+        tweener.tweenFactor = 0.0f;
+        tweener.PlayForward();
     }
 }

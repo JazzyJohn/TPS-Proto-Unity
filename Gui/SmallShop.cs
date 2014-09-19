@@ -54,16 +54,17 @@ public class SmallShop : MonoBehaviour {
     }
     public IEnumerator BuyItem() {
 
-        IEnumerator numenator = ItemManager.instance.BuyItem(mysqlId);
+        IEnumerator numenator = ItemManager.instance.BuyItem(mysqlId,null);
 
 		while(numenator.MoveNext()){
 			yield return numenator.Current;
 		}
-        numenator = ItemManager.instance.ReoadItemsSync();
+        numenator = ItemManager.instance.ReLoadItemsSync();
         while (numenator.MoveNext())
         {
             yield return numenator.Current;
         }
+        ItemManager.instance.ConnectToPrefab();
         numenator = GlobalPlayer.instance.ReloadStats();
         while (numenator.MoveNext())
         {

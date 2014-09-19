@@ -165,48 +165,13 @@ public class PrefabManager : MonoBehaviour {
 
 
                     bundle = www.assetBundle;
-
+                    AssetBundleManager.setAssetBundle(bundle, crossDomainesafeURL, version);
                     //Debug.Log(bundle.mainAsset);
                     //bundle
                     //Debug.Log(bundle.mainAsset);
                     //prefabObjects = bundle.LoadAll();
 
-                    foreach(InBundleData data in allObjects)
-                    {
-                        Type type =Type.GetType(data.type);
-                        foreach (string obj in data.objects) {
-                            AssetBundleRequest request = bundle.LoadAsync(obj, type);
-                            yield return request;
-                            if (request.asset != null)
-                            {
-                                GameObject prefab = ((MonoBehaviour)request.asset).gameObject;
-                                if (!PhotonResourceWrapper.allobject.ContainsKey(prefab.name))
-                                {
-                                    PhotonResourceWrapper.allobject[prefab.name] = prefab;
-                                }
-                                switch (data.type)
-                                {
-                                    case "BaseWeapon":
-                                        //Debug.Log(prefab);
-                                        ItemManager.instance.SetNewWeapon(prefab.GetComponent<BaseWeapon>());
-                                        break;
-
-
-                                }
-                            }
-                        }
-                             if (onStart)
-                        {
-                            switch (data.type)
-                            {
-                                case "BaseWeapon":
-                                    ItemManager.instance.ReoadItems();
-                                    break;
-                            }
-                        }
-
-                    }
-					AssetBundleManager.setAssetBundle(bundle, crossDomainesafeURL,version);
+                  
                     /*  prefabObjects = bundle.LoadAll(Type.GetType(typeOfObject));
                       AssetBundleManager.setAssetBundle(bundle, crossDomainesafeURL,version);
 
@@ -255,10 +220,48 @@ public class PrefabManager : MonoBehaviour {
                     www.Dispose();
                     //sbundle.Unload(false);
                 }
-                inProgress = false;
-                Debug.Log("PrefabManager " + BundleURL + " has been instantiated.");
-                instantiated = true;
+             
             }
+            foreach (InBundleData data in allObjects)
+            {
+                Type type = Type.GetType(data.type);
+                foreach (string obj in data.objects)
+                {
+                    AssetBundleRequest request = bundle.LoadAsync(obj, type);
+                    yield return request;
+                    if (request.asset != null)
+                    {
+                        GameObject prefab = ((MonoBehaviour)request.asset).gameObject;
+                        if (!PhotonResourceWrapper.allobject.ContainsKey(prefab.name))
+                        {
+                            PhotonResourceWrapper.allobject[prefab.name] = prefab;
+                        }
+                        switch (data.type)
+                        {
+                            case "BaseWeapon":
+                                //Debug.Log(prefab);
+                                ItemManager.instance.SetNewWeapon(prefab.GetComponent<BaseWeapon>());
+                                break;
+
+
+                        }
+                    }
+                }
+                if (onStart)
+                {
+                    switch (data.type)
+                    {
+                        case "BaseWeapon":
+                            ItemManager.instance.ConnectToPrefab();
+                            break;
+                    }
+                }
+
+            }
+            inProgress = false;
+            Debug.Log("PrefabManager " + BundleURL + " has been instantiated.");
+            instantiated = true;
+					
         }
 		inProgress = false;
 	}

@@ -8,6 +8,7 @@ public class ShopGUI : MonoBehaviour {
 	
 	public Transform TableTransform;
 	public UITable Table;
+	public UIPanel TablePanel;
 	public UIPanel ItemsPanel;
 	public MainMenuGUI MainMenu;
 
@@ -26,7 +27,9 @@ public class ShopGUI : MonoBehaviour {
 	{
 		ShopItem.Main = this;
 		Lot.alpha = 0f;
+        StartCoroutine(ItemManager.instance.LoadShop(this));
 		//ShopItem.EditCategory(ShopItem.SelectCategory, ShopItem.SelectClass);
+		ReSIZE();
 	}
 
 	public void HideAllPanel()
@@ -36,7 +39,7 @@ public class ShopGUI : MonoBehaviour {
 
 	public void ShowShop()
 	{
-        StartCoroutine(ItemManager.instance.LoadShop(this));
+    
 		if (Shop.alpha > 0f)
 		{
 			MainMenu.HideAllPanel();
@@ -67,27 +70,27 @@ public class ShopGUI : MonoBehaviour {
 
 	public void Move(string value)
 	{
-		/*switch(value)
+		switch(value)
 		{
 		case "Next":
 			if(LotGUI_item.numToItem >= ShopItem.AllItems.Count)
 			{
-				LotGUI_item.id = ShopItem.AllItems[0].id;
+                LotGUI_item.SetItem(ShopItem.AllItems[0].ItemInfo.item);
 				LotGUI_item.numToItem = 0;
 			}
 			else
-				LotGUI_item.id = ShopItem.AllItems[LotGUI_item.numToItem+1].id;
+                LotGUI_item.SetItem(ShopItem.AllItems[LotGUI_item.numToItem++].ItemInfo.item);
 			break;
 		case "Back":
-			if(LotGUI_item.numToItem <= 0)
+			if(LotGUI_item.numToItem < 0)
 			{
-				LotGUI_item.id = ShopItem.AllItems[ShopItem.AllItems.Count-1].id;
+                  LotGUI_item.SetItem(ShopItem.AllItems[ShopItem.AllItems.Count - 1].ItemInfo.item);
 				LotGUI_item.numToItem = ShopItem.AllItems.Count-1;
 			}
 			else
-				LotGUI_item.id = ShopItem.AllItems[LotGUI_item.numToItem-1].id;
+                LotGUI_item.SetItem(ShopItem.AllItems[LotGUI_item.numToItem--].ItemInfo.item);
 			break;
-		}*/
+		}
 	}
 
 	public void CloseLot()
@@ -99,13 +102,23 @@ public class ShopGUI : MonoBehaviour {
 
 	public void ReSIZE()
 	{
+		if(TablePanel.alpha == 1f)
+			TablePanel.alpha = 0f;
+
 		foreach(Item obj in ShopItem.AllItems)
 		{
 			obj.Box.width=(int)Math.Truncate((ItemsPanel.width/Table.columns)-Table.padding.x*(Table.columns+1));
 			obj.Box.height=(int)Math.Truncate((ItemsPanel.height/2)-Table.padding.y*3);
 		}
+		TableTransform.localPosition = new Vector3((-1*(ItemsPanel.width/2))+1, (ItemsPanel.height/2)+Table.padding.y, 0f);
+		StartCoroutine(Reposition());
+	}
+
+	IEnumerator Reposition()
+	{
+		yield return new WaitForEndOfFrame();
 		Table.Reposition();
-		TableTransform.localPosition = new Vector3((-1*(ItemsPanel.width/2))-Table.padding.x, (ItemsPanel.height/2)+Table.padding.y, 0f);
+		TablePanel.alpha = 1f;
 	}
 	
 	// Update is called once per frame
@@ -172,6 +185,9 @@ public class ShopItems
     }
 	public void EditCategory(ShopSlotType category, GameClassEnum gameClass) //Смена закладки(категории или класса)
 	{
+		if(Main.TablePanel.alpha == 1f)
+			Main.TablePanel.alpha = 0f;
+
         this.gameClass = gameClass;
         this.category = category;
         Main.StartCoroutine( ItemManager.instance.GenerateList(gameClass, category));
@@ -187,20 +203,13 @@ public class ShopItems
 		if (Category == ""|| Class == "" || (OldClass && OldCategory))
 			return;
 
-		/*Код загузки и добавления содержимого(цикл парсинга или ещё чего)
-		 * {
-		 * Add(id);
-		 * } 
-		 */
-       /*
-		ItemsCount = AllItems.Count;
-		if (ItemsCount != 0)
-		{
-			Page = (int)(Math.Ceiling(Convert.ToDouble(ItemsCount/(Main.Table.columns*2))));
-			Main.Scroll.numberOfSteps = Page;
-			Main.ReSIZE();
-		}*/
-	}
+		*/
+
+		Page = (int)(Math.Ceiling(Convert.ToDouble(Main.TableTransform.childCount/(Main.Table.columns*2))));
+		Main.Scroll.numberOfSteps = Page;
+		Main.ReSIZE();
+}
+
     public void Clean()
     {
         foreach(Item item in AllItems){

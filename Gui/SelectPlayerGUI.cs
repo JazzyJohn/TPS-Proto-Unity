@@ -150,10 +150,10 @@ public class SelectPlayerGUI : MonoBehaviour {
 		}
         for(int j = 0; j <4;j++){
             listOfItems [j] =ItemManager.instance.GetItemForSlot((GameClassEnum)Choice._Player, j);
-            int choice = Choice.ForGuiSlot(j);
-            if (choice != -1)
+            WeaponIndex choice = Choice.ForGuiSlot(j);
+            if (!choice.IsSameIndex( WeaponIndex.Zero))
             {
-                int index = listOfItems[j].FindIndex(delegate(GUIItem searchentry) { return searchentry.index == choice; });
+                int index = listOfItems[j].FindIndex(delegate(GUIItem searchentry) { return searchentry.index.IsSameIndex(choice); });
                 ChangeWeapon(j, index);
             }
             else
@@ -296,6 +296,7 @@ public class SelectPlayerGUI : MonoBehaviour {
         }
 
         MenuElements.Weapon[TypeW].mainTexture = listOfItems[TypeW][choice].texture;
+        MenuElements.WeaponBack[TypeW].color = listOfItems[TypeW][choice].color;
         Choice.SetChoice(TypeW, Choice._Player, listOfItems[TypeW][choice].index);
     }
 
@@ -420,6 +421,7 @@ public class _MenuElements
 	public UIGrid GridRobotClass;
 
 	public UITexture[] Weapon;
+    public UISprite[] WeaponBack;
 
     public UITexture[] Stims;
     
@@ -445,11 +447,11 @@ public static class Choice
 	public static int _Team=-1;
 	
 	//PlayerWeapons
-	public static int[] _Personal = new int[4]{-1,-1,-1,-1};
-	public static int[] _Main = new int[4]{-1,-1,-1,-1};
-	public static int[] _Extra = new int[4]{-1,-1,-1,-1};
-	public static int[] _Grenad = new int[4]{-1,-1,-1,-1};
-	public static int[] _Taunt = new int[4]{-1,-1,-1,-1};
+    public static WeaponIndex[] _Personal = new WeaponIndex[4] { WeaponIndex.Zero, WeaponIndex.Zero, WeaponIndex.Zero, WeaponIndex.Zero };
+    public static WeaponIndex[] _Main = new WeaponIndex[4] { WeaponIndex.Zero, WeaponIndex.Zero, WeaponIndex.Zero, WeaponIndex.Zero };
+    public static WeaponIndex[] _Extra = new WeaponIndex[4] { WeaponIndex.Zero, WeaponIndex.Zero, WeaponIndex.Zero, WeaponIndex.Zero };
+    public static WeaponIndex[] _Grenad = new WeaponIndex[4] { WeaponIndex.Zero, WeaponIndex.Zero, WeaponIndex.Zero, WeaponIndex.Zero };
+    public static WeaponIndex[] _Taunt = new WeaponIndex[4] { WeaponIndex.Zero, WeaponIndex.Zero, WeaponIndex.Zero, WeaponIndex.Zero };
 
     public static int[][] _GUIChoice = new int[][] 
     {
@@ -459,8 +461,9 @@ public static class Choice
         new int[5],
     };
 
-    
-	public static int ForGuiSlot(int slot){
+
+    public static WeaponIndex ForGuiSlot(int slot)
+    {
 		switch(slot){
 		case 0:
 			return _Personal[_Player];
@@ -479,9 +482,10 @@ public static class Choice
 			break;	
 			
 		}
-		return -1;
+        return WeaponIndex.Zero;
 	}
-	public static void SetChoice(int slot, int gameClass, int index){
+    public static void SetChoice(int slot, int gameClass, WeaponIndex index)
+    {
 		switch(slot){
 		case 0:
 			_Personal[gameClass]=index;
@@ -500,7 +504,7 @@ public static class Choice
 			break;
 		}
 	}
-	
+	/*
 	//RoboWeapons
 	public static int[] _MeleeRobo = new int[3]{-1,-1,-1};
 	public static int[] _MainRobo = new int[3]{-1,-1,-1};
@@ -539,5 +543,5 @@ public static class Choice
 			break;
 		}
 		return -1;
-	}
+	}*/
 }

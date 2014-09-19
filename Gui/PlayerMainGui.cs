@@ -178,7 +178,8 @@ public class PlayerMainGui : MonoBehaviour {
 	void Update(){
         if (LocalPlayer == null)
         {
-            if(PlayerView.allPlayer.ContainsKey(NetworkController.smartFox.MySelf.Id)){
+            if (NetworkController.smartFox!=null&&PlayerView.allPlayer.ContainsKey(NetworkController.smartFox.MySelf.Id))
+            {
                 SetLocalPlayer( PlayerView.allPlayer[NetworkController.smartFox.MySelf.Id].observed);
             }
             return;
