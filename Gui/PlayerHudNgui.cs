@@ -71,6 +71,8 @@ public class PlayerHudNgui : MonoBehaviour {
 	public UISprite annonce;
     
 	public UITweener annonceTweener;
+	
+	public UILabel tutorialText;
 
     /*
         public float robotTime=0;

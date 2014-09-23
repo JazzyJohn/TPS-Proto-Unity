@@ -758,27 +758,63 @@ public class BaseWeapon : DestroyableNetworkObject {
 
 	}
 	void DoSimpleDamage(){
-		Camera maincam = Camera.main;
-		Ray centerRay= maincam.ViewportPointToRay(new Vector3(.5f, 0.5f, 1f));
-		RaycastHit hitInfo;
-
-		if (Physics.Raycast (centerRay, out hitInfo, weaponRange)) {
+		Vector3 startPoint  = muzzlePoint.position+muzzleOffset;
+		Quaternion startRotation = getAimRotation();
+		GameObject proj;
+		float effAimRandCoef = GetRandomeDirectionCoef();
 		
-			HitEffect(hitInfo);
-			
+		if (effAimRandCoef > 0) {
+			startRotation = Quaternion.Euler (startRotation.eulerAngles + new Vector3 (Random.Range (-1 * effAimRandCoef, 1 * effAimRandCoef), Random.Range (-1 * effAimRandCoef, 1 * effAimRandCoef), Random.Range (-1 * effAimRandCoef, 1 * effAimRandCoef)));
+		}
+	
+		Vector3 direction = Vector3.forward*startRotation;
+		Ray centerRay=new Ray(startPoint,direction);
+		RaycastHit hitInfo;
+		float power=0;
+		float range = 0;
+		
+		switch(prefiretype){
+			case PREFIRETYPE.ChargedPower:
+				power += _pumpCoef;
+			break;
+			case PREFIRETYPE.ChargedRange:
+				range += _pumpCoef;
+			break;		
+		}
+     
+		if (Physics.Raycast (centerRay, out hitInfo, weaponRange+range)) {
+		
+			HitEffect(hitInfo,power);
+			rifleParticleController.CreateLine(startPoint,hitInfo.point);
+		}else{
+			rifleParticleController.CreateRay(startPoint,direction);
 		}
 	}
 	
 	/// <summary>
     /// Hit logic for SimpleDamage
     /// </summary>
-	protected virtual void HitEffect(RaycastHit hitInfo){
+	protected virtual void HitEffect(RaycastHit hitInfo,float power){
 			DamagebleObject target =(DamagebleObject) hitInfo.collider.GetComponent(typeof(DamagebleObject));
 			if(target!=null){
-				target.Damage(new BaseDamage(damageAmount) ,owner.gameObject);
+				BaseDamage dmg =new BaseDamage(damageAmount);
+				dmg.Damage += power;
+				target.Damage(dmg ,owner.gameObject);
 			}
 	}
-	
+	public virtual void RemoteSimpleHit(Vector3 position, Quaternion rotation, float power, float range, int viewId, int projId, long timeShoot)
+    {
+		Vector3 direction = Vector3.forward*rotation;
+		Ray centerRay=new Ray(position,direction);
+		RaycastHit hitInfo;
+		if (Physics.Raycast (centerRay, out hitInfo, weaponRange+range)) {
+		
+			HitEffect(hitInfo,power);
+			rifleParticleController.CreateLine(startPoint,hitInfo.point);
+		}else{
+			rifleParticleController.CreateRay(startPoint,direction);
+		}
+	}
 	/// <summary>
     /// Generate random distribution coef for projectile
     /// </summary>
@@ -860,7 +896,21 @@ public class BaseWeapon : DestroyableNetworkObject {
 		projScript.range+=range;
         projScript.Init();
 	}
-  
+	public virtual void  RemoteShot(Vector3 position, Quaternion rotation, float power, float range, int viewId, int projId, long timeShoot)
+    {
+		switch (amunitionType)
+        {
+            case AMUNITONTYPE.SIMPLEHIT:
+                RemoteSimpleHit(position, rotation, power, range, viewId, projId, timeShoot);
+                break;
+            case AMUNITONTYPE.PROJECTILE:
+				RemoteGenerate(position, rotation, power, range, viewId, projId, timeShoot);
+                break;
+      
+          
+
+        }
+	}
     public virtual void RemoteGenerate(Vector3 position, Quaternion rotation, float power, float range, int viewId, int projId, long timeShoot)
     {
         lastShootTime = Time.time;

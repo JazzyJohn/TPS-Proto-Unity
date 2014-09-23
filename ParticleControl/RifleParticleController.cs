@@ -7,6 +7,8 @@ public class RifleParticleController : MonoBehaviour
 	private ParticleSystem flameParticles;
 	private ShellparticleSystem shellParticles;
 	private ParticleSystem smokeParticles;
+	public GameObject simpleRay;
+	
 	protected Collider owner;
 	//Инициализация, получаем ссылки на необходимые нам компоненты
 	void Start()
@@ -39,5 +41,13 @@ public class RifleParticleController : MonoBehaviour
 	}
 	public void StopFlame(){
 		flameParticles.Stop();
+	}
+	
+	public void CreateRay(Vector3 start, vector3 direction){
+			Instantiate(simpleRay, start, direction); 
+	}
+	public void CreateLine(Vector3 start, vector3 point){
+			Instantiate(simpleRay, start, (point -start).normalized);
+			//TODO:: do size logic;
 	}
 }

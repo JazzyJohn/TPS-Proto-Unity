@@ -76,7 +76,7 @@ public class Player : MonoBehaviour {
 
     public PlayerView playerView;
 
-    public bool isMine { get { return playerView.isMine; } set { } }
+    public bool isMine { get { return playerView.isMine; } }
 
 	public UseObject useTarget;
 	//Func name for delayed external call

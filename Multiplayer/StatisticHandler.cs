@@ -34,6 +34,8 @@ public class StatisticHandler : MonoBehaviour {
 	
 	public static string REPAIR_ITEM ="repairItem";
 	
+	public static string DISENTEGRATE_ITEM = "disentegrateItem";
+		
 	public static string SAVE_ITEM = "saveitem";
 
 	public static string NEWS_ALL = "allnews";
@@ -41,7 +43,7 @@ public class StatisticHandler : MonoBehaviour {
 	public static string UPDATE_LORE = "updatelore";
 	
 	public static string LOAD_LORE = "loadlore";
-	
+	 
 	public static string LOAD_MONEY_REWARD = "loadmoneyreward";
 	
 	public static string SYNC_MONEY_REWARD = "syncmoneyreward";

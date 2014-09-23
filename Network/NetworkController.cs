@@ -1487,7 +1487,7 @@ public class NetworkController : MonoBehaviour {
             }
 			BaseWeapon weapon = GetView(dt.GetInt("id")).weapon;
 		
-			weapon.RemoteGenerate(((Vector3Model)dt.GetClass("position")).GetVector(),
+			weapon.RemoteShot(((Vector3Model)dt.GetClass("position")).GetVector(),
 								((QuaternionModel)dt.GetClass("direction")).GetQuat(),
 								dt.GetFloat("power"),dt.GetFloat("range"),dt.GetInt("viewId"),dt.GetInt("projId"),dt.GetLong("timeShoot"));
 		}

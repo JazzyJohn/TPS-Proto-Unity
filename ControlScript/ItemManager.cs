@@ -140,11 +140,7 @@ public class InventorySlot  : SimpleSlot{
 public class StimPack{
 	public int amount;
 
-    public int goldPrice;
-
-    public int normalPrice;
-
-	public bool active = false;
+   	public bool active = false;
 
     public int buffId;
 	
@@ -317,8 +313,6 @@ public class ItemManager : MonoBehaviour {
                 StimPack entry = new StimPack();
                 entry.amount = int.Parse(node.SelectSingleNode("amount").InnerText);
                 entry.name = node.SelectSingleNode("name").InnerText;
-                entry.goldPrice = int.Parse(node.SelectSingleNode("goldPrice").InnerText);
-                entry.normalPrice = int.Parse(node.SelectSingleNode("normalPrice").InnerText);
                 entry.mysqlId = node.SelectSingleNode("mysqlId").InnerText;
                 entry.buffId = int.Parse(node.SelectSingleNode("buffId").InnerText);
 
@@ -825,12 +819,44 @@ public class ItemManager : MonoBehaviour {
         WWW w = StatisticHandler.GetMeRightWWW(form,StatisticHandler.REPAIR_ITEM);
       
         yield return w;
-        IEnumerator numenator = ParseInventory(w.text);
+		XmlDocument xmlDoc = new XmlDocument();
+		xmlDoc.LoadXml(w.text);
+		
+		if(xmlDoc.SelectSingleNode("result/error").InnerText=="0"){
+		
+			IEnumerator numenator = ParseInventory(w.text);
 
-        while (numenator.MoveNext())
-        {
-            yield return numenator.Current;
-        }
+			while (numenator.MoveNext())
+			{
+				yield return numenator.Current;
+			}
+		
+		}
+	}
+	
+	public void DesintegrateItem(string id){
+		StartCoroutine(_UseRepairKit(itemId,kit_id));
+	}
+	IEnumerator _DesintegrateItem(string id){
+		WWWForm form = new WWWForm();
+        
+        form.AddField("uid", UID);
+        form.AddField("game_item", id);
+	    WWW w = StatisticHandler.GetMeRightWWW(form,StatisticHandler.DISENTEGRATE_ITEM);
+      
+        yield return w;
+		XmlDocument xmlDoc = new XmlDocument();
+		xmlDoc.LoadXml(w.text);
+		
+		if(xmlDoc.SelectSingleNode("result/error").InnerText=="0"){
+			
+			IEnumerator numenator = ParseInventory(w.text);
+
+			while (numenator.MoveNext())
+			{
+				yield return numenator.Current;
+			}
+		}
 	}
 	public List<CharacteristicToAdd> GetBuff(int id){
 		if(allBuff.ContainsKey(id)){
