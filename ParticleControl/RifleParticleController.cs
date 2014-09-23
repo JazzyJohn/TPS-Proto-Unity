@@ -43,11 +43,11 @@ public class RifleParticleController : MonoBehaviour
 		flameParticles.Stop();
 	}
 	
-	public void CreateRay(Vector3 start, vector3 direction){
-			Instantiate(simpleRay, start, direction); 
+	public void CreateRay(Vector3 start, Vector3 direction){
+			Instantiate(simpleRay, start, Quaternion.LookRotation(direction)); 
 	}
-	public void CreateLine(Vector3 start, vector3 point){
-			Instantiate(simpleRay, start, (point -start).normalized);
+	public void CreateLine(Vector3 start, Vector3 point){
+			Instantiate(simpleRay, start, Quaternion.LookRotation((point -start).normalized));
 			//TODO:: do size logic;
 	}
 }

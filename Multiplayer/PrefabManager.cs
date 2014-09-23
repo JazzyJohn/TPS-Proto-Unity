@@ -228,6 +228,7 @@ public class PrefabManager : MonoBehaviour {
                 foreach (string obj in data.objects)
                 {
                     AssetBundleRequest request = bundle.LoadAsync(obj, type);
+                    request.priority = 100;
                     yield return request;
                     if (request.asset != null)
                     {

@@ -3,14 +3,16 @@ using System.Collections;
 
 public class MoveNGUICamer : MonoBehaviour {
 
-	Camera cam;
+	public Camera cam;
 	Transform ThisObject;
+	UIWidget Panel;
 	public float MaxAndMinRotate = 3;
+	public bool inverse;
 
 	void Awake()
 	{
 		ThisObject = this.transform;
-		cam = GetComponent<Camera>();
+		Panel = GetComponent<UIWidget>();
 	}
 
 	// Use this for initialization
@@ -23,7 +25,14 @@ public class MoveNGUICamer : MonoBehaviour {
 	// Update is called once per frame
 	void Update ()  //
 	{
+		if(Panel.alpha != 1)
+			return;
+
 		posMouse = cam.ScreenToViewportPoint(Input.mousePosition);
-		ThisObject.localEulerAngles = new Vector3(((posMouse.y*2)-1)*-MaxAndMinRotate,((posMouse.x*2)-1)*MaxAndMinRotate, 0f); 
+
+		float Z = MaxAndMinRotate;
+		if(inverse)
+			Z = -Z;
+		ThisObject.localEulerAngles = new Vector3(((posMouse.y*2)-1)*Z,((posMouse.x*2)-1)*-Z, 0f); 
 	}
 }

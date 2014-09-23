@@ -396,8 +396,7 @@ public class SelectPlayerGUI : MonoBehaviour {
             
             shop.Icon.mainTexture = pack.textureGUI;
             shop.Offer.text = pack.name;
-            shop.GoldBuy.text = pack.goldPrice.ToString()+" For GITP";
-            shop.CreditBuy.text = pack.normalPrice.ToString() + " For KP";
+           
             shop.mysqlId = pack.mysqlId;
             shop.Show();
         }

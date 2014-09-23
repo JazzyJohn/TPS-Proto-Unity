@@ -42,7 +42,8 @@ public class GlobalPlayer : MonoBehaviour {
             if (menu != null)
             {
                 menu.LoadingFinish();
-            }	
+            }
+            StartCoroutine( ItemManager.instance.ReLoadItemsSync());
 		}
 	}
 	public List<string> friendsInfo = new List<string>();

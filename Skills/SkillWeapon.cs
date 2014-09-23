@@ -16,7 +16,7 @@ public class SkillWeapon : BaseWeapon{
 	}
 	/// <summary>
     /// Hit logic for 
-	protected override void HitEffect(RaycastHit hitInfo){
+	protected override void HitEffect(RaycastHit hitInfo,float damage){
 			Pawn target =hitInfo.collider.GetComponent<Pawn>();
 			switch(skill.type){
 				case TargetType.SELF:

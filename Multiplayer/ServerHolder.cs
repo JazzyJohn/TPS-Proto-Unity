@@ -442,12 +442,12 @@ public class ServerHolder : MonoBehaviour
         
 		
 		yield return new WaitForSeconds(1);
-	
 
 
-	
 
-		Application.backgroundLoadingPriority = ThreadPriority.High;
+
+
+        Application.backgroundLoadingPriority = ThreadPriority.High;
 		Debug.Log("Загружаем карту " + mapName );
 		async = Application.LoadLevelAsync(mapName);
 		yield return async;

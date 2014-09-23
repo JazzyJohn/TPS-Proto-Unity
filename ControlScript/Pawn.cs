@@ -1271,10 +1271,7 @@ public class Pawn : DamagebleObject
                 eurler.x = 0;
                 if (characterState == CharacterState.WallRunning || characterState == CharacterState.PullingUp)
                 {
-                    if (forwardRotation.sqrMagnitude > 0)
-                    {
-                        myTransform.rotation = Quaternion.LookRotation(forwardRotation);
-                    }
+                   
                 }
                 else
                 {
@@ -2034,7 +2031,7 @@ public class Pawn : DamagebleObject
         if ((!canWallRun || !_canWallRun) && foxView.isMine) return false;
 
         //if (isGrounded) return false;
-        if (lastTimeOnWall + 1.0f > Time.time)
+        if (lastTimeOnWall + 0.5f > Time.time)
         {
             return false;
         }
@@ -2063,21 +2060,21 @@ public class Pawn : DamagebleObject
 
 
         bool leftW = Physics.Raycast(myTransform.position,
-                                      (-1 * myTransform.right).normalized, out leftH, capsule.radius + 0.3f, wallRunLayers);
+                                      (-1 * myTransform.right).normalized, out leftH, capsule.radius + 0.4f, wallRunLayers);
         bool rightW = Physics.Raycast(myTransform.position,
-                                       (myTransform.right).normalized, out rightH, capsule.radius + 0.3f, wallRunLayers);
+                                       (myTransform.right).normalized, out rightH, capsule.radius + 0.4f, wallRunLayers);
         bool frontW = Physics.Raycast(myTransform.position,
                                        myTransform.forward, out frontH, capsule.radius + 0.2f, wallRunLayers);
 
-        /*Debug.DrawLine(myTransform.position,
-                        myTransform.position + (0.5f * myTransform.forward - myTransform.right).normalized * (capsule.radius + 0.2f));
+        Debug.DrawLine(myTransform.position,
+                        myTransform.position +  (- myTransform.right).normalized * (capsule.radius + 0.2f));
 
         Debug.DrawLine(myTransform.position,
-                        myTransform.position + (0.5f * myTransform.forward + myTransform.right).normalized * (capsule.radius + 0.2f));
+                        myTransform.position + ( myTransform.right).normalized * (capsule.radius + 0.2f));
 
         //Debug.DrawLine (myTransform.position,
         // myTransform.forward);
-*/
+
 
 
 
@@ -2158,6 +2155,7 @@ public class Pawn : DamagebleObject
                     characterState = CharacterState.Jumping;
                     lastTimeOnWall = Time.time;
                     jetPackEnable = false;
+                    //Debug.Log("nOhIT");
                 }
 
             }
@@ -2171,8 +2169,13 @@ public class Pawn : DamagebleObject
                 return false;
             }
 
-            forwardRotation = tangVect * 5;
-            //Debug.DrawLine(myTransform.position,forwardRotation);
+            forwardRotation = tangVect;
+            if (forwardRotation.sqrMagnitude > 0)
+            {
+                myTransform.rotation = Quaternion.LookRotation(forwardRotation);
+            }
+            //Debug.Log(forwardRotation);
+           // Debug.DrawRay(myTransform.position,forwardRotation,Color.green);
             //animator.WallAnimation(leftW,rightW,frontW);
 
 
@@ -2347,6 +2350,7 @@ public class Pawn : DamagebleObject
             case CharacterState.Walking:
                 if (isGrounded)
                 {
+                    jetPackEnable = false;
                     if (_rb.isKinematic) _rb.isKinematic = false;
 
                     //Debug.Log (this+ " " +velocityChange);

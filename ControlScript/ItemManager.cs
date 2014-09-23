@@ -124,7 +124,7 @@ public class InventorySlot  : SimpleSlot{
    
    public int charge;
    
-   public int timeEnd;
+   public DateTime timeEnd;
    
    public int modslot;
    
@@ -212,6 +212,41 @@ public class ItemManager : MonoBehaviour {
                 Choice.SetChoice(gameSlot, index.gameClass, index);
                    
             }
+        }
+        List<InventorySlot> toDelete = new List<InventorySlot>();
+        foreach (KeyValuePair<string, InventorySlot> slot in allitems)
+        {
+            switch (slot.Value.type)
+            {
+                case ShopSlotType.ETC:
+                    if (slot.Value.charge <= 0)
+                    {
+                        toDelete.Add(slot.Value);
+                    }
+                    break;
+                default:
+                    if (slot.Value.personal)
+                    {
+                        if (slot.Value.charge <= 0)
+                        {
+                            toDelete.Add(slot.Value);
+                        }
+                    }
+                    else
+                    {
+                        if (slot.Value.timeEnd !=null&&slot.Value.timeEnd < DateTime.Now)
+                        {
+                            toDelete.Add(slot.Value);
+                        }
+                    }
+                    break;
+
+            }
+        }
+        foreach (InventorySlot slot in toDelete)
+        {
+            allitems.Remove(slot.id);
+            invItems[slot.type].Remove(slot);
         }
        
     }
@@ -432,10 +467,16 @@ public class ItemManager : MonoBehaviour {
 		form.AddField ("class", Choice._Player);
 		form.AddField ("robotclass", Choice._Robot);
 		for(int i = 0;i<4;i++){
-            Debug.Log(Choice.ForGuiSlot(i).ToString());
-				form.AddField ("default[]", Choice. ForGuiSlot(i).ToString());
+          //  Debug.Log(Choice.ForGuiSlot(i).ToString());
+            WeaponIndex index = Choice.ForGuiSlot(i);
+				form.AddField ("default[]", index.ToString());
+            if(index.itemId!=null&&index.itemId!=""){
+                Debug.Log("ITEM"+index.itemId);
+                form.AddField("usedInvItem[]", index.itemId);
+            }
 		}
-	
+     
+        
 	/*	for(int i = 0;i<4;i++){
 		
 			form.AddField ("defaultrobot[]", Choice. ForGuiSlotRobot(i));
@@ -525,6 +566,7 @@ public class ItemManager : MonoBehaviour {
 
                 if (slot.gameType == intGameSlot && (slot.gameClass == GameClassEnum.ANY || slot.gameClass == gameClass))
                 {
+                  
                     GUIItem gui = new GUIItem();
                     gui.index = new WeaponIndex(slot.ingamekey, slot.id);
                     if (slot.personal)
@@ -835,7 +877,7 @@ public class ItemManager : MonoBehaviour {
 	}
 	
 	public void DesintegrateItem(string id){
-		StartCoroutine(_UseRepairKit(itemId,kit_id));
+        StartCoroutine(_DesintegrateItem(id));
 	}
 	IEnumerator _DesintegrateItem(string id){
 		WWWForm form = new WWWForm();
@@ -918,7 +960,19 @@ public class ItemManager : MonoBehaviour {
 				slot.type = (ShopSlotType)Enum.Parse(typeof(ShopSlotType), node.SelectSingleNode("type").InnerText);
 				slot.id = id;
 				slot.gameId= int.Parse(node.SelectSingleNode("game_id").InnerText);
-				slot.timeEnd= int.Parse(node.SelectSingleNode("time_end").InnerText);
+                if (node.SelectSingleNode("time_end").InnerText != "")
+                {
+                    try
+                    {
+                        slot.timeEnd = DateTime.Parse(node.SelectSingleNode("time_end").InnerText);
+                    }
+                    catch (Exception)
+                    {
+
+                        Debug.LogError("date format  exeption");
+                    }
+                   
+                }
 				slot.modslot= int.Parse(node.SelectSingleNode("modslot").InnerText);
 				slot.ingamekey= int.Parse(node.SelectSingleNode("ingamekey").InnerText);
 				slot.maxcharge= int.Parse(node.SelectSingleNode("maxcharge").InnerText);

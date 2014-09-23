@@ -767,7 +767,7 @@ public class BaseWeapon : DestroyableNetworkObject {
 			startRotation = Quaternion.Euler (startRotation.eulerAngles + new Vector3 (Random.Range (-1 * effAimRandCoef, 1 * effAimRandCoef), Random.Range (-1 * effAimRandCoef, 1 * effAimRandCoef), Random.Range (-1 * effAimRandCoef, 1 * effAimRandCoef)));
 		}
 	
-		Vector3 direction = Vector3.forward*startRotation;
+		Vector3 direction = startRotation*Vector3.forward;
 		Ray centerRay=new Ray(startPoint,direction);
 		RaycastHit hitInfo;
 		float power=0;
@@ -804,15 +804,15 @@ public class BaseWeapon : DestroyableNetworkObject {
 	}
 	public virtual void RemoteSimpleHit(Vector3 position, Quaternion rotation, float power, float range, int viewId, int projId, long timeShoot)
     {
-		Vector3 direction = Vector3.forward*rotation;
+		Vector3 direction = rotation *Vector3.forward;
 		Ray centerRay=new Ray(position,direction);
 		RaycastHit hitInfo;
 		if (Physics.Raycast (centerRay, out hitInfo, weaponRange+range)) {
 		
 			HitEffect(hitInfo,power);
-			rifleParticleController.CreateLine(startPoint,hitInfo.point);
+            rifleParticleController.CreateLine(position, hitInfo.point);
 		}else{
-			rifleParticleController.CreateRay(startPoint,direction);
+            rifleParticleController.CreateRay(position, direction);
 		}
 	}
 	/// <summary>

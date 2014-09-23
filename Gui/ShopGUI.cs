@@ -8,8 +8,8 @@ public class ShopGUI : MonoBehaviour {
 	
 	public Transform TableTransform;
 	public UITable Table;
-	public UIPanel TablePanel;
 	public UIPanel ItemsPanel;
+	public UIScrollView ItemsScroll;
 	public MainMenuGUI MainMenu;
 
 	public UIPanel Lot;
@@ -29,7 +29,7 @@ public class ShopGUI : MonoBehaviour {
 		Lot.alpha = 0f;
         StartCoroutine(ItemManager.instance.LoadShop(this));
 		//ShopItem.EditCategory(ShopItem.SelectCategory, ShopItem.SelectClass);
-		ReSIZE();
+		ShopItem.EditCategory(0, 0);
 	}
 
 	public void HideAllPanel()
@@ -73,22 +73,23 @@ public class ShopGUI : MonoBehaviour {
 		switch(value)
 		{
 		case "Next":
+                LotGUI_item.numToItem++;
 			if(LotGUI_item.numToItem >= ShopItem.AllItems.Count)
 			{
-                LotGUI_item.SetItem(ShopItem.AllItems[0].ItemInfo.item);
+               
 				LotGUI_item.numToItem = 0;
 			}
-			else
-                LotGUI_item.SetItem(ShopItem.AllItems[LotGUI_item.numToItem++].ItemInfo.item);
+		
+             LotGUI_item.SetItem(ShopItem.AllItems[LotGUI_item.numToItem].ItemInfo.item);
 			break;
 		case "Back":
+            LotGUI_item.numToItem--;
 			if(LotGUI_item.numToItem < 0)
 			{
-                  LotGUI_item.SetItem(ShopItem.AllItems[ShopItem.AllItems.Count - 1].ItemInfo.item);
+                 
 				LotGUI_item.numToItem = ShopItem.AllItems.Count-1;
 			}
-			else
-                LotGUI_item.SetItem(ShopItem.AllItems[LotGUI_item.numToItem--].ItemInfo.item);
+			LotGUI_item.SetItem(ShopItem.AllItems[LotGUI_item.numToItem].ItemInfo.item);
 			break;
 		}
 	}
@@ -102,15 +103,14 @@ public class ShopGUI : MonoBehaviour {
 
 	public void ReSIZE()
 	{
-		if(TablePanel.alpha == 1f)
-			TablePanel.alpha = 0f;
+		if(ItemsPanel.alpha == 1f)
+			ItemsPanel.alpha = 0f;
 
 		foreach(Item obj in ShopItem.AllItems)
 		{
 			obj.Box.width=(int)Math.Truncate((ItemsPanel.width/Table.columns)-Table.padding.x*(Table.columns+1));
 			obj.Box.height=(int)Math.Truncate((ItemsPanel.height/2)-Table.padding.y*3);
 		}
-		TableTransform.localPosition = new Vector3((-1*(ItemsPanel.width/2))+1, (ItemsPanel.height/2)+Table.padding.y, 0f);
 		StartCoroutine(Reposition());
 	}
 
@@ -118,13 +118,18 @@ public class ShopGUI : MonoBehaviour {
 	{
 		yield return new WaitForEndOfFrame();
 		Table.Reposition();
-		TablePanel.alpha = 1f;
+		ItemsScroll.ResetPosition();
+		TableTransform.localPosition = new Vector3((-1*(ItemsPanel.width/2))+1, (ItemsPanel.height/2)+Table.padding.y, 0f);
+		ItemsPanel.alpha = 1f;
 	}
-	
+
+	bool ReSizeRedy = false;
+
 	// Update is called once per frame
 	void Update () 
 	{
-		TestSizeScreen();
+		if(ShopItem.AllItems.Count > 0)
+			TestSizeScreen();
 	}
 
 
@@ -185,8 +190,8 @@ public class ShopItems
     }
 	public void EditCategory(ShopSlotType category, GameClassEnum gameClass) //Смена закладки(категории или класса)
 	{
-		if(Main.TablePanel.alpha == 1f)
-			Main.TablePanel.alpha = 0f;
+		if(Main.ItemsPanel.alpha == 1f)
+			Main.ItemsPanel.alpha = 0f;
 
         this.gameClass = gameClass;
         this.category = category;
