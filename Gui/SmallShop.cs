@@ -14,7 +14,7 @@ public class SmallShop : MonoBehaviour {
 
     public UILabel CreditBuy;
 
-    public string mysqlId;
+    public SmallShopData data;
 
     public UILabel MyGold;
 
@@ -40,11 +40,11 @@ public class SmallShop : MonoBehaviour {
             GlobalPlayer.instance.AskJsForMagazine("gitp_5");
             return;
         }
-        StartCoroutine(BuyItem());
+        StartCoroutine(BuyItem(data.goldSlot));
     }
     public void BuyForCash(){
     
-        StartCoroutine(BuyItem());
+        StartCoroutine(BuyItem(data.cashSlot));
     }
     public void Show() {
         panel.alpha = 1.0f;
@@ -52,9 +52,9 @@ public class SmallShop : MonoBehaviour {
         MyCash.text = GlobalPlayer.instance.cash + " KP";
         
     }
-    public IEnumerator BuyItem() {
+    public IEnumerator BuyItem(string id) {
 
-        IEnumerator numenator = ItemManager.instance.BuyItem(mysqlId,null);
+        IEnumerator numenator = ItemManager.instance.BuyItem(id);
 
 		while(numenator.MoveNext()){
 			yield return numenator.Current;

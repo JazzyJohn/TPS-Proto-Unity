@@ -67,6 +67,7 @@ public class FromDBWeapon{
 
 	public string name;
 	
+	public int group;
 
 }
 public class FromDBAnims{
@@ -119,6 +120,19 @@ public class ShopSlot : SimpleSlot{
 	
 	
 }
+public class SmallShopData{
+
+	public string cashSlot;
+
+    public string goldSlot;
+	
+	public string name;
+	
+    public int amount;
+	
+	public Texture2D textureGUI;
+
+}
 public class InventorySlot  : SimpleSlot{
    public bool personal;
    
@@ -135,6 +149,8 @@ public class InventorySlot  : SimpleSlot{
    public int gameId;
 
    public int gameType;
+   
+   public int group;
    
  }
 public class StimPack{
@@ -169,7 +185,7 @@ public class ItemManager : MonoBehaviour {
 	public  Dictionary<int,FromDBAnims> animsIndexTable= new Dictionary<int,FromDBAnims>();
 
     public List<WeaponIndex> cachedIndex = new List<WeaponIndex>();
-	public List<StimPack> stimPackDictionary = new List<StimPack>();
+	public StimPack[] stimPackDictionary;
 
     public Dictionary<int, Buff> allBuff = new Dictionary<int, Buff>();
 	private string UID ="";
@@ -290,7 +306,7 @@ public class ItemManager : MonoBehaviour {
 			FromDBWeapon entry = new FromDBWeapon();
 			entry.weaponId = int.Parse (node.SelectSingleNode ("weaponId").InnerText);
 			entry.gameClass =  gameClassPase(node.SelectSingleNode ("gameClass").InnerText);
-			
+			entry.group =int.Parse (node.SelectSingleNode ("ingametype").InnerText);
 			
 			
 			WWW www = StatisticHandler.GetMeRightWWW( node.SelectSingleNode ("textureGUIName").InnerText);
@@ -337,16 +353,19 @@ public class ItemManager : MonoBehaviour {
 		
 		}
         XmlNodeList stims = xmlDoc.SelectNodes("items/stim");
+		if(stimPackDictionary==null){
+			stimPackDictionary = new StimPack[stims.Count];
+		}
 		for(int j=0;j<stims.Count;j++){
             XmlNode node  = stims[j];
-            if (stimPackDictionary.Count > j)
+			key =node.SelectSingleNode("ingametype").InnerText;
+            if (stimPackDictionary[key]!=null)
             {
-                stimPackDictionary[j].amount = int.Parse(node.SelectSingleNode("amount").InnerText);
+                stimPackDictionary[key].amount = int.Parse(node.SelectSingleNode("amount").InnerText);
             }
             else
             {
                 StimPack entry = new StimPack();
-                entry.amount = int.Parse(node.SelectSingleNode("amount").InnerText);
                 entry.name = node.SelectSingleNode("name").InnerText;
                 entry.mysqlId = node.SelectSingleNode("mysqlId").InnerText;
                 entry.buffId = int.Parse(node.SelectSingleNode("buffId").InnerText);
@@ -357,7 +376,7 @@ public class ItemManager : MonoBehaviour {
                 entry.textureGUI = new Texture2D(150, 80);
                 www.LoadImageIntoTexture(entry.textureGUI);
                 //Debug.Log (entry.name + " " +entry.textureGUI + " " +entry.weaponId );
-                stimPackDictionary.Add(entry);
+                stimPackDictionary[key]=entry;
             }
 		
 		}
@@ -471,7 +490,7 @@ public class ItemManager : MonoBehaviour {
             WeaponIndex index = Choice.ForGuiSlot(i);
 				form.AddField ("default[]", index.ToString());
             if(index.itemId!=null&&index.itemId!=""){
-                Debug.Log("ITEM"+index.itemId);
+               // Debug.Log("ITEM"+index.itemId);
                 form.AddField("usedInvItem[]", index.itemId);
             }
 		}
@@ -547,7 +566,7 @@ public class ItemManager : MonoBehaviour {
 				gui.name= entry.name;
 				gui.texture = entry.textureGUI;
                 gui.color = Color.white;
-
+				gui.group= entry.group;
 				weaponList.Add(gui);
 			
 			}
@@ -579,6 +598,7 @@ public class ItemManager : MonoBehaviour {
                     }
                     gui.name = slot.name;
                     gui.texture = slot.texture;
+					gui.group= slot.group;
                     weaponList.Add(gui);
 
                 }
@@ -836,12 +856,13 @@ public class ItemManager : MonoBehaviour {
         }
 
     }
-	public bool TryUseStim(int id){
+	public bool TryUseStim(string itemId, out int id){
+	
+		id =allitems[itemId].ingamekey;
         //Debug.Log("use");
-		if(!stimPackDictionary[id].active&& stimPackDictionary[id].amount  >0){
-			stimPackDictionary[id].active = true;
-			stimPackDictionary[id].amount --;
-            StartCoroutine(UseItem(new string[] { stimPackDictionary[id] .mysqlId}));
+		if(!stimPackDictionary[id].active){
+			stimPackDictionary[id].active = true;			
+            StartCoroutine(UseItem(new string[] { itemId}));
 			return true;
 		}
 		return false;
@@ -960,6 +981,7 @@ public class ItemManager : MonoBehaviour {
 				slot.type = (ShopSlotType)Enum.Parse(typeof(ShopSlotType), node.SelectSingleNode("type").InnerText);
 				slot.id = id;
 				slot.gameId= int.Parse(node.SelectSingleNode("game_id").InnerText);
+				slot.group =int.Parse (node.SelectSingleNode ("ingametype").InnerText);
                 if (node.SelectSingleNode("time_end").InnerText != "")
                 {
                     try
@@ -1066,6 +1088,72 @@ public class ItemManager : MonoBehaviour {
         }
     }
 	//ENDINVENTORY SECTION
+	
+	//SMALL SHOP SECTION
+	/*
+	
+	
+	public class SmallShopData{
+
+	public string cashSlot;
+
+    public string goldSlot;
+	
+	public string name;
+	
+	public string itemId;
+	
+    public int amount;
+	
+	public Texture2D textureGUI;
+
+}
+*/
+	 public List<SmallShopData> GetAllStim(){
+		List<SmallShopData> allstims = new List<SmallShopData>();
+		foreach(StimPack pack in stimPackDictionary){
+			SmallShopData data=null;
+			if(invItems.ContainsKey(ShopSlotType.ETC)){
+				foreach(InventorySlot slot in 	invItems[ShopSlotType.ETC]){
+					if(slot.gameId==pack.mysqlId){
+					
+						if(data==null){
+							data= new SmallShopData();
+							data.name  = slot.name;
+							data.amount=0;
+							data.textureGUI = pack.textureGUI;
+							data.itemId =slot.id;
+						}
+						data.amount  += slot.charge;						
+					}				
+				}			
+			}
+			if(data!=null){
+				continue;
+			}
+			if(shopItems.ContainsKey(ShopSlotType.ETC)){
+				foreach(ShopSlot slot in 	shopItems[ShopSlotType.ETC]){	
+					if(slot.id==pack.mysqlId){
+						data= new SmallShopData();
+						data.name  = slot.name;
+						data.amount=0;
+						data.textureGUI = pack.textureGUI;
+						data.cashSlot= slot.cashSlot; 
+						data.goldSlot= slot.goldSlot;
+						break;
+						
+					}
+				}
+			}
+			if(data!=null){
+				continue;
+			}
+			allstims.Add(data);
+		}
+		return allstims;
+	 }
+	
+	//END SMALL SHOP SECTION
 	private static ItemManager s_Instance = null;
 	
 	public static ItemManager instance {

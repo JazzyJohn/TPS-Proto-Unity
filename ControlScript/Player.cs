@@ -741,9 +741,10 @@ public class Player : MonoBehaviour {
     /// <summary>
     /// ACTIVATE StimPack
     /// </summary>
-	public void ActivateStimpack(int id){
-		if(ItemManager.instance.TryUseStim(id)){
-			  activeSteampacks.Add(id);
+	public void ActivateStimpack(string id){
+		int stimId;
+		if(ItemManager.instance.TryUseStim(id, out stimId)){
+			  activeSteampacks.Add(stimId);
 		}
 	
 	}

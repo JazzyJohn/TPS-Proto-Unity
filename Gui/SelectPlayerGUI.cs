@@ -3,6 +3,13 @@ using System.Collections;
 using System.Collections.Generic;
 using System;
 
+public class GUIItem{
+    public WeaponIndex index;
+	public Texture2D texture;
+	public string name;
+    public Color color;
+    public int group;
+}
 public class SelectPlayerGUI : MonoBehaviour {
 
 	public _MenuElements MenuElements;
@@ -47,16 +54,16 @@ public class SelectPlayerGUI : MonoBehaviour {
         DrawStims();
     }
     public void DrawStims() {
+		List<SmallShopData> allStims = ItemManager.instance.GetAllStim();
         for (int i = 0; i < MenuElements.Stims.Length; i++)
         {
-            if (ItemManager.instance.stimPackDictionary.Count > i)
+            if (allStims.Count > i)
             {
-                MenuElements.Stims[i].mainTexture = ItemManager.instance.stimPackDictionary[i].textureGUI;
-                MenuElements.Stims[i].GetComponentInChildren<UILabel>().text = ItemManager.instance.stimPackDictionary[i].name + ": " + ItemManager.instance.stimPackDictionary[i].amount.ToString();
-            }
+                MenuElements.Stims[i].SetObject(allStims[i]);
+			}
             else
             {
-                MenuElements.Stims[i].alpha = 0.0f;
+                MenuElements.Stims[i].Hide();
             }
         }
     }
@@ -383,12 +390,12 @@ public class SelectPlayerGUI : MonoBehaviour {
        // Debug.Log("ROTATE");
     
     }
-    public void ActivateStimPack(int id)
+    public void ActivateStimPack(SmallShopData pack)
     {
-        StimPack pack  = ItemManager.instance.stimPackDictionary[id];
+       
         if (pack.amount > 0)
         {
-            LocalPlayer.ActivateStimpack(id);
+            LocalPlayer.ActivateStimpack(pack.itemId);
             DrawStims();
         }
         else
@@ -397,7 +404,7 @@ public class SelectPlayerGUI : MonoBehaviour {
             shop.Icon.mainTexture = pack.textureGUI;
             shop.Offer.text = pack.name;
            
-            shop.mysqlId = pack.mysqlId;
+            shop.data = pack;
             shop.Show();
         }
     }
@@ -422,7 +429,7 @@ public class _MenuElements
 	public UITexture[] Weapon;
     public UISprite[] WeaponBack;
 
-    public UITexture[] Stims;
+    public SmallShopSlot[] Stims;
     
     public Dictionary<int,GameObject> ClassModels  = new Dictionary<int,GameObject>();
 
