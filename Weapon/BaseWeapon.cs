@@ -121,6 +121,11 @@ public class BaseWeapon : DestroyableNetworkObject {
     /// </summary>
 	public float maxRandEffect;
 
+    /// <summary>
+    ///FOV if aiming with this weapon
+    /// </summary>
+    public float aimFOV;
+
 	public GameObject projectilePrefab;
 
     public BaseProjectile projectileClass;
@@ -190,10 +195,13 @@ public class BaseWeapon : DestroyableNetworkObject {
    
 	void Awake(){
 		foxView = GetComponent<FoxView>();
-        projectileClass = projectilePrefab.GetComponent<BaseProjectile>();
-        if (projectileClass.CountPooled() == 0)
+        if (projectilePrefab != null)
         {
-            projectileClass.CreatePool(50);
+            projectileClass = projectilePrefab.GetComponent<BaseProjectile>();
+            if (projectileClass.CountPooled() == 0)
+            {
+                projectileClass.CreatePool(50);
+            }
         }
 	}
 
@@ -439,7 +447,7 @@ public class BaseWeapon : DestroyableNetworkObject {
         _pumpAmount += Time.deltaTime;
 	}
 
-    private void ShootTick()
+    protected virtual void ShootTick()
     {
      
         if (fireTimer <= 0)
@@ -676,8 +684,9 @@ public class BaseWeapon : DestroyableNetworkObject {
                 sControl.playClip(fireSound);
                 GenerateProjectile();
                 break;
-            case AMUNITONTYPE.RAY:
-
+            case AMUNITONTYPE.AOE:
+                   sControl.playClip(fireSound);
+                DoSimpleDamage();
                 break;
             case AMUNITONTYPE.HTHWEAPON:
                 sControl.playClip(fireSound);
@@ -757,7 +766,11 @@ public class BaseWeapon : DestroyableNetworkObject {
 
 
 	}
-	void DoSimpleDamage(){
+    public virtual void StartFireRep()
+    {
+
+    }
+	protected virtual void DoSimpleDamage(){
 		Vector3 startPoint  = muzzlePoint.position+muzzleOffset;
 		Quaternion startRotation = getAimRotation();
 		GameObject proj;

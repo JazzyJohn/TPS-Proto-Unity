@@ -1863,7 +1863,7 @@ public class NetworkController : MonoBehaviour {
     {
         BaseWeapon weapon = GetView(dt.GetInt("id")).weapon;
 		if(dt.GetBool("state")){
-			weapon.StartFire();
+			weapon.StartFireRep();
 		}else{
 			weapon.StopFire();
 		}

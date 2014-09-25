@@ -140,7 +140,7 @@ public class CrosshairBehaviour : MonoBehaviour {
             }
         }
 
-        if (weapon.projectileClass.detonator == BaseProjectile.DETONATOR.Manual)
+        if (weapon.projectileClass!=null&&weapon.projectileClass.detonator == BaseProjectile.DETONATOR.Manual)
         {
             addonsSprite.spriteName = "ostorojno";
             addonsText.text = InputManager.instance.KeyName("Detonate");

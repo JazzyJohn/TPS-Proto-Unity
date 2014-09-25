@@ -111,11 +111,20 @@ public class StatisticHandler : MonoBehaviour {
 	}
     public static void SendPlayerKillNPC(string Uid, string Name)
     {
-        WWWForm form = new WWWForm();
+        try
+        {
+            WWWForm form = new WWWForm();
 
-        form.AddField("uid", Uid);
-        form.AddField("name", Name);
-        StatisticHandler.instance.StartCoroutine(SendForm(form, KILL_NPC));
+            form.AddField("uid", Uid);
+            form.AddField("name", Name);
+            StatisticHandler.instance.StartCoroutine(SendForm(form, KILL_NPC));
+        }
+        catch (Exception e)
+        {
+
+            Debug.Log(e);
+        }
+       
     }
 	public static void SendPlayerKillbyNPC(string Uid,string Name){
 		WWWForm form = new WWWForm ();

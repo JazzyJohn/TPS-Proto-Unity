@@ -53,4 +53,9 @@ public class PlayerCamera : MonoBehaviour {
 
     }
 
+
+    public virtual void SetAimFOV(float p)
+    {
+       
+    }
 }

@@ -54,7 +54,7 @@ public class SmallShop : MonoBehaviour {
     }
     public IEnumerator BuyItem(string id) {
 
-        IEnumerator numenator = ItemManager.instance.BuyItem(id);
+        IEnumerator numenator = ItemManager.instance.BuyItem(id,null);
 
 		while(numenator.MoveNext()){
 			yield return numenator.Current;

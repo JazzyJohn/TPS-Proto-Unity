@@ -36,10 +36,11 @@ public class RifleParticleController : MonoBehaviour
 			shellParticles.Play (owner);
 		}
 	}
-	public void StartFlame(){
+	public virtual void StartFlame(){
 		flameParticles.Play();
 	}
-	public void StopFlame(){
+    public virtual void StopFlame()
+    {
 		flameParticles.Stop();
 	}
 	

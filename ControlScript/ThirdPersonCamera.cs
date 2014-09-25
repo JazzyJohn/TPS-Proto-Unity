@@ -56,6 +56,7 @@ public class ThirdPersonCamera : PlayerCamera
 	private bool closeFOV= false;
 	private float startFov =60.0f;
 	public float sprintFov =60.0f;
+    public float aimFov = 60.0f;
 
     private static LayerMask layer = -123909;
 	Vector3 curAddShake= Vector3.zero;
@@ -174,9 +175,10 @@ public class ThirdPersonCamera : PlayerCamera
 
 		if (aiming) {
 				targetOffset = aimingOffset;
+                Camera.main.fieldOfView = aimFov;
 		} else {
 			targetOffset = normalOffset;
-
+            Camera.main.fieldOfView = startFov;
 		}
 	
 		// Convert the angle into a rotation, by which we then reposition the camera
@@ -291,7 +293,7 @@ public class ThirdPersonCamera : PlayerCamera
 			return;
 		}
      
-		if (_pawn.IsSprinting ()&&!closeFOV) {
+		/*if (_pawn.IsSprinting ()&&!closeFOV) {
 			closeFOV=true;
 			Camera.main.fieldOfView =sprintFov;
 
@@ -300,7 +302,7 @@ public class ThirdPersonCamera : PlayerCamera
 			closeFOV=false;
 			Camera.main.fieldOfView =startFov;
 			
-		}
+		}*/
 		Apply ();
 	}
 	
@@ -330,6 +332,17 @@ public class ThirdPersonCamera : PlayerCamera
 
         xAngle = 0;
 
+    }
+    public override void SetAimFOV(float p)
+    {
+        if (p == 0)
+        {
+            aimFov = startFov;
+        }
+        else
+        {
+            aimFov = p;
+        }
     }
 
 }

@@ -433,6 +433,7 @@ public class Pawn : DamagebleObject
            
             cameraController = GetComponent<PlayerCamera>();
             isAi = cameraController == null;
+            SetCurWeaponFov();
         }
         naturalWeapon = GetComponent<WeaponOfExtremities>();
         mainAi = GetComponent<AIBase>();
@@ -1483,9 +1484,19 @@ public class Pawn : DamagebleObject
                 animator.SetWeaponType(CurWeapon.animType);
             }
             weaponOffset = CurWeapon.MuzzleOffset();
+           
+            SetCurWeaponFov();
 
             weaponRenderer = CurWeapon.GetComponentInChildren<Renderer>();
             if (invisible) MakeWeaponInvisible();
+        }
+    }
+    public void SetCurWeaponFov()
+    {
+        if (cameraController != null)
+        {
+            Debug.Log(CurWeapon.aimFOV);
+            cameraController.SetAimFOV(CurWeapon.aimFOV);
         }
     }
     public void ChangeWeapon(int weaponIndex)
@@ -1884,13 +1895,16 @@ public class Pawn : DamagebleObject
             {
                 newDPS = area.getId();
             }
-            foreach (singleDPS key in activeDPS)
+            if (newDPS != null)
             {
-                if (newDPS.killer == key.killer)
+                foreach (singleDPS key in activeDPS)
                 {
-                    //Debug.Log("exit");
-                    key.noOnwer = true;
-                    break;
+                    if (newDPS.killer == key.killer)
+                    {
+                        //Debug.Log("exit");
+                        key.noOnwer = true;
+                        break;
+                    }
                 }
             }
         }

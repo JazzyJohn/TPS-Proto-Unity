@@ -22,7 +22,7 @@ public struct WeaponIndex
         if (indexs.Length < 2)
         {
             this.prefabId = -1;
-            this.itemId = null;
+            this.itemId = "";
         }
         else
         {
@@ -129,6 +129,8 @@ public class SmallShopData{
 	public string name;
 	
     public int amount;
+
+    public string itemId;
 	
 	public Texture2D textureGUI;
 
@@ -164,7 +166,7 @@ public class StimPack{
 
 	public string name;
 
-    public string mysqlId;
+    public int mysqlId;
 }
 
 public class Buff
@@ -322,11 +324,11 @@ public class ItemManager : MonoBehaviour {
 					case GameClassEnum.ANY:
 			
 						for(int j=0;j<Choice._Personal.Length;j++){
-							Choice.SetChoice((int)entry.gameSlot, j, new WeaponIndex(entry.weaponId,null));
+							Choice.SetChoice((int)entry.gameSlot, j, new WeaponIndex(entry.weaponId,""));
 						}
 					break;
 					default:
-                    Choice.SetChoice((int)entry.gameSlot, (int)entry.gameClass, new WeaponIndex(entry.weaponId, null));
+                    Choice.SetChoice((int)entry.gameSlot, (int)entry.gameClass, new WeaponIndex(entry.weaponId, ""));
 					break;
 
 				}
@@ -358,7 +360,7 @@ public class ItemManager : MonoBehaviour {
 		}
 		for(int j=0;j<stims.Count;j++){
             XmlNode node  = stims[j];
-			key =node.SelectSingleNode("ingametype").InnerText;
+			int key =int.Parse(node.SelectSingleNode("group").InnerText);
             if (stimPackDictionary[key]!=null)
             {
                 stimPackDictionary[key].amount = int.Parse(node.SelectSingleNode("amount").InnerText);
@@ -367,7 +369,7 @@ public class ItemManager : MonoBehaviour {
             {
                 StimPack entry = new StimPack();
                 entry.name = node.SelectSingleNode("name").InnerText;
-                entry.mysqlId = node.SelectSingleNode("mysqlId").InnerText;
+                entry.mysqlId = int.Parse(node.SelectSingleNode("mysqlId").InnerText) ;
                 entry.buffId = int.Parse(node.SelectSingleNode("buffId").InnerText);
 
                 WWW www = StatisticHandler.GetMeRightWWW(node.SelectSingleNode("textureGUIName").InnerText);
@@ -538,7 +540,7 @@ public class ItemManager : MonoBehaviour {
 	
 			if(entry.animationType==AnimType.TAUNT&&(entry.gameClass ==MyANY||entry.gameClass==gameClass)){
 				GUIItem gui = new GUIItem();
-				gui.index = new WeaponIndex(i++,null);
+				gui.index = new WeaponIndex(i++,"");
 				gui.name= entry.name;
 				gui.texture = entry.textureGUI;
 
@@ -562,7 +564,7 @@ public class ItemManager : MonoBehaviour {
             if (entry.gameSlot ==gameSlot && (entry.gameClass == MyANY || entry.gameClass == gameClass))
             {
 				GUIItem gui = new GUIItem();
-                gui.index = new WeaponIndex(entry.weaponId, null); ;
+                gui.index = new WeaponIndex(entry.weaponId, ""); ;
 				gui.name= entry.name;
 				gui.texture = entry.textureGUI;
                 gui.color = Color.white;
@@ -1090,25 +1092,8 @@ public class ItemManager : MonoBehaviour {
 	//ENDINVENTORY SECTION
 	
 	//SMALL SHOP SECTION
-	/*
-	
-	
-	public class SmallShopData{
 
-	public string cashSlot;
 
-    public string goldSlot;
-	
-	public string name;
-	
-	public string itemId;
-	
-    public int amount;
-	
-	public Texture2D textureGUI;
-
-}
-*/
 	 public List<SmallShopData> GetAllStim(){
 		List<SmallShopData> allstims = new List<SmallShopData>();
 		foreach(StimPack pack in stimPackDictionary){
@@ -1133,7 +1118,7 @@ public class ItemManager : MonoBehaviour {
 			}
 			if(shopItems.ContainsKey(ShopSlotType.ETC)){
 				foreach(ShopSlot slot in 	shopItems[ShopSlotType.ETC]){	
-					if(slot.id==pack.mysqlId){
+					if(slot.id==pack.mysqlId.ToString()){
 						data= new SmallShopData();
 						data.name  = slot.name;
 						data.amount=0;
@@ -1145,7 +1130,7 @@ public class ItemManager : MonoBehaviour {
 					}
 				}
 			}
-			if(data!=null){
+			if(data==null){
 				continue;
 			}
 			allstims.Add(data);

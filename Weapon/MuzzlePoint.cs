@@ -21,7 +21,7 @@ public class MuzzlePoint : MonoBehaviour {
         Destroy(damager.gameObject);
     }
 	// Update is called once per frame
-	void LateUpdate () {
+	void FixedUpdate () {
         damager.position = myTransform.position;
         damager.rotation = myTransform.rotation;
       //  Debug.DrawLine(this.transform.position, Vector3.zero, Color.blue, 5.0f);
