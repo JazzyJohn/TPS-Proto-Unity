@@ -314,6 +314,10 @@ public class BaseWeapon : DestroyableNetworkObject {
         }
 
     }
+	//Detected if replication should continue logic loop;
+	protected virtual bool ReplicationContinue(){
+		return !foxView.isMine;
+	}
 	// Update is called once per frame
 	void FixedUpdate () {
         UpdateWeapon(Time.fixedDeltaTime);
@@ -324,7 +328,9 @@ public class BaseWeapon : DestroyableNetworkObject {
 
 		}
 		//AimFix ();
-		
+		if(ReplicationContinue()){
+			return;
+		}
 
 		if(isReload){
 			if(reloadTimer<0){
@@ -340,7 +346,7 @@ public class BaseWeapon : DestroyableNetworkObject {
         switch(prefiretype){
             case PREFIRETYPE.Normal:
 		        if (isShooting) {
-                    ShootTick();
+                    ShootTick(deltaTime);
 		        }
               
 
@@ -353,7 +359,7 @@ public class BaseWeapon : DestroyableNetworkObject {
 						
                         if (isShooting)
                         {
-                            ShootTick();
+                            ShootTick(deltaTime);
 
                         }
                         else
@@ -447,7 +453,7 @@ public class BaseWeapon : DestroyableNetworkObject {
         _pumpAmount += Time.deltaTime;
 	}
 
-    protected virtual void ShootTick()
+    protected virtual void ShootTick(float deltaTime)
     {
      
         if (fireTimer <= 0)
@@ -457,7 +463,7 @@ public class BaseWeapon : DestroyableNetworkObject {
         }
         if (_waitForRelease && !waitForRelease)
         {
-            _releaseInterval += Time.deltaTime;
+            _releaseInterval += deltaTime;
             if (releaseInterval < _releaseInterval)
             {
                 _releaseInterval = 0.0f;
@@ -671,30 +677,32 @@ public class BaseWeapon : DestroyableNetworkObject {
 		//photonView.RPC("FireEffect",PhotonTargets.Others);
 	}
 
-    private void ActualFire()
+    protected virtual void ActualFire()
     {
        // Debug.Log("fire");
-        switch (amunitionType)
-        {
-            case AMUNITONTYPE.SIMPLEHIT:
-                sControl.playClip(fireSound);
-                DoSimpleDamage();
-                break;
-            case AMUNITONTYPE.PROJECTILE:
-                sControl.playClip(fireSound);
-                GenerateProjectile();
-                break;
-            case AMUNITONTYPE.AOE:
-                   sControl.playClip(fireSound);
-                DoSimpleDamage();
-                break;
-            case AMUNITONTYPE.HTHWEAPON:
-                sControl.playClip(fireSound);
-                owner.animator.StartAttackAnim(attackAnim);
-                ChangeWeaponStatus(true);
-                break;
+	   if(foxView.isMine){
+			switch (amunitionType)
+			{
+				case AMUNITONTYPE.SIMPLEHIT:
+					sControl.playClip(fireSound);
+					DoSimpleDamage();
+					break;
+				case AMUNITONTYPE.PROJECTILE:
+					sControl.playClip(fireSound);
+					GenerateProjectile();
+					break;
+				case AMUNITONTYPE.AOE:
+					   sControl.playClip(fireSound);
+					DoSimpleDamage();
+					break;
+				case AMUNITONTYPE.HTHWEAPON:
+					sControl.playClip(fireSound);
+					owner.animator.StartAttackAnim(attackAnim);
+					ChangeWeaponStatus(true);
+					break;
 
-        }
+			}
+		}
 		
     }
 
@@ -773,7 +781,7 @@ public class BaseWeapon : DestroyableNetworkObject {
 	protected virtual void DoSimpleDamage(){
 		Vector3 startPoint  = muzzlePoint.position+muzzleOffset;
 		Quaternion startRotation = getAimRotation();
-		GameObject proj;
+	
 		float effAimRandCoef = GetRandomeDirectionCoef();
 		
 		if (effAimRandCoef > 0) {

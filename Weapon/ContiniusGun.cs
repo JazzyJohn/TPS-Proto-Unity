@@ -1,7 +1,7 @@
 ﻿using UnityEngine;
 using System.Collections;
 
-public class ContiniusGun : BaseWeapon
+public class ContiniusGun : NetSyncGun
 {
 		
 	public Vector3 colliderUnableSize = new Vector3(1,1,3);
@@ -9,16 +9,14 @@ public class ContiniusGun : BaseWeapon
 
 	private BoxCollider AOECollider;
 
-    public RayController rayController;
-
-    public bool isSend;
+ 
+  
 	new void Start () {
 		base.Start ();
-        rayController = rifleParticleController as RayController;
         AOECollider = muzzlePoint.GetComponent<MuzzlePoint>().damager.GetComponent<BoxCollider>();
 		AOECollider.size = colliderDisableSize;
 		sControl.setLooped(true);
-        isSend = false;
+        
 	}
 
 	public void fireDamage (Pawn target)
@@ -43,18 +41,10 @@ public class ContiniusGun : BaseWeapon
 		sControl.playFullClip (fireSound);
 		rifleParticleController.StartFlame ();
 		AOECollider.GetComponent<BoxCollider>().size = colliderUnableSize;
-        if (foxView.isMine && !isSend)
-        {
-            isSend = true;
-			foxView.ChangeWeaponShootState(true);
-		}
+       
 	}
 
-    protected override void ShootTick()
-    {
-        base.ShootTick();
-        rayController.SetRay(muzzlePoint.position, owner.getAimpointForWeapon(0));
-    }
+  
     public override void StartFireRep()
     {
         sControl.playFullClip(fireSound);
@@ -66,13 +56,8 @@ public class ContiniusGun : BaseWeapon
         base.StopFire();
 		rifleParticleController.StopFlame ();
 		AOECollider.GetComponent<BoxCollider>().size = colliderDisableSize;
-		base.ReleaseFire();
-        if (foxView.isMine && isSend)
-        {
-            isSend = false;
-			foxView.ChangeWeaponShootState(false);
-		}
-        rayController.StopRay();
+		
+      
 	}
 	
 	public override void AimFix(){

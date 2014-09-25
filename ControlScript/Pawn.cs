@@ -1357,6 +1357,7 @@ public class Pawn : DamagebleObject
             {
                 singleDPS key = activeDPS[i];
                 key.lastTime += Time.deltaTime;
+				
                 //Debug.Log(key.lastTime);
                 if (key.noOnwer)
                 {
@@ -1371,18 +1372,19 @@ public class Pawn : DamagebleObject
                     //Debug.Log( " NO OWNER EXIT" );
                     continue;
                 }
+				if (key.lastTime > key.showInterval)
+                {
                 BaseDamage ldamage = new BaseDamage(key.damage);
                 ldamage.hitPosition = myTransform.position + UnityEngine.Random.onUnitSphere;
                 //ldamage.isContinius = true;
                 //Debug.Log(ldamage.Damage + " " + Time.deltaTime);
-                ldamage.Damage *= Time.deltaTime;
+                ldamage.Damage *= key.showInterval;
                 ldamage.sendMessage = false;
 
                 // Debug.Log(ldamage.Damage);
 
                 Damage(ldamage, key.killer);
-                if (key.lastTime > key.showInterval)
-                {
+            
                     Pawn killerPawn = key.killer.GetComponent<Pawn>();
                     if (killerPawn != null && killerPawn.team != 0 && killerPawn.team == team && !PlayerManager.instance.frendlyFire && killerPawn != this)
                     {

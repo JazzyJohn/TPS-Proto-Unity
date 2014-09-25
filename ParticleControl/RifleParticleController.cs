@@ -11,7 +11,7 @@ public class RifleParticleController : MonoBehaviour
 	
 	protected Collider owner;
 	//Инициализация, получаем ссылки на необходимые нам компоненты
-	void Start()
+	protected void Start()
 	{
 		flameParticles = transform.GetChild (0).GetComponent<ParticleSystem> ();
 		shellParticles = transform.GetChild (1).GetComponent<ShellparticleSystem> ();

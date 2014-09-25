@@ -652,8 +652,13 @@ public class ItemManager : MonoBehaviour {
 		
 	}
 	public void ClearShop(){
-		shopItems.Clear();
-		isShopLoading=false;
+		foreach(List<ShopSlot> list in shopItems.Values){
+			foreach(ShopSlot slot in list){
+				slot.texture= null;
+				slot.loadModel = null;
+			}
+		}
+		
 	}
 	
 	public void  ParseShop(string XML){

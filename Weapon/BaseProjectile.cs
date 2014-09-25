@@ -84,6 +84,8 @@ public class BaseProjectile : MonoBehaviour
     public int proojHitCnt;
 
     public int projHitMax;
+	
+	public float hitDelay;
     /// <summary>
     /// Define is Any Detonator effects
     /// </summary>
@@ -233,14 +235,16 @@ public class BaseProjectile : MonoBehaviour
             mRigidBody.AddForce(result, ForceMode.VelocityChange);
           
         }
-        mTransform.rotation = Quaternion.LookRotation(mRigidBody.velocity);
-        if (Physics.Raycast(transform.position, mRigidBody.velocity.normalized, out hit, mRigidBody.velocity.magnitude*0.1f))
-        {
+		if(mRigidBody.velocity,sqrmagnitude>0&&hitDelay<Time.time){
+			mTransform.rotation = Quaternion.LookRotation(mRigidBody.velocity);
+			if (Physics.Raycast(transform.position, mRigidBody.velocity.normalized, out hit, mRigidBody.velocity.magnitude*0.1f))
+			{
 
-          
-                onBulletHit(hit);
-            
-        }
+			  
+					onBulletHit(hit);
+				
+			}
+		}
 
     
         switch (trajectory)
@@ -445,7 +449,7 @@ public class BaseProjectile : MonoBehaviour
                         ProjectileManager.instance.InvokeRPC("NewVelocity", projId, mRigidBody.velocity, proojHitCnt);
                     }
                     
-                    if (proojHitCnt >= projHitMax)
+                    if (proojHitCnt > projHitMax)
                     {
                         ExplosionDamage(exploPosition);
                             
@@ -456,10 +460,13 @@ public class BaseProjectile : MonoBehaviour
                     if (!replication)
                     {
                         proojHitCnt++;
+						
+						hitDelay =  Time.time+ Mahtf.Max(1.0f/startImpulse,0.1f);
+						
                         ProjectileManager.instance.InvokeRPC("NewHitCount", projId, proojHitCnt);
                     }
                     
-                    if (proojHitCnt >= projHitMax)
+                    if (proojHitCnt > projHitMax)
                     {
 
                         ExplosionDamage(exploPosition);
