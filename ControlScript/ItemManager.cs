@@ -177,6 +177,11 @@ public class Buff
 }
 public class ItemManager : MonoBehaviour {
 
+	public static string smallRepairId;
+	public static string normalRepairId;
+	public static string maximumRepairId;
+
+
 	//PLAYER ITEM SECTION
 	public BaseWeapon[] weaponPrefabsListbyId;
 
@@ -875,12 +880,12 @@ public class ItemManager : MonoBehaviour {
 		return false;
 		
 	}
-	public void UseRepairKit(string itemId,string kit_id){
+	public void UseRepairKit(string itemId,string kit_id,InventoryGUI gui){
 		 StartCoroutine(_UseRepairKit(itemId,kit_id));
 	
 	}
 	
-	IEnumerator _UseRepairKit(string id,string kit_id){
+	IEnumerator _UseRepairKit(string id,string kit_id,InventoryGUI gui){
 		WWWForm form = new WWWForm();
         
         form.AddField("uid", UID);
@@ -893,7 +898,7 @@ public class ItemManager : MonoBehaviour {
 		xmlDoc.LoadXml(w.text);
 		
 		if(xmlDoc.SelectSingleNode("result/error").InnerText=="0"){
-		
+			gui.HideRepair();
 			IEnumerator numenator = ParseInventory(w.text);
 
 			while (numenator.MoveNext())
@@ -1050,26 +1055,11 @@ public class ItemManager : MonoBehaviour {
 	
 	}
 		
-	public IEnumerator GenerateInvList(GameClassEnum gameClass,ShopSlotType type)
+	public IEnumerator GenerateInvList(GameClassEnum gameClass,InventoryGUI inventory)
     {
         List<InventorySlot> result = new List<InventorySlot>();
-        if (!invItems.ContainsKey(type))
-        {
-            //shop.OpenList(result);
-            yield return null;
-        }
-        else
-        {
-
-            List<InventorySlot> list = invItems[type];
-            if (list == null)
-            {
-               // shop.OpenList(result);
-                yield return null;
-            }
-            else
-            {
-
+       
+		foreach( List<InventorySlot> list in invItems.Values){
                 foreach (InventorySlot slot in list)
                 {
                     if (gameClass == slot.gameClass || slot.gameClass == GameClassEnum.ANY)
@@ -1077,7 +1067,7 @@ public class ItemManager : MonoBehaviour {
                         result.Add(slot);
                     }
                 }
-               // shop.OpenList(result);
+                inventory.OpenList(result);
                 foreach (InventorySlot slot in result)
                 {
                     if (slot.texture == null)
@@ -1091,9 +1081,29 @@ public class ItemManager : MonoBehaviour {
 
 
                 }
-            }
-        }
+        }    
+        
     }
+	public int[] GetAllRepair(){
+		int[] answer = new int[3]{0,0,0};
+		if(invItems.ContainsKey(ShopSlotType.ETC)){
+			foreach (InventorySlot slot in invItems[ShopSlotType.ETC])
+			{
+				if( slot.gameId ==  smallRepairId   ){
+					answer[0]++;
+				}
+				if( slot.gameId ==  normalRepairId   ){
+					answer[1]++;
+				}
+				if( slot.gameId ==  maximumRepairId   ){
+					answer[2]++;
+				}
+			}
+		}
+		
+		return answer;
+	
+	}
 	//ENDINVENTORY SECTION
 	
 	//SMALL SHOP SECTION
