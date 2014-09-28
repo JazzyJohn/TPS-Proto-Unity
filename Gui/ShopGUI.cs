@@ -155,6 +155,11 @@ public class ShopGUI : MonoBehaviour {
         ShopItem.EditCategory((GameClassEnum)GameClass);
 	}
 
+    public void ShowCategory(int Category)
+    {
+        ShowShop();
+        ShopItem.EditCategory((ShopSlotType)Category);
+    }
     public void OpenList(List<ShopSlot> result)
     {
         ShopItem.Clean();

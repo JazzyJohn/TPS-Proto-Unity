@@ -29,8 +29,8 @@ public class InventoryGUI : MonoBehaviour {
 	void Start () 
 	{
 		InvItem.Main = this;
-		Lot.alpha = 0f;
-    
+        Detail.alpha = 0f;
+        repair.alpha = 0f;
 		//ShopItem.EditCategory(ShopItem.SelectCategory, ShopItem.SelectClass);
 		
 	}
@@ -72,8 +72,19 @@ public class InventoryGUI : MonoBehaviour {
 		}
       
 	}
+    void Update()
+    {
+
+        if (Inventory.alpha== 0f)
+        {
+            CloseLot();
+        }
+        if(InvItem.AllItems.Count > 0)
+			TestSizeScreen();
+	
+    }
 	void Repair(string id){
-		StartCoroutine(ItemManager.instance.UseRepairKit(detailItemGUI.item.id,id,this));
+		ItemManager.instance.UseRepairKit(detailItemGUI.item.id,id,this);
 	
 	}
 	public void SmallRepair(){
@@ -89,12 +100,17 @@ public class InventoryGUI : MonoBehaviour {
 	public void HideRepair(){
 		repair.alpha= 0.0f;
 	}
+
+    public void Disentegrate()
+    {
+        ItemManager.instance.DesintegrateItem(detailItemGUI.item.id,  this);
+    }
 	public void ShowRepair(){
 		repair.alpha= 1.0f;
 		int[] cnt = ItemManager.instance.GetAllRepair();
-		repairGui.smallCnt.text =cnt[0];
-		repairGui.mediumCnt.text =cnt[1];
-		repairGui.maxCnt.text =cnt[2];
+		repairGui.smallCnt.text =cnt[0].ToString();
+        repairGui.mediumCnt.text = cnt[1].ToString();
+        repairGui.maxCnt.text = cnt[2].ToString();
 	}
 
 	public void ReSIZE()
@@ -102,7 +118,7 @@ public class InventoryGUI : MonoBehaviour {
 		if(ItemsPanel.alpha == 1f)
 			ItemsPanel.alpha = 0f;
 
-		foreach(Item obj in ShopItem.AllItems)
+        foreach (InvItem obj in InvItem.AllItems)
 		{
 			obj.Box.width=(int)Math.Truncate((ItemsPanel.width/Table.columns)-Table.padding.x*(Table.columns+1));
 			obj.Box.height=(int)Math.Truncate((ItemsPanel.height/2)-Table.padding.y*3);
@@ -121,12 +137,8 @@ public class InventoryGUI : MonoBehaviour {
 
 	bool ReSizeRedy = false;
 
-	// Update is called once per frame
-	void Update () 
-	{
-		if(InvItem.AllItems.Count > 0)
-			TestSizeScreen();
-	}
+
+
 
 
 	int xScreen=0;
@@ -155,35 +167,39 @@ public class InventoryGUI : MonoBehaviour {
             InvItem.Add(slot);
         }
     }
-   
+    public void SetMessage(string text)
+    {
+        MainMenu.SetMessage(text);
+    }
+    public void ReloadCategory()
+    {
+        EditClass((int)InvItem.gameClass);
+    }
 }
 
 [Serializable]
 public class InvItems
 {
 	[HideInInspector]
-	public InvGUI Main;
+    public InventoryGUI Main;
 
 	public Transform ShablonItem;
 
 	public int Page;
 	public int ItemsCount;
 
-    GameClassEnum gameClass = GameClassEnum.ENGINEER;
-	public List<Item> AllItems;
+   public  GameClassEnum gameClass = GameClassEnum.ENGINEER;
+    public List<InvItem> AllItems;
    
-    public void EditCategory(GameClassEnum gameClass)
-    {
-        EditCategory( gameClass);
-    }
+   
 	public void EditCategory(GameClassEnum gameClass) //Смена закладки(категории или класса)
 	{
 		if(Main.ItemsPanel.alpha == 1f)
 			Main.ItemsPanel.alpha = 0f;
 
         this.gameClass = gameClass;
-      
-        Main.StartCoroutine( ItemManager.instance.GenerateList(gameClass),Main);
+
+        Main.StartCoroutine(ItemManager.instance.GenerateInvList(gameClass, Main));
 
 		/*if (SelectCategory == Category)
 			OldCategory = true;
@@ -205,14 +221,15 @@ public class InvItems
 
     public void Clean()
     {
-        foreach(Item item in AllItems){
+        foreach (InvItem item in AllItems)
+        {
             GameObject.Destroy(item.Obj.gameObject);
         }
         AllItems.Clear();
     }
 	public void Add(InventorySlot item) //Добавление товара в панель магазина
 	{
-		InvItemGUI NewItem = new InvItemGUI();
+        InvItem NewItem = new InvItem();
 
 		NewItem.Obj = Transform.Instantiate(ShablonItem) as Transform;
 		NewItem.ItemInfo = NewItem.Obj.GetComponent<InvItemGUI>();

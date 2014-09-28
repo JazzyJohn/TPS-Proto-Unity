@@ -13,7 +13,8 @@ public class DetailItemGUI : MonoBehaviour
     public GameObject gunModel;
     public UIWidget Box;
     public UILabel loading;
-   
+    public UIWidget repair;
+    public UIWidget raspil;
     [HideInInspector]
     public int numToItem;
 
@@ -43,7 +44,7 @@ public class DetailItemGUI : MonoBehaviour
         }
     }
 
-    public void SetItem(ShopSlot _item)
+    public void SetItem(InventorySlot _item)
     {
         item = _item;
         Name.text = item.name;
@@ -56,6 +57,22 @@ public class DetailItemGUI : MonoBehaviour
         gunModel = null;
         ItemManager.instance.LoadModel(item);
         loading.alpha = 1.0f;
+        if (item.personal)
+        {
+            repair.alpha = 1.0f;
+        }
+        else
+        {
+            repair.alpha = 0.0f;
+        }
+        if (item.type == ShopSlotType.ETC)
+        {
+            raspil.alpha = 0.0f;
+        }
+        else
+        {
+            raspil.alpha = 1.0f;
+        }
     }
   
 }

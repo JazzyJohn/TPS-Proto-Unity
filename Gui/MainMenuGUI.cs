@@ -431,6 +431,14 @@ public class MainMenuGUI : MonoBehaviour {
 	public void AddCoins(){
 		 _playerInfo.Player.AskJsForMagazine("gitp_5");
 	}
+    
+
+    public void SetMessage(string text)
+    {
+        _PanelsNgui.annonce.text = text;
+        _PanelsNgui.annonceTweener.tweenFactor = 0.0f;
+        _PanelsNgui.annonceTweener.PlayForward();
+    }
 
 }
 
@@ -524,6 +532,8 @@ public class PanelsNgui
 	public SlaiderPanel slaiderPanel;
     public UIPanel mainpanel;
     public UIPanel settings;
+    public UILabel annonce;
+    public UITweener annonceTweener;
 }
 [System.Serializable]
 public class LoginPanel

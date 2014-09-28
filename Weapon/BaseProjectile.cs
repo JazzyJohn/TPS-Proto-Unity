@@ -235,7 +235,7 @@ public class BaseProjectile : MonoBehaviour
             mRigidBody.AddForce(result, ForceMode.VelocityChange);
           
         }
-		if(mRigidBody.velocity,sqrmagnitude>0&&hitDelay<Time.time){
+		if(mRigidBody.velocity.sqrMagnitude >0&&hitDelay<Time.time){
 			mTransform.rotation = Quaternion.LookRotation(mRigidBody.velocity);
 			if (Physics.Raycast(transform.position, mRigidBody.velocity.normalized, out hit, mRigidBody.velocity.magnitude*0.1f))
 			{
@@ -461,7 +461,7 @@ public class BaseProjectile : MonoBehaviour
                     {
                         proojHitCnt++;
 						
-						hitDelay =  Time.time+ Mahtf.Max(1.0f/startImpulse,0.1f);
+						hitDelay =  Time.time+ Mathf.Max(1.0f/startImpulse,0.1f);
 						
                         ProjectileManager.instance.InvokeRPC("NewHitCount", projId, proojHitCnt);
                     }

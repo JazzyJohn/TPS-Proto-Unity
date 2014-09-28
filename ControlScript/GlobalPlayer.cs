@@ -234,6 +234,12 @@ public class GlobalPlayer : MonoBehaviour {
 
 		yield return w;
 		parseProfile(w.text);
+        MainMenuGUI menu =FindObjectOfType<MainMenuGUI>();
+        if (menu != null)
+        {
+            menu.GetPlayerInfo();
+            menu.SetPlayerInfoInGUI();
+        }
 	}	
 	
 	//EXTERNAL SECTION 

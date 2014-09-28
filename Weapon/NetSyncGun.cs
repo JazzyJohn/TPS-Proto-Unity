@@ -27,7 +27,7 @@ public class NetSyncGun : BaseWeapon
     }
 
 	
-	protected override void  ActualFire()
+	protected override void  ActualFire(){
 		base. ActualFire();
 	    if (foxView.isMine && !isSend)
         {

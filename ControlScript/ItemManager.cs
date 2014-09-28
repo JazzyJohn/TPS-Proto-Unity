@@ -141,6 +141,8 @@ public class InventorySlot  : SimpleSlot{
    public int charge;
    
    public DateTime timeEnd;
+
+   public bool isTimed;
    
    public int modslot;
    
@@ -177,9 +179,9 @@ public class Buff
 }
 public class ItemManager : MonoBehaviour {
 
-	public static string smallRepairId;
-	public static string normalRepairId;
-	public static string maximumRepairId;
+	public static string smallRepairId="18";
+    public static string normalRepairId = "22";
+    public static string maximumRepairId = "23";
 
 
 	//PLAYER ITEM SECTION
@@ -236,42 +238,7 @@ public class ItemManager : MonoBehaviour {
                    
             }
         }
-        List<InventorySlot> toDelete = new List<InventorySlot>();
-        foreach (KeyValuePair<string, InventorySlot> slot in allitems)
-        {
-            switch (slot.Value.type)
-            {
-                case ShopSlotType.ETC:
-                    if (slot.Value.charge <= 0)
-                    {
-                        toDelete.Add(slot.Value);
-                    }
-                    break;
-                default:
-                    if (slot.Value.personal)
-                    {
-                        if (slot.Value.charge <= 0)
-                        {
-                            toDelete.Add(slot.Value);
-                        }
-                    }
-                    else
-                    {
-                        if (slot.Value.timeEnd !=null&&slot.Value.timeEnd < DateTime.Now)
-                        {
-                            toDelete.Add(slot.Value);
-                        }
-                    }
-                    break;
-
-            }
-        }
-        foreach (InventorySlot slot in toDelete)
-        {
-            allitems.Remove(slot.id);
-            invItems[slot.type].Remove(slot);
-        }
-       
+        RemoveOldAndExpired();
     }
 	public IEnumerator ReLoadItemsSync(){
 		
@@ -366,11 +333,8 @@ public class ItemManager : MonoBehaviour {
 		for(int j=0;j<stims.Count;j++){
             XmlNode node  = stims[j];
 			int key =int.Parse(node.SelectSingleNode("group").InnerText);
-            if (stimPackDictionary[key]!=null)
-            {
-                stimPackDictionary[key].amount = int.Parse(node.SelectSingleNode("amount").InnerText);
-            }
-            else
+            if (stimPackDictionary[key]==null)
+         
             {
                 StimPack entry = new StimPack();
                 entry.name = node.SelectSingleNode("name").InnerText;
@@ -881,7 +845,7 @@ public class ItemManager : MonoBehaviour {
 		
 	}
 	public void UseRepairKit(string itemId,string kit_id,InventoryGUI gui){
-		 StartCoroutine(_UseRepairKit(itemId,kit_id));
+        StartCoroutine(_UseRepairKit(itemId, kit_id, gui));
 	
 	}
 	
@@ -889,7 +853,7 @@ public class ItemManager : MonoBehaviour {
 		WWWForm form = new WWWForm();
         
         form.AddField("uid", UID);
-        form.AddField("game_item", id);
+        form.AddField("game_id", id);
 		form.AddField("kit_id", kit_id);
         WWW w = StatisticHandler.GetMeRightWWW(form,StatisticHandler.REPAIR_ITEM);
       
@@ -905,33 +869,50 @@ public class ItemManager : MonoBehaviour {
 			{
 				yield return numenator.Current;
 			}
-		
-		}
+            RemoveInventoryItem(xmlDoc.SelectSingleNode("result/kit_id").InnerText);
+            gui.ReloadCategory();
+            gui.CloseLot();
+        }
+        else
+        {
+            gui.SetMessage(xmlDoc.SelectSingleNode("result/errortext").InnerText);
+        }
 	}
-	
-	public void DesintegrateItem(string id){
-        StartCoroutine(_DesintegrateItem(id));
+
+    public void DesintegrateItem(string id, InventoryGUI gui)
+    {
+        StartCoroutine(_DesintegrateItem(id, gui));
 	}
-	IEnumerator _DesintegrateItem(string id){
+    IEnumerator _DesintegrateItem(string id, InventoryGUI gui)
+    {
 		WWWForm form = new WWWForm();
         
         form.AddField("uid", UID);
-        form.AddField("game_item", id);
+        form.AddField("game_id", id);
 	    WWW w = StatisticHandler.GetMeRightWWW(form,StatisticHandler.DISENTEGRATE_ITEM);
       
         yield return w;
 		XmlDocument xmlDoc = new XmlDocument();
 		xmlDoc.LoadXml(w.text);
-		
+        
 		if(xmlDoc.SelectSingleNode("result/error").InnerText=="0"){
 			
-			IEnumerator numenator = ParseInventory(w.text);
+			IEnumerator numenator = GlobalPlayer.instance.ReloadStats();
+            while (numenator.MoveNext())
+            {
+                yield return numenator.Current;
+            }
+            gui.SetMessage("KP + " + xmlDoc.SelectSingleNode("result/cash").InnerText + " \n GITP + " + xmlDoc.SelectSingleNode("result/gold").InnerText);
+            gui.CloseLot();
+            gui.HideRepair();
+            RemoveInventoryItem(id);
+            gui.ReloadCategory();
 
-			while (numenator.MoveNext())
-			{
-				yield return numenator.Current;
-			}
-		}
+        }
+        else
+        {
+            gui.SetMessage(xmlDoc.SelectSingleNode("result/errortext").InnerText);
+        }
 	}
 	public List<CharacteristicToAdd> GetBuff(int id){
 		if(allBuff.ContainsKey(id)){
@@ -983,6 +964,7 @@ public class ItemManager : MonoBehaviour {
 			}else{
 				slot = new InventorySlot();
                 allitems[id] = slot;
+                slot.type = (ShopSlotType)Enum.Parse(typeof(ShopSlotType), node.SelectSingleNode("type").InnerText);
 				if (!invItems.ContainsKey(slot.type))
 				{
 					invItems[slot.type] = new List<InventorySlot>();
@@ -990,7 +972,7 @@ public class ItemManager : MonoBehaviour {
 				invItems[slot.type].Add(slot);
 				
 				slot.gameClass = (GameClassEnum)Enum.Parse(typeof(GameClassEnum), node.SelectSingleNode("class").InnerText);
-				slot.type = (ShopSlotType)Enum.Parse(typeof(ShopSlotType), node.SelectSingleNode("type").InnerText);
+				
 				slot.id = id;
 				slot.gameId= int.Parse(node.SelectSingleNode("game_id").InnerText);
 				slot.group =int.Parse (node.SelectSingleNode ("ingametype").InnerText);
@@ -999,13 +981,18 @@ public class ItemManager : MonoBehaviour {
                     try
                     {
                         slot.timeEnd = DateTime.Parse(node.SelectSingleNode("time_end").InnerText);
+                        slot.isTimed = true;
                     }
                     catch (Exception)
                     {
-
+                        slot.isTimed = false;
                         Debug.LogError("date format  exeption");
                     }
-                   
+
+                }
+                else
+                {
+                    slot.isTimed = false;
                 }
 				slot.modslot= int.Parse(node.SelectSingleNode("modslot").InnerText);
 				slot.ingamekey= int.Parse(node.SelectSingleNode("ingamekey").InnerText);
@@ -1023,7 +1010,7 @@ public class ItemManager : MonoBehaviour {
                     
 			}
 			slot.charge= int.Parse(node.SelectSingleNode("charge").InnerText);
-		
+           
 			
             /*slot.gameClasses = new GameClassEnum[node.SelectNodes("items/weapon").Count];
             int i=0;
@@ -1054,6 +1041,44 @@ public class ItemManager : MonoBehaviour {
 
 	
 	}
+    public void RemoveOldAndExpired()
+    {
+        List<InventorySlot> toDelete = new List<InventorySlot>();
+        foreach (KeyValuePair<string, InventorySlot> slot in allitems)
+        {
+            switch (slot.Value.type)
+            {
+                case ShopSlotType.ETC:
+                    if (slot.Value.charge <= 0)
+                    {
+                        toDelete.Add(slot.Value);
+                    }
+                    break;
+                default:
+                    if (slot.Value.personal)
+                    {
+                        if (slot.Value.charge <= 0)
+                        {
+                            toDelete.Add(slot.Value);
+                        }
+                    }
+                    else
+                    {
+                        if (slot.Value.isTimed && slot.Value.timeEnd < DateTime.Now)
+                        {
+                            toDelete.Add(slot.Value);
+                        }
+                    }
+                    break;
+
+            }
+        }
+        foreach (InventorySlot slot in toDelete)
+        {
+            allitems.Remove(slot.id);
+            invItems[slot.type].Remove(slot);
+        }
+    }
 		
 	public IEnumerator GenerateInvList(GameClassEnum gameClass,InventoryGUI inventory)
     {
@@ -1084,18 +1109,27 @@ public class ItemManager : MonoBehaviour {
         }    
         
     }
+    public void RemoveInventoryItem(string id)
+    {
+        InventorySlot item = allitems[id];
+        allitems.Remove(id);
+        invItems[item.type].Remove(item);
+
+    }
 	public int[] GetAllRepair(){
 		int[] answer = new int[3]{0,0,0};
 		if(invItems.ContainsKey(ShopSlotType.ETC)){
 			foreach (InventorySlot slot in invItems[ShopSlotType.ETC])
 			{
-				if( slot.gameId ==  smallRepairId   ){
+				if( slot.gameId.ToString() ==  smallRepairId   ){
 					answer[0]++;
 				}
-				if( slot.gameId ==  normalRepairId   ){
+                if (slot.gameId.ToString() == normalRepairId)
+                {
 					answer[1]++;
 				}
-				if( slot.gameId ==  maximumRepairId   ){
+                if (slot.gameId.ToString() == maximumRepairId)
+                {
 					answer[2]++;
 				}
 			}

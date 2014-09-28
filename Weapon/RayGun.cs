@@ -51,7 +51,7 @@ public class RayGun : NetSyncGun
 		DoRayDamage(deltaTime);
     }
 	
-	void DoRayDamage(float deltaTime)){
+	void DoRayDamage(float deltaTime){
 		Vector3 startPoint  = muzzlePoint.position+muzzleOffset;
 		Quaternion startRotation = getAimRotation();
 		
@@ -85,11 +85,11 @@ public class RayGun : NetSyncGun
 		Vector3 direction = startRotation*Vector3.forward;
 		Ray centerRay=new Ray(startPoint,direction);
 		RaycastHit hitInfo;
-		Physics.Raycast (centerRay, out hitInfo, weaponRange+range)
-		if (Physics.Raycast (centerRay, out hitInfo, weaponRange+range)) {
+        Physics.Raycast(centerRay, out hitInfo, weaponRange);
+		if (Physics.Raycast (centerRay, out hitInfo, weaponRange)) {
 			DrawEffect(startPoint,hitInfo.point,true);
 		}else{
-			DrawEffect(startPoint,startPoint+(weaponRange+range)*direction,false);
+			DrawEffect(startPoint,startPoint+(weaponRange)*direction,false);
 		}
 	}
 	
