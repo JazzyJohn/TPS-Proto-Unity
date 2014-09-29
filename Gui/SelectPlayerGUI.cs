@@ -458,7 +458,13 @@ public static class Choice
     public static WeaponIndex[] _Extra = new WeaponIndex[4] { WeaponIndex.Zero, WeaponIndex.Zero, WeaponIndex.Zero, WeaponIndex.Zero };
     public static WeaponIndex[] _Grenad = new WeaponIndex[4] { WeaponIndex.Zero, WeaponIndex.Zero, WeaponIndex.Zero, WeaponIndex.Zero };
     public static WeaponIndex[] _Taunt = new WeaponIndex[4] { WeaponIndex.Zero, WeaponIndex.Zero, WeaponIndex.Zero, WeaponIndex.Zero };
+	public static WeaponIndex[] _HeadImplant = new WeaponIndex[4] { WeaponIndex.Zero, WeaponIndex.Zero, WeaponIndex.Zero, WeaponIndex.Zero };
+	public static WeaponIndex[] _BodyImplant= new WeaponIndex[4] { WeaponIndex.Zero, WeaponIndex.Zero, WeaponIndex.Zero, WeaponIndex.Zero };
+    public static WeaponIndex[] _HandImplant = new WeaponIndex[4] { WeaponIndex.Zero, WeaponIndex.Zero, WeaponIndex.Zero, WeaponIndex.Zero };
+    public static WeaponIndex[] _ArmImplant = new WeaponIndex[4] { WeaponIndex.Zero, WeaponIndex.Zero, WeaponIndex.Zero, WeaponIndex.Zero };
 
+
+	 
     public static int[][] _GUIChoice = new int[][] 
     {
         new int[5] ,
@@ -486,7 +492,18 @@ public static class Choice
 		case 4:
 			return _Taunt[_Player];
 			break;	
-			
+		case 5:
+			return _HeadImplant[_Player];
+			break;	
+		case 6:
+				return _BodyImplant[_Player];
+				break;
+		case 7:
+				return _HandImplant[_Player];
+				break;
+		case 8:
+				return _ArmImplant[_Player];
+				break;			
 		}
         return WeaponIndex.Zero;
 	}
@@ -507,6 +524,18 @@ public static class Choice
 			break;
 		case 4:
 			_Taunt[gameClass]=index;
+			break;
+		case 5:
+			_HeadImplant[gameClass]=index;
+			break;
+		case 6:
+			_BodyImplant[gameClass]=index;
+			break;
+		case 7:
+			_HandImplant[gameClass]=index;
+			break;
+		case 8:
+			_ArmImplant[gameClass]=index;
 			break;
 		}
 	}

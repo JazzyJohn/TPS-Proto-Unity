@@ -40,7 +40,7 @@ public class BaseDamage{
 [RequireComponent(typeof(DelayDestroyedObject))]
 public class BaseProjectile : MonoBehaviour
 {
-
+	public bool active;
 
     public int projId;
     public bool replication = true;
@@ -55,9 +55,14 @@ public class BaseProjectile : MonoBehaviour
     public float minDamageRange;
     static float minimunProcent = 0.1f;
     public Vector3 startPosition;
+	
+	//EFFECTS
     public GameObject hitParticle;
-
-
+	
+	public float disableEffectDelay;
+	
+	public GameObject[] inactiveObjectInEffectStage;
+	
     public float splashRadius;
     public LayerMask explosionLayerBlock;
     //звуки
@@ -140,6 +145,9 @@ public class BaseProjectile : MonoBehaviour
       
         used = false;
         mRigidBody.velocity = Vector3.zero;
+		foreach(GameObject go in inactiveObjectInEffectStage){
+			go.SetActive(true);
+		}
     }
    public void Init(){
         shouldInit = false;
@@ -193,7 +201,9 @@ public class BaseProjectile : MonoBehaviour
 
     protected void FixedUpdate()
     {
-        
+        if(active){
+			return;
+		}
         RaycastHit hit;
         switch (speedChange)
         {
@@ -579,6 +589,13 @@ public class BaseProjectile : MonoBehaviour
         Invoke("DeActivate", 0.1f);
     }
 	public void DeActivate(){
+		active= false;
+		foreach(GameObject go in inactiveObjectInEffectStage){
+			go.SetActive(false);
+		}
+		 Invoke("_DeActivate", disableEffectDelay);
+	}
+	void _DeActivate(){
         ProjectileManager.instance.RemoveProjectile(projId);
 		gameObject.Recycle();
        

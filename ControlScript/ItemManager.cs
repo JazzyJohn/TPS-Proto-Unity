@@ -483,12 +483,17 @@ public class ItemManager : MonoBehaviour {
 			switch(gameSlot){
 				//Taunt section look WeaponPlayer.cs for details
 				case 5:
-					return  GetAnimationForSlot( gameClass);
-			
+						return  GetAnimationForSlot( gameClass);
+			    case 6:
+				case 7:
+				case 8:
+				case 9:
+						return  GetArmorForSlot( gameClass,  gameSlot);
 				default:
+				
 					return  GetWeaponForSlot( gameClass, (BaseWeapon.SLOTTYPE) gameSlot);
 			
-				
+					
 			
 			
 			}
@@ -519,7 +524,42 @@ public class ItemManager : MonoBehaviour {
 		}
 		return weaponList;
 	}
+	public List<GUIItem> GetWeaponForSlot(GameClassEnum gameClass, int gameSlot){
+	    List<GUIItem> weaponList = new List<GUIItem>();
+		List<InventorySlot> items = null;
+        if (invItems.ContainsKey(ShopSlotType.ARMOR))
+        {
+            items = invItems[ShopSlotType.ARMOR];
+        }
+        
+        if (items != null)
+        {
+            foreach (InventorySlot slot in items)
+            {
 
+                if (slot.gameType == gameSlot && (slot.gameClass == GameClassEnum.ANY || slot.gameClass == gameClass))
+                {
+                  
+                    GUIItem gui = new GUIItem();
+                    gui.index = new WeaponIndex(slot.ingamekey, slot.id);
+                    if (slot.personal)
+                    {
+                        gui.color = Color.blue;
+                    }
+                    else
+                    {
+                        gui.color = Color.green;
+                    }
+                    gui.name = slot.name;
+                    gui.texture = slot.texture;
+					gui.group= slot.group;
+                    weaponList.Add(gui);
+
+                }
+            }
+        }
+		return weaponList;
+	}
   
 	public List<GUIItem> GetWeaponForSlot(GameClassEnum gameClass, BaseWeapon.SLOTTYPE gameSlot){
 
@@ -1137,6 +1177,18 @@ public class ItemManager : MonoBehaviour {
 		
 		return answer;
 	
+	}
+	
+	public List<int> GetImplants(){
+		List<int> answer = new Array();
+		for(int i=5;i<=8;i++){
+			WeaponIndex index = Choice.ForGuiSlot(slot);
+			if(index.IsSameIndex(WeaponIndex.Zero)){
+					answer.Add(allitems[index.prefabId].ingamekey);
+			}
+		}
+		return answer;
+		
 	}
 	//ENDINVENTORY SECTION
 	
