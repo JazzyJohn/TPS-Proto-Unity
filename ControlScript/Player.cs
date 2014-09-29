@@ -194,7 +194,7 @@ public class Player : MonoBehaviour {
 	public int[] GetBuffs(){
 		List <int> allbuff = new List<int>();
         allbuff.AddRange(PassiveSkillManager.instance.GetSkills(selected));
-		allbuff.AddRange(ItemManager.instance.GetImplants(selected));
+		allbuff.AddRange(ItemManager.instance.GetImplants());
         foreach (int stimId in activeSteampacks)
         {
             allbuff.Add(ItemManager.instance.GetBuffFromStim(stimId));

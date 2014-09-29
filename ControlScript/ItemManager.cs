@@ -524,7 +524,8 @@ public class ItemManager : MonoBehaviour {
 		}
 		return weaponList;
 	}
-	public List<GUIItem> GetWeaponForSlot(GameClassEnum gameClass, int gameSlot){
+    public List<GUIItem> GetArmorForSlot(GameClassEnum gameClass, int gameSlot)
+    {
 	    List<GUIItem> weaponList = new List<GUIItem>();
 		List<InventorySlot> items = null;
         if (invItems.ContainsKey(ShopSlotType.ARMOR))
@@ -1180,11 +1181,11 @@ public class ItemManager : MonoBehaviour {
 	}
 	
 	public List<int> GetImplants(){
-		List<int> answer = new Array();
+        List<int> answer = new List<int>();
 		for(int i=5;i<=8;i++){
-			WeaponIndex index = Choice.ForGuiSlot(slot);
+			WeaponIndex index = Choice.ForGuiSlot(i);
 			if(index.IsSameIndex(WeaponIndex.Zero)){
-					answer.Add(allitems[index.prefabId].ingamekey);
+					answer.Add(allitems[index.itemId].ingamekey);
 			}
 		}
 		return answer;
