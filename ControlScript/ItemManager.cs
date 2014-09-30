@@ -1184,7 +1184,7 @@ public class ItemManager : MonoBehaviour {
         List<int> answer = new List<int>();
 		for(int i=5;i<=8;i++){
 			WeaponIndex index = Choice.ForGuiSlot(i);
-			if(index.IsSameIndex(WeaponIndex.Zero)){
+			if(!index.IsSameIndex(WeaponIndex.Zero)){
 					answer.Add(allitems[index.itemId].ingamekey);
 			}
 		}

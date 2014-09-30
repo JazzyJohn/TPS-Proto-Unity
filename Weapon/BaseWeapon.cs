@@ -1,9 +1,9 @@
-﻿using UnityEngine;
+﻿using System;
+using UnityEngine;
 using System.Collections;
 using System.Collections.Generic;
 using nstuff.juggerfall.extension.models;
-
-
+using Random = UnityEngine.Random;
 
 
 public class BaseWeapon : DestroyableNetworkObject {
@@ -191,6 +191,7 @@ public class BaseWeapon : DestroyableNetworkObject {
 	//ID for MySqlBAse
 	public int SQLId;
 
+  public event EventHandler IsFired;
 
    
 	void Awake(){
@@ -557,8 +558,8 @@ public class BaseWeapon : DestroyableNetworkObject {
 		curAmmo =owner.GetComponent<InventoryManager>().GiveAmmo(ammoType,clipSize-curAmmo)+oldClip;	
 		if (shootAfterReload) {
 			shootAfterReload=false;
-			StartFire();
-		}
+            StartFire();
+        }
         if (pumpAfterReload) {
             pumpAfterReload = false;
             StartPumping();
@@ -654,6 +655,7 @@ public class BaseWeapon : DestroyableNetworkObject {
 		if (rifleParticleController != null) {
 			rifleParticleController.CreateShootFlame ();
 		}
+		if (IsFired != null) IsFired(this, EventArgs.Empty);
 		
 		owner.shootEffect();
 	

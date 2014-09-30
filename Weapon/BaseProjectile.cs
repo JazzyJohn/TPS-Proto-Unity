@@ -205,6 +205,7 @@ public class BaseProjectile : MonoBehaviour
 			return;
 		}
         RaycastHit hit;
+      
         switch (speedChange)
         {
             case SPEEDCHANGE.Acceleration:
@@ -233,18 +234,23 @@ public class BaseProjectile : MonoBehaviour
                 result = Vector3.Lerp(mRigidBody.velocity, ((target.position + targetOffset) - mTransform.position).normalized * curSpeed, Time.deltaTime * _attractionCoef) - mRigidBody.velocity;
                 break;
             case ATTRACTION.NoAttraction:
-               
-                result = mRigidBody.velocity.normalized * curSpeed - mRigidBody.velocity;
+              //  Debug.Log(curSpeed);
+                switch (speedChange)
+                {
+                    case SPEEDCHANGE.Acceleration:
+                       result = mRigidBody.velocity.normalized * Time.deltaTime * speedChangeCoef;
+                        break;
+                    case SPEEDCHANGE.Deceleration:
+                        result =- mRigidBody.velocity.normalized * Time.deltaTime * speedChangeCoef;
+                        break;
+                }
+             
                 break;
            
 
 
         }
-        if (result.sqrMagnitude!=0)
-        {
-            mRigidBody.AddForce(result, ForceMode.VelocityChange);
-          
-        }
+     
 		if(mRigidBody.velocity.sqrMagnitude >0&&hitDelay<Time.time){
 			mTransform.rotation = Quaternion.LookRotation(mRigidBody.velocity);
 			if (Physics.Raycast(transform.position, mRigidBody.velocity.normalized, out hit, mRigidBody.velocity.magnitude*0.1f))
@@ -252,18 +258,28 @@ public class BaseProjectile : MonoBehaviour
 
 			  
 					onBulletHit(hit);
-				
-			}
+
+            }
+            else
+            {
+                if (result.sqrMagnitude != 0)
+                {
+                    Debug.Log(result);
+                    mRigidBody.AddForce(result, ForceMode.Acceleration);
+
+                }
+                switch (trajectory)
+                {
+                    case TRAJECTORY.Corkscrew:
+                        mRigidBody.AddForce(mTransform.right * Time.deltaTime * trajectoryCoef, ForceMode.Acceleration);
+                        break;
+
+                }
+            }
 		}
 
     
-        switch (trajectory)
-        {
-            case TRAJECTORY.Corkscrew:
-                mRigidBody.AddForce(mTransform.right * Time.deltaTime * trajectoryCoef, ForceMode.Acceleration);
-                break;
-
-        }
+       
         if (!replication)
         {
             switch (detonator)
