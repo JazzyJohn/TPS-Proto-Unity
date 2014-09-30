@@ -33,7 +33,7 @@ public class TrajectoryDrawer : MonoBehaviour {
         {
              // a hacky way of making sure this gets initialized in editor too...
             // this assumes 60 samples / sec
-            G = Physic.gravity / amountOfSamples*amountOfSamples;
+            G = Physics.gravity;
         }
         Vector3 momentum = rotation*Vector3.forward*startSpeed ;
         Vector3 pos = startPoint;
@@ -41,15 +41,16 @@ public class TrajectoryDrawer : MonoBehaviour {
 		lineRenderer.SetPosition(0, pos);
 		bool isHit= false;
 		int _reboundCnt=0;
-		lineRenderer.SetVertexCount( (int) (PredictionTime * 60)+1);
+        lineRenderer.SetVertexCount((int)(PredictionTime * amountOfSamples) + 1);
         for (int i = 0; i < (int) (PredictionTime * 60); i++)
         {
-            momentum += G + momentum.normalized.speedChange/amountOfSamples;
-            pos += momentum;
-			RaycastHit hitInfo;
-			if(Physics.Linecast(last,  pos, out hitInfo)){
-				pos = hitInfo.point;
-				if(rebound&&_reboundCnt<rebound){
+            momentum += (G + momentum.normalized*speedChange)/amountOfSamples;
+            pos += momentum / amountOfSamples;
+			RaycastHit hit;
+			if(Physics.Linecast(last,  pos, out hit)){
+				pos = hit.point;
+                if (rebound && _reboundCnt < reboundCnt)
+                {
 					_reboundCnt++;
 					momentum =momentum - 2 * Vector3.Project(momentum, hit.normal);
 				}else{

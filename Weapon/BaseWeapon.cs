@@ -209,8 +209,9 @@ public class BaseWeapon : DestroyableNetworkObject {
             }
         }
 		if(shouldDrawTrajectory){
-			drawer = GetComponent<TrajectoryDrawer>();
+			drawer = GetComponentInChildren<TrajectoryDrawer>();
 			drawer.Init(projectileClass);
+            drawer.gameObject.SetActive(false);
 		}
 	}
 
@@ -308,7 +309,7 @@ public class BaseWeapon : DestroyableNetworkObject {
                 owner.animator.StopShootAniamtion("shooting");
 
             }
-			if(shouldDrawTrajectory&&drawer!=null&&drawer.activeSelf){
+			if(shouldDrawTrajectory&&drawer!=null&&drawer.gameObject.activeSelf){
 				drawer.Draw(  muzzlePoint.position+muzzleOffset,getAimRotation());
 			}
         }
@@ -567,8 +568,9 @@ public class BaseWeapon : DestroyableNetworkObject {
 		curAmmo =owner.GetComponent<InventoryManager>().GiveAmmo(ammoType,clipSize-curAmmo)+oldClip;	
 		if (shootAfterReload) {
 			shootAfterReload=false;
-            StartFire();
-        }
+      //if (IsFired != null) IsFired(this, EventArgs.Empty);
+			StartFire();
+		}
         if (pumpAfterReload) {
             pumpAfterReload = false;
             StartPumping();
@@ -638,7 +640,7 @@ public class BaseWeapon : DestroyableNetworkObject {
 		if (!CanShoot ()) {
 			return;		
 		}
-       
+    if (IsFired != null) IsFired(this, EventArgs.Empty);
         LogicShoot();
         
 		if(curAmmo>0){
@@ -664,7 +666,6 @@ public class BaseWeapon : DestroyableNetworkObject {
 		if (rifleParticleController != null) {
 			rifleParticleController.CreateShootFlame ();
 		}
-		if (IsFired != null) IsFired(this, EventArgs.Empty);
 		
 		owner.shootEffect();
 	
@@ -989,8 +990,15 @@ public class BaseWeapon : DestroyableNetworkObject {
 		/*Vector3 randVec = Random.onUnitSphere;
 		Vector3 normalDirection  = owner.getAimRotation(weaponRange)-muzzlePoint.position;
 		normalDirection =normalDirection + randVec.normalized * normalDirection.magnitude * aimRandCoef / 100;*/
+        if (projectileClass != null)
+        {
 
-        return Quaternion.LookRotation(owner.getAimpointForWeapon(projectileClass.startImpulse) - muzzlePoint.position);
+            return Quaternion.LookRotation(owner.getAimpointForWeapon(projectileClass.startImpulse) - muzzlePoint.position);
+        }
+        else
+        {
+            return Quaternion.LookRotation(owner.getAimpointForWeapon() - muzzlePoint.position);
+        }
 		
 
 	}
@@ -1013,7 +1021,7 @@ public class BaseWeapon : DestroyableNetworkObject {
 	
 	public void ToggleAim(bool value){
 		if(shouldDrawTrajectory&&foxView.isMine){
-			drawer.SetActive(value);
+			drawer.gameObject.SetActive(value);
 		}
 	}
 

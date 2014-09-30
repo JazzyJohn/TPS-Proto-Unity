@@ -203,12 +203,12 @@ public class BaseProjectile : MonoBehaviour
         {
             case SPEEDCHANGE.Acceleration:
                 return  speedChangeCoef;
-                break;
+               
             case SPEEDCHANGE.Deceleration:
                 return  -speedChangeCoef;
-                break;
+                
         }
-	
+        return 0;
 	}
 
 

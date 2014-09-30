@@ -1525,6 +1525,7 @@ public class Pawn : DamagebleObject
     }
     public Vector3 getAimpointForWeapon(float speed)
     {
+        
         if (foxView.isMine)
         {
             if (isAi)
@@ -1541,6 +1542,12 @@ public class Pawn : DamagebleObject
             return aimRotation;
         }
 
+    }
+
+    public Vector3 getAimpointForWeapon()
+    {
+
+        return aimRotation;
     }
     public virtual void getAimRotation()
     {
@@ -1674,7 +1681,10 @@ public class Pawn : DamagebleObject
         {
             return;
         }
-		curWeapon.ToggleAim(value);
+        if (CurWeapon!=null)
+        {
+            CurWeapon.ToggleAim(value);
+        }
         isAiming = value;
         animator.ToggleAim(value);
         if (cameraController != null)

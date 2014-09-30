@@ -20,7 +20,7 @@ public class RayController : RifleParticleController
         rayRender.enabled = true;
         rayRender.SetPosition(0, start);
         rayRender.SetPosition(1, end);
-		hitTransform.position = end;
+        hitTransform.position = end - hitTransform.forward;
 		if(!hitPoint.isPlaying&&isHit){
 			hitPoint.Play();
 		}
@@ -33,6 +33,7 @@ public class RayController : RifleParticleController
     public void StopRay()
     {
         rayRender.enabled = false;
+        hitPoint.Stop();
     }
 
 

@@ -16,8 +16,9 @@ public class RayGun : NetSyncGun
     public int proojHitCnt;
 
     public int projHitMax;
-	
-	
+
+    private float ammoSpent = 0;
+
     public RayController rayController;
 
 	public float dmgDelay;
@@ -50,8 +51,24 @@ public class RayGun : NetSyncGun
     {
 		DoRayDamage(deltaTime);
     }
-	
+   
 	void DoRayDamage(float deltaTime){
+        ammoSpent += deltaTime;
+        if (curAmmo > 0)
+        {
+            if (ammoSpent > 1)
+            {
+                curAmmo--;
+                ammoSpent = 0;
+            }
+           
+        }
+        else
+        {
+           ReloadStart();
+           return;
+              
+        }
 		Vector3 startPoint  = muzzlePoint.position+muzzleOffset;
 		Quaternion startRotation = getAimRotation();
 		
@@ -102,6 +119,7 @@ public class RayGun : NetSyncGun
 				BaseDamage dmg =new BaseDamage(damageAmount);
 				power=power*dmgDelay;
 				dmg.Damage += power;
+                dmg.hitPosition = hitInfo.point;
 				target.Damage(dmg ,owner.gameObject);
 			}				
 		}
