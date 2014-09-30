@@ -42,7 +42,7 @@ public class TrajectoryDrawer : MonoBehaviour {
 		bool isHit= false;
 		int _reboundCnt=0;
         lineRenderer.SetVertexCount((int)(PredictionTime * amountOfSamples) + 1);
-        for (int i = 0; i < (int) (PredictionTime * 60); i++)
+        for (int i = 0; i < (int)(PredictionTime * amountOfSamples); i++)
         {
             momentum += (G + momentum.normalized*speedChange)/amountOfSamples;
             pos += momentum / amountOfSamples;
