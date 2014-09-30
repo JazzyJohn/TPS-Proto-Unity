@@ -125,6 +125,10 @@ public class BaseWeapon : DestroyableNetworkObject {
     ///FOV if aiming with this weapon
     /// </summary>
     public float aimFOV;
+	
+	public bool shouldDrawTrajectory;
+	
+	private TrajectoryDrawer drawer;
 
 	public GameObject projectilePrefab;
 
@@ -204,6 +208,10 @@ public class BaseWeapon : DestroyableNetworkObject {
                 projectileClass.CreatePool(50);
             }
         }
+		if(shouldDrawTrajectory){
+			drawer = GetComponent<TrajectoryDrawer>();
+			drawer.Init(projectileClass);
+		}
 	}
 
     public Pawn GetOwner()
@@ -300,7 +308,9 @@ public class BaseWeapon : DestroyableNetworkObject {
                 owner.animator.StopShootAniamtion("shooting");
 
             }
-            
+			if(shouldDrawTrajectory&&drawer!=null&&drawer.activeSelf){
+				drawer.Draw(  muzzlePoint.position+muzzleOffset,getAimRotation());
+			}
         }
         else
         {
@@ -398,8 +408,7 @@ public class BaseWeapon : DestroyableNetworkObject {
                     }
                     else
                     {
-						
-                        switch (prefiretype)
+						switch (prefiretype)
                         {
                             case PREFIRETYPE.Salvo:
 								Pumping();
@@ -1001,6 +1010,12 @@ public class BaseWeapon : DestroyableNetworkObject {
     {
 
     }
+	
+	public void ToggleAim(bool value){
+		if(shouldDrawTrajectory&&foxView.isMine){
+			drawer.SetActive(value);
+		}
+	}
 
 
 }

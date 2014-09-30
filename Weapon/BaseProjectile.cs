@@ -196,7 +196,20 @@ public class BaseProjectile : MonoBehaviour
 	//	Debug.Log("id " + projId+ " position " + mTransform.position + " rotation "+ mTransform.rotation);
        // mRigidBody.useGravity = false;
     }
-   
+	
+	public float GetSpeedChange(){
+		
+		switch (speedChange)
+        {
+            case SPEEDCHANGE.Acceleration:
+                return  speedChangeCoef;
+                break;
+            case SPEEDCHANGE.Deceleration:
+                return  -speedChangeCoef;
+                break;
+        }
+	
+	}
 
 
     protected void FixedUpdate()
@@ -466,39 +479,44 @@ public class BaseProjectile : MonoBehaviour
                  
                     break;
                 case HITEFFECT.Rebound:
-                    if (!replication)
-                    {
-                        proojHitCnt++;
-
-                        mRigidBody.velocity = mRigidBody.velocity - 2 * Vector3.Project(mRigidBody.velocity, hit.normal);
-
-                        ProjectileManager.instance.InvokeRPC("NewVelocity", projId, mRigidBody.velocity, proojHitCnt);
-                    }
-                    
-                    if (proojHitCnt > projHitMax)
+                   
+                    proojHitCnt++;
+                    if (proojHitCnt >projHitMax)
                     {
                         ExplosionDamage(exploPosition);
                             
-                    }
+                    }else{
+						if (!replication)
+						{
+							
+
+							mRigidBody.velocity = mRigidBody.velocity - 2 * Vector3.Project(mRigidBody.velocity, hit.normal);
+
+							ProjectileManager.instance.InvokeRPC("NewVelocity", projId, mRigidBody.velocity, proojHitCnt);
+						}
+					}
                     
                     break;
                 case HITEFFECT.Penetration:
-                    if (!replication)
-                    {
-                        proojHitCnt++;
-						
-						hitDelay =  Time.time+ Mathf.Max(1.0f/startImpulse,0.1f);
-						
-                        ProjectileManager.instance.InvokeRPC("NewHitCount", projId, proojHitCnt);
-                    }
-                    
+                   
+                    proojHitCnt++;
                     if (proojHitCnt > projHitMax)
                     {
 
                         ExplosionDamage(exploPosition);
                             
                           
-                    }
+                    }else{
+						if (!replication)
+						{
+						  
+							
+							hitDelay =  Time.time+ Mathf.Max(1.0f/startImpulse,0.1f);
+							
+							ProjectileManager.instance.InvokeRPC("NewHitCount", projId, proojHitCnt);
+						}
+					
+					}
                    
                     break;
                 case HITEFFECT.Cluster:

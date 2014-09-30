@@ -1674,7 +1674,7 @@ public class Pawn : DamagebleObject
         {
             return;
         }
-
+		curWeapon.ToggleAim(value);
         isAiming = value;
         animator.ToggleAim(value);
         if (cameraController != null)
