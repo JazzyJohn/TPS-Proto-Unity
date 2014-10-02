@@ -34,7 +34,7 @@ public class MarkItemGui : MonoBehaviour {
 	
         MainMenu.SetMessage("Недостаточно Денег");
    
-		MainMenu.MoneError();
+		MainMenu.MoneyError();
 	}
 	public void CloseWindow(){
 		Lot.alpha = 0.0f;

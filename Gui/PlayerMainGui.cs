@@ -387,7 +387,7 @@ public class PlayerMainGui : MonoBehaviour {
                 component.hudentry.withArrow = component.withArrow;
             
             }
-            component.hudentry.isShow =component.IsShow(MainCameraTransform); 
+            component.hudentry.isShow =component.IsShow(MainCameraTransform,LocalPlayer.team); 
             component.hudentry.startpos = component.myTransform.position;
            // 
             component.hudentry.label.text = publicName;

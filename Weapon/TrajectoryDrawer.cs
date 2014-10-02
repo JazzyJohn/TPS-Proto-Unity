@@ -19,9 +19,9 @@ public class TrajectoryDrawer : MonoBehaviour {
 	
 	public int amountOfSamples;
 	
-	public float startWidth=0.5;
+	public float startWidth=0.5f;
 	
-	const float SIZE_COEF = 0.5;
+	const float SIZE_COEF = 1.0f;
 	public void Init(BaseProjectile projectileClass){
 		gravity = projectileClass.rigidbody.useGravity;
 		startSpeed = projectileClass.startImpulse;
@@ -46,7 +46,7 @@ public class TrajectoryDrawer : MonoBehaviour {
 		int _reboundCnt=0;
 		int maxAmount =(int)(PredictionTime * amountOfSamples);
 		int amountOflines =maxAmount;
-        lineRenderer.SetVertexCount(maxAmount + 1);
+        lineRenderer.SetVertexCount(maxAmount + 2);
         for (int i = 0; i < maxAmount; i++)
         {
             momentum += (G + momentum.normalized*speedChange)/amountOfSamples;
@@ -59,7 +59,7 @@ public class TrajectoryDrawer : MonoBehaviour {
 					_reboundCnt++;
 					momentum =momentum - 2 * Vector3.Project(momentum, hit.normal);
 				}else{
-					lineRenderer.SetVertexCount(i+1);
+					lineRenderer.SetVertexCount(i+2);
 					lineRenderer.SetPosition(i+1, pos);
 					amountOflines=i+1;
 					break;
@@ -68,7 +68,9 @@ public class TrajectoryDrawer : MonoBehaviour {
 			lineRenderer.SetPosition(i+1, pos);
 			last = pos;
         }
-		 lineRenderer.SetWidth(startWidth, startWidth+amountOflines/maxAmount*spread*SIZE_COEF);
+
+    //    Debug.Log((float)amountOflines / (float)maxAmount * spread * SIZE_COEF);
+        lineRenderer.SetWidth(startWidth + (float)amountOflines / (float)maxAmount * spread * SIZE_COEF, startWidth + (float)amountOflines / (float)maxAmount * spread * SIZE_COEF);
 	
 	}
 }

@@ -46,6 +46,10 @@ public class CrosshairBehaviour : MonoBehaviour {
 
     public UIWidget mainAfter;
 
+    public UIProgressBar pumpBar;
+
+    public UISprite pumpBarSprite;
+
 
 
     public UISprite addonsSprite;
@@ -56,8 +60,7 @@ public class CrosshairBehaviour : MonoBehaviour {
 
     public UIWidget mainAddons;
 
-
-	
+   	
 	public Transform center;
 	
 	public Transform[] corners;
@@ -82,9 +85,13 @@ public class CrosshairBehaviour : MonoBehaviour {
                 
                 shootType.spriteName = shootTypes[shootTypeNum];
                 mainShoot.alpha = 1.0f;
+                pumpBar.alpha = 1.0f;
+                
+
             }
             else
             {
+                pumpBar.alpha = 0.0f;
                 mainShoot.alpha = 0.0f;
             }
          
@@ -115,8 +122,17 @@ public class CrosshairBehaviour : MonoBehaviour {
                 mainAfter.alpha = 0.0f;
             }
 		}
+        float pumpcoef = weapon.PumpCoef() / +weapon.pumpAmount;
 		pumpAmount.text = weapon.PumpCoef().ToString("0") +"/" +weapon.pumpAmount;
-		
+        if (pumpcoef > 0.6f)
+            pumpBarSprite.color = Color.green;
+        else if (pumpcoef <= 0.6f && pumpcoef > 0.3f)
+            pumpBarSprite.color = Color.yellow;
+        else if (pumpcoef <= 0.3f)
+            pumpBarSprite.color = Color.red;
+
+        pumpBar.value = pumpcoef;
+
 		if(weapon.AfterActing()){
 			afterReady.color= afterReadyColor;
 		}else{

@@ -224,6 +224,7 @@ public class ItemManager : MonoBehaviour {
             foreach (InventorySlot weapon in invItems[ShopSlotType.WEAPON])
             {
                 weapon.gameType = (int)weaponPrefabsListbyId[weapon.ingamekey].slotType;
+                Debug.Log(weapon.name + " " + weapon.gameType);
                 weaponPrefabsListbyId[weapon.ingamekey].HUDIcon = weapon.texture;
             }
 
@@ -398,7 +399,7 @@ public class ItemManager : MonoBehaviour {
            
 		}
 		foreach (XmlNode node in xmlDoc.SelectNodes("items/marked")) {
-			if(!markedItems.Contains(node.InnerText){
+			if(!markedItems.Contains(node.InnerText)){
 				markedItems.Add(node.InnerText);
 			}
            
@@ -409,6 +410,7 @@ public class ItemManager : MonoBehaviour {
         {
             yield return numenator.Current;
         }
+        Debug.Log("Inventory Loaded");
 		GlobalPlayer.instance.loadingStage++;
 		
 	}	
@@ -599,6 +601,7 @@ public class ItemManager : MonoBehaviour {
             int intGameSlot = (int)gameSlot;
             foreach (InventorySlot slot in items)
             {
+               /// Debug.Log(slot.name + " " + slot.gameType + " =" + intGameSlot);
 
                 if (slot.gameType == intGameSlot && (slot.gameClass == GameClassEnum.ANY || slot.gameClass == gameClass))
                 {
@@ -787,7 +790,7 @@ public class ItemManager : MonoBehaviour {
     {
         List<ShopSlot> result = new List<ShopSlot>();
 		foreach(string id in markedItems){
-			result.Add(allShopSlot[id])
+			result.Add(allShopSlot[id]);
 		}
 	
 		shop.OpenList(result);
@@ -806,20 +809,26 @@ public class ItemManager : MonoBehaviour {
 		}
     }
 	public void MarkedCost(out  int cash, out int gold){
+        cash=0;
+        gold= 0;
 		foreach(string id in markedItems){
 			cash +=allShopSlot[id].cashCost;
 			gold +=allShopSlot[id].goldCost;
 		}
 	
 	}
+    public int MarkedAmount()
+    {
+        return markedItems.Count;
+    }
 	public void AddToMarkedList(string id){
-		if(markedItems.Contains(id){
+		if(markedItems.Contains(id)){
 			return;
 		}
 		markedItems.Add(id);
 		StartCoroutine(_AddToMarkedList(id));
 	}
-	IEnumerator void _AddToMarkedList(string id){
+	IEnumerator  _AddToMarkedList(string id){
 		WWWForm form = new WWWForm ();
 			
 		form.AddField ("uid", UID);
@@ -830,13 +839,13 @@ public class ItemManager : MonoBehaviour {
 		yield return w;
 	}
 	public void RemoveFromMarkedList(string id){
-		if(!markedItems.Contains(id){
+		if(!markedItems.Contains(id)){
 			return;
 		}
 		markedItems.Remove(id);
 		StartCoroutine(_AddToMarkedList(id));
 	}
-	IEnumerator void _RemoveFromMarkedList(string id){
+	IEnumerator  _RemoveFromMarkedList(string id){
 		WWWForm form = new WWWForm ();
 			
 		form.AddField ("uid", UID);
@@ -896,9 +905,9 @@ public class ItemManager : MonoBehaviour {
 		int totalCost = 0;
 		foreach(string id in markedItems){
 			if(gold){
-				totalCost+ =allShopSlot[id].goldCost;
+				totalCost+=allShopSlot[id].goldCost;
 			}else{
-				totalCost+ =allShopSlot[id].cashCost;
+				totalCost+=allShopSlot[id].cashCost;
 			}
 		}
 		int maxCost =0;
@@ -923,11 +932,11 @@ public class ItemManager : MonoBehaviour {
 			
 				yield return w;
 			}
-			form = new WWWForm ();
-			
-			form.AddField ("uid", UID);
-			
-			IEnumerator numenator = LoadItems (form);
+            WWWForm itemForm = new WWWForm();
+
+            itemForm.AddField("uid", UID);
+
+            IEnumerator numenator = LoadItems(itemForm);
 			
 			while(numenator.MoveNext()){
 				yield return numenator.Current;

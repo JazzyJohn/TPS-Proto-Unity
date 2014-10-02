@@ -48,13 +48,19 @@ public class MainMenuGUI : MonoBehaviour {
 			loadingWidget=null;
 		}
         allWWidget.alpha = 1.0f;
-		int count =ItemManger.manager.MarkedAmount();
-		if(count>0){
-			markedPanel.alpha = 1.0f;
-			markedPanel.GetComponent<MarkItemGui>().Init(count);
-		}else{
-			markedPanel.alpha = 1.0f;
-		}
+		int count =ItemManager.instance.MarkedAmount();
+        if (_PanelsNgui.markedPanel != null)
+        {
+            if (count > 0)
+            {
+                _PanelsNgui.markedPanel.alpha = 1.0f;
+                _PanelsNgui.markedPanel.GetComponent<MarkItemGui>().Init(count);
+            }
+            else
+            {
+                _PanelsNgui.markedPanel.alpha = 0.0f;
+            }
+        }
     }
 
 	void Awake(){
@@ -447,6 +453,11 @@ public class MainMenuGUI : MonoBehaviour {
         _PanelsNgui.annonceTweener.PlayForward();
     }
 
+
+    public void MoneyError()
+    {
+        throw new System.NotImplementedException();
+    }
 }
 
 //Группы переменных

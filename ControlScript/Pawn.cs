@@ -1497,7 +1497,7 @@ public class Pawn : DamagebleObject
     {
         if (cameraController != null)
         {
-            Debug.Log(CurWeapon.aimFOV);
+//            Debug.Log(CurWeapon.aimFOV);
             cameraController.SetAimFOV(CurWeapon.aimFOV);
         }
     }

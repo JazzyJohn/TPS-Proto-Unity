@@ -74,6 +74,7 @@ public class BaseProjectile : MonoBehaviour
     protected Transform mTransform;
     protected Rigidbody mRigidBody;
     protected bool used = false;
+    protected bool boomed = false;
 
     protected DamagebleObject shootTarget;
 
@@ -144,6 +145,7 @@ public class BaseProjectile : MonoBehaviour
     {
       
         used = false;
+        boomed = false;
         mRigidBody.velocity = Vector3.zero;
 		foreach(GameObject go in inactiveObjectInEffectStage){
 			go.SetActive(true);
@@ -558,7 +560,7 @@ public class BaseProjectile : MonoBehaviour
         mRigidBody.velocity = Vector3.zero;
     }
 
-
+   
 
     void ExplosionDamage(Vector3 Position)
     {
@@ -570,9 +572,14 @@ public class BaseProjectile : MonoBehaviour
             Invoke("DeActivate", 0.1f);
                 return;
         }
+        if (boomed)
+        {
+            return;
+        }
+        boomed = true;
         sControl.stopSound();//останавливаем звук реактивного двигателя
         sControl.playClip(exploseSound);//звук взрыва
-        //Debug.Log(splashRadius);
+        Debug.Log("DOOOM");
         Collider[] hitColliders = Physics.OverlapSphere(Position, splashRadius);
    
         

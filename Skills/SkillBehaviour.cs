@@ -173,7 +173,7 @@ public class SkillBehaviour : MonoBehaviour
 	}
 	public void CheckAvailablePoint(){
 		RaycastHit hitInfo;
-		Vector3 direction = owner.myTransform.position -targetPoint;
+		Vector3 direction = targetPoint-owner.myTransform.position;
 		
         if ( Physics.Raycast(owner.myTransform.position, direction.normalized, out hitInfo, distance, skilllayer)){
 			if(Vector3.Dot(hitInfo.normal,Vector3.up )<0.45){
@@ -182,7 +182,7 @@ public class SkillBehaviour : MonoBehaviour
 				targetPoint-= direction*radius;
 			}	
 		}else{
-			targetPoint = owner.myTransform.position +direction*distance;
+			targetPoint = owner.myTransform.position +direction.normalized*distance;
 		
 		}
 	

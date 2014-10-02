@@ -73,7 +73,7 @@ public class KillCamera : ThirdPersonCamera
 				
 			}
 			if(!_pawn.isAi){
-				killerweapon = ItemManager.instance.weaponPrefabsListbyId[pawn.CurWeapon.SQLId];
+				killerweapon = ItemManager.instance.weaponPrefabsListbyId[_pawn.CurWeapon.SQLId];
 			}
 			InitOffsets();
 			return true;

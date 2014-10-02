@@ -44,9 +44,10 @@ public class ShowOnGuiComponent : MonoBehaviour {
             PlayerMainGui.instance.RemoveMessage(hudentry);
         }
 	}
-	public bool IsShow(Transform mainCamera){ 
-		bool basicShow = component.isShow && (component.showAnotherTeam || component.team==0||LocalPlayer.team==component.team);
-		bool addvanceShow =  !hideInClose|| (hideInClose&&(mainCamera.position-myTransform.position).sqrMagnitude<distanceHide);
+    public bool IsShow(Transform mainCamera, int inteam)
+    { 
+		bool basicShow = isShow && (showAnotherTeam || team==0||inteam==team);
+        bool addvanceShow = !hideInClose || (hideInClose && (mainCamera.position - myTransform.position).sqrMagnitude > distanceHide * distanceHide);
 		return basicShow&&addvanceShow;
 	}
 	public void SetTitle(string text){

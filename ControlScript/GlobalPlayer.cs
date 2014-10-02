@@ -68,7 +68,7 @@ public class GlobalPlayer : MonoBehaviour {
 	
 	
 	
-	public isLoaded = false;
+	public bool isLoaded = false;
 	
 	public void SetFaceBookInit() {
 		if(FB.IsLoggedIn) {
@@ -161,6 +161,7 @@ public class GlobalPlayer : MonoBehaviour {
 				{
 					menu.LoadingFinish();
 				}
+                isLoaded = true;
 			}
 		
 		}

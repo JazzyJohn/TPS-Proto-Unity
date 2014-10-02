@@ -52,6 +52,11 @@ public class PlayerHudNgui : MonoBehaviour {
     public UISprite reloadingSprite;
 	public UITexture weaponTexture;
 
+    //bar
+    public UIProgressBar reloadBar;
+
+   
+
     //Teams score labels
     public UILabel RedTeamScore;
     public UILabel BlueTeamScore;
@@ -126,9 +131,11 @@ public class PlayerHudNgui : MonoBehaviour {
 			if ( Stats.gun){
 
 				if(Stats.gun.IsReloading()){
+                    reloadBar.alpha = 1.0f;
+                    reloadBar.value = Stats.gun.ReloadProgress();
 					if (ammoInGun) ammoInGun.text = Stats.gun.ReloadTimer().ToString("0.0") + " (" + Stats.ammoInBag + ")";
 				}else{
-
+                    reloadBar.alpha = 0.0f;
 					if (ammoInGun) ammoInGun.text = Stats.gun.curAmmo+ "/" + Stats.gun.clipSize + " (" + Stats.ammoInBag + ")";
 				}
 				weaponTexture.mainTexture = Stats.gun.HUDIcon;

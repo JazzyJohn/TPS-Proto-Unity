@@ -536,6 +536,7 @@ public class BaseWeapon : DestroyableNetworkObject {
 		if (isReload) {
 			return;
 		}
+        alredyGunedAmmo = 0;
 		if(owner.GetComponent<InventoryManager>().HasAmmo(ammoType)){
 			isReload= true;
 			reloadTimer=reloadTime;
@@ -588,6 +589,15 @@ public class BaseWeapon : DestroyableNetworkObject {
 	public bool IsShooting(){
 		return isShooting && !isReload;
 	}
+
+    public float ReloadProgress(){
+    
+        if(reloadTime==0){
+            return 0;
+        }
+        return (reloadTime - reloadTimer) / reloadTime;
+       
+    }
 	public float ReloadTimer(){
 		if (isReload) {
 			return reloadTimer;
@@ -676,7 +686,7 @@ public class BaseWeapon : DestroyableNetworkObject {
                 ActualFire();
             }
 			_randShootCoef+=alredyGunedAmmo*randPerShoot;
-            alredyGunedAmmo = 0;
+          
         }
         else
         {
@@ -742,6 +752,10 @@ public class BaseWeapon : DestroyableNetworkObject {
 
     public virtual void AfterShootLogic()
     {
+        if (oneShootPump)
+        {
+            alredyGunedAmmo = 0;
+        }
 		
     }
 	public virtual bool CanShoot (){

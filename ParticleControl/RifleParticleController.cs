@@ -27,7 +27,10 @@ public class RifleParticleController : MonoBehaviour
 		//Шанс получения пламени при выстреле
 		if (Random.Range (0, 2) == 1)
 		{
-			flameParticles.Play();
+            if (flameParticles != null)
+            {
+                flameParticles.Play();
+            }
 		}
 		if (smokeParticles != null) {
 				smokeParticles.Play ();
