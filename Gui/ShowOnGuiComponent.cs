@@ -27,6 +27,11 @@ public class ShowOnGuiComponent : MonoBehaviour {
     public bool showAnotherTeam = true;
 
     public bool alwaysFriendly = false;
+	
+	public bool hideInClose = false;
+	
+	public float distanceHide = 10.0f;
+	
 	public void Awake(){
 		myTransform = transform;
 		allShowOnGui.Add(this);
@@ -39,7 +44,11 @@ public class ShowOnGuiComponent : MonoBehaviour {
             PlayerMainGui.instance.RemoveMessage(hudentry);
         }
 	}
-	
+	public bool IsShow(Transform mainCamera){ 
+		bool basicShow = component.isShow && (component.showAnotherTeam || component.team==0||LocalPlayer.team==component.team);
+		bool addvanceShow =  !hideInClose|| (hideInClose&&(mainCamera.position-myTransform.position).sqrMagnitude<distanceHide);
+		return basicShow&&addvanceShow;
+	}
 	public void SetTitle(string text){
 		title = baseTitle +" " +text;
 	}

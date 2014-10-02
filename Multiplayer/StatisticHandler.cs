@@ -37,6 +37,10 @@ public class StatisticHandler : MonoBehaviour {
 	public static string DISENTEGRATE_ITEM = "disentegrateItem";
 
 	public static string SAVE_ITEM = "saveitemnew";
+	
+	public static string MARK_ITEM = "markitem";	
+	
+	public static string UN_MARK_ITEM = "unmarkitem";	
 
 	public static string NEWS_ALL = "allnews";
 	

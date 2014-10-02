@@ -19,6 +19,9 @@ public class TrajectoryDrawer : MonoBehaviour {
 	
 	public int amountOfSamples;
 	
+	public float startWidth=0.5;
+	
+	const float SIZE_COEF = 0.5;
 	public void Init(BaseProjectile projectileClass){
 		gravity = projectileClass.rigidbody.useGravity;
 		startSpeed = projectileClass.startImpulse;
@@ -27,7 +30,7 @@ public class TrajectoryDrawer : MonoBehaviour {
 		reboundCnt= projectileClass.projHitMax;
 		lineRenderer = GetComponent<LineRenderer>();
 	}
-	public void Draw(Vector3 startPoint, Quaternion rotation){
+	public void Draw(Vector3 startPoint, Quaternion rotation,float spread){
 		Vector3 G= Vector3.zero;
 		if (gravity)
         {
@@ -41,8 +44,10 @@ public class TrajectoryDrawer : MonoBehaviour {
 		lineRenderer.SetPosition(0, pos);
 		bool isHit= false;
 		int _reboundCnt=0;
-        lineRenderer.SetVertexCount((int)(PredictionTime * amountOfSamples) + 1);
-        for (int i = 0; i < (int)(PredictionTime * amountOfSamples); i++)
+		int maxAmount =(int)(PredictionTime * amountOfSamples);
+		int amountOflines =maxAmount;
+        lineRenderer.SetVertexCount(maxAmount + 1);
+        for (int i = 0; i < maxAmount; i++)
         {
             momentum += (G + momentum.normalized*speedChange)/amountOfSamples;
             pos += momentum / amountOfSamples;
@@ -56,13 +61,14 @@ public class TrajectoryDrawer : MonoBehaviour {
 				}else{
 					lineRenderer.SetVertexCount(i+1);
 					lineRenderer.SetPosition(i+1, pos);
+					amountOflines=i+1;
 					break;
 				}
 			}
 			lineRenderer.SetPosition(i+1, pos);
 			last = pos;
         }
-
+		 lineRenderer.SetWidth(startWidth, startWidth+amountOflines/maxAmount*spread*SIZE_COEF);
 	
 	}
 }

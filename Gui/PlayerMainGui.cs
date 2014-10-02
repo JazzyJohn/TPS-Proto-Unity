@@ -11,6 +11,8 @@ public class PlayerMainGui : MonoBehaviour {
 	public Player LocalPlayer;
 
 	public Camera MainCamera;
+	
+	public Transform MainCameraTransform;
 
 	public float MarkSize;
 
@@ -137,6 +139,7 @@ public class PlayerMainGui : MonoBehaviour {
 	// Use this for initialization
 	void Start () {
 		MainCamera = Camera.main;
+		MainCameraTransform= MainCamera.transform;
 		
 	if(GameObject.Find("P1"))
 			P1Hud = GameObject.Find("Player_HUD_text").GetComponent<HUDText>();
@@ -384,7 +387,7 @@ public class PlayerMainGui : MonoBehaviour {
                 component.hudentry.withArrow = component.withArrow;
             
             }
-            component.hudentry.isShow = component.isShow && (component.showAnotherTeam || component.team==0||LocalPlayer.team==component.team);
+            component.hudentry.isShow =component.IsShow(MainCameraTransform); 
             component.hudentry.startpos = component.myTransform.position;
            // 
             component.hudentry.label.text = publicName;

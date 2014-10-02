@@ -14,6 +14,8 @@ public class KillCamera : ThirdPersonCamera
 	
 	private Player killpalyer; 
 	
+	private BaseWeapon killerweapon;
+	
 	void  Awake (){
 		
 		if(!cameraTransform && Camera.main)
@@ -70,7 +72,9 @@ public class KillCamera : ThirdPersonCamera
 				normalOffset =mediumTargetOffset;
 				
 			}
-			
+			if(!_pawn.isAi){
+				killerweapon = ItemManager.instance.weaponPrefabsListbyId[pawn.CurWeapon.SQLId];
+			}
 			InitOffsets();
 			return true;
 		}

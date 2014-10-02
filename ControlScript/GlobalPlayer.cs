@@ -60,6 +60,16 @@ public class GlobalPlayer : MonoBehaviour {
 
     public bool isDebug=false;
 	
+	public int loadingStage = 0;
+	
+	//this is for loading screen every long loading after loading increment  loadingStage when it's reached 
+	//MAXLOADSTAGE load finish;
+	private const int MAXLOADSTAGE =2;
+	
+	
+	
+	public isLoaded = false;
+	
 	public void SetFaceBookInit() {
 		if(FB.IsLoggedIn) {
 			UID ="FB"+FB.UserId;
@@ -143,6 +153,16 @@ public class GlobalPlayer : MonoBehaviour {
 				 FullScreen(true);
 			}
             ResizeCall();
+		}
+		if(!isLoaded){
+			if(loadingStage>=MAXLOADSTAGE){
+				MainMenuGUI menu = FindObjectOfType<MainMenuGUI>();
+				if (menu != null)
+				{
+					menu.LoadingFinish();
+				}
+			}
+		
 		}
 	}
 	public static void FullScreen(bool FullScreen_Z= false){

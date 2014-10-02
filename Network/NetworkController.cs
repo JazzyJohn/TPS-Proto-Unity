@@ -281,11 +281,7 @@ public class NetworkController : MonoBehaviour {
             // On to the lobby
             serverHolder = GetComponent<ServerHolder>();
             serverHolder.Connect();
-            MainMenuGUI menu = FindObjectOfType<MainMenuGUI>();
-            if (menu != null)
-            {
-                menu.LoadingFinish();
-            }
+            GlobalPlayer.instance.loadingStage++;
         }
     }
     public void OnVariablesUpdate(BaseEvent evt)

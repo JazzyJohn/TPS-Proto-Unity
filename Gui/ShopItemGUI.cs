@@ -12,7 +12,8 @@ public class ShopItemGUI : MonoBehaviour {
 	public UITexture Texture;
     public UIWidget Box;
     public UILabel loading;
-
+	public UISprite star;
+	
 	[HideInInspector]
 	public int numToItem;
 
@@ -39,7 +40,11 @@ public class ShopItemGUI : MonoBehaviour {
         Description.text = item.description;
         Texture.mainTexture = null;
         loading.alpha = 1.0f;
-        
+		if(ItemManager.instance.IsMarked(iten.id)){
+			star.alpha = 1.0f;
+		}else{
+			star.alpha = 0.0f;
+		}
     }
         
 }

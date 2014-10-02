@@ -310,7 +310,7 @@ public class BaseWeapon : DestroyableNetworkObject {
 
             }
 			if(shouldDrawTrajectory&&drawer!=null&&drawer.gameObject.activeSelf){
-				drawer.Draw(  muzzlePoint.position+muzzleOffset,getAimRotation());
+				drawer.Draw(  muzzlePoint.position+muzzleOffset,getAimRotation(), GetRandomeDirectionCoef());
 			}
         }
         else

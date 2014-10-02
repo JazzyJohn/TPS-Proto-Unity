@@ -187,7 +187,7 @@ public class ItemManager : MonoBehaviour {
 	//PLAYER ITEM SECTION
 	public BaseWeapon[] weaponPrefabsListbyId;
 
-
+	public List<string> markedItems = new List<string>();
 
 	public Dictionary<int,FromDBWeapon>  weaponIndexTable = new Dictionary<int,FromDBWeapon>();
 	
@@ -397,14 +397,19 @@ public class ItemManager : MonoBehaviour {
             cachedIndex.Add(index);
            
 		}
-		
+		foreach (XmlNode node in xmlDoc.SelectNodes("items/marked")) {
+			if(!markedItems.Contains(node.InnerText){
+				markedItems.Add(node.InnerText);
+			}
+           
+		}
         IEnumerator numenator = ParseInventory(XML);
 
         while (numenator.MoveNext())
         {
             yield return numenator.Current;
         }
-
+		GlobalPlayer.instance.loadingStage++;
 		
 	}	
 	public void SetNewWeapon(BaseWeapon prefab){
@@ -626,6 +631,9 @@ public class ItemManager : MonoBehaviour {
 	public bool isShopLoading;
 
     public Dictionary<ShopSlotType, List<ShopSlot>> shopItems = new Dictionary<ShopSlotType, List<ShopSlot> >();
+	
+	
+	public Dictionary<string,ShopSlot> allShopSlot = new Dictionary<string,ShopSlot>();
 
     public List<ShopSlot> cachedShopList = new List<ShopSlot>();
 
@@ -675,7 +683,9 @@ public class ItemManager : MonoBehaviour {
 		XmlDocument xmlDoc = new XmlDocument();
 		xmlDoc.LoadXml(XML);
 		shopItems.Clear();
+		allShopSlot.Clear();
 		foreach (XmlNode node in xmlDoc.SelectNodes("items/slot")) {
+			
 			ShopSlot slot = new ShopSlot();
             slot.gameClass = (GameClassEnum)Enum.Parse(typeof(GameClassEnum), node.SelectSingleNode("class").InnerText);
             slot.type = (ShopSlotType)Enum.Parse(typeof(ShopSlotType), node.SelectSingleNode("type").InnerText);
@@ -698,7 +708,7 @@ public class ItemManager : MonoBehaviour {
             /*slot.gameClasses = new GameClassEnum[node.SelectNodes("items/weapon").Count];
             int i=0;
             foreach (XmlNode gameClass in node.SelectNodes("class")) {
-                    slot.gameClasses[i++]=	(GameClassEnum)int.Parse(gameClass.InnerText);			
+                    slot.gameClasses[i++]=	(GameClassEnum)int.Parse(gameClass.InnerText);			f yt
             }
 
             WWW www = null;
@@ -724,6 +734,7 @@ public class ItemManager : MonoBehaviour {
                 shopItems[slot.type] = new List<ShopSlot>();
             }
             shopItems[slot.type].Add(slot);
+			allShopSlot[slot.id] = slot;
 		}
 
 		
@@ -772,6 +783,74 @@ public class ItemManager : MonoBehaviour {
             }
         }
     }
+    public IEnumerator GenerateMarkedList(GameClassEnum gameClass,ShopSlotType type)
+    {
+        List<ShopSlot> result = new List<ShopSlot>();
+		foreach(string id in markedItems){
+			result.Add(allShopSlot[id])
+		}
+	
+		shop.OpenList(result);
+		foreach (ShopSlot slot in result)
+		{
+			if (slot.texture == null)
+			{
+				WWW www = StatisticHandler.GetMeRightWWW(slot.shopicon);
+			   
+				yield return www;
+				slot.texture = new Texture2D(138, 58);
+				www.LoadImageIntoTexture(slot.texture);
+			}
+
+
+		}
+    }
+	public void MarkedCost(out  int cash, out int gold){
+		foreach(string id in markedItems){
+			cash +=allShopSlot[id].cashCost;
+			gold +=allShopSlot[id].goldCost;
+		}
+	
+	}
+	public void AddToMarkedList(string id){
+		if(markedItems.Contains(id){
+			return;
+		}
+		markedItems.Add(id);
+		StartCoroutine(_AddToMarkedList(id));
+	}
+	IEnumerator void _AddToMarkedList(string id){
+		WWWForm form = new WWWForm ();
+			
+		form.AddField ("uid", UID);
+		form.AddField ("game_id", id);
+	
+		WWW w =StatisticHandler.GetMeRightWWW(form,StatisticHandler.MARK_ITEM);
+	
+		yield return w;
+	}
+	public void RemoveFromMarkedList(string id){
+		if(!markedItems.Contains(id){
+			return;
+		}
+		markedItems.Remove(id);
+		StartCoroutine(_AddToMarkedList(id));
+	}
+	IEnumerator void _RemoveFromMarkedList(string id){
+		WWWForm form = new WWWForm ();
+			
+		form.AddField ("uid", UID);
+		form.AddField ("game_id", id);
+	
+		WWW w =StatisticHandler.GetMeRightWWW(form,StatisticHandler.UN_MARK_ITEM);
+	
+		yield return w;
+	}
+
+	public bool IsMarked(string id){
+		return markedItems.Contains(id);
+	}
+	
     public void LoadModel(SimpleSlot slot)
     {
         StartCoroutine(_LoadModel(slot));
@@ -813,7 +892,62 @@ public class ItemManager : MonoBehaviour {
         }
        
     }
-	public IEnumerator  BuyItem(string itemId,LotItemGUI gui){
+	public IEnumerator BuyMarkeditems(MarkItemGui gui,bool gold){
+		int totalCost = 0;
+		foreach(string id in markedItems){
+			if(gold){
+				totalCost+ =allShopSlot[id].goldCost;
+			}else{
+				totalCost+ =allShopSlot[id].cashCost;
+			}
+		}
+		int maxCost =0;
+		if(gold)
+			maxCost =GlobalPlayer.instance.gold;
+		else
+			maxCost = GlobalPlayer.instance.cash;
+		
+		if(maxCost>totalCost){
+			while(markedItems.Count>0){
+				string id =markedItems[0];
+				markedItems.RemoveAt(0);
+				WWWForm form = new WWWForm ();
+			
+				form.AddField ("uid", UID);
+				if(gold){
+					form.AddField ("shop_item", allShopSlot[id].goldSlot);
+				}else{
+					form.AddField ("shop_item", allShopSlot[id].cashSlot);
+				}
+				WWW w =StatisticHandler.GetMeRightWWW(form,StatisticHandler.BUY_ITEM);
+			
+				yield return w;
+			}
+			form = new WWWForm ();
+			
+			form.AddField ("uid", UID);
+			
+			IEnumerator numenator = LoadItems (form);
+			
+			while(numenator.MoveNext()){
+				yield return numenator.Current;
+			}
+            numenator = GlobalPlayer.instance.ReloadStats();
+            while (numenator.MoveNext())
+            {
+                yield return numenator.Current;
+            }
+            if (gui != null)
+            {
+                gui.CloseWindow();
+            }
+		
+		}else{
+			gui.MoneyError();	
+		
+		}
+	}
+	public IEnumerator BuyItem(string itemId,LotItemGUI gui){
 		WWWForm form = new WWWForm ();
 			
 		form.AddField ("uid", UID);

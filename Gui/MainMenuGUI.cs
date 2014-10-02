@@ -48,6 +48,13 @@ public class MainMenuGUI : MonoBehaviour {
 			loadingWidget=null;
 		}
         allWWidget.alpha = 1.0f;
+		int count =ItemManger.manager.MarkedAmount();
+		if(count>0){
+			markedPanel.alpha = 1.0f;
+			markedPanel.GetComponent<MarkItemGui>().Init(count);
+		}else{
+			markedPanel.alpha = 1.0f;
+		}
     }
 
 	void Awake(){
@@ -534,6 +541,7 @@ public class PanelsNgui
     public UIPanel settings;
     public UILabel annonce;
     public UITweener annonceTweener;
+	public UIPanel markedPanel;
 }
 [System.Serializable]
 public class LoginPanel
