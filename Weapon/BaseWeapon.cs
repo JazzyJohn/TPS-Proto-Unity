@@ -650,7 +650,7 @@ public class BaseWeapon : DestroyableNetworkObject {
 		if (!CanShoot ()) {
 			return;		
 		}
-    if (IsFired != null) IsFired(this, EventArgs.Empty);
+		if (IsFired != null) IsFired(this, EventArgs.Empty);
         LogicShoot();
         
 		if(curAmmo>0){

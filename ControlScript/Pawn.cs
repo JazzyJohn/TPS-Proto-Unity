@@ -35,6 +35,8 @@ public class singleDPS
     public GameObject killer;
     public float lastTime = 1.0f;
     public float showInterval = 1.0f;
+	//how long fire damage without signal from particleCollision
+	public float damageWithouSignalDelay= 1.0f;
     public bool noOnwer = false;
 
 }
@@ -1923,7 +1925,19 @@ public class Pawn : DamagebleObject
 
     }
 
-    public void addDPS(BaseDamage damage, GameObject killer, float fireInterval = 1.0f)
+	public override  void clearDps(GameObject killer){
+		
+        foreach (singleDPS key in activeDPS)
+        {
+            if (killer == key.killer)
+            {
+                key.noOnwer = true;
+                return;
+            }
+        }
+		
+	}
+    public override void addDPS(BaseDamage damage, GameObject killer, float fireInterval = 1.0f)
     {
         foreach (singleDPS key in activeDPS)
         {

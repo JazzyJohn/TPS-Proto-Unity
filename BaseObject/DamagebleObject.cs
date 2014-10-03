@@ -23,7 +23,14 @@ public class DamagebleObject : DestroyableNetworkObject {
 		}
 		
 	}
-
+	public virtual  void clearDps(GameObject killer){
+	
+		
+	}
+    public virtual void addDPS(BaseDamage damage, GameObject killer, float fireInterval = 1.0f)
+    {
+	
+    }
 
 
 	public bool destructableObject = true;
