@@ -456,9 +456,37 @@ public class MainMenuGUI : MonoBehaviour {
 
     public void MoneyError()
     {
-        throw new System.NotImplementedException();
+        AskMoneyShow();
     }
+    public void AskMoneyShow()
+    {
+        CamMove.RideTo(1);
+        _PanelsNgui.askAboutMoneyPanel.alpha = 1f;
+    }
+    public void AskMoneyHide()
+    {
+        CamMove.Reset();
+        
+        _PanelsNgui.askAboutMoneyPanel.alpha = 0.0f;
+    }
+    public void MoneyBuyShow()
+    {
+        CamMove.RideTo(2);
+        _PanelsNgui.askAboutMoneyPanel.alpha = 0.0f;
+        _PanelsNgui.moneyBuyPanel.alpha = 1f;
+    }
+    public void MoneyBuyHide()
+    {
+        CamMove.Reset();
+        _PanelsNgui.moneyBuyPanel.alpha = 0.0f;
+    }
+    public void AskExternalBuy(string item)
+    {
+
+        GlobalPlayer.instance.AskJsForMagazine(item);
+    } 
 }
+
 
 //Группы переменных
 
@@ -553,6 +581,8 @@ public class PanelsNgui
     public UILabel annonce;
     public UITweener annonceTweener;
 	public UIPanel markedPanel;
+    public UIPanel askAboutMoneyPanel;
+    public UIPanel moneyBuyPanel;
 }
 [System.Serializable]
 public class LoginPanel

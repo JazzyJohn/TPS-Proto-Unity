@@ -195,7 +195,8 @@ public class BaseWeapon : DestroyableNetworkObject {
 	//ID for MySqlBAse
 	public int SQLId;
 
-  public event EventHandler IsFired;
+  public event EventHandler FireStarted;
+  public event EventHandler FireStoped;
 
    
 	void Awake(){
@@ -213,6 +214,8 @@ public class BaseWeapon : DestroyableNetworkObject {
 			drawer.Init(projectileClass);
             drawer.gameObject.SetActive(false);
 		}
+    if (FireStarted != null) FireStarted(this, EventArgs.Empty);
+    if (FireStoped != null) FireStoped(this, EventArgs.Empty);
 	}
 
     public Pawn GetOwner()
@@ -650,7 +653,7 @@ public class BaseWeapon : DestroyableNetworkObject {
 		if (!CanShoot ()) {
 			return;		
 		}
-		if (IsFired != null) IsFired(this, EventArgs.Empty);
+  
         LogicShoot();
         
 		if(curAmmo>0){

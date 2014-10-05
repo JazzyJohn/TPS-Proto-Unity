@@ -994,6 +994,10 @@ public class ItemManager : MonoBehaviour {
         {
             if (gui != null)
             {
+                if (xmlDoc.SelectSingleNode("result/error").InnerText == "2")
+                {
+                    gui.Shop.MainMenu.MoneyError();
+                }
                 gui.SetError(xmlDoc.SelectSingleNode("result/errortext").InnerText);
             }
         }

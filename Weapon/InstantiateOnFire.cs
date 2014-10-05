@@ -8,18 +8,35 @@ public class InstantiateOnFire : MonoBehaviour
   public GameObject Effect;
   public float DeactivateTimeDelay = 1;
 
+  private bool isVisible;
   private GameObject effectInstance;
-	// Use this for initialization
+  private ParticleSystem[] particles;
+
 	void Start () {
-    BaseWeapon.IsFired += BaseWeapon_IsFired;
+    BaseWeapon.FireStarted += BaseWeapon_FireStarted;
+    BaseWeapon.FireStoped += BaseWeapon_FireStoped;
+	  particles = Effect.GetComponentsInChildren<ParticleSystem>();
     Effect.SetActive(false);
 	}
 
-  void BaseWeapon_IsFired(object sender, System.EventArgs e)
+  void BaseWeapon_FireStarted(object sender, System.EventArgs e)
   {
-    CancelInvoke("DeactivateEffect");
+    if (DeactivateTimeDelay > 0.01f) {
+      CancelInvoke("DeactivateEffect");
+      Invoke("DeactivateEffect", DeactivateTimeDelay);
+    }
     Effect.SetActive(true);
-    Invoke("DeactivateEffect", DeactivateTimeDelay);
+  }
+
+  void BaseWeapon_FireStoped(object sender, System.EventArgs e)
+  {
+    foreach (var particle in particles) {
+      particle.Stop();
+    }
+    if (DeactivateTimeDelay > 0.01f) {
+      CancelInvoke("DeactivateEffect");
+      Invoke("DeactivateEffect", DeactivateTimeDelay);
+    }
   }
 
   void DeactivateEffect()
