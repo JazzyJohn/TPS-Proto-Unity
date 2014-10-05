@@ -28,7 +28,7 @@ public class ContiniusGun : NetSyncGun
 	}
 	public void ClearDps (DamagebleObject target)
 	{
-		obj.clearDps(owner.gameObject);
+        target.clearDps(owner.gameObject);
 	}
 	
 	public singleDPS getId ()

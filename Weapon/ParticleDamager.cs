@@ -1,5 +1,6 @@
 using UnityEngine;
 using System.Collections;
+using System.Collections.Generic;
 
 public class ParticleDamager : MonoBehaviour {
 	
@@ -12,7 +13,7 @@ public class ParticleDamager : MonoBehaviour {
 		
 		
 
-		void FidexUpdate(){
+		void FixedUpdate(){
 			foreach(DamagebleObject obj in objectToClean){
 				gun.ClearDps(obj);
 			}
@@ -24,6 +25,7 @@ public class ParticleDamager : MonoBehaviour {
 			objectToDmg.Clear();
 		}
 	   void OnParticleCollision(GameObject other) {
+           //Debug.Log("hit " + other);
 			DamagebleObject obj =other.GetComponent<DamagebleObject>();
 			if(obj!=null){
 				objectToDmg.Add(obj);
