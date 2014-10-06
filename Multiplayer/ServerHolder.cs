@@ -118,7 +118,7 @@ public class ServerHolder : MonoBehaviour
     	// If we joined a game room, then we either created it (and auto joined) or manually selected a game to join
       if (shouldLoad)
       {
-
+		   CancelInvoke("RetryRoomCreate");	
           StartCoroutine(LoadMap(room.GetVariable("map").GetStringValue()));
           
       }
@@ -343,11 +343,16 @@ public class ServerHolder : MonoBehaviour
         NetworkController.smartFox.Send(new JoinRoomRequest(room.id));
 	}
 
-  
+    GAMEMODE lastMode;
 	public void CreateNewRoom(GAMEMODE mode) //Создание комноты (+)
 	{
         if (map == "")
         {
+			MainMenuGUI mainMenu = FindObjectOfType<MainMenuGUI> ();
+			if (mainMenu != null) {
+				mainMenu.SetMessage("Не выбрана карта");
+				mainMenu. CreateRoom();
+			}
             return;
         }
 		/*ExitGames.Client.Photon.Hashtable customProps = new ExitGames.Client.Photon.Hashtable();
@@ -356,6 +361,7 @@ public class ServerHolder : MonoBehaviour
 		exposedProps[0] = "MapName";
        
         */
+		lastMode= mode;
         bool isVisible = true;
         int roomCnt = newRoomMaxPlayers;
         RoomSettings settings = new RoomSettings(newRoomName);
@@ -417,7 +423,7 @@ public class ServerHolder : MonoBehaviour
         settings.MaxSpectators = 0;
         settings.Extension = new RoomExtension(ExtName, ExtClass);
         NetworkController.smartFox.Send(new CreateRoomRequest(settings, true, NetworkController.smartFox.LastJoinedRoom));
-
+		Invoke("RetryRoomCreate", 10);
       
 	}
 
@@ -434,6 +440,12 @@ public class ServerHolder : MonoBehaviour
 		}
 		return ((float)progress.finishedLoader)/progress.allLoader*100f +progress.curLoader/progress.allLoader;
 	}
+	public void RetryRoomCreate(){
+		CreateNewRoom(lastMode);
+		
+	}
+	
+	
 	IEnumerator LoadMap (string mapName,bool next =false)
 	{
 		AsyncOperation async;

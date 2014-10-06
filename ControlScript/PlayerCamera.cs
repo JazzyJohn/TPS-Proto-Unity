@@ -6,8 +6,8 @@ public class PlayerCamera : MonoBehaviour {
 
     public Transform cameraTransform;
 
-    protected Transform minimapTransform;
-    protected Camera minimapCamera;
+    /*protected Transform minimapTransform;
+    protected Camera minimapCamera;*/
     protected Transform _target;
     protected Pawn _pawn;
 

@@ -113,10 +113,10 @@ public class ThirdPersonCamera : PlayerCamera
 		centerPoint.z = minimapOffset.y;
 		centerPoint.x = 0.5f;
 		centerPoint.y = 0.5f;
-	
+	/*
 		if (minimapTransform != null) {
 						minimapTransform.position = targetCenter + minimapTransform.position - minimapCamera.ViewportToWorldPoint (centerPoint);
-				}
+				}*/
 	//	DebugDrawStuff();
 	
 		// Calculate the current & target rotation angles
@@ -267,7 +267,7 @@ public class ThirdPersonCamera : PlayerCamera
 		// Always look at the target	
 		Vector3 relativePos=(targetforCamera + localTargetOffset)-cameraTransform.position;
 
-			cameraTransform.rotation = Quaternion.LookRotation (-direction);
+		cameraTransform.rotation = Quaternion.LookRotation (-direction);
 
 		///SetUpRotation(targetCenter+ localTargetOffset, targetHead);
 	}
