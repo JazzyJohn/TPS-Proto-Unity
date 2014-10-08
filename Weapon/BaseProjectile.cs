@@ -84,6 +84,8 @@ public class BaseProjectile : MonoBehaviour
     public enum HITEFFECT { Destruction, Rebound, Penetration, Cluster, Sticking, Flak, NextTarget }
 
     public HITEFFECT projHtEffect;
+	
+    public HITEFFECT projHtPersonEffect;
 
     public float jumpDistance;
 
@@ -385,7 +387,7 @@ public class BaseProjectile : MonoBehaviour
         {
             DamageLogic(obj, ldamage);
             shootTarget = obj;
-            switch (projHtEffect)
+            switch (projHtPersonEffect)
             {
 
                 case HITEFFECT.NextTarget:
@@ -458,6 +460,28 @@ public class BaseProjectile : MonoBehaviour
                         }
                     }
 
+                    break;
+				case HITEFFECT.Penetration:
+                   
+                    proojHitCnt++;
+                    if (proojHitCnt > projHitMax)
+                    {
+
+                        ExplosionDamage(exploPosition);
+                            
+                          
+                    }else{
+						if (!replication)
+						{
+						  
+							
+							hitDelay =  Time.time+ Mathf.Max(1.0f/startImpulse,0.1f);
+							
+							ProjectileManager.instance.InvokeRPC("NewHitCount", projId, proojHitCnt);
+						}
+					
+					}
+                   
                     break;
                 default:
                     used = true;
