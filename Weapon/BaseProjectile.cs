@@ -21,7 +21,8 @@ public class BaseDamage{
 	public bool sendMessage= true;
 	[HideInInspector] 
 	public bool isContinius =false;
-	
+	[HideInInspector] 
+	public int shootWeapon = -1;
 	
     public BaseDamage()
     {
@@ -33,6 +34,7 @@ public class BaseDamage{
         knockOut = old.knockOut;
 		splash = old.splash;
         weapon = old.weapon;
+		shootWeapon= old.shootWeapon;
 	}
 
 }

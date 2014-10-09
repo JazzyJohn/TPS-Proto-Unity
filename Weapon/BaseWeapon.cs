@@ -213,9 +213,11 @@ public class BaseWeapon : DestroyableNetworkObject {
 			drawer = GetComponentInChildren<TrajectoryDrawer>();
 			drawer.Init(projectileClass);
             drawer.gameObject.SetActive(false);
+			
 		}
-    if (FireStarted != null) FireStarted(this, EventArgs.Empty);
-    if (FireStoped != null) FireStoped(this, EventArgs.Empty);
+		damageAmount.shootWeapon = SQLId;
+		if (FireStarted != null) FireStarted(this, EventArgs.Empty);
+		if (FireStoped != null) FireStoped(this, EventArgs.Empty);
 	}
 
     public Pawn GetOwner()

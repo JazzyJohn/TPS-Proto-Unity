@@ -1039,12 +1039,10 @@ public class NetworkController : MonoBehaviour {
     /// pawnDiedByKill request to server
     /// </summary>	
 
-    public void PawnDiedByKillRequest(int id, int player)
+    public void PawnDiedByKillRequest( ISFSObject data)
     {
 
-        ISFSObject data = new SFSObject();
-        data.PutInt("viewId", id);
-        data.PutInt("player", player);
+       
         ExtensionRequest request = new ExtensionRequest("pawnDiedByKill", data, serverHolder.gameRoom);
         smartFox.Send(request);
     }
@@ -1637,7 +1635,7 @@ public class NetworkController : MonoBehaviour {
         pawn.PawnKill();
         int player = dt.GetInt("player");
         if(player==_smartFox.MySelf.Id){
-              GetPlayer(player).PawnKill(pawn.player,pawn.myTransform.position);
+              GetPlayer(player).PawnKill(pawn.player,pawn.myTransform.position, dt.GetInt("weaponId").ToString());
 
             
         }

@@ -56,6 +56,12 @@ public class LevelingManager : MonoBehaviour, LocalPlayerListener,GameListener{
 		return stats;
 	
 	}
+	class ExpReward : Reward{
+		int amount;
+		public ExpReward(int amount){
+			this.amoutn = amount;
+		}
+	}
 	public Dictionary<string,int> expDictionary = new Dictionary<string, int>();
 	
 
@@ -113,7 +119,9 @@ public class LevelingManager : MonoBehaviour, LocalPlayerListener,GameListener{
 		}
 		foreach (XmlNode node in xmlDoc.SelectNodes("leveling/expdictionary/slots")) {
 			//Debug.Log ("LEVELING" +node.SelectSingleNode("name").InnerText+" "+node.SelectSingleNode("value").InnerText);
-			expDictionary.Add(node.SelectSingleNode("name").InnerText,int.Parse(node.SelectSingleNode("value").InnerText));
+			ExpReward reward = new ExpReward(int.Parse(node.SelectSingleNode("value").InnerText));
+			reward.descr =node.SelectSingleNode("name").InnerText;
+			expDictionary.Add(node.SelectSingleNode("name").InnerText,reward);
 		}
 		//Parse  Data
 		playerLvl = int.Parse(xmlDoc.SelectSingleNode("leveling/player/currentlvl").InnerText);
@@ -127,7 +135,9 @@ public class LevelingManager : MonoBehaviour, LocalPlayerListener,GameListener{
 		isLoaded = true;
 	}
 	//adding exp to current
-	public bool UpExp(int exp,int selected=-1){
+	public bool UpExp(string cause,int selected=-1){
+		int exp = expDictionary[cause].amount;
+		expDictionary[cause].Increment();
 		bool sendByLvl=false;
 		//Check if we on max lvl
 		if(playerLvl<=playerNeededExp.Length){
@@ -188,38 +198,38 @@ public class LevelingManager : MonoBehaviour, LocalPlayerListener,GameListener{
 			
 		}
 	}
-	public void EventPawnKillPlayer(Player target){
+	public void EventPawnKillPlayer(Player target,string weapon_id){
 		if (target == myPlayer) {
-			UpExp(expDictionary[PARAM_KILL],target.selected);	
+			UpExp(PARAM_KILL,target.selected);	
 		}
 	}
-	public void EventPawnKillAI(Player target){
+	public void EventPawnKillAI(Player target,string weapon_id){
 	
 
 		if (target == myPlayer) {
 
-			UpExp(expDictionary[PARAM_KILL_AI],target.selected);	
+			UpExp(PARAM_KILL_AI,target.selected);	
 		}
 	
 	}
 	public void EventTeamWin(int teamNumber){
 		//if we not winner so no change in exp, or we a winner but no send were initiate we sync data 
-		if (myPlayer.team	!= teamNumber||(myPlayer.team == teamNumber&&!UpExp(expDictionary[PARAM_WIN]))) {
+		if (myPlayer.team	!= teamNumber||(myPlayer.team == teamNumber&&!UpExp(PARAM_WIN))) {
 			SyncLvl();
 		}
 		
 	}
 	public void EventKilledByFriend(Player target,Player friend){
 		if (target == myPlayer) {
-			UpExp(expDictionary[PARAM_KILL_BY_FRIEND],target.selected);	
+			UpExp(PARAM_KILL_BY_FRIEND,target.selected);	
 		}
 	}
-	public void EventKilledAFriend(Player target,Player friend){
+	public void EventKilledAFriend(Player target,Player friend,string weapon_id){
 		if (target == myPlayer) {
-			UpExp(expDictionary[PARAM_KILL_FRIEND],target.selected);	
+			UpExp(PARAM_KILL_FRIEND,target.selected);	
 		}
 	}
-	public void EventPawnDeadByPlayer(Player target){}
+	public void EventPawnDeadByPlayer(Player target,string weapon_id){}
 	public void EventPawnDeadByAI(Player target){}
 	public void EventPawnGround(Player target){	}
 	public void EventPawnDoubleJump(Player target){}
@@ -231,6 +241,12 @@ public class LevelingManager : MonoBehaviour, LocalPlayerListener,GameListener{
 	public void EventStart(){}
 	public void EventRestart(){
 			SyncLvl();
+	}
+	public	void EventJuggerTake(Player target){
+	
+	}
+	public void EventJuggerKill(Player target,string weapon_id){
+	
 	}
 	public void EventRoomFinished(){}
 	private static LevelingManager s_Instance = null;

@@ -234,7 +234,11 @@ public class FoxView : MonoBehaviour {
 
     public void PawnDiedByKill(int userId)
     {
-        NetworkController.Instance.PawnDiedByKillRequest(viewID, userId);
+		ISFSObject data = new SFSObject();
+        data.PutInt("viewId", viewID);
+        data.PutInt("player", userId);
+		pawn.InfoAboutDeath(data);
+        NetworkController.Instance.PawnDiedByKillRequest(data);
     }
 	
 	public void VipSpawnedRequest(PawnModel pawn)

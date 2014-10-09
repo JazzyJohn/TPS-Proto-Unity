@@ -4,17 +4,42 @@ using System.Xml;
 using System.Collections;
 using System.Collections.Generic;
 //using System.Threading;
+public class Reward{
+	int count = 0;
+	public string descr;
+	public void Increment(){
+		count++;
+	}	
+	public void GetRewardCounter(){
+		return count;
+	}
+	public void Reset(){
+		count= 0;
+	}
 
+}
 public class  RewardManager : MonoBehaviour, LocalPlayerListener,GameListener{ 
 		
 	public const string PARAM_KILL = "Kill";
 	public const string PARAM_WIN = "Win";
+	public const string PARAM_LOSE = "Lose";
 	public const string PARAM_KILL_AI= "KillAI"; 
 	public const string PARAM_KILL_FRIEND = "KillFriend";
 	public const string PARAM_KILL_BY_FRIEND= "KilledByFriend";
     public const string PARAM_ROOM_FINISHED = "RoomFinished";
-
-	public Dictionary<string,int> rewardMoneyDictionary = new Dictionary<string, int>();
+	public const string PARAM_JUGGER_TAKE= "JuggerTake";
+    public const string PARAM_JUGGER_KILL= "JuggerKill";
+	
+	class MoneyReward : Reward{
+		public int cash = 0;
+		public int gold =0;
+		public MoneyReward(cash,gold){
+			this.cash = cash;
+			this.gold = gold;
+		}
+	}
+	
+	public Dictionary<string,MoneyReward> rewardMoneyDictionary = new Dictionary<string, MoneyReward>();
 
     private string UID;
 	public void Init(string uid){
@@ -44,14 +69,19 @@ public class  RewardManager : MonoBehaviour, LocalPlayerListener,GameListener{
 		xmlDoc.LoadXml(XML);
 		foreach (XmlNode node in xmlDoc.SelectNodes("reward/money")) {
 			//Debug.Log ("Reward" +node.SelectSingleNode("name").InnerText+" "+node.SelectSingleNode("value").InnerText);
-            rewardMoneyDictionary.Add(node.SelectSingleNode("name").InnerText, int.Parse(node.SelectSingleNode("value").InnerText));
+			MoneyReward reward = new MoneyReward(int.Parse(node.SelectSingleNode("value").InnerText),int.Parse(node.SelectSingleNode("valueGold").InnerText));
+			reward.descr =node.SelectSingleNode("name").InnerText;
+            rewardMoneyDictionary.Add(node.SelectSingleNode("name").InnerText,reward);
 		}
 	
 	}
 	private int upCash = 0;
+    private int upGold = 0;
 	public void UpMoney(string reason){
         if(rewardMoneyDictionary.ContainsKey(reason)){
-	    	upCash+= rewardMoneyDictionary[reason];
+	    	upCash+= rewardMoneyDictionary[reason].cash;
+			upGold+= rewardMoneyDictionary[reason].gold;
+			rewardMoneyDictionary[reason].Increment();
         }
 		
 	}
@@ -61,7 +91,9 @@ public class  RewardManager : MonoBehaviour, LocalPlayerListener,GameListener{
 			
 		form.AddField ("uid", UID);
 		form.AddField ("upCash", upCash);
+		form.AddField ("upGold", upGold);
         upCash = 0;
+		upGold=0;
 		StartCoroutine(_SyncReward (form));
 	}
 	private IEnumerator _SyncReward(WWWForm form){
@@ -79,12 +111,12 @@ public class  RewardManager : MonoBehaviour, LocalPlayerListener,GameListener{
 			
 		}
 	}
-	public void EventPawnKillPlayer(Player target){
+	public void EventPawnKillPlayer(Player target,string weapon_id){
 		if (target == myPlayer) {
 			UpMoney(PARAM_KILL);	
 		}
 	}
-	public void EventPawnKillAI(Player target){
+	public void EventPawnKillAI(Player target,string weapon_id){
 	
 
 		if (target == myPlayer) {
@@ -98,6 +130,9 @@ public class  RewardManager : MonoBehaviour, LocalPlayerListener,GameListener{
 		if (myPlayer.team	!= teamNumber||(myPlayer.team == teamNumber)) {
             UpMoney(PARAM_WIN);
 			SyncReward();
+		}else{
+		   UpMoney(PARAM_LOSE);
+			SyncReward();
 		}
 		
 	}
@@ -106,16 +141,22 @@ public class  RewardManager : MonoBehaviour, LocalPlayerListener,GameListener{
 			UpMoney(PARAM_KILL_BY_FRIEND);	
 		}
 	}
-	public void EventKilledAFriend(Player target,Player friend){
+	public void EventKilledAFriend(Player target,Player friend,string weapon_id){
 		if (target == myPlayer) {
 			UpMoney(PARAM_KILL_FRIEND);	
 		}
 	}
-	public void EventPawnDeadByPlayer(Player target){
+	public void EventPawnDeadByPlayer(Player target,string weapon_id){
 		SyncReward();
 	}
 	public void EventPawnDeadByAI(Player target){
 		SyncReward();
+	}
+	public	void EventJuggerTake(Player target){
+	
+	}
+	public void EventJuggerKill(Player target,string weapon_id){
+	
 	}
 	public void EventPawnGround(Player target){	}
 	public void EventPawnDoubleJump(Player target){}

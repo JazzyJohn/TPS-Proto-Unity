@@ -1,10 +1,13 @@
 ﻿using UnityEngine;
 using System.Collections;
-
+public struct KillInfo{
+	public int weaponId;
+}
 public class DamagebleObject : DestroyableNetworkObject {
 
 	private float _health;
-
+	
+	private KillInfo killInfo;
 	public float health{
 		
 		get {
@@ -48,6 +51,9 @@ public class DamagebleObject : DestroyableNetworkObject {
 		if (destructableObject){
 			health-= damage.Damage;
 			if(health<=0){
+				
+					killInfo.weaponId=damage.shootWeapon;
+				
 				KillIt(killer);
 
 			}

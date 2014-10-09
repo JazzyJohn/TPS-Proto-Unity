@@ -21,6 +21,8 @@ public class Achievement{
 	public int achievementId;
 	public Texture2D textureIcon;
 	public bool isDone = false;
+	public int amount  =0;
+	public bool isMultiplie = false;
 	public override string ToString(){
 		return name + " " + description + " " + achievementId + " " + achivParams.ToString();
 	}
@@ -94,6 +96,7 @@ public class AchievementManager : MonoBehaviour, LocalPlayerListener{
 		xmlDoc.LoadXml(XML);
 		ongoingAchivment= new List<Achievement>();
 		finishedAchivment= new List<Achievement>();
+		daylyFinished =bool.Parse(xmlDoc.SelectSingleNode("achivements/daylyfinish").InnerText);
 		foreach (XmlNode node in xmlDoc.SelectNodes("achivements/achivement")) {
 			Achievement achivment = new Achievement();
 			achivment.name = node.SelectSingleNode("name").InnerText;
@@ -110,15 +113,30 @@ public class AchievementManager : MonoBehaviour, LocalPlayerListener{
 				AchievementParam param = new AchievementParam();
 				param.current =0.0f;
 				param.needed = float.Parse(paramNode.SelectSingleNode("value").InnerText);
+				param.resetEvent = paramNode.SelectSingleNode("resetname").InnerText;
 				achivment.achivParams.Add(paramNode.SelectSingleNode("name").InnerText,param);
 			}
+				achivment.amount  =int.Parse(node.SelectSingleNode("amount").InnerText);
 //			Debug.Log("ACHIVMENT " +achivment);
 			bool open = bool.Parse(node.SelectSingleNode("open").InnerText);
+			achivment.isMultiplie = bool.Parse(node.SelectSingleNode("multiplie").InnerText);
 			//Debug.Log(open);
 			if(!open){
 				ongoingAchivment.Add(achivment);
 			}else{
-				finishedAchivment.Add(achivment);
+				
+				if(multiplie){
+					bool ready = bool.Parse(node.SelectSingleNode("ready").InnerText);
+					if(ready){
+						ongoingAchivment.Add(achivment);
+					}else{
+						finishedAchivment.Add(achivment);
+					}
+				}else{
+					finishedAchivment.Add(achivment);
+				}
+				
+				
 			}
 
 		}
@@ -131,12 +149,15 @@ public class AchievementManager : MonoBehaviour, LocalPlayerListener{
 	private List<Achievement> ongoingAchivment;
 
 	private List<Achievement> finishedAchivment;
+	
+	public bool daylyFinished = false;
 
 	private Thread myThread;
 
 	private void AchivmentLoop(){
 		while (true) {
 			//Debug.Log (incomeQueue.Count	);
+			try{
 						while (incomeQueue.Count>0) {
 								IncomingMessage mess = incomeQueue.Dequeue ();
                                 //Debug.Log(mess.param);
@@ -145,6 +166,12 @@ public class AchievementManager : MonoBehaviour, LocalPlayerListener{
 										if (achiv.achivParams.ContainsKey (mess.param)) {
 					
 												achiv.achivParams [mess.param].current += mess.delta;
+										}
+										foreach(AchievementParam param in achiv.achivParams ) {
+											if(param.resetEvent==mess.param){
+												param.current =0;
+											}
+										
 										}
 								}
 						}
@@ -162,6 +189,9 @@ public class AchievementManager : MonoBehaviour, LocalPlayerListener{
 						//	
 					
 						Thread.Sleep (1000);
+					}catch( Exeption e){
+					
+					}
 				}
 	}
 	protected void SyncAchievement(List<int> syncAchivment){
@@ -171,8 +201,22 @@ public class AchievementManager : MonoBehaviour, LocalPlayerListener{
 		foreach(int id in syncAchivment){
 			form.AddField ("ids[]", id);
 		}
-		StatisticHandler.instance.StartCoroutine(StatisticHandler.SendForm (form,StatisticHandler.SAVE_ACHIVE));
 		
+		StatisticHandler.instance.StartCoroutine(SendAchive(form));
+		
+	}
+	IEnumerator SendAchive(WWWForm form){
+		WWW www =GetMeRightWWW(form,StatisticHandler.SAVE_ACHIVE);
+		yield return w;
+		
+		XmlDocument xmlDoc = new XmlDocument();
+		xmlDoc.LoadXml(w.text);
+		
+		if(xmlDoc.SelectSingleNode("result/error").InnerText=="0"){
+			daylyFinished =bool.Parse(xmlDoc.SelectSingleNode("result/daylyfinish").InnerText);
+		}else{
+		
+		}
 	}
 	
 	void OnDestroy(){
@@ -234,13 +278,19 @@ public class AchievementManager : MonoBehaviour, LocalPlayerListener{
 		}
 	}
 
-	public void EventPawnDeadByPlayer(Player target){
+	public void EventPawnDeadByPlayer(Player target,string weapon_id){
 		if (target == myPlayer) {
 			IncomingMessage mess = new IncomingMessage();
 			mess.delta=1.0f;
 			mess.param =PARAM_DEATH;
 		
 			incomeQueue.Enqueue(mess);
+			mess = new IncomingMessage();
+			mess.delta=1.0f;
+			mess.param =PARAM_DEATH+"by"+weapon_id;
+		
+			incomeQueue.Enqueue(mess);
+
 
 		}
 	}
@@ -254,11 +304,16 @@ public class AchievementManager : MonoBehaviour, LocalPlayerListener{
 			incomeQueue.Enqueue(mess);
 		}
 	}
-	public void EventPawnKillPlayer(Player target){
+	public void EventPawnKillPlayer(Player target,string weapon_id){
 		if (target == myPlayer) {
 			IncomingMessage mess = new IncomingMessage();
 			mess.delta=1.0f;
 			mess.param =PARAM_KILL;
+			incomeQueue.Enqueue(mess);
+			mess = new IncomingMessage();
+			mess.delta=1.0f;
+			mess.param =PARAM_KILL+"by"+weapon_id;
+		
 			incomeQueue.Enqueue(mess);
 		}
 	}
@@ -272,7 +327,7 @@ public class AchievementManager : MonoBehaviour, LocalPlayerListener{
 			incomeQueue.Enqueue(mess);
 		}
 	}
-	public void EventKilledAFriend(Player target,Player friend){
+	public void EventKilledAFriend(Player target,Player friend,string weapon_id){
 		if (target == myPlayer) {
 			IncomingMessage mess = new IncomingMessage();
 			mess.delta=1.0f;
@@ -281,11 +336,16 @@ public class AchievementManager : MonoBehaviour, LocalPlayerListener{
 		}
 	}
 
-	public void EventPawnKillAI(Player target){
+	public void EventPawnKillAI(Player target,string weapon_id){
 		if (target == myPlayer) {
 			IncomingMessage mess = new IncomingMessage();
 			mess.delta=1.0f;
 			mess.param =PARAM_KILL_AI;
+			incomeQueue.Enqueue(mess);
+			mess = new IncomingMessage();
+			mess.delta=1.0f;
+			mess.param =PARAM_KILL_AI+"by"+weapon_id;
+		
 			incomeQueue.Enqueue(mess);
 		}
 	}
@@ -311,6 +371,12 @@ public class AchievementManager : MonoBehaviour, LocalPlayerListener{
 	}
 	public void EventEndSprintRun(Player target,Vector3 position){
 
+	}
+	public	void EventJuggerTake(Player target){
+		
+		}
+	public void EventJuggerKill(Player target,string weapon_id){
+	
 	}
 	public void EventEndWallRun(Player target, Vector3 position){
 		if (target == myPlayer) {
@@ -340,5 +406,13 @@ public class AchievementManager : MonoBehaviour, LocalPlayerListener{
 			mess.param =PARAM_ROOM_FINISHED;
 			incomeQueue.Enqueue(mess);
 	
+	
+	
+	}
+	public void UnEvnetAchive(string key, float value){
+		IncomingMessage mess = new IncomingMessage();
+		mess.delta=value;
+		mess.param =key;
+		incomeQueue.Enqueue(mess);
 	}
 }

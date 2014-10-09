@@ -793,7 +793,12 @@ public class Pawn : DamagebleObject
                     killerID = killerPlayer.playerView.GetId();
                     if (foxView.isMine && killerPawn.foxView.isMine)
                     {
-                        killerPlayer.PawnKill(player, myTransform.position);
+						RobotPawn robot = this as RobotPawn;
+						if(robot!=null){
+								killerPlayer.JuggerKill(player, myTransform.position,killInfo.weaponId.ToString());
+						}else{
+							killerPlayer.PawnKill(player, myTransform.position,killInfo.weaponId.ToString());
+						}
                     }
                 }
             }
@@ -810,7 +815,7 @@ public class Pawn : DamagebleObject
             }
             else
             {
-                player.PawnDead(killerPlayer, killerPawn);
+                player.PawnDead(killerPlayer, killerPawn,killInfo.weaponId.ToString());
             }
         }
 
@@ -3110,7 +3115,10 @@ public class Pawn : DamagebleObject
             }
         }
     }
-
+	public void InfoAboutDeath(ISFSObject data){
+		
+		data.SetInt("weaponId",killInfo.weaponId);
+	}
 
 
     //For machine we turn off render but leave logic and movement 
@@ -3193,4 +3201,5 @@ public class Pawn : DamagebleObject
             }
         }
     }
+	
 }

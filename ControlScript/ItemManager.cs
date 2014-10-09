@@ -215,17 +215,21 @@ public class ItemManager : MonoBehaviour {
        
         foreach (FromDBWeapon weapon in weaponIndexTable.Values)
         {
-            weapon.gameSlot = weaponPrefabsListbyId[weapon.weaponId].slotType;
-            weapon.name = weaponPrefabsListbyId[weapon.weaponId].weaponName;
-            weaponPrefabsListbyId[weapon.weaponId].HUDIcon = weapon.textureGUI;
+			if( weaponPrefabsListbyId.ContainsKey(weapon.weaponId)){
+				weapon.gameSlot = weaponPrefabsListbyId[weapon.weaponId].slotType;
+				weapon.name = weaponPrefabsListbyId[weapon.weaponId].weaponName;
+				weaponPrefabsListbyId[weapon.weaponId].HUDIcon = weapon.textureGUI;
+			}
         }
         if (invItems.ContainsKey(ShopSlotType.WEAPON))
         {
             foreach (InventorySlot weapon in invItems[ShopSlotType.WEAPON])
             {
-                weapon.gameType = (int)weaponPrefabsListbyId[weapon.ingamekey].slotType;
-                Debug.Log(weapon.name + " " + weapon.gameType);
-                weaponPrefabsListbyId[weapon.ingamekey].HUDIcon = weapon.texture;
+				if( weaponPrefabsListbyId.ContainsKey(weapon.ingamekey)){
+					weapon.gameType = (int)weaponPrefabsListbyId[weapon.ingamekey].slotType;
+					Debug.Log(weapon.name + " " + weapon.gameType);
+					weaponPrefabsListbyId[weapon.ingamekey].HUDIcon = weapon.texture;
+				}
             }
 
         }
@@ -234,8 +238,11 @@ public class ItemManager : MonoBehaviour {
            
             if (index.prefabId != -1)
             {
-                int gameSlot = (int)weaponPrefabsListbyId[index.prefabId].slotType;
-                Choice.SetChoice(gameSlot, index.gameClass, index);
+				if( weaponPrefabsListbyId.ContainsKey(index.prefabId)){
+					int gameSlot = (int)weaponPrefabsListbyId[index.prefabId].slotType;
+					Choice.SetChoice(gameSlot, index.gameClass, index);
+				
+				}
                    
             }
         }
@@ -416,11 +423,17 @@ public class ItemManager : MonoBehaviour {
 	}	
 	public void SetNewWeapon(BaseWeapon prefab){
 		//Debug.Log (prefab);
+		
 		weaponPrefabsListbyId [prefab.SQLId] = prefab;
+
 		//weaponPrefabsListbyId[prefab.SQLId].HUDIcon = weaponIndexTable[prefab.SQLId].textureGUI;
 	}
 	public BaseWeapon GetWeaponprefabByID(WeaponIndex index){
-        return weaponPrefabsListbyId[index.prefabId];
+		if( weaponPrefabsListbyId.ContainsKey(index.prefabId)){
+			return weaponPrefabsListbyId[index.prefabId];
+		}else{
+			return weaponPrefabsListbyId[0];
+		}
 	}
 	public static GameClassEnum gameClassPase(string text){
 		switch (text) {

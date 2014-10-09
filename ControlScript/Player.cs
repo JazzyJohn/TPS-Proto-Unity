@@ -420,7 +420,7 @@ public class Player : MonoBehaviour {
     }
 	
 	
-	public void PawnDead(Player Killer,Pawn killerPawn ){
+	public void PawnDead(Player Killer,Pawn killerPawn,string weaponId ){
 	
 
 		int pawnViewId =0;
@@ -428,7 +428,7 @@ public class Player : MonoBehaviour {
          
 		
 			PVPGameRule.instance.Kill (Killer.team);
-			EventHolder.instance.FireEvent(typeof(LocalPlayerListener),"EventPawnDeadByPlayer",this);
+			EventHolder.instance.FireEvent(typeof(LocalPlayerListener),"EventPawnDeadByPlayer",this,weaponId);
 		} else {
             PVPGameRule.instance.PlayerDeath();
 			EventHolder.instance.FireEvent(typeof(LocalPlayerListener),"EventPawnDeadByAI",this);
@@ -460,7 +460,19 @@ public class Player : MonoBehaviour {
         }	
 
 	}
-	public void PawnKill(Player victim,Vector3 position){
+	public void JuggerKill(Player victim,Vector3 position,string weaponId){
+		if (!playerView.isMine)
+        {
+			return;
+		
+		}
+	
+		if (victim != null) {
+		    EventHolder.instance.FireEvent(typeof(LocalPlayerListener), "EventJuggerKill", this,weaponId);
+		}
+	}
+	
+	public void PawnKill(Player victim,Vector3 position,string weaponId){
 		if (!playerView.isMine)
         {
 			return;
@@ -470,12 +482,12 @@ public class Player : MonoBehaviour {
 		if (victim != null) {
             //TODO: move text to config
 
-            EventHolder.instance.FireEvent(typeof(LocalPlayerListener), "EventPawnKillPlayer", this);
+            EventHolder.instance.FireEvent(typeof(LocalPlayerListener), "EventPawnKillPlayer", this,weaponId);
           
 
             if (isPlayerFriend(victim.UID))
             {
-                EventHolder.instance.FireEvent(typeof(LocalPlayerListener), "EventKilledAFriend", this, victim);
+                EventHolder.instance.FireEvent(typeof(LocalPlayerListener), "EventKilledAFriend", this, victim,weaponId);
             }
             killInRow++;
             switch (killInRow)
@@ -516,7 +528,7 @@ public class Player : MonoBehaviour {
 		} else {
             //TODO: move text to config
             PlayerMainGui.instance.Annonce(AnnonceType.AIKILL);
-            EventHolder.instance.FireEvent(typeof(LocalPlayerListener), "EventPawnKillAI", this);
+            EventHolder.instance.FireEvent(typeof(LocalPlayerListener), "EventPawnKillAI", this,weaponId);
             StatisticHandler.SendPlayerKillNPC(UID, PlayerName);
 		}
 
@@ -586,6 +598,7 @@ public class Player : MonoBehaviour {
         robotPawn.MySelfEnter();
 		currentPawn.DeActivate();
 		currentPawn.transform.parent = robotPawn.transform;
+		EventHolder.instance.FireEvent(typeof(LocalPlayerListener), "EventJuggerTake", this);
 		robotPawn.Activate ();
 	}
 	public void ExitBot(){
