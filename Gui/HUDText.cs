@@ -122,6 +122,7 @@ public class HUDText : MonoBehaviour
 		ne.PerfabInfo = ne.Perfab.GetComponent<PerfabMessageInfo>();
 		ne.Type = TypeMessage.Perfab;
         ne.label = ne.PerfabInfo.Label;
+        ne.label.keepCrispWhenShrunk = UILabel.Crispness.Never;
         ne.Sprite = ne.PerfabInfo.Sprite;
 		mList.Add(ne);
 		++counter;
@@ -169,6 +170,7 @@ public class HUDText : MonoBehaviour
 			ne.label.name = counter.ToString();
 			ne.label.effectStyle = effect;
 			ne.label.bitmapFont = font;
+            ne.label.keepCrispWhenShrunk = UILabel.Crispness.Never;
 			ne.Type = TypeMessage.Texts;
 
 			ne.label.cachedTransform.localScale = new Vector3(0.01f, 0.01f, 0.01f);

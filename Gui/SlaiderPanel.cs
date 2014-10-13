@@ -103,6 +103,7 @@ public class SlaiderPanel : MonoBehaviour {
 
 			objectnews.transform.parent = allNewsPivot;
 			objectnews.transform.localScale = new Vector3(1f,1f,1f);
+            objectnews.transform.localEulerAngles = new Vector3(0f, 0f, 0f);
 
 			objectnews.transform.localPosition   = new Vector3(offset*i, 0, 0);
 			//objectnews.GetComponent<UIWidget>().SetDimensions((int)allNewsPanel.baseClipRegion.w, (int)allNewsPanel.baseClipRegion.z);

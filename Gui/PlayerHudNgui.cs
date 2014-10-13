@@ -31,7 +31,7 @@ public class PlayerHudNgui : MonoBehaviour {
 
 
     public UILabel healthLabel;
-    public UILabel juggernautDropTime;
+    //public UILabel juggernautDropTime;
     public UILabel ammoInGun;
     public UILabel maxAmmoInGun;
     public UILabel ammoInBag;
@@ -126,7 +126,7 @@ public class PlayerHudNgui : MonoBehaviour {
             
             if (healthLabel) healthLabel.text = LocalPlayer.GetPlayerStats().health.ToString("0");
 
-            if (juggernautDropTime) juggernautDropTime.text = Stats.robotTime.ToString("0.0") ;
+            //if (juggernautDropTime) juggernautDropTime.text = Stats.robotTime.ToString("0.0") ;
 
 			if ( Stats.gun){
 

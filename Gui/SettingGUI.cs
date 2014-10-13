@@ -270,7 +270,7 @@ public class SettingGUI : MonoBehaviour {
 
                     }
                     graphicSetting.Graphic.text = QualitySettings.names[index];
-                    Debug.Log(((float)index) / (graphicSetting.GraphicScroll.numberOfSteps) + " " + QualitySettings.names[index]);
+                  //  Debug.Log(((float)index) / (graphicSetting.GraphicScroll.numberOfSteps) + " " + QualitySettings.names[index]);
                     graphicSetting.GraphicScroll.value =( (float)index) / (graphicSetting.GraphicScroll.numberOfSteps-1);
 
                 } 
@@ -281,7 +281,7 @@ public class SettingGUI : MonoBehaviour {
                 }
             
         }else{
-            Debug.Log( AllResolution[arg1]);
+           // Debug.Log( AllResolution[arg1]);
             ValueLabel.text = AllResolution[arg1];
         }
 

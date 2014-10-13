@@ -5,7 +5,9 @@ using System.Collections.Generic;
 
 
 public class MapDownloader : MonoBehaviour {
-	public static MapDownloader instance;
+
+    public GameObject playerHud;
+	/*public static MapDownloader instance;
     protected bool instantiated;
 	
 	
@@ -17,7 +19,7 @@ public class MapDownloader : MonoBehaviour {
     protected WWW www;
 
     public AssetBundle bundle;
-	public GameObject playerHud;
+	
 
 	public bool isReady()
 	{
@@ -122,7 +124,7 @@ public class MapDownloader : MonoBehaviour {
                 }
                 */
                 //			Debug.Log (sp.transform.position);
-
+    /*
                 Debug.Log("MapDownloader has been instantiated.");
                 instantiated = true;
                 inProgress = false;
@@ -132,5 +134,5 @@ public class MapDownloader : MonoBehaviour {
 		//Destroy(this);
 	}
 	
-
+*/
 }

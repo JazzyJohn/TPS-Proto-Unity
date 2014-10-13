@@ -94,6 +94,7 @@ public class AchievementManager : MonoBehaviour, LocalPlayerListener{
 	protected IEnumerator ParseList(string XML){
 		XmlDocument xmlDoc = new XmlDocument();
 		xmlDoc.LoadXml(XML);
+//        Debug.Log(XML);
 		ongoingAchivment= new List<Achievement>();
 		finishedAchivment= new List<Achievement>();
 		daylyFinished =bool.Parse(xmlDoc.SelectSingleNode("achivements/daylyfinish").InnerText);

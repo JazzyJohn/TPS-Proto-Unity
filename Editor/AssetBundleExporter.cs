@@ -44,7 +44,7 @@ public class AssetBundleExporter : EditorWindow
 	static List<string> mExcludeFileExt = new List<string>();
 	
 	// Add menu named "My Window" to the Window menu
-	[MenuItem ("Window/AssetBundle Exporter")]
+    [MenuItem("Assets/AssetBundle Exporter")]
 	static void Init () 
 	{
 		mExcludeFileExt.AddRange(ForbidenExtensions);
@@ -192,6 +192,7 @@ public class AssetBundleExporter : EditorWindow
 		//build AssetBundle
 		try {
 			BuildAssetBundleOptions options = BuildAssetBundleOptions.CompleteAssets;
+           
 			options |= BuildAssetBundleOptions.CollectDependencies;
 			if(!mMakeCompressedAsset) {
 				options |= BuildAssetBundleOptions.UncompressedAssetBundle;

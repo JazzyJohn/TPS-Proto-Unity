@@ -107,25 +107,7 @@ public class SelectPlayerGUI : MonoBehaviour {
 	//Коректировка размеров
 	public void ReSize()
 	{
-		//Коректировка классов
-		int w1 = (MenuElements.wSelectClass - MenuElements.PlayerClass.Length)/MenuElements.PlayerClass.Length;
 
-		foreach (_PlayerClass Player in MenuElements.PlayerClass)
-		{
-			Player.Sprite.width = w1;
-		}
-		MenuElements.GridPlayerClass.cellWidth = w1;
-		MenuElements.GridPlayerClass.Reposition();
-
-		//Коректировка Роботов
-		int w2 = (MenuElements.wSelectRobots - MenuElements.PlayerRobots.Length)/MenuElements.PlayerRobots.Length;
-		
-		foreach (_PlayerClass Player in MenuElements.PlayerRobots)
-		{
-			Player.Sprite.width = w2;
-		}
-		MenuElements.GridRobotClass.cellWidth = w2;
-		MenuElements.GridRobotClass.Reposition();
 	}
 
 	//Выбор класса
@@ -180,19 +162,6 @@ public class SelectPlayerGUI : MonoBehaviour {
         }
     
     }
-
-	// Update is called once per frame
-	void Update () 
-	{
-		if (W != Screen.width || H != Screen.height)
-		{
-			MenuElements.wSelectClass = MenuElements.SelectClass.width;
-			MenuElements.wSelectRobots = MenuElements.SelectRobots.width;
-			W = Screen.width;
-			H = Screen.height;
-			ReSize();
-		}
-	}
 
 	public void SelectRobot()
 	{
@@ -341,10 +310,9 @@ public class SelectPlayerGUI : MonoBehaviour {
       
         if (Choice._Team == -1)
         {
-
             AutoSelectTeam();
         }
-        if (Choice._Player != -1 && Choice._Robot != -1 && Choice._Team != -1 )
+        if (Choice._Player != -1 && Choice._Team != -1 )
         {
 
             switch (mode)
@@ -365,7 +333,7 @@ public class SelectPlayerGUI : MonoBehaviour {
                      listOfItems[j] = ItemManager.instance.GetItemForSlot((GameClassEnum)Choice._Player, j);
                      ChangeWeapon(j, 0);
                  }
-                 LocalPlayer.selectedBot = Choice._Robot;
+                 LocalPlayer.selectedBot = 1;
                  LocalPlayer.selected = Choice._Player;
                  LocalPlayer.isStarted = true;
                  HideModel();
@@ -419,12 +387,6 @@ public class _MenuElements
 	public int wSelectClass = 0;
 	public UISprite SelectClass;
 	public _PlayerClass[] PlayerClass = new _PlayerClass[4];
-	public UIGrid GridPlayerClass;
-
-	public int wSelectRobots = 0;
-	public UISprite SelectRobots;
-	public _PlayerClass[] PlayerRobots = new _PlayerClass[3];
-	public UIGrid GridRobotClass;
 
 	public UITexture[] Weapon;
     public UISprite[] WeaponBack;

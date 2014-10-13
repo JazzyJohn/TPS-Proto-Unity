@@ -213,13 +213,9 @@ public class BaseWeapon : DestroyableNetworkObject {
 			drawer = GetComponentInChildren<TrajectoryDrawer>();
 			drawer.Init(projectileClass);
             drawer.gameObject.SetActive(false);
-			
 		}
-
-		damageAmount.shootWeapon = SQLId;
-		if (FireStarted != null) FireStarted(this, EventArgs.Empty);
-		if (FireStoped != null) FireStoped(this, EventArgs.Empty);
-
+  
+  
 	}
 
     public Pawn GetOwner()
@@ -717,7 +713,7 @@ public class BaseWeapon : DestroyableNetworkObject {
         if (FireStarted != null)
         {
             FireStarted(this, EventArgs.Empty);
-            Debug.Log("fire" + FireStarted);
+            //Debug.Log("fire" + FireStarted);
         }
     }
 
@@ -786,6 +782,8 @@ public class BaseWeapon : DestroyableNetworkObject {
            
             return false;
         }
+	  if (muzzlePoint==null)
+	    return true;
 		Vector3 aimDir = (owner.getCachedAimRotation() -muzzlePoint.position).normalized;
 		Vector3 realDir = muzzlePoint.forward;
 		float angle = Vector3.Dot (aimDir, realDir);

@@ -6,7 +6,7 @@ using System.Collections.Generic;
 public class PartMapDownloader : MapDownloader
 {
 
-    public override IEnumerator DownloadAndCache()
+/*    public override IEnumerator DownloadAndCache()
     {
         // Wait for the Caching system to be ready
         while (!Caching.ready)
@@ -123,7 +123,7 @@ public class PartMapDownloader : MapDownloader
                 }
                 */
                 //			Debug.Log (sp.transform.position);
-
+   /*
                 Debug.Log("MapDownloader has been instantiated.");
                 instantiated = true;
                 inProgress = false;
@@ -131,5 +131,5 @@ public class PartMapDownloader : MapDownloader
             }
         }
         //Destroy(this);
-    }
+    }*/
 }

@@ -88,6 +88,7 @@ public class PassiveSkillManager : MonoBehaviour
 	public IEnumerator InitSkillTree(string XML){
 		XmlDocument xmlDoc = new XmlDocument();
 		xmlDoc.LoadXml(XML);
+       // Debug.Log(XML);
 		int classAmount = int.Parse (xmlDoc.SelectSingleNode ("leveling/classes/classcount").InnerText);
 		skillPointLeft= int.Parse (xmlDoc.SelectSingleNode ("leveling/player/skillpoint").InnerText);
 		allSkill = new PassiveSkillClass[classAmount];

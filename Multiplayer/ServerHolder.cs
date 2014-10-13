@@ -449,7 +449,7 @@ public class ServerHolder : MonoBehaviour
 	
 	IEnumerator LoadMap (string mapName,bool next =false)
 	{
-		AsyncOperation async;
+		//AsyncOperation async;
 
 		connectingToRoom = true;
         
@@ -461,22 +461,28 @@ public class ServerHolder : MonoBehaviour
 
 
         Application.backgroundLoadingPriority = ThreadPriority.High;
-		Debug.Log("Загружаем карту " + mapName );
+	/*	Debug.Log("Загружаем карту " + mapName );
 		async = Application.LoadLevelAsync(mapName);
 		yield return async;
-		Debug.Log ("Загрузка завершена.");
-		
-		MapDownloader loader = FindObjectOfType<MapDownloader>();
+		Debug.Log ("Загрузка завершена.");*/
+
+        MapLoader loader = FindObjectOfType<MapLoader>();
+        Debug.Log(loader);
 		if (loader != null) {
-				PrefabManager[] managers = FindObjectsOfType<PrefabManager> ();
-				//MapLoader + MApUnity load = 2;
 				
-				progress.allLoader = 2+managers.Length;
+				//MapLoader + MApUnity load = 2;
+
+               progress.allLoader = 5;
 				progress.finishedLoader=1;
 				progress.curLoader=0;
-				IEnumerator innerCoroutineEnumerator = loader.DownloadAndCache ();
+                Debug.Log("Загружаем карту " + mapName );
+                IEnumerator innerCoroutineEnumerator = loader.Load(mapName);
 				while (innerCoroutineEnumerator.MoveNext())
 						yield return innerCoroutineEnumerator.Current;
+
+                PrefabManager[] managers = FindObjectsOfType<PrefabManager>();
+                progress.allLoader = 2 + managers.Length;
+                Debug.Log("Загрузка завершена.");
 
 				progress.finishedLoader++;
 				progress.curLoader=0;
@@ -490,12 +496,12 @@ public class ServerHolder : MonoBehaviour
 		}
         ItemManager.instance.ConnectToPrefab();
 
-
+        MapDownloader downloadata = FindObjectOfType<MapDownloader>();
 
       
 		FinishLoad ();
 		yield return new WaitForEndOfFrame();
-		GameObject menu =Instantiate (loader.playerHud, Vector3.zero, Quaternion.identity) as GameObject;
+        GameObject menu = Instantiate(downloadata.playerHud, Vector3.zero, Quaternion.identity) as GameObject;
 		Camera.main.GetComponent<PlayerMainGui> ().enabled = true;
 		//menu.transform.parent = Camera.main.transform;
         menu.transform.localPosition = Vector3.zero;

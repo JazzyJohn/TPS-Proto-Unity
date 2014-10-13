@@ -14,14 +14,25 @@ public class StatisticMessage : MonoBehaviour {
 
 
 
-	// Use this for initialization
-	void Start () {
+    void Awake()
+    {
 		Name = transform.FindChild ("Name").GetComponent<UILabel> ();
 		Kill = transform.FindChild ("Kill").GetComponent<UILabel> ();
 		Dead = transform.FindChild ("Dead").GetComponent<UILabel> ();
 		HelpKill = transform.FindChild ("HelpKill").GetComponent<UILabel> ();
 		Ping = transform.FindChild ("Ping").GetComponent<UILabel> ();
 	}
+
+    public void Hide(bool Bool)
+    {
+
+        //Debug.Log ("Dead" + Deads);
+        Name.enabled = !Bool;
+        Kill.enabled = !Bool;
+        Dead.enabled = !Bool;
+        HelpKill.enabled = !Bool;
+        Ping.enabled = !Bool;
+    }
 
 	public void SetStartInfo(string NamePlayer, int Kills, int Deads, int HelpKills, Player MyPlayer)
 	{
@@ -34,14 +45,9 @@ public class StatisticMessage : MonoBehaviour {
 		I_am = MyPlayer;
 	}
 
-	// Update is called once per frame
-	void Update () {
-	
-	}
-
-	void FixedUpdate()
+	void Update()
 	{
 		//найти пинг
-		Ping.text = "0";
+		//Ping.text = "0";
 	}
 }

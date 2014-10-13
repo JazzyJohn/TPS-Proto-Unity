@@ -4,7 +4,6 @@ using System.Collections.Generic;
 
 
 public class TeamSlot{
-	public UIPanel panel;
 	public StatisticMessage message;
 }
 
@@ -14,6 +13,8 @@ public class Statistic : MonoBehaviour {
 	public UIPanel MainPanel;
 
 	public bool active;
+
+    public UIGrid[] GrildTeam = new UIGrid[2];
 
 	public UILabel PlayerName;
 
@@ -48,17 +49,14 @@ public class Statistic : MonoBehaviour {
 		for (int i=0; i<TeamBlue.transform.childCount;i++)
 		{
 			BlueTeamlPlayer[i] = new TeamSlot();
-
-			BlueTeamlPlayer[i].panel  =TeamBlue.transform.GetChild(i).GetComponent<UIPanel>();
-			BlueTeamlPlayer[i].panel.alpha = 0f;
-			BlueTeamlPlayer[i].message=BlueTeamlPlayer[i].panel.GetComponent<StatisticMessage>();
+            BlueTeamlPlayer[i].message = TeamBlue.transform.GetChild(i).GetComponent<StatisticMessage>();
+            BlueTeamlPlayer[i].message.Hide(true);
 		}
 		for (int i=0; i<TeamRed.transform.childCount;i++)
 		{
-			RedTeamlPlayer[i]  = new TeamSlot(); 
-			RedTeamlPlayer[i].panel  = TeamRed.transform.GetChild(i).GetComponent<UIPanel>();
-			RedTeamlPlayer[i].panel .alpha = 0f;
-			RedTeamlPlayer[i].message=RedTeamlPlayer[i].panel.GetComponent<StatisticMessage>();
+			RedTeamlPlayer[i]  = new TeamSlot();
+            RedTeamlPlayer[i].message = TeamRed.transform.GetChild(i).GetComponent<StatisticMessage>();
+            RedTeamlPlayer[i].message.Hide(true);
 		}
 	}
 
@@ -67,11 +65,6 @@ public class Statistic : MonoBehaviour {
         LocalPlayer = newPlayer;
     }
 
-	// Update is called once per frame
-	void Update () 
-	{
-	
-	}
     public void SetLocalPlayer(Player newPlayer)
     {
         LocalPlayer = newPlayer;
@@ -93,7 +86,9 @@ public class Statistic : MonoBehaviour {
 			LocalPlayerStat(LocalPlayer.GetName(), Choice._Player); // Внесения базовой инфы в статистику (+)
 
 			AvatarPlayer(); //Установка аватара (+)
-		
+
+            ResizeGrild(); // Изменение активных слотов
+
 			RefreshStatisticPlayers(); //Обновление списока статистики игроков (+)
 		}
 	}
@@ -164,45 +159,121 @@ public class Statistic : MonoBehaviour {
 		Label.text = (int.Parse(Label.text)+AddNum).ToString();
 	}
 
+    int countRed = 0;
+    int countBlue = 0;
+
+    int countRedSlotUse = 0;
+    int countBlueSlotUse = 0;
+
+    List<Player> old_players = null;
+
+    public void ResizeGrild()
+    {
+        List<Player> players = PlayerManager.instance.FindAllPlayer();
+
+        if (old_players != players)
+        {
+            old_players = players;
+
+            countRed = 0;
+            countBlue = 0;
+            foreach (Player Gamer in players)
+            {
+                switch (Gamer.team)
+                {
+                    case 1:
+                        countRed++;
+                        break;
+                    case 2:
+                        countBlue++;
+                        break;
+                }
+            }
+
+            //Изменения активных слотов
+            int RUse = countRedSlotUse;
+            int RSlot = countRed;
+            if (RSlot > RUse)
+            {
+                for (int i = RUse; i < RSlot; i++)
+                {
+                    RedTeamlPlayer[i].message.Hide(false);
+                    countRedSlotUse++;
+                }
+            }
+            else if (RSlot < RUse)
+            {
+
+                for (int i = RSlot; i < RUse; i++)
+                {
+                    RedTeamlPlayer[i].message.Hide(true);
+                    countRedSlotUse--;
+                }
+            }
+
+            int BUse = countBlueSlotUse;
+            int BSlot = countBlue;
+            if (BSlot > BUse)
+            {
+                for (int i = BUse; i < BSlot; i++)
+                {
+                    BlueTeamlPlayer[i].message.Hide(false);
+                    countBlueSlotUse++;
+                }
+            }
+            else if (BSlot < BUse)
+            {
+
+                for (int i = BSlot; i < BUse; i++)
+                {
+                    BlueTeamlPlayer[i].message.Hide(true);
+                    countBlueSlotUse--;
+                }
+            }
+            
+        }
+
+    }
+
 	public void RefreshStatisticPlayers()
-	{ 
+	{
+        List<Player> players = PlayerManager.instance.FindAllPlayer();
 
-			for (int i=0; i<TeamBlue.transform.childCount;i++)
-			{
-				BlueTeamlPlayer[i].panel.alpha = 0f;
-			}
-			for (int i=0; i<TeamRed.transform.childCount;i++)
-			{
-				RedTeamlPlayer[i].panel.alpha = 0f;
-			}
-			
-			List<Player> players = PlayerManager.instance.FindAllPlayer ();
+        countRed = 0;
+        countBlue = 0;
 
-			int countRed=0;
-			int countBlue=0;
+        foreach (Player Gamer in players)
+        {
 
-			foreach(Player Gamer in players)
-			{
-				
-				switch(Gamer.team)
-				{
-				case 1:
-					RedTeamlPlayer[countRed].panel.alpha = 1f;
-					RedTeamlPlayer[countRed].message.UID = Gamer.GetUid();
-					RedTeamlPlayer[countRed].message.SetStartInfo(Gamer.GetName(), Gamer.Score.Kill, Gamer.Score.Death, Gamer.Score.Assist, Gamer);
-					countRed++;
-					break;
-				case 2:
-					BlueTeamlPlayer[countBlue].panel.alpha = 1f;
-					BlueTeamlPlayer[countBlue].message.UID = Gamer.GetUid();
-					BlueTeamlPlayer[countBlue].message.SetStartInfo(Gamer.GetName(), Gamer.Score.Kill, Gamer.Score.Death, Gamer.Score.Assist, Gamer);
-					countBlue++;
-					break;
-				}
-			}
+            switch (Gamer.team)
+            {
+                case 1:
+                    RedTeamlPlayer[countRed].message.UID = Gamer.GetUid();
 
-		
-		
+                    string namer;
+                    if (Gamer.GetName() != null || Gamer.GetName() != "")
+                        namer = Gamer.GetName();
+                    else
+                        namer = "NoName";
+
+                    RedTeamlPlayer[countRed].message.SetStartInfo(namer, Gamer.Score.Kill, Gamer.Score.Death, Gamer.Score.Assist, Gamer);
+                    
+                    countRed++;
+                    break;
+                case 2:
+                    BlueTeamlPlayer[countBlue].message.UID = Gamer.GetUid();
+
+                    string nameb;
+                    if (Gamer.GetName() != null || Gamer.GetName() != "")
+                        nameb = Gamer.GetName();
+                    else
+                        nameb = "NoName";
+
+                    BlueTeamlPlayer[countBlue].message.SetStartInfo(nameb, Gamer.Score.Kill, Gamer.Score.Death, Gamer.Score.Assist, Gamer);
+                    countBlue++;
+                    break;
+            }
+        }
 	}
 	public void Activate(){
 		MainPanel.alpha = 1.0f;
