@@ -3,6 +3,7 @@ using System;
 using System.Collections;
 using System.Collections.Generic;
 using nstuff.juggerfall.extension.models;
+using Sfs2X.Entities.Data;
 
 
 
@@ -3117,7 +3118,7 @@ public class Pawn : DamagebleObject
     }
 	public void InfoAboutDeath(ISFSObject data){
 		
-		data.SetInt("weaponId",killInfo.weaponId);
+		data.PutInt("weaponId",killInfo.weaponId);
 	}
 
 

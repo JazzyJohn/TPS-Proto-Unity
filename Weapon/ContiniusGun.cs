@@ -43,24 +43,25 @@ public class ContiniusGun : NetSyncGun
 	protected override void DoSimpleDamage(){
 		
 		sControl.playFullClip (fireSound);
-		rifleParticleController.StartFlame ();
+		//rifleParticleController.StartFlame ();
 		//AOECollider.GetComponent<BoxCollider>().size = colliderUnableSize;
-       
+        FiredEffect();
 	}
 
   
     public override void StartFireRep()
     {
         sControl.playFullClip(fireSound);
-        rifleParticleController.StartFlame();
+       /// rifleParticleController.StartFlame();
         //AOECollider.GetComponent<BoxCollider>().size = colliderUnableSize;
+        FiredEffect();
    
     }
 	public override void StopFire(){
         base.StopFire();
-		rifleParticleController.StopFlame ();
+		//rifleParticleController.StopFlame ();
 		//AOECollider.GetComponent<BoxCollider>().size = colliderDisableSize;
-		
+        FiredStopEffect();
       
 	}
 	

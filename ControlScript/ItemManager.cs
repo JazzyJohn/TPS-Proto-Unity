@@ -215,7 +215,7 @@ public class ItemManager : MonoBehaviour {
        
         foreach (FromDBWeapon weapon in weaponIndexTable.Values)
         {
-			if( weaponPrefabsListbyId.ContainsKey(weapon.weaponId)){
+			if( weaponPrefabsListbyId[weapon.weaponId]!=null){
 				weapon.gameSlot = weaponPrefabsListbyId[weapon.weaponId].slotType;
 				weapon.name = weaponPrefabsListbyId[weapon.weaponId].weaponName;
 				weaponPrefabsListbyId[weapon.weaponId].HUDIcon = weapon.textureGUI;
@@ -225,7 +225,8 @@ public class ItemManager : MonoBehaviour {
         {
             foreach (InventorySlot weapon in invItems[ShopSlotType.WEAPON])
             {
-				if( weaponPrefabsListbyId.ContainsKey(weapon.ingamekey)){
+                if (weaponPrefabsListbyId[weapon.ingamekey] != null)
+                {
 					weapon.gameType = (int)weaponPrefabsListbyId[weapon.ingamekey].slotType;
 					Debug.Log(weapon.name + " " + weapon.gameType);
 					weaponPrefabsListbyId[weapon.ingamekey].HUDIcon = weapon.texture;
@@ -238,7 +239,8 @@ public class ItemManager : MonoBehaviour {
            
             if (index.prefabId != -1)
             {
-				if( weaponPrefabsListbyId.ContainsKey(index.prefabId)){
+                if (weaponPrefabsListbyId[index.prefabId] != null)
+                {
 					int gameSlot = (int)weaponPrefabsListbyId[index.prefabId].slotType;
 					Choice.SetChoice(gameSlot, index.gameClass, index);
 				
@@ -429,7 +431,8 @@ public class ItemManager : MonoBehaviour {
 		//weaponPrefabsListbyId[prefab.SQLId].HUDIcon = weaponIndexTable[prefab.SQLId].textureGUI;
 	}
 	public BaseWeapon GetWeaponprefabByID(WeaponIndex index){
-		if( weaponPrefabsListbyId.ContainsKey(index.prefabId)){
+        if (weaponPrefabsListbyId[index.prefabId]!=null)
+        {
 			return weaponPrefabsListbyId[index.prefabId];
 		}else{
 			return weaponPrefabsListbyId[0];

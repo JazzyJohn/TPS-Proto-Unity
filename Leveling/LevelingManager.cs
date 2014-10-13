@@ -57,12 +57,12 @@ public class LevelingManager : MonoBehaviour, LocalPlayerListener,GameListener{
 	
 	}
 	class ExpReward : Reward{
-		int amount;
+        public int amount;
 		public ExpReward(int amount){
-			this.amoutn = amount;
+            this.amount = amount;
 		}
 	}
-	public Dictionary<string,int> expDictionary = new Dictionary<string, int>();
+    Dictionary<string, ExpReward> expDictionary = new Dictionary<string, ExpReward>();
 	
 
 	public void Init(string uid){

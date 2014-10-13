@@ -105,6 +105,8 @@ public class StatisticHandler : MonoBehaviour {
     }
 	public static void SendPlayerKillbyPlayer(string Uid,string Name, string KillerUid,string KillerName)
 	{
+        try
+        {
 		WWWForm form = new WWWForm();
 
 		form.AddField("uid",Uid);
@@ -112,6 +114,13 @@ public class StatisticHandler : MonoBehaviour {
 		form.AddField("killeruid",KillerUid);	
 		form.AddField("killername",KillerName);
 		StatisticHandler.instance.StartCoroutine(SendForm (form,KILLED_BY));
+        }
+        catch (Exception e)
+        {
+
+            Debug.Log(e);
+        }
+       
 	}
     public static void SendPlayerKillNPC(string Uid, string Name)
     {
@@ -132,10 +141,17 @@ public class StatisticHandler : MonoBehaviour {
     }
 	public static void SendPlayerKillbyNPC(string Uid,string Name){
 		WWWForm form = new WWWForm ();
-	
-		form.AddField ("uid", Uid);
-		form.AddField ("name", Name);
-		StatisticHandler.instance.StartCoroutine(SendForm (form,KILLED_BY));
+          try
+        {
+		    form.AddField ("uid", Uid);
+		    form.AddField ("name", Name);
+		    StatisticHandler.instance.StartCoroutine(SendForm (form,KILLED_BY));
+        }
+          catch (Exception e)
+          {
+
+              Debug.Log(e);
+          }
 	}
 	public static void StartStats(string Uid,string Name){
 		WWWForm form = new WWWForm ();

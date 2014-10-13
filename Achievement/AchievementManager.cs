@@ -124,8 +124,9 @@ public class AchievementManager : MonoBehaviour, LocalPlayerListener{
 			if(!open){
 				ongoingAchivment.Add(achivment);
 			}else{
-				
-				if(multiplie){
+
+                if (achivment.isMultiplie)
+                {
 					bool ready = bool.Parse(node.SelectSingleNode("ready").InnerText);
 					if(ready){
 						ongoingAchivment.Add(achivment);
@@ -167,7 +168,7 @@ public class AchievementManager : MonoBehaviour, LocalPlayerListener{
 					
 												achiv.achivParams [mess.param].current += mess.delta;
 										}
-										foreach(AchievementParam param in achiv.achivParams ) {
+										foreach(AchievementParam param in achiv.achivParams.Values ) {
 											if(param.resetEvent==mess.param){
 												param.current =0;
 											}
@@ -189,7 +190,7 @@ public class AchievementManager : MonoBehaviour, LocalPlayerListener{
 						//	
 					
 						Thread.Sleep (1000);
-					}catch( Exeption e){
+					}catch( Exception e){
 					
 					}
 				}
@@ -206,7 +207,7 @@ public class AchievementManager : MonoBehaviour, LocalPlayerListener{
 		
 	}
 	IEnumerator SendAchive(WWWForm form){
-		WWW www =GetMeRightWWW(form,StatisticHandler.SAVE_ACHIVE);
+        WWW w = StatisticHandler.GetMeRightWWW(form, StatisticHandler.SAVE_ACHIVE);
 		yield return w;
 		
 		XmlDocument xmlDoc = new XmlDocument();

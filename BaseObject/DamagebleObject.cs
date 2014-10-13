@@ -7,7 +7,7 @@ public class DamagebleObject : DestroyableNetworkObject {
 
 	private float _health;
 	
-	private KillInfo killInfo;
+	protected KillInfo killInfo;
 	public float health{
 		
 		get {

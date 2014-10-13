@@ -115,10 +115,11 @@ public class ServerHolder : MonoBehaviour
       {
           return; 
       }
+      CancelInvoke("RetryRoomCreate");	
     	// If we joined a game room, then we either created it (and auto joined) or manually selected a game to join
       if (shouldLoad)
       {
-		   CancelInvoke("RetryRoomCreate");	
+		  
           StartCoroutine(LoadMap(room.GetVariable("map").GetStringValue()));
           
       }

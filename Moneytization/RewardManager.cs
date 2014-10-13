@@ -10,7 +10,7 @@ public class Reward{
 	public void Increment(){
 		count++;
 	}	
-	public void GetRewardCounter(){
+	public int GetRewardCounter(){
 		return count;
 	}
 	public void Reset(){
@@ -33,13 +33,13 @@ public class  RewardManager : MonoBehaviour, LocalPlayerListener,GameListener{
 	class MoneyReward : Reward{
 		public int cash = 0;
 		public int gold =0;
-		public MoneyReward(cash,gold){
+		public MoneyReward(int cash,int gold){
 			this.cash = cash;
 			this.gold = gold;
 		}
 	}
-	
-	public Dictionary<string,MoneyReward> rewardMoneyDictionary = new Dictionary<string, MoneyReward>();
+
+    private Dictionary<string, MoneyReward> rewardMoneyDictionary = new Dictionary<string, MoneyReward>();
 
     private string UID;
 	public void Init(string uid){

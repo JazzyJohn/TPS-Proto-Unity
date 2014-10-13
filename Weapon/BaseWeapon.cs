@@ -215,9 +215,11 @@ public class BaseWeapon : DestroyableNetworkObject {
             drawer.gameObject.SetActive(false);
 			
 		}
+
 		damageAmount.shootWeapon = SQLId;
 		if (FireStarted != null) FireStarted(this, EventArgs.Empty);
 		if (FireStoped != null) FireStoped(this, EventArgs.Empty);
+
 	}
 
     public Pawn GetOwner()
@@ -528,7 +530,7 @@ public class BaseWeapon : DestroyableNetworkObject {
 		ReleaseFire ();
         _waitForRelease = false;
         _amountInShoot = 0;
-       
+        alredyGunedAmmo = 0;
         if (!isPumping) {
             _pumpCoef = 0.0f;
             _pumpAmount = 0.0f;
@@ -673,7 +675,7 @@ public class BaseWeapon : DestroyableNetworkObject {
             }
             else
             {
-                alredyGunedAmmo--;
+               // alredyGunedAmmo--;
             }
 		}
 			//играем звук стрельбы
@@ -683,9 +685,10 @@ public class BaseWeapon : DestroyableNetworkObject {
 		}
 		
 		owner.shootEffect();
-	
+        FiredEffect();
         if (alredyGunedAmmo > 0)
         {
+            curAmmo++;
             for (int i = 0; i < alredyGunedAmmo; i++)
             {
                 ActualFire();
@@ -703,6 +706,20 @@ public class BaseWeapon : DestroyableNetworkObject {
         AfterShootLogic();
 		//photonView.RPC("FireEffect",PhotonTargets.Others);
 	}
+    protected void FiredStopEffect()
+    {
+
+        if (FireStoped != null) FireStoped(this, EventArgs.Empty);
+    }
+    protected void FiredEffect()
+    {
+
+        if (FireStarted != null)
+        {
+            FireStarted(this, EventArgs.Empty);
+            Debug.Log("fire" + FireStarted);
+        }
+    }
 
     protected virtual void ActualFire()
     {

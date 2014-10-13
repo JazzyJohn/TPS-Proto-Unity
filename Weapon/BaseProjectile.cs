@@ -519,7 +519,7 @@ public class BaseProjectile : MonoBehaviour
 							
 
 							mRigidBody.velocity = mRigidBody.velocity - 2 * Vector3.Project(mRigidBody.velocity, hit.normal);
-
+                            mTransform.position = hit.point;
 							ProjectileManager.instance.InvokeRPC("NewVelocity", projId, mRigidBody.velocity, proojHitCnt);
 						}
 					}

@@ -36,6 +36,7 @@ public class RayGun : NetSyncGun
 		{
 			if(!foxView.isMine){
 				DrawEffectRep();
+
 			}
 			owner.animator.StartShootAniamtion("shooting");
 		}
@@ -69,6 +70,7 @@ public class RayGun : NetSyncGun
            return;
               
         }
+        FiredEffect();
 		Vector3 startPoint  = muzzlePoint.position+muzzleOffset;
 		Quaternion startRotation = getAimRotation();
 		
@@ -130,11 +132,13 @@ public class RayGun : NetSyncGun
     public override void StartFireRep()
     {
 		isShooting= true;
+        FiredEffect();
    
     }
 	public override void StopFire(){
         base.StopFire();
 		rayController.StopRay();
+        FiredStopEffect();
 	}
 	
 	public override void AimFix(){
