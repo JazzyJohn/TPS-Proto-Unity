@@ -25,7 +25,7 @@ public class ParticleDamager : MonoBehaviour {
 			objectToDmg.Clear();
 		}
 	   void OnParticleCollision(GameObject other) {
-           //Debug.Log("hit " + other);
+           Debug.Log("hit " + other);
 			DamagebleObject obj =other.GetComponent<DamagebleObject>();
 			if(obj!=null){
 				objectToDmg.Add(obj);

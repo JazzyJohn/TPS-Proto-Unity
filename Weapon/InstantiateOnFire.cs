@@ -71,10 +71,11 @@ public class InstantiateOnFire : MonoBehaviour
       effectT.position = parentT.position;
       effectT.rotation = parentT.rotation;
     }
+  
   }
 
   void DeactivateEffect()
   {
-    Effect.SetActive(false);
+    Effect.SetActive(Effect);
   }
 }

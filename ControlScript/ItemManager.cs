@@ -228,7 +228,7 @@ public class ItemManager : MonoBehaviour {
                 if (weaponPrefabsListbyId[weapon.ingamekey] != null)
                 {
 					weapon.gameType = (int)weaponPrefabsListbyId[weapon.ingamekey].slotType;
-					Debug.Log(weapon.name + " " + weapon.gameType);
+//					Debug.Log(weapon.name + " " + weapon.gameType);
 					weaponPrefabsListbyId[weapon.ingamekey].HUDIcon = weapon.texture;
 				}
             }
@@ -886,6 +886,7 @@ public class ItemManager : MonoBehaviour {
         if (slot.loadModel == null)
         {
             string crossDomainesafeURL = StatisticHandler.GetNormalURL() + slot.model;
+            Debug.Log("Load" + crossDomainesafeURL);
             AssetBundle bundle = null;
             // Load the AssetBundle file from Cache if it exists with the same version or download and store it in the cache
             if (AssetBundleManager.isHasAssetBundle(crossDomainesafeURL, 1))

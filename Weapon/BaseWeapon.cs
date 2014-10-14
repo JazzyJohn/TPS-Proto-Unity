@@ -1039,8 +1039,14 @@ public class BaseWeapon : DestroyableNetworkObject {
 	
 	
 	public float MuzzleOffset(){
-
-		return (muzzlePoint.position + muzzleOffset - curTransform.position).sqrMagnitude;
+        if (muzzlePoint != null)
+        {
+            return (muzzlePoint.position + muzzleOffset - curTransform.position).sqrMagnitude;
+        }
+        else
+        {
+            return 0.0f;
+        }
 	}
     WeaponModel sirWep = new WeaponModel();
     public WeaponModel GetSerilizedData()

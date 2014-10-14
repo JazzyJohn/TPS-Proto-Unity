@@ -56,6 +56,7 @@ public class MapLoader : MonoBehaviour {
         }
         else
         {
+            inProgress = true;
             Debug.Log("NO BUNLDE NET TO LOAD");
             using (www = WWW.LoadFromCacheOrDownload(crossDomainesafeURL, version))
             {
