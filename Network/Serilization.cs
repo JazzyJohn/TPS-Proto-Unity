@@ -181,6 +181,7 @@ namespace nstuff.juggerfall.extension.models
 		public Vector3Model hitPosition;
 		public bool isContinius;
 		public int weaponId;
+		public int damageType; 
 		 
         public BaseDamageModel()
         {
@@ -194,6 +195,7 @@ namespace nstuff.juggerfall.extension.models
 			this.pushDirection= new Vector3Model(damage.pushDirection);
 			this.hitPosition= new Vector3Model(damage.hitPosition);
             this.weaponId = damage.shootWeapon;
+			this.damageType = (int)damage.damageType;
 		}	
 		public BaseDamage GetDamage(){
             BaseDamage damageClass = new BaseDamage();
@@ -204,6 +206,7 @@ namespace nstuff.juggerfall.extension.models
             damageClass.pushDirection = pushDirection.GetVector();
             damageClass.hitPosition = hitPosition.GetVector();
 			damageClass.shootWeapon =weaponId;
+			damageClass.damageType = (DamageType)damageType ;
             return damageClass;
 		}	
     }

@@ -3,12 +3,23 @@ using System;
 
 using System.Collections;
 using System.Collections.Generic;
+
+public enum DamageType{
+	SIMPLE,
+	FIRE,
+	ACID
+
+}
+
+
 [Serializable]
 public class BaseDamage{
 	public float Damage;
 	public bool isVsArmor;
 	public float pushForce;
-    public bool knockOut= false;
+	public bool knockOut= false;
+	public DamageType type;
+	
 	[HideInInspector] 
 	public bool splash=false;
 	[HideInInspector] 
@@ -34,6 +45,7 @@ public class BaseDamage{
         knockOut = old.knockOut;
 		splash = old.splash;
         weapon = old.weapon;
+		type = old.type;
 		shootWeapon= old.shootWeapon;
 	}
 

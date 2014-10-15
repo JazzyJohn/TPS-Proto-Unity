@@ -1,23 +1,24 @@
 using UnityEngine;
 using System.Collections;
+using nstuff.juggerfall.extension.models
 
 public class TeamDeathmatch_PVPGameRule : PVPGameRule {
 
-		public int killMax;
-		
-		public override bool IsGameEnded(){
-			for(int i=0;i<teamKill.Length;i++){
-				if(killMax<=teamKill[i]){
-					return true;
-				}
-			}
-			return base.IsGameEnded();
-		}
-		void Awake(){
-			
-			base.Awake();
-			maxScore=killMax;
-		}
+	public override void SetFromModel(PVPGameRuleModel model)
+    {
+        PVPGameRuleModel pvpmodel = (PVPGameRuleModel)model;
+        
+        if (!isGameEnded && pvpmodel.isGameEnded)
+        {
+            GameEnded();
+            isGameEnded = true;
+        }
+        for (int i = 0; i < pvpmodel.teamScore.Count; i++)
+        {
+               
+            teamScore[i] = (int)pvpmodel.teamScore[i];
+        }
+    }
 	/*	public override void ActuakKillCount(int team){
 		Debug.Log ("KILL COUNT" + team);
 			teamKill[team-1]++;
@@ -25,5 +26,5 @@ public class TeamDeathmatch_PVPGameRule : PVPGameRule {
 		}*/
 		
 		
-	}
+}
 

@@ -191,6 +191,10 @@ public class Player : MonoBehaviour {
        
 
 	}
+	public virtual Pawn GetNewPawn(){
+			return PlayerManager.instance.SpawmPlayer(PlayerManager.instance.pawnName[selected],team,GetBuffs());
+	}
+
 	public int[] GetBuffs(){
 		List <int> allbuff = new List<int>();
         allbuff.AddRange(PassiveSkillManager.instance.GetSkills(selected));
@@ -217,7 +221,7 @@ public class Player : MonoBehaviour {
 //			Debug.Log ("Dead");
 			if(respawnTimer<=0&&isStarted){
 				respawnTimer=respawnTime;
-				currentPawn =PlayerManager.instance.SpawmPlayer(PlayerManager.instance.pawnName[selected],team,GetBuffs());
+				currentPawn = GetNewPawn();
 				currentPawn.ChangeDefaultWeapon(Choice._Player);
 				ItemManager.instance.SaveItemForSlot();
 				//PVPGameRule.instance.Spawn(team);

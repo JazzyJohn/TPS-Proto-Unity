@@ -37,7 +37,7 @@ public class NetworkController : MonoBehaviour {
     public string zone = "BasicJugger";
     public bool debug = true;
     public bool pause = false;
-	
+	public string PlayerPrefab = "Player";
   
     private static NetworkController instance;
     public static NetworkController Instance
@@ -680,7 +680,7 @@ public class NetworkController : MonoBehaviour {
     {
 
         //Debug.Log( "CREATE PLAYER " + player.userId );
-        GameObject newObject = _SpawnPrefab("Player", Vector3.zero, Quaternion.identity);
+        GameObject newObject = _SpawnPrefab(PlayerPrefab, Vector3.zero, Quaternion.identity);
         PlayerView view = newObject.GetComponent<PlayerView>();
         view.SetId(player.userId);
         view.NetUpdate(player);

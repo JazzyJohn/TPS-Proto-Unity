@@ -315,9 +315,9 @@ public class Pawn : DamagebleObject
     public BasePawnStatistic statistic = new BasePawnStatistic();
     //effects
 
-    public GameObject bloodSplash;
+	public PawnEffectController effectController;
+	
 
-    public ParticleEmitter emitter;
 
     //звуки
 
@@ -416,9 +416,9 @@ public class Pawn : DamagebleObject
         //проигрываем звук респавна
         sControl.playClip(spawnSound);
         isActive = true;
-        if (emitter != null)
+        if (effectController.IsSpawn())
         {
-            emitter.Emit();//запускаем эмиттер
+        
             isSpawn = true;//отключаем движения и повреждения
         }
 
@@ -615,10 +615,7 @@ public class Pawn : DamagebleObject
                 killerPlayer.DamagePawn(damage);
             }
         }
-        if (damage.sendMessage)
-        {
-            AddEffect(damage.hitPosition);
-        }
+       
         if (foxView.isMine)
         {
 
@@ -673,12 +670,20 @@ public class Pawn : DamagebleObject
         }
         if (killerPawn == null && foxView.isMine)
         {
+			if (damage.sendMessage)
+			{
+				AddEffect(damage.hitPosition,damage.type);
+			}
             base.Damage(damage, killer);
         }
         if (killerPawn != null && killerPawn.foxView.isMine)
         {
             if (foxView.isMine)
             {
+   			    if (damage.sendMessage)
+				{
+					AddEffect(damage.hitPosition,damage.type);
+				}
                 base.Damage(damage, killer);
             }
             else
@@ -729,6 +734,10 @@ public class Pawn : DamagebleObject
             eventHandler.Damage(killer, damage.Damage);
         }
         //Debug.Log ("DAMAGE");
+		if (damage.sendMessage)
+		{
+			AddEffect(damage.hitPosition,damage.type);
+		}
         base.Damage(damage, killer);
     }
 
@@ -900,12 +909,9 @@ public class Pawn : DamagebleObject
         Destroy(gameObject);
     }
     //EFFECCT SECTION
-    void AddEffect(Vector3 position)
+    void AddEffect(Vector3 position,DamageType type)
     {
-        if (bloodSplash != null)
-        {
-            Instantiate(bloodSplash, position, Quaternion.LookRotation(UnityEngine.Random.onUnitSphere));
-        }
+        effectController.DamageEffect(type);
 
     }
 
@@ -1205,7 +1211,7 @@ public class Pawn : DamagebleObject
         if (isSpawn)
         {//если респавн
 
-            if (emitter == null)
+            if (effectController.IsSpawn())
             {//если все партиклы кончились
                 isSpawn = false;//то освобождаем все движения и повреждения
             }

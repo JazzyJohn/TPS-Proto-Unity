@@ -393,7 +393,7 @@ public class ServerHolder : MonoBehaviour
                 break;
             case GAMEMODE.PVPJUGGERFIGHT:
                 gameRule = new SFSRoomVariable("ruleClass", "nstuff.juggerfall.extension.gamerule.PVPJuggerFightGameRule");
-                 setting.teamCount = 2;
+                setting.teamCount = 2;
                 setting.maxTime =0;
                 setting.maxScore= 25;
                 break;
