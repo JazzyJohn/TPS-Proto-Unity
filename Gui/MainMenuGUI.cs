@@ -375,6 +375,10 @@ public class MainMenuGUI : MonoBehaviour {
 
 	public void AddMessageToChat(string name, string message)//Добавление сообщения в чат
 	{
+        if (ChatComponent.ChatShablon == null)
+        {
+            return;
+        }
 		ChatComponent.NumMessage++;
 
 		if (_chat.Count > ChatComponent.MessageLimit)

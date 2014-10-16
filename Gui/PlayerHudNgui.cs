@@ -27,8 +27,8 @@ public class PlayerHudNgui : MonoBehaviour {
 
     private Player LocalPlayer;
     public PlayerMainGui.PlayerStats Stats= null;
-    
 
+    public DeadGUI _DeadGUI;
 
     public UILabel healthLabel;
     //public UILabel juggernautDropTime;

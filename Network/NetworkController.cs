@@ -700,9 +700,12 @@ public class NetworkController : MonoBehaviour {
      public void SendMapData()
      {
          ISFSObject data = new SFSObject();
-         AIDirector.instance.SendData(data);
-         ExtensionRequest request = new ExtensionRequest("mapData", data, serverHolder.gameRoom);
-         smartFox.Send(request);
+         if (AIDirector.instance != null)
+         {
+             AIDirector.instance.SendData(data);
+             ExtensionRequest request = new ExtensionRequest("mapData", data, serverHolder.gameRoom);
+             smartFox.Send(request);
+         }
      }
      public void ReadMapData(ISFSObject data)
      {
@@ -771,7 +774,7 @@ public class NetworkController : MonoBehaviour {
     /// <summary>
     /// pawnSpawn request to server
     /// </summary>	
-    public GameObject PawnForSwarmSpawnRequest(string prefab, Vector3 vector3, Quaternion quaternion, int[] stims,int swarm,int home)
+    public GameObject PawnForSwarmSpawnRequest(string prefab, Vector3 vector3, Quaternion quaternion, int[] stims,int swarm,int home, int team = 0)
     {
         ISFSObject data = new SFSObject();
 
@@ -781,6 +784,7 @@ public class NetworkController : MonoBehaviour {
         GameObject go = InstantiateNetPrefab(prefab, vector3, quaternion, data, true);
         PawnModel pawn = go.GetComponent<Pawn>().GetSerilizedData();
         pawn.type = prefab;
+        pawn.team = team;
         data.PutClass("pawn", pawn);
         data.PutInt("group", swarm);
         data.PutInt("home", home);
@@ -1845,7 +1849,15 @@ public class NetworkController : MonoBehaviour {
     public void HandleAISpawnBot(ISFSObject dt)
     {
         ISFSObject data = new SFSObject();
-        AIDirector.instance.swarms[dt.GetInt("swarmId")].SpawnBot(dt.GetUtfString("prefabName"), dt.GetInt("id"), ((Vector3Model)dt.GetClass("position")).GetVector());
+        if (dt.ContainsKey("team"))
+        {
+            AIDirector.instance.swarms[dt.GetInt("swarmId")].SpawnBot(dt.GetUtfString("prefabName"), dt.GetInt("id"), ((Vector3Model)dt.GetClass("position")).GetVector(),dt.GetInt("team"));
+        }
+        else
+        {
+            AIDirector.instance.swarms[dt.GetInt("swarmId")].SpawnBot(dt.GetUtfString("prefabName"), dt.GetInt("id"), ((Vector3Model)dt.GetClass("position")).GetVector());
+        }
+       
       
 
     }

@@ -242,36 +242,42 @@ public class PlayerMainGui : MonoBehaviour {
         switch (nextState)
         {
             case GUIState.Normal:
+                hud._DeadGUI.DeActivate();
                  pausegui.BackToGame();
                 stat.DeActivate();
                 respawnMenu.DeActivate();
                 hud.Activate();
                 break;
             case GUIState.Respawn:
+                hud._DeadGUI.DeActivate();
                 pausegui.BackToGame();
                 stat.DeActivate();
                 hud.DeActivate();
                 respawnMenu.Activate();
                 break;
             case GUIState.Playerlist:
+                hud._DeadGUI.DeActivate();
                 pausegui.BackToGame();
                 hud.DeActivate();
                 respawnMenu.DeActivate();
                 stat.Activate();
                 break;
             case GUIState.KillCam:
+                hud._DeadGUI.Activate();
                 pausegui.BackToGame();
                 stat.DeActivate();
                 respawnMenu.DeActivate();
                 hud.DeActivate();
                 break;
             case GUIState.GameResult:
+                hud._DeadGUI.DeActivate();
                 pausegui.BackToGame();
                 stat.DeActivate();
                 respawnMenu.DeActivate();
                 hud.DeActivate();
                 break;
             case GUIState.Pause:
+                hud._DeadGUI.DeActivate();
                 stat.DeActivate();
                 respawnMenu.DeActivate();
                 hud.DeActivate();
@@ -318,7 +324,8 @@ public class PlayerMainGui : MonoBehaviour {
 				
 					break;
 				case GUIState.KillCam:
-					Screen.lockCursor = true;
+                    
+					Screen.lockCursor = false;
 					PlayerList();
 					
 					break;

@@ -109,7 +109,12 @@ public class GameRule : MonoBehaviour {
             PathfindingEngine.Instance.GenerateStaticMap();
         }
         IsLvlChanging = false;
-        FindObjectOfType<AIDirector>().StartDirector();
+        AIDirector director = FindObjectOfType<AIDirector>();
+        if (director != null)
+        {
+            FindObjectOfType<AIDirector>().StartDirector();
+
+        }
     }
 
     public virtual void SetFromModel(GameRuleModel model)

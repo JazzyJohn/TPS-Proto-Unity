@@ -93,8 +93,10 @@ public class PauseMenu : MonoBehaviour {
                 effect.enabled = false;
             }
             PlayerGUI.guiState = PlayerMainGui.GUIState.Normal;
-            
-            Setting.CearControlls();
+            if (Setting != null)
+            {
+                Setting.CearControlls();
+            }
             PausePanel.alpha = 0f;
             PlayGUI.alpha = 1f;
         

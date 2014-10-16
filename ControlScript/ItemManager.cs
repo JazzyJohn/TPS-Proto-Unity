@@ -568,11 +568,11 @@ public class ItemManager : MonoBehaviour {
                     gui.index = new WeaponIndex(slot.ingamekey, slot.id);
                     if (slot.personal)
                     {
-                        gui.color = Color.blue;
+                        gui.color = ItemColor.Personal;
                     }
                     else
                     {
-                        gui.color = Color.green;
+                        gui.color = ItemColor.Times;
                     }
                     gui.name = slot.name;
                     gui.texture = slot.texture;
@@ -600,7 +600,7 @@ public class ItemManager : MonoBehaviour {
                 gui.index = new WeaponIndex(entry.weaponId, ""); ;
 				gui.name= entry.name;
 				gui.texture = entry.textureGUI;
-                gui.color = Color.white;
+                gui.color = ItemColor.Normal;
 				gui.group= entry.group;
 				weaponList.Add(gui);
 			
@@ -626,11 +626,11 @@ public class ItemManager : MonoBehaviour {
                     gui.index = new WeaponIndex(slot.ingamekey, slot.id);
                     if (slot.personal)
                     {
-                        gui.color = Color.blue;
+                        gui.color = ItemColor.Personal;
                     }
                     else
                     {
-                        gui.color = Color.green;
+                        gui.color = ItemColor.Times;
                     }
                     gui.name = slot.name;
                     gui.texture = slot.texture;
@@ -670,13 +670,13 @@ public class ItemManager : MonoBehaviour {
 		
 		    WWW w = null;
 		    if (String.Compare(Application.absoluteURL, 0, "https", 0,5) != 0) {
-			
-			    Debug.Log ("STATS HTTP SEND" + StatisticHandler.STATISTIC_PHP_HTTPS + StatisticHandler.LOAD_SHOP);
-			    w = new WWW (StatisticHandler.STATISTIC_PHP + StatisticHandler.LOAD_SHOP, form);
+
+                Debug.Log("STATS HTTP SEND" + StatisticHandler.GetSTATISTIC_PHP() + StatisticHandler.LOAD_SHOP);
+			    w = new WWW (StatisticHandler.GetSTATISTIC_PHP()+ StatisticHandler.LOAD_SHOP, form);
 		    }
 		    else{
-			    Debug.Log ("STATS HTTPS SEND"+StatisticHandler.STATISTIC_PHP_HTTPS + StatisticHandler.LOAD_ITEMS);
-			    w = new WWW (StatisticHandler.STATISTIC_PHP_HTTPS + StatisticHandler.LOAD_SHOP, form);
+			    Debug.Log ("STATS HTTPS SEND"+StatisticHandler.GetSTATISTIC_PHP_HTTPS() + StatisticHandler.LOAD_ITEMS);
+                w = new WWW(StatisticHandler.GetSTATISTIC_PHP_HTTPS() + StatisticHandler.LOAD_SHOP, form);
 		    }
 
 		    yield return w;
@@ -734,7 +734,7 @@ public class ItemManager : MonoBehaviour {
             if (String.Compare(Application.absoluteURL, 0, "https", 0,5) != 0) {
 				
                 Debug.Log ("STATS HTTP SEND" + StatisticHandler.STATISTIC_PHP_HTTPS + StatisticHandler.LOAD_SHOP);
-                www = new WWW (StatisticHandler.STATISTIC_PHP +  node.SelectSingleNode ("imageurl").InnerText);
+                www = new WWW (StatisticHandler.GetSTATISTIC_PHP()+  node.SelectSingleNode ("imageurl").InnerText);
             }
             else{
                 Debug.Log ("STATS HTTPS SEND"+StatisticHandler.STATISTIC_PHP_HTTPS + StatisticHandler.LOAD_ITEMS);
@@ -1227,7 +1227,7 @@ public class ItemManager : MonoBehaviour {
             if (String.Compare(Application.absoluteURL, 0, "https", 0,5) != 0) {
 				
                 Debug.Log ("STATS HTTP SEND" + StatisticHandler.STATISTIC_PHP_HTTPS + StatisticHandler.LOAD_SHOP);
-                www = new WWW (StatisticHandler.STATISTIC_PHP +  node.SelectSingleNode ("imageurl").InnerText);
+                www = new WWW (StatisticHandler.GetSTATISTIC_PHP()+  node.SelectSingleNode ("imageurl").InnerText);
             }
             else{
                 Debug.Log ("STATS HTTPS SEND"+StatisticHandler.STATISTIC_PHP_HTTPS + StatisticHandler.LOAD_ITEMS);

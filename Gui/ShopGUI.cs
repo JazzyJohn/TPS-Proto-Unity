@@ -63,7 +63,7 @@ public class ShopGUI : MonoBehaviour {
                 LotGUI_item.numToItem = i;
         }
         LotGUI_item.SetItem(item.item);
-
+        MainMenu.CamMove.RideTo(1);
 		
 	
 	}
@@ -99,6 +99,7 @@ public class ShopGUI : MonoBehaviour {
 		Lot.alpha = 0f;
         LotGUI_item.item = null;
         Destroy(LotGUI_item.gunModel);
+        MainMenu.CamMove.RideTo(0);
 	}
 
 	public void ReSIZE()

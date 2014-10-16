@@ -1,10 +1,10 @@
 using UnityEngine;
 using System.Collections;
-using nstuff.juggerfall.extension.models
+using nstuff.juggerfall.extension.models;
 
 public class TeamDeathmatch_PVPGameRule : PVPGameRule {
 
-	public override void SetFromModel(PVPGameRuleModel model)
+    public override void SetFromModel(GameRuleModel model)
     {
         PVPGameRuleModel pvpmodel = (PVPGameRuleModel)model;
         

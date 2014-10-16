@@ -35,6 +35,7 @@ public class PawnOnGuiComponent : ShowOnGuiComponent {
             return;
         }
         float health = pawn.health;
+        team = pawn.team;
         if (health<0)
         {
             health = 0;

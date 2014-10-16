@@ -18,6 +18,10 @@ public class ProgressBarsOnHUD : MonoBehaviour {
 	// Update is called once per frame
 	void Update () 
 	{
+        if (JetPackEnergySprite == null)
+        {
+            return;
+        }
 		if (Stats != null)
 		{
 			Energy = Stats.jetPackCharge;

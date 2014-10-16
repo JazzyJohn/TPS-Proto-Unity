@@ -200,7 +200,17 @@ public class AISwarm:MonoBehaviour
         ai.Init(aiGroup, this, point);
         AfterSpawnAction(ai);
     }
+    public void SpawnBot(string prefabName, int point, Vector3 position,int team)
+    {
 
+        GameObject obj = NetworkController.Instance.PawnForSwarmSpawnRequest(prefabName, position, respawns[point].transform.rotation, new int[0], aiGroup, point, team);
+        Pawn pawn = obj.GetComponent<Pawn>();
+        pawn.SetTeam(team);
+
+        AIBase ai = obj.GetComponent<AIBase>();
+        ai.Init(aiGroup, this, point);
+        AfterSpawnAction(ai);
+    }
     public virtual  void SendData(ISFSObject swarmSend)
     {
         ISFSArray points = new SFSArray();

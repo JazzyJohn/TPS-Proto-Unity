@@ -61,6 +61,10 @@ public class GlobalPlayer : MonoBehaviour {
     public bool isDebug=false;
 	
 	public int loadingStage = 0;
+
+    public string STATISTIC_PHP = "";
+
+    public  string STATISTIC_PHP_HTTPS = "";
 	
 	//this is for loading screen every long loading after loading increment  loadingStage when it's reached 
 	//MAXLOADSTAGE load finish;
@@ -226,12 +230,12 @@ public class GlobalPlayer : MonoBehaviour {
 		WWW w = null;
 		if (String.Compare(Application.absoluteURL, 0, "https", 0,5) != 0) {
 			
-			Debug.Log ("STATS HTTP SEND" + StatisticHandler.STATISTIC_PHP_HTTPS + StatisticHandler.ADD_USER);
-			w = new WWW (StatisticHandler.STATISTIC_PHP + StatisticHandler.ADD_USER, form);
+			Debug.Log ("STATS HTTP SEND" + StatisticHandler.GetSTATISTIC_PHP_HTTPS()+ StatisticHandler.ADD_USER);
+			w = new WWW (StatisticHandler.GetSTATISTIC_PHP()+ StatisticHandler.ADD_USER, form);
 		}
 		else{
-			Debug.Log ("STATS HTTPS SEND"+StatisticHandler.STATISTIC_PHP_HTTPS + StatisticHandler.ADD_USER);
-			w = new WWW (StatisticHandler.STATISTIC_PHP_HTTPS + StatisticHandler.ADD_USER, form);
+			Debug.Log ("STATS HTTPS SEND"+StatisticHandler.GetSTATISTIC_PHP_HTTPS()+ StatisticHandler.ADD_USER);
+			w = new WWW (StatisticHandler.GetSTATISTIC_PHP_HTTPS()+ StatisticHandler.ADD_USER, form);
 		}
 
 		yield return w;
@@ -245,12 +249,12 @@ public class GlobalPlayer : MonoBehaviour {
 		WWW w = null;
 		if (String.Compare(Application.absoluteURL, 0, "https", 0,5) != 0) {
 			
-			Debug.Log ("STATS HTTP SEND" + StatisticHandler.STATISTIC_PHP_HTTPS + StatisticHandler.RELOAD_STATS);
-			w = new WWW (StatisticHandler.STATISTIC_PHP + StatisticHandler.RELOAD_STATS, form);
+			Debug.Log ("STATS HTTP SEND" + StatisticHandler.GetSTATISTIC_PHP_HTTPS()+ StatisticHandler.RELOAD_STATS);
+			w = new WWW (StatisticHandler.GetSTATISTIC_PHP()+ StatisticHandler.RELOAD_STATS, form);
 		}
 		else{
-			Debug.Log ("STATS HTTPS SEND"+StatisticHandler.STATISTIC_PHP_HTTPS + StatisticHandler.RELOAD_STATS);
-			w = new WWW (StatisticHandler.STATISTIC_PHP_HTTPS + StatisticHandler.RELOAD_STATS, form);
+			Debug.Log ("STATS HTTPS SEND"+StatisticHandler.GetSTATISTIC_PHP_HTTPS()+ StatisticHandler.RELOAD_STATS);
+			w = new WWW (StatisticHandler.GetSTATISTIC_PHP_HTTPS()+ StatisticHandler.RELOAD_STATS, form);
 		}
 
 		yield return w;

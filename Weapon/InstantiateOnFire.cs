@@ -1,4 +1,5 @@
-﻿using UnityEngine;
+﻿using System;
+using UnityEngine;
 using System.Collections;
 
 public class InstantiateOnFire : MonoBehaviour
@@ -7,6 +8,7 @@ public class InstantiateOnFire : MonoBehaviour
   public GameObject Effect;
   public float DeactivateTimeDelay = 1;
   public bool UpdatePositionWithoutKinematic;
+  public float LifeTimeAfterRootDestroy = 5;
 
   private bool isVisible;
   private GameObject effectInstance;
@@ -71,11 +73,16 @@ public class InstantiateOnFire : MonoBehaviour
       effectT.position = parentT.position;
       effectT.rotation = parentT.rotation;
     }
-  
+  }
+
+  void OnDestroy()
+  {
+    Destroy(Effect, LifeTimeAfterRootDestroy);
   }
 
   void DeactivateEffect()
   {
-    Effect.SetActive(Effect);
+    Effect.SetActive(false);
+    isFired = false;
   }
 }

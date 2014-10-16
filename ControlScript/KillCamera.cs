@@ -9,12 +9,12 @@ public class KillCamera : ThirdPersonCamera
 	public Vector3 mediumTargetOffset  = Vector3.zero;
 	
 	public Vector3 bigTargetOffset  = Vector3.zero;
-	
-	private float killCamTimer = 0.0f;
-	
-	private Player killpalyer; 
-	
-	private BaseWeapon killerweapon;
+
+    public float killCamTimer = 0.0f;
+
+    public Player killpalyer;
+
+    public BaseWeapon killerweapon;
 	
 	void  Awake (){
 		

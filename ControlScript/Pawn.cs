@@ -416,7 +416,7 @@ public class Pawn : DamagebleObject
         //проигрываем звук респавна
         sControl.playClip(spawnSound);
         isActive = true;
-        if (effectController.IsSpawn())
+        if (effectController!=null&&effectController.IsSpawn())
         {
         
             isSpawn = true;//отключаем движения и повреждения
@@ -911,8 +911,10 @@ public class Pawn : DamagebleObject
     //EFFECCT SECTION
     void AddEffect(Vector3 position,DamageType type)
     {
-        effectController.DamageEffect(type);
-
+        if (effectController != null)
+        {
+            effectController.DamageEffect(type);
+        }
     }
 
 
@@ -1211,7 +1213,7 @@ public class Pawn : DamagebleObject
         if (isSpawn)
         {//если респавн
 
-            if (effectController.IsSpawn())
+            if (effectController != null && effectController.IsSpawn())
             {//если все партиклы кончились
                 isSpawn = false;//то освобождаем все движения и повреждения
             }

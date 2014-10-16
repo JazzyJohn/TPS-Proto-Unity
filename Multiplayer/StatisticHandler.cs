@@ -60,9 +60,9 @@ public class StatisticHandler : MonoBehaviour {
 
 	public static string LOGIN = "login";
 	
-    public static string STATISTIC_PHP = "http://juggerfall.com/";
+    private static string STATISTIC_PHP = "http://juggerfall.com/";
 
-    public static string STATISTIC_PHP_HTTPS = "https://juggerfall.com/";
+    private static string STATISTIC_PHP_HTTPS = "https://juggerfall.com/";
 
 	// s_Instance is used to cache the instance found in the scene so we don't have to look it up every time.
 	private static StatisticHandler s_Instance = null;
@@ -166,11 +166,11 @@ public class StatisticHandler : MonoBehaviour {
 		if (String.Compare(Application.absoluteURL, 0, "https", 0,5) != 0) {
 
 						//Debug.Log ("STATS HTTP SEND");
-						w = new WWW (STATISTIC_PHP + url, form);
+						w = new WWW (GetSTATISTIC_PHP()+ url, form);
 		}
 		else{
 			//Debug.Log ("STATS HTTPS SEND");
-			 w = new WWW (STATISTIC_PHP_HTTPS + url, form);
+			 w = new WWW (GetSTATISTIC_PHP_HTTPS()+ url, form);
 		}
 			yield return w;
 			Debug.Log (w.text);
@@ -185,11 +185,11 @@ public class StatisticHandler : MonoBehaviour {
 		if (String.Compare(Application.absoluteURL, 0, "https", 0,5) != 0) {
 			
 			//Debug.Log ("STATS HTTP SEND" + StatisticHandler.STATISTIC_PHP_HTTPS + URL);
-			www = new WWW (StatisticHandler.STATISTIC_PHP + URL,form);
+			www = new WWW (StatisticHandler.GetSTATISTIC_PHP()+ URL,form);
 		}
 		else{
-			//Debug.Log ("STATS HTTPS SEND"+StatisticHandler.STATISTIC_PHP_HTTPS +  URL);
-			www = new WWW (StatisticHandler.STATISTIC_PHP_HTTPS +  URL,form);
+			//Debug.Log ("STATS HTTPS SEND"+StatisticHandler.GetSTATISTIC_PHP_HTTPS()+  URL);
+			www = new WWW (StatisticHandler.GetSTATISTIC_PHP_HTTPS()+  URL,form);
 		}
 	
 		return www;
@@ -200,26 +200,41 @@ public class StatisticHandler : MonoBehaviour {
 		if (String.Compare(Application.absoluteURL, 0, "https", 0,5) != 0) {
 			
 			//Debug.Log ("STATS HTTP SEND" + StatisticHandler.STATISTIC_PHP_HTTPS +  node.SelectSingleNode ("textureGUIName").InnerText);
-			www = new WWW (StatisticHandler.STATISTIC_PHP + URL);
+			www = new WWW (StatisticHandler.GetSTATISTIC_PHP()+ URL);
 		}
 		else{
 			//Debug.Log ("STATS HTTPS SEND"+StatisticHandler.STATISTIC_PHP_HTTPS +  node.SelectSingleNode ("textureGUIName").InnerText);
-			www = new WWW (StatisticHandler.STATISTIC_PHP_HTTPS +  URL);
+			www = new WWW (StatisticHandler.GetSTATISTIC_PHP_HTTPS()+  URL);
 		}
 		
 		return www;
 		
 	}
+    public static String GetSTATISTIC_PHP(){
+        if(GlobalPlayer.instance!=null&&GlobalPlayer.instance.STATISTIC_PHP!=""){
+            return GlobalPlayer.instance.STATISTIC_PHP;
+        }
+        return STATISTIC_PHP;
+    }
+
+    public static String GetSTATISTIC_PHP_HTTPS()
+    {
+        if (GlobalPlayer.instance != null && GlobalPlayer.instance.STATISTIC_PHP_HTTPS!= "")
+        {
+            return GlobalPlayer.instance.STATISTIC_PHP_HTTPS;
+        }
+        return STATISTIC_PHP_HTTPS;
+    }
 	public static String GetNormalURL(){
 	
 		if (String.Compare(Application.absoluteURL, 0, "https", 0,5) != 0) {
 			
 			//Debug.Log ("STATS HTTP SEND" + StatisticHandler.STATISTIC_PHP_HTTPS +  node.SelectSingleNode ("textureGUIName").InnerText);
-			return StatisticHandler.STATISTIC_PHP;
+            return StatisticHandler.GetSTATISTIC_PHP();
 		}
 		else{
 			//Debug.Log ("STATS HTTPS SEND"+StatisticHandler.STATISTIC_PHP_HTTPS +  node.SelectSingleNode ("textureGUIName").InnerText);
-			return StatisticHandler.STATISTIC_PHP_HTTPS;
+            return StatisticHandler.GetSTATISTIC_PHP_HTTPS();
 		}
 	}
 	
@@ -228,12 +243,12 @@ public class StatisticHandler : MonoBehaviour {
 		WWW www = null;
 		if (String.Compare(Application.absoluteURL, 0, "https", 0,5) != 0) {
 			
-			//Debug.Log ("STATS HTTP SEND" + StatisticHandler.STATISTIC_PHP_HTTPS +  node.SelectSingleNode ("textureGUIName").InnerText);
-			www = new WWW (StatisticHandler.STATISTIC_PHP + URL,form);
+			//Debug.Log ("STATS HTTP SEND" + StatisticHandler.GetSTATISTIC_PHP_HTTPS()+  node.SelectSingleNode ("textureGUIName").InnerText);
+			www = new WWW (StatisticHandler.GetSTATISTIC_PHP()+ URL,form);
 		}
 		else{
-			//Debug.Log ("STATS HTTPS SEND"+StatisticHandler.STATISTIC_PHP_HTTPS +  node.SelectSingleNode ("textureGUIName").InnerText);
-			www = new WWW (StatisticHandler.STATISTIC_PHP_HTTPS +  URL,form);
+			//Debug.Log ("STATS HTTPS SEND"+StatisticHandler.GetSTATISTIC_PHP_HTTPS()+  node.SelectSingleNode ("textureGUIName").InnerText);
+			www = new WWW (StatisticHandler.GetSTATISTIC_PHP_HTTPS()+  URL,form);
 		}
 		int i = 0;
 		while(true){
@@ -252,9 +267,9 @@ public class StatisticHandler : MonoBehaviour {
 
 	/*	string url = "";
 		if (String.Compare (Application.absoluteURL, 0, "https", 0, 5) != 0) {
-			url = StatisticHandler.STATISTIC_PHP + URL;
+			url = StatisticHandler.GetSTATISTIC_PHP()+ URL;
 		}else{
-			url = StatisticHandler.STATISTIC_PHP_HTTPS + URL;
+			url = StatisticHandler.GetSTATISTIC_PHP_HTTPS()+ URL;
 		}
 		string result = System.Text.Encoding.UTF8.GetString (form.data);
 

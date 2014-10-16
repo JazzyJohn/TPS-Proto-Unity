@@ -151,7 +151,7 @@ public class CrosshairBehaviour : MonoBehaviour {
             }
             else
             {
-                skillReady.fillAmount = 1 - (gamestats.skill.CoolDown() / 18.0f);
+                skillReady.fillAmount = 1 - (gamestats.skill.CoolDown() / gamestats.skill.coolDown);
                 skillReadyLablel.text = gamestats.skill.CoolDown().ToString("0.0");
             }
         }

@@ -3,11 +3,18 @@ using System.Collections;
 using System.Collections.Generic;
 using System;
 
+public enum ItemColor
+{
+    Normal,
+    Times,
+    Personal
+}
+
 public class GUIItem{
     public WeaponIndex index;
 	public Texture2D texture;
 	public string name;
-    public Color color;
+    public ItemColor color;
     public int group;
 }
 public class SelectPlayerGUI : MonoBehaviour {
@@ -39,7 +46,11 @@ public class SelectPlayerGUI : MonoBehaviour {
 
     public UIToggle[] team;
 
+    public int slotAmount =4;
+    
     public List<GUIItem>[] listOfItems = new List<GUIItem>[4];
+
+    public Color[] colorByType;
 	// Use this for initialization
 	void Start () 
 	{
@@ -89,7 +100,7 @@ public class SelectPlayerGUI : MonoBehaviour {
         if (ThisPanel.alpha==0.0f)
         {
             ThisPanel.alpha = 1.0f;
-            if(Choice._Player!=-1){
+            if(Choice._Player!=-1&&MenuElements.ClassModels.Count<Choice._Player&& MenuElements.ClassModels[Choice._Player] != null){
                 MenuElements.ClassModels[Choice._Player].SetActive(true);
             }
         }
@@ -137,7 +148,8 @@ public class SelectPlayerGUI : MonoBehaviour {
 			Choice._Player = (int)GameClassEnum.ASSAULT;
 			break;
 		}
-        for(int j = 0; j <4;j++){
+        for (int j = 0; j < slotAmount; j++)
+        {
             listOfItems [j] =ItemManager.instance.GetItemForSlot((GameClassEnum)Choice._Player, j);
             WeaponIndex choice = Choice.ForGuiSlot(j);
             if (!choice.IsSameIndex( WeaponIndex.Zero))
@@ -151,8 +163,9 @@ public class SelectPlayerGUI : MonoBehaviour {
             }
         }
         HideModel();
-        
-        MenuElements.ClassModels[Choice._Player].SetActive(true);
+        if (MenuElements.ClassModels.Count<Choice._Player&& MenuElements.ClassModels[Choice._Player] != null) {
+            MenuElements.ClassModels[Choice._Player].SetActive(true);
+        };
 	}
 
     public void HideModel() {
@@ -272,7 +285,7 @@ public class SelectPlayerGUI : MonoBehaviour {
         }
 
         MenuElements.Weapon[TypeW].mainTexture = listOfItems[TypeW][choice].texture;
-        MenuElements.WeaponBack[TypeW].color = listOfItems[TypeW][choice].color;
+        MenuElements.WeaponBack[TypeW].color = colorByType[(int)listOfItems[TypeW][choice].color];
         Choice.SetChoice(TypeW, Choice._Player, listOfItems[TypeW][choice].index);
     }
 
@@ -328,7 +341,7 @@ public class SelectPlayerGUI : MonoBehaviour {
 			 int timer = (int)LocalPlayer.GetRespawnTimer();
              if (timer <= 0)
              {
-                 for (int j = 0; j < 4; j++)
+                 for (int j = 0; j < slotAmount; j++)
                  {
                      listOfItems[j] = ItemManager.instance.GetItemForSlot((GameClassEnum)Choice._Player, j);
                      ChangeWeapon(j, 0);
@@ -346,13 +359,17 @@ public class SelectPlayerGUI : MonoBehaviour {
     public Transform playerPreView;
     public void LoadFromPrefab(){
         UnityEngine.Object[] models = playerManager.bundle.LoadAll(typeof(ModelForGui));
-       foreach (UnityEngine.Object model in models) {
-           ModelForGui obj = Instantiate(model, playerPreView.position, playerPreView.rotation) as ModelForGui;
-           MenuElements.ClassModels[obj.index] = obj.gameObject;
-           obj.gameObject.SetActive(false);
-           obj.transform.parent = playerPreView;
-           obj.transform.localScale = new Vector3(1,1,1);
-       }
+        if (playerPreView != null)
+        {
+            foreach (UnityEngine.Object model in models)
+            {
+                ModelForGui obj = Instantiate(model, playerPreView.position, playerPreView.rotation) as ModelForGui;
+                MenuElements.ClassModels[obj.index] = obj.gameObject;
+                obj.gameObject.SetActive(false);
+                obj.transform.parent = playerPreView;
+                obj.transform.localScale = new Vector3(1, 1, 1);
+            }
+        }
     }
     public void RotateModel() {
        // Debug.Log("ROTATE");

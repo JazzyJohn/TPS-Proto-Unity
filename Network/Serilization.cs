@@ -195,7 +195,7 @@ namespace nstuff.juggerfall.extension.models
 			this.pushDirection= new Vector3Model(damage.pushDirection);
 			this.hitPosition= new Vector3Model(damage.hitPosition);
             this.weaponId = damage.shootWeapon;
-			this.damageType = (int)damage.damageType;
+			this.damageType = (int)damage.type;
 		}	
 		public BaseDamage GetDamage(){
             BaseDamage damageClass = new BaseDamage();
@@ -206,7 +206,7 @@ namespace nstuff.juggerfall.extension.models
             damageClass.pushDirection = pushDirection.GetVector();
             damageClass.hitPosition = hitPosition.GetVector();
 			damageClass.shootWeapon =weaponId;
-			damageClass.damageType = (DamageType)damageType ;
+            damageClass.type = (DamageType)damageType;
             return damageClass;
 		}	
     }

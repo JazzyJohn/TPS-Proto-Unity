@@ -12,7 +12,8 @@ public class PawnEffectController : MonoBehaviour
 	public GameObject spawnEffect;
 	
 	[Serializable]
-	public struct EffectEntity{
+    public class EffectEntity
+    {
 		public DamageType type;
 		
 		public GameObject effectObject;
@@ -34,7 +35,7 @@ public class PawnEffectController : MonoBehaviour
 			if(entity._timer>0){
 				entity._timer-=Time.deltaTime;
 				if(entity._timer<=0){
-					effectObject.SetActive(false);
+                    entity.effectObject.SetActive(false);
 				}
 			}
 		
@@ -46,7 +47,17 @@ public class PawnEffectController : MonoBehaviour
 	}
 	
 	public void DamageEffect(DamageType type){
-	
+        foreach (EffectEntity entity in allEffect)
+        {
+            if (entity.type == type)
+            {
+                if (entity.timer <= 0)
+                {
+                    entity.effectObject.SetActive(true);
+                }
+                entity.timer = entity._timer;
+            }
+        }
 	
 	}
 	

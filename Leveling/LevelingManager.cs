@@ -84,12 +84,12 @@ public class LevelingManager : MonoBehaviour, LocalPlayerListener,GameListener{
 		WWW w = null;
 		if (String.Compare(Application.absoluteURL, 0, "https", 0,5) != 0) {
 			
-			Debug.Log ("STATS HTTP SEND" + StatisticHandler.STATISTIC_PHP + StatisticHandler.LOAD_LVL);
-			w = new WWW (StatisticHandler.STATISTIC_PHP + StatisticHandler.LOAD_LVL, form);
+			Debug.Log ("STATS HTTP SEND" + StatisticHandler.GetSTATISTIC_PHP()+ StatisticHandler.LOAD_LVL);
+			w = new WWW (StatisticHandler.GetSTATISTIC_PHP()+ StatisticHandler.LOAD_LVL, form);
 		}
 		else{
-			Debug.Log ("STATS HTTPS SEND"+StatisticHandler.STATISTIC_PHP_HTTPS + StatisticHandler.LOAD_LVL);
-			w = new WWW (StatisticHandler.STATISTIC_PHP_HTTPS + StatisticHandler.LOAD_LVL, form);
+			//Debug.Log ("STATS HTTPS SEND"+StatisticHandler.STATISTIC_PHP_HTTPS + StatisticHandler.LOAD_LVL);
+            w = new WWW(StatisticHandler.GetSTATISTIC_PHP_HTTPS() + StatisticHandler.LOAD_LVL, form);
 		}
 
 		yield return w;
