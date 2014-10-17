@@ -206,9 +206,9 @@ public class AIState : MonoBehaviour {
 		if(isAgressive){
 			if(target.isAi){
                 //Debug.Log("ENEMY? ME"+controlledPawn +"YOu" +target);
-                return aibase.IsEnemy(target.mainAi.aiGroup);
+                return aibase.IsEnemy(target);
 			}else{
-                return true;
+                return aibase.IsPlayerEnemy(target);
 			}
 		}else{
 			

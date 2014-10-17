@@ -29,9 +29,9 @@ public class AIBase : MonoBehaviour
 
     private List<GameObject> _arrayPlayerInRadius = new List<GameObject>();
 
-	private AIState _currentState;
+	protected AIState _currentState;
 
-	private Pawn controlledPawn;
+	protected Pawn controlledPawn;
 
     public bool standAlone = false;
 
@@ -186,9 +186,14 @@ public class AIBase : MonoBehaviour
 
 
 
-   public  bool IsEnemy(int group)
+   public virtual bool IsEnemy(Pawn target)
    {
-       return aiSwarm.IsEnemy(group);
+       return aiSwarm.IsEnemy(target.mainAi.aiGroup);
+   }
+   
+   public virtual bool IsPlayerEnemy(Pawn target)
+   {
+       return return true;
    }
    public AISwarm GetAISwarm()
    {
@@ -203,7 +208,7 @@ public class AIBase : MonoBehaviour
             aiSwarm.NewEnemy(enemy);
 		}
    }
-   public void EnemyFromSwarm(Pawn enemy){
+   public virtual void EnemyFromSwarm(Pawn enemy){
 		_currentState.EnemyFromSwarm(enemy);
    }
 

@@ -285,7 +285,9 @@ public class SelectPlayerGUI : MonoBehaviour {
         }
 
         MenuElements.Weapon[TypeW].mainTexture = listOfItems[TypeW][choice].texture;
-        MenuElements.WeaponBack[TypeW].color = colorByType[(int)listOfItems[TypeW][choice].color];
+		if(colorByType.Lenght>(int)listOfItems[TypeW][choice].color){
+			MenuElements.WeaponBack[TypeW].color = colorByType[(int)listOfItems[TypeW][choice].color];
+		}
         Choice.SetChoice(TypeW, Choice._Player, listOfItems[TypeW][choice].index);
     }
 

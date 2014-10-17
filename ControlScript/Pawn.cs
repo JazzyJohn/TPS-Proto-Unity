@@ -672,7 +672,7 @@ public class Pawn : DamagebleObject
         {
 			if (damage.sendMessage)
 			{
-				AddEffect(damage.hitPosition,damage.type);
+				AddEffect(damage.hitPosition,damage.pushDirection ,damage.type);
 			}
             base.Damage(damage, killer);
         }
@@ -682,7 +682,7 @@ public class Pawn : DamagebleObject
             {
    			    if (damage.sendMessage)
 				{
-					AddEffect(damage.hitPosition,damage.type);
+					AddEffect(damage.hitPosition,damage.pushDirection ,damage.type);
 				}
                 base.Damage(damage, killer);
             }
@@ -736,7 +736,7 @@ public class Pawn : DamagebleObject
         //Debug.Log ("DAMAGE");
 		if (damage.sendMessage)
 		{
-			AddEffect(damage.hitPosition,damage.type);
+			AddEffect(damage.hitPosition,damage.pushDirection ,damage.type);
 		}
         base.Damage(damage, killer);
     }
@@ -909,11 +909,11 @@ public class Pawn : DamagebleObject
         Destroy(gameObject);
     }
     //EFFECCT SECTION
-    void AddEffect(Vector3 position,DamageType type)
+    void AddEffect(Vector3 position,Vector3 direction,DamageType type)
     {
         if (effectController != null)
         {
-            effectController.DamageEffect(type);
+            effectController.DamageEffect(type,position,direction);
         }
     }
 
