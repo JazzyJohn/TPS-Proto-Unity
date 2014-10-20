@@ -194,6 +194,9 @@ public class AIMovementState : AIState
 
     public bool CheckJump(Vector3 translate)
     {
+		if(!controlledPawn.canJump){
+			return false;
+		}
         translate.y=0;
        /* RaycastHit hit;
         bool result = 

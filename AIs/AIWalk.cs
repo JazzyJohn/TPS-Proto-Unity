@@ -453,6 +453,9 @@ public class AIWalk : AIMovementState
 
     public bool JumpToEnemy(Vector3 translateVect)
     {
+		if(!controlledPawn.canJump){
+			return false;
+		}
 		if(enemyAbove){
 			//If (Melee in At tack)  
 			 
