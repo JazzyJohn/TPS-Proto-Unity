@@ -7,6 +7,7 @@ public class ShopItemGUI : MonoBehaviour {
     public ShopSlot item;
 	public UILabel Name;
 	public UILabel PriceKP;
+	public UIWidget PriceKPBox;
 	public UILabel PriceGITP;
     public UILabel Description;
 	public UITexture Texture;
@@ -35,7 +36,10 @@ public class ShopItemGUI : MonoBehaviour {
     {
         item = _item;
         Name.text = item.name;
-        PriceKP.text = item.cashCost + " KP";
+		if( item.cashCost ==0){
+			PriceKP.text = item.cashCost + " KP";
+			PriceKPBox.alpha = 0.0f;
+		}
         PriceGITP.text = item.goldCost + " GITP";
         Description.text = item.description;
         Texture.mainTexture = null;

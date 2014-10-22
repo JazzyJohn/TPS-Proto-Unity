@@ -9,6 +9,7 @@ public class LotItemGUI : MonoBehaviour
     public ShopSlot item;
     public UILabel Name;
     public UILabel PriceKP;
+	public UIWidget PriceKPBox;
     public UILabel PriceGITP;
     public UILabel Description;
     public Transform gun;
@@ -49,6 +50,12 @@ public class LotItemGUI : MonoBehaviour
     {
         item = _item;
         Name.text = item.name;
+		if( item.cashCost ==0){
+			
+			PriceKPBox.alpha = 0.0f;
+		}else{
+			PriceKPBox.alpha = 1.0f;
+		}
         PriceKP.text = item.cashCost + " KP";
         PriceGITP.text = item.goldCost + " GITP";
         Description.text = item.description;

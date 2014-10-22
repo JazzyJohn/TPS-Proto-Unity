@@ -9,6 +9,7 @@ public class LevelingManager : MonoBehaviour, LocalPlayerListener,GameListener{
 	
 	public const string PARAM_KILL = "Kill";
 	public const string PARAM_WIN = "Win";
+	public const string PARAM_LOSE = "Lose";
 	public const string PARAM_KILL_AI= "KillAI"; 
 	public const string PARAM_KILL_FRIEND = "KillFriend";
 	public const string PARAM_KILL_BY_FRIEND= "KilledByFriend"; 
@@ -214,7 +215,7 @@ public class LevelingManager : MonoBehaviour, LocalPlayerListener,GameListener{
 	}
 	public void EventTeamWin(int teamNumber){
 		//if we not winner so no change in exp, or we a winner but no send were initiate we sync data 
-		if (myPlayer.team	!= teamNumber||(myPlayer.team == teamNumber&&!UpExp(PARAM_WIN))) {
+		if ((myPlayer.team	!= teamNumber&&!UpExp(PARAM_LOSE))||(myPlayer.team == teamNumber&&!UpExp(PARAM_WIN))) {
 			SyncLvl();
 		}
 		
