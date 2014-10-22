@@ -193,7 +193,7 @@ public class AIBase : MonoBehaviour
    
    public virtual bool IsPlayerEnemy(Pawn target)
    {
-       return return true;
+       return true;
    }
    public AISwarm GetAISwarm()
    {

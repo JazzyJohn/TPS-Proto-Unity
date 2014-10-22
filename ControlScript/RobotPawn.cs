@@ -19,7 +19,7 @@ public class RobotPawn : Pawn {
         //проигрываем звук респавна
         sControl.playClip(spawnSound);
         isActive = true;
-        if (effectController.IsSpawn() != null)
+        if (effectController != null && effectController.IsSpawn() != null)
         {
           //  emitter.Emit();//запускаем эмиттер
             isSpawn = true;//отключаем движения и повреждения

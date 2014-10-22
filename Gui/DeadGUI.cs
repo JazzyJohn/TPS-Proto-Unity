@@ -19,10 +19,24 @@ public class DeadGUI : MonoBehaviour {
         {
             Panel.alpha = 1f;
             active = true;
+            weaponTexture.alpha =1.0f;
             if (KillCam.killpalyer != null)
             {
                 NameKiller.text = KillCam.killpalyer.PlayerName;
                 weaponTexture.mainTexture = KillCam.killerweapon.HUDIcon;
+            }
+            else
+            {
+                NameKiller.text = KillCam.killpawn.publicName;
+                if (KillCam.killerweapon==null||KillCam.killerweapon.HUDIcon == null)
+                {
+                    weaponTexture.alpha = 0.0f;
+                }
+                else
+                {
+                    weaponTexture.mainTexture = KillCam.killerweapon.HUDIcon;
+                }
+               
             }
         }
     }

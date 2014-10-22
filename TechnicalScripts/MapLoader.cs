@@ -52,7 +52,8 @@ public class MapLoader : MonoBehaviour {
             bundle = AssetBundleManager.getAssetBundle(crossDomainesafeURL, version);
             Debug.Log("MyBundle" + bundle);
             inProgress = false;
-            yield return null;
+            AsyncOperation async = Application.LoadLevelAsync(assetbundleMapName);
+            yield return async;
         }
         else
         {
@@ -80,10 +81,11 @@ public class MapLoader : MonoBehaviour {
                 }
 
             }
+            AsyncOperation async = Application.LoadLevelAsync(assetbundleMapName);
+            yield return async;
         }
         // Load the level we have just downloaded
-        AsyncOperation async =Application.LoadLevelAsync(assetbundleMapName);
-        yield return async;
+        
     }
  
 }

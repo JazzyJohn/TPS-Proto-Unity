@@ -14,6 +14,8 @@ public class KillCamera : ThirdPersonCamera
 
     public Player killpalyer;
 
+    public Pawn killpawn;
+
     public BaseWeapon killerweapon;
 	
 	void  Awake (){
@@ -63,6 +65,7 @@ public class KillCamera : ThirdPersonCamera
 	public bool Init(Pawn Killer){
 		
 		_pawn  =Killer;
+        killpawn = Killer;
 		killCamTimer = 0.0f;
 		if(_pawn !=null){
 			_target =_pawn.myTransform;
@@ -74,7 +77,11 @@ public class KillCamera : ThirdPersonCamera
 			}
 			if(!_pawn.isAi){
 				killerweapon = ItemManager.instance.weaponPrefabsListbyId[_pawn.CurWeapon.SQLId];
-			}
+            }
+            else
+            {
+                killerweapon = null;
+            }
 			InitOffsets();
 			return true;
 		}

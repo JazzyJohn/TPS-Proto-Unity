@@ -466,20 +466,27 @@ public class ServerHolder : MonoBehaviour
 		yield return async;
 		Debug.Log ("Загрузка завершена.");*/
 
-        MapLoader loader = FindObjectOfType<MapLoader>();
-        Debug.Log(loader);
-		if (loader != null) {
-				
-				//MapLoader + MApUnity load = 2;
+         bool loaded = false;
+        
+        if (!loaded)
+        {
+            MapLoader loader = FindObjectOfType<MapLoader>();
+            Debug.Log(loader);
+            if (loader != null)
+            {
 
-               progress.allLoader = 5;
-				progress.finishedLoader=1;
-				progress.curLoader=0;
-                Debug.Log("Загружаем карту " + mapName );
+                //MapLoader + MApUnity load = 2;
+
+                progress.allLoader = 5;
+                progress.finishedLoader = 1;
+                progress.curLoader = 0;
+                Debug.Log("Загружаем карту " + mapName);
                 IEnumerator innerCoroutineEnumerator = loader.Load(mapName);
-				while (innerCoroutineEnumerator.MoveNext())
-						yield return innerCoroutineEnumerator.Current;
+                while (innerCoroutineEnumerator.MoveNext())
+                    yield return innerCoroutineEnumerator.Current;
+            }
 
+        }
                 PrefabManager[] managers = FindObjectsOfType<PrefabManager>();
                 progress.allLoader = 2 + managers.Length;
                 Debug.Log("Загрузка завершена.");
@@ -493,7 +500,7 @@ public class ServerHolder : MonoBehaviour
 						progress.finishedLoader++;
 						progress.curLoader=0;
 				}
-		}
+	
         ItemManager.instance.ConnectToPrefab();
 
         MapDownloader downloadata = FindObjectOfType<MapDownloader>();

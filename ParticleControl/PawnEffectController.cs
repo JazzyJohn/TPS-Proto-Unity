@@ -18,10 +18,12 @@ public class PawnEffectController : MonoBehaviour
     {
 		public DamageType type;
 		
-		public GameObject effectObject;
+		public GameObject[] effectObject;
+
+        public ParticleSystem[] particleObject;
 		
 		public bool spawn;
-		
+        [HideInInspector] 
 		public float _timer;
 		
 		public float timer;
@@ -42,7 +44,14 @@ public class PawnEffectController : MonoBehaviour
 			if(entity._timer>0){
 				entity._timer-=Time.deltaTime;
 				if(entity._timer<=0&&!entity.spawn){
-                    entity.effectObject.SetActive(false);
+                    foreach (GameObject effectObject in entity.effectObject)
+                    {
+                        effectObject.SetActive(false);
+                    }
+                    foreach (ParticleSystem effectObject in entity.particleObject)
+                    {
+                        effectObject.Stop();
+                    }
 				}
 			}
 		
@@ -66,20 +75,31 @@ public class PawnEffectController : MonoBehaviour
         {
             if (entity.type == type)
             {
+               // Debug.Log(type + "  " + entity.effectObject + "  " + entity.timer+" "+ entity.spawn);
 				if(entity.spawn){
-					if (entity.timer <= 0)
+					if (entity._timer <= 0)
 					{
-					 Instantiate(effectObject, position, Quaternion.identity)
+                        entity._timer = entity.timer;
+                        Instantiate(entity.effectObject[UnityEngine.Random.Range(0,entity.effectObject.Length)], position, rot);
 					}
 				}else{
-					if (entity.timer <= 0)
+                   
+					if (entity._timer <= 0)
 					{
-						entity.effectObject.SetActive(true);
+                        foreach (GameObject effectObject in entity.effectObject)
+                        {
+                            effectObject.SetActive(true);
+                        }
+                        foreach (ParticleSystem effectObject in entity.particleObject)
+                        {
+                            effectObject.Play();
+                        }
 					}
-					entity.timer = entity._timer;
+					entity._timer = entity.timer;
 				}
+                break;
             }
-			break;
+			
         }
 	
 	}

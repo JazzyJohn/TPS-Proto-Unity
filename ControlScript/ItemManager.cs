@@ -425,9 +425,9 @@ public class ItemManager : MonoBehaviour {
 	}	
 	public void SetNewWeapon(BaseWeapon prefab){
 		//Debug.Log (prefab);
-		
-		weaponPrefabsListbyId [prefab.SQLId] = prefab;
-
+        if (prefab.SQLId >= 0) { 
+		    weaponPrefabsListbyId [prefab.SQLId] = prefab;
+        }
 		//weaponPrefabsListbyId[prefab.SQLId].HUDIcon = weaponIndexTable[prefab.SQLId].textureGUI;
 	}
 	public BaseWeapon GetWeaponprefabByID(WeaponIndex index){

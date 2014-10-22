@@ -342,6 +342,10 @@ public class BaseWeapon : DestroyableNetworkObject {
 			RequestKillMe();
 
 		}
+        if (_randShootCoef > 0)
+        {
+            _randShootCoef -= randCoolingEffect * deltaTime;
+        }
 		//AimFix ();
 		if(ReplicationContinue()){
 			return;
@@ -456,10 +460,7 @@ public class BaseWeapon : DestroyableNetworkObject {
                 }
                 break;
         }
-        if (_randShootCoef > 0)
-        {
-            _randShootCoef -= randCoolingEffect * deltaTime;
-        }
+        
      
 	}
 	private void Pumping(){

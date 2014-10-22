@@ -385,6 +385,7 @@ public class Pawn : DamagebleObject
         {
             correctPlayerPos = transform.position;
         }
+        effectController = GetComponentInChildren<PawnEffectController>();
         charMan = GetComponent<CharacteristicManager>();
         charMan.Init();
         skillManager = GetComponent<SkillManager>();

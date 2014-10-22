@@ -246,6 +246,7 @@ public class SelectPlayerGUI : MonoBehaviour {
 		if(teamCount[1]>teamCount[0]+1){
 			teamBblock=true;
 		}
+        Debug.Log(teamAblock + "  " + teamBblock + i);
 		if (i == 1 && !teamAblock)
 			Choice._Team = 1;
         else if (i == 2 && !teamBblock)
@@ -285,7 +286,7 @@ public class SelectPlayerGUI : MonoBehaviour {
         }
 
         MenuElements.Weapon[TypeW].mainTexture = listOfItems[TypeW][choice].texture;
-		if(colorByType.Lenght>(int)listOfItems[TypeW][choice].color){
+		if(colorByType.Length>(int)listOfItems[TypeW][choice].color){
 			MenuElements.WeaponBack[TypeW].color = colorByType[(int)listOfItems[TypeW][choice].color];
 		}
         Choice.SetChoice(TypeW, Choice._Player, listOfItems[TypeW][choice].index);

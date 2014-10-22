@@ -21,6 +21,7 @@ public class ClearCache : ScriptableObject
 	{
 		if (Caching.CleanCache ()) 
 		{
+            
 			Debug.LogWarning ("Successfully cleaned all caches.");
 		}
 		else 
