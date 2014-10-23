@@ -58,10 +58,10 @@ public class PVEGameExpidition : GameRule {
     }
     public override void MoveOn()
     {
-        curStage = 0;
+        curStage = MUSIC_STAGE.EXPLORATION;
     }
     public void Battle() {
-        curStage = 1;
+        curStage = MUSIC_STAGE.BATLLE;
     
     }
 

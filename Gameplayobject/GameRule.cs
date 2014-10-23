@@ -24,7 +24,8 @@ public class GameRule : MonoBehaviour {
 
     public bool CanUseRobot = true;
 
-    public curStage curStage = MUSIC_STAGE.BATLLE;
+    [HideInInspector]
+    public MUSIC_STAGE curStage = MUSIC_STAGE.BATLLE;
 
     public bool start = false;
 
@@ -32,6 +33,7 @@ public class GameRule : MonoBehaviour {
 
     protected void Awake()
     {
+        curStage = MUSIC_STAGE.BATLLE;
         isGameEnded = false;
         lvlChanging = false;
        // PhotonNetwork.isMessageQueueRunning = true;

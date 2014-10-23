@@ -15,8 +15,8 @@ public class MusicHolder : MonoBehaviour {
 	public float musicTimeOut;
 	
 	public AudioSource musicPlayer;
-	
-	public STAGE curStage;
+
+    public int curStage;
 	
 	int curMusic;
 	
@@ -44,7 +44,7 @@ public class MusicHolder : MonoBehaviour {
 		for (int i = 0; i < MusicBefore.Length; i++) {
 			MusicBefore[i] = MusicInStage[i] + tempMusic;
 			tempMusic += MusicInStage[i];
-			//Debug.Log(MusicBefore[i]);
+			Debug.Log(MusicBefore[i]);
 		}
 
 	}
@@ -70,20 +70,23 @@ public class MusicHolder : MonoBehaviour {
 			curMusic = (int)UnityEngine.Random.Range (0, MusicBefore [curStage]);
 		}
 		else {
+            
 			curMusic = (int)UnityEngine.Random.Range (MusicBefore [curStage - 1], MusicBefore [curStage]);
+         
 			if(curMusic>allClip.Length) curMusic = MusicBefore[curStage-1] - 1;
 		}
-	
-		musicPlayer.clip = allClip [curMusic];
+        Debug.Log("NOW PLAY" + curMusic); 
+        musicPlayer.clip = allClip[curMusic];
 		musicPlayer.PlayDelayed (musicTimeOut);
 
 	}
 	
 	public void NextStage(){
-		if (curStage < MusicInStage.Length - 1) {
+        Debug.Log("NEW STAGE " + MusicInStage.Length);
+		if (curStage <= MusicInStage.Length - 1) {
 				//curStage++;
-				curMusic = MusicBefore[curStage] - 1;
-			//Debug.Log (curMusic);
+				//curMusic = MusicBefore[curStage] - 1;
+            Debug.Log("NEW STAGE " + curStage);
 				musicPlayer.Stop ();
 				
 		}

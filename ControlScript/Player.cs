@@ -226,8 +226,11 @@ public class Player : MonoBehaviour {
 				ItemManager.instance.SaveItemForSlot();
 				//PVPGameRule.instance.Spawn(team);
 				AfterSpawnSetting(currentPawn,GetBuffs());
-				prefabBot =PlayerManager.instance.avaibleBots[selectedBot];
-				prefabGhostBot =PlayerManager.instance.ghostsBots[selectedBot];
+                if (GameRule.instance.CanUseRobot)
+                {
+                    prefabBot = PlayerManager.instance.avaibleBots[selectedBot];
+                    prefabGhostBot = PlayerManager.instance.ghostsBots[selectedBot];
+                }
 
 			}
 			robotTime =  charMan.GetFloatChar(CharacteristicList.PLAYER_JUGGER_TIME);
