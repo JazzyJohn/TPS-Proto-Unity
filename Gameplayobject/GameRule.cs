@@ -24,7 +24,7 @@ public class GameRule : MonoBehaviour {
 
     public bool CanUseRobot = true;
 
-    public int curStage = 0;
+    public curStage curStage = MUSIC_STAGE.BATLLE;
 
     public bool start = false;
 

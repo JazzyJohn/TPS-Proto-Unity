@@ -1,6 +1,12 @@
 ﻿using UnityEngine;
 using System.Collections;
 
+public enum MUSIC_STAGE{
+	MAIN_MENU,
+	BATLLE,
+	EXPLORATION,
+}
+
 public class MusicHolder : MonoBehaviour {
 	public int[] MusicInStage;
 	
@@ -10,7 +16,7 @@ public class MusicHolder : MonoBehaviour {
 	
 	public AudioSource musicPlayer;
 	
-	public int curStage;
+	public STAGE curStage;
 	
 	int curMusic;
 	
@@ -52,9 +58,9 @@ public class MusicHolder : MonoBehaviour {
 			StartSong();
 		}
         
-        if ( GameRule.instance!=null&&curStage != GameRule.instance.curStage)
+        if ( GameRule.instance!=null&&curStage != (int)GameRule.instance.curStage)
         {
-            curStage = GameRule.instance.curStage;
+            curStage = (int)GameRule.instance.curStage;
 			NextStage();
 		}
 	}
@@ -65,8 +71,9 @@ public class MusicHolder : MonoBehaviour {
 		}
 		else {
 			curMusic = (int)UnityEngine.Random.Range (MusicBefore [curStage - 1], MusicBefore [curStage]);
+			if(curMusic>allClip.Length) curMusic = MusicBefore[curStage-1] - 1;
 		}
-		//if(curMusic>allClip.Length&&curMusic >= MusicBefore[curStage+1]-1) curMusic = MusicBefore[curStage] - 1;
+	
 		musicPlayer.clip = allClip [curMusic];
 		musicPlayer.PlayDelayed (musicTimeOut);
 
