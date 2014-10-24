@@ -34,6 +34,8 @@ public class AISwarm:MonoBehaviour
 	public List<AIBase> allPawn;
 
     public int aiGroup;
+	
+	public int inSecDelay;
 
     public bool isActive = false;
 
@@ -221,6 +223,7 @@ public class AISwarm:MonoBehaviour
         swarmSend.PutLong("timeDelay",timeDelay);
         swarmSend.PutSFSArray("points", points);
         swarmSend.PutUtfStringArray("bots", Bots);
+		swarmSend.PutInt("delay", inSecDelay);
         swarmSend.PutUtfString("class", this.GetType().Name);
     }
 
