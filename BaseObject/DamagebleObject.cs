@@ -2,6 +2,15 @@
 using System.Collections;
 public struct KillInfo{
 	public int weaponId;
+    public bool isHeadShoot;
+
+
+    public KillInfo(int weaponId, bool isHeadShoot)
+    {
+        
+        this.weaponId = weaponId;
+        this.isHeadShoot = isHeadShoot;
+    }
 }
 public class DamagebleObject : DestroyableNetworkObject {
 
@@ -52,8 +61,8 @@ public class DamagebleObject : DestroyableNetworkObject {
 			health-= damage.Damage;
 			if(health<=0){
 				
-					killInfo.weaponId=damage.shootWeapon;
-				
+				killInfo.weaponId=damage.shootWeapon;
+                killInfo.isHeadShoot = damage.isHeadshoot;
 				KillIt(killer);
 
 			}

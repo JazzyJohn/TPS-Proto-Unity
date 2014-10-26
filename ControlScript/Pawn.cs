@@ -136,7 +136,7 @@ public class Pawn : DamagebleObject
 
     private float jetPackCharge;
 
-    private bool jetPackEnable = false;
+    protected bool jetPackEnable = false;
 
     public float jetPackFlyFuelConsumption = 1.0f;
 
@@ -146,7 +146,7 @@ public class Pawn : DamagebleObject
 
     public float jetPackDefaultFuelConsumption = 0.5f;
 
-    private Vector3 nextMovement;
+    protected Vector3 nextMovement;
 
     public PlayerCamera cameraController;
 
@@ -158,7 +158,7 @@ public class Pawn : DamagebleObject
 
     protected Rigidbody _rb;
 
-    private Vector3 pushingForce;
+    protected Vector3 pushingForce;
 
     private const float FORCE_MULIPLIER = 10.0f;
 
@@ -178,7 +178,7 @@ public class Pawn : DamagebleObject
 
     protected bool _canWallRun;
 
-    private bool canMove = true;
+    protected bool canMove = true;
 
     public bool canPullUp;
 
@@ -806,9 +806,9 @@ public class Pawn : DamagebleObject
                     {
 						RobotPawn robot = this as RobotPawn;
 						if(robot!=null){
-								killerPlayer.JuggerKill(player, myTransform.position,killInfo.weaponId.ToString());
+								killerPlayer.JuggerKill(this,player, myTransform.position,killInfo);
 						}else{
-							killerPlayer.PawnKill(player, myTransform.position,killInfo.weaponId.ToString());
+                            killerPlayer.PawnKill(this, player, myTransform.position, killInfo);
 						}
                     }
                 }
@@ -826,7 +826,7 @@ public class Pawn : DamagebleObject
             }
             else
             {
-                player.PawnDead(killerPlayer, killerPawn,killInfo.weaponId.ToString());
+                player.PawnDead(killerPlayer, killerPawn,killInfo);
             }
         }
 
@@ -3128,6 +3128,7 @@ public class Pawn : DamagebleObject
 	public void InfoAboutDeath(ISFSObject data){
 		
 		data.PutInt("weaponId",killInfo.weaponId);
+        data.PutBool("headShot", killInfo.isHeadShoot);
 	}
 
 

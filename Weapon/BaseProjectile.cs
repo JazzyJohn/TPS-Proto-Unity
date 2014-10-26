@@ -34,7 +34,9 @@ public class BaseDamage{
 	public bool isContinius =false;
 	[HideInInspector] 
 	public int shootWeapon = -1;
-	
+    [HideInInspector]
+    public bool isHeadshoot = false;
+
     public BaseDamage()
     {
     }
@@ -47,6 +49,7 @@ public class BaseDamage{
         weapon = old.weapon;
 		type = old.type;
 		shootWeapon= old.shootWeapon;
+        isHeadshoot = old.isHeadshoot;
 	}
 
 }
@@ -76,6 +79,8 @@ public class BaseProjectile : MonoBehaviour
 	public float disableEffectDelay;
 	
 	public GameObject[] inactiveObjectInEffectStage;
+
+    public static LayerMask dmgLayers;
 	
     public float splashRadius;
     public LayerMask explosionLayerBlock;
@@ -198,7 +203,7 @@ public class BaseProjectile : MonoBehaviour
             distance += (float)(TimeManager.Instance.NetworkTime  - lateTime) * mRigidBody.velocity.magnitude;
         }
 
-        if (distance>0&&Physics.Raycast(mTransform.position, mRigidBody.velocity.normalized, out hit, distance))
+        if (distance > 0 && Physics.Raycast(mTransform.position, mRigidBody.velocity.normalized, out hit, distance, dmgLayers))
         {
 
                 onBulletHit(hit);
@@ -284,7 +289,7 @@ public class BaseProjectile : MonoBehaviour
      
 		if(mRigidBody.velocity.sqrMagnitude >0&&hitDelay<Time.time){
 			mTransform.rotation = Quaternion.LookRotation(mRigidBody.velocity);
-			if (Physics.Raycast(transform.position, mRigidBody.velocity.normalized, out hit, mRigidBody.velocity.magnitude*0.1f))
+            if (Physics.Raycast(transform.position, mRigidBody.velocity.normalized, out hit, mRigidBody.velocity.magnitude * 0.1f, dmgLayers))
 			{
 
 			  
@@ -345,7 +350,7 @@ public class BaseProjectile : MonoBehaviour
 
             Vector3 direction = position - mTransform.position;
             //Debug.DrawLine(mTransform.position, mTransform.position +  mRigidBody.velocity*(direction.magnitude+0.1f),Color.red,10.0f);
-            if (Physics.Raycast(mTransform.position, mRigidBody.velocity.normalized, out hit,direction.magnitude+ mRigidBody.velocity.magnitude * 0.1f))
+            if (Physics.Raycast(mTransform.position, mRigidBody.velocity.normalized, out hit, direction.magnitude + mRigidBody.velocity.magnitude * 0.1f, dmgLayers))
             {
 
                 onBulletHit(hit);
@@ -353,7 +358,7 @@ public class BaseProjectile : MonoBehaviour
             }
             mTransform.position = position - mRigidBody.velocity.normalized * 0.05f;
           //  Debug.DrawLine(mTransform.position, mTransform.position + mRigidBody.velocity * (direction.magnitude + mRigidBody.velocity.magnitude * 0.15f), Color.blue, 10.0f);
-            if (Physics.Raycast(mTransform.position,  mRigidBody.velocity.normalized, out hit, direction.magnitude + mRigidBody.velocity.magnitude * 0.15f))
+            if (Physics.Raycast(mTransform.position, mRigidBody.velocity.normalized, out hit, direction.magnitude + mRigidBody.velocity.magnitude * 0.15f, dmgLayers))
             {
 
                 onBulletHit(hit);

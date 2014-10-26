@@ -427,7 +427,7 @@ public class Player : MonoBehaviour {
     }
 	
 	
-	public void PawnDead(Player Killer,Pawn killerPawn,string weaponId ){
+	public void PawnDead(Player Killer,Pawn killerPawn,KillInfo killinfo ){
 	
 
 		int pawnViewId =0;
@@ -435,7 +435,7 @@ public class Player : MonoBehaviour {
          
 		
 			PVPGameRule.instance.Kill (Killer.team);
-			EventHolder.instance.FireEvent(typeof(LocalPlayerListener),"EventPawnDeadByPlayer",this,weaponId);
+            EventHolder.instance.FireEvent(typeof(LocalPlayerListener), "EventPawnDeadByPlayer", this, killinfo);
 		} else {
             PVPGameRule.instance.PlayerDeath();
 			EventHolder.instance.FireEvent(typeof(LocalPlayerListener),"EventPawnDeadByAI",this);
@@ -467,7 +467,8 @@ public class Player : MonoBehaviour {
         }	
 
 	}
-	public void JuggerKill(Player victim,Vector3 position,string weaponId){
+    public void JuggerKill(Pawn deadPawn,  Player victim, Vector3 position, KillInfo killinfo)
+    {
 		if (!playerView.isMine)
         {
 			return;
@@ -475,47 +476,54 @@ public class Player : MonoBehaviour {
 		}
 	
 		if (victim != null) {
-		    EventHolder.instance.FireEvent(typeof(LocalPlayerListener), "EventJuggerKill", this,weaponId);
+            EventHolder.instance.FireEvent(typeof(LocalPlayerListener), "EventJuggerKill", this, killinfo);
 		}
 	}
-	
-	public void PawnKill(Player victim,Vector3 position,string weaponId){
+
+    public void PawnKill(Pawn deadPawn,Player victim, Vector3 position, KillInfo killinfo)
+    {
 		if (!playerView.isMine)
         {
 			return;
 		
 		}
-	
+        AnnonceAddType addtype = AnnonceAddType.NONE;
+        if (killinfo.isHeadShoot)
+        {
+            addtype = AnnonceAddType.HEADSHOT;
+        }
 		if (victim != null) {
             //TODO: move text to config
 
-            EventHolder.instance.FireEvent(typeof(LocalPlayerListener), "EventPawnKillPlayer", this,weaponId);
+            EventHolder.instance.FireEvent(typeof(LocalPlayerListener), "EventPawnKillPlayer", this, killinfo);
           
 
             if (isPlayerFriend(victim.UID))
             {
-                EventHolder.instance.FireEvent(typeof(LocalPlayerListener), "EventKilledAFriend", this, victim,weaponId);
+                EventHolder.instance.FireEvent(typeof(LocalPlayerListener), "EventKilledAFriend", this, victim, killinfo);
             }
+            String victimName = victim.PlayerName;
+           
             killInRow++;
             switch (killInRow)
             {
                 case 1:
-                    PlayerMainGui.instance.Annonce(AnnonceType.KILL);
+                    PlayerMainGui.instance.Annonce(AnnonceType.KILL, addtype, victimName);
                     break;
                 case 2:
-                    PlayerMainGui.instance.Annonce(AnnonceType.DOUBLEKILL);
+                    PlayerMainGui.instance.Annonce(AnnonceType.DOUBLEKILL, addtype, victimName);
                     break;
                 case 3:
-                    PlayerMainGui.instance.Annonce(AnnonceType.TRIPLIKILL);
+                    PlayerMainGui.instance.Annonce(AnnonceType.TRIPLIKILL, addtype, victimName);
                     break;
                 case 4:
-                    PlayerMainGui.instance.Annonce(AnnonceType.ULTRAKILL);
+                    PlayerMainGui.instance.Annonce(AnnonceType.ULTRAKILL, addtype, victimName);
                     break;
                 case 5:
-                    PlayerMainGui.instance.Annonce(AnnonceType.MEGAKILL);
+                    PlayerMainGui.instance.Annonce(AnnonceType.MEGAKILL, addtype, victimName);
                     break;
                 default:
-                    PlayerMainGui.instance.Annonce(AnnonceType.RAMPAGE);
+                    PlayerMainGui.instance.Annonce(AnnonceType.RAMPAGE, addtype, victimName);
                     break;
 
 
@@ -534,8 +542,8 @@ public class Player : MonoBehaviour {
 
 		} else {
             //TODO: move text to config
-            PlayerMainGui.instance.Annonce(AnnonceType.AIKILL);
-            EventHolder.instance.FireEvent(typeof(LocalPlayerListener), "EventPawnKillAI", this,weaponId);
+            PlayerMainGui.instance.Annonce(AnnonceType.AIKILL,addtype, deadPawn.publicName);
+            EventHolder.instance.FireEvent(typeof(LocalPlayerListener), "EventPawnKillAI", this, killinfo);
             StatisticHandler.SendPlayerKillNPC(UID, PlayerName);
 		}
 

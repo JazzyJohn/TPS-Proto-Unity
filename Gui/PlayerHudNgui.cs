@@ -23,6 +23,12 @@ public enum AnnonceType
 	RESTAKEJUGGER
 
 }
+
+public enum AnnonceAddType
+{
+    NONE,
+    HEADSHOT
+}
 public class PlayerHudNgui : MonoBehaviour {
 
     private Player LocalPlayer;
@@ -76,6 +82,12 @@ public class PlayerHudNgui : MonoBehaviour {
 	public UISprite annonce;
     
 	public UITweener annonceTweener;
+
+    public UILabel annonceLabel;
+
+    public string[] additionalSprites;
+
+    public UISprite annonceAddSprite;
 	
 	public UILabel tutorialText;
 
@@ -175,7 +187,7 @@ public class PlayerHudNgui : MonoBehaviour {
         }
 	}
 
-    public void Annonce(AnnonceType type)
+    public void Annonce(AnnonceType type, AnnonceAddType newAddSprite, string text)
     {
         if (annonce.enabled == false) {
             annonce.enabled = true;
@@ -188,6 +200,13 @@ public class PlayerHudNgui : MonoBehaviour {
 		}
 		curAnnonce =(int)type;
         annonce.spriteName = annonceSprites[curAnnonce].sprite;
+        if (annonceAddSprite != null)
+        {
+            annonceAddSprite.spriteName = additionalSprites[(int)newAddSprite];
+        }
+        if (annonceLabel != null) {
+            annonceLabel.text = text;
+        }
         annonceTweener.tweenFactor = 0.0f;
         annonceTweener.PlayForward();
 

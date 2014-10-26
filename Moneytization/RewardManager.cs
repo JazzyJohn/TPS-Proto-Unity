@@ -30,6 +30,8 @@ public class  RewardManager : MonoBehaviour, LocalPlayerListener,GameListener{
 	public const string PARAM_JUGGER_TAKE= "JuggerTake";
     public const string PARAM_JUGGER_KILL= "JuggerKill";
 	
+   
+
 	class MoneyReward : Reward{
 		public int cash = 0;
 		public int gold =0;
@@ -83,8 +85,26 @@ public class  RewardManager : MonoBehaviour, LocalPlayerListener,GameListener{
 			upGold+= rewardMoneyDictionary[reason].gold;
 			rewardMoneyDictionary[reason].Increment();
         }
+        if (PlayerMainGui.instance != null)
+        {
+            String reward = MakeRewardString(rewardMoneyDictionary[reason].cash, rewardMoneyDictionary[reason].gold);
+            PlayerMainGui.instance.AddMessage(reward, PlayerMainGui.MessageType.MONEY_REWARD);
+        }
 		
 	}
+    private String MakeRewardString(int cash,int gold)
+    {
+        String reward  = "";
+        if (cash > 0)
+        {
+            reward = "KP +" + cash + " ";
+        }
+        if (gold > 0)
+        {
+            reward = "GTIP +" + gold;
+        }
+        return reward;
+    }
 	
 	private void SyncReward(){
 		WWWForm form = new WWWForm ();
@@ -111,12 +131,14 @@ public class  RewardManager : MonoBehaviour, LocalPlayerListener,GameListener{
 			
 		}
 	}
-	public void EventPawnKillPlayer(Player target,string weapon_id){
+    public void EventPawnKillPlayer(Player target, KillInfo killinfo)
+    {
 		if (target == myPlayer) {
 			UpMoney(PARAM_KILL);	
 		}
 	}
-	public void EventPawnKillAI(Player target,string weapon_id){
+    public void EventPawnKillAI(Player target, KillInfo killinfo)
+    {
 	
 
 		if (target == myPlayer) {
@@ -141,12 +163,14 @@ public class  RewardManager : MonoBehaviour, LocalPlayerListener,GameListener{
 			UpMoney(PARAM_KILL_BY_FRIEND);	
 		}
 	}
-	public void EventKilledAFriend(Player target,Player friend,string weapon_id){
+    public void EventKilledAFriend(Player target, Player friend, KillInfo killinfo)
+    {
 		if (target == myPlayer) {
 			UpMoney(PARAM_KILL_FRIEND);	
 		}
 	}
-	public void EventPawnDeadByPlayer(Player target,string weapon_id){
+    public void EventPawnDeadByPlayer(Player target, KillInfo killinfo)
+    {
 		SyncReward();
 	}
 	public void EventPawnDeadByAI(Player target){
@@ -155,7 +179,8 @@ public class  RewardManager : MonoBehaviour, LocalPlayerListener,GameListener{
 	public	void EventJuggerTake(Player target){
 	
 	}
-	public void EventJuggerKill(Player target,string weapon_id){
+    public void EventJuggerKill(Player target, KillInfo killinfo)
+    {
 	
 	}
 	public void EventPawnGround(Player target){	}

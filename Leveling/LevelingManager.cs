@@ -12,8 +12,9 @@ public class LevelingManager : MonoBehaviour, LocalPlayerListener,GameListener{
 	public const string PARAM_LOSE = "Lose";
 	public const string PARAM_KILL_AI= "KillAI"; 
 	public const string PARAM_KILL_FRIEND = "KillFriend";
-	public const string PARAM_KILL_BY_FRIEND= "KilledByFriend"; 
-
+	public const string PARAM_KILL_BY_FRIEND= "KilledByFriend";
+    public const string PARAM_HEAD_SHOOT = "HeadStoot";
+    public const string PARAM_HEAD_SHOOT_AI = "HeadStootAI";
 		
 	public int playerLvl = 0;
 	
@@ -160,9 +161,18 @@ public class LevelingManager : MonoBehaviour, LocalPlayerListener,GameListener{
 		if(sendByLvl){
 			SyncLvl();
 		}
-	
+        if (PlayerMainGui.instance != null)
+        {
+            String reward = MakeExpString(exp);
+            PlayerMainGui.instance.AddMessage(reward, PlayerMainGui.MessageType.LVL_REWARD);
+        }
 		return sendByLvl;
 	}
+
+    public String MakeExpString(int amount)
+    {
+        return "XP +" + amount;
+    }
 	public void SyncLvl(){
 		WWWForm form = new WWWForm ();
 		
@@ -199,17 +209,27 @@ public class LevelingManager : MonoBehaviour, LocalPlayerListener,GameListener{
 			
 		}
 	}
-	public void EventPawnKillPlayer(Player target,string weapon_id){
+    public void EventPawnKillPlayer(Player target, KillInfo killinfo)
+    {
 		if (target == myPlayer) {
-			UpExp(PARAM_KILL,target.selected);	
+			UpExp(PARAM_KILL,target.selected);
+            if (killinfo.isHeadShoot)
+            {
+                UpExp(PARAM_HEAD_SHOOT, target.selected);
+            }
 		}
 	}
-	public void EventPawnKillAI(Player target,string weapon_id){
+    public void EventPawnKillAI(Player target, KillInfo killinfo)
+    {
 	
 
 		if (target == myPlayer) {
 
-			UpExp(PARAM_KILL_AI,target.selected);	
+			UpExp(PARAM_KILL_AI,target.selected);
+            if (killinfo.isHeadShoot)
+            {
+                UpExp(PARAM_HEAD_SHOOT_AI, target.selected);
+            }
 		}
 	
 	}
@@ -225,12 +245,13 @@ public class LevelingManager : MonoBehaviour, LocalPlayerListener,GameListener{
 			UpExp(PARAM_KILL_BY_FRIEND,target.selected);	
 		}
 	}
-	public void EventKilledAFriend(Player target,Player friend,string weapon_id){
+    public void EventKilledAFriend(Player target, Player friend, KillInfo killinfo)
+    {
 		if (target == myPlayer) {
 			UpExp(PARAM_KILL_FRIEND,target.selected);	
 		}
 	}
-	public void EventPawnDeadByPlayer(Player target,string weapon_id){}
+    public void EventPawnDeadByPlayer(Player target, KillInfo killinfo) { }
 	public void EventPawnDeadByAI(Player target){}
 	public void EventPawnGround(Player target){	}
 	public void EventPawnDoubleJump(Player target){}
@@ -246,7 +267,8 @@ public class LevelingManager : MonoBehaviour, LocalPlayerListener,GameListener{
 	public	void EventJuggerTake(Player target){
 	
 	}
-	public void EventJuggerKill(Player target,string weapon_id){
+    public void EventJuggerKill(Player target, KillInfo killinfo)
+    {
 	
 	}
 	public void EventRoomFinished(){}

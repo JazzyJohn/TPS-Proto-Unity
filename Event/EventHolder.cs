@@ -6,11 +6,11 @@ using System.Reflection;
 
 public interface  LocalPlayerListener{
 	void EventAppear(Player target);
-	void EventPawnDeadByPlayer(Player target,string weapon_id);
+	void EventPawnDeadByPlayer(Player target,KillInfo killinfo);
 	void EventPawnDeadByAI(Player target);
-	void EventPawnKillPlayer(Player target,string weapon_id);
-	void EventPawnKillAI(Player target,string weapon_id);
-	void EventJuggerKill(Player target,string weapon_id);
+    void EventPawnKillPlayer(Player target, KillInfo killinfo);
+    void EventPawnKillAI(Player target, KillInfo killinfo);
+    void EventJuggerKill(Player target, KillInfo killinfo);
 	void EventJuggerTake(Player target);	
 	void EventPawnGround(Player target);
 	void EventPawnDoubleJump(Player target);
@@ -20,7 +20,7 @@ public interface  LocalPlayerListener{
 	void EventEndWallRun(Player target, Vector3 Position);
 	void EventPawnReload(Player target);
 	void EventKilledByFriend(Player target,Player friend);
-	void EventKilledAFriend(Player target,Player friend,string weapon_id);
+    void EventKilledAFriend(Player target, Player friend, KillInfo killinfo);
 } 
 public interface  GameListener{
 	void EventStart();

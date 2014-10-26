@@ -29,7 +29,9 @@ public class PlayerMainGui : MonoBehaviour {
 			KILL_TEXT = 2,
 			ACHIVEMENT = 3,
 			ANALIZE_POINT = 4,
-			OPEN_LORE = 5
+			OPEN_LORE = 5,
+            MONEY_REWARD=6,
+            LVL_REWARD=7
 	}
 	public Texture[] messageTexture;
 	public GUIStyle[] messageStyle;
@@ -448,8 +450,18 @@ public class PlayerMainGui : MonoBehaviour {
 	
 	}
     public void Annonce(AnnonceType type) {
-        hud.Annonce(type);
+        hud.Annonce(type, AnnonceAddType.NONE, "");
     
+    }
+    public void Annonce(AnnonceType type, AnnonceAddType sprite)
+    {
+        hud.Annonce(type, sprite, "");
+
+    }
+    public void Annonce(AnnonceType type, AnnonceAddType sprite,string text)
+    {
+        hud.Annonce(type, sprite, text);
+
     }
 	void RespawnGui(){
 		/*float screenX = Screen.width, screenY = Screen.height;

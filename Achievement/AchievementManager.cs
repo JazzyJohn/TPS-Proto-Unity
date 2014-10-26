@@ -48,6 +48,8 @@ public class AchievementManager : MonoBehaviour, LocalPlayerListener{
 	public const string PARAM_KILL_FRIEND = "KillFriend";
 	public const string PARAM_KILL_BY_FRIEND= "KilledByFriend"; 
 	public const string PARAM_ROOM_FINISHED = "RoomFinished";
+    public const string PARAM_HEAD_SHOOT= "HeadStoot";
+    public const string PARAM_HEAD_SHOOT_AI = "HeadStootAI";
 	struct IncomingMessage{
 		public string param;
 		public float delta;
@@ -280,7 +282,7 @@ public class AchievementManager : MonoBehaviour, LocalPlayerListener{
 		}
 	}
 
-	public void EventPawnDeadByPlayer(Player target,string weapon_id){
+	public void EventPawnDeadByPlayer(Player target,KillInfo killinfo){
 		if (target == myPlayer) {
 			IncomingMessage mess = new IncomingMessage();
 			mess.delta=1.0f;
@@ -289,7 +291,7 @@ public class AchievementManager : MonoBehaviour, LocalPlayerListener{
 			incomeQueue.Enqueue(mess);
 			mess = new IncomingMessage();
 			mess.delta=1.0f;
-			mess.param =PARAM_DEATH+"by"+weapon_id;
+            mess.param = PARAM_DEATH + "by" + killinfo.weaponId.ToString();
 		
 			incomeQueue.Enqueue(mess);
 
@@ -306,7 +308,8 @@ public class AchievementManager : MonoBehaviour, LocalPlayerListener{
 			incomeQueue.Enqueue(mess);
 		}
 	}
-	public void EventPawnKillPlayer(Player target,string weapon_id){
+    public void EventPawnKillPlayer(Player target, KillInfo killinfo)
+    {
 		if (target == myPlayer) {
 			IncomingMessage mess = new IncomingMessage();
 			mess.delta=1.0f;
@@ -314,9 +317,16 @@ public class AchievementManager : MonoBehaviour, LocalPlayerListener{
 			incomeQueue.Enqueue(mess);
 			mess = new IncomingMessage();
 			mess.delta=1.0f;
-			mess.param =PARAM_KILL+"by"+weapon_id;
+            mess.param = PARAM_KILL + "by" + killinfo.weaponId.ToString();
 		
 			incomeQueue.Enqueue(mess);
+            if (killinfo.isHeadShoot)
+            {
+                mess = new IncomingMessage();
+                mess.delta = 1.0f;
+                mess.param = PARAM_HEAD_SHOOT;
+                incomeQueue.Enqueue(mess);
+            }
 		}
 	}
 
@@ -329,7 +339,8 @@ public class AchievementManager : MonoBehaviour, LocalPlayerListener{
 			incomeQueue.Enqueue(mess);
 		}
 	}
-	public void EventKilledAFriend(Player target,Player friend,string weapon_id){
+    public void EventKilledAFriend(Player target, Player friend, KillInfo killinfo)
+    {
 		if (target == myPlayer) {
 			IncomingMessage mess = new IncomingMessage();
 			mess.delta=1.0f;
@@ -338,7 +349,8 @@ public class AchievementManager : MonoBehaviour, LocalPlayerListener{
 		}
 	}
 
-	public void EventPawnKillAI(Player target,string weapon_id){
+    public void EventPawnKillAI(Player target, KillInfo killinfo)
+    {
 		if (target == myPlayer) {
 			IncomingMessage mess = new IncomingMessage();
 			mess.delta=1.0f;
@@ -346,9 +358,16 @@ public class AchievementManager : MonoBehaviour, LocalPlayerListener{
 			incomeQueue.Enqueue(mess);
 			mess = new IncomingMessage();
 			mess.delta=1.0f;
-			mess.param =PARAM_KILL_AI+"by"+weapon_id;
+            mess.param = PARAM_KILL_AI + "by" + killinfo.weaponId.ToString();
 		
 			incomeQueue.Enqueue(mess);
+            if (killinfo.isHeadShoot)
+            {
+                mess = new IncomingMessage();
+                mess.delta = 1.0f;
+                mess.param = PARAM_HEAD_SHOOT_AI;
+                incomeQueue.Enqueue(mess);
+            }
 		}
 	}
 	public void EventPawnGround(Player target){
@@ -377,7 +396,8 @@ public class AchievementManager : MonoBehaviour, LocalPlayerListener{
 	public	void EventJuggerTake(Player target){
 		
 		}
-	public void EventJuggerKill(Player target,string weapon_id){
+    public void EventJuggerKill(Player target, KillInfo killinfo)
+    {
 	
 	}
 	public void EventEndWallRun(Player target, Vector3 position){

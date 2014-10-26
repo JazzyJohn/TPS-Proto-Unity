@@ -690,19 +690,32 @@ public class BaseWeapon : DestroyableNetworkObject {
             {
                 ActualFire();
             }
-			_randShootCoef+=alredyGunedAmmo*randPerShoot;
+            IncreseRandFromShoot(alredyGunedAmmo);
+			
           
         }
         else
         {
             ActualFire();
-			_randShootCoef+=randPerShoot;
+            IncreseRandFromShoot(1);
+			
         }
 	
 		owner.HasShoot ();
         AfterShootLogic();
 		//photonView.RPC("FireEffect",PhotonTargets.Others);
 	}
+
+    private void IncreseRandFromShoot(int count)
+    {
+        if (randPerShoot > 0)
+        {
+            if (!IsRandMax())
+            {
+                _randShootCoef += count * randPerShoot;
+            }
+        }
+    }
     protected void FiredStopEffect()
     {
 
@@ -908,6 +921,22 @@ public class BaseWeapon : DestroyableNetworkObject {
         }
 		return effAimRandCoef;
 	}
+    public bool IsRandMax()
+    {
+        float effAimRandCoef = _randShootCoef;
+        if (owner.isAiming)
+        {
+            effAimRandCoef += aimRandCoef;
+        }
+        else
+        {
+            effAimRandCoef += normalRandCoef;
+        }
+
+        effAimRandCoef += owner.AimingCoef();
+        return effAimRandCoef > maxRandEffect;
+        
+    }
 	
 	protected virtual void GenerateProjectile(){
 		Vector3 startPoint  = muzzlePoint.position+muzzleOffset;
