@@ -163,16 +163,13 @@ public class LevelingManager : MonoBehaviour, LocalPlayerListener,GameListener{
 		}
         if (PlayerMainGui.instance != null)
         {
-            String reward = MakeExpString(exp);
+            String reward = TextGenerator.instance.GetExpText(cause,exp);
             PlayerMainGui.instance.AddMessage(reward, PlayerMainGui.MessageType.LVL_REWARD);
         }
 		return sendByLvl;
 	}
 
-    public String MakeExpString(int amount)
-    {
-        return "XP +" + amount;
-    }
+  
 	public void SyncLvl(){
 		WWWForm form = new WWWForm ();
 		

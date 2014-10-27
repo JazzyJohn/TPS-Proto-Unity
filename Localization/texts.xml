@@ -1,0 +1,25 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<texts>
+	<moneytexts>
+		<oneentry>
+			<name>
+				Kill
+			</name>
+			<text>
+				Убийство + {0} кредитов
+			</text>
+		</oneentry>
+	</moneytexts>
+	<lvltexts>
+		<oneentry>
+			<name>
+				Kill
+			</name>
+			<text>
+				Убийство + {0} опыт 
+			</text>
+		</oneentry>
+	</lvltexts>
+
+
+</texts>

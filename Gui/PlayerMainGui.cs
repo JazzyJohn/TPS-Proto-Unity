@@ -366,6 +366,7 @@ public class PlayerMainGui : MonoBehaviour {
 					GUI.Label (achvmessRect,"ACHIVMENT UNLOCK: \n " +guiMessage.text,messStyle);
 				
 				break;
+				
 				default:
                
 				break;
@@ -689,12 +690,26 @@ public class PlayerMainGui : MonoBehaviour {
 		guiMessages.Enqueue(message);
 	}
 	public void AddMessage(string text, MessageType type ){
-		GUIMessage message = new GUIMessage();
-		message.destroyTime = Time.time + messageDelay;
-		message.text = text;
-		message.worldPoint = Vector3.zero;
-		message.type = type;
-		guiMessages.Enqueue(message);
+		try{
+		switch(type){
+			case MessageType.MONEY_REWARD:
+				hud.AddMoneyMessage(text);
+			break;
+			case MessageType.LVL_REWARD:
+				hud.AddLvlMessage(text);
+			break;
+			default:
+				GUIMessage message = new GUIMessage();
+				message.destroyTime = Time.time + messageDelay;
+				message.text = text;
+				message.worldPoint = Vector3.zero;
+				message.type = type;
+				guiMessages.Enqueue(message);
+			break;
+		}
+		}catch(Exception e){
+			Debug.Log(e);
+		}
 	}
 	public void AddMessage(string text, Texture icon, MessageType type ){
 		GUIMessage message = new GUIMessage();

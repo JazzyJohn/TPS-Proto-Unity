@@ -90,6 +90,8 @@ public class PlayerHudNgui : MonoBehaviour {
     public UISprite annonceAddSprite;
 	
 	public UILabel tutorialText;
+	
+	public CrosshairBehaviour crosshair;
 
     /*
         public float robotTime=0;
@@ -102,7 +104,21 @@ public class PlayerHudNgui : MonoBehaviour {
 		public string gunName="";
 			
      */
-	public CrosshairBehaviour crosshair;
+	 
+	 
+	 //Message section
+	public UIScrollView lvlView;
+	
+	public Transform  lvlTable;
+	
+	public Transform lvlPrefab;
+	
+	public UIScrollView moneyView;
+	
+	public Transform moneyTable;
+	
+	public Transform moneyPrefab;
+
 
     public enum HudState
     {
@@ -211,4 +227,22 @@ public class PlayerHudNgui : MonoBehaviour {
         annonceTweener.PlayForward();
 
     }
+	public void AddMoneyMessage(string text){
+		Transform newTrans = Instantiate(moneyPrefab);
+		newTrans.parent = moneyTable;
+		newTrans.localScale= new Vector3(1f, 1f, 1f);
+		newTrans.localEulerAngles  = new Vector3(0f, 0f, 0f);
+		newTrans.localPosition= new Vector3(0f, 0f, 0f);
+		newTrans.GetComponent<UILabel>().text = text;
+		moneyView.ResetPostiton();
+	}
+	public void AddLvlMessage(string text){
+		Transform newTrans = Instantiate(lvlPrefab);
+		newTrans.parent = lvlTable;
+		newTrans.localScale = new Vector3(1f, 1f, 1f);
+		newTrans.localEulerAngles  = new Vector3(0f, 0f, 0f);
+		newTrans.localPosition= new Vector3(0f, 0f, 0f);
+		newTrans.GetComponent<UILabel>().text = text;
+		lvlView.ResetPostiton();
+	}
 }
