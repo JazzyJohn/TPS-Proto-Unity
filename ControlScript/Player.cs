@@ -428,9 +428,11 @@ public class Player : MonoBehaviour {
 	
 	
 	public void PawnDead(Player Killer,Pawn killerPawn,KillInfo killinfo ){
-	
 
-		int pawnViewId =0;
+
+        int pawnViewId = 0;
+        isDead = true;
+	
 		if (Killer != null) {
          
 		
@@ -443,7 +445,7 @@ public class Player : MonoBehaviour {
         if (killerPawn != null) {
             pawnViewId = killerPawn.foxView.viewID;                
         }
-
+       
         DeathUpdate();
         if (Killer != null)
         {

@@ -10,6 +10,7 @@ public class TextGenerator : MonoBehaviour{
 	
 	void Awake(){
 		XmlDocument xmlDoc = new XmlDocument();
+       // Debug.Log(xml.text);
 		xmlDoc.LoadXml(xml.text);
 		ParseText(xmlDoc);
 
@@ -20,17 +21,21 @@ public class TextGenerator : MonoBehaviour{
 	private  Dictionary<string, string>  moneyTexts = new Dictionary<string, string>();
 	
 	private  Dictionary<string, string>  lvlTexts = new Dictionary<string, string>();
-	
-	
-	
-	
-	
-	public void ParseText(){
-		foreach (XmlNode node in xmlDoc.SelectNodes("moneytexts/oneentry")) {
-			moneyTexts.Add(node.SelectSingleNode("cause").InnerText,node.SelectSingleNode("text").InnerText);
+
+
+
+
+
+    public void ParseText(XmlDocument xmlDoc)
+    {
+		foreach (XmlNode node in xmlDoc.SelectNodes("texts/moneytexts/oneentry")) {
+           // Debug.Log(node.SelectSingleNode("name").InnerText + node.SelectSingleNode("text").InnerText);
+            moneyTexts.Add(node.SelectSingleNode("name").InnerText, node.SelectSingleNode("text").InnerText);
 		}
-		foreach (XmlNode node in xmlDoc.SelectNodes("lvltexts/oneentry")) {
-			lvlTexts.Add(node.SelectSingleNode("cause").InnerText,node.SelectSingleNode("text").InnerText);
+        foreach (XmlNode node in xmlDoc.SelectNodes("texts/lvltexts/oneentry"))
+        {
+         //   Debug.Log(node.SelectSingleNode("name").InnerText + node.SelectSingleNode("text").InnerText);
+            lvlTexts.Add(node.SelectSingleNode("name").InnerText, node.SelectSingleNode("text").InnerText);
 		}
 	}
 

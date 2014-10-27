@@ -355,22 +355,11 @@ public class MainMenuGUI : MonoBehaviour {
 
 	public void FullScreen() // На весь экран
 	{
-		Resolution[] resolutions = Screen.resolutions;
-		switch(SizeScreen.FullScreen_Z)
-		{
-		case true:
-			SizeScreen.FullScreen_Z = false;
-			Screen.SetResolution(Screen.width, Screen.height, SizeScreen.FullScreen_Z);
-			ReSize();
 
-			break;
-		case false:
-			SizeScreen.FullScreen_Z = true;
-			Screen.SetResolution(Screen.width, Screen.height, SizeScreen.FullScreen_Z);
-			ReSize();
+        GlobalPlayer.FullScreen(!SizeScreen.FullScreen_Z);
 
-			break;
-		}
+
+       ReSize();
 	}
 
 	public void AddMessageToChat(string name, string message)//Добавление сообщения в чат

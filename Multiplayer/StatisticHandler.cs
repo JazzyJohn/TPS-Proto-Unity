@@ -173,7 +173,7 @@ public class StatisticHandler : MonoBehaviour {
 			 w = new WWW (GetSTATISTIC_PHP_HTTPS()+ url, form);
 		}
 			yield return w;
-			Debug.Log (w.text);
+			
 	
 
 

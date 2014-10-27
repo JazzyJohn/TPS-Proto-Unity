@@ -158,15 +158,7 @@ public class SettingGUI : MonoBehaviour {
 
 	public void FullScreen() // На весь экран
 	{
-		switch(FullScreen_Z)
-		{
-		case true:
-			FullScreen_Z = false;
-			break;
-		case false:
-			FullScreen_Z = true;
-			break;
-		}
+        FullScreen_Z = !FullScreen_Z;
 		GlobalPlayer.FullScreen(FullScreen_Z);
 		
 
@@ -408,6 +400,7 @@ public class SettingGUI : MonoBehaviour {
 		AllResolution.Clear();
 		foreach (Resolution res in resolutions) 
 		{
+            //Debug.Log(res.width + "x" + res.height);
 			AllResolution.Add(res.width + "x" + res.height);
 		}
         
@@ -423,7 +416,7 @@ public class SettingGUI : MonoBehaviour {
     void CheckVideo()
     {
         RestoreGrahicSettingInMenu();
-        if (PlayerPrefs.GetString("SaveSetting2", "no") == "yes")
+        if (PlayerPrefs.GetString("SaveSetting", "no") == "yes")
         {
             //Загрузка настроек
             graphicSetting.ResolutionScroll.value = PlayerPrefs.GetFloat("Resolution");
@@ -434,9 +427,9 @@ public class SettingGUI : MonoBehaviour {
         }
         else
         {
-            volumes.VolumeScroll.value = 1f;
-            volumes.SoundFxScroll.value = 1f;
-            volumes.MusicScroll.value = 1f;
+            volumes.VolumeScroll.value = 0.5f;
+            volumes.SoundFxScroll.value = 0.5f;
+            volumes.MusicScroll.value = 0.5f;
         }
 
     }
@@ -448,6 +441,9 @@ public class SettingGUI : MonoBehaviour {
 			graphicSetting.TextureScroll.value = PlayerPrefs.GetFloat("TextureQuality");
 			graphicSetting.ShadowScroll.value = PlayerPrefs.GetFloat("ShadowQuality");
 			graphicSetting.LighningScroll.value = PlayerPrefs.GetFloat("LighningQuality");
+
+           
+            PlayerPrefs.SetFloat("Music", volumes.MusicScroll.value);
 		}
 		else
 		{

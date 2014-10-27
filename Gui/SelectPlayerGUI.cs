@@ -209,7 +209,7 @@ public class SelectPlayerGUI : MonoBehaviour {
                 }
              
                 int i =0;
-                if (teamCount[0] > teamCount[1]) {
+                if (teamCount[0] < teamCount[1]) {
                     i=2;
                 }else{
                     i=1;
@@ -240,17 +240,21 @@ public class SelectPlayerGUI : MonoBehaviour {
 			}
 		}
 		bool teamAblock=false,teamBblock=false;
-		if(teamCount[0]>teamCount[1]+1){
+		if(teamCount[0]>=teamCount[1]+1){
 			teamAblock=true;
 		}
-		if(teamCount[1]>teamCount[0]+1){
+		if(teamCount[1]>=teamCount[0]+1){
 			teamBblock=true;
 		}
         Debug.Log(teamAblock + "  " + teamBblock + i);
-		if (i == 1 && !teamAblock)
-			Choice._Team = 1;
-        else if (i == 2 && !teamBblock)
+		if (teamAblock)
 			Choice._Team = 2;
+        else if (teamBblock)
+			Choice._Team = 1;
+        else
+        {
+            Choice._Team = i;
+        }
 	}
 
     public void NextWeapon(int TypeW) //Вперёд слайдер оружия

@@ -4,7 +4,7 @@ using System.Collections;
 using System.Collections.Generic;
 
 
-public class BugPawn : Pawn {
+public class SimplePawn : Pawn {
 
 
     protected bool stopSprint;
@@ -175,6 +175,9 @@ public class BugPawn : Pawn {
         }
         stopSprint = true;
     }
-	
+    public override bool CanSprint()
+    {
+        return base.CanSprint() && !CurWeapon.IsShooting();
+    }
 	
 }

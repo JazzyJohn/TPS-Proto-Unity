@@ -40,24 +40,27 @@ public class KillCamera : ThirdPersonCamera
 			}
 			
 		}
-		if(_pawn==null){
+		/*if(_pawn==null){
 			FinishKillCam();
 			return;
-		}
+		}*/
 		killCamTimer+= Time.deltaTime;
+     //   Debug.Log(killCamTime+" < "+killCamTimer);
 		if(killCamTime<killCamTimer){
 			FinishKillCam();
 		}
 		
 	}
 	void FinishKillCam(){
-	
+      
 		PlayerMainGui.instance.StopKillCam();	
 		this.enabled = false;
 	}
 	public bool Init(Player Killer){
 		
 		_pawn  =Killer.GetActivePawn();
+
+        Debug.Log("KILLER PAWWN"+_pawn);
 		killpalyer = Killer;
 		return Init (_pawn);
 		

@@ -13,8 +13,8 @@ public class LevelingManager : MonoBehaviour, LocalPlayerListener,GameListener{
 	public const string PARAM_KILL_AI= "KillAI"; 
 	public const string PARAM_KILL_FRIEND = "KillFriend";
 	public const string PARAM_KILL_BY_FRIEND= "KilledByFriend";
-    public const string PARAM_HEAD_SHOOT = "HeadStoot";
-    public const string PARAM_HEAD_SHOOT_AI = "HeadStootAI";
+    public const string PARAM_HEAD_SHOOT = "HeadShoot";
+    public const string PARAM_HEAD_SHOOT_AI = "HeadShootAI";
 		
 	public int playerLvl = 0;
 	
@@ -138,6 +138,10 @@ public class LevelingManager : MonoBehaviour, LocalPlayerListener,GameListener{
 	}
 	//adding exp to current
 	public bool UpExp(string cause,int selected=-1){
+        if (!expDictionary.ContainsKey(cause))
+        {
+            return false ;
+        }
 		int exp = expDictionary[cause].amount;
 		expDictionary[cause].Increment();
 		bool sendByLvl=false;

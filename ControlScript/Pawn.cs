@@ -511,7 +511,7 @@ public class Pawn : DamagebleObject
 
         groundWalkSpeed = groundWalkSpeed * GetPercentValue(CharacteristicList.SPEED);
 
-        jumpHeight = groundWalkSpeed * GetPercentValue(CharacteristicList.JUMPHEIGHT);
+        jumpHeight = jumpHeight * GetPercentValue(CharacteristicList.JUMPHEIGHT);
     }
     public float GetSize()
     {
@@ -2077,7 +2077,7 @@ public class Pawn : DamagebleObject
         return characterState == CharacterState.Sprinting;
 
     }
-    public bool CanSprint()
+    public virtual bool CanSprint()
     {
         return jetPackCharge >= 1.0f || characterState == CharacterState.Sprinting;
     }
@@ -2305,14 +2305,36 @@ public class Pawn : DamagebleObject
             {
                 minAngle = 0.2f;
             }
-            if (Vector3.Dot(Direction.normalized, Vector3.down) > minAngle)
+            else
+            {
+                CapsuleCollider capsule = ((CapsuleCollider)myCollider);
+                minAngle = Mathf.Atan(capsule.radius / capsule.height * 2)  ;
+            }
+           // Debug.Log(Mathf.Cos(minAngle));
+          
+            /*
+             *   float normalRadius;
+             *   
+            if (((CapsuleCollider)myCollider).direction == 2)
+            {
+                minAngle = 0.2f;
+                normalRadius =((CapsuleCollider)myCollider).radius;
+            }else{
+                 normalRadius =((CapsuleCollider)myCollider).height/2;
+            }
+            float radiusPoint = Mathf.Sin(Vector3.Angle(Direction.normalized, Vector3.down)) * Direction.magnitude;
+            Debug.Log(radiusPoint);
+             *
+             * */
+            //Debug.Log(Vector3.Dot(Direction.normalized, Vector3.down));
+            if (Vector3.Dot(Direction.normalized, Vector3.down) > Mathf.Cos(minAngle))
             {
                 isGrounded = true;
 
                 floorNormal = contact.normal;
             }
 
-            //Debug.DrawRay(contact.point, contact.normal, Color.white);
+            Debug.DrawLine(myTransform.position + ((CapsuleCollider)myCollider).center, contact.point, Color.white);
 
         }
 
@@ -2376,6 +2398,7 @@ public class Pawn : DamagebleObject
         {
             KillIt(null);
         }
+        Debug.Log(characterState +" " +isGrounded);
         Vector3 velocity = _rb.velocity;
         /* if(nextMovement.y==0){
              nextMovement.y = velocity.y;

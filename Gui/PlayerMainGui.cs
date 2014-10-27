@@ -1,6 +1,7 @@
 ﻿using UnityEngine;
 using System.Collections;
 using System.Collections.Generic;
+using System;
 
 
 public class PlayerMainGui : MonoBehaviour {
@@ -225,6 +226,7 @@ public class PlayerMainGui : MonoBehaviour {
             }
             else
             {
+              
                 if (guiState != GUIState.KillCam)
                 {
                     ChageState(GUIState.Respawn);
@@ -767,7 +769,7 @@ public class PlayerMainGui : MonoBehaviour {
 				KillCamera s_Instance =FindObjectOfType<KillCamera>();
 				s_Instance.enabled = true;
 				if (s_Instance.Init (killer)) {
-						Debug.Log("killcam");
+						
 						ChageState (GUIState.KillCam);
 				} else {
 						ChageState (GUIState.Respawn);

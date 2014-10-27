@@ -87,7 +87,7 @@ public class  RewardManager : MonoBehaviour, LocalPlayerListener,GameListener{
         }
         if (PlayerMainGui.instance != null)
         {
-            String reward = TextGenerator.instance.G(rewardMoneyDictionary[reason].cash, rewardMoneyDictionary[reason].gold);
+            String reward = TextGenerator.instance.GetMoneyText(reason,rewardMoneyDictionary[reason].cash, rewardMoneyDictionary[reason].gold);
             PlayerMainGui.instance.AddMessage(reward, PlayerMainGui.MessageType.MONEY_REWARD);
         }
 		

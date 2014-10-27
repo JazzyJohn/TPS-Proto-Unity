@@ -178,7 +178,8 @@ public class GlobalPlayer : MonoBehaviour {
 
 		if (PlayerPrefs.GetString("ResolutionValue", "none") != "none")
 			x_y = PlayerPrefs.GetString("ResolutionValue").Split('x');
-	    
+
+        Debug.Log(x_y[0] +" "+ x_y[1]);
         Screen.SetResolution(int.Parse(x_y[0]), int.Parse(x_y[1]), FullScreen_Z);
 	}
    public  static void ResizeCall()

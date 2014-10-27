@@ -107,13 +107,13 @@ public class PlayerHudNgui : MonoBehaviour {
 	 
 	 
 	 //Message section
-	public UIScrollView lvlView;
+    public UITable lvlView;
 	
 	public Transform  lvlTable;
 	
 	public Transform lvlPrefab;
 	
-	public UIScrollView moneyView;
+	public UITable moneyView;
 	
 	public Transform moneyTable;
 	
@@ -228,21 +228,29 @@ public class PlayerHudNgui : MonoBehaviour {
 
     }
 	public void AddMoneyMessage(string text){
-		Transform newTrans = Instantiate(moneyPrefab);
+		Transform newTrans = Instantiate(moneyPrefab) as Transform;
 		newTrans.parent = moneyTable;
 		newTrans.localScale= new Vector3(1f, 1f, 1f);
 		newTrans.localEulerAngles  = new Vector3(0f, 0f, 0f);
 		newTrans.localPosition= new Vector3(0f, 0f, 0f);
 		newTrans.GetComponent<UILabel>().text = text;
-		moneyView.ResetPostiton();
+        newTrans.GetComponent<SimpleDelayDestroy>().enabled = true;
+        UITweener tweener = newTrans.GetComponent<UITweener>();
+        tweener.tweenFactor = 0.0f;
+        tweener.PlayForward();
+		moneyView.Reposition();
 	}
 	public void AddLvlMessage(string text){
-		Transform newTrans = Instantiate(lvlPrefab);
+        Transform newTrans = Instantiate(lvlPrefab) as Transform;
 		newTrans.parent = lvlTable;
 		newTrans.localScale = new Vector3(1f, 1f, 1f);
 		newTrans.localEulerAngles  = new Vector3(0f, 0f, 0f);
 		newTrans.localPosition= new Vector3(0f, 0f, 0f);
 		newTrans.GetComponent<UILabel>().text = text;
-		lvlView.ResetPostiton();
+        newTrans.GetComponent<SimpleDelayDestroy>().enabled = true;
+        UITweener tweener = newTrans.GetComponent<UITweener>();
+        tweener.tweenFactor = 0.0f;
+        tweener.PlayForward();
+        lvlView.Reposition();
 	}
 }

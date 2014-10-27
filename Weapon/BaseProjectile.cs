@@ -80,7 +80,7 @@ public class BaseProjectile : MonoBehaviour
 	
 	public GameObject[] inactiveObjectInEffectStage;
 
-    public static LayerMask dmgLayers;
+    public LayerMask dmgLayers;
 	
     public float splashRadius;
     public LayerMask explosionLayerBlock;
