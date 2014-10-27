@@ -18,12 +18,12 @@ public class PawnOnGuiComponent : ShowOnGuiComponent {
         hudentry.PerfabInfo.Sprite.width = (int)width;
         if (pawn.team != team && pawn.team!=0)
         {
-            if (hudentry.PerfabInfo.ProgressBar.alpha != 0)
+            if (hudentry.PerfabInfo.ProgressBar != null && hudentry.PerfabInfo.ProgressBar.alpha != 0)
             {
                 hudentry.PerfabInfo.ProgressBar.alpha = 0;
             }
         }
-        
+        Debug.Log(state);
         isShow = state;
 
 
@@ -40,8 +40,11 @@ public class PawnOnGuiComponent : ShowOnGuiComponent {
         {
             health = 0;
         }
-       
-        hudentry.PerfabInfo.ProgressBar.value = health / pawn.GetMaxHealth();
+        if (hudentry.PerfabInfo.ProgressBar != null)
+        {
+
+            hudentry.PerfabInfo.ProgressBar.value = health / pawn.GetMaxHealth();
+        }
 
 
 

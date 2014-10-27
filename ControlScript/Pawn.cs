@@ -2334,7 +2334,7 @@ public class Pawn : DamagebleObject
                 floorNormal = contact.normal;
             }
 
-            Debug.DrawLine(myTransform.position + ((CapsuleCollider)myCollider).center, contact.point, Color.white);
+           // Debug.DrawLine(myTransform.position + ((CapsuleCollider)myCollider).center, contact.point, Color.white);
 
         }
 
@@ -2398,7 +2398,7 @@ public class Pawn : DamagebleObject
         {
             KillIt(null);
         }
-        Debug.Log(characterState +" " +isGrounded);
+       // Debug.Log(characterState +" " +isGrounded);
         Vector3 velocity = _rb.velocity;
         /* if(nextMovement.y==0){
              nextMovement.y = velocity.y;
