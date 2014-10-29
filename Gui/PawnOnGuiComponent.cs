@@ -6,6 +6,8 @@ public class PawnOnGuiComponent : ShowOnGuiComponent {
     public float startWidth=100.0f;
 
     public float sizeCoef=1.0f;
+	
+	public bool teamColor=false;
 
     Pawn pawn;
     public override void LocalPlayerSeeMe(float distance,int team, bool state){
@@ -35,6 +37,27 @@ public class PawnOnGuiComponent : ShowOnGuiComponent {
             return;
         }
         float health = pawn.health;
+		if(team!=pawn.team){
+			if (team==1)
+			{
+				if(hudentry.label!=null){
+					hudentry.label.color = ally;
+				}
+				if(hudentry.Sprite!=null){
+					hudentry.Sprite.color = ally;
+				}
+			}
+			else
+			{
+				if(hudentry.label!=null){
+					hudentry.label.color = enemy;
+				}
+				if(hudentry.Sprite!=null){
+					hudentry.Sprite.color = enemy;
+				}
+			}
+			
+		}
         team = pawn.team;
         if (health<0)
         {
@@ -55,4 +78,11 @@ public class PawnOnGuiComponent : ShowOnGuiComponent {
     {
         this.pawn = pawn;
     }
+	
+	public override void ChangeTeamColor(bool ally){
+		if(teamColor){
+			return;
+		}
+		base.ChangeTeamColor(ally);
+	}
 }

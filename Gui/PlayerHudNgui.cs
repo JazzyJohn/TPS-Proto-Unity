@@ -82,6 +82,8 @@ public class PlayerHudNgui : MonoBehaviour {
 	public UISprite annonce;
     
 	public UITweener annonceTweener;
+	
+	public UILabel annonceName;
 
     public UILabel annonceLabel;
 
@@ -221,8 +223,11 @@ public class PlayerHudNgui : MonoBehaviour {
             annonceAddSprite.spriteName = additionalSprites[(int)newAddSprite];
         }
         if (annonceLabel != null) {
-            annonceLabel.text = text;
+            annonceLabel.text =  TextGenerator.instance.GetAddAnnonceText(curAnnonce,text);
         }
+		if(annonceName!=null){
+			annonceName.text = TextGenerator.instance.GetMainAnnonceText(curAnnonce);
+		}
         annonceTweener.tweenFactor = 0.0f;
         annonceTweener.PlayForward();
 

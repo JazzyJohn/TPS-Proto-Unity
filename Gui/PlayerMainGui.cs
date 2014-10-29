@@ -403,15 +403,9 @@ public class PlayerMainGui : MonoBehaviour {
             component.hudentry.startpos = component.myTransform.position;
            // 
             component.hudentry.label.text = publicName;
-            if (component.team == LocalPlayer.team||component.alwaysFriendly)
-            {
-
-                component.hudentry.label.color = Color.green;
-            }
-            else
-            {
-                component.hudentry.label.color = Color.red;
-            }
+			
+			component.ChangeTeamColor(component.team == LocalPlayer.team||component.alwaysFriendly);
+           
 
         }
         P1Hud.ReDraw();

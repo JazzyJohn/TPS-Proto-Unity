@@ -32,6 +32,12 @@ public class ShowOnGuiComponent : MonoBehaviour {
 	
 	public float distanceHide = 10.0f;
 	
+	public bool allyDipendColor;
+	
+	public Color ally =Color.green;
+	
+	public Color enemy =Color.red;
+	
 	public void Awake(){
 		myTransform = transform;
 		allShowOnGui.Add(this);
@@ -69,6 +75,29 @@ public class ShowOnGuiComponent : MonoBehaviour {
 	}
 	public virtual void LocalPlayerSeeMe(float distance,int team,bool state){
 			
+	}
+	public virtual void ChangeTeamColor(bool ally){
+		if(!allyDipendColor){
+			return;
+		}
+		if (ally)
+		{
+			if(hudentry.label!=null){
+				hudentry.label.color = ally;
+			}
+			if(hudentry.Sprite!=null){
+				hudentry.Sprite.color = ally;
+			}
+		}
+		else
+		{
+			if(hudentry.label!=null){
+				hudentry.label.color = enemy;
+			}
+			if(hudentry.Sprite!=null){
+				hudentry.Sprite.color = enemy;
+			}
+		}
 	}
 
 }

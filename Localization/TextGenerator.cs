@@ -22,7 +22,9 @@ public class TextGenerator : MonoBehaviour{
 	
 	private  Dictionary<string, string>  lvlTexts = new Dictionary<string, string>();
 
+	private  Dictionary<AnnonceType, string>  mainAnnonceText = new Dictionary<AnnonceType, string>();
 
+	private  Dictionary<AnnonceType, string>  addAnnonceText = new Dictionary<AnnonceType, string>();
 
 
 
@@ -36,6 +38,16 @@ public class TextGenerator : MonoBehaviour{
         {
          //   Debug.Log(node.SelectSingleNode("name").InnerText + node.SelectSingleNode("text").InnerText);
             lvlTexts.Add(node.SelectSingleNode("name").InnerText, node.SelectSingleNode("text").InnerText);
+		}
+		foreach (XmlNode node in xmlDoc.SelectNodes("texts/annonce/oneentry"))
+        {
+         //   Debug.Log(node.SelectSingleNode("name").InnerText + node.SelectSingleNode("text").InnerText);
+			AnnonceType type =(AnnonceType)System.Enum.Parse(typeof(AnnonceType), node.SelectSingleNode("name").InnerText);
+            mainAnnonceText.Add(type, node.SelectSingleNode("text").InnerText);
+			XmlNode addText = node.SelectSingleNode("text");
+			if(addText!=null){
+				addAnnonceText.Add(type,addText.InnerText);
+			}
 		}
 	}
 
@@ -57,6 +69,26 @@ public class TextGenerator : MonoBehaviour{
 		}
 		return String.Format(result,cash,gold);
 	}
+	public string GetMainAnnonceText(AnnonceType type){
+		
+		if(mainAnnonceText.ContainsKey(type)){
+			return mainAnnonceText[type];
+		}else{
+			return "";
+		}
+		
+	}
+	
+	public string GetAddAnnonceText(AnnonceType type,string text){
+		string result;
+		if(moneyTexts.addAnnonceText(type)){
+			result = addAnnonceText[type];
+		}else{
+			return text;
+		}
+		return String.Format(result,text);
+	}
+	
 
 	private static TextGenerator s_Instance = null;
 	
