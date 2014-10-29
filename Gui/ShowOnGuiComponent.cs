@@ -53,6 +53,7 @@ public class ShowOnGuiComponent : MonoBehaviour {
     public bool IsShow(Transform mainCamera, int inteam)
     { 
 		bool basicShow = isShow && (showAnotherTeam || team==0||inteam==team);
+        Debug.Log("ShowOnGuiComponent" + isShow + " " + team);
         bool addvanceShow = !hideInClose || (hideInClose && (mainCamera.position - myTransform.position).sqrMagnitude > distanceHide * distanceHide);
 		return basicShow&&addvanceShow;
 	}

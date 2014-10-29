@@ -54,7 +54,8 @@ public class MusicHolder : MonoBehaviour {
 	
 	// Update is called once per frame
 	void Update () {
-		if (!musicPlayer.isPlaying) {
+        if (!musicPlayer.isPlaying && allClip.Length>0)
+        {
 			StartSong();
 		}
         

@@ -221,6 +221,21 @@ public class MainMenuGUI : MonoBehaviour {
             _LoginPanel.regError.text = "Пароли не совпадают";
 			return;
 		}
+        if (password.text =="")
+        {
+            _LoginPanel.regError.text = "Пароль не может быть пустым";
+            return;
+        }
+        if (login.text == "")
+        {
+            _LoginPanel.regError.text = "Логин не может быть пустым";
+            return;
+        }
+        if (nick.text == "")
+        {
+            _LoginPanel.regError.text = "Ник не может быть пустым";
+            return;
+        }
         RegistrationAPI.instance.Registration(login.text, password.text, nick.text);
 	}
 	public void SetRegistarationError(string text){

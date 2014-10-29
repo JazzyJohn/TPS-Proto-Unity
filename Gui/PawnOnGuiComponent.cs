@@ -18,6 +18,7 @@ public class PawnOnGuiComponent : ShowOnGuiComponent {
         float width = startWidth -distance*sizeCoef;
       //  Debug.Log((int)width);
         hudentry.PerfabInfo.Sprite.width = (int)width;
+     //   Debug.Log("PawnOnGuiComponent" +pawn.team+" "+team);
         if (pawn.team != team && pawn.team!=0)
         {
             if (hudentry.PerfabInfo.ProgressBar != null && hudentry.PerfabInfo.ProgressBar.alpha != 0)
