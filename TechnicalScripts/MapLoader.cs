@@ -39,13 +39,15 @@ public class MapLoader : MonoBehaviour {
         }
 
 	}
-    public IEnumerator Load(string assetbundleMapName)
+
+   
+    public IEnumerator Load(string assetbundleMapName, string versionstr="")
     {
 
         while (!Caching.ready)
             yield return null;
 
-        string crossDomainesafeURL = StatisticHandler.GetNormalURL() + mapSubDir + assetbundleMapName +".unity3d";
+        string crossDomainesafeURL = StatisticHandler.GetNormalURL() + mapSubDir + assetbundleMapName + versionstr + ".unity3d";
         Debug.Log(crossDomainesafeURL);
         if (AssetBundleManager.isHasAssetBundle(crossDomainesafeURL, version))
         {

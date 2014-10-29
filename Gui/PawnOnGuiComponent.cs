@@ -26,7 +26,7 @@ public class PawnOnGuiComponent : ShowOnGuiComponent {
                 hudentry.PerfabInfo.ProgressBar.alpha = 0;
             }
         }
-        Debug.Log(state);
+//        Debug.Log(state);
         isShow = state;
 
 
@@ -38,8 +38,9 @@ public class PawnOnGuiComponent : ShowOnGuiComponent {
             return;
         }
         float health = pawn.health;
-		if(team!=pawn.team){
-			if (team==1)
+        if (teamColor&&team != pawn.team)
+        {
+            if (pawn.team == 1)
 			{
 				if(hudentry.label!=null){
 					hudentry.label.color = ally;

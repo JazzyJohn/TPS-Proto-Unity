@@ -197,7 +197,7 @@ public class BaseProjectile : MonoBehaviour
         curSpeed = startImpulse;
 		
         RaycastHit hit;
-        float distance = mTransform.InverseTransformDirection(mRigidBody.velocity).z * 0.1f;
+        float distance = mTransform.InverseTransformDirection(mRigidBody.velocity).z* 0.1f;
         if (replication)
         {
             distance += (float)(TimeManager.Instance.NetworkTime  - lateTime) * mRigidBody.velocity.magnitude;
@@ -209,6 +209,7 @@ public class BaseProjectile : MonoBehaviour
                 onBulletHit(hit);
          
         }
+        //Debug.DrawRay(mTransform.position, mTransform.forward * distance, Color.blue, 10.0f);
 	//Debug.Log("id " + projId+ " position " + mTransform.position + " rotation "+ mTransform.rotation);
    
         if (replication)
@@ -241,7 +242,7 @@ public class BaseProjectile : MonoBehaviour
 			return;
 		}
         RaycastHit hit;
-      
+    
         switch (speedChange)
         {
             case SPEEDCHANGE.Acceleration:
@@ -289,10 +290,12 @@ public class BaseProjectile : MonoBehaviour
      
 		if(mRigidBody.velocity.sqrMagnitude >0&&hitDelay<Time.time){
 			mTransform.rotation = Quaternion.LookRotation(mRigidBody.velocity);
-            if (Physics.Raycast(transform.position, mRigidBody.velocity.normalized, out hit, mRigidBody.velocity.magnitude * 0.1f, dmgLayers))
+            //
+          //  Debug.Log(used);
+            if (!used&&Physics.Raycast(transform.position, mRigidBody.velocity.normalized, out hit, mRigidBody.velocity.magnitude * 0.1f, dmgLayers))
 			{
-
-			  
+              
+                //Debug.DrawRay(mTransform.position, mTransform.forward * mRigidBody.velocity.magnitude * 0.1f, Color.red, 10.0f);
 					onBulletHit(hit);
 
             }
@@ -300,7 +303,7 @@ public class BaseProjectile : MonoBehaviour
             {
                 if (result.sqrMagnitude != 0)
                 {
-                    Debug.Log(result);
+                   // Debug.Log(result);
                     mRigidBody.AddForce(result, ForceMode.Acceleration);
 
                 }

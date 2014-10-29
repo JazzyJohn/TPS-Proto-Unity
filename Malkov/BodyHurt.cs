@@ -20,8 +20,8 @@ public class BodyHurt : DamagebleObject {
 	}
 	
 	// Update is called once per fra
-		void Update () {
-		
+		void FixedUpdate () {
+         //   Debug.DrawLine(transform.position, TargetHarm.transform.position);
 		}
 
 	public override void Damage(BaseDamage damage,GameObject killer)

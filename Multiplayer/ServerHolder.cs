@@ -21,7 +21,12 @@ public class RoomData
     public int playerCount;
     public int maxPlayers;
 }
-
+[Serializable]
+public class MapData
+{
+    public string name;
+    public string version;
+}
 public class ServerHolder : MonoBehaviour 
 {
 	public bool shouldLoad = true;
@@ -69,7 +74,8 @@ public class ServerHolder : MonoBehaviour
 
     public string ExtName = "fps";  // The server extension we work with
     public string ExtClass = "dk.fullcontrol.fps.FpsExtension"; // The class name of the extension
- 
+
+    public MapData[] allMaps;
 
 	public static LoadProgress progress= new LoadProgress();
 
@@ -465,11 +471,15 @@ public class ServerHolder : MonoBehaviour
 		async = Application.LoadLevelAsync(mapName);
 		yield return async;
 		Debug.Log ("Загрузка завершена.");*/
-
-         bool loaded = false;
-        
-        if (!loaded)
-        {
+        MapData data = null;
+        foreach(MapData iterdata in allMaps){
+            if (iterdata.name == mapName)
+            {
+                data = iterdata;
+                break; 
+            }
+        }
+       
             MapLoader loader = FindObjectOfType<MapLoader>();
             Debug.Log(loader);
             if (loader != null)
@@ -481,12 +491,21 @@ public class ServerHolder : MonoBehaviour
                 progress.finishedLoader = 1;
                 progress.curLoader = 0;
                 Debug.Log("Загружаем карту " + mapName);
-                IEnumerator innerCoroutineEnumerator = loader.Load(mapName);
+                IEnumerator innerCoroutineEnumerator;
+                if (data != null)
+                {
+                     innerCoroutineEnumerator = loader.Load(mapName, data.version);
+                }
+                else
+                {
+                     innerCoroutineEnumerator = loader.Load(mapName);
+                }
+          
                 while (innerCoroutineEnumerator.MoveNext())
                     yield return innerCoroutineEnumerator.Current;
             }
 
-        }
+        
                 PrefabManager[] managers = FindObjectsOfType<PrefabManager>();
                 progress.allLoader = 2 + managers.Length;
                 Debug.Log("Загрузка завершена.");

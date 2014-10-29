@@ -223,10 +223,11 @@ public class PlayerHudNgui : MonoBehaviour {
             annonceAddSprite.spriteName = additionalSprites[(int)newAddSprite];
         }
         if (annonceLabel != null) {
-            annonceLabel.text =  TextGenerator.instance.GetAddAnnonceText(curAnnonce,text);
+            annonceLabel.text = TextGenerator.instance.GetAddAnnonceText(type, text);
         }
 		if(annonceName!=null){
-			annonceName.text = TextGenerator.instance.GetMainAnnonceText(curAnnonce);
+            Debug.Log(TextGenerator.instance.GetMainAnnonceText(type));
+            annonceName.text = TextGenerator.instance.GetMainAnnonceText(type);
 		}
         annonceTweener.tweenFactor = 0.0f;
         annonceTweener.PlayForward();

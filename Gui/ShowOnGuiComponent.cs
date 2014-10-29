@@ -53,7 +53,7 @@ public class ShowOnGuiComponent : MonoBehaviour {
     public bool IsShow(Transform mainCamera, int inteam)
     { 
 		bool basicShow = isShow && (showAnotherTeam || team==0||inteam==team);
-        Debug.Log("ShowOnGuiComponent" + isShow + " " + team);
+       // Debug.Log("ShowOnGuiComponent" + isShow + " " + team);
         bool addvanceShow = !hideInClose || (hideInClose && (mainCamera.position - myTransform.position).sqrMagnitude > distanceHide * distanceHide);
 		return basicShow&&addvanceShow;
 	}
@@ -77,11 +77,11 @@ public class ShowOnGuiComponent : MonoBehaviour {
 	public virtual void LocalPlayerSeeMe(float distance,int team,bool state){
 			
 	}
-	public virtual void ChangeTeamColor(bool ally){
+	public virtual void ChangeTeamColor(bool isAlly){
 		if(!allyDipendColor){
 			return;
 		}
-		if (ally)
+        if (isAlly)
 		{
 			if(hudentry.label!=null){
 				hudentry.label.color = ally;

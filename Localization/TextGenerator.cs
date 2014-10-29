@@ -41,10 +41,11 @@ public class TextGenerator : MonoBehaviour{
 		}
 		foreach (XmlNode node in xmlDoc.SelectNodes("texts/annonce/oneentry"))
         {
-         //   Debug.Log(node.SelectSingleNode("name").InnerText + node.SelectSingleNode("text").InnerText);
+           
 			AnnonceType type =(AnnonceType)System.Enum.Parse(typeof(AnnonceType), node.SelectSingleNode("name").InnerText);
+          //  Debug.Log(type + node.SelectSingleNode("text").InnerText);
             mainAnnonceText.Add(type, node.SelectSingleNode("text").InnerText);
-			XmlNode addText = node.SelectSingleNode("text");
+			XmlNode addText = node.SelectSingleNode("textAdd");
 			if(addText!=null){
 				addAnnonceText.Add(type,addText.InnerText);
 			}
@@ -81,7 +82,8 @@ public class TextGenerator : MonoBehaviour{
 	
 	public string GetAddAnnonceText(AnnonceType type,string text){
 		string result;
-		if(moneyTexts.addAnnonceText(type)){
+        if (addAnnonceText.ContainsKey(type))
+        {
 			result = addAnnonceText[type];
 		}else{
 			return text;
