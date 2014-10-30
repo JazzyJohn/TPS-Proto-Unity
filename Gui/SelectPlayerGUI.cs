@@ -365,18 +365,25 @@ public class SelectPlayerGUI : MonoBehaviour {
     public PrefabManager playerManager;
     public Transform playerPreView;
     public void LoadFromPrefab(){
-        UnityEngine.Object[] models = playerManager.bundle.LoadAll(typeof(ModelForGui));
-        if (playerPreView != null)
-        {
-            foreach (UnityEngine.Object model in models)
-            {
-                ModelForGui obj = Instantiate(model, playerPreView.position, playerPreView.rotation) as ModelForGui;
-                MenuElements.ClassModels[obj.index] = obj.gameObject;
-                obj.gameObject.SetActive(false);
-                obj.transform.parent = playerPreView;
-                obj.transform.localScale = new Vector3(1, 1, 1);
-            }
-        }
+		UnityEngine.Object[] models;
+		if(playerManager!=null){
+			models = playerManager.bundle.LoadAll(typeof(ModelForGui));
+		}else{
+			MapLoader loader = FindObjectOfType<MapLoader>();
+			models = loader.pawnBundle.LoadAll(typeof(ModelForGui));
+		}
+			if (playerPreView != null)
+			{
+				foreach (UnityEngine.Object model in models)
+				{
+					ModelForGui obj = Instantiate(model, playerPreView.position, playerPreView.rotation) as ModelForGui;
+					MenuElements.ClassModels[obj.index] = obj.gameObject;
+					obj.gameObject.SetActive(false);
+					obj.transform.parent = playerPreView;
+					obj.transform.localScale = new Vector3(1, 1, 1);
+				}
+			}
+		
     }
     public void RotateModel() {
        // Debug.Log("ROTATE");

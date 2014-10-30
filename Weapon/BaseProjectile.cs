@@ -58,14 +58,17 @@ public class BaseDamage{
 public class BaseProjectile : MonoBehaviour
 {
 	public bool active;
-
+	[HideInInspector]
     public int projId;
+	[HideInInspector]
     public bool replication = true;
     public long lateTime;
     public BaseDamage damage;
     public float startImpulse;
     private float curSpeed;
+	[HideInInspector]
     public GameObject owner;
+	[HideInInspector]
     public Transform target;
     public Vector3 targetOffset; 
     public float range;
@@ -382,31 +385,35 @@ public class BaseProjectile : MonoBehaviour
         //Debug.Log ("HADISH INTO SOME PLAYER! " + hit.transform.gameObject.name);
         //Destroy (gameObject, 0.1f);
     }
+	
     public void onBulletHit(RaycastHit hit)
     {
-        if (owner == hit.transform.gameObject || used)
+        if (owner == hit.transform.root.gameObject || used)
         {
             return;
         }
-        float distance = (startPosition - mTransform.position).magnitude;
-        BaseDamage ldamage = new BaseDamage(damage);
-        if (range < distance)
-        {
-            float coef = 1 - (distance - range) / minDamageRange;
-            if (coef < minimunProcent)
-            {
-                coef = minimunProcent;
-            }
-            ldamage.Damage = damage.Damage * coef;
-        }
-
-        ldamage.pushDirection = mTransform.forward;
-        ldamage.hitPosition = hit.point;
+     
         DamagebleObject obj = hit.transform.gameObject.GetComponent<DamagebleObject>();
         //move explosion center from surface so raycast dont hit it
         Vector3 exploPosition = hit.point + hit.normal;
         if (obj != null)
         {
+		
+			float distance = (startPosition - mTransform.position).magnitude;
+			BaseDamage ldamage = new BaseDamage(damage);
+			if (range < distance)
+			{
+				float coef = 1 - (distance - range) / minDamageRange;
+				if (coef < minimunProcent)
+				{
+					coef = minimunProcent;
+				}
+				ldamage.Damage = damage.Damage * coef;
+			}
+
+			ldamage.pushDirection = mTransform.forward;
+			ldamage.hitPosition = hit.point;
+			
             DamageLogic(obj, ldamage);
             shootTarget = obj;
             switch (projHtPersonEffect)

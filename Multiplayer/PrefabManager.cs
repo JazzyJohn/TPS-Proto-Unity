@@ -155,7 +155,7 @@ public class PrefabManager : MonoBehaviour {
         }
         else
         {
-            Debug.Log("NO BUNLDE NET TO LOAD" );
+            Debug.Log("NO BUNLDE NEED TO LOAD" );
             using (www = WWW.LoadFromCacheOrDownload(crossDomainesafeURL, version))
             {
                 yield return www;

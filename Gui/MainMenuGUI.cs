@@ -9,6 +9,8 @@ public class MainMenuGUI : MonoBehaviour {
 	private ServerHolder Server;
 
 	public MoveNGUICamer CamMove;
+	
+	public GameObject loadingScreen;
 
 	[HideInInspector] 
 	public GameObject ActivBut;
@@ -423,10 +425,7 @@ public class MainMenuGUI : MonoBehaviour {
 			_timer.timer = 0;
 		}
 
-		//TODO:LoadMap
-		if (Server.connectingToRoom) {
-			_RoomsNgui.LoadingProgress.value = Server.LoadProcent()/100f;
-		}
+	
 		if (LevelingManager.instance.isLoaded) {
 			LoadData();		
 		

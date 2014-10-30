@@ -26,6 +26,9 @@ public class MapData
 {
     public string name;
     public string version;
+	public string weaponAsset;
+	public string characterAsset;
+	
 }
 public class ServerHolder : MonoBehaviour 
 {
@@ -460,6 +463,14 @@ public class ServerHolder : MonoBehaviour
 		connectingToRoom = true;
         
 		
+		MainMenuGUI mainMenu = FindObjectOfType<MainMenuGUI> ();
+		GameObject loadingScreen = null; 
+		if (mainMenu != null) {
+				Destroy (mainMenu.gameObject);
+				ItemManager.instance.ClearShop();
+				loadingScreen = Instantiate(mainMenu.loadingScreen, Vector3.zero, Quaternion.identity) as GameObject;
+		}
+		
 		yield return new WaitForSeconds(1);
 
 
@@ -494,38 +505,74 @@ public class ServerHolder : MonoBehaviour
                 IEnumerator innerCoroutineEnumerator;
                 if (data != null)
                 {
-                     innerCoroutineEnumerator = loader.Load(mapName, data.version);
+					bool skipWeapon=false,skipPawn = false;
+					if(IsInCache(data.weaponAsset)){
+						IEnumerator tempEnumerator =loader.DownloadAndCache(data.weaponAsset,AssetBundleType.WEAPON);
+						while (innerCoroutineEnumerator.MoveNext()){
+							yield return innerCoroutineEnumerator.Current;
+						}
+						skipWeapon= true;
+					}
+					if(IsInCache(data.characterAsset)){
+						IEnumerator tempEnumerator =loader.DownloadAndCache(data.characterAsset,AssetBundleType.PAWN);
+						while (innerCoroutineEnumerator.MoveNext()){
+							yield return innerCoroutineEnumerator.Current;
+						}
+						skipPawn = true;
+					}
+                    innerCoroutineEnumerator = loader.Load(mapName, data.version);
+					while (innerCoroutineEnumerator.MoveNext()){
+						yield return innerCoroutineEnumerator.Current;
+					}
+					if(!skipPawn){
+						IEnumerator tempEnumerator =loader.DownloadAndCache(data.characterAsset,AssetBundleType.PAWN);
+						while (innerCoroutineEnumerator.MoveNext()){
+							yield return innerCoroutineEnumerator.Current;
+						}
+					
+					}
+					if(!skipWeapon){
+						IEnumerator tempEnumerator =loader.DownloadAndCache(data.weaponAsset,AssetBundleType.WEAPON);
+						while (innerCoroutineEnumerator.MoveNext()){
+							yield return innerCoroutineEnumerator.Current;
+						}
+					
+					}
                 }
                 else
                 {
                      innerCoroutineEnumerator = loader.Load(mapName);
+					 
+					while (innerCoroutineEnumerator.MoveNext()){
+						yield return innerCoroutineEnumerator.Current;
+					}
+
+			
+					PrefabManager[] managers = FindObjectsOfType<PrefabManager>();
+					progress.allLoader = 2 + managers.Length;
+					Debug.Log("Загрузка завершена.");
+
+					progress.finishedLoader++;
+					progress.curLoader=0;
+					foreach (PrefabManager manger in managers) {
+							IEnumerator innerPrefabEnum = manger.DownloadAndCache ();
+							while (innerPrefabEnum.MoveNext())
+									yield return innerPrefabEnum.Current;
+							progress.finishedLoader++;
+							progress.curLoader=0;
+					}
                 }
           
-                while (innerCoroutineEnumerator.MoveNext())
-                    yield return innerCoroutineEnumerator.Current;
-            }
-
-        
-                PrefabManager[] managers = FindObjectsOfType<PrefabManager>();
-                progress.allLoader = 2 + managers.Length;
-                Debug.Log("Загрузка завершена.");
-
-				progress.finishedLoader++;
-				progress.curLoader=0;
-				foreach (PrefabManager manger in managers) {
-						IEnumerator innerPrefabEnum = manger.DownloadAndCache ();
-						while (innerPrefabEnum.MoveNext())
-								yield return innerPrefabEnum.Current;
-						progress.finishedLoader++;
-						progress.curLoader=0;
-				}
 	
         ItemManager.instance.ConnectToPrefab();
 
         MapDownloader downloadata = FindObjectOfType<MapDownloader>();
-
+		if(loadingScreen!=null){
+			Destroy(loadingScreen);
+		}
       
 		FinishLoad ();
+		
 		yield return new WaitForEndOfFrame();
         GameObject menu = Instantiate(downloadata.playerHud, Vector3.zero, Quaternion.identity) as GameObject;
 		Camera.main.GetComponent<PlayerMainGui> ().enabled = true;
@@ -572,11 +619,7 @@ public class ServerHolder : MonoBehaviour
 		}
 		connectingToRoom = false;
 		
-		MainMenuGUI mainMenu = FindObjectOfType<MainMenuGUI> ();
-		if (mainMenu != null) {
-				Destroy (mainMenu.gameObject);
-				ItemManager.instance.ClearShop();
-		}
+		
         AITargetManager.Reload();
         TimeManager.Instance.Init();
 	}
