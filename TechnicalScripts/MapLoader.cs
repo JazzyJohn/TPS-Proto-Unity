@@ -4,7 +4,7 @@ using System.Collections;
 using System.Collections.Generic;
 
 using System.Reflection;
-enum AssetBundleType{
+public enum AssetBundleType{
 	PAWN,WEAPON
 }
 
@@ -128,59 +128,63 @@ public class MapLoader : MonoBehaviour {
                 Debug.Log("LOADING "+crossDomainesafeURL+" WWW ERROR " + www.error);
                 if (www.error == null)
                 {
-					UnityEngine.Object[] prefabObjects;
-					switch(type){
-						case	AssetBundleType.PAWN:
-							pawnBundle = www.assetBundle;
-							AssetBundleManager.setAssetBundle(pawnBundle, crossDomainesafeURL, version);
-							prefabObjects =pawnBundle.LoadAll(typeof(Pawn));
-							Debug.Log("MyBundle" + pawnBundle);
-							inProgress = false;
-							
-						break;
-						case AssetBundleType.WEAPON:
-							weaponBundle = www.assetBundle;
-							weaponBundle.LoadAll(typeof(BaseWeapon));
-							AssetBundleManager.setAssetBundle(weaponBundle, crossDomainesafeURL, version);
-							Debug.Log("MyBundle" + weaponBundle);
-							inProgress = false;
-							
-						break;
-						default:
-							prefabObjects=new UnityEngine.Object[0]; 
-						break;
-					}
-					for (int i = 0; i < prefabObjects.Length; i++)
-					{
+                    UnityEngine.Object[] prefabObjects;
+                    switch (type)
+                    {
+                        case AssetBundleType.PAWN:
+                            pawnBundle = www.assetBundle;
+                            AssetBundleManager.setAssetBundle(pawnBundle, crossDomainesafeURL, version);
+                            prefabObjects = pawnBundle.LoadAll(typeof(Pawn));
+                            Debug.Log("MyBundle" + pawnBundle);
+                            inProgress = false;
 
-						GameObject prefab = ((MonoBehaviour)prefabObjects[i]).gameObject;
-						if (!PhotonResourceWrapper.allobject.ContainsKey(prefab.name))
-						{
-							PhotonResourceWrapper.allobject[prefab.name] = prefab;
-						}
-						switch (type)
-						{
-							case AssetBundleType.WEAPON:
-							//Debug.Log(prefab);
-								ItemManager.instance.SetNewWeapon(prefab.GetComponent<BaseWeapon>());
-							break;
-						}
+                            break;
+                        case AssetBundleType.WEAPON:
+                            weaponBundle = www.assetBundle;
+                            prefabObjects = weaponBundle.LoadAll(typeof(BaseWeapon));
+                            AssetBundleManager.setAssetBundle(weaponBundle, crossDomainesafeURL, version);
+                            Debug.Log("MyBundle" + weaponBundle);
+                            inProgress = false;
 
-					}
-                
-                    www.Dispose();
+                            break;
+                        default:
+                            prefabObjects = new UnityEngine.Object[0];
+                            break;
+                    }
+
+                    for (int i = 0; i < prefabObjects.Length; i++)
+                    {
+
+                     
+                        GameObject prefab = ((MonoBehaviour)prefabObjects[i]).gameObject;
+                        Debug.Log(prefab.name);
+                        if (!PhotonResourceWrapper.allobject.ContainsKey(prefab.name))
+                        {
+                            PhotonResourceWrapper.allobject[prefab.name] = prefab;
+                        }
+                        switch (type)
+                        {
+                            case AssetBundleType.WEAPON:
+                                //Debug.Log(prefab);
+                                ItemManager.instance.SetNewWeapon(prefab.GetComponent<BaseWeapon>());
+                                break;
+                        }
+
+                    }
+                }
+                 www.Dispose();
                   
              
             }
            
             inProgress = false;
-            Debug.Log("PrefabManager " + BundleURL + " has been instantiated.");
-            instantiated = true;
+            Debug.Log("PrefabManager " + name + " has been instantiated.");
+         
 					
         }
 		inProgress = false;
 	}
-	public bool IsInCache(name){
+	public bool IsInCache(string name){
 		string crossDomainesafeURL =StatisticHandler.GetNormalURL()+name;
 		return Caching.IsVersionCached(crossDomainesafeURL,version);
 	}

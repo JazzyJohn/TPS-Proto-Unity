@@ -469,6 +469,7 @@ public class ServerHolder : MonoBehaviour
 				Destroy (mainMenu.gameObject);
 				ItemManager.instance.ClearShop();
 				loadingScreen = Instantiate(mainMenu.loadingScreen, Vector3.zero, Quaternion.identity) as GameObject;
+             
 		}
 		
 		yield return new WaitForSeconds(1);
@@ -498,72 +499,90 @@ public class ServerHolder : MonoBehaviour
 
                 //MapLoader + MApUnity load = 2;
 
-                progress.allLoader = 5;
+                progress.allLoader = 4;
                 progress.finishedLoader = 1;
                 progress.curLoader = 0;
                 Debug.Log("Загружаем карту " + mapName);
                 IEnumerator innerCoroutineEnumerator;
                 if (data != null)
                 {
-					bool skipWeapon=false,skipPawn = false;
-					if(IsInCache(data.weaponAsset)){
-						IEnumerator tempEnumerator =loader.DownloadAndCache(data.weaponAsset,AssetBundleType.WEAPON);
-						while (innerCoroutineEnumerator.MoveNext()){
-							yield return innerCoroutineEnumerator.Current;
-						}
-						skipWeapon= true;
-					}
-					if(IsInCache(data.characterAsset)){
-						IEnumerator tempEnumerator =loader.DownloadAndCache(data.characterAsset,AssetBundleType.PAWN);
-						while (innerCoroutineEnumerator.MoveNext()){
-							yield return innerCoroutineEnumerator.Current;
-						}
-						skipPawn = true;
-					}
-                    innerCoroutineEnumerator = loader.Load(mapName, data.version);
-					while (innerCoroutineEnumerator.MoveNext()){
-						yield return innerCoroutineEnumerator.Current;
-					}
-					if(!skipPawn){
-						IEnumerator tempEnumerator =loader.DownloadAndCache(data.characterAsset,AssetBundleType.PAWN);
-						while (innerCoroutineEnumerator.MoveNext()){
-							yield return innerCoroutineEnumerator.Current;
-						}
-					
-					}
-					if(!skipWeapon){
-						IEnumerator tempEnumerator =loader.DownloadAndCache(data.weaponAsset,AssetBundleType.WEAPON);
-						while (innerCoroutineEnumerator.MoveNext()){
-							yield return innerCoroutineEnumerator.Current;
-						}
-					
-					}
+                    bool skipWeapon = false, skipPawn = false;
+                    IEnumerator tempEnumerator;
+                    if (loader.IsInCache(data.weaponAsset))
+                    {
+                        tempEnumerator = loader.DownloadAndCache(data.weaponAsset, AssetBundleType.WEAPON);
+                        while (tempEnumerator.MoveNext())
+                        {
+                            yield return tempEnumerator.Current;
+                        }
+                        progress.finishedLoader++;
+                        skipWeapon = true;
+                    }
+                    if (loader.IsInCache(data.characterAsset))
+                    {
+                         tempEnumerator = loader.DownloadAndCache(data.characterAsset, AssetBundleType.PAWN);
+                        while (tempEnumerator.MoveNext())
+                        {
+                            yield return tempEnumerator.Current;
+                        }
+                        progress.finishedLoader++;
+                        skipPawn = true;
+                    }
+                    
+                    tempEnumerator = loader.Load(mapName, data.version);
+                    while (tempEnumerator.MoveNext())
+                    {
+                        yield return tempEnumerator.Current;
+                    }
+                    progress.finishedLoader++;
+                    if (!skipPawn)
+                    {
+                         tempEnumerator = loader.DownloadAndCache(data.characterAsset, AssetBundleType.PAWN);
+                         while (tempEnumerator.MoveNext())
+                        {
+                            yield return tempEnumerator.Current;
+                        }
+                         progress.finishedLoader++;
+
+                    }
+                    if (!skipWeapon)
+                    {
+                         tempEnumerator = loader.DownloadAndCache(data.weaponAsset, AssetBundleType.WEAPON);
+                         while (tempEnumerator.MoveNext())
+                        {
+                            yield return tempEnumerator.Current;
+                        }
+                         progress.finishedLoader++;
+
+                    }
                 }
                 else
                 {
-                     innerCoroutineEnumerator = loader.Load(mapName);
-					 
-					while (innerCoroutineEnumerator.MoveNext()){
-						yield return innerCoroutineEnumerator.Current;
-					}
+                    innerCoroutineEnumerator = loader.Load(mapName);
 
-			
-					PrefabManager[] managers = FindObjectsOfType<PrefabManager>();
-					progress.allLoader = 2 + managers.Length;
-					Debug.Log("Загрузка завершена.");
+                    while (innerCoroutineEnumerator.MoveNext())
+                    {
+                        yield return innerCoroutineEnumerator.Current;
+                    }
 
-					progress.finishedLoader++;
-					progress.curLoader=0;
-					foreach (PrefabManager manger in managers) {
-							IEnumerator innerPrefabEnum = manger.DownloadAndCache ();
-							while (innerPrefabEnum.MoveNext())
-									yield return innerPrefabEnum.Current;
-							progress.finishedLoader++;
-							progress.curLoader=0;
-					}
+
+                    PrefabManager[] managers = FindObjectsOfType<PrefabManager>();
+                    progress.allLoader = 2 + managers.Length;
+                    Debug.Log("Загрузка завершена.");
+
+                    progress.finishedLoader++;
+                    progress.curLoader = 0;
+                    foreach (PrefabManager manger in managers)
+                    {
+                        IEnumerator innerPrefabEnum = manger.DownloadAndCache();
+                        while (innerPrefabEnum.MoveNext())
+                            yield return innerPrefabEnum.Current;
+                        progress.finishedLoader++;
+                        progress.curLoader = 0;
+                    }
                 }
-          
-	
+
+            }
         ItemManager.instance.ConnectToPrefab();
 
         MapDownloader downloadata = FindObjectOfType<MapDownloader>();

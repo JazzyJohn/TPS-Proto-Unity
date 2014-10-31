@@ -366,7 +366,8 @@ public class SelectPlayerGUI : MonoBehaviour {
     public Transform playerPreView;
     public void LoadFromPrefab(){
 		UnityEngine.Object[] models;
-		if(playerManager!=null){
+        if (playerManager != null && playerManager.bundle!=null)
+        {
 			models = playerManager.bundle.LoadAll(typeof(ModelForGui));
 		}else{
 			MapLoader loader = FindObjectOfType<MapLoader>();
