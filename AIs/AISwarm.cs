@@ -188,10 +188,22 @@ public class AISwarm:MonoBehaviour
             DeActivate();
         }
     }
-
+	Vector3 NormalizePositon( Vector3 position){
+		Collider[] hitColliders = Physics.OverlapSphere(posititon,PlayerManager.instance.radius);
+				
+		Vector3 direction  = Vector3.Zero;		
+		for(Collider col in hitColliders){
+			if(col.transform.root.GetComponent<Pawn>()!=null){
+				direction+= position -col.transform.root.position;
+			}
+		}
+		position +=direction.normalized*PlayerManager.instance.radius;
+		return position;
+	}
     public void SpawnBot(string prefabName, int point, Vector3 position)
     {
 
+		position =NormalizePositon(position);
         GameObject obj = NetworkController.Instance.PawnForSwarmSpawnRequest(prefabName, position, respawns[point].transform.rotation, new int[0], aiGroup, point);
         Pawn pawn = obj.GetComponent<Pawn>();
         pawn.SetTeam(0);
@@ -202,7 +214,7 @@ public class AISwarm:MonoBehaviour
     }
     public void SpawnBot(string prefabName, int point, Vector3 position,int team)
     {
-
+		position =NormalizePositon(position);
         GameObject obj = NetworkController.Instance.PawnForSwarmSpawnRequest(prefabName, position, respawns[point].transform.rotation, new int[0], aiGroup, point, team);
         Pawn pawn = obj.GetComponent<Pawn>();
         pawn.SetTeam(team);

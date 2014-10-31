@@ -30,6 +30,8 @@ public class PlayerManager : MonoBehaviour {
     public float updateTimer = 0.0f;
 	
 	public int maxPawnSend = 5;
+	
+	public float radius = 2.0f;
 
 	
 	public InventoryManager.AmmoBag[] AllTypeInGame;
@@ -64,7 +66,8 @@ public class PlayerManager : MonoBehaviour {
 		Pawn localPlayer;
 		Transform targetPos = GetSpamPosition (team);
 
-
+	
+		
         localPlayer = (Pawn)NetworkController.Instance.PawnSpawnRequest(newPalyerClass, targetPos.position, targetPos.rotation, false, stims,false).GetComponent<Pawn>();
 
 		return localPlayer;
@@ -74,7 +77,7 @@ public class PlayerManager : MonoBehaviour {
     public Pawn SpawmBot(Pawn newPalyerClass, Vector3 position,Quaternion rotation ,int[] stims) {
 		Pawn localPlayer;
 	
-
+	
 		localPlayer =NetworkController.Instance.PawnSpawnRequest(newPalyerClass.name,position,rotation, false, stims,false).GetComponent<Pawn>();
 		
 		return localPlayer;
@@ -88,7 +91,9 @@ public class PlayerManager : MonoBehaviour {
         {
             if (disspamPoints[i].team == 0 || team == disspamPoints[i].team)
             {
-                listDist.Add(disspamPoints[i]);
+			
+				listDist.Add(disspamPoints[i]);
+				
             }
         }
         if (listDist.Count > 0)
@@ -100,7 +105,17 @@ public class PlayerManager : MonoBehaviour {
 		for(int i=0; i<spamPoints.Length;i++){
 			if(spamPoints[i].team==0||team==spamPoints[i].team)
 			{
-				list.Add(spamPoints[i]);
+				Collider[] hitColliders = Physics.OverlapSphere(disspamPoints[i].transform.posititon,radius);
+				bool move = false;
+				
+				for(Collider col in hitColliders){
+					if(col.transform.root.GetComponent<Pawn>()!=null){
+						move= true;
+					}
+				}
+				if(!move||(i==(spamPoints.Length-1)&&list.Count()==0)){
+					list.Add(spamPoints[i]);
+				}
 			}
 		}
 //		Debug.Log ( list.Count);
