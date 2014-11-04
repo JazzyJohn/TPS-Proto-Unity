@@ -775,7 +775,8 @@ public class Player : MonoBehaviour {
 	public void ActivateStimpack(string id){
 		int stimId;
 		if(ItemManager.instance.TryUseStim(id, out stimId)){
-			  activeSteampacks.Add(stimId);
+            AchievementManager.instance.UnEvnetAchive(AchievementManager.PARAM_STIM_PACK,1.0f);
+			activeSteampacks.Add(stimId);
 		}
 	
 	}

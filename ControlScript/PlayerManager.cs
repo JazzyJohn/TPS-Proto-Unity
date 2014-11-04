@@ -105,15 +105,15 @@ public class PlayerManager : MonoBehaviour {
 		for(int i=0; i<spamPoints.Length;i++){
 			if(spamPoints[i].team==0||team==spamPoints[i].team)
 			{
-				Collider[] hitColliders = Physics.OverlapSphere(disspamPoints[i].transform.posititon,radius);
+                Collider[] hitColliders = Physics.OverlapSphere(spamPoints[i].transform.position, radius);
 				bool move = false;
 				
-				for(Collider col in hitColliders){
+				foreach(Collider col in hitColliders){
 					if(col.transform.root.GetComponent<Pawn>()!=null){
 						move= true;
 					}
 				}
-				if(!move||(i==(spamPoints.Length-1)&&list.Count()==0)){
+				if(!move||(i==(spamPoints.Length-1)&&list.Count==0)){
 					list.Add(spamPoints[i]);
 				}
 			}

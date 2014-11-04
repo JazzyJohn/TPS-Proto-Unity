@@ -189,10 +189,10 @@ public class AISwarm:MonoBehaviour
         }
     }
 	Vector3 NormalizePositon( Vector3 position){
-		Collider[] hitColliders = Physics.OverlapSphere(posititon,PlayerManager.instance.radius);
+		Collider[] hitColliders = Physics.OverlapSphere(position,PlayerManager.instance.radius);
 				
-		Vector3 direction  = Vector3.Zero;		
-		for(Collider col in hitColliders){
+		Vector3 direction  = Vector3.zero;		
+		foreach(Collider col in hitColliders){
 			if(col.transform.root.GetComponent<Pawn>()!=null){
 				direction+= position -col.transform.root.position;
 			}

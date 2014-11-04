@@ -2694,6 +2694,7 @@ public class Pawn : DamagebleObject
             //звук прыжка
             sControl.playClip(jumpSound);
         }
+        AchievementManager.instance.UnEvnetAchive(AchievementManager.PARAM_JUMP, 1.0f);
         lastJumpTime = Time.time;
         //photonView.RPC("JumpChange",PhotonTargets.OthersBuffered,true);
     }

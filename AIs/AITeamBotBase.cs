@@ -27,9 +27,10 @@ public class AITeamBotBase : AIBase
 
         public override void EnemyFromSwarm(Pawn enemy)
         {
-		if(enemy.team!=controlledPawn.team){
-			_currentState.EnemyFromSwarm(enemy);
-		}
-   }
+            return;
+		    if(enemy.team!=controlledPawn.team){
+			    _currentState.EnemyFromSwarm(enemy);
+		    }
+        }
 
 }

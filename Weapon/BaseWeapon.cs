@@ -226,7 +226,7 @@ public class BaseWeapon : DestroyableNetworkObject {
 	protected void Start () {
 		aSource = GetComponent<AudioSource> ();
 		sControl = new soundControl (aSource);//создаем обьект контроллера звука
-
+        damageAmount.shootWeapon = SQLId;
 		//проверяем длительности звуков стрельбы и перезарядки
 		if (fireSound!=null&&fireSound.length >= fireInterval) {
 			//Debug.LogWarning("fireSound clip length is greater than fireIntrval value");

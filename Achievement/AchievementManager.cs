@@ -36,20 +36,23 @@ public class Achievement{
 	}
 		
 }
-public class AchievementManager : MonoBehaviour, LocalPlayerListener{
+public class AchievementManager : MonoBehaviour, LocalPlayerListener, GameListener{
 	//Its here because it's clearly parse params and this calss for parse www data
-	public const string PARAM_DEATH = "Death";
-	public const string PARAM_DEATH_AI = "DeathAI";
-	public const string PARAM_KILL = "Kill";
-	public const string PARAM_KILL_AI= "KillAI";
-	public const string PARAM_DOUBLE_JUMP= "DoubeJump";
-	public const string PARAM_WALL_RUN= "WallRun";
-	public const string PARAM_RELOAD="Reload";
-	public const string PARAM_KILL_FRIEND = "KillFriend";
-	public const string PARAM_KILL_BY_FRIEND= "KilledByFriend"; 
-	public const string PARAM_ROOM_FINISHED = "RoomFinished";
-    public const string PARAM_HEAD_SHOOT= "HeadStoot";
-    public const string PARAM_HEAD_SHOOT_AI = "HeadStootAI";
+	public static string PARAM_DEATH = "Death";
+    public static string PARAM_DEATH_AI = "DeathAI";
+    public static string PARAM_KILL = "Kill";
+    public static string PARAM_KILL_AI = "KillAi";
+    public static string PARAM_DOUBLE_JUMP = "DoubeJump";
+    public static string PARAM_JUMP = "Jump";
+    public static string PARAM_WALL_RUN = "WallRun";
+    public static string PARAM_RELOAD = "Reload";
+    public static string PARAM_KILL_FRIEND = "KillFriend";
+    public static string PARAM_KILL_BY_FRIEND = "KilledByFriend";
+    public static string PARAM_ROOM_FINISHED = "RoomFinished";
+    public static string PARAM_HEAD_SHOOT = "HeadShoot";
+    public static string PARAM_HEAD_SHOOT_AI = "HeadShootAI";
+    public static string PARAM_WIN = "Win";
+    public static string PARAM_STIM_PACK = "StimPack";
 	struct IncomingMessage{
 		public string param;
 		public float delta;
@@ -168,7 +171,7 @@ public class AchievementManager : MonoBehaviour, LocalPlayerListener{
 								foreach (Achievement achiv in ongoingAchivment) {
                                
 										if (achiv.achivParams.ContainsKey (mess.param)) {
-					
+                                            Debug.Log(mess.param + "  " + mess.delta + "  " + achiv.achivParams[mess.param].current);
 												achiv.achivParams [mess.param].current += mess.delta;
 										}
 										foreach(AchievementParam param in achiv.achivParams.Values ) {
@@ -181,6 +184,7 @@ public class AchievementManager : MonoBehaviour, LocalPlayerListener{
 						}
 						ongoingAchivment.ForEach (delegate(Achievement obj) {
 								if (obj.CheckDone ()) {
+                                    Debug.Log(obj.description);
 										outcomeQueue.Enqueue (obj);
 										
 								}
@@ -212,7 +216,7 @@ public class AchievementManager : MonoBehaviour, LocalPlayerListener{
 	IEnumerator SendAchive(WWWForm form){
         WWW w = StatisticHandler.GetMeRightWWW(form, StatisticHandler.SAVE_ACHIVE);
 		yield return w;
-		
+        Debug.Log(w.text);
 		XmlDocument xmlDoc = new XmlDocument();
 		xmlDoc.LoadXml(w.text);
 		
@@ -306,6 +310,11 @@ public class AchievementManager : MonoBehaviour, LocalPlayerListener{
 			mess.param =PARAM_DEATH_AI;
 		
 			incomeQueue.Enqueue(mess);
+            mess = new IncomingMessage();
+            mess.delta = 1.0f;
+            mess.param = PARAM_DEATH;
+
+            incomeQueue.Enqueue(mess);
 		}
 	}
     public void EventPawnKillPlayer(Player target, KillInfo killinfo)
@@ -437,4 +446,18 @@ public class AchievementManager : MonoBehaviour, LocalPlayerListener{
 		mess.param =key;
 		incomeQueue.Enqueue(mess);
 	}
+
+    public void EventStart() { }
+    public void EventTeamWin(int teamNumber) {
+        if (teamNumber == myPlayer.team)
+        {
+
+            IncomingMessage mess = new IncomingMessage();
+			mess.delta=1.0f;
+            mess.param = PARAM_WIN;
+			incomeQueue.Enqueue(mess);
+        }
+    }
+    public void EventRestart() { }
+    
 }
