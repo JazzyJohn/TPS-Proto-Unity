@@ -18,7 +18,7 @@ public class Achievement{
 	public Dictionary<string,AchievementParam> achivParams = new Dictionary<string, AchievementParam>();
 	public String name;
 	public String description;
-	public int achievementId;
+  	public int achievementId;
 	public Texture2D textureIcon;
 	public bool isDone = false;
 	public int amount  =0;
@@ -34,7 +34,19 @@ public class Achievement{
 		isDone = lIsDone;
 		return isDone;
 	}
-		
+
+
+    public string GetProgress()
+    {
+        float cnt=0.0f,max=0.0f;
+        foreach (KeyValuePair<string, AchievementParam> entry in achivParams)
+        {
+            cnt += entry.Value.current;
+            max += entry.Value.needed;
+
+        }
+        return cnt.ToString("0") +"/"+max.ToString("0");
+    }
 }
 public class AchievementManager : MonoBehaviour, LocalPlayerListener, GameListener{
 	//Its here because it's clearly parse params and this calss for parse www data
@@ -99,7 +111,7 @@ public class AchievementManager : MonoBehaviour, LocalPlayerListener, GameListen
 	protected IEnumerator ParseList(string XML){
 		XmlDocument xmlDoc = new XmlDocument();
 		xmlDoc.LoadXml(XML);
-//        Debug.Log(XML);
+       Debug.Log(XML);
 		ongoingAchivment= new List<Achievement>();
 		finishedAchivment= new List<Achievement>();
 		daylyFinished =bool.Parse(xmlDoc.SelectSingleNode("achivements/daylyfinish").InnerText);
@@ -107,7 +119,7 @@ public class AchievementManager : MonoBehaviour, LocalPlayerListener, GameListen
 			Achievement achivment = new Achievement();
 			achivment.name = node.SelectSingleNode("name").InnerText;
 			achivment.description = node.SelectSingleNode("description").InnerText;
-
+           
 			achivment.achievementId = int.Parse(node.SelectSingleNode("id").InnerText);
 			WWW www = StatisticHandler.GetMeRightWWW( node.SelectSingleNode ("icon").InnerText);
 		
@@ -125,19 +137,17 @@ public class AchievementManager : MonoBehaviour, LocalPlayerListener, GameListen
 				achivment.amount  =int.Parse(node.SelectSingleNode("amount").InnerText);
 //			Debug.Log("ACHIVMENT " +achivment);
 			bool open = bool.Parse(node.SelectSingleNode("open").InnerText);
-			achivment.isMultiplie = bool.Parse(node.SelectSingleNode("multiplie").InnerText);
+            achivment.isDone = open;
+            achivment.isMultiplie = bool.Parse(node.SelectSingleNode("multiplie").InnerText);
 			//Debug.Log(open);
-			if(!open){
-				ongoingAchivment.Add(achivment);
-			}else{
+            ongoingAchivment.Add(achivment);
+			if(open){
 
                 if (achivment.isMultiplie)
                 {
 					bool ready = bool.Parse(node.SelectSingleNode("ready").InnerText);
-					if(ready){
-						ongoingAchivment.Add(achivment);
-					}else{
-						finishedAchivment.Add(achivment);
+					if(!ready){
+					    finishedAchivment.Add(achivment);
 					}
 				}else{
 					finishedAchivment.Add(achivment);
@@ -169,9 +179,12 @@ public class AchievementManager : MonoBehaviour, LocalPlayerListener, GameListen
 								IncomingMessage mess = incomeQueue.Dequeue ();
                                 //Debug.Log(mess.param);
 								foreach (Achievement achiv in ongoingAchivment) {
-                               
+                                        if (achiv.isDone)
+                                        {
+                                            continue;
+                                        }
 										if (achiv.achivParams.ContainsKey (mess.param)) {
-                                            Debug.Log(mess.param + "  " + mess.delta + "  " + achiv.achivParams[mess.param].current);
+                                            //Debug.Log(mess.param + "  " + mess.delta + "  " + achiv.achivParams[mess.param].current);
 												achiv.achivParams [mess.param].current += mess.delta;
 										}
 										foreach(AchievementParam param in achiv.achivParams.Values ) {
@@ -189,11 +202,7 @@ public class AchievementManager : MonoBehaviour, LocalPlayerListener, GameListen
 										
 								}
 						});
-					
-						ongoingAchivment.RemoveAll (delegate(Achievement achv) {
-								
-								return achv.isDone;
-						});
+
 						//	
 					
 						Thread.Sleep (1000);
@@ -250,6 +259,20 @@ public class AchievementManager : MonoBehaviour, LocalPlayerListener, GameListen
 	
 		return finishedAchivment;
 	}
+
+    public List<Achievement> GetDaylics()
+    {
+        List<Achievement> list = new List<Achievement>();
+        for (int i = 0; i < ongoingAchivment.Count; i++)
+        {
+          //  Debug.Log(ongoingAchivment[i].name +"  " + ongoingAchivment[i].isMultiplie);
+            if (ongoingAchivment[i].isMultiplie)
+            {
+                list.Add(ongoingAchivment[i]);
+            }
+        }
+        return list;
+    }
 
 	private static AchievementManager s_Instance = null;
 	

@@ -36,6 +36,10 @@ public class Statistic : MonoBehaviour {
 
 	public ClassStat[] ClassStats;
 
+    public AchievementUI[] achievements;
+
+    public string achievementOpenSprite;
+
 	private float timer;
 
 	TeamSlot[] RedTeamlPlayer = new TeamSlot[12];
@@ -278,11 +282,36 @@ public class Statistic : MonoBehaviour {
 	public void Activate(){
 		MainPanel.alpha = 1.0f;
 		active = true;
+        AquierAchievement();
 	}
 	public void DeActivate(){
 		MainPanel.alpha = 0.0f;
 		active = false;
 	}
+    public void AquierAchievement()
+    {
+        List<Achievement> list = AchievementManager.instance.GetDaylics();
+        for (int i =0; i< achievements.Length;i++)
+        {
+            AchievementUI ui = achievements[i];
+            if (list.Count <= i)
+            {
+                ui.main.alpha = 0.0f;
+                break;
+            }
+            else
+            {
+                ui.main.alpha = 1.0f;
+            }
+            Achievement ach  = list[i];
+            if (ach.isDone)
+            {
+                ui.finished.spriteName = achievementOpenSprite;
+            }
+            ui.name.text = ach.description;
+            ui.progress.text = ach.GetProgress();
+        }
+    }
 }
 
 [System.Serializable]
@@ -291,4 +320,14 @@ public class ClassStat
 	public string NameClass;
 	public UILabel Lvl;
 	public UIProgressBar Progress;
+}
+
+[System.Serializable]
+public class AchievementUI
+{
+    public UILabel name;
+    public UILabel progress;
+    public UISprite finished;
+    public UIWidget main;
+
 }

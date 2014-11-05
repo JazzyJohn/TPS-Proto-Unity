@@ -50,6 +50,7 @@ public class ShopGUI : MonoBehaviour {
 			MainMenu.HideAllPanel();
 			HideAllPanel();
 			Shop.alpha = 1f;
+            Invoke("ReSIZE", 0.1f);
 		}
       
 	}

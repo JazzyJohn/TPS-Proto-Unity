@@ -482,7 +482,7 @@ public class Player : MonoBehaviour {
 		}
 	}
 
-    public void PawnKill(Pawn deadPawn,Player victim, Vector3 position, KillInfo killinfo)
+    public virtual void PawnKill(Pawn deadPawn,Player victim, Vector3 position, KillInfo killinfo)
     {
 		if (!playerView.isMine)
         {
