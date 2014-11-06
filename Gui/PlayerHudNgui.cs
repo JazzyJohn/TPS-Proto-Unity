@@ -74,6 +74,8 @@ public class PlayerHudNgui : MonoBehaviour {
 		
 		public int priority;
 		
+		public AudioClip sound;
+		
 	}
     public OneAnnonce[] annonceSprites;
 	
@@ -90,6 +92,8 @@ public class PlayerHudNgui : MonoBehaviour {
     public string[] additionalSprites;
 
     public UISprite annonceAddSprite;
+			
+	public AudioSource annoncePlayer;
 	
 	public UILabel tutorialText;
 	
@@ -138,6 +142,9 @@ public class PlayerHudNgui : MonoBehaviour {
 
         StartCoroutine(LateFrameResize());
     }
+	public void Start(){
+		annoncePlayer.loop = false;
+	}
     void Update()
     {
         PlayerMainGui.GameStats gamestats = GameRule.instance.GetStats();
@@ -229,8 +236,14 @@ public class PlayerHudNgui : MonoBehaviour {
             Debug.Log(TextGenerator.instance.GetMainAnnonceText(type));
             annonceName.text = TextGenerator.instance.GetMainAnnonceText(type);
 		}
-        annonceTweener.tweenFactor = 0.0f;
-        annonceTweener.PlayForward();
+		if( annonce.spriteName !=""){
+			annonceTweener.tweenFactor = 0.0f;
+			annonceTweener.PlayForward();
+		}
+		if(annonceSprites[curAnnonce].sound!=null){
+			annoncePlayer.clip = annonceSprites[curAnnonce].sound;	
+			annoncePlayer.Play();
+		}
 
     }
 	public void AddMoneyMessage(string text){

@@ -183,6 +183,13 @@ public class ItemManager : MonoBehaviour {
     public static string normalRepairId = "22";
     public static string maximumRepairId = "23";
 
+	//blocks 
+	
+	public bool buyBlock = false;
+	public bool useBlock = false;
+	public bool repairBlock= false;
+	public bool desintegrateBlock = false;
+	
 
 	//PLAYER ITEM SECTION
 	public BaseWeapon[] weaponPrefabsListbyId;
@@ -973,7 +980,12 @@ public class ItemManager : MonoBehaviour {
 		
 		}
 	}
+	
 	public IEnumerator BuyItem(string itemId,LotItemGUI gui){
+		if(buyBlock){
+			yield break;		
+		}
+		buyBlock= true;
 		WWWForm form = new WWWForm ();
 			
 		form.AddField ("uid", UID);
@@ -1018,9 +1030,16 @@ public class ItemManager : MonoBehaviour {
                 gui.SetError(xmlDoc.SelectSingleNode("result/errortext").InnerText);
             }
         }
+		buyBlock =false;
 	}
+	
+	
     public IEnumerator UseItem(string[] itemId)
     {
+		if(useBlock){
+			  yield break;
+		}
+		useBlock= true;
         WWWForm form = new WWWForm();
         
         form.AddField("uid", UID);
@@ -1035,10 +1054,10 @@ public class ItemManager : MonoBehaviour {
         {
             yield return numenator.Current;
         }
-
+		useBlock= false;
     }
 	public bool TryUseStim(string itemId, out int id){
-	
+		
 		id =allitems[itemId].ingamekey;
         //Debug.Log("use");
 		if(!stimPackDictionary[id].active){
@@ -1050,11 +1069,15 @@ public class ItemManager : MonoBehaviour {
 		
 	}
 	public void UseRepairKit(string itemId,string kit_id,InventoryGUI gui){
+		if(repairBlock){
+			return;
+		}
         StartCoroutine(_UseRepairKit(itemId, kit_id, gui));
 	
 	}
 	
 	IEnumerator _UseRepairKit(string id,string kit_id,InventoryGUI gui){
+		repairBlock= true;
 		WWWForm form = new WWWForm();
         
         form.AddField("uid", UID);
@@ -1082,14 +1105,19 @@ public class ItemManager : MonoBehaviour {
         {
             gui.SetMessage(xmlDoc.SelectSingleNode("result/errortext").InnerText);
         }
+		repairBlock= false;
 	}
 
     public void DesintegrateItem(string id, InventoryGUI gui)
     {
+		if(desintegrateBlock){
+			return;
+		}
         StartCoroutine(_DesintegrateItem(id, gui));
 	}
     IEnumerator _DesintegrateItem(string id, InventoryGUI gui)
     {
+		desintegrateBlock= true;
 		WWWForm form = new WWWForm();
         
         form.AddField("uid", UID);
@@ -1118,6 +1146,7 @@ public class ItemManager : MonoBehaviour {
         {
             gui.SetMessage(xmlDoc.SelectSingleNode("result/errortext").InnerText);
         }
+		desintegrateBlock= false;
 	}
 	public List<CharacteristicToAdd> GetBuff(int id){
 		if(allBuff.ContainsKey(id)){
