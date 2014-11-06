@@ -22,7 +22,12 @@ public class PVPGameRule : GameRule {
 			
             Annonce();
             base.Update();
-				
+            #if UNITY_EDITOR
+                        if (Input.GetKeyDown(KeyCode.L))
+                        {
+                            GameEnded();
+                        }
+            #endif
 		}
 
       

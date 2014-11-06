@@ -52,12 +52,7 @@ public class GameRule : MonoBehaviour {
             restartTimer += Time.deltaTime;
         }
 
-    #if UNITY_EDITOR
-        if (Input.GetKeyDown(KeyCode.L))
-        {
-            isGameEnded = true;
-        }
-    #endif
+  
 	}
 
     // s_Instance is used to cache the instance found in the scene so we don't have to look it up every time.
