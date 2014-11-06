@@ -43,6 +43,39 @@ public class  RewardManager : MonoBehaviour, LocalPlayerListener,GameListener{
 
     private Dictionary<string, MoneyReward> rewardMoneyDictionary = new Dictionary<string, MoneyReward>();
 
+    public List<RewardGUI> GetAllReward()
+    {
+        List<RewardGUI> answer = new List<RewardGUI>();
+        foreach (KeyValuePair<string, MoneyReward> entry in rewardMoneyDictionary)
+        {
+            if (entry.Value.GetRewardCounter() > 0)
+            {
+                if (entry.Value.cash > 0)
+                {
+                    RewardGUI reward = new RewardGUI();
+                    reward.count = entry.Value.GetRewardCounter();
+
+                    reward.amount = reward.count * entry.Value.cash;
+                    reward.text = TextGenerator.instance.GetSimpleText(entry.Key);
+                    reward.isCash = true;
+                    answer.Add(reward);
+                }
+                if (entry.Value.gold>0){
+                     RewardGUI reward = new RewardGUI();
+                    reward.count = entry.Value.GetRewardCounter();
+
+                    reward.amount = reward.count * entry.Value.cash;
+                    reward.text = TextGenerator.instance.GetSimpleText(entry.Key);
+                    reward.isCash = false;
+                    answer.Add(reward);
+                }
+                entry.Value.Reset();
+            }
+        }
+        return answer;
+    }
+
+
     private string UID;
 	public void Init(string uid){
 		EventHolder.instance.Bind (this);
@@ -83,7 +116,10 @@ public class  RewardManager : MonoBehaviour, LocalPlayerListener,GameListener{
         if(rewardMoneyDictionary.ContainsKey(reason)){
 	    	upCash+= rewardMoneyDictionary[reason].cash;
 			upGold+= rewardMoneyDictionary[reason].gold;
-			rewardMoneyDictionary[reason].Increment();
+            if (rewardMoneyDictionary[reason].cash != 0 || rewardMoneyDictionary[reason].gold != 0)
+            {
+                rewardMoneyDictionary[reason].Increment();
+            }
         }
         if (PlayerMainGui.instance != null)
         {
@@ -197,5 +233,32 @@ public class  RewardManager : MonoBehaviour, LocalPlayerListener,GameListener{
         UpMoney(PARAM_ROOM_FINISHED);	
 
     }
-	
+
+    private static RewardManager s_Instance = null;
+
+    public static RewardManager instance
+    {
+        get
+        {
+            if (s_Instance == null)
+            {
+                //Debug.Log ("FIND");
+                // This is where the magic happens.
+                //  FindObjectOfType(...) returns the first AManager object in the scene.
+                s_Instance = FindObjectOfType(typeof(RewardManager)) as RewardManager;
+            }
+
+
+            // If it is still null, create a new instance
+            if (s_Instance == null)
+            {
+                //	Debug.Log ("CREATE");
+                GameObject obj = new GameObject("RewardManager");
+                s_Instance = obj.AddComponent(typeof(RewardManager)) as RewardManager;
+
+            }
+
+            return s_Instance;
+        }
+    }
 }

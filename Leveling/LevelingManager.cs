@@ -65,7 +65,25 @@ public class LevelingManager : MonoBehaviour, LocalPlayerListener,GameListener{
 		}
 	}
     Dictionary<string, ExpReward> expDictionary = new Dictionary<string, ExpReward>();
-	
+
+    public List<RewardGUI>  GetAllReward()
+    {
+         List<RewardGUI> answer = new List<RewardGUI>();
+         foreach (KeyValuePair<string, ExpReward> entry in expDictionary)
+         {
+             if (entry.Value.GetRewardCounter() > 0)
+             {
+                 RewardGUI reward = new RewardGUI();
+                 reward.count = entry.Value.GetRewardCounter();
+                 entry.Value.Reset();
+                 reward.amount = reward.count * entry.Value.amount;
+                 reward.text = TextGenerator.instance.GetSimpleText(entry.Key);
+
+                 answer.Add(reward);
+             }
+         }
+         return answer;
+    }
 
 	public void Init(string uid){
 		EventHolder.instance.Bind (this);
@@ -143,6 +161,10 @@ public class LevelingManager : MonoBehaviour, LocalPlayerListener,GameListener{
             return false ;
         }
 		int exp = expDictionary[cause].amount;
+        if (exp == 0)
+        {
+            return false;
+        }
 		expDictionary[cause].Increment();
 		bool sendByLvl=false;
 		//Check if we on max lvl

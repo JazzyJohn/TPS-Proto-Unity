@@ -279,7 +279,7 @@ public class Statistic : MonoBehaviour {
             }
         }
 	}
-	public void Activate(){
+	public virtual void Activate(){
 		MainPanel.alpha = 1.0f;
 		active = true;
         AquierAchievement();

@@ -131,6 +131,7 @@ public class PlayerMainGui : MonoBehaviour {
 
 	private PlayerHudNgui hud;
 
+    public GameFinished finished;
 	private ChatHolder[] chats;
 
 	public static bool IsMouseAV;
@@ -138,7 +139,7 @@ public class PlayerMainGui : MonoBehaviour {
 
 	
 
-	Statistic stat;
+	public Statistic stat;
 	// Use this for initialization
 	void Start () {
 		MainCamera = Camera.main;
@@ -161,10 +162,22 @@ public class PlayerMainGui : MonoBehaviour {
 		foreach (ChatHolder holder in chats) {
 			holder.SetPlayer(newPlayer);	
 		}
-
-		stat =  Transform.FindObjectOfType<Statistic>(); //Статистика (+)
-        stat.SetLocalPalyer(newPlayer);
-
+      
+            Statistic[] statistics  =Transform.FindObjectsOfType<Statistic>(); //Статистика (+)
+            foreach(Statistic tempStat in statistics){
+                GameFinished  tempFinished = tempStat as GameFinished;
+                if (tempFinished == null)
+                {
+                    stat = tempStat;
+                    stat.SetLocalPlayer(newPlayer);
+                }else{
+                    finished = tempFinished;
+                    finished.SetLocalPlayer(newPlayer);
+                }
+            }
+          
+        
+      
 		hud = Transform.FindObjectOfType<PlayerHudNgui> ();
 		hud.SetLocalPlayer(LocalPlayer);
 		respawnMenu = Transform.FindObjectOfType<SelectPlayerGUI>();
@@ -251,6 +264,7 @@ public class PlayerMainGui : MonoBehaviour {
                 stat.DeActivate();
                 respawnMenu.DeActivate();
                 hud.Activate();
+                finished.DeActivate();
                 break;
             case GUIState.Respawn:
                 hud._DeadGUI.DeActivate();
@@ -258,12 +272,14 @@ public class PlayerMainGui : MonoBehaviour {
                 stat.DeActivate();
                 hud.DeActivate();
                 respawnMenu.Activate();
+                finished.DeActivate();
                 break;
             case GUIState.Playerlist:
                 hud._DeadGUI.DeActivate();
                 pausegui.BackToGame();
                 hud.DeActivate();
                 respawnMenu.DeActivate();
+                finished.DeActivate();
                 stat.Activate();
                 break;
             case GUIState.KillCam:
@@ -271,6 +287,7 @@ public class PlayerMainGui : MonoBehaviour {
                 pausegui.BackToGame();
                 stat.DeActivate();
                 respawnMenu.DeActivate();
+                finished.DeActivate();
                 hud.DeActivate();
                 break;
             case GUIState.GameResult:
@@ -279,12 +296,14 @@ public class PlayerMainGui : MonoBehaviour {
                 stat.DeActivate();
                 respawnMenu.DeActivate();
                 hud.DeActivate();
+                finished.Activate();
                 break;
             case GUIState.Pause:
                 hud._DeadGUI.DeActivate();
                 stat.DeActivate();
                 respawnMenu.DeActivate();
                 hud.DeActivate();
+                finished.DeActivate();
                 pausegui.ActivateMenu();
                 break;
             
@@ -334,6 +353,7 @@ public class PlayerMainGui : MonoBehaviour {
 					
 					break;
 				case GUIState.GameResult:
+                    Screen.lockCursor = false;
 					GameResult();
 					
 					break;
@@ -503,22 +523,7 @@ public class PlayerMainGui : MonoBehaviour {
 		
 	}
 	void GameResult(){
-		float screenX = Screen.width, screenY = Screen.height;
-		float TimerLabel = screenX / 4;
-		Rect crosrect = new Rect ((screenX - TimerLabel) / 2, (screenY - TimerLabel) / 2, TimerLabel, TimerLabel);
-        GUI.Label(crosrect, "WINNER: " + FormTeamName(  GameRule.instance.Winner()) + "");
-		crosrect = new Rect ((screenX - TimerLabel) / 2, (screenY - TimerLabel) / 2 +TimerLabel, TimerLabel, TimerLabel);
-        float restart = GameRule.instance.GetRestartTimer();
-        if (restart < 0)
-        {
-            GUI.Label(crosrect, "Prepare for loading");
-
-        }
-        else
-        {
-            GUI.Label(crosrect, "NEXT ROUND IN  " + GameRule.instance.GetRestartTimer().ToString("0.0") + " sec.");
-        }
-        
+		
 	}
 	void MainHud(){
 		float screenX = Screen.width, screenY = Screen.height;

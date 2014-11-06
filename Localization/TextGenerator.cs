@@ -19,6 +19,8 @@ public class TextGenerator : MonoBehaviour{
 	}
 	
 	private  Dictionary<string, string>  moneyTexts = new Dictionary<string, string>();
+
+    private Dictionary<string, string> simpleText = new Dictionary<string, string>();
 	
 	private  Dictionary<string, string>  lvlTexts = new Dictionary<string, string>();
 
@@ -34,6 +36,11 @@ public class TextGenerator : MonoBehaviour{
            // Debug.Log(node.SelectSingleNode("name").InnerText + node.SelectSingleNode("text").InnerText);
             moneyTexts.Add(node.SelectSingleNode("name").InnerText, node.SelectSingleNode("text").InnerText);
 		}
+        foreach (XmlNode node in xmlDoc.SelectNodes("texts/simpletexts/oneentry"))
+        {
+            // Debug.Log(node.SelectSingleNode("name").InnerText + node.SelectSingleNode("text").InnerText);
+            simpleText.Add(node.SelectSingleNode("name").InnerText, node.SelectSingleNode("text").InnerText);
+        }
         foreach (XmlNode node in xmlDoc.SelectNodes("texts/lvltexts/oneentry"))
         {
          //   Debug.Log(node.SelectSingleNode("name").InnerText + node.SelectSingleNode("text").InnerText);
@@ -90,7 +97,18 @@ public class TextGenerator : MonoBehaviour{
 		}
 		return String.Format(result,text);
 	}
-	
+    public string GetSimpleText(string text)
+    {
+
+        if (simpleText.ContainsKey(text))
+        {
+            return simpleText[text];
+        }
+        else
+        {
+            return text;
+        }
+    }
 
 	private static TextGenerator s_Instance = null;
 	
