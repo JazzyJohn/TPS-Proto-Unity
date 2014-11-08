@@ -62,11 +62,18 @@ public class InputManager{
 	}
     public bool GetButton(string name)
     {
+        if (!keyMap.ContainsKey(name))
+        {
+            return false;
+        }
         return Input.GetKey(keyMap[name]);
 		
 	}
 	public  bool GetButtonUp(string name){
-     
+        if (!keyMap.ContainsKey(name))
+        {
+            return false;
+        }
 		return Input.GetKeyUp(keyMap[name]);
 		
 	}
@@ -74,6 +81,10 @@ public class InputManager{
 
     public bool GetButtonDown(string name)
     {
+        if (!keyMap.ContainsKey(name))
+        {
+            return false;
+        }
 		return Input.GetKeyDown(keyMap[name]);
 		
 	}

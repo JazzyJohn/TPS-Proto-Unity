@@ -156,15 +156,8 @@ public class MainMenuGUI : MonoBehaviour {
 				_RoomsNgui.Loading.alpha = 1f;
 				_PanelsNgui.SliderPanel.alpha = 1f;
 			}else{
-				
-				if (_RoomsNgui.CreateRoom.alpha >0f) {
-					HideAllPanel();
-					_PanelsNgui.SliderPanel.alpha= 1f;
-				} else {
-					HideAllPanel();
-					_RoomsNgui.CreateRoom.alpha = 1f;
-				}
-				_RoomsNgui.NameNewRoom.value = Server.newRoomName;
+
+                Server.CreateNewRoom();
 			}
 			
 			

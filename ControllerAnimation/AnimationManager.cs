@@ -296,6 +296,8 @@ public class AnimationManager : MonoBehaviour
 
 	public void StartDeath(AnimDirection direction){
         SetNotMainLayer(0.0f);
+
+        Debug.Log("StartDeath");
         isDead = true;
       // Debug.Log(direction);
         IKOff();
@@ -343,9 +345,11 @@ public class AnimationManager : MonoBehaviour
         animator.SetBool(animName,false);
 	}
     public void KnockOut() {
+        Debug.Log("KnockOut");
         DollOn();
     }
     public void DollOn(){
+        Debug.Log("DROPDEAD");
         aimPos.IKShutDown();
          animator.enabled = false;
          if (raggdollRoot != null)

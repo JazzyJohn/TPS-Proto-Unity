@@ -18,6 +18,8 @@ public class DetailItemGUI : MonoBehaviour
     [HideInInspector]
     public int numToItem;
 
+    public CharSection weaponSection;
+
     // Use this for initialization
     void Start()
     {
@@ -72,6 +74,21 @@ public class DetailItemGUI : MonoBehaviour
         else
         {
             raspil.alpha = 1.0f;
+        }
+        ItemManager.instance.LoadModel(item);
+        if (item.type == ShopSlotType.WEAPON)
+        {
+            weaponSection.widget.alpha = 1.0f;
+            weaponSection.magazine.text = item.chars.magazine.ToString();
+            weaponSection.dmg.value = item.chars.dmg;
+            weaponSection.aim.value = item.chars.aim;
+            weaponSection.reload.value = item.chars.reload;
+            weaponSection.speed.value = item.chars.speed;
+            weaponSection.mode.text = TextGenerator.instance.GetSimpleText(item.chars.gunMode);
+        }
+        else
+        {
+            weaponSection.widget.alpha = 0.0f;
         }
     }
   

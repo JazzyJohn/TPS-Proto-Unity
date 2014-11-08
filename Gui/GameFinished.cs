@@ -35,7 +35,7 @@ public class GameFinished : Statistic
 
     public UIPanel moneyScroll;
 
-    public UILabel timer;
+    public UILabel timerRestart;
 
     public UILabel winner;
 
@@ -58,12 +58,12 @@ public class GameFinished : Statistic
         float restart = GameRule.instance.GetRestartTimer();
         if (restart < 0)
         {
-                timer.text = TextGenerator.instance.GetSimpleText("Loading");
+            timerRestart.text = TextGenerator.instance.GetSimpleText("Loading");
 
         }
         else
         {
-            timer.text = TextGenerator.instance.GetSimpleText("NextRound") +GameRule.instance.GetRestartTimer().ToString("0.0");
+            timerRestart.text = TextGenerator.instance.GetSimpleText("NextRound") + GameRule.instance.GetRestartTimer().ToString("0.0");
         }
 
         

@@ -36,12 +36,16 @@ public class ShopItemGUI : MonoBehaviour {
     {
         item = _item;
         Name.text = item.name;
-		if( item.cashCost ==0){
-			
-			PriceKPBox.alpha = 0.0f;
-		}
-        PriceKP.text = TextGenerator.instance.GetSimpleText("KP") + ": " + item.cashCost;
-        PriceGITP.text = TextGenerator.instance.GetSimpleText("GITP") + ": " + item.goldCost; 
+        if (PriceKP != null)
+        {
+            if (item.cashCost == 0)
+            {
+
+                PriceKPBox.alpha = 0.0f;
+            }
+            PriceKP.text = TextGenerator.instance.GetSimpleText("KP") + ": " + item.cashCost;
+            PriceGITP.text = TextGenerator.instance.GetSimpleText("GITP") + ": " + item.goldCost;
+        }
        
         Description.text = item.description;
         Texture.mainTexture = null;

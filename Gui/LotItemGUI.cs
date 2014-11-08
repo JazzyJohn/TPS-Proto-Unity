@@ -5,6 +5,8 @@ public class LotItemGUI : MonoBehaviour
 {
 
 
+    public CharSection weaponSection;
+
     public ShopGUI Shop;
     public ShopSlot item;
     public UILabel Name;
@@ -20,6 +22,7 @@ public class LotItemGUI : MonoBehaviour
     [HideInInspector]
     public int numToItem;
 
+  
     // Use this for initialization
     void Start()
     {
@@ -66,6 +69,20 @@ public class LotItemGUI : MonoBehaviour
         }
         gunModel = null;
         ItemManager.instance.LoadModel(item);
+        if (item.type == ShopSlotType.WEAPON)
+        {
+            weaponSection.widget.alpha = 1.0f;
+            weaponSection.magazine.text = item.chars.magazine.ToString();
+            weaponSection.dmg.value = item.chars.dmg;
+            weaponSection.aim.value = item.chars.aim;
+            weaponSection.reload.value = item.chars.reload;
+            weaponSection.speed.value = item.chars.speed;
+            weaponSection.mode.text = TextGenerator.instance.GetSimpleText(item.chars.gunMode);
+        }
+        else
+        {
+            weaponSection.widget.alpha = 0.0f;
+        }
         loading.alpha = 1.0f;
     }
     public void KPBuy()
@@ -84,4 +101,15 @@ public class LotItemGUI : MonoBehaviour
         tweener.tweenFactor = 0.0f;
         tweener.PlayForward();
     }
+}
+[System.Serializable]
+public class CharSection
+{
+    public UIWidget widget;
+    public UILabel mode;
+    public UILabel magazine;
+    public UIProgressBar dmg;
+    public UIProgressBar aim;
+    public UIProgressBar speed;
+    public UIProgressBar reload;
 }

@@ -117,8 +117,24 @@ public class ShopSlot : SimpleSlot{
     public int cashCost;
 
     public int goldCost;
+   
+	public WeaponChar chars;
 	
-	
+}
+
+public class WeaponChar {
+    public string gunMode;
+
+    public float aim;
+
+    public float dmg;
+
+    public float speed;
+
+    public int magazine;
+
+    public float reload;
+
 }
 public class SmallShopData{
 
@@ -155,6 +171,8 @@ public class InventorySlot  : SimpleSlot{
    public int gameType;
    
    public int group;
+
+   public WeaponChar chars;
    
  }
 public class StimPack{
@@ -730,6 +748,19 @@ public class ItemManager : MonoBehaviour {
             if (slot.cashCost != 0)
             {
                 slot.cashSlot = node.SelectSingleNode("kp_shop_id").InnerText;
+                
+            }
+            switch (slot.type)
+            {
+                case ShopSlotType.WEAPON:
+                    slot.chars = new WeaponChar();
+                    slot.chars.aim = float.Parse(node.SelectSingleNode("aim").InnerText);
+                    slot.chars.dmg = float.Parse(node.SelectSingleNode("damage").InnerText);
+                    slot.chars.speed = float.Parse(node.SelectSingleNode("speed").InnerText);
+                    slot.chars.reload = float.Parse(node.SelectSingleNode("reload").InnerText);
+                    slot.chars.magazine = int.Parse(node.SelectSingleNode("magazine").InnerText);
+                    slot.chars.gunMode = node.SelectSingleNode("mode").InnerText;
+                    break;
             }
             /*slot.gameClasses = new GameClassEnum[node.SelectNodes("items/weapon").Count];
             int i=0;
@@ -1236,6 +1267,20 @@ public class ItemManager : MonoBehaviour {
 				slot.shopicon = node.SelectSingleNode("shopicon").InnerText;
 				slot.model = node.SelectSingleNode("model").InnerText;
                 slot.personal = bool.Parse(node.SelectSingleNode("personal").InnerText);
+
+                switch (slot.type)
+                {
+                    case ShopSlotType.WEAPON:
+                        slot.chars = new WeaponChar();
+                        slot.chars.aim = float.Parse(node.SelectSingleNode("aim").InnerText);
+                        slot.chars.dmg = float.Parse(node.SelectSingleNode("damage").InnerText);
+                        slot.chars.speed = float.Parse(node.SelectSingleNode("speed").InnerText);
+                        slot.chars.reload = float.Parse(node.SelectSingleNode("reload").InnerText);
+                        slot.chars.magazine = int.Parse(node.SelectSingleNode("magazine").InnerText);
+                        slot.chars.gunMode = node.SelectSingleNode("mode").InnerText;
+                        break;
+                }
+
                 WWW www = StatisticHandler.GetMeRightWWW(slot.shopicon);
                        
                 yield return www;

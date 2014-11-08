@@ -360,6 +360,7 @@ public class NetworkController : MonoBehaviour {
 						}
 
                     }
+
 					//Delete scene view that was deleted before player join
 				    foreach (int id in dt.GetIntArray("deleteSceneView"))
                     {
@@ -1322,7 +1323,7 @@ public class NetworkController : MonoBehaviour {
 	public void HandlePawnSpawn(ISFSObject dt )
     {
         PawnModel sirPawn = (PawnModel)dt.GetClass("pawn");
-        //Debug.Log("Pawn Spawn" + sirPawn.type);
+        Debug.Log("Pawn Spawn" + sirPawn.type + "ID:"+ sirPawn.id);
 		GameObject go =RemoteInstantiateNetPrefab(sirPawn.type, Vector3.zero,Quaternion.identity,sirPawn.id);
         if (go == null)
         {

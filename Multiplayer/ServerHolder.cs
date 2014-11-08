@@ -354,10 +354,21 @@ public class ServerHolder : MonoBehaviour
 	}
 
     GAMEMODE lastMode;
+
+    public void CreateNewRoom() //Создание комноты (+)
+    {
+        map = allMaps[0].name;
+        newRoomName = map +UnityEngine.Random.Range(1000,10000).ToString();
+        CreateNewRoom(GAMEMODE.PVP);
+       
+    }
+
+
 	public void CreateNewRoom(GAMEMODE mode) //Создание комноты (+)
 	{
         if (map == "")
         {
+            Debug.Log("emptyMap");
 			MainMenuGUI mainMenu = FindObjectOfType<MainMenuGUI> ();
 			if (mainMenu != null) {
 				mainMenu.SetMessage("Не выбрана карта");
@@ -432,6 +443,7 @@ public class ServerHolder : MonoBehaviour
         settings.MaxUsers =(short)roomCnt;
         settings.MaxSpectators = 0;
         settings.Extension = new RoomExtension(ExtName, ExtClass);
+        Debug.Log(map);
         NetworkController.smartFox.Send(new CreateRoomRequest(settings, true, NetworkController.smartFox.LastJoinedRoom));
 		Invoke("RetryRoomCreate", 10);
       
