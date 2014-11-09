@@ -935,17 +935,19 @@ public class ItemManager : MonoBehaviour {
             }
             else
             {
-                Debug.Log("NO BUNLDE NET TO LOAD");
+                Debug.Log("NO BUNLDE NEEd TO LOAD" + crossDomainesafeURL);
                 WWW www = WWW.LoadFromCacheOrDownload(crossDomainesafeURL, 1);
 
                 yield return www;
+                Debug.Log("ERROR" + www.error);
                 if (www.error == null)
                 {
 
 
                     bundle = www.assetBundle;
+                    AssetBundleManager.setAssetBundle(bundle, crossDomainesafeURL, 1);
                 }
-				 AssetBundleManager.setAssetBundle(bundle, crossDomainesafeURL,1);
+				
 
             }
 

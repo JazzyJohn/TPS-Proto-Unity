@@ -1639,15 +1639,24 @@ public class NetworkController : MonoBehaviour {
         Pawn pawn = GetView(dt.GetInt("viewId")).pawn;
         pawn.PawnKill();
         int player = dt.GetInt("player");
-        if(player==_smartFox.MySelf.Id){
+        if (player == _smartFox.MySelf.Id)
+        {
             bool headShoot = false;
-            if(dt.ContainsKey("headShot")){
-                headShoot =dt.GetBool("headShot");
+            if (dt.ContainsKey("headShot"))
+            {
+                headShoot = dt.GetBool("headShot");
             }
-            KillInfo info = new KillInfo(dt.GetInt("weaponId"),headShoot);
-            GetPlayer(player).PawnKill(pawn,pawn.player, pawn.myTransform.position, info);
+            KillInfo info = new KillInfo(dt.GetInt("weaponId"), headShoot);
+            GetPlayer(player).PawnKill(pawn, pawn.player, pawn.myTransform.position, info);
 
-            
+
+        }
+        else
+        {
+            if (player > 0)
+            {
+                GetPlayer(player).Score.Kill++;
+            }
         }
 
        

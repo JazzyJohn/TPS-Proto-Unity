@@ -142,13 +142,18 @@ public class AchievementManager : MonoBehaviour, LocalPlayerListener, GameListen
 			//Debug.Log(open);
             ongoingAchivment.Add(achivment);
 			if(open){
-
+             
                 if (achivment.isMultiplie)
                 {
 					bool ready = bool.Parse(node.SelectSingleNode("ready").InnerText);
+                    Debug.Log(achivment.description + "  " + ready);
 					if(!ready){
 					    finishedAchivment.Add(achivment);
-					}
+                    }
+                    else
+                    {
+                        achivment.isDone = false;   
+                    }
 				}else{
 					finishedAchivment.Add(achivment);
 				}
@@ -196,6 +201,10 @@ public class AchievementManager : MonoBehaviour, LocalPlayerListener, GameListen
 								}
 						}
 						ongoingAchivment.ForEach (delegate(Achievement obj) {
+                                if (obj.isDone)
+                                {
+                                    return ;
+                                }
 								if (obj.CheckDone ()) {
                                     Debug.Log(obj.description);
 										outcomeQueue.Enqueue (obj);

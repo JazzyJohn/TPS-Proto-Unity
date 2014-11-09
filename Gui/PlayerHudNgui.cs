@@ -272,4 +272,6 @@ public class PlayerHudNgui : MonoBehaviour {
         tweener.PlayForward();
         lvlView.Reposition();
 	}
+
+    
 }

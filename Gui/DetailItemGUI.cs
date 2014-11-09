@@ -75,7 +75,7 @@ public class DetailItemGUI : MonoBehaviour
         {
             raspil.alpha = 1.0f;
         }
-        ItemManager.instance.LoadModel(item);
+       
         if (item.type == ShopSlotType.WEAPON)
         {
             weaponSection.widget.alpha = 1.0f;

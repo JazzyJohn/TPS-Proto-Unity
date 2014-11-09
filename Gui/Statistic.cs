@@ -18,6 +18,9 @@ public class Statistic : MonoBehaviour {
 
 	public UILabel PlayerName;
 
+
+    public UITexture avatar;
+
 	public GameObject TeamRed;
 	public GameObject ShablonRedPlayer;
 
@@ -49,7 +52,7 @@ public class Statistic : MonoBehaviour {
 	void Start () 
 	{
 		timer=0;
-
+     
 		for (int i=0; i<TeamBlue.transform.childCount;i++)
 		{
 			BlueTeamlPlayer[i] = new TeamSlot();
@@ -62,6 +65,7 @@ public class Statistic : MonoBehaviour {
             RedTeamlPlayer[i].message = TeamRed.transform.GetChild(i).GetComponent<StatisticMessage>();
             RedTeamlPlayer[i].message.Hide(true);
 		}
+        avatar.mainTexture = GlobalPlayer.instance.avatar;
 	}
 
 
@@ -112,6 +116,7 @@ public class Statistic : MonoBehaviour {
 	public void LocalPlayerStat(string NamePlayer, int Class)
 	{
 		PlayerName.text = NamePlayer;
+
 		switch((GameClassEnum)Class)
 		{
 		case GameClassEnum.ENGINEER:
@@ -173,11 +178,7 @@ public class Statistic : MonoBehaviour {
 
     public void ResizeGrild()
     {
-        List<Player> players = PlayerManager.instance.FindAllPlayer();
-
-        if (old_players != players)
-        {
-            old_players = players;
+       
 
             countRed = 0;
             countBlue = 0;
@@ -235,7 +236,7 @@ public class Statistic : MonoBehaviour {
                 }
             }
             
-        }
+        
 
     }
 
@@ -248,7 +249,7 @@ public class Statistic : MonoBehaviour {
 
         foreach (Player Gamer in players)
         {
-
+            Debug.Log(Gamer.UID);
             switch (Gamer.team)
             {
                 case 1:
@@ -261,7 +262,7 @@ public class Statistic : MonoBehaviour {
                         namer = "NoName";
 
                     RedTeamlPlayer[countRed].message.SetStartInfo(namer, Gamer.Score.Kill, Gamer.Score.Death, Gamer.Score.Assist, Gamer);
-                    
+                    RedTeamlPlayer[countRed].message.Hide(false);
                     countRed++;
                     break;
                 case 2:
@@ -274,6 +275,7 @@ public class Statistic : MonoBehaviour {
                         nameb = "NoName";
 
                     BlueTeamlPlayer[countBlue].message.SetStartInfo(nameb, Gamer.Score.Kill, Gamer.Score.Death, Gamer.Score.Assist, Gamer);
+                    BlueTeamlPlayer[countBlue].message.Hide(false);
                     countBlue++;
                     break;
             }
@@ -304,9 +306,11 @@ public class Statistic : MonoBehaviour {
                 ui.main.alpha = 1.0f;
             }
             Achievement ach  = list[i];
+            
             if (ach.isDone)
             {
                 ui.finished.spriteName = achievementOpenSprite;
+                ui.progress.alpha=0.0f;
             }
             ui.name.text = ach.description;
             ui.progress.text = ach.GetProgress();

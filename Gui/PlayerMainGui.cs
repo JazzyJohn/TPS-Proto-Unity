@@ -239,8 +239,12 @@ public class PlayerMainGui : MonoBehaviour {
             }
             else
             {
-              
-                if (guiState != GUIState.KillCam)
+
+                if (PVPGameRule.instance.isGameEnded)
+                {
+                    ChageState(GUIState.GameResult);
+
+                }else if (guiState != GUIState.KillCam)
                 {
                     ChageState(GUIState.Respawn);
                 }

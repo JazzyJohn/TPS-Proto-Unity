@@ -867,6 +867,11 @@ public class Pawn : DamagebleObject
     protected override void ActualKillMe()
     {
         AITargetManager.DeadPawn(this);
+        if (!foxView.isMine && player!=null)
+        {
+            player.Score.Death++;
+        }
+
         isDead = true;
         health = 0;
         characterState = CharacterState.Dead;
@@ -901,7 +906,7 @@ public class Pawn : DamagebleObject
         }
 
         StartCoroutine(AfterAnimKill());
-
+        StopFire();
     }
 
     public IEnumerator AfterAnimKill()

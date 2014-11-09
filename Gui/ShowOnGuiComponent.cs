@@ -60,6 +60,10 @@ public class ShowOnGuiComponent : MonoBehaviour {
 	public void SetTitle(string text){
 		title = baseTitle +" " +text;
 	}
+    public void SetFullTitle(string text)
+    {
+        title = text;
+    }
 	public void SetTitle(string text,int team){
 		title = baseTitle +" " +text;
 		this.team =team;

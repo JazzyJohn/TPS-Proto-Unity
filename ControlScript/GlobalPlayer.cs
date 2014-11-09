@@ -58,6 +58,7 @@ public class GlobalPlayer : MonoBehaviour {
 	
 	public int cash;
 
+    public Texture2D avatar;
     public bool isDebug=false;
 	
 	public int loadingStage = 0;
@@ -301,5 +302,24 @@ public class GlobalPlayer : MonoBehaviour {
 		PlayerName = newname;
         SetUid(uid);
 	}
+    public void AskAvatar(string text)
+    {
+        StartCoroutine(_LoadAvatar(text));
+
+    }
+    public IEnumerator _LoadAvatar(string text)
+    {
+        WWW www = new WWW(text);
+
+        Debug.Log("startLoad" + text);
+       yield return www;
+       avatar = new Texture2D(100, 100);
+       www.LoadImageIntoTexture(avatar);
+        MainMenuGUI gui = FindObjectOfType<MainMenuGUI>();
+        if (gui != null)
+        {
+            gui.SetAvatar(avatar);
+        }
+    }
 	
 }

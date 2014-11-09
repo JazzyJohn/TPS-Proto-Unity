@@ -110,8 +110,8 @@ public class ServerHolder : MonoBehaviour
 
 	void OnJoinRoom(BaseEvent evt) {
 
-        
-      
+
+        blockQuickStart = false;
       Sfs2X.Entities.Room room = (Sfs2X.Entities.Room)evt.Params["room"];
 	  if(!room.IsGame){
 			return;
@@ -145,6 +145,7 @@ public class ServerHolder : MonoBehaviour
 		if(mainMenu!=null){
             mainMenu.CreateRoom();
 		}
+        blockQuickStart = false;
 		Debug.Log("Room creation error; the following error occurred: " + error);
 	}
 
@@ -354,10 +355,15 @@ public class ServerHolder : MonoBehaviour
 	}
 
     GAMEMODE lastMode;
-
+    bool blockQuickStart = false;
     public void CreateNewRoom() //Создание комноты (+)
     {
+        if (blockQuickStart)
+        {
+            return;
+        }
         map = allMaps[0].name;
+        blockQuickStart = true;
         newRoomName = map +UnityEngine.Random.Range(1000,10000).ToString();
         CreateNewRoom(GAMEMODE.PVP);
        
@@ -409,7 +415,7 @@ public class ServerHolder : MonoBehaviour
                 gameRule = new SFSRoomVariable("ruleClass", "nstuff.juggerfall.extension.gamerule.PVPGameRule");
                 setting.teamCount = 2;
                 setting.maxTime =0;
-                setting.maxScore= 25;
+                setting.maxScore= 1;
                 break;
             case GAMEMODE.PVPJUGGERFIGHT:
                 gameRule = new SFSRoomVariable("ruleClass", "nstuff.juggerfall.extension.gamerule.PVPJuggerFightGameRule");
@@ -482,8 +488,16 @@ public class ServerHolder : MonoBehaviour
 				ItemManager.instance.ClearShop();
 				loadingScreen = Instantiate(mainMenu.loadingScreen, Vector3.zero, Quaternion.identity) as GameObject;
              
+
 		}
-		
+        if (Camera.main != null)
+        {
+            PlayerMainGui oldmap = Camera.main.GetComponent<PlayerMainGui>();
+            if (oldmap != null)
+            {
+                oldmap.enabled = false;
+            }
+        }
 		yield return new WaitForSeconds(1);
 
 

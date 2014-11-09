@@ -484,7 +484,12 @@ public class MainMenuGUI : MonoBehaviour {
     {
 
         GlobalPlayer.instance.AskJsForMagazine(item);
-    } 
+    }
+
+    public void SetAvatar(Texture2D avatar)
+    {
+        _PlayerComponent.avatar.mainTexture = avatar;
+    }
 }
 
 
@@ -535,6 +540,7 @@ public class PlayerComponent
 	public UILabel PremDate;
 	public UIPanel Prem_have;
 	public UIPanel Prem_DoNot_have;
+    public UITexture avatar;
 }
 
 [System.Serializable]

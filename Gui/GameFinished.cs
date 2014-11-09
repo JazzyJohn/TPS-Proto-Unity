@@ -63,7 +63,8 @@ public class GameFinished : Statistic
         }
         else
         {
-            timerRestart.text = TextGenerator.instance.GetSimpleText("NextRound") + GameRule.instance.GetRestartTimer().ToString("0.0");
+            timerRestart.text = TextGenerator.instance.GetSimpleText("NextRound");
+            timerRestart.text = timerRestart.text +GameRule.instance.GetRestartTimer().ToString("0.0");
         }
 
         

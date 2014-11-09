@@ -60,6 +60,7 @@ public class PawnOnGuiComponent : ShowOnGuiComponent {
 			}
 			
 		}
+       
         team = pawn.team;
         if (health<0)
         {
@@ -72,7 +73,10 @@ public class PawnOnGuiComponent : ShowOnGuiComponent {
         }
 
 
-
+        if (pawn.player != null)
+        {
+            SetFullTitle(pawn.player.PlayerName);
+        }
         
     }
 
