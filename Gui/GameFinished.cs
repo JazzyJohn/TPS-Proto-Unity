@@ -85,7 +85,7 @@ public class GameFinished : Statistic
             script.text.text = reward.text;
             script.max.text = "=" + reward.amount.ToString();
             script.count.text = "x" + reward.count.ToString();
-            script.box.width = (int)Math.Truncate((lvlScroll.width));
+            //script.box.width = (int)Math.Truncate((lvlScroll.width));
            
         }
         Debug.Log(totalXP);
@@ -115,7 +115,7 @@ public class GameFinished : Statistic
             script.text.text = reward.text;
             script.max.text = "=" + reward.amount.ToString();
             script.count.text = "x" + reward.count.ToString();
-            script.box.width = (int)Math.Truncate((moneyScroll.width));
+            //script.box.width = (int)Math.Truncate((moneyScroll.width));
         }
         totalGoldLabel.text = totalGold.ToString();
         totalCashLabel.text = totalCash.ToString();

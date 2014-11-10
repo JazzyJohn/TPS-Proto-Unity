@@ -1602,8 +1602,9 @@ public class NetworkController : MonoBehaviour {
 	
     public void HandleMasterStart(ISFSObject dt)
     {
-        Debug.Log("master");
+        Debug.Log("HandleMasterStart: " +string.Join("|",dt.GetKeys()));
 		GameRule.instance.ReadMasterInfo(dt);
+		GameRule.instance.StartGame();
 		MasterViewUpdate();      
 
     }	
@@ -1857,13 +1858,14 @@ public class NetworkController : MonoBehaviour {
 
     }
      /// <summary>
-    /// handle AINextWave  request to server
+    /// handle AISpawnBot  request to server
     /// </summary>	
 
 
     public void HandleAISpawnBot(ISFSObject dt)
     {
         ISFSObject data = new SFSObject();
+		Debug.Log("HandleAISpawnBot: " +string.Join("|",data.GetKeys()));
         if (dt.ContainsKey("team"))
         {
             AIDirector.instance.swarms[dt.GetInt("swarmId")].SpawnBot(dt.GetUtfString("prefabName"), dt.GetInt("id"), ((Vector3Model)dt.GetClass("position")).GetVector(),dt.GetInt("team"));

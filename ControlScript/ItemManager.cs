@@ -85,7 +85,7 @@ public class FromDBAnims{
 }
 public enum ShopSlotType
 {
-    WEAPON, ARMOR, ETC
+    WEAPON, ARMOR, ETC,OFFERS
 }
 public class SimpleSlot{
  public GameClassEnum gameClass;

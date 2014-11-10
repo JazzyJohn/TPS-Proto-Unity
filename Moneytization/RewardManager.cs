@@ -64,7 +64,7 @@ public class  RewardManager : MonoBehaviour, LocalPlayerListener,GameListener{
                      RewardGUI reward = new RewardGUI();
                     reward.count = entry.Value.GetRewardCounter();
 
-                    reward.amount = reward.count * entry.Value.cash;
+                    reward.amount = reward.count * entry.Value.gold;
                     reward.text = TextGenerator.instance.GetSimpleText(entry.Key);
                     reward.isCash = false;
                     answer.Add(reward);
@@ -185,7 +185,7 @@ public class  RewardManager : MonoBehaviour, LocalPlayerListener,GameListener{
 	}
 	public void EventTeamWin(int teamNumber){
 		//if we not winner so no change in exp, or we a winner but no send were initiate we sync data 
-		if (myPlayer.team	!= teamNumber||(myPlayer.team == teamNumber)) {
+		if (myPlayer.team	== teamNumber) {
             UpMoney(PARAM_WIN);
 			SyncReward();
 		}else{

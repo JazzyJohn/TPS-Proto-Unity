@@ -24,6 +24,7 @@ public class InventoryGUI : MonoBehaviour {
 
 	public RepairGUI repairGui;
 
+	public AskWindow askWindow;
 
 	// Use this for initialization
 	void Start () 
@@ -100,9 +101,19 @@ public class InventoryGUI : MonoBehaviour {
 	public void HideRepair(){
 		repair.alpha= 0.0f;
 	}
-
+	
+	public void DisentegrateAsk(){
+		askWindow.text =  TextGenerator.instance.GetSimpleText("DisentegrateAsk");
+		askWindow.panel.alpha = 1.0f;
+		askWindow.ConfirmAction  = Disentegrate;
+		askWindow.backPosition =0;
+		MainMenu.CamMove.RideTo(2);
+	}
+	
+	
     public void Disentegrate()
     {
+		
         ItemManager.instance.DesintegrateItem(detailItemGUI.item.id,  this);
     }
 	public void ShowRepair(){
@@ -258,3 +269,4 @@ public class InvItem
 	public UIWidget Box;
 	public InvItemGUI ItemInfo;
 }
+

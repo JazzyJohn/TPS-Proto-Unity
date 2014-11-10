@@ -36,7 +36,18 @@ public class PawnEffectController : MonoBehaviour
 	
 	void Start(){
 		myTransform= transform;
-	
+		foreach(EffectEntity entity in allEffect){
+			foreach (GameObject effectObject in entity.effectObject)
+			{
+				effectObject.SetActive(false);
+			}
+			foreach (ParticleSystem effectObject in entity.particleObject)
+			{
+				effectObject.Stop();
+			}
+			
+		}		
+		
 	}
 	
 	void Update(){

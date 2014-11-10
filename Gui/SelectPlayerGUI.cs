@@ -93,7 +93,11 @@ public class SelectPlayerGUI : MonoBehaviour {
         ReDrawAll();
         SelectPlayer(1);
         SelectRobot();
-        Choice._Team = -1;
+		if(player.team==0){
+			Choice._Team = -1;
+		}else{
+			Choice._Team =player.team;
+		}
     }
     public void Activate()
     {
