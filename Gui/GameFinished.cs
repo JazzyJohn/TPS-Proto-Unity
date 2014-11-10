@@ -83,12 +83,12 @@ public class GameFinished : Statistic
             newTrans.localPosition = new Vector3(0f, 0f, 0f);
             NGUIReward script =  newTrans.GetComponent<NGUIReward>();
             script.text.text = reward.text;
-            script.max.text = "=" + reward.amount.ToString();
+            script.max.text = "" + reward.amount.ToString();
             script.count.text = "x" + reward.count.ToString();
-            //script.box.width = (int)Math.Truncate((lvlScroll.width));
+            script.box.width = (int)Math.Truncate((lvlScroll.width));
            
         }
-        Debug.Log(totalXP);
+//        Debug.Log(totalXP);
         totalXpLabel.text = totalXP.ToString();
         lvlTable.localPosition = new Vector3((-1 * (lvlScroll.width / 2)) + 1, (lvlScroll.height / 2) + lvlTableWid.padding.y, 0f);
         lvlTableWid.Reposition();
@@ -113,9 +113,9 @@ public class GameFinished : Statistic
             newTrans.localPosition = new Vector3(0f, 0f, 0f);
             NGUIReward script = newTrans.GetComponent<NGUIReward>();
             script.text.text = reward.text;
-            script.max.text = "=" + reward.amount.ToString();
+            script.max.text = "" + reward.amount.ToString();
             script.count.text = "x" + reward.count.ToString();
-            //script.box.width = (int)Math.Truncate((moneyScroll.width));
+            script.box.width = (int)Math.Truncate((moneyScroll.width));
         }
         totalGoldLabel.text = totalGold.ToString();
         totalCashLabel.text = totalCash.ToString();

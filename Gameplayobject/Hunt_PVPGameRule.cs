@@ -7,17 +7,17 @@ public class Hunt_PVPGameRule : PVPGameRule {
 	public override void SetFromModel(GameRuleModel model)
     {
         PVPHuntGameRuleModel pvpmodel = (PVPHuntGameRuleModel)model;
-        
+        for (int i = 0; i < pvpmodel.teamScore.Count; i++)
+        {
+
+            teamScore[i] = (int)pvpmodel.teamScore[i];
+        }
         if (!isGameEnded && pvpmodel.isGameEnded)
         {
             GameEnded();
             isGameEnded = true;
         }
-        for (int i = 0; i < pvpmodel.teamScore.Count; i++)
-        {
-               
-            teamScore[i] = (int)pvpmodel.teamScore[i];
-        }
+       
     }
 		
 	public void LastWave(){

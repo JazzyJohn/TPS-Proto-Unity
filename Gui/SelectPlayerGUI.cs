@@ -93,11 +93,13 @@ public class SelectPlayerGUI : MonoBehaviour {
         ReDrawAll();
         SelectPlayer(1);
         SelectRobot();
+        Debug.Log(player.team);
 		if(player.team==0){
 			Choice._Team = -1;
 		}else{
 			Choice._Team =player.team;
 		}
+        Debug.Log(Choice._Team );
     }
     public void Activate()
     {
@@ -250,7 +252,7 @@ public class SelectPlayerGUI : MonoBehaviour {
 		if(teamCount[1]>=teamCount[0]+1){
 			teamBblock=true;
 		}
-        Debug.Log(teamAblock + "  " + teamBblock + i);
+       Debug.Log(teamAblock + "  " + teamBblock + i);
 		if (teamAblock)
 			Choice._Team = 2;
         else if (teamBblock)

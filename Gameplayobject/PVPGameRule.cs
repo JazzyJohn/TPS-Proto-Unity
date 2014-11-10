@@ -114,15 +114,17 @@ public class PVPGameRule : GameRule {
         public override void SetFromModel(GameRuleModel model)
         {
             PVPGameRuleModel pvpmodel = (PVPGameRuleModel)model;
-            if (!isGameEnded && pvpmodel.isGameEnded)
-            {
-                GameEnded();
-                isGameEnded = true;
-            }
             for (int i = 0; i < pvpmodel.teamKill.Count; i++)
             {
                 teamKill[i] = (int)pvpmodel.teamKill[i];
                 teamScore[i] = (int)pvpmodel.teamScore[i];
             }
+          
+            if (!isGameEnded && pvpmodel.isGameEnded)
+            {
+                GameEnded();
+                isGameEnded = true;
+            }
+            
         }
 }

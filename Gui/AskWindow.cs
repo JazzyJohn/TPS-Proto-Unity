@@ -3,7 +3,7 @@ using System.Collections;
 using System.Collections.Generic;
 using System;
 
-delegate void ConfirmAction();
+public delegate void ConfirmAction();
 
 public class AskWindow  : MonoBehaviour{
 
@@ -21,7 +21,7 @@ public class AskWindow  : MonoBehaviour{
 	
 		panel.alpha = 0.0f;
 		MainMenu.CamMove.RideTo(backPosition);
-		ConfirmAction();
+        action();
 	}
 	
 	

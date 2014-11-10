@@ -103,9 +103,9 @@ public class InventoryGUI : MonoBehaviour {
 	}
 	
 	public void DisentegrateAsk(){
-		askWindow.text =  TextGenerator.instance.GetSimpleText("DisentegrateAsk");
+		askWindow.text.text =  TextGenerator.instance.GetSimpleText("DisentegrateAsk");
 		askWindow.panel.alpha = 1.0f;
-		askWindow.ConfirmAction  = Disentegrate;
+		askWindow.action  = Disentegrate;
 		askWindow.backPosition =0;
 		MainMenu.CamMove.RideTo(2);
 	}

@@ -174,11 +174,13 @@ public class Statistic : MonoBehaviour {
     int countRedSlotUse = 0;
     int countBlueSlotUse = 0;
 
-    List<Player> old_players = null;
+    
 
     public void ResizeGrild()
     {
-       
+        List<Player> players = PlayerManager.instance.FindAllPlayer();
+
+      
 
             countRed = 0;
             countBlue = 0;

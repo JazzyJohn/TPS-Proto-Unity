@@ -91,12 +91,26 @@ public class NetworkController : MonoBehaviour {
             }
             
        }
-	
+        Debug.Log("IMMASTER"+smartFox.MySelf.ContainsVariable("Master"));
 	}
 
     public static bool IsMaster()
     {
         return smartFox.MySelf.ContainsVariable("Master") && smartFox.MySelf.GetVariable("Master").GetBoolValue();
+    }
+     public void OnVariablesUpdate(BaseEvent evt)
+    {
+     //   evt.Params["user"];
+       User user = (User)evt.Params["user"];
+       if (user == smartFox.MySelf)
+       {
+           if (user.ContainsVariable("Master") && smartFox.MySelf.GetVariable("Master").GetBoolValue())
+           {
+              
+               GameRule.instance.StartGame();
+               MasterViewUpdate();
+           }
+       }
     }
 
    
@@ -284,11 +298,7 @@ public class NetworkController : MonoBehaviour {
             GlobalPlayer.instance.loadingStage++;
         }
     }
-    public void OnVariablesUpdate(BaseEvent evt)
-    {
-     //   evt.Params["user"];
-    }
-
+   
     private Queue<BaseEvent> lateEvents = new Queue<BaseEvent>();
     private void OnExtensionResponse(BaseEvent evt)
     {
@@ -1603,9 +1613,8 @@ public class NetworkController : MonoBehaviour {
     public void HandleMasterStart(ISFSObject dt)
     {
         Debug.Log("HandleMasterStart: " +string.Join("|",dt.GetKeys()));
-		GameRule.instance.ReadMasterInfo(dt);
-		GameRule.instance.StartGame();
-		MasterViewUpdate();      
+        GameRule.instance.ReadMasterInfo(dt);
+		//MasterViewUpdate();      
 
     }	
     /// <summary>
@@ -1864,8 +1873,8 @@ public class NetworkController : MonoBehaviour {
 
     public void HandleAISpawnBot(ISFSObject dt)
     {
-        ISFSObject data = new SFSObject();
-		Debug.Log("HandleAISpawnBot: " +string.Join("|",data.GetKeys()));
+            
+        Debug.Log("HandleAISpawnBot: " + string.Join("|", dt.GetKeys()));
         if (dt.ContainsKey("team"))
         {
             AIDirector.instance.swarms[dt.GetInt("swarmId")].SpawnBot(dt.GetUtfString("prefabName"), dt.GetInt("id"), ((Vector3Model)dt.GetClass("position")).GetVector(),dt.GetInt("team"));

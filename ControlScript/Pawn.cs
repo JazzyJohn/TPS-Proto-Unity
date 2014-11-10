@@ -3091,6 +3091,7 @@ public class Pawn : DamagebleObject
 
             RestartLocalVisibilite();
         }
+        rigidbody.isKinematic = false;
     }
 
     public void RemoteSetAI(int group, int homeindex)
