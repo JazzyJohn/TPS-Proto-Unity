@@ -101,6 +101,8 @@ public class PVPGameRule : GameRule {
 			//Player player = GameObject.Find ("Player").GetComponent<Player> ();
 			//player.GameEnd ();
 			EventHolder.instance.FireEvent(typeof(GameListener),"EventTeamWin",Winner());
+            
+            ItemManager.instance.RemoveOldAndExpired();
 		}
 
 		public bool FinalStage (){

@@ -2,6 +2,7 @@ using UnityEngine;
 using System;
 using System.Collections.Generic;
 using Sfs2X.Entities.Data;
+using Sfs2X.Entities;
 
 public enum PawnType{PAWN,BOT};
 

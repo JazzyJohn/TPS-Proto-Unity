@@ -234,6 +234,13 @@ public class  RewardManager : MonoBehaviour, LocalPlayerListener,GameListener{
 
     }
 
+    public void AddPremiumBoost(int cashBoost)
+    {
+        upCash += cashBoost;
+       
+        SyncReward();
+    }
+
     private static RewardManager s_Instance = null;
 
     public static RewardManager instance

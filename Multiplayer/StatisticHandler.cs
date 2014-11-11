@@ -54,7 +54,9 @@ public class StatisticHandler : MonoBehaviour {
 	
 	public static string SPEND_SKILL_POINT = "spendskillpoint";
 	
-	public static string GLOBAL_ERROR_LOG = "globalerrorlog";
+	public static string GLOBAL_ERROR_LOG = "globalerro-rlog";
+
+    public static string DOUBLE_REWARD = "doublereward";
 	
 	public static string REGISTRATION = "registration";
 

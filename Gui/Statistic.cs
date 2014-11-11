@@ -251,7 +251,7 @@ public class Statistic : MonoBehaviour {
 
         foreach (Player Gamer in players)
         {
-            Debug.Log(Gamer.UID);
+         
             switch (Gamer.team)
             {
                 case 1:

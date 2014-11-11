@@ -34,6 +34,7 @@ public class LevelingManager : MonoBehaviour, LocalPlayerListener,GameListener{
 
 	public bool isLoaded = false;
 
+
 	public PlayerMainGui.LevelStats GetPlayerStats(){
 		PlayerMainGui.LevelStats stats  = new PlayerMainGui.LevelStats();
 		stats.playerLvl = playerLvl;
@@ -300,6 +301,19 @@ public class LevelingManager : MonoBehaviour, LocalPlayerListener,GameListener{
 	
 	}
 	public void EventRoomFinished(){}
+
+
+    public void AddPremiumBoost(int boost)
+    {
+        playerExp += boost;
+        //if lvl mark that it's time to sync with server
+        if (playerExp >= playerNeededExp[playerLvl])
+        {
+            
+            playerLvl++;
+        }
+        SyncLvl();
+    }
 	private static LevelingManager s_Instance = null;
 	
 	public static LevelingManager instance {

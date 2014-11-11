@@ -479,7 +479,7 @@ public class ServerHolder : MonoBehaviour
 		//AsyncOperation async;
 
 		connectingToRoom = true;
-        
+        AfterGameBonuses.Clear();
 		
 		MainMenuGUI mainMenu = FindObjectOfType<MainMenuGUI> ();
 		GameObject loadingScreen = null; 

@@ -104,11 +104,21 @@ public class NetworkController : MonoBehaviour {
 		userVars.Add( new SFSUserVariable("lvl", lvl) );
 		smartFox.Send( new SetUserVariablesRequest(userVars) );
 	}
+    public User GetUser(int id)
+    {
+        return serverHolder.gameRoom.GetUserById(id);
+    }
      public void OnVariablesUpdate(BaseEvent evt)
     {
      //   evt.Params["user"];
+        foreach (System.Object obj in evt.Params.Keys)
+        {
+            Debug.Log(obj +"  "+obj.GetType());
+        }
+      
+        return;
 	   List<String> changedVars = (List<String>)evt.Params["changedVars"];
-	   Debug.Log("OnVariablesUpdate: " + string.Join("|", changedVars.asArray()));
+	   Debug.Log("OnVariablesUpdate: " + string.Join("|", changedVars.ToArray()));
 	   User user = (User)evt.Params["user"];
 	   if (user == smartFox.MySelf)
 	   {

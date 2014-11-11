@@ -1210,7 +1210,7 @@ public class ItemManager : MonoBehaviour {
 	
     public Dictionary<ShopSlotType, List<InventorySlot>>  invItems = new Dictionary<ShopSlotType, List<InventorySlot> >();
 
-		
+    List<InventorySlot> toDelete = new List<InventorySlot>();	
 	public IEnumerator ParseInventory(String XML){
 		XmlDocument xmlDoc = new XmlDocument();
 		xmlDoc.LoadXml(XML);
@@ -1321,10 +1321,12 @@ public class ItemManager : MonoBehaviour {
 		}
 
 	
-	}
+	}   
+    
+
     public void RemoveOldAndExpired()
     {
-        List<InventorySlot> toDelete = new List<InventorySlot>();
+     
         foreach (KeyValuePair<string, InventorySlot> slot in allitems)
         {
             switch (slot.Value.type)
@@ -1353,6 +1355,8 @@ public class ItemManager : MonoBehaviour {
                     break;
 
             }
+            toDelete.Add(slot.Value);
+            Debug.Log("ADD" + slot.Value);
         }
         foreach (InventorySlot slot in toDelete)
         {
@@ -1419,7 +1423,17 @@ public class ItemManager : MonoBehaviour {
 		return answer;
 	
 	}
-	
+
+    public List<InventorySlot> GetMeDelete()
+    {
+        return toDelete;
+    }
+
+    public void ClearMyDelete()
+    {
+        toDelete.Clear();
+    }
+
 	public List<int> GetImplants(){
         List<int> answer = new List<int>();
 		for(int i=5;i<=8;i++){
