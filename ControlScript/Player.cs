@@ -79,7 +79,7 @@ public class Player : MonoBehaviour {
     public bool isMine { get { return playerView.isMine; } }
 
 	public UseObject useTarget;
-	//Func name for delayed external call
+	//Func name for delayed external call	
 	public string delayedExternalCallName;
 	//param for delayed external call
 	public string delayedExternalCallData;
@@ -126,6 +126,17 @@ public class Player : MonoBehaviour {
     {
         Init();
     }
+	public int GetLvl(){
+		if(isMine){
+			return LevelingManager.instance.playerLvl;
+		}else{
+			User user =NetworkController.Instance.GetUser(playerView.GetId());
+			if(user.ContainsVariable("lvl") ){
+					return user.GetVariable("lvl").	GetIntValue();
+			}
+			return 1;
+		}
+	}
 	void Init(){
 		
 		PlayerManager.instance.addPlayer(this);
@@ -565,9 +576,15 @@ public class Player : MonoBehaviour {
 	}
 		
 	public void AchivmenUnlock(Achievement achv){
-		PlayerMainGui.instance.AddMessage(achv.name+"\n"+achv.description,Vector3.zero,PlayerMainGui.MessageType.ACHIVEMENT);
-		delayedExternalCallName ="AchivmenUnlock";
-		delayedExternalCallData = achv.name + " " + achv.description;
+		if(achv.isMultiplie){
+			PlayerMainGui.instance.AddMessage(achv.description,Vector3.zero,PlayerMainGui.MessageType.ACHIVEMENT);
+			delayedExternalCallName ="AchivmenUnlock";
+			delayedExternalCallData = achv.description;
+		}else{
+			PlayerMainGui.instance.AddMessage(achv.name+"\n"+achv.description,Vector3.zero,PlayerMainGui.MessageType.ACHIVEMENT);
+			delayedExternalCallName ="AchivmenUnlock";
+			delayedExternalCallData = achv.name + " " + achv.description;
+		}
 		
 	}
 	

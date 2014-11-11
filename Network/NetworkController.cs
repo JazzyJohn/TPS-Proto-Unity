@@ -98,19 +98,32 @@ public class NetworkController : MonoBehaviour {
     {
         return smartFox.MySelf.ContainsVariable("Master") && smartFox.MySelf.GetVariable("Master").GetBoolValue();
     }
+	
+	public void SetNetworkLvl(int lvl){
+		List<UserVariable> userVars = new List<UserVariable>();
+		userVars.Add( new SFSUserVariable("lvl", lvl) );
+		smartFox.Send( new SetUserVariablesRequest(userVars) );
+	}
      public void OnVariablesUpdate(BaseEvent evt)
     {
      //   evt.Params["user"];
-       User user = (User)evt.Params["user"];
-       if (user == smartFox.MySelf)
-       {
-           if (user.ContainsVariable("Master") && smartFox.MySelf.GetVariable("Master").GetBoolValue())
-           {
-              
-               GameRule.instance.StartGame();
-               MasterViewUpdate();
-           }
-       }
+	   List<String> changedVars = (List<String>)evt.Params["changedVars"];
+	   Debug.Log("OnVariablesUpdate: " + string.Join("|", changedVars.asArray()));
+	   User user = (User)evt.Params["user"];
+	   if (user == smartFox.MySelf)
+	   {
+			if (changedVars.Contains("Master")){
+				Debug.Log(smartFox.MySelf.GetVariable("Master").GetBoolValue());
+				if(smartFox.MySelf.GetVariable("Master").GetBoolValue())
+				{
+				  
+				   GameRule.instance.StartGame();
+				   MasterViewUpdate();
+				}
+			}
+				   
+	   }
+	  
     }
 
    

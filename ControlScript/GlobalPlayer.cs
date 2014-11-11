@@ -166,11 +166,17 @@ public class GlobalPlayer : MonoBehaviour {
 				{
 					menu.LoadingFinish();
 				}
+				FinishedLoad();
                 isLoaded = true;
 			}
 		
 		}
 	}
+	public void FinishedLoad(){
+		LevelingManager.instance.SetNetworkLvl();
+	
+	}
+	
 	public static void FullScreen(bool FullScreen_Z= false){
 		string[] x_y = new string[2];
 

@@ -99,6 +99,11 @@ public class LevelingManager : MonoBehaviour, LocalPlayerListener,GameListener{
 		//QuitSyncLvl();
 
 	}
+	
+	public void SetNetworkLvl(){
+		NetworkController.Instance.SetNetworkLvl(playerLvl);
+	}
+	
 	protected IEnumerator LoadLvling(WWWForm form){
 		Debug.Log (form );
 		WWW w = null;
@@ -207,7 +212,7 @@ public class LevelingManager : MonoBehaviour, LocalPlayerListener,GameListener{
 			form.AddField ("classLvl[]", classLvl[i]);
 		}
 		StatisticHandler.instance.StartCoroutine(StatisticHandler.SendForm (form,StatisticHandler.SAVE_LVL));
-		
+		SetNetworkLvl();
 	}
 
 	public void QuitSyncLvl(){
