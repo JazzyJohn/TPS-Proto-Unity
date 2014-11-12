@@ -153,7 +153,9 @@ public class PlayerManager : MonoBehaviour {
 		return cachedPlayers;
 
 	}
-
+	public int playerCount(){
+		return cachedPlayers.Count;
+	}
 
     public void ClearAll()
     {

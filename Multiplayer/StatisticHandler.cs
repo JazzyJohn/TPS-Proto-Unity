@@ -58,6 +58,8 @@ public class StatisticHandler : MonoBehaviour {
 
     public static string DOUBLE_REWARD = "doublereward";
 	
+	public static string LOWER_STAMINA = "lowerstamina";
+	
 	public static string REGISTRATION = "registration";
 
 	public static string LOGIN = "login";

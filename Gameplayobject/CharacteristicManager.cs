@@ -37,6 +37,8 @@ public enum CharacteristicList{
 		DAMAGE_REDUCE_GUN,
 		DAMAGE_REDUCE_ALL,
 		
+		AMMO_AMOUNT,
+		
 		
 		
 }

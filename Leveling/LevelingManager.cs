@@ -162,11 +162,16 @@ public class LevelingManager : MonoBehaviour, LocalPlayerListener,GameListener{
 	}
 	//adding exp to current
 	public bool UpExp(string cause,int selected=-1){
-        if (!expDictionary.ContainsKey(cause))
+        if(GameRule.instance.IsPractice()){
+			return;
+		}
+		if (!expDictionary.ContainsKey(cause))
         {
             return false ;
         }
+		
 		int exp = expDictionary[cause].amount;
+		exp = exp *PremiumManager. GetMultiplier();
         if (exp == 0)
         {
             return false;
@@ -212,8 +217,25 @@ public class LevelingManager : MonoBehaviour, LocalPlayerListener,GameListener{
 			form.AddField ("classExp[]", classExp[i]);
 			form.AddField ("classLvl[]", classLvl[i]);
 		}
-		StatisticHandler.instance.StartCoroutine(StatisticHandler.SendForm (form,StatisticHandler.SAVE_LVL));
+		
+		StartCoroutine(SyncSend(form));
 		SetNetworkLvl();
+	}
+	IEnumerator SyncSend(WWWForm form){
+		WWW www =StatisticHandler.GetMeRightWWW(form,StatisticHandler.SAVE_LVL);
+		yield return w;
+		w.text();
+        XmlDocument xmlDoc = new XmlDocument();
+        xmlDoc.LoadXml(w.text);
+		XmlNode node =xmlDoc.SelectSingleNode("result/item_reward");
+		if(node!=null){
+			
+			FindObjectOfType<AddShops>().NewItem(node.InnerText);
+			Itemmanager.instance.ReloadItem()
+			
+		}
+		
+
 	}
 
 	public void QuitSyncLvl(){

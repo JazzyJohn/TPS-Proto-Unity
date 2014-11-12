@@ -183,6 +183,9 @@ public class AchievementManager : MonoBehaviour, LocalPlayerListener, GameListen
 						while (incomeQueue.Count>0) {
 								IncomingMessage mess = incomeQueue.Dequeue ();
                                 //Debug.Log(mess.param);
+								if(GameRule.instance.IsPractice()){
+									continue;
+								}
 								foreach (Achievement achiv in ongoingAchivment) {
                                         if (achiv.isDone)
                                         {

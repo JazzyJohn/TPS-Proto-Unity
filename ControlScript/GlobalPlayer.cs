@@ -58,6 +58,8 @@ public class GlobalPlayer : MonoBehaviour {
 	
 	public int cash;
 
+	public int stamina;
+	
     public Texture2D avatar;
     public bool isDebug=false;
 	
@@ -227,8 +229,24 @@ public class GlobalPlayer : MonoBehaviour {
 		xmlDoc.LoadXml(XML);
 		gold = int.Parse (xmlDoc.SelectSingleNode ("player/gold").InnerText);
 		cash = int.Parse (xmlDoc.SelectSingleNode ("player/cash").InnerText);
+		stamina = int.Parse (xmlDoc.SelectSingleNode ("player/stamina").InnerText);
 	}
 	
+	public void MathcEnd(){
+		if(stamina>0){
+			AfterGameReward.wasStamined = true;
+			stamina--;
+			StartCourutine(LowetStamina);
+		}
+		AfterGameReward.wasStamined = false;
+	}
+	protected IENumerator LowerStamina(){
+		WWWForm form = new WWWForm ();
+		
+		form.AddField ("uid", Uid);
+		WWW w = StatisticHandler.GetMeRightWWW(form,StatisticHandler.LOWER_STAMINA);
+		yield return w;
+	}
 	
 	protected IEnumerator  StartStats(string Uid,string Name){
 		WWWForm form = new WWWForm ();

@@ -275,6 +275,9 @@ public class ItemManager : MonoBehaviour {
         }
         RemoveOldAndExpired();
     }
+	public void ReloadItem(){
+	 StartCoroutine(ReLoadItemsSync());
+	}
 	public IEnumerator ReLoadItemsSync(){
 		
 		WWWForm form = new WWWForm ();
@@ -1200,6 +1203,21 @@ public class ItemManager : MonoBehaviour {
         }
     
     }
+	public void GetItem(string item,ShowAndTellAction action){
+			StartCoroutine(_GetItem(item,action));
+	}
+	
+	public IEnumerator _GetItem(string item,ShowAndTellAction action){
+		ShopSlot slot = allShopSlot[item];
+		if(slot.texture==null){
+			WWW www = StatisticHandler.GetMeRightWWW(slot.shopicon);
+		   
+			yield return www;
+			slot.texture = new Texture2D(138, 58);
+			www.LoadImageIntoTexture(slot.texture);
+		}
+		action(slot.name,slot.texture);
+	}
 	
 	//END SHOPING SECTION 
 	

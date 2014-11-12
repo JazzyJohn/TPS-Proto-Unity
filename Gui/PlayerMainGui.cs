@@ -130,7 +130,7 @@ public class PlayerMainGui : MonoBehaviour {
     private PauseMenu pausegui;
 
 	private PlayerHudNgui hud;
-
+	
     public GameFinished finished;
 	private ChatHolder[] chats;
 
@@ -206,6 +206,15 @@ public class PlayerMainGui : MonoBehaviour {
 		if (guiState == GUIState.Dedicated) {
 			return;
 		}
+		if(GameRule.instance.IsPractice()&&hud.practice.alpha==0.0f){
+			hud.practice.alpha =1.0f;
+		
+		}
+		if(!GameRule.instance.IsPractice()&&hud.practice.alpha==1.0f){
+			hud.practice.alpha =0.0f;
+		
+		}
+		
         if (pausegui.IsActive())
         
         {

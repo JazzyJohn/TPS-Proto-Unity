@@ -1,6 +1,10 @@
 ﻿using UnityEngine;
 using System.Collections;
 
+public delegate void ShowAndTellAction(string text, Texture2D texture);
+
+
+
 public class AddShops : MonoBehaviour
 {
 
@@ -16,6 +20,11 @@ public class AddShops : MonoBehaviour
 
     bool shoodHitMoney;
 
+    public UITexture textureAnon;
+	
+	public UILabel textureAnonLabel;
+
+    public UITweener textureAnonTweener;
 
 
     ConfirmAction noMoneyAction;
@@ -82,10 +91,23 @@ public class AddShops : MonoBehaviour
 
 
     }
+	
+	public void NewItem(){
+		ItemManager.instance.GetItem(ShowItem);
+	}
 
+	public void ShowItem(string text, Texture2D texture){
+		textureAnonLabel.text = TextGenerator.instance.GetMoneyText("OpenItem") + text;
+		textureAnon.texture = texture;
+        textureAnonTweener.enabled = true;
+        textureAnonTweener.tweenFactor = 0.0f;
+        textureAnonTweener.PlayForward();
+	}
+	
     public void SetMessage(string text)
     {
         annonce.text = text;
+		 annonceTweener.enabled = true;
         annonceTweener.tweenFactor = 0.0f;
         annonceTweener.PlayForward();
     }

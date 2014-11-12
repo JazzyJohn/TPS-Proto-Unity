@@ -5,6 +5,8 @@ using System.Xml;
 public class PremiumManager : MonoBehaviour {
 
     public static int DOUBLECOST = 1;
+	
+	public static int STAMINA_MULTIPLIER=2;
 
     bool buyBlock = false;
     public IEnumerator PayForDouble(AddShops shop)
@@ -82,6 +84,12 @@ public class PremiumManager : MonoBehaviour {
         LevelingManager.instance.AddPremiumBoost(AfterGameBonuses.expBoost);
         AfterGameBonuses.done = true;
     }
+	public static float GetMultiplier(){
+		if(GlobalPlayer.instance.stamina>0){
+			return STAMINA_MULTIPLIER;
+		}
+		return 1.0f;
+	}
 }
 
 public static class AfterGameBonuses
@@ -90,6 +98,7 @@ public static class AfterGameBonuses
     public static int expBoost;
     public static int cashBoost;
     public static bool done;
+	public static bool wasStamined;
 
     public static void Clear()
     {

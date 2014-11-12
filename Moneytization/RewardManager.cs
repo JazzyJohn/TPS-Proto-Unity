@@ -113,9 +113,13 @@ public class  RewardManager : MonoBehaviour, LocalPlayerListener,GameListener{
 	private int upCash = 0;
     private int upGold = 0;
 	public void UpMoney(string reason){
+		if(GameRule.instance.IsPractice()){
+			return;
+		}
+	
         if(rewardMoneyDictionary.ContainsKey(reason)){
-	    	upCash+= rewardMoneyDictionary[reason].cash;
-			upGold+= rewardMoneyDictionary[reason].gold;
+	    	upCash+= rewardMoneyDictionary[reason].cash *PremiumManager. GetMultiplier();
+			upGold+= rewardMoneyDictionary[reason].gold *PremiumManager. GetMultiplier();
             if (rewardMoneyDictionary[reason].cash != 0 || rewardMoneyDictionary[reason].gold != 0)
             {
                 rewardMoneyDictionary[reason].Increment();

@@ -261,7 +261,9 @@ public class BaseWeapon : DestroyableNetworkObject {
 		//RemoteAttachWeapon(inowner);
 		reloadTime =reloadTime*owner.GetPercentValue(CharacteristicList.RELOAD_SPEED);
         fireInterval = fireInterval * owner.GetPercentValue(CharacteristicList.FIRE_RATE);
-
+				
+		clipSize =(int) clipSize* owner.GetPercentValue(CharacteristicList.AMMO_AMOUNT);
+				
         float recoilmod = owner.GetValue(CharacteristicList.RECOIL_ALL);	
 		switch(descriptionType){
 			

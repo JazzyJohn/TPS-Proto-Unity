@@ -51,6 +51,8 @@ public class GameFinished : Statistic
     public UIPanel itemScroll;
 
     public Transform itemTable;
+	
+	public UIWidget stamined;
 
     public override void Activate()
     {
@@ -137,6 +139,12 @@ public class GameFinished : Statistic
         moneyTableWid.Reposition();
         AfterGameBonuses.cashBoost = totalCash;
         winner.text = TextGenerator.instance.GetSimpleText("Team" + GameRule.instance.Winner());
+		
+		if(AfterGameReward.wasStamined){
+			stamined.alpha = 1.0f;
+		}else{
+			stamined.alpha = 0.0f;
+		}
 
     }
     public void ResolvedExpired()

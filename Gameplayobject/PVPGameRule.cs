@@ -61,6 +61,9 @@ public class PVPGameRule : GameRule {
 			return Application.loadedLevelName;
 		}
 		
+		public override bool IsPractice(){
+			return PlayerManager.instance.playerCount()<=1;
+		}
 		/*public override void Kill(int team){
             ActuakKillCount(team);
 		}
@@ -101,7 +104,7 @@ public class PVPGameRule : GameRule {
 			//Player player = GameObject.Find ("Player").GetComponent<Player> ();
 			//player.GameEnd ();
 			EventHolder.instance.FireEvent(typeof(GameListener),"EventTeamWin",Winner());
-            
+            GlobalPlayer.instance.MathcEnd();
             ItemManager.instance.RemoveOldAndExpired();
 		}
 

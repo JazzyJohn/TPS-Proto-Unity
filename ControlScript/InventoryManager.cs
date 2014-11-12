@@ -188,7 +188,11 @@ public class InventoryManager : MonoBehaviour {
 	}
 	//Load needed weapon info
 	void LoadOldInfo(int index,BaseWeapon gun){
-		gun.curAmmo=weaponInfo[index].amount;
+		if(weaponInfo[index].amount==prefabWeapon[i].clipSize){
+			gun.curAmmo=gun.clipSize;
+		}else{
+			gun.curAmmo=weaponInfo[index].amount;
+		}
 		
 	}
 	
@@ -313,7 +317,6 @@ public class InventoryManager : MonoBehaviour {
 		currentWeapon=firstWeapon;
 		owner.setWeapon(firstWeapon);
 		LoadOldInfo();
-			
 			
 
 	}
