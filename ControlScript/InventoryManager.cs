@@ -188,7 +188,8 @@ public class InventoryManager : MonoBehaviour {
 	}
 	//Load needed weapon info
 	void LoadOldInfo(int index,BaseWeapon gun){
-		if(weaponInfo[index].amount==prefabWeapon[i].clipSize){
+        if (weaponInfo[index].amount == prefabWeapon[index].clipSize)
+        {
 			gun.curAmmo=gun.clipSize;
 		}else{
 			gun.curAmmo=weaponInfo[index].amount;

@@ -62,7 +62,10 @@ public class PVPGameRule : GameRule {
 		}
 		
 		public override bool IsPractice(){
-			return PlayerManager.instance.playerCount()<=1;
+             #if UNITY_EDITOR
+                  return false;
+            #endif
+            return PlayerManager.instance.playerCount()<=1;
 		}
 		/*public override void Kill(int team){
             ActuakKillCount(team);

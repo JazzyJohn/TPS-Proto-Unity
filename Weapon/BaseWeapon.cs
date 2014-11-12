@@ -261,8 +261,8 @@ public class BaseWeapon : DestroyableNetworkObject {
 		//RemoteAttachWeapon(inowner);
 		reloadTime =reloadTime*owner.GetPercentValue(CharacteristicList.RELOAD_SPEED);
         fireInterval = fireInterval * owner.GetPercentValue(CharacteristicList.FIRE_RATE);
-				
-		clipSize =(int) clipSize* owner.GetPercentValue(CharacteristicList.AMMO_AMOUNT);
+
+        clipSize =  Mathf.RoundToInt(clipSize * owner.GetPercentValue(CharacteristicList.AMMO_AMOUNT));
 				
         float recoilmod = owner.GetValue(CharacteristicList.RECOIL_ALL);	
 		switch(descriptionType){
@@ -633,19 +633,19 @@ public class BaseWeapon : DestroyableNetworkObject {
 			
 			case PREFIRETYPE.ChargedRange:
                 return _pumpCoef >= 1.0f;
-                break;
+                
 			case PREFIRETYPE.Salvo:
                 return _pumpAmount / pumpCoef >= 1.0f;
-                break;
+               
 			 case PREFIRETYPE.Spooling:
 				return _pumpAmount>=pumpAmount;
-                break;
+              
              case PREFIRETYPE.Guidance:
                 return _pumpAmount >= pumpAmount;
-                break;
+               
 			default:
                	return false;
-                break;
+               
         }
 	}
 	//temporary function to fix wrong aiming

@@ -136,6 +136,6 @@ public class GameRule : MonoBehaviour {
     }
 	
 	public virtual bool IsPractice(){
-	
+        return false;
 	}
 }

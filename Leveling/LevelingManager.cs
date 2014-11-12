@@ -69,6 +69,11 @@ public class LevelingManager : MonoBehaviour, LocalPlayerListener,GameListener{
 
     public List<RewardGUI>  GetAllReward()
     {
+        int multiplier = 1;
+        if (AfterGameBonuses.wasStamined)
+        {
+            multiplier = Mathf.RoundToInt(PremiumManager.STAMINA_MULTIPLIER);
+        }
          List<RewardGUI> answer = new List<RewardGUI>();
          foreach (KeyValuePair<string, ExpReward> entry in expDictionary)
          {
@@ -77,7 +82,7 @@ public class LevelingManager : MonoBehaviour, LocalPlayerListener,GameListener{
                  RewardGUI reward = new RewardGUI();
                  reward.count = entry.Value.GetRewardCounter();
                  entry.Value.Reset();
-                 reward.amount = reward.count * entry.Value.amount;
+                 reward.amount = reward.count * entry.Value.amount * multiplier;
                  reward.text = TextGenerator.instance.GetSimpleText(entry.Key);
 
                  answer.Add(reward);
@@ -163,7 +168,7 @@ public class LevelingManager : MonoBehaviour, LocalPlayerListener,GameListener{
 	//adding exp to current
 	public bool UpExp(string cause,int selected=-1){
         if(GameRule.instance.IsPractice()){
-			return;
+			return false;
 		}
 		if (!expDictionary.ContainsKey(cause))
         {
@@ -171,7 +176,7 @@ public class LevelingManager : MonoBehaviour, LocalPlayerListener,GameListener{
         }
 		
 		int exp = expDictionary[cause].amount;
-		exp = exp *PremiumManager. GetMultiplier();
+		exp = Mathf.RoundToInt( exp *PremiumManager. GetMultiplier());
         if (exp == 0)
         {
             return false;
@@ -223,15 +228,16 @@ public class LevelingManager : MonoBehaviour, LocalPlayerListener,GameListener{
 	}
 	IEnumerator SyncSend(WWWForm form){
 		WWW www =StatisticHandler.GetMeRightWWW(form,StatisticHandler.SAVE_LVL);
-		yield return w;
-		w.text();
+        yield return www;
+        
         XmlDocument xmlDoc = new XmlDocument();
-        xmlDoc.LoadXml(w.text);
+        Debug.Log(www.text);
+        xmlDoc.LoadXml(www.text);
 		XmlNode node =xmlDoc.SelectSingleNode("result/item_reward");
 		if(node!=null){
 			
 			FindObjectOfType<AddShops>().NewItem(node.InnerText);
-			Itemmanager.instance.ReloadItem()
+            ItemManager.instance.ReloadItem();
 			
 		}
 		

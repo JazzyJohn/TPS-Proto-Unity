@@ -183,7 +183,7 @@ public class AchievementManager : MonoBehaviour, LocalPlayerListener, GameListen
 						while (incomeQueue.Count>0) {
 								IncomingMessage mess = incomeQueue.Dequeue ();
                                 //Debug.Log(mess.param);
-								if(GameRule.instance.IsPractice()){
+								if(IsPractice){
 									continue;
 								}
 								foreach (Achievement achiv in ongoingAchivment) {
@@ -219,7 +219,7 @@ public class AchievementManager : MonoBehaviour, LocalPlayerListener, GameListen
 					
 						Thread.Sleep (1000);
 					}catch( Exception e){
-					
+                        Debug.LogError(e);
 					}
 				}
 	}
@@ -254,7 +254,16 @@ public class AchievementManager : MonoBehaviour, LocalPlayerListener, GameListen
 		}
 		
 	}
+    private bool IsPractice;
 	void Update(){
+        if (GameRule.instance != null)
+        {
+            IsPractice = GameRule.instance.IsPractice();
+        }
+        else
+        {
+            IsPractice = false;
+        }
 		List<int> syncAchivment = new List<int>();
 		while (outcomeQueue.Count>0) {
 			Achievement finished = outcomeQueue.Dequeue();

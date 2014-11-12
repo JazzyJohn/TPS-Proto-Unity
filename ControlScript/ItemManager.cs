@@ -231,6 +231,7 @@ public class ItemManager : MonoBehaviour {
             form.AddField("uid", UID);
 
             StartCoroutine(LoadItems(form));
+           // StartCoroutine(LoadShop(null));
 	}
 
 

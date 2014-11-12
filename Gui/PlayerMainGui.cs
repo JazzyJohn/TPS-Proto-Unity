@@ -206,14 +206,7 @@ public class PlayerMainGui : MonoBehaviour {
 		if (guiState == GUIState.Dedicated) {
 			return;
 		}
-		if(GameRule.instance.IsPractice()&&hud.practice.alpha==0.0f){
-			hud.practice.alpha =1.0f;
-		
-		}
-		if(!GameRule.instance.IsPractice()&&hud.practice.alpha==1.0f){
-			hud.practice.alpha =0.0f;
-		
-		}
+	
 		
         if (pausegui.IsActive())
         
@@ -229,35 +222,48 @@ public class PlayerMainGui : MonoBehaviour {
 					
 						
 		} else {
-            if (LocalPlayer != null && !LocalPlayer.IsDead())
+            if (PVPGameRule.instance.isGameEnded)
             {
-
-                if (PVPGameRule.instance.isGameEnded)
-                {
-
-                    ChageState(GUIState.GameResult);
-                   
+                ChageState(GUIState.GameResult);
+                if (hud.practice.alpha == 1.0f){
+                    hud.practice.alpha = 0.0f;
                 }
-                else
-                {
-                    ChageState(GUIState.Normal);
-                }
-
-
 
             }
             else
             {
 
-                if (PVPGameRule.instance.isGameEnded)
+                if (GameRule.instance.IsPractice() && hud.practice.alpha == 0.0f)
                 {
-                    ChageState(GUIState.GameResult);
+                    hud.practice.alpha = 1.0f;
 
-                }else if (guiState != GUIState.KillCam)
+                }
+                if (!GameRule.instance.IsPractice() && hud.practice.alpha == 1.0f)
                 {
-                    ChageState(GUIState.Respawn);
+                    hud.practice.alpha = 0.0f;
+
+                }
+
+                if (LocalPlayer != null && !LocalPlayer.IsDead())
+                {
+
+
+                    ChageState(GUIState.Normal);
+
+
+
+
+                }
+                else
+                {
+                    if (guiState != GUIState.KillCam)
+                    {
+                        ChageState(GUIState.Respawn);
+
+                    }
                 }
             }
+            
 		}
 		
 		 Messagess();
@@ -698,7 +704,7 @@ public class PlayerMainGui : MonoBehaviour {
 		message.text = text;
 		message.worldPoint = worldPoint;
 		message.type = type;
-		float damage = 0f;
+	
 		
         message.entry = P1Hud.Add(message.text, Color.red,  message.worldPoint,false);
 		guiMessages.Enqueue(message);
@@ -753,13 +759,13 @@ public class PlayerMainGui : MonoBehaviour {
 		switch (team) {
 			case 1:
                 return "Команда А";
-				break;
+				
 		case 2:
 			return"Команда B";
-				break;
+				
             case 0:
                 return "Планета Каспи";
-                break;
+               
 		}
 		return "";
 	}

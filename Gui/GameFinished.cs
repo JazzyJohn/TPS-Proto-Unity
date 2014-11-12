@@ -139,8 +139,9 @@ public class GameFinished : Statistic
         moneyTableWid.Reposition();
         AfterGameBonuses.cashBoost = totalCash;
         winner.text = TextGenerator.instance.GetSimpleText("Team" + GameRule.instance.Winner());
-		
-		if(AfterGameReward.wasStamined){
+
+        if (AfterGameBonuses.wasStamined)
+        {
 			stamined.alpha = 1.0f;
 		}else{
 			stamined.alpha = 0.0f;

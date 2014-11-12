@@ -111,14 +111,20 @@ public class NetworkController : MonoBehaviour {
      public void OnVariablesUpdate(BaseEvent evt)
     {
      //   evt.Params["user"];
-        foreach (System.Object obj in evt.Params.Keys)
+     /*   foreach (System.Object obj in evt.Params.Keys)
         {
             Debug.Log(obj +"  "+obj.GetType());
         }
       
-        return;
-	   List<String> changedVars = (List<String>)evt.Params["changedVars"];
-	   Debug.Log("OnVariablesUpdate: " + string.Join("|", changedVars.ToArray()));
+        */
+        ArrayList changedVars = (ArrayList)evt.Params["changedVars"];
+       if (changedVars != null)
+       {
+             Debug.Log("OnVariablesUpdate: " +  changedVars.ToArray().ToFormattedString("|"));
+       }
+
+
+	
 	   User user = (User)evt.Params["user"];
 	   if (user == smartFox.MySelf)
 	   {
@@ -126,9 +132,11 @@ public class NetworkController : MonoBehaviour {
 				Debug.Log(smartFox.MySelf.GetVariable("Master").GetBoolValue());
 				if(smartFox.MySelf.GetVariable("Master").GetBoolValue())
 				{
-				  
-				   GameRule.instance.StartGame();
-				   MasterViewUpdate();
+                    if (GameRule.instance != null)
+                    {
+                        GameRule.instance.StartGame();
+                        MasterViewUpdate();
+                    }
 				}
 			}
 				   
@@ -283,7 +291,7 @@ public class NetworkController : MonoBehaviour {
 
     public void OnLogin(BaseEvent evt)
     {
-        bool success = true;
+       
         if (evt.Params.Contains("success") && !(bool)evt.Params["success"])
         {
             // Login failed - lets display the error message sent to us
@@ -338,8 +346,10 @@ public class NetworkController : MonoBehaviour {
             switch (cmd)
             {
                 case "getTime":
-                   
-		            TimeManager.Instance.Synchronize(dt.GetLong("t"));
+                    if (TimeManager.Instance != null)
+                    {
+                        TimeManager.Instance.Synchronize(dt.GetLong("t"));
+                    }
                     break;
             
                 case "playersSpawm":

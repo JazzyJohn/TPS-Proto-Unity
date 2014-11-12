@@ -233,17 +233,21 @@ public class GlobalPlayer : MonoBehaviour {
 	}
 	
 	public void MathcEnd(){
-		if(stamina>0){
-			AfterGameReward.wasStamined = true;
-			stamina--;
-			StartCourutine(LowetStamina);
-		}
-		AfterGameReward.wasStamined = false;
+        if (stamina > 0&& !GameRule.instance.IsPractice())
+        {
+            AfterGameBonuses.wasStamined = true;
+            stamina--;
+            StartCoroutine(LowerStamina());
+        }
+        else
+        {
+            AfterGameBonuses.wasStamined = false;
+        }
 	}
-	protected IENumerator LowerStamina(){
+	protected IEnumerator LowerStamina(){
 		WWWForm form = new WWWForm ();
 		
-		form.AddField ("uid", Uid);
+		form.AddField ("uid", UID);
 		WWW w = StatisticHandler.GetMeRightWWW(form,StatisticHandler.LOWER_STAMINA);
 		yield return w;
 	}

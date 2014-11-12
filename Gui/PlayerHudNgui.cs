@@ -68,6 +68,8 @@ public class PlayerHudNgui : MonoBehaviour {
     public UILabel BlueTeamScore;
 
 	public UIPanel hudpanel;
+
+    public UIPanel practice;
 	[System.Serializable]
 	public class OneAnnonce{
 		public  string sprite;

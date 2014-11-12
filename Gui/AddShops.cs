@@ -92,13 +92,13 @@ public class AddShops : MonoBehaviour
 
     }
 	
-	public void NewItem(){
-		ItemManager.instance.GetItem(ShowItem);
+	public void NewItem(string id){
+        ItemManager.instance.GetItem(id,ShowItem);
 	}
 
 	public void ShowItem(string text, Texture2D texture){
-		textureAnonLabel.text = TextGenerator.instance.GetMoneyText("OpenItem") + text;
-		textureAnon.texture = texture;
+		textureAnonLabel.text = TextGenerator.instance.GetSimpleText("OpenItem") + text;
+		textureAnon.mainTexture = texture;
         textureAnonTweener.enabled = true;
         textureAnonTweener.tweenFactor = 0.0f;
         textureAnonTweener.PlayForward();

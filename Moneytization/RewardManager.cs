@@ -45,6 +45,11 @@ public class  RewardManager : MonoBehaviour, LocalPlayerListener,GameListener{
 
     public List<RewardGUI> GetAllReward()
     {
+        int multiplier = 1;
+        if (AfterGameBonuses.wasStamined)
+        {
+            multiplier = Mathf.RoundToInt(PremiumManager.STAMINA_MULTIPLIER);
+        }
         List<RewardGUI> answer = new List<RewardGUI>();
         foreach (KeyValuePair<string, MoneyReward> entry in rewardMoneyDictionary)
         {
@@ -55,7 +60,7 @@ public class  RewardManager : MonoBehaviour, LocalPlayerListener,GameListener{
                     RewardGUI reward = new RewardGUI();
                     reward.count = entry.Value.GetRewardCounter();
 
-                    reward.amount = reward.count * entry.Value.cash;
+                    reward.amount = reward.count * entry.Value.cash * multiplier;
                     reward.text = TextGenerator.instance.GetSimpleText(entry.Key);
                     reward.isCash = true;
                     answer.Add(reward);
@@ -64,7 +69,7 @@ public class  RewardManager : MonoBehaviour, LocalPlayerListener,GameListener{
                      RewardGUI reward = new RewardGUI();
                     reward.count = entry.Value.GetRewardCounter();
 
-                    reward.amount = reward.count * entry.Value.gold;
+                    reward.amount = reward.count * entry.Value.gold * multiplier;
                     reward.text = TextGenerator.instance.GetSimpleText(entry.Key);
                     reward.isCash = false;
                     answer.Add(reward);
@@ -118,8 +123,8 @@ public class  RewardManager : MonoBehaviour, LocalPlayerListener,GameListener{
 		}
 	
         if(rewardMoneyDictionary.ContainsKey(reason)){
-	    	upCash+= rewardMoneyDictionary[reason].cash *PremiumManager. GetMultiplier();
-			upGold+= rewardMoneyDictionary[reason].gold *PremiumManager. GetMultiplier();
+	    	upCash+=Mathf.RoundToInt( rewardMoneyDictionary[reason].cash *PremiumManager. GetMultiplier());
+			upGold+=Mathf.RoundToInt( rewardMoneyDictionary[reason].gold *PremiumManager. GetMultiplier());
             if (rewardMoneyDictionary[reason].cash != 0 || rewardMoneyDictionary[reason].gold != 0)
             {
                 rewardMoneyDictionary[reason].Increment();
