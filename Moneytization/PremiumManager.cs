@@ -7,8 +7,22 @@ public class PremiumManager : MonoBehaviour {
     public static int DOUBLECOST = 1;
 	
 	public static int STAMINA_MULTIPLIER=2;
-
-    bool buyBlock = false;
+	
+	public static int PREMIUM_MULTIPLIER= 2;
+	
+	bool isPremium = false;
+	
+	bool buyBlock = false;
+	
+	DateTime timeEnd;
+	
+	
+	
+	public void Start(){
+		timeEnd = DateTime.Now;
+	}
+	
+	
     public IEnumerator PayForDouble(AddShops shop)
     {
         if (buyBlock)
@@ -49,10 +63,37 @@ public class PremiumManager : MonoBehaviour {
         buyBlock = false;
     }
 
-
+	public string TimeLeft(){
+		if(premium){
+			timeEnd.Subtract(DateTime.Now).ToString("c");
+		}
+		return "";
+	}
+	
+	public bool IsPremium(){
+		return premium;
+	}
+	public void Update(){
+		DateTime saveNow = DateTime.Now;
+		if(saveNow>timeEnd&&premium){
+			
+			GUIHelper.SendMessage(TextGenerator.instance.GetSimpleText("PremiumEnd"));
+			
+			premium= false; 
+		}	
+		
+	
+	}
+	
+	public void SetPremium(bool isPremium,DateTime timeEnd){
+		premium = isPremium;
+		this.timeEnd = timeEnd;
+		
+	}
+	
     private static PremiumManager s_Instance = null;
 
-    public static PremiumManager instance
+	public static PremiumManager instance
     {
         get
         {
@@ -85,10 +126,14 @@ public class PremiumManager : MonoBehaviour {
         AfterGameBonuses.done = true;
     }
 	public static float GetMultiplier(){
+		float multiplier = 1.0f;
 		if(GlobalPlayer.instance.stamina>0){
-			return STAMINA_MULTIPLIER;
+			multiplier*= STAMINA_MULTIPLIER;
 		}
-		return 1.0f;
+		if(instance.premium){
+			multiplier*= PREMIUM_MULTIPLIER;
+		}
+		return multiplier;
 	}
 }
 

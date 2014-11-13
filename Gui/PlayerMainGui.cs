@@ -814,3 +814,21 @@ public class PlayerMainGui : MonoBehaviour {
 		ChageState(GUIState.Respawn);
 	}
 }
+
+public static class GUIHelper{
+	
+	public static SendMessage(string text){
+			MainMenuGUI menu =Object.FindObjectOfType<MainMenuGUI>();
+			if (menu != null)
+			{
+				menu.SetMessage(text);
+			}
+			AddShops shops =Object.FindObjectOfType<AddShops>();
+			if (shops != null)
+			{
+				shops.SetMessage(text);
+			}
+		
+	}
+	
+}

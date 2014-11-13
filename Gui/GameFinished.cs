@@ -53,6 +53,10 @@ public class GameFinished : Statistic
     public Transform itemTable;
 	
 	public UIWidget stamined;
+	
+	public UIWidget forNotPremium;
+	
+	public UIWidget premium;
 
     public override void Activate()
     {
@@ -145,6 +149,17 @@ public class GameFinished : Statistic
 			stamined.alpha = 1.0f;
 		}else{
 			stamined.alpha = 0.0f;
+		}
+			public UIWidget forNotPremium;
+	
+	
+		if(PremiumManager.instance.IsPremium()){
+			forNotPremium.alpha = 0.0f;
+			premium.alpha = 1.0f;
+		
+		}else{
+			forNotPremium.alpha = 1.0f;
+			premium.alpah = 0.0f;
 		}
 
     }

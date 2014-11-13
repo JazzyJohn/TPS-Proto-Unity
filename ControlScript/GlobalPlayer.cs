@@ -10,6 +10,9 @@ public enum PLATFORMTYPE{
 	VK,
 	FACEBOOK
 }
+public enum AsyncNotify{
+	PREMIUM
+}
 public class GlobalPlayer : MonoBehaviour {
 
 	void Awake(){
@@ -230,6 +233,23 @@ public class GlobalPlayer : MonoBehaviour {
 		gold = int.Parse (xmlDoc.SelectSingleNode ("player/gold").InnerText);
 		cash = int.Parse (xmlDoc.SelectSingleNode ("player/cash").InnerText);
 		stamina = int.Parse (xmlDoc.SelectSingleNode ("player/stamina").InnerText);
+		bool isPremium = bool.Parse (xmlDoc.SelectSingleNode ("player/premium").InnerText);
+		DateTime timeEnd= DateTime.Parse((xmlDoc.SelectSingleNode ("player/premiumEnd").InnerText);
+		PremiumManager.instance.SetPremium(isPremium,timeEnd);
+		XmlNodeList list = xmlDoc.SelectNodes("player/notify");
+       
+
+        foreach (XmlNode node in list)
+        {
+			AsyncNotify type = (AsyncNotify)Enum.Parse(typeof(AsyncNotify), node.SelectSingleNode("type").InnerText);
+			switch(type){
+				case AsyncNotify.PREMIUM:
+				GUIHelper.SendMessage(TextGenerator.instance.GetSimpleText("PremiumStart"));
+				ItemManager.instance.ReloadItem();			
+				break;
+			}
+		}
+		
 	}
 	
 	public void MathcEnd(){

@@ -11,6 +11,8 @@ public enum GameClassEnum{ENGINEER,ASSAULT,SCOUT,MEDIC,ANY,ROBOTHEAVY,ROBOTMEDIU
 
 public class Player : MonoBehaviour {
 
+	public static Player localPlayer;
+
 	public LayerMask robotLayer =1 ;
 
 	public List<string> friendsInfo = new List<string>();
@@ -144,6 +146,7 @@ public class Player : MonoBehaviour {
        
         if (playerView.isMine)
         {
+			localPlayer= this;
             if (charMan == null)
             {
                 charMan = GetComponent<CharacteristicPlayerManager>();
@@ -206,7 +209,9 @@ public class Player : MonoBehaviour {
 	public virtual Pawn GetNewPawn(){
 			return PlayerManager.instance.SpawmPlayer(PlayerManager.instance.pawnName[selected],team,GetBuffs());
 	}
-
+	void OnDestroy(){
+		localPlayer= null;
+	}
 	public int[] GetBuffs(){
 		List <int> allbuff = new List<int>();
         allbuff.AddRange(PassiveSkillManager.instance.GetSkills(selected));

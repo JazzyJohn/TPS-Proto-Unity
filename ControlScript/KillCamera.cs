@@ -70,6 +70,7 @@ public class KillCamera : ThirdPersonCamera
 		_pawn  =Killer;
         killpawn = Killer;
 		killCamTimer = 0.0f;
+		killCamTime = Player.localPlayer.respawnTime;
 		if(_pawn !=null){
 			_target =_pawn.myTransform;
 			if(_pawn.bigTarget){
