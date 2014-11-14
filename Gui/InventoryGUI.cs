@@ -182,6 +182,9 @@ public class InventoryGUI : MonoBehaviour {
     {
         MainMenu.SetMessage(text);
     }
+	public void SetMoneyMessage(string cash, string gold){
+		MainMenu.SetMoneyMessage(cash,gold);
+	}
     public void ReloadCategory()
     {
         EditClass((int)InvItem.gameClass);

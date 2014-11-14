@@ -123,17 +123,25 @@ public class  RewardManager : MonoBehaviour, LocalPlayerListener,GameListener{
 		}
 	
         if(rewardMoneyDictionary.ContainsKey(reason)){
-	    	upCash+=Mathf.RoundToInt( rewardMoneyDictionary[reason].cash *PremiumManager. GetMultiplier());
-			upGold+=Mathf.RoundToInt( rewardMoneyDictionary[reason].gold *PremiumManager. GetMultiplier());
-            if (rewardMoneyDictionary[reason].cash != 0 || rewardMoneyDictionary[reason].gold != 0)
+			MoneyReward reward = rewardMoneyDictionary[reason];
+			
+	    	upCash+=Mathf.RoundToInt( reward.cash *PremiumManager. GetMultiplier());
+			upGold+=Mathf.RoundToInt( reward.gold *PremiumManager. GetMultiplier());
+            if (reward.cash != 0 || reward.gold != 0)
             {
-                rewardMoneyDictionary[reason].Increment();
+               reward.Increment();
             }
         }
         if (PlayerMainGui.instance != null)
         {
-            String reward = TextGenerator.instance.GetMoneyText(reason,rewardMoneyDictionary[reason].cash, rewardMoneyDictionary[reason].gold);
-            PlayerMainGui.instance.AddMessage(reward, PlayerMainGui.MessageType.MONEY_REWARD);
+			if(reward.cash>0){
+			    String reward = TextGenerator.instance.GetMoneyText(reason,reward.cash);
+				PlayerMainGui.instance.AddMessage(reward, PlayerMainGui.MessageType.MONEY_REWARD);
+			}
+			if( reward.gold >0){
+			    String reward = TextGenerator.instance.GetMoneyText(reason, reward.gold );
+				PlayerMainGui.instance.AddMessage(reward, PlayerMainGui.MessageType.GOLD_REWARD);
+			}
         }
 		
 	}

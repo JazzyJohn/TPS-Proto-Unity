@@ -20,6 +20,8 @@ public class MainMenuGUI : MonoBehaviour {
 	public LoginPanel _LoginPanel;
 
 	public PanelsNgui _PanelsNgui;
+	
+	public MoneyAnnonce _MoneyAnnonce;
 
 	public List<Chat> _chat;
 
@@ -452,7 +454,13 @@ public class MainMenuGUI : MonoBehaviour {
         _PanelsNgui.annonceTweener.tweenFactor = 0.0f;
         _PanelsNgui.annonceTweener.PlayForward();
     }
-
+	public void SetMoneyMessage(string cash,string gold)
+    {
+        _MoneyAnnonce.gold.text = gold;
+		_MoneyAnnonce.cash.text = cash;
+        _MoneyAnnonce.annonceTweener.tweenFactor = 0.0f;
+        _MoneyAnnonce.annonceTweener.PlayForward();
+    }
 
     public void MoneyError()
     {
@@ -602,4 +610,13 @@ public class LoginPanel
 	
 	
 }
+[System.Serializable]
+public class MoneyAnnonce
+{
+	public UILabel cash;
+	public UILabel gold;
+    public UITweener annonceTweener;
+
+}
+
 

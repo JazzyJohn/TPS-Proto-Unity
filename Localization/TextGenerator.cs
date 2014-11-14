@@ -68,14 +68,14 @@ public class TextGenerator : MonoBehaviour{
 		}
 		 return String.Format(result,amount);
 	}
-	public string GetMoneyText(string cause, int cash,int gold){
+	public string GetMoneyText(string cause, int count){
 		string result;
 		if(moneyTexts.ContainsKey(cause)){
 			result = moneyTexts[cause];
 		}else{
-			return cash+" "+gold;
+			return cash;
 		}
-		return String.Format(result,cash,gold);
+		return String.Format(result,cash);
 	}
 	public string GetMainAnnonceText(AnnonceType type){
 		

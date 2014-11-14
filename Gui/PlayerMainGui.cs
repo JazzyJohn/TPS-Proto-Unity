@@ -32,7 +32,8 @@ public class PlayerMainGui : MonoBehaviour {
 			ANALIZE_POINT = 4,
 			OPEN_LORE = 5,
             MONEY_REWARD=6,
-            LVL_REWARD=7
+            LVL_REWARD=7,
+			GOLD_REWARD =8,
 	}
 	public Texture[] messageTexture;
 	public GUIStyle[] messageStyle;
@@ -713,7 +714,10 @@ public class PlayerMainGui : MonoBehaviour {
 		try{
 		switch(type){
 			case MessageType.MONEY_REWARD:
-				hud.AddMoneyMessage(text);
+				hud.AddMoneyMessage(text,false);
+			break;
+			case MessageType.GOLD_REWARD
+				hud.AddMoneyMessage(text,true);
 			break;
 			case MessageType.LVL_REWARD:
 				hud.AddLvlMessage(text);

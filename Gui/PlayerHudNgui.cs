@@ -126,7 +126,8 @@ public class PlayerHudNgui : MonoBehaviour {
 	public Transform moneyTable;
 	
 	public Transform moneyPrefab;
-
+	
+	public Transform goldPrefab;
 
     public enum HudState
     {
@@ -248,8 +249,13 @@ public class PlayerHudNgui : MonoBehaviour {
 		}
 
     }
-	public void AddMoneyMessage(string text){
-		Transform newTrans = Instantiate(moneyPrefab) as Transform;
+	public void AddMoneyMessage(string text,bool gold){
+		Transform newTrans;
+		if(gold){
+			newTrans =Instantiate(moneyPrefab) as Transform;
+		}else{
+			newTrans = Instantiate(goldPrefab) as Transform;
+		}
 		newTrans.parent = moneyTable;
 		newTrans.localScale= new Vector3(1f, 1f, 1f);
 		newTrans.localEulerAngles  = new Vector3(0f, 0f, 0f);

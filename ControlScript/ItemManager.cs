@@ -1172,7 +1172,7 @@ public class ItemManager : MonoBehaviour {
             {
                 yield return numenator.Current;
             }
-            gui.SetMessage(TextGenerator.instance.GetSimpleText("KP") + " + " + xmlDoc.SelectSingleNode("result/cash").InnerText + " \n " + TextGenerator.instance.GetSimpleText("GITP") + " + " + xmlDoc.SelectSingleNode("result/gold").InnerText);
+            gui.SetMoneyMessage(xmlDoc.SelectSingleNode("result/cash").InnerText , xmlDoc.SelectSingleNode("result/gold").InnerText);
             gui.CloseLot();
             gui.HideRepair();
             RemoveInventoryItem(id);
