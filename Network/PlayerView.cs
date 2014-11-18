@@ -20,6 +20,9 @@ public class PlayerView : MonoBehaviour {
     public void SetId(int userId)
     {
         ownerId = userId;
+		if( NetworkController.smartFox.MySelf==null){
+			NetworkController.Instance.BackToMenu();
+		}
         isMine = NetworkController.smartFox.MySelf.Id == ownerId;
         observed = GetComponent<Player>();
         allPlayer.Add(ownerId, this);

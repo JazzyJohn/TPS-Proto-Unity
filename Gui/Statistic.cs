@@ -117,20 +117,22 @@ public class Statistic : MonoBehaviour {
 	{
 		PlayerName.text = NamePlayer;
 
-		switch((GameClassEnum)Class)
-		{
-		case GameClassEnum.ENGINEER:
-			PlayerPreviev.spriteName="engineer";
-			break;
-		case GameClassEnum.MEDIC:
-			PlayerPreviev.spriteName="medic";
-			break;
-		case GameClassEnum.ASSAULT:
-			PlayerPreviev.spriteName="storm";
-			break;
-		case GameClassEnum.SCOUT:
-			PlayerPreviev.spriteName="sniper";
-			break;
+		if(PlayerPreviev!=null){
+			switch((GameClassEnum)Class)
+			{
+			case GameClassEnum.ENGINEER:
+				PlayerPreviev.spriteName="engineer";
+				break;
+			case GameClassEnum.MEDIC:
+				PlayerPreviev.spriteName="medic";
+				break;
+			case GameClassEnum.ASSAULT:
+				PlayerPreviev.spriteName="storm";
+				break;
+			case GameClassEnum.SCOUT:
+				PlayerPreviev.spriteName="sniper";
+				break;
+			}
 		}
 		PlayerMainGui.LevelStats stats = LevelingManager.instance.GetPlayerStats ();
 

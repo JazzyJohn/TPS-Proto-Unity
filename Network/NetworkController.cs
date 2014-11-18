@@ -235,6 +235,25 @@ public class NetworkController : MonoBehaviour {
 	private void UnsubscribeDelegates() {
         _smartFox.RemoveAllEventListeners();
 	}
+	public void BackToMenu(){
+		Pause = false;
+        if (effect != null)
+        {
+            effect.enabled = false;
+        }
+		Screen.lockCursor = false;
+		try
+        {
+			LeaveRoomReuqest();
+		}
+		catch (Exception e)
+        {
+           
+            Debug.LogError("Exception handling response: " + e.Message + " >>> " + e.StackTrace);
+        }
+
+        Application.LoadLevel(0);
+	}
     void OnApplicationQuit()
     {
 		_smartFox.Disconnect();
