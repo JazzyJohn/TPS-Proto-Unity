@@ -17,6 +17,8 @@ public class GUIItem{
     public ItemColor color;
     public int group;
     public string text;
+    public bool isTimed=false;
+    public DateTime timeend;
     public WeaponChar chars;
 }
 public class SelectPlayerGUI : MonoBehaviour {
@@ -331,6 +333,7 @@ public class SelectPlayerGUI : MonoBehaviour {
                 MenuElements.WeaponBars[TypeW].widget.alpha = 0.0f;
             }
         }
+        MenuElements.WeaponSelect[TypeW] = item;
         Choice.SetChoice(TypeW, Choice._Player, item.index);
     }
 
@@ -354,7 +357,17 @@ public class SelectPlayerGUI : MonoBehaviour {
             if (MenuElements.Blue != null)
             {
                 MenuElements.Blue.text = Blue.ToString();
-            }		
+            }
+            DateTime saveNow = DateTime.Now;
+            for (int i = 0; i < MenuElements.WeaponText.Length;i++ )
+            {
+                if (MenuElements.WeaponSelect[i].isTimed)
+                {
+                    TimeSpan timeSpan = MenuElements.WeaponSelect[i].timeend.Subtract(saveNow);
+                    MenuElements.WeaponText[i].text = string.Format("{0:D2}:{1:D2}:{2:D2}:{3:D2}", timeSpan.Days, timeSpan.Hours, timeSpan.Minutes, timeSpan.Seconds);
+                }
+
+            }
 		
 	}
 
@@ -460,6 +473,7 @@ public class _MenuElements
 
 	public UITexture[] Weapon;
     public UISprite[] WeaponBack;
+    public GUIItem[] WeaponSelect= new GUIItem[8];
     public UILabel[] WeaponText;
     public UILabel[] WeaponTitle;
     public CharSection[] WeaponBars;

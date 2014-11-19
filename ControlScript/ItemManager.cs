@@ -649,7 +649,7 @@ public class ItemManager : MonoBehaviour {
         
         if (items != null)
         {
-            DateTime saveNow = DateTime.Now;
+           
             int intGameSlot = (int)gameSlot;
             foreach (InventorySlot slot in items)
             {
@@ -669,10 +669,14 @@ public class ItemManager : MonoBehaviour {
                     else
                     {
 
+                        if (slot.isTimed)
+                        {
+                            gui.isTimed = true;
+                            gui.timeend = slot.timeEnd;
+                             gui.color = ItemColor.Times;
+                        }
 
-                        TimeSpan timeSpan = slot.timeEnd.Subtract(saveNow);
-                        gui.text = string.Format("{0:D2}:{1:D2}:{2:D2}:{3:D2}",timeSpan.Days, timeSpan.Hours, timeSpan.Minutes, timeSpan.Seconds); 
-                        gui.color = ItemColor.Times;
+                      
                     }
                     gui.chars = slot.chars;
                     gui.name = slot.name;

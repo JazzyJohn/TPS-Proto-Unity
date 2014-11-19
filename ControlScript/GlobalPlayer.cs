@@ -228,7 +228,7 @@ public class GlobalPlayer : MonoBehaviour {
 	
 	public void parseProfile(string XML){
 
-        Debug.Log(XML);
+//        Debug.Log(XML);
 		XmlDocument xmlDoc = new XmlDocument();
 		xmlDoc.LoadXml(XML);
 		gold = int.Parse (xmlDoc.SelectSingleNode ("player/gold").InnerText);

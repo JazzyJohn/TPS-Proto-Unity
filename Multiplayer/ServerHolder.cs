@@ -362,7 +362,7 @@ public class ServerHolder : MonoBehaviour
         {
             return;
         }
-        map = allMaps[0].name;
+        map = allMaps[UnityEngine.Random.Range(0,allMaps.Length)].name;
         blockQuickStart = true;
         newRoomName = map +UnityEngine.Random.Range(1000,10000).ToString();
         CreateNewRoom(GAMEMODE.PVP);

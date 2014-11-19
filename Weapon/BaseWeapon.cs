@@ -567,6 +567,10 @@ public class BaseWeapon : DestroyableNetworkObject {
 		}
 		
 	}
+    public void OnDestroy()
+    {
+        owner.animator.ReloadStop();
+    }
 	public void Reload(){
 
 		isReload = false;
