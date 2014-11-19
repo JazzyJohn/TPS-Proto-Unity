@@ -131,18 +131,21 @@ public class  RewardManager : MonoBehaviour, LocalPlayerListener,GameListener{
             {
                reward.Increment();
             }
+            if (PlayerMainGui.instance != null)
+            {
+                if (reward.cash > 0)
+                {
+                    String rewardStr = TextGenerator.instance.GetMoneyText(reason, Mathf.RoundToInt(reward.cash * PremiumManager.GetMultiplier()));
+                    PlayerMainGui.instance.AddMessage(rewardStr, PlayerMainGui.MessageType.MONEY_REWARD);
+                }
+                if (reward.gold > 0)
+                {
+                    String rewardStr = TextGenerator.instance.GetMoneyText(reason,Mathf.RoundToInt( reward.gold * PremiumManager.GetMultiplier()));
+                    PlayerMainGui.instance.AddMessage(rewardStr, PlayerMainGui.MessageType.GOLD_REWARD);
+                }
+            }
         }
-        if (PlayerMainGui.instance != null)
-        {
-			if(reward.cash>0){
-			    String reward = TextGenerator.instance.GetMoneyText(reason,reward.cash);
-				PlayerMainGui.instance.AddMessage(reward, PlayerMainGui.MessageType.MONEY_REWARD);
-			}
-			if( reward.gold >0){
-			    String reward = TextGenerator.instance.GetMoneyText(reason, reward.gold );
-				PlayerMainGui.instance.AddMessage(reward, PlayerMainGui.MessageType.GOLD_REWARD);
-			}
-        }
+     
 		
 	}
     private String MakeRewardString(int cash,int gold)

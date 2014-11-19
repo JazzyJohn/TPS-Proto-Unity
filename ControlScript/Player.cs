@@ -220,7 +220,7 @@ public class Player : MonoBehaviour {
         {
             allbuff.Add(ItemManager.instance.GetBuffFromStim(stimId));
         }
-     
+        
 		return allbuff.ToArray();
 	}
 	void Update(){
@@ -239,10 +239,12 @@ public class Player : MonoBehaviour {
 			if(respawnTimer<=0&&isStarted){
 				respawnTimer=respawnTime;
 				currentPawn = GetNewPawn();
-				currentPawn.ChangeDefaultWeapon(Choice._Player);
+				
 				ItemManager.instance.SaveItemForSlot();
 				//PVPGameRule.instance.Spawn(team);
 				AfterSpawnSetting(currentPawn,GetBuffs());
+                activeSteampacks.Clear();
+                currentPawn.ChangeDefaultWeapon(Choice._Player);
                 if (GameRule.instance.CanUseRobot)
                 {
                     prefabBot = PlayerManager.instance.avaibleBots[selectedBot];

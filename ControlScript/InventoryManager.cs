@@ -7,6 +7,7 @@ public enum AMMOTYPE{PISTOL,RIFLE,ROCKETS,MACHINEGUN,SHOOTGUNSHEELL,FUEL};
 public class InventoryManager : MonoBehaviour {
 
 	public BaseWeapon[] prefabWeapon;
+    public string[] weaponNames;
 
 	private BaseWeapon currentWeapon;
 	
@@ -25,7 +26,30 @@ public class InventoryManager : MonoBehaviour {
 
 			
 	}
-	
+
+    public void Awake()
+    {
+        prefabWeapon = new BaseWeapon[weaponNames.Length];
+        for (int i =0;i<weaponNames.Length;i++)
+        {
+
+            GameObject resourceGameObject = null;
+            if (PhotonResourceWrapper.allobject.ContainsKey(weaponNames[i]))
+            {
+                resourceGameObject = PhotonResourceWrapper.allobject[ weaponNames[i]];
+            }
+            else
+            {
+
+
+                resourceGameObject = (GameObject)Resources.Load( weaponNames[i], typeof(GameObject));
+
+
+
+            }
+            prefabWeapon[i] = resourceGameObject.GetComponent<BaseWeapon>() ;
+        }
+    }
 	
 	public class WeaponBackUp {
 	
@@ -305,7 +329,7 @@ public class InventoryManager : MonoBehaviour {
         }
 
 	
-		owner.setWeapon(firstWeapon);
+	
 		if(currentWeapon!=null){
 			if(indexWeapon!=newWeapon){
 				SaveOldInfo(indexWeapon,currentWeapon);

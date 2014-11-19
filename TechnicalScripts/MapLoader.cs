@@ -157,7 +157,7 @@ public class MapLoader : MonoBehaviour {
 
                      
                         GameObject prefab = ((MonoBehaviour)prefabObjects[i]).gameObject;
-                        Debug.Log(prefab.name);
+                     //   Debug.Log(prefab.name);
                         if (!PhotonResourceWrapper.allobject.ContainsKey(prefab.name))
                         {
                             PhotonResourceWrapper.allobject[prefab.name] = prefab;

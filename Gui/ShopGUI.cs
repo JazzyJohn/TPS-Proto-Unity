@@ -9,6 +9,7 @@ public class ShopGUI : MonoBehaviour {
 	public Transform TableTransform;
 	public UITable Table;
 	public UIPanel ItemsPanel;
+    public UIWidget premiumWidjet;
 	public UIScrollView ItemsScroll;
 	public MainMenuGUI MainMenu;
 
@@ -19,6 +20,8 @@ public class ShopGUI : MonoBehaviour {
 
     public LotItemGUI LotGUI_item;
 	public UIScrollBar Scroll;
+
+
 
 
 
@@ -200,6 +203,16 @@ public class ShopItems
 		if(Main.ItemsPanel.alpha == 1f)
 			Main.ItemsPanel.alpha = 0f;
 
+        if (category == ShopSlotType.PREMIUM)
+        {
+            Main.premiumWidjet.alpha = 1.0f;
+            Main.ItemsPanel.alpha = 0.0f;
+        }
+        else
+        {
+            Main.premiumWidjet.alpha = 0.0f;
+            Main.ItemsPanel.alpha = 1.0f;
+        }
         this.gameClass = gameClass;
         this.category = category;
         Main.StartCoroutine( ItemManager.instance.GenerateList(gameClass, category));

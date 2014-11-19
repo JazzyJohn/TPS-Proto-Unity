@@ -48,8 +48,10 @@ public class SmallShop : MonoBehaviour {
     }
     public void Show() {
         panel.alpha = 1.0f;
-        MyGold.text = GlobalPlayer.instance.gold + " GITP";
-        MyCash.text = GlobalPlayer.instance.cash + " KP";
+        MyGold.text = GlobalPlayer.instance.gold.ToString();
+        MyCash.text = GlobalPlayer.instance.cash.ToString();
+        GoldBuy.text = data.goldCost.ToString();
+        CreditBuy.text = data.cashCost.ToString();
         
     }
     public IEnumerator BuyItem(string id) {

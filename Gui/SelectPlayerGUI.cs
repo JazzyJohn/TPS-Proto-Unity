@@ -16,6 +16,8 @@ public class GUIItem{
 	public string name;
     public ItemColor color;
     public int group;
+    public string text;
+    public WeaponChar chars;
 }
 public class SelectPlayerGUI : MonoBehaviour {
 
@@ -295,11 +297,41 @@ public class SelectPlayerGUI : MonoBehaviour {
             return;
         }
 
-        MenuElements.Weapon[TypeW].mainTexture = listOfItems[TypeW][choice].texture;
-		if(colorByType.Length>(int)listOfItems[TypeW][choice].color){
-			MenuElements.WeaponBack[TypeW].color = colorByType[(int)listOfItems[TypeW][choice].color];
+        GUIItem item =  listOfItems[TypeW][choice];
+        MenuElements.Weapon[TypeW].mainTexture = item.texture;
+
+
+		if(colorByType.Length>(int)item.color){
+			MenuElements.WeaponBack[TypeW].color = colorByType[(int)item.color];
 		}
-        Choice.SetChoice(TypeW, Choice._Player, listOfItems[TypeW][choice].index);
+
+        if (MenuElements.WeaponTitle.Length > TypeW)
+        {
+            MenuElements.WeaponTitle[TypeW].text = item.name;
+        }
+        if (MenuElements.WeaponText.Length > TypeW)
+        {
+            MenuElements.WeaponText[TypeW].text = item.text;
+        }
+        if (MenuElements.WeaponBars.Length > TypeW)
+        {
+          
+            if (item.chars != null)
+            {
+                MenuElements.WeaponBars[TypeW].widget.alpha = 1.0f;
+                MenuElements.WeaponBars[TypeW].magazine.text = item.chars.magazine.ToString();
+                MenuElements.WeaponBars[TypeW].dmg.value = item.chars.dmg;
+                MenuElements.WeaponBars[TypeW].aim.value = item.chars.aim;
+                MenuElements.WeaponBars[TypeW].reload.value = item.chars.reload;
+                MenuElements.WeaponBars[TypeW].speed.value = item.chars.speed;
+                MenuElements.WeaponBars[TypeW].mode.text = TextGenerator.instance.GetSimpleText(item.chars.gunMode);
+            }
+            else
+            {
+                MenuElements.WeaponBars[TypeW].widget.alpha = 0.0f;
+            }
+        }
+        Choice.SetChoice(TypeW, Choice._Player, item.index);
     }
 
 
@@ -428,7 +460,9 @@ public class _MenuElements
 
 	public UITexture[] Weapon;
     public UISprite[] WeaponBack;
-
+    public UILabel[] WeaponText;
+    public UILabel[] WeaponTitle;
+    public CharSection[] WeaponBars;
     public SmallShopSlot[] Stims;
     
     public Dictionary<int,GameObject> ClassModels  = new Dictionary<int,GameObject>();

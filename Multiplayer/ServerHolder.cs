@@ -28,7 +28,7 @@ public class MapData
     public string version;
 	public string weaponAsset;
 	public string characterAsset;
-	
+    public GameObject playerHud;
 }
 public class ServerHolder : MonoBehaviour 
 {
@@ -611,7 +611,7 @@ public class ServerHolder : MonoBehaviour
             }
         ItemManager.instance.ConnectToPrefab();
 
-        MapDownloader downloadata = FindObjectOfType<MapDownloader>();
+     
 		if(loadingScreen!=null){
 			Destroy(loadingScreen);
 		}
@@ -619,7 +619,17 @@ public class ServerHolder : MonoBehaviour
 		FinishLoad ();
 		
 		yield return new WaitForEndOfFrame();
-        GameObject menu = Instantiate(downloadata.playerHud, Vector3.zero, Quaternion.identity) as GameObject;
+        GameObject menu;
+        if (data != null)
+        {
+            menu = Instantiate(data.playerHud, Vector3.zero, Quaternion.identity) as GameObject;
+        }
+        else
+        {
+            MapDownloader downloadata = FindObjectOfType<MapDownloader>();
+            menu = Instantiate(downloadata.playerHud, Vector3.zero, Quaternion.identity) as GameObject;
+        }
+      
 		Camera.main.GetComponent<PlayerMainGui> ().enabled = true;
 		//menu.transform.parent = Camera.main.transform;
         menu.transform.localPosition = Vector3.zero;

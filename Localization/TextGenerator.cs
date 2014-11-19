@@ -73,10 +73,23 @@ public class TextGenerator : MonoBehaviour{
 		if(moneyTexts.ContainsKey(cause)){
 			result = moneyTexts[cause];
 		}else{
-			return cash;
+            return count.ToString();
 		}
-		return String.Format(result,cash);
+        return String.Format(result, count);
 	}
+    public string GetMoneyText(string cause, int cash, int gold)
+    {
+        string result;
+        if (moneyTexts.ContainsKey(cause))
+        {
+            result = moneyTexts[cause];
+        }
+        else
+        {
+            return cash +  " " +gold;
+        }
+        return String.Format(result, cash, gold);
+    }
 	public string GetMainAnnonceText(AnnonceType type){
 		
 		if(mainAnnonceText.ContainsKey(type)){
@@ -107,6 +120,18 @@ public class TextGenerator : MonoBehaviour{
         else
         {
             return text;
+        }
+    }
+    public string GetSimpleText(string text,string addtext)
+    {
+
+        if (simpleText.ContainsKey(text))
+        {
+            return String.Format(simpleText[text], addtext);
+        }
+        else
+        {
+            return text + addtext;
         }
     }
 

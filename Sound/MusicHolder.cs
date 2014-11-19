@@ -8,7 +8,7 @@ public enum MUSIC_STAGE{
 }
 [System.Serializable]
 public class MusizStage{
-	public enum MUSIC_STAGE;
+
 	public AudioClip[] clips;
 	
 }
@@ -44,7 +44,7 @@ public class MusicHolder : MonoBehaviour {
 	void Awake () {
 		musicPlayer = GetComponent<AudioSource> ();
         musicPlayer.ignoreListenerVolume = true;
-		
+        curStage = MusicInStage[0];
 
 	}
 	void Start(){
@@ -53,12 +53,12 @@ public class MusicHolder : MonoBehaviour {
 	
 	// Update is called once per frame
 	void Update () {
-        if (!musicPlayer.isPlaying && allClip.Length>0)
+        if (!musicPlayer.isPlaying && MusicInStage.Length > 0)
         {
 			StartSong();
 		}
-        
-        if ( GameRule.instance!=null&&curStage != (int)GameRule.instance.curStage)
+
+        if (GameRule.instance != null && curStageInt != (int)GameRule.instance.curStage)
         {
             curStageInt = (int)GameRule.instance.curStage;
 			NextStage();
@@ -78,7 +78,7 @@ public class MusicHolder : MonoBehaviour {
 	public void NextStage(){
         Debug.Log("NEW STAGE " + MusicInStage.Length);
 		if (curStageInt <MusicInStage.Length ) {
-			curStage = MusicInStage[curStageInt]
+            curStage = MusicInStage[curStageInt];
 		    StartSong();
 		}
 	}

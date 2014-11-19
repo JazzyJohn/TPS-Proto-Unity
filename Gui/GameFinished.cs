@@ -150,7 +150,7 @@ public class GameFinished : Statistic
 		}else{
 			stamined.alpha = 0.0f;
 		}
-			public UIWidget forNotPremium;
+		
 	
 	
 		if(PremiumManager.instance.IsPremium()){
@@ -159,7 +159,7 @@ public class GameFinished : Statistic
 		
 		}else{
 			forNotPremium.alpha = 1.0f;
-			premium.alpah = 0.0f;
+			premium.alpha = 0.0f;
 		}
 
     }

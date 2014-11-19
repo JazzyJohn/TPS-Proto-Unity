@@ -570,7 +570,7 @@ public class BaseWeapon : DestroyableNetworkObject {
 	public void Reload(){
 
 		isReload = false;
-
+        owner.animator.ReloadStop();
 		int oldClip = curAmmo;
 		curAmmo =owner.GetComponent<InventoryManager>().GiveAmmo(ammoType,clipSize-curAmmo)+oldClip;	
 		if (shootAfterReload) {

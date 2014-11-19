@@ -120,7 +120,7 @@ public class NetworkController : MonoBehaviour {
         ArrayList changedVars = (ArrayList)evt.Params["changedVars"];
        if (changedVars != null)
        {
-             Debug.Log("OnVariablesUpdate: " +  changedVars.ToArray().ToFormattedString("|"));
+             Debug.Log("OnVariablesUpdate: " +  changedVars.ToArray());
        }
 
 
@@ -236,11 +236,7 @@ public class NetworkController : MonoBehaviour {
         _smartFox.RemoveAllEventListeners();
 	}
 	public void BackToMenu(){
-		Pause = false;
-        if (effect != null)
-        {
-            effect.enabled = false;
-        }
+		
 		Screen.lockCursor = false;
 		try
         {

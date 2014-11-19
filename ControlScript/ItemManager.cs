@@ -85,7 +85,7 @@ public class FromDBAnims{
 }
 public enum ShopSlotType
 {
-    WEAPON, ARMOR, ETC,OFFERS
+    WEAPON, ARMOR, ETC,OFFERS,PREMIUM
 }
 public class SimpleSlot{
  public GameClassEnum gameClass;
@@ -141,6 +141,10 @@ public class SmallShopData{
 	public string cashSlot;
 
     public string goldSlot;
+
+    public int cashCost;
+
+    public int goldCost;
 	
 	public string name;
 	
@@ -202,11 +206,11 @@ public class ItemManager : MonoBehaviour {
     public static string maximumRepairId = "23";
 
 	//blocks 
-	
-	public bool buyBlock = false;
-	public bool useBlock = false;
-	public bool repairBlock= false;
-	public bool desintegrateBlock = false;
+
+    private bool buyBlock = false;
+    private bool useBlock = false;
+    private bool repairBlock = false;
+    private bool desintegrateBlock = false;
 	
 
 	//PLAYER ITEM SECTION
@@ -379,14 +383,14 @@ public class ItemManager : MonoBehaviour {
                 entry.name = node.SelectSingleNode("name").InnerText;
                 entry.mysqlId = int.Parse(node.SelectSingleNode("mysqlId").InnerText) ;
                 entry.buffId = int.Parse(node.SelectSingleNode("buffId").InnerText);
-
+                stimPackDictionary[key] = entry;
                 WWW www = StatisticHandler.GetMeRightWWW(node.SelectSingleNode("textureGUIName").InnerText);
 
                 yield return www;
                 entry.textureGUI = new Texture2D(150, 80);
                 www.LoadImageIntoTexture(entry.textureGUI);
                 //Debug.Log (entry.name + " " +entry.textureGUI + " " +entry.weaponId );
-                stimPackDictionary[key]=entry;
+             
             }
 		
 		}
@@ -628,9 +632,11 @@ public class ItemManager : MonoBehaviour {
 				GUIItem gui = new GUIItem();
                 gui.index = new WeaponIndex(entry.weaponId, ""); ;
 				gui.name= entry.name;
+                gui.text = "";
 				gui.texture = entry.textureGUI;
                 gui.color = ItemColor.Normal;
 				gui.group= entry.group;
+                gui.chars = null;
 				weaponList.Add(gui);
 			
 			}
@@ -643,6 +649,7 @@ public class ItemManager : MonoBehaviour {
         
         if (items != null)
         {
+            DateTime saveNow = DateTime.Now;
             int intGameSlot = (int)gameSlot;
             foreach (InventorySlot slot in items)
             {
@@ -655,12 +662,19 @@ public class ItemManager : MonoBehaviour {
                     gui.index = new WeaponIndex(slot.ingamekey, slot.id);
                     if (slot.personal)
                     {
+
+                        gui.text = slot.charge.ToString();
                         gui.color = ItemColor.Personal;
                     }
                     else
                     {
+
+
+                        TimeSpan timeSpan = slot.timeEnd.Subtract(saveNow);
+                        gui.text = string.Format("{0:D2}:{1:D2}:{2:D2}:{3:D2}",timeSpan.Days, timeSpan.Hours, timeSpan.Minutes, timeSpan.Seconds); 
                         gui.color = ItemColor.Times;
                     }
+                    gui.chars = slot.chars;
                     gui.name = slot.name;
                     gui.texture = slot.texture;
 					gui.group= slot.group;
@@ -1074,6 +1088,7 @@ public class ItemManager : MonoBehaviour {
     public IEnumerator UseItem(string[] itemId)
     {
 		if(useBlock){
+           
 			  yield break;
 		}
 		useBlock= true;
@@ -1084,21 +1099,28 @@ public class ItemManager : MonoBehaviour {
         WWW w = StatisticHandler.GetMeRightWWW(form,StatisticHandler.USE_ITEM);
       
         yield return w;
-
+        useBlock = false;
+       
         IEnumerator numenator = ParseInventory(w.text); 
 
         while (numenator.MoveNext())
         {
             yield return numenator.Current;
         }
-		useBlock= false;
+	
     }
 	public bool TryUseStim(string itemId, out int id){
-		
+        if (useBlock)
+        {
+            id = -1;
+            return false;
+        }
 		id =allitems[itemId].ingamekey;
         //Debug.Log("use");
 		if(!stimPackDictionary[id].active){
-			stimPackDictionary[id].active = true;			
+            allitems[itemId].charge--;
+			stimPackDictionary[id].active = true;
+            Debug.Log("UseItem");
             StartCoroutine(UseItem(new string[] { itemId}));
 			return true;
 		}
@@ -1310,8 +1332,8 @@ public class ItemManager : MonoBehaviour {
                     
 			}
 			slot.charge= int.Parse(node.SelectSingleNode("charge").InnerText);
-           
-			
+
+            //Debug.Log(slot.name + "  " + slot.charge);
             /*slot.gameClasses = new GameClassEnum[node.SelectNodes("items/weapon").Count];
             int i=0;
             foreach (XmlNode gameClass in node.SelectNodes("class")) {
@@ -1374,8 +1396,7 @@ public class ItemManager : MonoBehaviour {
                     break;
 
             }
-            toDelete.Add(slot.Value);
-            Debug.Log("ADD" + slot.Value);
+           
         }
         foreach (InventorySlot slot in toDelete)
         {
@@ -1475,6 +1496,7 @@ public class ItemManager : MonoBehaviour {
 			SmallShopData data=null;
 			if(invItems.ContainsKey(ShopSlotType.ETC)){
 				foreach(InventorySlot slot in 	invItems[ShopSlotType.ETC]){
+                 //   Debug.Log(slot.gameId + "   " + pack.mysqlId);
 					if(slot.gameId==pack.mysqlId){
 					
 						if(data==null){
@@ -1489,10 +1511,12 @@ public class ItemManager : MonoBehaviour {
 				}			
 			}
 			if(data!=null){
+                allstims.Add(data);
 				continue;
 			}
 			if(shopItems.ContainsKey(ShopSlotType.ETC)){
-				foreach(ShopSlot slot in 	shopItems[ShopSlotType.ETC]){	
+				foreach(ShopSlot slot in 	shopItems[ShopSlotType.ETC]){
+                  
 					if(slot.id==pack.mysqlId.ToString()){
 						data= new SmallShopData();
 						data.name  = slot.name;
@@ -1500,6 +1524,8 @@ public class ItemManager : MonoBehaviour {
 						data.textureGUI = pack.textureGUI;
 						data.cashSlot= slot.cashSlot; 
 						data.goldSlot= slot.goldSlot;
+                        data.cashCost = slot.cashCost;
+                        data.goldCost = slot.goldCost;
 						break;
 						
 					}

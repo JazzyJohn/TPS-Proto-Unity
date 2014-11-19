@@ -227,14 +227,15 @@ public class GlobalPlayer : MonoBehaviour {
 	
 	
 	public void parseProfile(string XML){
-       
+
+        Debug.Log(XML);
 		XmlDocument xmlDoc = new XmlDocument();
 		xmlDoc.LoadXml(XML);
 		gold = int.Parse (xmlDoc.SelectSingleNode ("player/gold").InnerText);
 		cash = int.Parse (xmlDoc.SelectSingleNode ("player/cash").InnerText);
 		stamina = int.Parse (xmlDoc.SelectSingleNode ("player/stamina").InnerText);
 		bool isPremium = bool.Parse (xmlDoc.SelectSingleNode ("player/premium").InnerText);
-		DateTime timeEnd= DateTime.Parse((xmlDoc.SelectSingleNode ("player/premiumEnd").InnerText);
+		DateTime timeEnd= DateTime.Parse((xmlDoc.SelectSingleNode ("player/premiumEnd").InnerText));
 		PremiumManager.instance.SetPremium(isPremium,timeEnd);
 		XmlNodeList list = xmlDoc.SelectNodes("player/notify");
        

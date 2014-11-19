@@ -233,16 +233,18 @@ public class PlayerMainGui : MonoBehaviour {
             }
             else
             {
-
-                if (GameRule.instance.IsPractice() && hud.practice.alpha == 0.0f)
+                if (hud.practice != null)
                 {
-                    hud.practice.alpha = 1.0f;
+                    if (GameRule.instance.IsPractice() && hud.practice.alpha == 0.0f)
+                    {
+                        hud.practice.alpha = 1.0f;
 
-                }
-                if (!GameRule.instance.IsPractice() && hud.practice.alpha == 1.0f)
-                {
-                    hud.practice.alpha = 0.0f;
+                    }
+                    if (!GameRule.instance.IsPractice() && hud.practice.alpha == 1.0f)
+                    {
+                        hud.practice.alpha = 0.0f;
 
+                    }
                 }
 
                 if (LocalPlayer != null && !LocalPlayer.IsDead())
@@ -716,7 +718,7 @@ public class PlayerMainGui : MonoBehaviour {
 			case MessageType.MONEY_REWARD:
 				hud.AddMoneyMessage(text,false);
 			break;
-			case MessageType.GOLD_REWARD
+			case MessageType.GOLD_REWARD:
 				hud.AddMoneyMessage(text,true);
 			break;
 			case MessageType.LVL_REWARD:
@@ -821,13 +823,13 @@ public class PlayerMainGui : MonoBehaviour {
 
 public static class GUIHelper{
 	
-	public static SendMessage(string text){
-			MainMenuGUI menu =Object.FindObjectOfType<MainMenuGUI>();
+	public static void SendMessage(string text){
+			MainMenuGUI menu =UnityEngine.Object.FindObjectOfType<MainMenuGUI>();
 			if (menu != null)
 			{
 				menu.SetMessage(text);
 			}
-			AddShops shops =Object.FindObjectOfType<AddShops>();
+			AddShops shops =UnityEngine.Object.FindObjectOfType<AddShops>();
 			if (shops != null)
 			{
 				shops.SetMessage(text);

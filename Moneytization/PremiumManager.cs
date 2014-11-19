@@ -1,6 +1,7 @@
 ﻿using UnityEngine;
 using System.Collections;
 using System.Xml;
+using System;
 
 public class PremiumManager : MonoBehaviour {
 
@@ -64,30 +65,44 @@ public class PremiumManager : MonoBehaviour {
     }
 
 	public string TimeLeft(){
-		if(premium){
-			timeEnd.Subtract(DateTime.Now).ToString("c");
+        if (isPremium)
+        {
+            TimeSpan timeSpan = timeEnd.Subtract(DateTime.Now);
+            return string.Format("{0:D2}:{1:D2}:{2:D2}:{3:D2}",timeSpan.Days, timeSpan.Hours, timeSpan.Minutes, timeSpan.Seconds); 
 		}
 		return "";
 	}
 	
 	public bool IsPremium(){
-		return premium;
+        return isPremium;
 	}
 	public void Update(){
 		DateTime saveNow = DateTime.Now;
-		if(saveNow>timeEnd&&premium){
+        if (saveNow > timeEnd && isPremium)
+        {
 			
 			GUIHelper.SendMessage(TextGenerator.instance.GetSimpleText("PremiumEnd"));
-			
-			premium= false; 
+
+            isPremium = false; 
 		}	
 		
 	
 	}
 	
 	public void SetPremium(bool isPremium,DateTime timeEnd){
-		premium = isPremium;
-		this.timeEnd = timeEnd;
+        	DateTime saveNow = DateTime.Now;
+            if (saveNow < timeEnd)
+            {
+                
+                this.isPremium = isPremium;
+                this.timeEnd = timeEnd;
+            }
+            else
+            {
+                this.isPremium = false;
+            }
+
+       
 		
 	}
 	
@@ -130,7 +145,8 @@ public class PremiumManager : MonoBehaviour {
 		if(GlobalPlayer.instance.stamina>0){
 			multiplier*= STAMINA_MULTIPLIER;
 		}
-		if(instance.premium){
+        if (instance.isPremium)
+        {
 			multiplier*= PREMIUM_MULTIPLIER;
 		}
 		return multiplier;

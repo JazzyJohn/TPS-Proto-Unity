@@ -290,9 +290,14 @@ public class AnimationManager : MonoBehaviour
 	}
 	public void ReloadStart(){
 	
-		animator.SetTrigger ("Reload");
+		animator.SetBool ("Reload",true);
 	}
+    public void ReloadStop()
+    {
 
+        animator.SetBool("Reload",false);
+        IKOn();
+    }
 
 	public void StartDeath(AnimDirection direction){
         SetNotMainLayer(0.0f);

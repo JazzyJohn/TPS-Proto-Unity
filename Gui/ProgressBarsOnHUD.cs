@@ -9,7 +9,8 @@ public class ProgressBarsOnHUD : MonoBehaviour {
 	public UIProgressBar JetPackEnergy;
 	public UISprite JetPackEnergySprite;
 	public float JetPackMax;
-	
+    public bool colorDepends = true;
+    public bool showOnActive = false;
 	float Energy;
 
 
@@ -25,14 +26,28 @@ public class ProgressBarsOnHUD : MonoBehaviour {
 		if (Stats != null)
 		{
 			Energy = Stats.jetPackCharge;
-			
-			if (Energy > 0.6f)
-				JetPackEnergySprite.color = Color.green;
-			else if (Energy <= 0.6f && Energy > 0.3f)
-				JetPackEnergySprite.color = Color.yellow;
-			else if (Energy <= 0.3f)
-				JetPackEnergySprite.color = Color.red;
 
+            if (colorDepends)
+            {
+                if (Energy > 0.6f)
+                    JetPackEnergySprite.color = Color.green;
+                else if (Energy <= 0.6f && Energy > 0.3f)
+                    JetPackEnergySprite.color = Color.yellow;
+                else if (Energy <= 0.3f)
+                    JetPackEnergySprite.color = Color.red;
+
+            }
+            if (showOnActive)
+            {
+                if (Energy == 1.0f)
+                {
+                    JetPackEnergy.alpha = 0.0f;
+                }
+                else
+                {
+                    JetPackEnergy.alpha = 1.0f;
+                }
+            }
 			JetPackEnergy.value = Energy;
 		}
 		else

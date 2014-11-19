@@ -252,9 +252,9 @@ public class PlayerHudNgui : MonoBehaviour {
 	public void AddMoneyMessage(string text,bool gold){
 		Transform newTrans;
 		if(gold){
-			newTrans =Instantiate(moneyPrefab) as Transform;
+            newTrans = Instantiate(goldPrefab) as Transform;
 		}else{
-			newTrans = Instantiate(goldPrefab) as Transform;
+            newTrans = Instantiate(moneyPrefab) as Transform;
 		}
 		newTrans.parent = moneyTable;
 		newTrans.localScale= new Vector3(1f, 1f, 1f);

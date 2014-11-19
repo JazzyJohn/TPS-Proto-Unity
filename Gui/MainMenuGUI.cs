@@ -71,7 +71,21 @@ public class MainMenuGUI : MonoBehaviour {
 		HideAllPanel();
 		DontDestroyOnLoad(transform.gameObject);
 	}
-	
+    void Update()
+    {
+
+        if (PremiumManager.instance.IsPremium())
+        {
+          
+            _PlayerComponent.premium.text = TextGenerator.instance.GetSimpleText("PremiumLeft",PremiumManager.instance.TimeLeft());
+
+        }
+        else
+        {
+            _PlayerComponent.premium.text = TextGenerator.instance.GetSimpleText("NoPremiumTitle");
+        }
+
+    }
 
 	// Use this for initialization
 	void Start () 
@@ -549,6 +563,7 @@ public class PlayerComponent
 	public UIPanel Prem_have;
 	public UIPanel Prem_DoNot_have;
     public UITexture avatar;
+    public UILabel premium;
 }
 
 [System.Serializable]
@@ -562,7 +577,8 @@ public class PlayerInfo
 	public int GITP;
 	public float playerProcent;
 	public bool Premium_have;
-	
+
+  
 
 	public GlobalPlayer Player;
 }

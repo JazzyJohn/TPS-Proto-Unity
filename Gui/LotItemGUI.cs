@@ -59,8 +59,8 @@ public class LotItemGUI : MonoBehaviour
 		}else{
 			PriceKPBox.alpha = 1.0f;
 		}
-        PriceKP.text = TextGenerator.instance.GetSimpleText("KP")  + ": " +item.cashCost ;
-        PriceGITP.text = TextGenerator.instance.GetSimpleText("GITP") +": "+ item.goldCost ; 
+        PriceKP.text = item.cashCost.ToString() ;
+        PriceGITP.text = item.goldCost.ToString(); 
         Description.text = item.description;
 
         if (gunModel != null)
