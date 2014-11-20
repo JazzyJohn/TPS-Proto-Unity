@@ -26,6 +26,7 @@ public class AddShops : MonoBehaviour
 
     public UITweener textureAnonTweener;
 
+    public UIWidget premium;
 
     ConfirmAction noMoneyAction;
 
@@ -119,5 +120,14 @@ public class AddShops : MonoBehaviour
         annonceTweener.enabled = true;
         annonceTweener.tweenFactor = 0.0f;
         annonceTweener.PlayForward();
+    }
+
+    public void ShowPremium()
+    {
+        premium.alpha = 1.0f;
+    }
+    public void HidePremium()
+    {
+        premium.alpha = 0.0f;
     }
 }

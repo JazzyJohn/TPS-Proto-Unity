@@ -315,7 +315,19 @@ public class GlobalPlayer : MonoBehaviour {
         {
             menu.GetPlayerInfo();
             menu.SetPlayerInfoInGUI();
+        
+        
         }
+        
+        AddShops shops =FindObjectOfType<AddShops>();
+        if (shops != null)
+        {
+            shops.ReloadFinished();
+        
+        
+        }
+
+     
 	}	
 	
 	//EXTERNAL SECTION 

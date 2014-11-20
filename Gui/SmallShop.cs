@@ -20,6 +20,8 @@ public class SmallShop : MonoBehaviour {
 
     public UILabel MyCash;
 
+    public AddShops addshops;
+
 	// Use this for initialization
 	void Start () {
 	
@@ -37,7 +39,7 @@ public class SmallShop : MonoBehaviour {
     {
         if (GlobalPlayer.instance.gold <= 0)
         {
-            GlobalPlayer.instance.AskJsForMagazine("gitp_5");
+            addshops.AskMoneyShow(BuyForGold);
             return;
         }
         StartCoroutine(BuyItem(data.goldSlot));
