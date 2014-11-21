@@ -16,4 +16,10 @@ public class ConterIdleRequest : MonoBehaviour {
         }
 
 	}
+	
+	public void Recived{
+		#if UNITY_EDITOR
+			Debug.Log("ping");
+		#endif
+	}
 }

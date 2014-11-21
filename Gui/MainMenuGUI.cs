@@ -382,7 +382,7 @@ public class MainMenuGUI : MonoBehaviour {
 	public void FullScreen() // На весь экран
 	{
 
-        GlobalPlayer.FullScreen(!SizeScreen.FullScreen_Z);
+        GlobalPlayer.FullScreen(!Screen.fullScreen);
 
 
        ReSize();

@@ -673,9 +673,9 @@ public class ItemManager : MonoBehaviour {
                         {
                             gui.isTimed = true;
                             gui.timeend = slot.timeEnd;
-                             gui.color = ItemColor.Times;
+                            
                         }
-
+						gui.color = ItemColor.Times;
                       
                     }
                     gui.chars = slot.chars;

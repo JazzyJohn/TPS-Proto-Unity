@@ -38,7 +38,7 @@ public class NetworkController : MonoBehaviour {
     public bool debug = true;
     public bool pause = false;
 	public string PlayerPrefab = "Player";
-  
+	ConterIdleRequest ConterIdleRequest;
     private static NetworkController instance;
     public static NetworkController Instance
     {
@@ -317,9 +317,9 @@ public class NetworkController : MonoBehaviour {
         {
             // Startup up UDP
             Debug.Log("Login ok");
-            ConterIdleRequest req = FindObjectOfType<ConterIdleRequest>();
-            if (req != null) { 
-                req.enabled = true;
+            conterIdleRequest = FindObjectOfType<ConterIdleRequest>();
+            if (conterIdleRequest != null) { 
+                conterIdleRequest.enabled = true;
             }
 			List<UserVariable> userVars = new List<UserVariable>();
 	
@@ -366,7 +366,9 @@ public class NetworkController : MonoBehaviour {
                         TimeManager.Instance.Synchronize(dt.GetLong("t"));
                     }
                     break;
-            
+				case "ConterIdleRequest":
+					conterIdleRequest.Recived();	
+					break;
                 case "playersSpawm":
 
                     foreach (PlayerModel player in dt.GetSFSArray("owners"))

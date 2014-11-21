@@ -364,7 +364,7 @@ public class SelectPlayerGUI : MonoBehaviour {
                 if (MenuElements.WeaponSelect[i].isTimed)
                 {
                     TimeSpan timeSpan = MenuElements.WeaponSelect[i].timeend.Subtract(saveNow);
-                    MenuElements.WeaponText[i].text = string.Format("{0:D2}:{1:D2}:{2:D2}:{3:D2}", timeSpan.Days, timeSpan.Hours, timeSpan.Minutes, timeSpan.Seconds);
+                    MenuElements.WeaponText[i].text = string.Format("{0:D2}:{1:D2}:{2:D2}", timeSpan.Hours, timeSpan.Minutes, timeSpan.Seconds);
                 }
 
             }
