@@ -571,7 +571,15 @@ public class Player : MonoBehaviour {
 
 	}
 
-
+	public void ShowDamageIndicator(Vector3 position){
+		PlayerMainGui.instance. ShowDamageIndicator( position);
+		
+	}
+	public void CrosshairType(CrosshairColor color){
+		PlayerMainGui.instance. CrosshairType( color);
+		
+	
+	}
 	//Delayed external for that function that can destrupt user like VK wallpost
 	public void SendDelayedExternal(){
 		if(delayedExternalCallName!=""){

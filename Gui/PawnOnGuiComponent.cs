@@ -91,4 +91,10 @@ public class PawnOnGuiComponent : ShowOnGuiComponent {
 		}
 		base.ChangeTeamColor(ally);
 	}
+	public void HideName(){
+		hudentry.label.alpha = 0.0f;
+	}
+	public void ShowName(){
+		hudentry.label.alpha = 1.0f;
+	}
 }

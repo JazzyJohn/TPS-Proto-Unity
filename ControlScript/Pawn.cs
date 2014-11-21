@@ -921,6 +921,9 @@ public class Pawn : DamagebleObject
         {
             effectController.DamageEffect(type,position,direction);
         }
+		if(player!=null){
+			player.ShowDamageIndicator(mTransform.position -10*direction);
+		}
     }
 
 
@@ -1599,10 +1602,7 @@ public class Pawn : DamagebleObject
             }
             else
             {
-                if (cameraController == null)
-                {
-
-                }
+               
                 if (cameraController.enabled == false)
                 {
                     aimRotation = myTransform.position + myTransform.forward * 50;
@@ -1615,6 +1615,7 @@ public class Pawn : DamagebleObject
                 bool wasHit = false;
                 float magnitude = aimRange;
                 float range = aimRange;
+				Transform localTarget;
                 foreach (RaycastHit hitInfo in Physics.RaycastAll(centerRay, aimRange))
                 {
                     if (hitInfo.collider == myCollider || hitInfo.transform.IsChildOf(myTransform) || hitInfo.collider.isTrigger)
@@ -1636,7 +1637,9 @@ public class Pawn : DamagebleObject
                     }
                     wasHit = true;
                     targetpoint = hitInfo.point;
-                    curLookTarget = hitInfo.transform;
+                    localTarget = hitInfo.transform;
+					
+					
                     //Debug.Log (curLookTarget);
 
 
@@ -1646,12 +1649,13 @@ public class Pawn : DamagebleObject
                 if (!wasHit)
                 {
                     //Debug.Log("NO HIT");
-                    curLookTarget = null;
+                    SwitchLookTarget(curLookTarget,null);
                     animator.WeaponDown(false);
                     targetpoint = maincam.transform.forward * aimRange + maincam.ViewportToWorldPoint(new Vector3(.5f, 0.5f, 1f));
                 }
                 else
                 {
+					SwitchLookTarget(curLookTarget,localTarget);
                     //Debug.Log(range.ToString()+(cameraController.normalOffset.magnitude+5));
                     if (CurWeapon != null && IsBadSpot(targetpoint))
                     {
@@ -1670,6 +1674,50 @@ public class Pawn : DamagebleObject
 
         }
     }
+	
+	public void SwitchLookTarget(Transform oldTarget,Transform newTarget){
+		if(oldTarget==newTarget){
+			return;
+		}
+		curLookTarget= newTarget;
+		
+		if(oldTarget!=null){
+			Pawn tPawn = oldTarget.root.GetComponent<Pawn>();
+			if(tPawn!=null){
+				tPawn.HideName();
+			}
+		}
+		if(newTarget!=null){
+			tPawn = newTarget.root.GetComponent<Pawn>();
+			if(tPawn!=null){
+				tPawn.ShowName();
+				if(player!=null&&tPawn!=null){
+				
+					if(tPawn.team==team){
+						player.CrosshairType(CrosshairColor.ALLY);
+					}else{
+						player.CrosshairType(CrosshairColor.ENEMY);
+					}
+				
+				}
+			}else{
+				if(player!=null){
+					player.CrosshairType(CrosshairColor.NEUTRAL);
+				}
+			}
+		}else{
+			if(player!=null){
+				player.CrosshairType(CrosshairColor.NEUTRAL);
+			}
+		}
+		
+	}
+	void HideName(){
+		guiComponent.HideName();
+	}
+	void ShowName(){
+		guiComponent.ShowName();
+	}
     public bool IsBadSpot(Vector3 spot)
     {
         Vector3 charDirection = (spot - myTransform.position).normalized,

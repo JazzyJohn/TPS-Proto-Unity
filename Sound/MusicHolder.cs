@@ -47,9 +47,7 @@ public class MusicHolder : MonoBehaviour {
         curStage = MusicInStage[0];
 
 	}
-	void Start(){
-        musicPlayer.volume = volume;
-	}
+	
 	
 	// Update is called once per frame
 	void Update () {

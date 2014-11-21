@@ -233,23 +233,23 @@ public class PlayerMainGui : MonoBehaviour {
             }
             else
             {
-                if (hud.practice != null)
-                {
-                    if (GameRule.instance.IsPractice() && hud.practice.alpha == 0.0f)
-                    {
-                        hud.practice.alpha = 1.0f;
-
-                    }
-                    if (!GameRule.instance.IsPractice() && hud.practice.alpha == 1.0f)
-                    {
-                        hud.practice.alpha = 0.0f;
-
-                    }
-                }
-
+              
                 if (LocalPlayer != null && !LocalPlayer.IsDead())
                 {
 
+					if (hud.practice != null)
+					{
+						if (GameRule.instance.IsPractice() && hud.practice.alpha == 0.0f)
+						{
+							hud.practice.alpha = 1.0f;
+
+						}
+						if (!GameRule.instance.IsPractice() && hud.practice.alpha == 1.0f)
+						{
+							hud.practice.alpha = 0.0f;
+
+						}
+					}
 
                     ChageState(GUIState.Normal);
 
@@ -353,7 +353,7 @@ public class PlayerMainGui : MonoBehaviour {
 						RespawnGui();
 					break;
 				case GUIState.Normal:
-			
+						LabelSection();
 						//MAIN HUD
 						MainHud();	
 							if (GUI.GetNameOfFocusedControl () != "") {
@@ -385,7 +385,7 @@ public class PlayerMainGui : MonoBehaviour {
 				
 			
 			 
-			LabelSection();
+			
 		
 
 	}
@@ -502,6 +502,15 @@ public class PlayerMainGui : MonoBehaviour {
         hud.Annonce(type, sprite, text);
 
     }
+	public void ShowDamageIndicator(Vector3 position){
+		hud.ShowDamageIndicator( position);
+		
+	}
+	public void CrosshairType(CrosshairColor color){
+		hud. CrosshairType( color);
+		
+	
+	}
 	void RespawnGui(){
 		/*float screenX = Screen.width, screenY = Screen.height;
 		Screen.lockCursor = false;
@@ -702,6 +711,13 @@ public class PlayerMainGui : MonoBehaviour {
 
 	
 	public void AddMessage(string text,Vector3 worldPoint, MessageType type ){
+		switch(type){
+			case MessageType.DMG_TEXT:
+				hud.ShowHit();
+			break;
+		}
+	
+	
 		GUIMessage message = new GUIMessage();
 		message.destroyTime = Time.time + messageDelay;
 		message.text = text;

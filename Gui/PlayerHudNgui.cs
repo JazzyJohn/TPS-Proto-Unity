@@ -129,6 +129,12 @@ public class PlayerHudNgui : MonoBehaviour {
 	
 	public Transform goldPrefab;
 
+	public Transform damageRoot;
+	
+	public UITweener damageTweener;
+	
+	public UITweener hitTweener;
+	
     public enum HudState
     {
         Waiting = 0,
@@ -197,6 +203,7 @@ public class PlayerHudNgui : MonoBehaviour {
             crosshair.UpdateCrosshair(Stats);
         }
     }
+	
     public void SetLocalPlayer(Player player)
     {
         LocalPlayer = player;
@@ -281,5 +288,23 @@ public class PlayerHudNgui : MonoBehaviour {
         lvlView.Reposition();
 	}
 
-    
+	public void ShowDamageIndicator(Vector3 position){
+		Vector3 screenPos = Camera.main.WorldToScreenPoint(target.position);
+		Vector3 direction = screenPos- new Vecto3(0.5,0.5,0);
+		damageRoot.localRotation = Quaternion.eulerAngles(0,0,Vector3.Angle(direction.normalized, Vector3.up);
+		damageTweener.tweenFactor = 0.0f;
+        damageTweener.PlayForward();
+		
+	}
+	
+	public void ShowHit(){
+		hitTweener.tweenFactor = 0.0f;
+        hitTweener.PlayForward();
+	
+	}
+	public void CrosshairType(CrosshairColor color){
+		crosshair.CrosshairType( color);
+		
+	
+	} 
 }

@@ -1,6 +1,13 @@
 using UnityEngine;
 using System.Collections;
 
+public enum CrosshairColor{
+	NEUTRAL,
+	ENEMY,
+	ALLY,
+
+}
+
 public class CrosshairBehaviour : MonoBehaviour {
  
 	
@@ -65,12 +72,22 @@ public class CrosshairBehaviour : MonoBehaviour {
 	
 	public Transform[] corners;
 	
+	public UIWidget mainCrosshair;
+	
+	public Color[] crosshairColor;
+	
+	
 	public float maxCoef;
-    public void Awake()
+   
+   public void Awake()
     {
-       
-    }
 
+    }
+	public void CrosshairType(CrosshairColor color){
+		mainCrosshair.color = crosshairColor[(int)color];
+		
+	
+	} 
 	
 	public void UpdateCrosshair(   PlayerMainGui.PlayerStats gamestats){
 		BaseWeapon weapon = gamestats.gun;
