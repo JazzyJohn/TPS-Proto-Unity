@@ -116,6 +116,11 @@ public class BaseWeapon : DestroyableNetworkObject {
     /// How cooling move to zero;
     /// </summary>
 	public float randCoolingEffect;
+    /// <summary>
+    /// How cooling move to zero when not firing
+    /// </summary>
+    public float randCoolingEffectNotFire;
+    
 	/// <summary>
     ///MAximum of all random Effect;
     /// </summary>
@@ -194,6 +199,8 @@ public class BaseWeapon : DestroyableNetworkObject {
 
 	//ID for MySqlBAse
 	public int SQLId;
+
+    
 
   public event EventHandler FireStarted;
   public event EventHandler FireStoped;
@@ -346,7 +353,14 @@ public class BaseWeapon : DestroyableNetworkObject {
 		}
         if (_randShootCoef > 0)
         {
-            _randShootCoef -= randCoolingEffect * deltaTime;
+            if (isShooting)
+            {
+                _randShootCoef -= randCoolingEffect * deltaTime;
+            }
+            else
+            {
+                _randShootCoef -= randCoolingEffectNotFire * deltaTime;
+            }
         }
 		//AimFix ();
 		if(ReplicationContinue()){
@@ -530,6 +544,7 @@ public class BaseWeapon : DestroyableNetworkObject {
         _waitForRelease = false;
         _amountInShoot = 0;
         alredyGunedAmmo = 0;
+      
         if (!isPumping) {
             _pumpCoef = 0.0f;
             _pumpAmount = 0.0f;

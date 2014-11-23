@@ -12,12 +12,12 @@ public class ConterIdleRequest : MonoBehaviour {
         if (_timer > time)
         {
             _timer = 0.0f;
-            NetworkController.Instance.ConterIdleRequest();
+            NetworkController.Instance.ConterIdleRequestSend();
         }
 
 	}
 	
-	public void Recived{
+	public void Recived(){
 		#if UNITY_EDITOR
 			Debug.Log("ping");
 		#endif

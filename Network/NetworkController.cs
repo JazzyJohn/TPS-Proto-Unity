@@ -38,7 +38,7 @@ public class NetworkController : MonoBehaviour {
     public bool debug = true;
     public bool pause = false;
 	public string PlayerPrefab = "Player";
-	ConterIdleRequest ConterIdleRequest;
+	ConterIdleRequest conterIdleRequest;
     private static NetworkController instance;
     public static NetworkController Instance
     {
@@ -727,7 +727,7 @@ public class NetworkController : MonoBehaviour {
     ///Prevent player form diconect in main menu
     /// </summary>	
 
-    public void ConterIdleRequest()
+    public void ConterIdleRequestSend()
     {
         ISFSObject data = new SFSObject();
  

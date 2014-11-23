@@ -261,6 +261,7 @@ public class PlayerMainGui : MonoBehaviour {
                 {
                     if (guiState != GUIState.KillCam)
                     {
+                              hud.practice.alpha = 0.0f;
                         ChageState(GUIState.Respawn);
 
                     }
@@ -502,8 +503,9 @@ public class PlayerMainGui : MonoBehaviour {
         hud.Annonce(type, sprite, text);
 
     }
-	public void ShowDamageIndicator(Vector3 position){
-		hud.ShowDamageIndicator( position);
+    public void ShowDamageIndicator(Vector3 angle)
+    {
+		hud.ShowDamageIndicator( angle);
 		
 	}
 	public void CrosshairType(CrosshairColor color){

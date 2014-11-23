@@ -216,17 +216,22 @@ public class SettingGUI : MonoBehaviour {
 	{
 		string value = (ScrollArg.value * 100f).ToString("0");
 		IntArg.text = value;
-
-        if (ScrollArg == volumes.SoundFxScroll)
+        Debug.Log("SET SET SET");
+        if (panel.alpha == 1.0f)
         {
-            AudioListener.volume = volumes.SoundFxScroll.value * volumes.VolumeScroll.value;
-        }
-        else if (ScrollArg == volumes.MusicScroll)
-        {
-             MusicHolder.SetVolume(volumes.MusicScroll.value * volumes.VolumeScroll.value);
-        }else{
-             AudioListener.volume = volumes.SoundFxScroll.value * volumes.VolumeScroll.value;
-            MusicHolder.SetVolume(volumes.MusicScroll.value * volumes.VolumeScroll.value);
+            if (ScrollArg == volumes.SoundFxScroll)
+            {
+                AudioListener.volume = volumes.SoundFxScroll.value * volumes.VolumeScroll.value;
+            }
+            else if (ScrollArg == volumes.MusicScroll)
+            {
+                MusicHolder.SetVolume(volumes.MusicScroll.value * volumes.VolumeScroll.value);
+            }
+            else
+            {
+                AudioListener.volume = volumes.SoundFxScroll.value * volumes.VolumeScroll.value;
+                MusicHolder.SetVolume(volumes.MusicScroll.value * volumes.VolumeScroll.value);
+            }
         }
 	}
     
@@ -442,9 +447,7 @@ public class SettingGUI : MonoBehaviour {
 			graphicSetting.ShadowScroll.value = PlayerPrefs.GetFloat("ShadowQuality");
 			graphicSetting.LighningScroll.value = PlayerPrefs.GetFloat("LighningQuality");
 
-           
-            PlayerPrefs.SetFloat("Music", volumes.MusicScroll.value);
-		}
+        }
 		else
 		{
 			DefaultGraphic();

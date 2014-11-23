@@ -132,6 +132,8 @@ public class PlayerHudNgui : MonoBehaviour {
 	public Transform damageRoot;
 	
 	public UITweener damageTweener;
+
+    public Transform camTramsf;
 	
 	public UITweener hitTweener;
 	
@@ -152,6 +154,7 @@ public class PlayerHudNgui : MonoBehaviour {
         StartCoroutine(LateFrameResize());
     }
 	public void Start(){
+        camTramsf =Camera.main.transform;
 		annoncePlayer.loop = false;
 	}
     void Update()
@@ -201,6 +204,11 @@ public class PlayerHudNgui : MonoBehaviour {
             if (BlueTeamScore) BlueTeamScore.text = gamestats.score[1].ToString();
 
             crosshair.UpdateCrosshair(Stats);
+        }
+        if (damageTweener != null && damageTweener.enabled)
+        {
+            RotateDamage();
+           
         }
     }
 	
@@ -287,15 +295,22 @@ public class PlayerHudNgui : MonoBehaviour {
         tweener.PlayForward();
         lvlView.Reposition();
 	}
-
-	public void ShowDamageIndicator(Vector3 position){
-		Vector3 screenPos = Camera.main.WorldToScreenPoint(target.position);
-		Vector3 direction = screenPos- new Vecto3(0.5,0.5,0);
-		damageRoot.localRotation = Quaternion.eulerAngles(0,0,Vector3.Angle(direction.normalized, Vector3.up);
+    Vector3 hitPosition;
+    public void ShowDamageIndicator(Vector3 direction)
+    {
+        hitPosition = direction;
+        RotateDamage();
+       
 		damageTweener.tweenFactor = 0.0f;
         damageTweener.PlayForward();
 		
 	}
+    void RotateDamage(){
+         float z_angle = Quaternion.FromToRotation(camTramsf.forward, -hitPosition).eulerAngles.y;
+
+
+            damageRoot.localRotation = Quaternion.Euler(0, 0,180- z_angle);
+    }
 	
 	public void ShowHit(){
 		hitTweener.tweenFactor = 0.0f;

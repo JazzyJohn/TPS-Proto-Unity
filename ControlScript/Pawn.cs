@@ -922,7 +922,8 @@ public class Pawn : DamagebleObject
             effectController.DamageEffect(type,position,direction);
         }
 		if(player!=null){
-			player.ShowDamageIndicator(mTransform.position -10*direction);
+          
+            player.ShowDamageIndicator(-direction);
 		}
     }
 
@@ -1615,7 +1616,7 @@ public class Pawn : DamagebleObject
                 bool wasHit = false;
                 float magnitude = aimRange;
                 float range = aimRange;
-				Transform localTarget;
+				Transform localTarget=null;
                 foreach (RaycastHit hitInfo in Physics.RaycastAll(centerRay, aimRange))
                 {
                     if (hitInfo.collider == myCollider || hitInfo.transform.IsChildOf(myTransform) || hitInfo.collider.isTrigger)
@@ -1680,9 +1681,9 @@ public class Pawn : DamagebleObject
 			return;
 		}
 		curLookTarget= newTarget;
-		
+		Pawn tPawn ;
 		if(oldTarget!=null){
-			Pawn tPawn = oldTarget.root.GetComponent<Pawn>();
+            tPawn  = oldTarget.root.GetComponent<Pawn>();
 			if(tPawn!=null){
 				tPawn.HideName();
 			}

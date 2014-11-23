@@ -58,6 +58,10 @@ public class PawnOnGuiComponent : ShowOnGuiComponent {
 					hudentry.Sprite.color = enemy;
 				}
 			}
+            if (hudentry.label != null)
+            {
+                hudentry.label.alpha = 0;
+            }
 			
 		}
        
@@ -83,6 +87,7 @@ public class PawnOnGuiComponent : ShowOnGuiComponent {
     public void SetPawn(Pawn pawn)
     {
         this.pawn = pawn;
+
     }
 	
 	public override void ChangeTeamColor(bool ally){

@@ -72,11 +72,11 @@ public class CrosshairBehaviour : MonoBehaviour {
 	
 	public Transform[] corners;
 	
-	public UIWidget mainCrosshair;
+	public UIWidget[] crosshairParts;
 	
 	public Color[] crosshairColor;
-	
-	
+
+
 	public float maxCoef;
    
    public void Awake()
@@ -84,9 +84,13 @@ public class CrosshairBehaviour : MonoBehaviour {
 
     }
 	public void CrosshairType(CrosshairColor color){
-		mainCrosshair.color = crosshairColor[(int)color];
+        foreach (UIWidget widget in crosshairParts)
+        {
+            widget.color = crosshairColor[(int)color];
+        }
 		
-	
+
+      
 	} 
 	
 	public void UpdateCrosshair(   PlayerMainGui.PlayerStats gamestats){
