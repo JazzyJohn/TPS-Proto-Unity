@@ -236,7 +236,7 @@ public class Player : MonoBehaviour {
 			respawnTimer-=Time.deltaTime;
 			
 //			Debug.Log ("Dead");
-			if(respawnTimer<=0&&isStarted){
+			if(respawnTimer<=0&&isStarted&&!GameRule.instance.isGameEnded){
 				respawnTimer=respawnTime;
 				currentPawn = GetNewPawn();
 				

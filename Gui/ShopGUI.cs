@@ -194,6 +194,7 @@ public class ShopItems
     {
         EditCategory(category,gameClass);
     }
+
     public void EditCategory(GameClassEnum gameClass)
     {
         EditCategory(category, gameClass);
@@ -210,7 +211,8 @@ public class ShopItems
         }
         else
         {
-            Main.premiumWidjet.alpha = 0.0f;
+			if(Main.premiumWidjet != null)
+            	Main.premiumWidjet.alpha = 0.0f;
             Main.ItemsPanel.alpha = 1.0f;
         }
         this.gameClass = gameClass;

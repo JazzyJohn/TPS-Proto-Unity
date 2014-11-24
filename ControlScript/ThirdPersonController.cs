@@ -369,7 +369,7 @@ public float CalculateJumpVerticalSpeed ( float targetJumpHeight  )
                 pawn.UnUseSkill(0);
             }
 
-      
+            pawn.UpdateRotation(-InputManager.instance.GetMouseAxis("Mouse Y"),InputManager.instance.GetMouseAxis("Mouse X"));
                  
                        
 		}

@@ -1,6 +1,7 @@
 using UnityEngine;
 using System.Collections;
 using nstuff.juggerfall.extension.models;
+using System.Collections.Generic;
 
 public class PVPGameRule : GameRule {
 
@@ -109,6 +110,12 @@ public class PVPGameRule : GameRule {
 			EventHolder.instance.FireEvent(typeof(GameListener),"EventTeamWin",Winner());
             GlobalPlayer.instance.MathcEnd();
             ItemManager.instance.RemoveOldAndExpired();
+            List<Pawn> pawns = PlayerManager.instance.FindAllPawn();
+            foreach (Pawn pawn in pawns)
+            {
+                pawn.gameEnded();
+            }
+           
 		}
 
 		public bool FinalStage (){

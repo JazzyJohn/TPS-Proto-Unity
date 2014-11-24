@@ -13,6 +13,9 @@ public class PlayerCamera : MonoBehaviour {
 
     protected Vector3 headOffset = Vector3.zero;
     protected Vector3 centerOffset = Vector3.zero;
+
+    public float MaxYAngle = 90f;
+    public float MinYAngle = -90f;
 	// Use this for initialization
 	void Start () {
 	

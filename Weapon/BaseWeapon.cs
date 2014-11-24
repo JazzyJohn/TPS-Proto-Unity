@@ -160,6 +160,11 @@ public class BaseWeapon : DestroyableNetworkObject {
     /// </summary>
     public int alredyGunedAmmoMax;
 
+     /// <summary>
+    ///  How hard camera shake when shoot
+    /// </summary>
+    public float camRecoilMod;
+
 	protected Pawn owner;
 
 	public Transform curTransform;

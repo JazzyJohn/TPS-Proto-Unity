@@ -775,13 +775,16 @@ public class ItemManager : MonoBehaviour {
             switch (slot.type)
             {
                 case ShopSlotType.WEAPON:
-                    slot.chars = new WeaponChar();
-                    slot.chars.aim = float.Parse(node.SelectSingleNode("aim").InnerText);
-                    slot.chars.dmg = float.Parse(node.SelectSingleNode("damage").InnerText);
-                    slot.chars.speed = float.Parse(node.SelectSingleNode("speed").InnerText);
-                    slot.chars.reload = float.Parse(node.SelectSingleNode("reload").InnerText);
-                    slot.chars.magazine = int.Parse(node.SelectSingleNode("magazine").InnerText);
-                    slot.chars.gunMode = node.SelectSingleNode("mode").InnerText;
+                    if (node.SelectSingleNode("aim") != null)
+                    {
+                        slot.chars = new WeaponChar();
+                        slot.chars.aim = float.Parse(node.SelectSingleNode("aim").InnerText);
+                        slot.chars.dmg = float.Parse(node.SelectSingleNode("damage").InnerText);
+                        slot.chars.speed = float.Parse(node.SelectSingleNode("speed").InnerText);
+                        slot.chars.reload = float.Parse(node.SelectSingleNode("reload").InnerText);
+                        slot.chars.magazine = int.Parse(node.SelectSingleNode("magazine").InnerText);
+                        slot.chars.gunMode = node.SelectSingleNode("mode").InnerText;
+                    }
                     break;
             }
             /*slot.gameClasses = new GameClassEnum[node.SelectNodes("items/weapon").Count];
@@ -1318,13 +1321,17 @@ public class ItemManager : MonoBehaviour {
                 switch (slot.type)
                 {
                     case ShopSlotType.WEAPON:
-                        slot.chars = new WeaponChar();
-                        slot.chars.aim = float.Parse(node.SelectSingleNode("aim").InnerText);
-                        slot.chars.dmg = float.Parse(node.SelectSingleNode("damage").InnerText);
-                        slot.chars.speed = float.Parse(node.SelectSingleNode("speed").InnerText);
-                        slot.chars.reload = float.Parse(node.SelectSingleNode("reload").InnerText);
-                        slot.chars.magazine = int.Parse(node.SelectSingleNode("magazine").InnerText);
-                        slot.chars.gunMode = node.SelectSingleNode("mode").InnerText;
+                        if (node.SelectSingleNode("aim") != null)
+                        {
+
+                            slot.chars = new WeaponChar();
+                            slot.chars.aim = float.Parse(node.SelectSingleNode("aim").InnerText);
+                            slot.chars.dmg = float.Parse(node.SelectSingleNode("damage").InnerText);
+                            slot.chars.speed = float.Parse(node.SelectSingleNode("speed").InnerText);
+                            slot.chars.reload = float.Parse(node.SelectSingleNode("reload").InnerText);
+                            slot.chars.magazine = int.Parse(node.SelectSingleNode("magazine").InnerText);
+                            slot.chars.gunMode = node.SelectSingleNode("mode").InnerText;
+                        }
                         break;
                 }
 

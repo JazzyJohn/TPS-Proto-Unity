@@ -291,6 +291,8 @@ public class Pawn : DamagebleObject
 
     public Vector3 headOffset;
 
+    public float headOddsetFloat = 0.5f;
+
     public static float gravity = 20.0f;
 
     public InventoryManager ivnMan;
@@ -396,6 +398,9 @@ public class Pawn : DamagebleObject
             guiComponent.baseTitle = publicName;
             guiComponent.SetPawn(this);
         }
+        desiredRotation = Quaternion.LookRotation(myTransform.forward);
+        xAngle = desiredRotation.eulerAngles.x;
+        yAngle = desiredRotation.eulerAngles.y;
     }
 
 
@@ -459,7 +464,7 @@ public class Pawn : DamagebleObject
         ivnMan.Init();
         centerOffset = capsule.bounds.center - myTransform.position;
         headOffset = centerOffset;
-        headOffset.y = capsule.bounds.max.y - myTransform.position.y;
+        headOffset.y = capsule.bounds.max.y - myTransform.position.y- headOddsetFloat;
 
         distToGround = capsule.height / 2 - capsule.center.y;
 
@@ -1575,6 +1580,38 @@ public class Pawn : DamagebleObject
 
         return aimRotation;
     }
+    public Vector3 getAimpointForCamera()
+    {
+
+        return myTransform.position + headOffset + desiredRotation * Vector3.forward * aimRange;
+    }
+    Quaternion desiredRotation;
+    float xAngle = 0;
+    float yAngle = 0;
+    public static float fromOldRotationMod =5.0f;
+    public virtual void UpdateRotation(float xDeltaAngle,float yDeltaAngle)
+    {
+
+        xAngle += xDeltaAngle * fromOldRotationMod;
+        xAngle = Mathf.Clamp(xAngle, cameraController.MinYAngle, cameraController.MaxYAngle);
+        yAngle += yDeltaAngle * fromOldRotationMod;
+        if (yAngle > 360)
+        {
+            yAngle -= 360;
+        }
+        if (yAngle < -360)
+        {
+            yAngle+=360;
+        }
+
+        desiredRotation = Quaternion.Euler(xAngle, yAngle,0.0f);
+
+    }
+
+    public Quaternion GetDesireRotation()
+    {
+        return desiredRotation;
+    }
     public virtual void getAimRotation()
     {
 
@@ -1612,12 +1649,14 @@ public class Pawn : DamagebleObject
                 Camera maincam = Camera.main;
                 Ray centerRay = maincam.ViewportPointToRay(new Vector3(.5f, 0.5f, 1f));
 
+                //Ray centerRay = new Ray(myTransform.position + headOffset, desiredRotation * Vector3.forward);
+                Debug.DrawRay(myTransform.position + headOffset,desiredRotation * Vector3.forward);
                 Vector3 targetpoint = Vector3.zero;
                 bool wasHit = false;
                 float magnitude = aimRange;
                 float range = aimRange;
 				Transform localTarget=null;
-                foreach (RaycastHit hitInfo in Physics.RaycastAll(centerRay, aimRange))
+                foreach (RaycastHit hitInfo in Physics.RaycastAll(centerRay, aimRange, ThirdPersonCamera.cameraLayer))
                 {
                     if (hitInfo.collider == myCollider || hitInfo.transform.IsChildOf(myTransform) || hitInfo.collider.isTrigger)
                     {
@@ -1649,10 +1688,12 @@ public class Pawn : DamagebleObject
 
                 if (!wasHit)
                 {
-                    //Debug.Log("NO HIT");
+                   // Debug.Log("NO HIT");
                     SwitchLookTarget(curLookTarget,null);
                     animator.WeaponDown(false);
                     targetpoint = maincam.transform.forward * aimRange + maincam.ViewportToWorldPoint(new Vector3(.5f, 0.5f, 1f));
+
+//                    targetpoint = desiredRotation * Vector3.forward * aimRange;
                 }
                 else
                 {
@@ -1783,9 +1824,9 @@ public class Pawn : DamagebleObject
     }
     public float RecoilMod()
     {
-        if (CurWeapon == null)
+        if (CurWeapon != null)
         {
-            return 0;
+            return CurWeapon.camRecoilMod;
         }
         return 0;
     }
@@ -3291,5 +3332,11 @@ public class Pawn : DamagebleObject
             }
         }
     }
-	
+    public void gameEnded()
+    {
+        StopFire();
+       
+        Destroy(gameObject);
+       
+    }
 }
