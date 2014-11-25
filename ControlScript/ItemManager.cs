@@ -151,7 +151,9 @@ public class SmallShopData{
     public int amount;
 
     public string itemId;
-	
+
+    public string descr;
+
 	public Texture2D textureGUI;
 
 }
@@ -402,6 +404,7 @@ public class ItemManager : MonoBehaviour {
             if (allBuff.ContainsKey(id))
             {
                 buff = allBuff[id];
+                buff.listOfEffect.Clear();
             }else{
                 buff = new Buff();
                 allBuff[id] = buff;
@@ -1114,6 +1117,7 @@ public class ItemManager : MonoBehaviour {
         {
             yield return numenator.Current;
         }
+
 	
     }
 	public bool TryUseStim(string itemId, out int id){
@@ -1129,6 +1133,7 @@ public class ItemManager : MonoBehaviour {
 			stimPackDictionary[id].active = true;
             Debug.Log("UseItem");
             StartCoroutine(UseItem(new string[] { itemId}));
+            GUIHelper.SendMessage(TextGenerator.instance.GetSimpleText("UseItem") + allitems[itemId].name, allitems[itemId].texture);
 			return true;
 		}
 		return false;
@@ -1216,6 +1221,7 @@ public class ItemManager : MonoBehaviour {
 	}
 	public List<CharacteristicToAdd> GetBuff(int id){
 		if(allBuff.ContainsKey(id)){
+          //  Debug.Log("size"+allBuff[id].listOfEffect.Count);
 			return allBuff[id].listOfEffect;
 		}else{
 			return new List<CharacteristicToAdd>();
@@ -1226,6 +1232,11 @@ public class ItemManager : MonoBehaviour {
     {
         return stimPackDictionary[id].buffId;
     }
+    public Texture2D GetStimTexture(int id)
+    {
+        return stimPackDictionary[id].textureGUI;
+    }
+    
     public void RestartStimPack() {
         foreach (StimPack stim in stimPackDictionary)
         {
@@ -1513,6 +1524,7 @@ public class ItemManager : MonoBehaviour {
 						if(data==null){
 							data= new SmallShopData();
 							data.name  = slot.name;
+                            data.descr = slot.description;
 							data.amount=0;
 							data.textureGUI = pack.textureGUI;
 							data.itemId =slot.id;
@@ -1521,18 +1533,20 @@ public class ItemManager : MonoBehaviour {
 					}				
 				}			
 			}
-			if(data!=null){
-                allstims.Add(data);
-				continue;
-			}
+			
 			if(shopItems.ContainsKey(ShopSlotType.ETC)){
 				foreach(ShopSlot slot in 	shopItems[ShopSlotType.ETC]){
                   
 					if(slot.id==pack.mysqlId.ToString()){
-						data= new SmallShopData();
-						data.name  = slot.name;
-						data.amount=0;
-						data.textureGUI = pack.textureGUI;
+                        if (data == null)
+                        {
+                            data = new SmallShopData();
+                            data.name = slot.name;
+                            data.amount = 0;
+                             data.descr = slot.description;
+
+                            data.textureGUI = pack.textureGUI;
+                        }
 						data.cashSlot= slot.cashSlot; 
 						data.goldSlot= slot.goldSlot;
                         data.cashCost = slot.cashCost;

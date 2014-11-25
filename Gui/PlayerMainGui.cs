@@ -513,6 +513,16 @@ public class PlayerMainGui : MonoBehaviour {
 		
 	
 	}
+   
+
+    public void ActivateStim(List<int> activeSteampacks)
+    {
+           hud.ClearStim();
+           foreach (int i in activeSteampacks)
+           {
+               hud.ActivateStim(ItemManager.instance.GetStimTexture(i));
+           }
+    }
 	void RespawnGui(){
 		/*float screenX = Screen.width, screenY = Screen.height;
 		Screen.lockCursor = false;
@@ -825,7 +835,7 @@ public class PlayerMainGui : MonoBehaviour {
 				KillCamera s_Instance =FindObjectOfType<KillCamera>();
 				s_Instance.enabled = true;
 				if (s_Instance.Init (killer)) {
-						Debug.Log("killcam");
+						
 						ChageState (GUIState.KillCam);
 				} else {
 						ChageState (GUIState.Respawn);
@@ -854,5 +864,14 @@ public static class GUIHelper{
 			}
 		
 	}
-	
+    public static void SendMessage( string text,Texture2D icon)
+    {
+      
+        AddShops shops = UnityEngine.Object.FindObjectOfType<AddShops>();
+        if (shops != null)
+        {
+            shops.ShowIconMessage(text,icon);
+        }
+
+    }
 }

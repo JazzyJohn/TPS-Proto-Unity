@@ -108,7 +108,7 @@ public class GameFinished : Statistic
            
         }
 //        Debug.Log(totalXP);
-        totalXpLabel.text = totalXP.ToString();
+       
         AfterGameBonuses.expBoost = totalXP;
         lvlTable.localPosition = new Vector3((-1 * (lvlScroll.width / 2)) + 1, (lvlScroll.height ) + lvlTableWid.padding.y, 0f);
         lvlTableWid.Reposition();
@@ -137,8 +137,7 @@ public class GameFinished : Statistic
             script.count.text = "x" + reward.count.ToString();
             script.box.width = (int)Math.Truncate((moneyScroll.width));
         }
-        totalGoldLabel.text = totalGold.ToString();
-        totalCashLabel.text = totalCash.ToString();
+        
        moneyTable.localPosition = new Vector3((-1 * (moneyScroll.width / 2)) + 1, (moneyScroll.height/2 ) + moneyTableWid.padding.y, 0f);
         moneyTableWid.Reposition();
         AfterGameBonuses.cashBoost = totalCash;
@@ -146,6 +145,7 @@ public class GameFinished : Statistic
 
         if (AfterGameBonuses.wasStamined)
         {
+            Debug.Log("stamined");
 			stamined.alpha = 1.0f;
 		}else{
 			stamined.alpha = 0.0f;
@@ -161,27 +161,34 @@ public class GameFinished : Statistic
 			forNotPremium.alpha = 1.0f;
 			premium.alpha = 0.0f;
 		}
-
+        totalXpLabel.text = totalXP.ToString();
+        totalGoldLabel.text = totalGold.ToString();
+        totalCashLabel.text = totalCash.ToString();
     }
     public void ResolvedExpired()
     {
         List<InventorySlot> ended = ItemManager.instance.GetMeDelete();
         foreach (InventorySlot item in ended)
         {
-
-            Transform newTrans = Instantiate(itemEntry) as Transform;
-            newTrans.parent = itemTable;
-            newTrans.localScale = new Vector3(1f, 1f, 1f);
-            newTrans.localEulerAngles = new Vector3(0f, 0f, 0f);
-            newTrans.localPosition = new Vector3(0f, 0f, 0f);
-            NGUIExpired script = newTrans.GetComponent<NGUIExpired>();
-            script.texture.mainTexture = item.texture;
-            if(item.personal){
-                script.text.text = TextGenerator.instance.GetSimpleText("NeedRepair");
-            }else{
-                script.text.text = TextGenerator.instance.GetSimpleText("Expired");
-            }
-            script.box.height =(int)Math.Truncate( itemScroll.height);
+            if (item.type == ShopSlotType.WEAPON)
+            {
+                Transform newTrans = Instantiate(itemEntry) as Transform;
+                newTrans.parent = itemTable;
+                newTrans.localScale = new Vector3(1f, 1f, 1f);
+                newTrans.localEulerAngles = new Vector3(0f, 0f, 0f);
+                newTrans.localPosition = new Vector3(0f, 0f, 0f);
+                NGUIExpired script = newTrans.GetComponent<NGUIExpired>();
+                script.texture.mainTexture = item.texture;
+                if (item.personal)
+                {
+                    script.text.text = TextGenerator.instance.GetSimpleText("NeedRepair");
+                }
+                else
+                {
+                    script.text.text = TextGenerator.instance.GetSimpleText("Expired");
+                }
+                script.box.height = (int)Math.Truncate(itemScroll.height);
+            }    
         }
 
         itemTable.localPosition = new Vector3((-1 * (itemScroll.width / 2)) + 1, (itemScroll.height / 2) + moneyTableWid.padding.y, 0f);

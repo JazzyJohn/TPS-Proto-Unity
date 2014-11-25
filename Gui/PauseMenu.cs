@@ -77,7 +77,7 @@ public class PauseMenu : MonoBehaviour {
     }
      public bool IsActive()
      {
-         if (InputManager.instance.GetButtonDown("Pause"))
+         if (InputManager.instance.GetButtonDown("Pause")||Input.GetKeyDown(KeyCode.Escape))
          {
          
              return !Pause;

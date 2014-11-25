@@ -181,7 +181,7 @@ public class Player : MonoBehaviour {
         Score.Death = 0;
         Score.Kill = 0;
         Score.RobotKill = 0;
-        isStarted = false;
+       
         respawnTimer = 0;
 	}
 	
@@ -237,12 +237,14 @@ public class Player : MonoBehaviour {
 			
 //			Debug.Log ("Dead");
 			if(respawnTimer<=0&&isStarted&&!GameRule.instance.isGameEnded){
+                isStarted = false;
 				respawnTimer=respawnTime;
 				currentPawn = GetNewPawn();
 				
 				ItemManager.instance.SaveItemForSlot();
 				//PVPGameRule.instance.Spawn(team);
 				AfterSpawnSetting(currentPawn,GetBuffs());
+                PlayerMainGui.instance.ActivateStim(activeSteampacks);
                 activeSteampacks.Clear();
                 currentPawn.ChangeDefaultWeapon(Choice._Player);
                 if (GameRule.instance.CanUseRobot)
@@ -423,7 +425,7 @@ public class Player : MonoBehaviour {
 
         killInRow = 0;
         Score.Death++;
-        isStarted = false;
+      
         isDead = true; 
         charMan.DeathUpdate();
         ItemManager.instance.RestartStimPack();
@@ -816,7 +818,7 @@ public class Player : MonoBehaviour {
 
     private void ActualUseOfBuff(int id)
     {
-       // Debug.Log("BUFF ADd"+id);
+       ///Debug.Log("BUFF ADd"+id);
         charMan.AddList( ItemManager.instance.GetBuff(id));
 	}
 

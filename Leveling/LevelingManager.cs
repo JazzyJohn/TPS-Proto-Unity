@@ -40,7 +40,11 @@ public class LevelingManager : MonoBehaviour, LocalPlayerListener,GameListener{
 		stats.playerLvl = playerLvl;
 		if(playerLvl==0){
 			stats.playerProcent  =(int)(playerExp/(float)playerNeededExp[playerLvl]*100.0f);
-		}else{
+        }
+        else if (playerLvl >= playerNeededExp.Length)
+        {
+            stats.playerProcent = 100;
+        }else{
 			//Debug.Log ((playerExp-playerNeededExp[playerLvl-1])+ "/" +((float)playerNeededExp[playerLvl]-playerNeededExp[playerLvl-1])+(playerExp-playerNeededExp[playerLvl-1])/((float)playerNeededExp[playerLvl]-playerNeededExp[playerLvl-1]));
 			stats.playerProcent =(int)((playerExp-playerNeededExp[playerLvl-1])/((float)playerNeededExp[playerLvl]-playerNeededExp[playerLvl-1])*100.0f);
 		}
@@ -52,7 +56,12 @@ public class LevelingManager : MonoBehaviour, LocalPlayerListener,GameListener{
 			stats.classLvl[i] =  oneClassLvl;
 			if(oneClassLvl==0){
 				stats.classProcent[i]  =(int)(classExp[i]/(float)classNeededExp[oneClassLvl]*100.0f);
-			}else{
+            }
+            else if (oneClassLvl >= classNeededExp.Length)
+            {
+                stats.classProcent[i] = 100;
+            }
+            else {
 				stats.classProcent[i] =(int)((classExp[i]-classNeededExp[oneClassLvl-1])/((float)classNeededExp[oneClassLvl]-classNeededExp[oneClassLvl-1])*100.0f);
 			}
 		}

@@ -136,7 +136,13 @@ public class PlayerHudNgui : MonoBehaviour {
     public Transform camTramsf;
 	
 	public UITweener hitTweener;
-	
+
+    public Transform stimPrefab;
+
+    public Transform stimTableTransform;
+
+    public UITable stimTable;
+
     public enum HudState
     {
         Waiting = 0,
@@ -321,5 +327,36 @@ public class PlayerHudNgui : MonoBehaviour {
 		crosshair.CrosshairType( color);
 		
 	
-	} 
+	}
+
+    public void ActivateStim(Texture2D stimTexture)
+    {
+        if (stimTableTransform == null)
+        {
+            return;
+
+        }
+        Transform newTrans = Instantiate(stimPrefab) as Transform;
+        newTrans.parent = stimTableTransform;
+        newTrans.localScale = new Vector3(1f, 1f, 1f);
+        newTrans.localEulerAngles = new Vector3(0f, 0f, 0f);
+        newTrans.localPosition = new Vector3(0f, 0f, 0f);
+     
+        newTrans.GetComponent<UITexture>().mainTexture = stimTexture;
+     
+        stimTable.Reposition();
+    }
+
+    public void ClearStim()
+    {
+        if (stimTableTransform == null)
+        {
+            return;
+
+        }
+        foreach (Transform child in stimTableTransform)
+        {
+            Destroy(child.gameObject);
+        }
+    }
 }

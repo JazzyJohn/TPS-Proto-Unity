@@ -363,7 +363,8 @@ public class CharacteristicManager : MonoBehaviour {
 	
 	public void AddList(List<CharacteristicToAdd> effects){
 		foreach(CharacteristicToAdd add in effects){
-         
+
+           
             if (allCharacteristic[(int)add.characteristic] == null)
             {
                 Effect<float> floatEffect = add.addEffect as Effect<float>;

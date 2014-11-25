@@ -219,12 +219,13 @@ public class SelectPlayerGUI : MonoBehaviour {
                 }
              
                 int i =0;
-                if (teamCount[0] < teamCount[1]) {
-                    i=2;
-                }else{
+                if (teamCount[0] <= teamCount[1]) {
                     i=1;
+                }else{
+                    i=2;
                 }
-                
+
+             
                 if (i == 1 )
                     Choice._Team = 1;
                 if (i == 2 )

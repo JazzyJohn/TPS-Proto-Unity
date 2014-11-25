@@ -191,7 +191,7 @@ public class ThirdPersonCamera : PlayerCamera
 
 	
 		curAddShake= Vector3.Lerp (curAddShake,Vector3.zero,Time.deltaTime*10);
-        Debug.Log(curAddShake);
+    //    Debug.Log(curAddShake);
 		return curAddShake;
 
 	}

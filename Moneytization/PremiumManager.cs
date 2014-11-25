@@ -149,6 +149,7 @@ public class PremiumManager : MonoBehaviour {
         {
 			multiplier*= PREMIUM_MULTIPLIER;
 		}
+//        Debug.Log(multiplier);
 		return multiplier;
 	}
 }

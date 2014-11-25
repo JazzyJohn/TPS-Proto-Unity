@@ -20,6 +20,8 @@ public class SmallShop : MonoBehaviour {
 
     public UILabel MyCash;
 
+    public UILabel descr;
+
     public AddShops addshops;
 
 	// Use this for initialization
@@ -54,7 +56,7 @@ public class SmallShop : MonoBehaviour {
         MyCash.text = GlobalPlayer.instance.cash.ToString();
         GoldBuy.text = data.goldCost.ToString();
         CreditBuy.text = data.cashCost.ToString();
-        
+        descr.text = data.descr;
     }
     public IEnumerator BuyItem(string id) {
 

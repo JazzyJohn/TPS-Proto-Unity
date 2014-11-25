@@ -504,6 +504,7 @@ public class Pawn : DamagebleObject
     }
     public void SpeedInit()
     {
+        Debug.Log("speed mod" + GetPercentValue(CharacteristicList.SPEED));
         wallRunSpeed = wallRunSpeed * GetPercentValue(CharacteristicList.SPEED);
 
         groundSprintSpeed = groundSprintSpeed * GetPercentValue(CharacteristicList.SPEED);
@@ -1081,7 +1082,30 @@ public class Pawn : DamagebleObject
 
                         break;
                 }
+                if (isLookingAt)
+                {
+                    Vector3 laimRotation;
+                    if (isAi)
+                    {
+                        laimRotation = aimRotation; 
+                    }
+                    else
+                    {
+                        laimRotation = myTransform.position + desiredRotation * Vector3.forward * aimRange;
+                    }
+                 
+                    /*if(animator.isWeaponAimable()){
+                        Quaternion diference = Quaternion.FromToRotation(CurWeapon.muzzlePoint.forward,myTransform.forward);
 
+                        Vector3 direction= laimRotation-myTransform.position;
+				
+                        laimRotation =(diference *direction.normalized)*direction.magnitude +myTransform.position;
+                    }*/
+
+                    animator.SetLookAtPosition(laimRotation);
+                    //animator.animator.SetLookAtWeight (1, 0.5f, 0.7f, 0.0f, 0.5f);
+
+                }
                 //
             }
             else
@@ -1177,22 +1201,23 @@ public class Pawn : DamagebleObject
                         return;
                 }
                 characterState = nextState;
-            }
-            if (isLookingAt)
-            {
-                Vector3 laimRotation = aimRotation;
-                /*if(animator.isWeaponAimable()){
-                    Quaternion diference = Quaternion.FromToRotation(CurWeapon.muzzlePoint.forward,myTransform.forward);
+                if (isLookingAt)
+                {
+                    Vector3 laimRotation = aimRotation;
+                    /*if(animator.isWeaponAimable()){
+                        Quaternion diference = Quaternion.FromToRotation(CurWeapon.muzzlePoint.forward,myTransform.forward);
 
-                    Vector3 direction= laimRotation-myTransform.position;
+                        Vector3 direction= laimRotation-myTransform.position;
 				
-                    laimRotation =(diference *direction.normalized)*direction.magnitude +myTransform.position;
-                }*/
+                        laimRotation =(diference *direction.normalized)*direction.magnitude +myTransform.position;
+                    }*/
 
-                animator.SetLookAtPosition(laimRotation);
-                //animator.animator.SetLookAtWeight (1, 0.5f, 0.7f, 0.0f, 0.5f);
+                    animator.SetLookAtPosition(laimRotation);
+                    //animator.animator.SetLookAtWeight (1, 0.5f, 0.7f, 0.0f, 0.5f);
 
+                }
             }
+         
         }
 
     }
@@ -1298,7 +1323,18 @@ public class Pawn : DamagebleObject
                 /*}else{
                     aimRotation = Vector3.Lerp(aimRotation,getAimRotation(CurWeapon.weaponRange), Time.deltaTime*10);
                 }*/
-                Vector3 eurler = Quaternion.LookRotation((aimRotation - myTransform.position).normalized).eulerAngles;
+                Vector3 eurler;
+                if (isAi)
+                {
+                    eurler = Quaternion.LookRotation((aimRotation - myTransform.position).normalized).eulerAngles;
+                }
+                else
+                {
+                    eurler = desiredRotation.eulerAngles;
+                }
+               
+
+            
                 eurler.z = 0;
                 eurler.x = 0;
                 if (characterState == CharacterState.WallRunning || characterState == CharacterState.PullingUp)
@@ -3222,6 +3258,7 @@ public class Pawn : DamagebleObject
 
         correctPlayerPos = pawn.position.MakeVector(correctPlayerPos);
         correctPlayerRot = pawn.rotation.MakeQuaternion(correctPlayerRot);
+     
         aimRotation = pawn.aimRotation.MakeVector(aimRotation);
         ToggleAim(pawn.isAiming);
         team = pawn.team;

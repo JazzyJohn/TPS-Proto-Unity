@@ -237,6 +237,10 @@ public class KillCamera : ThirdPersonCamera
 		}
 		
 	}
+    void LateUpdate()
+    {
+        Apply();
+    }
 	void FinishKillCam(){
       
 		PlayerMainGui.instance.StopKillCam();	
@@ -254,6 +258,7 @@ public class KillCamera : ThirdPersonCamera
 	public bool Init(Pawn Killer){
 		
 		_pawn  =Killer;
+        Debug.Log("KILLER PAWWN" + _pawn);
         killpawn = Killer;
 		killCamTimer = 0.0f;
 		killCamTime = Player.localPlayer.respawnTime;
