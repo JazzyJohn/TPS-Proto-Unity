@@ -74,6 +74,10 @@ public class Pawn : DamagebleObject
     //If this spawn pre defained by game designer we don't want to start in on start but on AIDirector start so set this to false;
 
     public bool isSpawned = true;
+	
+	public bool isSpawnImortality = false;
+	
+	public float spawnImortalityDuration= 3.0f;
     //Weapon that in hand
     public BaseWeapon CurWeapon;
 
@@ -401,8 +405,11 @@ public class Pawn : DamagebleObject
         desiredRotation = Quaternion.LookRotation(myTransform.forward);
         xAngle = desiredRotation.eulerAngles.x;
         yAngle = desiredRotation.eulerAngles.y;
+		Invoke("SpawnImmortalityEnd",spawnImortalityDuration)
     }
-
+	public void SpawnImmortalityEnd(){
+		isSpawnImortality= false;
+	}
 
     // Use this for initialization
     protected void Start()
@@ -681,7 +688,9 @@ public class Pawn : DamagebleObject
 			{
 				AddEffect(damage.hitPosition,damage.pushDirection ,damage.type);
 			}
-            base.Damage(damage, killer);
+			if(CanBeDamaged()){
+				base.Damage(damage, killer);
+			}
         }
         if (killerPawn != null && killerPawn.foxView.isMine)
         {
@@ -691,7 +700,9 @@ public class Pawn : DamagebleObject
 				{
 					AddEffect(damage.hitPosition,damage.pushDirection ,damage.type);
 				}
-                base.Damage(damage, killer);
+				if(CanBeDamaged()){
+					base.Damage(damage, killer);
+				}
             }
             else
             {
@@ -745,8 +756,13 @@ public class Pawn : DamagebleObject
 		{
 			AddEffect(damage.hitPosition,damage.pushDirection ,damage.type);
 		}
-        base.Damage(damage, killer);
+		if(CanBeDamaged()){
+			base.Damage(damage, killer);
+		}
     }
+	public virtual bool CanBeDamaged(){
+		return 	!isSpawnImortality;
+	}
 
     public void Heal(float damage, GameObject Healler)
     {
@@ -1518,6 +1534,7 @@ public class Pawn : DamagebleObject
         {
             CurWeapon.StartFire();
         }
+		isSpawnImortality= false;
     }
     public virtual void StopFire()
     {

@@ -169,10 +169,7 @@ public class SimplePawn : Pawn {
     }
     public override void StartFire()
     {
-        if (CurWeapon != null)
-        {
-            CurWeapon.StartFire();
-        }
+        base. StartFire();
         stopSprint = true;
     }
     public override bool CanSprint()
