@@ -874,4 +874,32 @@ public static class GUIHelper{
         }
 
     }
+	
+	public static void ShowConnectionStart(){
+		MainMenuGUI menu =UnityEngine.Object.FindObjectOfType<MainMenuGUI>();
+		if (menu != null)
+		{
+			menu.ShowServerWait();
+		}
+		AddShops shops =UnityEngine.Object.FindObjectOfType<AddShops>();
+		if (shops != null)
+		{
+			shops.ShowServerWait();
+		}
+	
+	}
+	
+	public static void ConnectionStop(){
+		MainMenuGUI menu =UnityEngine.Object.FindObjectOfType<MainMenuGUI>();
+		if (menu != null)
+		{
+			menu.HideServerWait();
+		}
+		AddShops shops =UnityEngine.Object.FindObjectOfType<AddShops>();
+		if (shops != null)
+		{
+			shops.HideServerWait();
+		}
+
+	}
 }

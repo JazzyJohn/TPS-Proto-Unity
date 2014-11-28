@@ -67,6 +67,7 @@ public class MainMenuGUI : MonoBehaviour {
         }
     }
 
+
 	void Awake(){
 		HideAllPanel();
 		DontDestroyOnLoad(transform.gameObject);
@@ -512,6 +513,18 @@ public class MainMenuGUI : MonoBehaviour {
     {
         _PlayerComponent.avatar.mainTexture = avatar;
     }
+	
+	public void ShowServerWait(){
+		if(_PanelsNgui.serverResponse!=null){
+			_PanelsNgui.serverResponse.alpha = 1.0f;
+		}
+	
+	}
+	public void HideServerWait(){
+		if(_PanelsNgui.serverResponse!=null){
+			_PanelsNgui.serverResponse.alpha = 0.0f;
+		}
+	}
 }
 
 
@@ -613,6 +626,7 @@ public class PanelsNgui
 	public UIPanel markedPanel;
     public UIPanel askAboutMoneyPanel;
     public UIPanel moneyBuyPanel;
+	public UIWidget serverResponse;
 }
 [System.Serializable]
 public class LoginPanel

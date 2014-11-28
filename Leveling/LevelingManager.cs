@@ -121,17 +121,9 @@ public class LevelingManager : MonoBehaviour, LocalPlayerListener,GameListener{
 	
 	protected IEnumerator LoadLvling(WWWForm form){
 		Debug.Log (form );
-		WWW w = null;
-		if (String.Compare(Application.absoluteURL, 0, "https", 0,5) != 0) {
-			
-			Debug.Log ("STATS HTTP SEND" + StatisticHandler.GetSTATISTIC_PHP()+ StatisticHandler.LOAD_LVL);
-			w = new WWW (StatisticHandler.GetSTATISTIC_PHP()+ StatisticHandler.LOAD_LVL, form);
-		}
-		else{
-			//Debug.Log ("STATS HTTPS SEND"+StatisticHandler.STATISTIC_PHP_HTTPS + StatisticHandler.LOAD_LVL);
-            w = new WWW(StatisticHandler.GetSTATISTIC_PHP_HTTPS() + StatisticHandler.LOAD_LVL, form);
-		}
-
+		WWW w =StatisticHandler.GetMeRightWWW(form,StatisticHandler.LOAD_LVL);
+		
+		
 		yield return w;
 		//Debug.Log (w.text);
 		ParseList (w.text);

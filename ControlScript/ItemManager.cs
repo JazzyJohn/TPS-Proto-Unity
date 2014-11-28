@@ -1052,9 +1052,12 @@ public class ItemManager : MonoBehaviour {
 		form.AddField ("uid", UID);
 		form.AddField ("shop_item", itemId);
 	
+		GUIHelper.ShowConnectionStart();
+	
 		WWW w =StatisticHandler.GetMeRightWWW(form,StatisticHandler.BUY_ITEM);
 	
 		yield return w;
+		
         Debug.Log(w.text);
 		XmlDocument xmlDoc = new XmlDocument();
 		xmlDoc.LoadXml(w.text);
@@ -1091,6 +1094,7 @@ public class ItemManager : MonoBehaviour {
                 gui.SetError(xmlDoc.SelectSingleNode("result/errortext").InnerText);
             }
         }
+		GUIHelper.ShowConnectionStop();
 		buyBlock =false;
 	}
 	
@@ -1131,7 +1135,7 @@ public class ItemManager : MonoBehaviour {
 		if(!stimPackDictionary[id].active){
             allitems[itemId].charge--;
 			stimPackDictionary[id].active = true;
-            Debug.Log("UseItem");
+            
             StartCoroutine(UseItem(new string[] { itemId}));
             GUIHelper.SendMessage(TextGenerator.instance.GetSimpleText("UseItem") + allitems[itemId].name, allitems[itemId].texture);
 			return true;
@@ -1150,13 +1154,14 @@ public class ItemManager : MonoBehaviour {
 	IEnumerator _UseRepairKit(string id,string kit_id,InventoryGUI gui){
 		repairBlock= true;
 		WWWForm form = new WWWForm();
-        
+        GUIHelper.ShowConnectionStart();
         form.AddField("uid", UID);
         form.AddField("game_id", id);
 		form.AddField("kit_id", kit_id);
         WWW w = StatisticHandler.GetMeRightWWW(form,StatisticHandler.REPAIR_ITEM);
       
         yield return w;
+		
 		XmlDocument xmlDoc = new XmlDocument();
 		xmlDoc.LoadXml(w.text);
 		
@@ -1176,6 +1181,7 @@ public class ItemManager : MonoBehaviour {
         {
             gui.SetMessage(xmlDoc.SelectSingleNode("result/errortext").InnerText);
         }
+		GUIHelper.ShowConnectionStop();
 		repairBlock= false;
 	}
 
@@ -1190,12 +1196,13 @@ public class ItemManager : MonoBehaviour {
     {
 		desintegrateBlock= true;
 		WWWForm form = new WWWForm();
-        
+        GUIHelper.ShowConnectionStart();
         form.AddField("uid", UID);
         form.AddField("game_id", id);
 	    WWW w = StatisticHandler.GetMeRightWWW(form,StatisticHandler.DISENTEGRATE_ITEM);
       
         yield return w;
+	
 		XmlDocument xmlDoc = new XmlDocument();
 		xmlDoc.LoadXml(w.text);
         
@@ -1217,6 +1224,7 @@ public class ItemManager : MonoBehaviour {
         {
             gui.SetMessage(xmlDoc.SelectSingleNode("result/errortext").InnerText);
         }
+		GUIHelper.ShowConnectionStop();
 		desintegrateBlock= false;
 	}
 	public List<CharacteristicToAdd> GetBuff(int id){

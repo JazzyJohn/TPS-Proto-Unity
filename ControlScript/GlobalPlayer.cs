@@ -23,8 +23,7 @@ public class GlobalPlayer : MonoBehaviour {
 				
 					switch(platformType){
 						case PLATFORMTYPE.VK:
-						
-							Application.ExternalCall ("SayMyName");
+							Application.ExternalCall ("SayMyName");						
 						break;
 						case PLATFORMTYPE.FACEBOOK:
 							FB.Init(SetFaceBookInit, OnHideFaceBookUnity);
@@ -143,6 +142,7 @@ public class GlobalPlayer : MonoBehaviour {
 			break;
 			default:
               if (isDebug){
+				 
                   SetUid(UID);
               }else{
 				    MainMenuGUI menu = FindObjectOfType<MainMenuGUI>();
@@ -358,6 +358,10 @@ public class GlobalPlayer : MonoBehaviour {
 		ItemManager.instance.Init(UID);
         FindObjectOfType<RewardManager>().Init(UID);
         NetworkController.Instance.SetLogin(UID);
+	}
+	public void SetSid(string sid){
+		StatisticHandler.SID = sid;
+		Application.ExternalCall ("SayMyName");
 	}
 	public void FinishInnerLogin(string uid,string newname){
 		PlayerName = newname;

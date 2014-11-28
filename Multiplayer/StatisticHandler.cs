@@ -71,6 +71,10 @@ public class StatisticHandler : MonoBehaviour {
 	// s_Instance is used to cache the instance found in the scene so we don't have to look it up every time.
 	private static StatisticHandler s_Instance = null;
 	
+	private string UNITY_KEY = "redrageawesome";
+	
+	public static string SID  = "DebugEditor";
+	
 	// This defines a static instance property that attempts to find the manager object in the scene and
 	// returns it to the caller.
 	public static StatisticHandler instance {
@@ -184,16 +188,44 @@ public class StatisticHandler : MonoBehaviour {
 
 	}
 	
+	static string GetMd5Hash(MD5 md5Hash, string input){
+
+		// Convert the input string to a byte array and compute the hash.
+		byte[] data = md5Hash.ComputeHash(Encoding.UTF8.GetBytes(input));
+
+		// Create a new Stringbuilder to collect the bytes
+		// and create a string.
+		StringBuilder sBuilder = new StringBuilder();
+
+		// Loop through each byte of the hashed data 
+		// and format each one as a hexadecimal string.
+		for (int i = 0; i < data.Length; i++)
+		{
+			sBuilder.Append(data[i].ToString("x2"));
+		}
+
+		// Return the hexadecimal string.
+		return sBuilder.ToString();
+	}
+	
 	public static WWW GetMeRightWWW(WWWForm form,string URL){
+	    Hashtable headers = form.headers;
+	    string rawData = System.Text.Encoding.UTF8.GetString(form.data);
+	
+		using (MD5 md5Hash = MD5.Create())
+        {
+            headers["X-Digest"] == GetMd5Hash(md5Hash, rawData + UNITY_KEY);
+			
+		}
 		WWW www = null;
 		if (String.Compare(Application.absoluteURL, 0, "https", 0,5) != 0) {
 			
 			//Debug.Log ("STATS HTTP SEND" + StatisticHandler.STATISTIC_PHP_HTTPS + URL);
-			www = new WWW (StatisticHandler.GetSTATISTIC_PHP()+ URL,form);
+			www = new WWW (StatisticHandler.GetSTATISTIC_PHP()+ URL,form.data,headers);
 		}
 		else{
 			//Debug.Log ("STATS HTTPS SEND"+StatisticHandler.GetSTATISTIC_PHP_HTTPS()+  URL);
-			www = new WWW (StatisticHandler.GetSTATISTIC_PHP_HTTPS()+  URL,form);
+			www = new WWW (StatisticHandler.GetSTATISTIC_PHP_HTTPS()+  URL,form.data,headers);
 		}
 	
 		return www;

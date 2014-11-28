@@ -27,6 +27,8 @@ public class AddShops : MonoBehaviour
     public UITweener textureAnonTweener;
 
     public UIWidget premium;
+	
+	public UIWidget serverResponse;
 
     ConfirmAction noMoneyAction;
 
@@ -134,4 +136,16 @@ public class AddShops : MonoBehaviour
     {
         premium.alpha = 0.0f;
     }
+	
+	public void ShowServerWait(){
+		if(serverResponse!=null){
+			serverResponse.alpha = 1.0f;
+		}
+	
+	}
+	public void HideServerWait(){
+		if(serverResponse!=null){
+			serverResponse.alpha = 0.0f;
+		}
+	}
 }
