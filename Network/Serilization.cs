@@ -299,6 +299,8 @@ namespace nstuff.juggerfall.extension.models
 		public int maxScore;
 		
 		public Hashtable huntTable;
+		
+		public bool isWithPractice;
 	}
 	
 	

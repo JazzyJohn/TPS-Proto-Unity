@@ -395,6 +395,7 @@ public class ServerHolder : MonoBehaviour
         RoomVariable gameRule = null;
         settings.MaxVariables = 10;
 		GameSettingModel setting = new GameSettingModel();
+		setting.isWithPractice = false;
         switch (mode)
         {
             case GAMEMODE.PVE:
