@@ -380,7 +380,7 @@ public class BaseProjectile : MonoBehaviour
 
     public virtual void DamageLogic(DamagebleObject obj, BaseDamage inDamage)
     {
-        GA.API.Design.NewEvent("Game:Weapon:Hit:" + inDamage.shootWeapon);
+
         obj.Damage(inDamage, owner);
        
         //Debug.Log ("HADISH INTO SOME PLAYER! " + hit.transform.gameObject.name);

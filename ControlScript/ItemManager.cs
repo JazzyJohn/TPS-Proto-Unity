@@ -92,6 +92,8 @@ public class SimpleSlot{
 
 	public string name;
 	
+	public string engName;
+	
 	public string id;
 	
 	public string description;
@@ -147,6 +149,8 @@ public class SmallShopData{
     public int goldCost;
 	
 	public string name;
+	
+	public string engName;
 	
     public int amount;
 

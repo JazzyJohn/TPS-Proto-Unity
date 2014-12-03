@@ -87,7 +87,7 @@ public class PauseMenu : MonoBehaviour {
      }
 	public void BackToGame()
 	{
-            GA.API.Design.NewEvent("GUI:Pause:BackToGame"); 
+          
             Pause = false;
             if (effect != null)
             {

@@ -592,7 +592,7 @@ public class BaseWeapon : DestroyableNetworkObject {
         owner.animator.ReloadStop();
     }
 	public void Reload(){
-        GA.API.Design.NewEvent("Game:Weapon:Reload:" + SQLId);
+      
 		isReload = false;
         owner.animator.ReloadStop();
 		int oldClip = curAmmo;
@@ -759,7 +759,7 @@ public class BaseWeapon : DestroyableNetworkObject {
 
     protected virtual void ActualFire()
     {
-        GA.API.Design.NewEvent("Game:Weapon:Fire:" + SQLId);
+       
        // Debug.Log("fire");
 	   if(foxView.isMine){
 			switch (amunitionType)

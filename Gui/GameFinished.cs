@@ -171,7 +171,7 @@ public class GameFinished : Statistic
         GA.API.Design.NewEvent("Game:MatchEnd:End", 1);
         GA.API.Design.NewEvent("Game:MatchEnd:PlayerReward:XP", totalXP);
         GA.API.Design.NewEvent("Game:MatchEnd:PlayerReward:Gold", totalGold);
-        GA.API.Design.NewEvent("Game:MatchEnd:PlayerReward:Cash", totalGold);
+        GA.API.Design.NewEvent("Game:MatchEnd:PlayerReward:Cash", totalCash);
    
     }
     public void ResolvedExpired()
