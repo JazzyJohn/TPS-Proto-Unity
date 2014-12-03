@@ -63,10 +63,17 @@ public class WeaponOfExtremities : MonoBehaviour {
 	
 	public virtual void StopKick()
 	{
-        owner.StartMovement();
+        if (owner != null)
+        {
+            owner.StartMovement();
+        }
+      
 		foreach(HTHHitter Attack in Weapon)
-		{   
-            Attack.StopKick();
+		{
+            if (Attack != null)
+            {
+                Attack.StopKick();
+            }
 					
 		}
         isKicking = false;

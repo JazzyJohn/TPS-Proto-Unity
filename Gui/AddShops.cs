@@ -27,8 +27,8 @@ public class AddShops : MonoBehaviour
     public UITweener textureAnonTweener;
 
     public UIWidget premium;
-	
-	public UIWidget serverResponse;
+
+    public UIPanel serverResponse;
 
     ConfirmAction noMoneyAction;
 
@@ -44,6 +44,7 @@ public class AddShops : MonoBehaviour
         ask.panel.alpha = 1.0f;
         ask.text.text = TextGenerator.instance.GetSimpleText("DoubleExp");
         ask.action = BuyDouble;
+        GA.API.Design.NewEvent("GUI:SmallShop:Double", 1);
     }
 
 
@@ -56,10 +57,12 @@ public class AddShops : MonoBehaviour
         }
         if (GlobalPlayer.instance.gold >= PremiumManager.DOUBLECOST)
         {
+            GA.API.Business.NewEvent("SmallShop:DoubleReward", "GOLD", PremiumManager.DOUBLECOST);
             StartCoroutine(PremiumManager.instance.PayForDouble(this));
         }
         else
         {
+
             AskMoneyShow(BuyDouble);
 
         }
@@ -68,6 +71,7 @@ public class AddShops : MonoBehaviour
 
     public void AskMoneyShow(ConfirmAction action)
     {
+        GA.API.Design.NewEvent("GUI:SmallShop:AskMoneyShow", 1);
         noMoneyAction = action;
         ask.panel.alpha = 1.0f;
         ask.text.text = TextGenerator.instance.GetSimpleText("NoMoney");

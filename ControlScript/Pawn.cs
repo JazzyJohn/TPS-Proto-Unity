@@ -375,6 +375,7 @@ public class Pawn : DamagebleObject
     //Some special event handler(like damage on boss that we mast send to server)
 
     public SpecialEventsHandler eventHandler;
+    public float timeSpawned;
 
     protected void Awake()
     {
@@ -405,7 +406,8 @@ public class Pawn : DamagebleObject
         desiredRotation = Quaternion.LookRotation(myTransform.forward);
         xAngle = desiredRotation.eulerAngles.x;
         yAngle = desiredRotation.eulerAngles.y;
-		Invoke("SpawnImmortalityEnd",spawnImortalityDuration)
+        Invoke("SpawnImmortalityEnd", spawnImortalityDuration);
+        timeSpawned = Time.time;
     }
 	public void SpawnImmortalityEnd(){
 		isSpawnImortality= false;
@@ -850,9 +852,16 @@ public class Pawn : DamagebleObject
             {
                 player.PawnDead(killerPlayer, killerPawn,killInfo);
             }
+            GA.API.Design.NewEvent("Game:PawnDead:Player:" + killInfo.weaponId);
+            GA.API.Design.NewEvent("Game:Lifetime:Player", Time.time - timeSpawned);
         }
-
-
+        else
+        {
+            GA.API.Design.NewEvent("Game:PawnDead:AI:" + killInfo.weaponId);
+            GA.API.Design.NewEvent("Game:Lifetime:AI",Time.time -timeSpawned);
+        }
+        
+        
         PawnKill();
 
 

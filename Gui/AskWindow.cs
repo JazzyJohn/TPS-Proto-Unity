@@ -18,7 +18,7 @@ public class AskWindow  : MonoBehaviour{
 	public int backPosition;
 	
 	public void Accept(){
-	
+        GA.API.Design.NewEvent("GUI:AskWindow:" + action.ToString()+":Yes", 1); 
 		panel.alpha = 0.0f;
 		MainMenu.CamMove.RideTo(backPosition);
         action();
@@ -26,6 +26,7 @@ public class AskWindow  : MonoBehaviour{
 	
 	
 	public void Decline(){
+        GA.API.Design.NewEvent("GUI:AskWindow:" + action.ToString()+":No", 1); 
 		panel.alpha = 0.0f;
 		MainMenu.CamMove.RideTo(backPosition);
 	}

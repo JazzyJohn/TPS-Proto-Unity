@@ -3,6 +3,8 @@ using System;
 using System.Collections;
 using System.Net.Sockets;
 using System.Threading;
+using System.Security.Cryptography;
+using System.Text;
 
 public class StatisticHandler : MonoBehaviour {
 
@@ -71,7 +73,7 @@ public class StatisticHandler : MonoBehaviour {
 	// s_Instance is used to cache the instance found in the scene so we don't have to look it up every time.
 	private static StatisticHandler s_Instance = null;
 	
-	private string UNITY_KEY = "redrageawesome";
+	private static  string UNITY_KEY = "redrageawesome";
 	
 	public static string SID  = "DebugEditor";
 	
@@ -214,7 +216,7 @@ public class StatisticHandler : MonoBehaviour {
 	
 		using (MD5 md5Hash = MD5.Create())
         {
-            headers["X-Digest"] == GetMd5Hash(md5Hash, rawData + UNITY_KEY);
+            headers["X-Digest"] = GetMd5Hash(md5Hash, rawData + UNITY_KEY);
 			
 		}
 		WWW www = null;

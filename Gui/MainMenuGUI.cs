@@ -146,6 +146,8 @@ public class MainMenuGUI : MonoBehaviour {
 	{
 		yield return new WaitForSeconds(0.05f);
 		Debug.Log ("PLAY");
+        GA.API.Design.NewEvent("GUI:MainMenu:Play", 1); 
+   
 		if (ActivBut != null) {
 			switch (ActivBut.GetComponent<AnyRoom> ()._TypeRoom) {
 			case AnyRoom.TypeRoom.JoinRoom:
@@ -483,6 +485,7 @@ public class MainMenuGUI : MonoBehaviour {
     }
     public void AskMoneyShow()
     {
+        GA.API.Design.NewEvent("GUI:MainMenu:AskMoneyShow", 1); 
         CamMove.RideTo(1);
         _PanelsNgui.askAboutMoneyPanel.alpha = 1f;
     }
@@ -494,6 +497,7 @@ public class MainMenuGUI : MonoBehaviour {
     }
     public void MoneyBuyShow()
     {
+        GA.API.Design.NewEvent("GUI:MainMenu:MoneyBuyShow", 1); 
         CamMove.RideTo(2);
         _PanelsNgui.askAboutMoneyPanel.alpha = 0.0f;
         _PanelsNgui.moneyBuyPanel.alpha = 1f;
@@ -505,7 +509,7 @@ public class MainMenuGUI : MonoBehaviour {
     }
     public void AskExternalBuy(string item)
     {
-
+        GA.API.Design.NewEvent("GUI:MainMenu:AskExternalBuy:" + item, 1); 
         GlobalPlayer.instance.AskJsForMagazine(item);
     }
 
@@ -626,7 +630,7 @@ public class PanelsNgui
 	public UIPanel markedPanel;
     public UIPanel askAboutMoneyPanel;
     public UIPanel moneyBuyPanel;
-	public UIWidget serverResponse;
+    public UIPanel serverResponse;
 }
 [System.Serializable]
 public class LoginPanel

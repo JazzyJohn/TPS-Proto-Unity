@@ -269,6 +269,15 @@ public class AchievementManager : MonoBehaviour, LocalPlayerListener, GameListen
 			Achievement finished = outcomeQueue.Dequeue();
 			myPlayer.AchivmenUnlock(finished);
 			finishedAchivment.Add(finished);
+            if (finished.isMultiplie)
+            {
+                GA.API.Design.NewEvent("Achievement:Daylic:" + finished.name);
+            }
+            else
+            {
+                GA.API.Design.NewEvent("Achievement:Open:" + finished.name);
+            }
+          
 			syncAchivment.Add(finished.achievementId);
 		}
 		if (syncAchivment.Count > 0) {

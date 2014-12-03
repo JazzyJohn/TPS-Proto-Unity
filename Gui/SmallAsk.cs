@@ -13,7 +13,7 @@ public class SmallAsk : MonoBehaviour {
 
     public void Accept()
     {
-
+        GA.API.Design.NewEvent("GUI:SmallAsk:" + action.ToString() + ":Yes", 1); 
         panel.alpha = 0.0f;
     
         action();
@@ -22,6 +22,7 @@ public class SmallAsk : MonoBehaviour {
 
     public void Decline()
     {
+        GA.API.Design.NewEvent("GUI:SmallAsk:" + action.ToString() + ":No", 1); 
         panel.alpha = 0.0f;
 
     }

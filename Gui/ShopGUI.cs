@@ -50,6 +50,7 @@ public class ShopGUI : MonoBehaviour {
 		}
 		else
 		{
+            GA.API.Design.NewEvent("GUI:Shop:ShowShop"); 
 			MainMenu.HideAllPanel();
 			HideAllPanel();
 			Shop.alpha = 1f;
@@ -152,6 +153,7 @@ public class ShopGUI : MonoBehaviour {
 
 	public void EditCategory(int Category)
 	{
+        GA.API.Design.NewEvent("GUI:Shop:ShowCategory:" + Category); 
 		ShopItem.EditCategory((ShopSlotType) Category);
 	}
 
@@ -163,6 +165,7 @@ public class ShopGUI : MonoBehaviour {
     public void ShowCategory(int Category)
     {
         ShowShop();
+        GA.API.Design.NewEvent("GUI:Shop:ShowCategory:" + Category); 
         ShopItem.EditCategory((ShopSlotType)Category);
     }
     public void OpenList(List<ShopSlot> result)

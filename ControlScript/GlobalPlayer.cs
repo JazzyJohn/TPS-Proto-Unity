@@ -182,7 +182,9 @@ public class GlobalPlayer : MonoBehaviour {
 	
 	}
 	
+
 	public static void FullScreen(bool FullScreen_Z= false){
+        GA.API.Design.NewEvent("GUI:Settings:FullScreen"); 
 		string[] x_y = new string[2];
 
 		x_y[0] = Screen.resolutions[ Screen.resolutions.Length-1].width.ToString();
@@ -351,13 +353,14 @@ public class GlobalPlayer : MonoBehaviour {
 	{
 
 		UID = uid;
-		
+      
 		StartCoroutine(StartStats(UID,PlayerName));
 		LevelingManager.instance.Init(UID);
 		AchievementManager.instance.Init(UID);
 		ItemManager.instance.Init(UID);
         FindObjectOfType<RewardManager>().Init(UID);
         NetworkController.Instance.SetLogin(UID);
+        GA.SettingsGA.SetCustomUserID(uid);
 	}
 	public void SetSid(string sid){
 		StatisticHandler.SID = sid;

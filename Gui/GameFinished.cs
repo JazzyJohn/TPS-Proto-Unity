@@ -146,24 +146,33 @@ public class GameFinished : Statistic
         if (AfterGameBonuses.wasStamined)
         {
             Debug.Log("stamined");
+            GA.API.Design.NewEvent("Game:MatchEnd:Staminned:Yes", 1);
 			stamined.alpha = 1.0f;
 		}else{
+            GA.API.Design.NewEvent("Game:MatchEnd:Staminned:No", 1);
 			stamined.alpha = 0.0f;
 		}
 		
 	
 	
 		if(PremiumManager.instance.IsPremium()){
+            GA.API.Design.NewEvent("Game:MatchEnd:Premium:Yes", 1);
 			forNotPremium.alpha = 0.0f;
 			premium.alpha = 1.0f;
 		
 		}else{
+            GA.API.Design.NewEvent("Game:MatchEnd:Premium:No", 1);
 			forNotPremium.alpha = 1.0f;
 			premium.alpha = 0.0f;
 		}
         totalXpLabel.text = totalXP.ToString();
         totalGoldLabel.text = totalGold.ToString();
         totalCashLabel.text = totalCash.ToString();
+        GA.API.Design.NewEvent("Game:MatchEnd:End", 1);
+        GA.API.Design.NewEvent("Game:MatchEnd:PlayerReward:XP", totalXP);
+        GA.API.Design.NewEvent("Game:MatchEnd:PlayerReward:Gold", totalGold);
+        GA.API.Design.NewEvent("Game:MatchEnd:PlayerReward:Cash", totalGold);
+   
     }
     public void ResolvedExpired()
     {

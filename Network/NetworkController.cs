@@ -40,6 +40,8 @@ public class NetworkController : MonoBehaviour {
 	public string PlayerPrefab = "Player";
 	ConterIdleRequest conterIdleRequest;
     private static NetworkController instance;
+
+    List<int> deleteIdLate = new List<int>();
     public static NetworkController Instance
     {
         get
@@ -953,6 +955,7 @@ public class NetworkController : MonoBehaviour {
         smartFox.Send(request);
 
     }
+    
 	/// <summary>
     /// deleteView request to server
     /// </summary>	
@@ -1383,6 +1386,11 @@ public class NetworkController : MonoBehaviour {
 	public void HandlePawnSpawn(ISFSObject dt )
     {
         PawnModel sirPawn = (PawnModel)dt.GetClass("pawn");
+        if (deleteIdLate.Remove(sirPawn.id))
+        {
+            Debug.Log("ALredy delete");
+            return;
+        }
         Debug.Log("Pawn Spawn" + sirPawn.type + "ID:"+ sirPawn.id);
 		GameObject go =RemoteInstantiateNetPrefab(sirPawn.type, Vector3.zero,Quaternion.identity,sirPawn.id);
         if (go == null)
@@ -1502,6 +1510,12 @@ public class NetworkController : MonoBehaviour {
 	
 	public void HandleDeleteView(ISFSObject dt )
     {
+
+        if (GetView(dt.GetInt("id")) == null)
+        {
+            deleteIdLate.Add(dt.GetInt("id"));
+            return;
+        }
 		DestroyableNetworkObject obj = GetView(dt.GetInt("id")).GetComponent<DestroyableNetworkObject>();
 		
 		obj.KillMe();
@@ -1514,11 +1528,18 @@ public class NetworkController : MonoBehaviour {
 	public void HandleWeaponSpawn(ISFSObject dt )
     {
 		WeaponModel sirWeapon = (WeaponModel)dt.GetClass("weapon");
+        if (deleteIdLate.Remove(sirWeapon.id))
+        {
+            
+            return;
+        }
+
 		GameObject go =RemoteInstantiateNetPrefab(sirWeapon.type, Vector3.zero,Quaternion.identity,sirWeapon.id);
         if (go == null)
         {
             return;
         }
+
 		BaseWeapon weapon = go.GetComponent<BaseWeapon>();
 		weapon.NetUpdate(sirWeapon);
 		Pawn pawn  =  GetView(dt.GetInt("pawnId")).pawn;
@@ -1618,6 +1639,10 @@ public class NetworkController : MonoBehaviour {
         SimpleNetModel model = dt.GetClass("model") as SimpleNetModel;
         if (model != null)
         {
+            if (deleteIdLate.Remove(model.id))
+            {
+                return;
+            }
             GameObject go = RemoteInstantiateNetPrefab(model.type, model.position.GetVector(), model.rotation.GetQuat(), model.id);
             if (go == null)
             {
@@ -1635,6 +1660,11 @@ public class NetworkController : MonoBehaviour {
        SimpleDestroyableModel destrModel = dt.GetClass("model") as SimpleDestroyableModel;
        if (model != null)
        {
+           if (deleteIdLate.Remove(destrModel.id))
+           {
+               return;
+           }
+
            FoxView view = GetView(destrModel.id);
            if (view != null)
            {
@@ -1695,7 +1725,13 @@ public class NetworkController : MonoBehaviour {
 
     public void HandlePawnDiedByKill(ISFSObject dt)
     {
-        //Debug.Log("PAWN DIED");
+        Debug.Log("PAWN DIED");
+        if (GetView(dt.GetInt("viewId")) == null)
+        {
+            deleteIdLate.Add(dt.GetInt("viewId"));
+            Debug.Log("Add to Late");
+            return;
+        }
         Pawn pawn = GetView(dt.GetInt("viewId")).pawn;
         pawn.PawnKill();
         int player = dt.GetInt("player");

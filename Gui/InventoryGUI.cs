@@ -32,6 +32,9 @@ public class InventoryGUI : MonoBehaviour {
 
 	public _statistic Statistic;
 
+    public ShopGUI shop;
+
+    bool[] allowedReapair = new bool[3];
 	// Use this for initialization
 	void Start () 
 	{
@@ -97,17 +100,37 @@ public class InventoryGUI : MonoBehaviour {
 	
     }
 	void Repair(string id){
+        GA.API.Design.NewEvent("GUI:MainMenu:Inventory:Repair:" + detailItemGUI.item.name, 1);
+       
 		ItemManager.instance.UseRepairKit(detailItemGUI.item.id,id,this);
 	
 	}
 	public void SmallRepair(){
+        if (!allowedReapair[0])
+        {
+            shop.ShowCategory(2);
+            return;
+        }
+        GA.API.Design.NewEvent("GUI:MainMenu:Inventory:RepairKit:Small");
 		Repair(ItemManager.smallRepairId);
 	
 	}
 	public void NormalRepair(){
+        if (!allowedReapair[1])
+        {
+            shop.ShowCategory(2);
+            return;
+        }
+        GA.API.Design.NewEvent("GUI:MainMenu:Inventory:RepairKit:Normal");
 		Repair(ItemManager.normalRepairId);
 	}
 	public void MaximumRepair(){
+        if (!allowedReapair[2])
+        {
+            shop.ShowCategory(2);
+            return;
+        }
+        GA.API.Design.NewEvent("GUI:MainMenu:Inventory:RepairKit:Big");
 		Repair(ItemManager.maximumRepairId);
 	}
 	public void HideRepair(){
@@ -125,13 +148,20 @@ public class InventoryGUI : MonoBehaviour {
 	
     public void Disentegrate()
     {
-		
+        GA.API.Design.NewEvent("GUI:MainMenu:Inventory:Disentegrate:" + detailItemGUI.item.name,1);
         ItemManager.instance.DesintegrateItem(detailItemGUI.item.id,  this);
     }
+
+ 
 	public void ShowRepair(){
 		repair.alpha= 1.0f;
 		int[] cnt = ItemManager.instance.GetAllRepair();
-		repairGui.smallCnt.text =cnt[0].ToString();
+        for (int i = 0; i < 3; i++)
+        {
+            allowedReapair[i] = cnt[i] > 0;
+        }
+        GA.API.Design.NewEvent("GUI:MainMenu:Inventory:ShowRepair");
+         repairGui.smallCnt.text = cnt[0].ToString();
         repairGui.mediumCnt.text = cnt[1].ToString();
         repairGui.maxCnt.text = cnt[2].ToString();
 	}

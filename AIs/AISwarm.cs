@@ -241,4 +241,3 @@ public class AISwarm:MonoBehaviour
         isActive = iSFSObject.GetBool("active");
     }
 }
-

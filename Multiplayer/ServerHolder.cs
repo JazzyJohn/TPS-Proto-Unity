@@ -478,7 +478,9 @@ public class ServerHolder : MonoBehaviour
 	IEnumerator LoadMap (string mapName,bool next =false)
 	{
 		//AsyncOperation async;
-
+        progress.allLoader = 4;
+        progress.finishedLoader = 1;
+        progress.curLoader = 0;
 		connectingToRoom = true;
         AfterGameBonuses.Clear();
 		
@@ -526,9 +528,7 @@ public class ServerHolder : MonoBehaviour
 
                 //MapLoader + MApUnity load = 2;
 
-                progress.allLoader = 4;
-                progress.finishedLoader = 1;
-                progress.curLoader = 0;
+                
                 Debug.Log("Загружаем карту " + mapName);
                 IEnumerator innerCoroutineEnumerator;
                 if (data != null)

@@ -31,7 +31,7 @@ public class InvItemGUI : MonoBehaviour {
     public void SetItem(InventorySlot _item)
     {
         item = _item;
-       
+        GA.API.Design.NewEvent("GUI:MainMenu:Inventory:SelectItem:" + _item.name);
         Texture.mainTexture = null;
 
         if (_item.personal)

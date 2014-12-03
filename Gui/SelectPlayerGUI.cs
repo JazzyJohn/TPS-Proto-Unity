@@ -200,6 +200,7 @@ public class SelectPlayerGUI : MonoBehaviour {
 	}
 
     public void AutoSelectTeam() {
+        GA.API.Design.NewEvent("GUI:Select:AutoSelect"); 
         switch (mode) { 
             case GAMEMODE.PVE:
                 Choice._Team = 1;
@@ -242,7 +243,7 @@ public class SelectPlayerGUI : MonoBehaviour {
 
 	public void SelectTeam(int i)
 	{
-     
+        GA.API.Design.NewEvent("GUI:Select:SelectTeam:"+i); 
 		int[] teamCount = new int[2];
 		List<Player> players = PlayerManager.instance.FindAllPlayer ();
 		foreach(Player player in players) {
@@ -270,10 +271,12 @@ public class SelectPlayerGUI : MonoBehaviour {
 
     public void NextWeapon(int TypeW) //Вперёд слайдер оружия
     {
+        GA.API.Design.NewEvent("GUI:Select:NextWeapon"); 
         ChangeWeapon(TypeW, 1);
     }
     public void BackWeapon(int TypeW) //Назад слайдер оружия
     {
+        GA.API.Design.NewEvent("GUI:Select:BackWeapon"); 
         ChangeWeapon(TypeW, -1);
 
     }
@@ -379,7 +382,7 @@ public class SelectPlayerGUI : MonoBehaviour {
         {
             return;
         }
-      
+        GA.API.Design.NewEvent("GUI:Select:Start"); 
         if (Choice._Team == -1)
         {
             AutoSelectTeam();
@@ -444,7 +447,8 @@ public class SelectPlayerGUI : MonoBehaviour {
     }
     public void ActivateStimPack(SmallShopData pack)
     {
-       
+
+        GA.API.Design.NewEvent("GUI:Select:ActivateStimPack:"+pack.name); 
         if (pack.amount > 0)
         {
             LocalPlayer.ActivateStimpack(pack.itemId);

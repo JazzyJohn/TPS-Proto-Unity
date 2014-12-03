@@ -49,6 +49,8 @@ public class DetailItemGUI : MonoBehaviour
     public void SetItem(InventorySlot _item)
     {
         item = _item;
+        GA.API.Design.NewEvent("GUI:MainMenu:ShowDetailItem:" + item.name, 1); 
+
         Name.text = item.name;
         Description.text = item.description;
 

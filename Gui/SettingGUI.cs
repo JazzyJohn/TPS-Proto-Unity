@@ -92,7 +92,7 @@ public class SettingGUI : MonoBehaviour {
 		if(  control.alpha ==0){
 			CearControlls();				
 		}
-		
+        GA.API.Design.NewEvent("GUI:Settings:ShowControl"); 
 		HideAllSettingsPanel();
 		control.alpha = 1f;
 		
@@ -150,7 +150,7 @@ public class SettingGUI : MonoBehaviour {
 
 	public void ShowVideo()
 	{
-     
+        GA.API.Design.NewEvent("GUI:Settings:Video"); 
 		HideAllSettingsPanel();
 		video.alpha = 1f;
         CheckVideo();
@@ -160,8 +160,8 @@ public class SettingGUI : MonoBehaviour {
 	{
         FullScreen_Z = !FullScreen_Z;
 		GlobalPlayer.FullScreen(FullScreen_Z);
-		
 
+        
 		if(MainMenu != null && TypeSettingPanel != _TypeSettingPanel.MainMenu)
 			MainMenu.ReSize();
 	}

@@ -52,6 +52,7 @@ public class LotItemGUI : MonoBehaviour
     public void SetItem(ShopSlot _item)
     {
         item = _item;
+        GA.API.Design.NewEvent("GUI:MainMenu:Shop:SelectItem:" + _item.name);
         Name.text = item.name;
 		if( item.cashCost ==0){
 			
@@ -87,15 +88,20 @@ public class LotItemGUI : MonoBehaviour
     }
     public void KPBuy()
     {
+
+        GA.API.Business.NewEvent("Shop:BUYItem:" + item.name, "GASH", item.cashCost);
         StartCoroutine( ItemManager.instance.BuyItem(item.cashSlot,this));
     }
     public void GITPBuy()
     {
+
+        GA.API.Business.NewEvent("Shop:BUYItem:" + item.name, "GOLD", item.goldCost);
        StartCoroutine( ItemManager.instance.BuyItem(item.goldSlot,this));
     }
 
     public void SetError(string error)
     {
+        GA.API.Business.NewEvent("Shop:BUYError", error, 0);
         buyLabel.text = error;
         UITweener tweener = buyLabel.GetComponent<UITweener>();
         tweener.tweenFactor = 0.0f;

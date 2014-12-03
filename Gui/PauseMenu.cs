@@ -46,7 +46,7 @@ public class PauseMenu : MonoBehaviour {
 	
 	public void GoToMainMenu()
 	{
-    
+        GA.API.Design.NewEvent("GUI:Pause:MainMenu" ); 
 		Pause = false;
         if (effect != null)
         {
@@ -61,7 +61,8 @@ public class PauseMenu : MonoBehaviour {
 	}
      public void ActivateMenu(){
          if (PausePanel.alpha == 0f)
-		{
+         {
+                GA.API.Design.NewEvent("GUI:Pause:Show"); 
                 Pause = true;
                 if (effect != null)
                 {
@@ -86,7 +87,7 @@ public class PauseMenu : MonoBehaviour {
      }
 	public void BackToGame()
 	{
-      
+            GA.API.Design.NewEvent("GUI:Pause:BackToGame"); 
             Pause = false;
             if (effect != null)
             {
@@ -99,6 +100,7 @@ public class PauseMenu : MonoBehaviour {
             }
             PausePanel.alpha = 0f;
             PlayGUI.alpha = 1f;
+
         
 	}
 

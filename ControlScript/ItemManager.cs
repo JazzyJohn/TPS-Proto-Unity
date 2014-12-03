@@ -964,7 +964,7 @@ public class ItemManager : MonoBehaviour {
             else
             {
                 Debug.Log("NO BUNLDE NEEd TO LOAD" + crossDomainesafeURL);
-                WWW www = WWW.LoadFromCacheOrDownload(crossDomainesafeURL, 1);
+                WWW www = new  WWW(crossDomainesafeURL);
 
                 yield return www;
                 Debug.Log("ERROR" + www.error);
@@ -1094,7 +1094,7 @@ public class ItemManager : MonoBehaviour {
                 gui.SetError(xmlDoc.SelectSingleNode("result/errortext").InnerText);
             }
         }
-		GUIHelper.ShowConnectionStop();
+        GUIHelper.ConnectionStop();
 		buyBlock =false;
 	}
 	
@@ -1164,7 +1164,7 @@ public class ItemManager : MonoBehaviour {
 		
 		XmlDocument xmlDoc = new XmlDocument();
 		xmlDoc.LoadXml(w.text);
-		
+        Debug.Log(w.text);
 		if(xmlDoc.SelectSingleNode("result/error").InnerText=="0"){
 			gui.HideRepair();
 			IEnumerator numenator = ParseInventory(w.text);
@@ -1181,7 +1181,7 @@ public class ItemManager : MonoBehaviour {
         {
             gui.SetMessage(xmlDoc.SelectSingleNode("result/errortext").InnerText);
         }
-		GUIHelper.ShowConnectionStop();
+        GUIHelper.ConnectionStop();
 		repairBlock= false;
 	}
 
@@ -1224,7 +1224,7 @@ public class ItemManager : MonoBehaviour {
         {
             gui.SetMessage(xmlDoc.SelectSingleNode("result/errortext").InnerText);
         }
-		GUIHelper.ShowConnectionStop();
+        GUIHelper.ConnectionStop();
 		desintegrateBlock= false;
 	}
 	public List<CharacteristicToAdd> GetBuff(int id){

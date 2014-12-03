@@ -380,8 +380,9 @@ public class BaseProjectile : MonoBehaviour
 
     public virtual void DamageLogic(DamagebleObject obj, BaseDamage inDamage)
     {
+        GA.API.Design.NewEvent("Game:Weapon:Hit:" + inDamage.shootWeapon);
         obj.Damage(inDamage, owner);
-
+       
         //Debug.Log ("HADISH INTO SOME PLAYER! " + hit.transform.gameObject.name);
         //Destroy (gameObject, 0.1f);
     }
@@ -634,7 +635,7 @@ public class BaseProjectile : MonoBehaviour
         sControl.playClip(exploseSound);//звук взрыва
         Debug.Log("DOOOM");
         Collider[] hitColliders = Physics.OverlapSphere(Position, splashRadius);
-   
+        List<Transform> alredyHit = new List<Transform>();
         
         for (int i = 0; i < hitColliders.Length; i++)
         {
@@ -652,9 +653,10 @@ public class BaseProjectile : MonoBehaviour
                
            
                 DamagebleObject obj = hitColliders[i].GetComponent<DamagebleObject>();
-               
-                if (obj != null && obj != shootTarget)
+
+                if (obj != null && obj != shootTarget && !alredyHit.Contains(obj.transform.root))
                 {
+                    alredyHit.Add(obj.transform.root);
                     BaseDamage lDamage = new BaseDamage(damage);
                     lDamage.pushDirection = mTransform.forward;
                     lDamage.hitPosition = mTransform.position;

@@ -229,6 +229,7 @@ public class InventoryManager : MonoBehaviour {
 	//WEAPON CHANGE SECTION
 	
 	public void SetSlot( BaseWeapon prefab){
+        GA.API.Design.NewEvent("Game:Weapon:Choice:" + prefab.SQLId);
 		for(int i=0;i<prefabWeapon.Length;i++){
 			if(prefabWeapon[i].slotType==prefab.slotType){
 				prefabWeapon[i]=prefab;
