@@ -448,7 +448,7 @@ public class SelectPlayerGUI : MonoBehaviour {
     public void ActivateStimPack(SmallShopData pack)
     {
 
-        GA.API.Design.NewEvent("GUI:Select:ActivateStimPack:"+pack.name); 
+        GA.API.Design.NewEvent("GUI:Select:ActivateStimPack:" + pack.engName); 
         if (pack.amount > 0)
         {
             LocalPlayer.ActivateStimpack(pack.itemId);

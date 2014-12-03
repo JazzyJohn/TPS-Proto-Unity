@@ -3,6 +3,7 @@ using System;
 using System.Xml;
 using System.Collections;
 using System.Collections.Generic;
+using UnidecodeSharpFork;
 public struct WeaponIndex
 {
     public int prefabId;
@@ -763,7 +764,9 @@ public class ItemManager : MonoBehaviour {
             slot.gameClass = (GameClassEnum)Enum.Parse(typeof(GameClassEnum), node.SelectSingleNode("class").InnerText);
             slot.type = (ShopSlotType)Enum.Parse(typeof(ShopSlotType), node.SelectSingleNode("type").InnerText);
             slot.id =node.SelectSingleNode("game_id").InnerText;
+           
             slot.name = node.SelectSingleNode("name").InnerText;
+            slot.engName = slot.name.Unidecode();
             slot.description = node.SelectSingleNode("description").InnerText;
             slot.shopicon = node.SelectSingleNode("shopicon").InnerText;
             slot.model = node.SelectSingleNode("model").InnerText;
@@ -1336,6 +1339,7 @@ public class ItemManager : MonoBehaviour {
 				slot.ingamekey= int.Parse(node.SelectSingleNode("ingamekey").InnerText);
 				slot.maxcharge= int.Parse(node.SelectSingleNode("maxcharge").InnerText);
 				slot.name = node.SelectSingleNode("name").InnerText;
+                slot.engName = slot.name.Unidecode();
 				slot.description = node.SelectSingleNode("description").InnerText;
 				slot.shopicon = node.SelectSingleNode("shopicon").InnerText;
 				slot.model = node.SelectSingleNode("model").InnerText;
@@ -1536,6 +1540,7 @@ public class ItemManager : MonoBehaviour {
 						if(data==null){
 							data= new SmallShopData();
 							data.name  = slot.name;
+                            data.engName = slot.engName;
                             data.descr = slot.description;
 							data.amount=0;
 							data.textureGUI = pack.textureGUI;
@@ -1554,6 +1559,7 @@ public class ItemManager : MonoBehaviour {
                         {
                             data = new SmallShopData();
                             data.name = slot.name;
+                            data.engName = slot.engName;
                             data.amount = 0;
                              data.descr = slot.description;
 

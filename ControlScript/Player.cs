@@ -61,6 +61,7 @@ public class Player : MonoBehaviour {
 		public int Death=0;
 		public int Assist=0;
 		public int RobotKill=0;
+        public int AIKill = 0;
 	}
  
 	
@@ -88,7 +89,9 @@ public class Player : MonoBehaviour {
 	public string delayedExternalCallData;
 	
 	public bool wasWallPost = false;
-	
+
+    bool winnerWallPost = false;
+
 	public const float SQUERED_RADIUS_OF_ACTION = 16.0f;
 	
 	public GlobalPlayer globalPlayer;
@@ -178,6 +181,7 @@ public class Player : MonoBehaviour {
         }
         DeathUpdate();
         Score.Assist = 0;
+        Score.AIKill = 0;
         Score.Death = 0;
         Score.Kill = 0;
         Score.RobotKill = 0;
@@ -193,14 +197,23 @@ public class Player : MonoBehaviour {
 
 	}
 	
-
+   
 	public void GameEnd(){
-		if (currentPawn != null) {
-			currentPawn.RequestKillMe ();
-		}
-		if(robotPawn!= null) {
-			robotPawn.RequestKillMe ();
-		}
+        if (GameRule.instance.Winner() == team)
+        {
+            if (!winnerWallPost)
+            {
+                winnerWallPost = true;
+                String text = TextGenerator.instance.GetSimpleText("WallPostWinner");
+                text = String.Format(text,Score.AIKill, Score.Kill );
+                Application.ExternalCall("AchivmenUnlock", text);
+            }
+            else
+            {
+                winnerWallPost = false;
+            }
+          
+        }
 	}
 	public void Respawn(Pawn newPawn){
        
@@ -564,6 +577,7 @@ public class Player : MonoBehaviour {
             }
 
 		} else {
+            Score.AIKill++;
             //TODO: move text to config
             PlayerMainGui.instance.Annonce(AnnonceType.AIKILL,addtype, deadPawn.publicName);
             EventHolder.instance.FireEvent(typeof(LocalPlayerListener), "EventPawnKillAI", this, killinfo);
@@ -601,7 +615,7 @@ public class Player : MonoBehaviour {
 		}else{
 			PlayerMainGui.instance.AddMessage(achv.name+"\n"+achv.description,Vector3.zero,PlayerMainGui.MessageType.ACHIVEMENT);
 			delayedExternalCallName ="AchivmenUnlock";
-			delayedExternalCallData = achv.name + " " + achv.description;
+            delayedExternalCallData = achv.name + ": " + achv.description;
 		}
 		
 	}

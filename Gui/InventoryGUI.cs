@@ -100,7 +100,7 @@ public class InventoryGUI : MonoBehaviour {
 	
     }
 	void Repair(string id){
-        GA.API.Design.NewEvent("GUI:MainMenu:Inventory:Repair:" + detailItemGUI.item.name, 1);
+        GA.API.Design.NewEvent("GUI:MainMenu:Inventory:Repair:" + detailItemGUI.item.engName, 1);
        
 		ItemManager.instance.UseRepairKit(detailItemGUI.item.id,id,this);
 	
@@ -148,7 +148,7 @@ public class InventoryGUI : MonoBehaviour {
 	
     public void Disentegrate()
     {
-        GA.API.Design.NewEvent("GUI:MainMenu:Inventory:Disentegrate:" + detailItemGUI.item.name,1);
+        GA.API.Design.NewEvent("GUI:MainMenu:Inventory:Disentegrate:" + detailItemGUI.item.engName, 1);
         ItemManager.instance.DesintegrateItem(detailItemGUI.item.id,  this);
     }
 

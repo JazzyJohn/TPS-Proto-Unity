@@ -109,6 +109,7 @@ public class PVPGameRule : GameRule {
 			//player.GameEnd ();
 			EventHolder.instance.FireEvent(typeof(GameListener),"EventTeamWin",Winner());
             GlobalPlayer.instance.MathcEnd();
+            Player.localPlayer.GameEnd();
             ItemManager.instance.RemoveOldAndExpired();
             List<Pawn> pawns = PlayerManager.instance.FindAllPawn();
             foreach (Pawn pawn in pawns)

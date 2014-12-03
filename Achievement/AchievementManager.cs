@@ -4,7 +4,7 @@ using System.Xml;
 using System.Collections;
 using System.Collections.Generic;
 using System.Threading;
-
+using UnidecodeSharpFork;
 
 //ALL ACHIEVMENT IN DIIFERENT THREAD
 public class AchievementParam{
@@ -17,6 +17,7 @@ public class AchievementParam{
 public class Achievement{
 	public Dictionary<string,AchievementParam> achivParams = new Dictionary<string, AchievementParam>();
 	public String name;
+    public String engName;
 	public String description;
   	public int achievementId;
 	public Texture2D textureIcon;
@@ -118,6 +119,7 @@ public class AchievementManager : MonoBehaviour, LocalPlayerListener, GameListen
 		foreach (XmlNode node in xmlDoc.SelectNodes("achivements/achivement")) {
 			Achievement achivment = new Achievement();
 			achivment.name = node.SelectSingleNode("name").InnerText;
+            achivment.engName = achivment.name.Unidecode();
 			achivment.description = node.SelectSingleNode("description").InnerText;
            
 			achivment.achievementId = int.Parse(node.SelectSingleNode("id").InnerText);
@@ -271,11 +273,11 @@ public class AchievementManager : MonoBehaviour, LocalPlayerListener, GameListen
 			finishedAchivment.Add(finished);
             if (finished.isMultiplie)
             {
-                GA.API.Design.NewEvent("Achievement:Daylic:" + finished.name);
+                GA.API.Design.NewEvent("Achievement:Daylic:" + finished.engName);
             }
             else
             {
-                GA.API.Design.NewEvent("Achievement:Open:" + finished.name);
+                GA.API.Design.NewEvent("Achievement:Open:" + finished.engName);
             }
           
 			syncAchivment.Add(finished.achievementId);

@@ -44,15 +44,15 @@ public class SmallShop : MonoBehaviour {
             addshops.AskMoneyShow(BuyForGold);
             return;
         }
-        GA.API.Business.NewEvent("SmallShop:BUYItem:" + data.name, "GOLD", data.goldCost);
+        GA.API.Business.NewEvent("SmallShop:BUYItem:" + data.engName, "GOLD", data.goldCost);
         StartCoroutine(BuyItem(data.goldSlot));
     }
     public void BuyForCash(){
-        GA.API.Business.NewEvent("SmallShop:BUYItem:" + data.name, "GASH", data.cashCost);
+        GA.API.Business.NewEvent("SmallShop:BUYItem:" + data.engName, "GASH", data.cashCost);
         StartCoroutine(BuyItem(data.cashSlot));
     }
     public void Show() {
-        GA.API.Design.NewEvent("GUI:SmallShop:SHOW:" + data.name, 1);
+        GA.API.Design.NewEvent("GUI:SmallShop:SHOW:" + data.engName, 1);
         panel.alpha = 1.0f;
         MyGold.text = GlobalPlayer.instance.gold.ToString();
         MyCash.text = GlobalPlayer.instance.cash.ToString();

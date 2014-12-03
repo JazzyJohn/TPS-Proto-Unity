@@ -52,7 +52,7 @@ public class LotItemGUI : MonoBehaviour
     public void SetItem(ShopSlot _item)
     {
         item = _item;
-        GA.API.Design.NewEvent("GUI:MainMenu:Shop:SelectItem:" + _item.name);
+        GA.API.Design.NewEvent("GUI:MainMenu:Shop:SelectItem:" + _item.engName);
         Name.text = item.name;
 		if( item.cashCost ==0){
 			
@@ -89,13 +89,13 @@ public class LotItemGUI : MonoBehaviour
     public void KPBuy()
     {
 
-        GA.API.Business.NewEvent("Shop:BUYItem:" + item.name, "GASH", item.cashCost);
+        GA.API.Business.NewEvent("Shop:BUYItem:" + item.engName, "GASH", item.cashCost);
         StartCoroutine( ItemManager.instance.BuyItem(item.cashSlot,this));
     }
     public void GITPBuy()
     {
 
-        GA.API.Business.NewEvent("Shop:BUYItem:" + item.name, "GOLD", item.goldCost);
+        GA.API.Business.NewEvent("Shop:BUYItem:" + item.engName, "GOLD", item.goldCost);
        StartCoroutine( ItemManager.instance.BuyItem(item.goldSlot,this));
     }
 
