@@ -253,6 +253,7 @@ public class GlobalPlayer : MonoBehaviour {
 			}
 		}
 		
+		TournamentManager.instance.ParseData(xmlDoc);
 	}
 	
 	public void MathcEnd(){
@@ -280,6 +281,7 @@ public class GlobalPlayer : MonoBehaviour {
 		
 		form.AddField ("uid", Uid);
 		form.AddField ("name", Name);
+		form.AddField ("tournament", 1);
 		WWW w = null;
 		if (String.Compare(Application.absoluteURL, 0, "https", 0,5) != 0) {
 			
@@ -375,6 +377,11 @@ public class GlobalPlayer : MonoBehaviour {
         StartCoroutine(_LoadAvatar(text));
 
     }
+	
+	public void ReturnUsers(string text){
+		StartCoroutine(	TournamentManager.instance.SetSocInfo(text));
+	
+	}
     public IEnumerator _LoadAvatar(string text)
     {
         WWW www = new WWW(text);
