@@ -185,7 +185,7 @@ public class LevelingManager : MonoBehaviour, LocalPlayerListener,GameListener{
 		expDictionary[cause].Increment();
 		bool sendByLvl=false;
 		//Check if we on max lvl
-		if(playerLvl<=playerNeededExp.Length){
+		if(playerLvl<playerNeededExp.Length){
 			//add exp
 			playerExp+=exp;
 			//if lvl mark that it's time to sync with server
@@ -194,7 +194,7 @@ public class LevelingManager : MonoBehaviour, LocalPlayerListener,GameListener{
 				playerLvl++;
 			}
 		}
-		if(selected!=-1&&classLvl[selected]<=classNeededExp.Length){
+		if(selected!=-1&&classLvl[selected]<classNeededExp.Length){
 			classExp[selected]+=exp;
 			if(classExp[selected]>=classNeededExp[classLvl[selected]]){
 				sendByLvl= true;

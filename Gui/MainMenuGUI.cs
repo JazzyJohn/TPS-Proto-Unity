@@ -65,6 +65,7 @@ public class MainMenuGUI : MonoBehaviour {
                 _PanelsNgui.markedPanel.alpha = 0.0f;
             }
         }
+        FindObjectOfType<SlaiderPanel>().isActive = true;
     }
 
 
@@ -353,7 +354,14 @@ public class MainMenuGUI : MonoBehaviour {
 		_playerInfo.GITP = _playerInfo.Player.gold;
 		_playerInfo.playerLvl = lvl.playerLvl;
 		_playerInfo.playerExp =  LevelingManager.instance.playerExp;
-		_playerInfo.playerExpNeed =  LevelingManager.instance.playerNeededExp[_playerInfo.playerLvl];
+        if (LevelingManager.instance.playerNeededExp.Length > _playerInfo.playerLvl)
+        {
+            _playerInfo.playerExpNeed = LevelingManager.instance.playerNeededExp[_playerInfo.playerLvl];
+        }
+        else
+        {
+            _playerInfo.playerExpNeed = _playerInfo.playerExp;
+        }
 		_playerInfo.playerProcent = lvl.playerProcent;
 	}
 

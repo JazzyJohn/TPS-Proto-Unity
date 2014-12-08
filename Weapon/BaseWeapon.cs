@@ -205,8 +205,10 @@ public class BaseWeapon : DestroyableNetworkObject {
 	//ID for MySqlBAse
 	public int SQLId;
 
-    
 
+    public Vector3 muzzleCached;
+
+    public Vector3 muzzleCachedforward;
   public event EventHandler FireStarted;
   public event EventHandler FireStoped;
 
@@ -314,7 +316,7 @@ public class BaseWeapon : DestroyableNetworkObject {
 	}
     void Update()
     {
-		
+        UpdateWeapon(Time.deltaTime);
         if (foxView.isMine)
         {
             if (isShooting)
@@ -327,7 +329,7 @@ public class BaseWeapon : DestroyableNetworkObject {
 
             }
 			if(shouldDrawTrajectory&&drawer!=null&&drawer.gameObject.activeSelf){
-				drawer.Draw(  muzzlePoint.position+muzzleOffset,getAimRotation(), GetRandomeDirectionCoef());
+                drawer.Draw(muzzleCached + muzzleOffset, getAimRotation(), GetRandomeDirectionCoef());
 			}
         }
         else
@@ -348,8 +350,14 @@ public class BaseWeapon : DestroyableNetworkObject {
 		return !foxView.isMine;
 	}
 	// Update is called once per frame
-	void FixedUpdate () {
-        UpdateWeapon(Time.fixedDeltaTime);
+    public void UpdateCahedPosition()
+    {
+        if (muzzlePoint != null)
+        {
+            muzzleCached = muzzlePoint.position;
+            muzzleCachedforward = muzzlePoint.forward;
+        }
+      
     }
     void UpdateWeapon(float deltaTime){
 		if(init&&owner==null) {
@@ -491,9 +499,10 @@ public class BaseWeapon : DestroyableNetworkObject {
 
     protected virtual void ShootTick(float deltaTime)
     {
-     
+       
         if (fireTimer <= 0)
         {
+           
             fireTimer = fireInterval;
             Fire();
         }
@@ -529,6 +538,7 @@ public class BaseWeapon : DestroyableNetworkObject {
     
     }
 	public virtual void StopFire(){
+        
         switch (prefiretype)
         {
             case PREFIRETYPE.Normal:
@@ -825,13 +835,13 @@ public class BaseWeapon : DestroyableNetworkObject {
         }
 	  if (muzzlePoint==null)
 	    return true;
-		Vector3 aimDir = (owner.getCachedAimRotation() -muzzlePoint.position).normalized;
-		Vector3 realDir = muzzlePoint.forward;
+        Vector3 aimDir = (owner.getCachedAimRotation() - muzzleCached).normalized;
+        Vector3 realDir = muzzleCachedforward;
 		float angle = Vector3.Dot (aimDir, realDir);
 
 		if (angle < MAXDIFFERENCEINANGLE) {
-           // Debug.Log("angle");
-			return false;		
+            Debug.Log("angle");
+			//return false;		
 		}
 
 //		Vector3 aimDir = (owner.getCachedAimRotation() -muzzlePoint.position).normalized;
@@ -866,7 +876,7 @@ public class BaseWeapon : DestroyableNetworkObject {
 
     }
 	protected virtual void DoSimpleDamage(){
-		Vector3 startPoint  = muzzlePoint.position+muzzleOffset;
+        Vector3 startPoint = muzzleCached + muzzleOffset;
 		Quaternion startRotation = getAimRotation();
 	
 		float effAimRandCoef = GetRandomeDirectionCoef();
@@ -966,7 +976,7 @@ public class BaseWeapon : DestroyableNetworkObject {
     }
 	
 	protected virtual void GenerateProjectile(){
-		Vector3 startPoint  = muzzlePoint.position+muzzleOffset;
+		Vector3 startPoint  = muzzleCached+muzzleOffset;
 		Quaternion startRotation = getAimRotation();
 		GameObject proj;
 		float effAimRandCoef = GetRandomeDirectionCoef();
@@ -1076,7 +1086,7 @@ public class BaseWeapon : DestroyableNetworkObject {
 		projScript.owner = owner.gameObject;
 		return projScript;
 	}
-
+  
 	protected Quaternion getAimRotation(){
 		/*Vector3 randVec = Random.onUnitSphere;
 		Vector3 normalDirection  = owner.getAimRotation(weaponRange)-muzzlePoint.position;
@@ -1084,11 +1094,11 @@ public class BaseWeapon : DestroyableNetworkObject {
         if (projectileClass != null)
         {
 
-            return Quaternion.LookRotation(owner.getAimpointForWeapon(projectileClass.startImpulse) - muzzlePoint.position);
+            return Quaternion.LookRotation(owner.getAimpointForWeapon(projectileClass.startImpulse) - muzzleCached);
         }
         else
         {
-            return Quaternion.LookRotation(owner.getAimpointForWeapon() - muzzlePoint.position);
+            return Quaternion.LookRotation(owner.getAimpointForWeapon() - muzzleCached);
         }
 		
 

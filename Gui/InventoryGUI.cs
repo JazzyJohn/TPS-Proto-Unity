@@ -30,7 +30,7 @@ public class InventoryGUI : MonoBehaviour {
 
 	public AskWindow askWindow;
 
-	public _statistic Statistic;
+	public MainMenuStatistic statistic;
 
     public ShopGUI shop;
 
@@ -39,13 +39,14 @@ public class InventoryGUI : MonoBehaviour {
 	void Start () 
 	{
 		InvItem.Main = this;
+        statistic.Main = this;
         Detail.alpha = 0f;
         repair.alpha = 0f;
 
-		Statistic.AllStat.AddRange(Statistic.AllStatGrild.transform.GetComponentsInChildren<UILabel>());
-		foreach(UILabel Label in Statistic.AllStat)
+        statistic.AllStat.AddRange(statistic.AllStatGrild.transform.GetComponentsInChildren<UILabel>());
+        foreach (UILabel Label in statistic.AllStat)
 		{
-			Statistic.DefValueStat.Add(Label.text);
+            statistic.DefValueStat.Add(Label.text);
 		}
 		//ShopItem.EditCategory(ShopItem.SelectCategory, ShopItem.SelectClass);
 		
@@ -259,26 +260,42 @@ public class InventoryGUI : MonoBehaviour {
 
 	public void EditCategoryStat(int num)
 	{
-		Statistic.OpenTab = (_statistic.Tab)num;
+        statistic.OpenTab = (MainMenuStatistic.Tab)num;
 
-		switch(Statistic.OpenTab)
+		switch(statistic.OpenTab)
 		{
-		case _statistic.Tab.Achive:
-			Statistic.Clean(AchivGUI.type.Achiv);
-			//добавление объектов в Ачивки через Statistic.AddObj(Номер объекта, _statistic.type.Achiv)
-			break;
-		case _statistic.Tab.Missions:
-			Statistic.Clean(AchivGUI.type.Dailic);
-			//добавление объектов в Дейлики через Statistic.AddObj(Номер объекта, _statistic.type.Dailic)	
-			break;
-		case _statistic.Tab.Stat:
-			Statistic.StatToDef();
-			foreach(UILabel Label in Statistic.AllStat)
+            case MainMenuStatistic.Tab.Achive:
+                {
+                    statistic.Clean(AchivGUI.type.Achiv);
+
+                    List<Achievement> achivments = AchievementManager.instance.GetAchivment();
+                    foreach (Achievement achiv in achivments)
+                    {
+                        statistic.AddObj(achiv, AchivGUI.type.Achiv);
+                    }
+                }
+                break;
+            case MainMenuStatistic.Tab.Missions:
+                {
+
+                    statistic.Clean(AchivGUI.type.Dailic);
+                    List<Achievement> achivments = AchievementManager.instance.GetDaylics();
+                    foreach (Achievement achiv in achivments)
+                    {
+                        statistic.AddObj(achiv, AchivGUI.type.Dailic);
+                    }
+                }
+                
+                break;
+            case MainMenuStatistic.Tab.Stat:
+            statistic.StatToDef();
+            foreach (UILabel Label in statistic.AllStat)
 			{
 				//Label.text += полученное значение;
 			}
 			break;
 		}
+        StartCoroutine(statistic.ReSize());
 	}
 	
 }
@@ -372,8 +389,10 @@ public class InvItem
 }
 
 [Serializable]
-public class _statistic
+public class MainMenuStatistic
 {
+    [HideInInspector]
+    public InventoryGUI Main;
 	public UISprite Background;
 	public UITable[] Tables;
 	public int CoutColl;
@@ -386,10 +405,9 @@ public class _statistic
 	public enum Tab{Stat, Missions, Achive};
 	public Tab OpenTab = Tab.Stat;
 
-	public AchivGUI perfab;
+    public AchivGUI achivPerfab;
 
-	public List<AchivGUI> Achiv;
-	public List<AchivGUI> Dailic;
+    public AchivGUI daylicPrefab;
 
 	public UITable AchivTable;
 	public UITable DailicTable;
@@ -404,13 +422,18 @@ public class _statistic
 	
 	int Width;
 
-	public void AddObj(int num, AchivGUI.type TypeObj)
+	public void AddObj(Achievement achiv, AchivGUI.type TypeObj)
 	{
-		Transform obj = Transform.Instantiate(perfab.transform) as Transform;
-		AchivGUI Script = obj.GetComponent<AchivGUI>(); 
-		Script.Type = TypeObj;
-		Script.numObj = num;
-		Script.StartCoroutine(Script.GetInfo());
+        Transform obj;
+        if (TypeObj == AchivGUI.type.Achiv)
+		     obj = Transform.Instantiate(achivPerfab.transform) as Transform;
+        else
+            obj = Transform.Instantiate(daylicPrefab.transform) as Transform;
+		AchivGUI script = obj.GetComponent<AchivGUI>();
+        script.Main = Main;
+        script.Type = TypeObj;
+
+        script.GetInfo(achiv);
 	}
 
 	public void GetParent(AchivGUI obj)
@@ -419,8 +442,11 @@ public class _statistic
 			obj.transform.parent = AchivTable.transform;
 		else
 			obj.transform.parent = DailicTable.transform;
-
-		ReSize();
+        obj.transform.localScale = new Vector3(1f, 1f, 1f);
+        obj.transform.localEulerAngles = new Vector3(0f, 0f, 0f);
+        obj.transform.localPosition = new Vector3(0f, 0f, 0f);
+     
+	
 
 		obj.Widget.alpha = 1f;
 	}
@@ -443,31 +469,28 @@ public class _statistic
 		switch(Type)
 		{
 		case AchivGUI.type.Achiv:
-			foreach(AchivGUI Obj in Achiv)
+             foreach (Transform Obj in AchivTable.transform)
 			{
 				GameObject.Destroy(Obj.gameObject);
 			}
-			Achiv.Clear();
+			
 			break;
 		case AchivGUI.type.Dailic:
-			foreach(AchivGUI Obj in Dailic)
-			{
-				GameObject.Destroy(Obj.gameObject);
-			}
-			Dailic.Clear();
+            foreach (Transform Obj in DailicTable.transform)
+            {
+                GameObject.Destroy(Obj.gameObject);
+            }
 			break;
 		}
 	}
 
-	public void ReSize()
+	public IEnumerator ReSize()
 	{
-		if(Background.width-25 != Width)
-		{
-			Width = Background.width - 25;
-			EditCountColl = Mathf.RoundToInt(Mathf.Floor(Width/125));
+
+        yield return new WaitForEndOfFrame();
+       
 			AchivTable.Reposition();
 			DailicTable.Reposition();
-		}
-
+		
 	}
 }

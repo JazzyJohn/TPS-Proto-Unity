@@ -90,16 +90,8 @@ public class AchievementManager : MonoBehaviour, LocalPlayerListener, GameListen
 	}
 	protected IEnumerator LoadAchivment(WWWForm form){
 		//Debug.Log (form );
-		WWW w = null;
-		if (String.Compare(Application.absoluteURL, 0, "https", 0,5) != 0) {
-			
-			Debug.Log ("STATS HTTP SEND" + StatisticHandler.GetSTATISTIC_PHP_HTTPS()+ StatisticHandler.LOAD_ACHIVE);
-			w = new WWW (StatisticHandler.GetSTATISTIC_PHP()+ StatisticHandler.LOAD_ACHIVE, form);
-		}
-		else{
-			Debug.Log ("STATS HTTPS SEND"+StatisticHandler.GetSTATISTIC_PHP_HTTPS()+ StatisticHandler.LOAD_ACHIVE);
-			w = new WWW (StatisticHandler.GetSTATISTIC_PHP_HTTPS()+ StatisticHandler.LOAD_ACHIVE, form);
-		}
+        WWW w = StatisticHandler.GetMeRightWWW(form, StatisticHandler.LOAD_ACHIVE);
+		
 		yield return w;
 		//Debug.Log (w.text);
 		IEnumerator numenator = ParseList (w.text);

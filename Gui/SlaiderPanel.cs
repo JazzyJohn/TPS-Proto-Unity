@@ -15,6 +15,8 @@ public class SlaiderPanel : MonoBehaviour {
 	public Transform allNewsPivot;
 	
 	public Transform allBtnPivot;
+
+    public Transform[] addnews;
 		
 	private int newsCount = 0;
 	
@@ -27,6 +29,8 @@ public class SlaiderPanel : MonoBehaviour {
 	private float slideTimer =0.0f;
 
 	private float offset;
+
+    public bool isActive = false;
 
 	private List<UIToggle> newsbtns = new List<UIToggle> ();
 
@@ -44,7 +48,7 @@ public class SlaiderPanel : MonoBehaviour {
 				GenerateNewsBoxes();
 		}	
 
-		if(newsCount!=0){
+		if(newsCount!=0&&isActive){
 			if(IsSliding){
 				Vector3 target = new Vector3(-curItem*offset, 0, 0);
 				allNewsPivot.localPosition = Vector3.Lerp(	allNewsPivot.localPosition, target,Time.deltaTime);
@@ -86,9 +90,10 @@ public class SlaiderPanel : MonoBehaviour {
 	public void ReSize(){
 		offset = oneNewPrefab.GetComponent<UIWidget> ().width;
 		//first is shablon
+
 		for (int i=1; i<=newsCount; i++) {
-						
-			allNewsPivot.transform.GetChild(i).localPosition = new Vector3 (offset *( i-1), 0, 0);
+
+            allNewsPivot.transform.GetChild(i).localPosition = new Vector3(offset * (i- 1), 0, 0);
 		}
 	}
 	void GenerateNewsBoxes(){
@@ -96,9 +101,28 @@ public class SlaiderPanel : MonoBehaviour {
 		offset = oneNewPrefab.GetComponent<UIWidget> ().width;
 		float btnoffset = onewNewButton.GetComponent<UISprite> ().width;
 		List<NewUpdate> news = NewsManager.instance. getNewsList();
-		newsCount = news.Count;
-		for(int i=0;i<news.Count;i++){
-			NewUpdate oneNew= news[i];
+        newsCount = news.Count + addnews.Length;
+
+        for (int i = 0; i < addnews.Length; i++)
+        {
+            GameObject objectnews = addnews[i].gameObject;
+            objectnews.transform.parent = allNewsPivot;
+            objectnews.transform.localScale = new Vector3(1f, 1f, 1f);
+            objectnews.transform.localEulerAngles = new Vector3(0f, 0f, 0f);
+
+            objectnews.transform.localPosition = new Vector3(offset * i, 0, 0);
+         
+            GameObject objectbtn = Instantiate(onewNewButton) as GameObject;
+
+            objectbtn.transform.parent = allBtnPivot;
+            objectbtn.transform.localScale = new Vector3(1f, 1f, 1f);
+            objectbtn.transform.localPosition = new Vector3(btnoffset * (i - newsCount / 2), 0, 0);
+            objectbtn.GetComponent<SliderBtn>().Init(i, this);
+            newsbtns.Add(objectbtn.GetComponent<UIToggle>());
+        }
+        for (int i = addnews.Length; i < newsCount; i++)
+        {
+            NewUpdate oneNew = news[i - addnews.Length];
 			GameObject  objectnews =Instantiate(oneNewPrefab)as GameObject;
 
 			objectnews.transform.parent = allNewsPivot;

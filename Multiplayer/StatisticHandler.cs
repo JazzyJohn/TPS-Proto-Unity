@@ -17,6 +17,8 @@ public class StatisticHandler : MonoBehaviour {
 	public static string LOAD_ACHIVE = "loadachive";
 	
 	public static string SAVE_ACHIVE = "saveachive";
+
+    public static string SAVE_OPERATION = "saveoperation";
 	
 	public static string LOAD_LVL = "loadlvl";
 

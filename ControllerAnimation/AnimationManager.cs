@@ -1,9 +1,12 @@
 ﻿using UnityEngine;
 using System;
 using System.Collections;
+using RootMotion.FinalIK;
 
 public enum AnimType {TAUNT};
 public enum AnimDirection {Front,Back};
+
+public delegate void UpdateFinished();
 public class AnimationManager : MonoBehaviour
 {
     private float
@@ -16,12 +19,16 @@ public class AnimationManager : MonoBehaviour
 	public Rigidbody rb;
     protected RaggdollRoot raggdollRoot;
     public bool isDead = false;
+    public Pawn pawn;
 	protected void Awake()
     {
         animator = GetComponent<Animator>();
 		if (aimPos == null) {
 			aimPos = gameObject.GetComponentInChildren<IKcontroller> ();
+           
 		}
+        gameObject.GetComponentInChildren<AimIK>().solver.action = FinisedIKUpdate;
+        pawn =transform.root.GetComponent<Pawn>();
         if (animator == null)
             Debug.LogError("Animator not find!", this);
 
@@ -29,31 +36,10 @@ public class AnimationManager : MonoBehaviour
         raggdollRoot = gameObject.GetComponentInChildren<RaggdollRoot>();
     }
 
-    //debug
-    private void Update()
+
+    public void FinisedIKUpdate()
     {
-        #region Read and delete this!!!
-       /* directionAxisZ = Input.GetAxis("Vertical");
-        directionAxisX = Input.GetAxis("Horizontal");
-        float runButton = Input.GetAxis("Run") ;
-
-        directionAxisX += directionAxisX > 0 ? runButton : directionAxisX < 0 ? -runButton : 0;
-        directionAxisZ += directionAxisZ > 0 ? runButton : directionAxisZ < 0 ? -runButton : 0;
-
-        ApllyMotion(directionAxisX, directionAxisZ);
-        ApllyJump(Input.GetKeyDown(KeyCode.Space));
-
-        if (Input.GetKeyDown(KeyCode.Alpha1))
-            ApllyDeath(Random.Range(1, 3));
-        if (Input.GetKeyDown(KeyCode.Alpha2))
-            ApllyClimbLedge(Random.Range(1, 4));
-        else
-            ApllyClimbLedge(0);
-
-        //reset animation
-        if (Input.GetKeyDown(KeyCode.Tab))        
-            ResetAnimation();*/
-        #endregion
+        pawn.CurWeapon.UpdateCahedPosition();
     }
     /// <summary>
     /// Задает или возвращает значение воспроизведения скорости анимации

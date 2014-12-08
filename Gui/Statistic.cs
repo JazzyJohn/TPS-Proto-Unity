@@ -138,7 +138,14 @@ public class Statistic : MonoBehaviour {
 
 		Lvl.text = "Lvl "+LevelingManager.instance.playerLvl;
 		ExpLabel.text = LevelingManager.instance.playerExp.ToString();
-		ExpNeedLabel.text = LevelingManager.instance.playerNeededExp[LevelingManager.instance.playerLvl].ToString();
+        if (LevelingManager.instance.playerLvl < LevelingManager.instance.playerNeededExp.Length)
+        {
+            ExpNeedLabel.text = LevelingManager.instance.playerNeededExp[LevelingManager.instance.playerLvl].ToString();
+        }
+        else
+        {
+            ExpNeedLabel.text = LevelingManager.instance.playerExp.ToString();
+        }
 		if (LevelingManager.instance.playerNeededExp[LevelingManager.instance.playerLvl] != 0)
 			Exp.value = stats.playerProcent/100f;
 

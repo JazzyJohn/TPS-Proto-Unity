@@ -37,9 +37,10 @@ public class ThirdPersonCamera : PlayerCamera
 
     protected bool aiming = false;
 
-	
+    public float inWallDrop;
 
-	
+    public float maxDistance;
+    public float xOffset = 0.0f;
 	
 	private float heightVelocity= 0.0f;
 	private float angleVelocity= 0.0f;
@@ -59,6 +60,8 @@ public class ThirdPersonCamera : PlayerCamera
 
     public static LayerMask cameraLayer = -123909;
 	Vector3 curAddShake= Vector3.zero;
+
+    Camera mainCamera;
 	
 	void  Awake (){
 		
@@ -70,6 +73,7 @@ public class ThirdPersonCamera : PlayerCamera
 			enabled = false;	
 		}
 		startFov = Camera.main.fieldOfView;
+        mainCamera = Camera.main;
 		//minimapTransform = GameObject.FindGameObjectWithTag ("MinimapCamera").GetComponent<Transform> ();
 		//minimapCamera = minimapTransform.camera;
 		_target = transform;
@@ -116,8 +120,9 @@ public class ThirdPersonCamera : PlayerCamera
             Camera.main.fieldOfView = startFov;
         }
 		
-        Vector3 targetHead = _target.position + _pawn.headOffset;
+        Vector3 targetHead = _target.position + _pawn.headOffset +_pawn.GetDesireRotation()*Vector3.right*xOffset;
         Vector3 lOffset = _pawn.GetDesireRotation()* targetOffset;
+
         Debug.DrawLine(targetHead, targetHead + lOffset, Color.red);
 
         Vector3 resultcameraPos = targetHead + lOffset;
@@ -175,14 +180,33 @@ public class ThirdPersonCamera : PlayerCamera
             }
 
         }
+       
 
 
+        Vector3 fromHeadDirection = targetHead - (resultcameraPos + GetShaker());
+        Vector3 direction = _pawn.getAimpointForCamera() - (resultcameraPos + GetShaker());
+       
+        if (fromHeadDirection.sqrMagnitude < maxDistance|| Vector3.Dot(direction,fromHeadDirection)<0)
+        {
+            resultcameraPos = targetHead + lOffset.normalized * inWallDrop;
+            direction = _pawn.getAimpointForCamera() - (resultcameraPos + GetShaker());
+            if (mainCamera.useOcclusionCulling)
+            {
+                mainCamera.useOcclusionCulling = false;
+            }
+        }
+        else
+        {
+            if (!mainCamera.useOcclusionCulling)
+            {
+                mainCamera.useOcclusionCulling = true;
+            }
+        }
 
 
         cameraTransform.position = resultcameraPos + GetShaker();
         // Always look at the target	
-        Vector3 direction = _pawn.getAimpointForCamera() - cameraTransform.position;
-
+     
         cameraTransform.rotation = Quaternion.LookRotation(direction);
 	}
 

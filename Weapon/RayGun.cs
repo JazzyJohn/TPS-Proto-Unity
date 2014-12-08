@@ -71,7 +71,7 @@ public class RayGun : NetSyncGun
               
         }
         FiredEffect();
-		Vector3 startPoint  = muzzlePoint.position+muzzleOffset;
+        Vector3 startPoint = muzzleCached + muzzleOffset;
 		Quaternion startRotation = getAimRotation();
 		
 		Vector3 direction = startRotation*Vector3.forward;
@@ -99,7 +99,7 @@ public class RayGun : NetSyncGun
 	}
 	
 	void DrawEffectRep(){
-		Vector3 startPoint  = muzzlePoint.position+muzzleOffset;
+        Vector3 startPoint = muzzleCached + muzzleOffset;
 		Quaternion startRotation = getAimRotation();
 		Vector3 direction = startRotation*Vector3.forward;
 		Ray centerRay=new Ray(startPoint,direction);

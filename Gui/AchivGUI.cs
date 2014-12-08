@@ -8,26 +8,26 @@ public class AchivGUI : MonoBehaviour {
 
 	public int numObj;
 
-	InventoryGUI Main;
+    public InventoryGUI Main;
 	public UIWidget Widget;
-	public UILabel NameAndDescription;
+	public UILabel nameAndDescription;
+    public UILabel progress;
 	public UITexture picture;
 
-	public IEnumerator GetInfo()
+	public void GetInfo(Achievement achivment)
 	{
-		return null; //Вставить получение
 
-		switch(Type)
-		{
-		case type.Achiv:
-			//NameAndDescription.text = Name;
-			break;
-		case type.Dailic:
-			//NameAndDescription.text = Name+"\n"+Progres;
-			break;
-		}
-		//picture.mainTexture = texture;
-		Main.Statistic.GetParent(this);
+
+
+        nameAndDescription.text = achivment.description;
+        if (achivment.isMultiplie)
+        {
+            progress.text = achivment.GetProgress();
+            //
+        }
+       
+        picture.mainTexture = achivment.textureIcon;
+		Main.statistic.GetParent(this);
 	}
 
 	// Use this for initialization

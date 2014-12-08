@@ -6,7 +6,7 @@ public class BaseShootgun : BaseWeapon {
 	public int NumerOfPeace=8;
 
 	protected override void GenerateProjectile(){
-		Vector3 startPoint  = muzzlePoint.position+muzzleOffset;
+        Vector3 startPoint = muzzleCached + muzzleOffset;
 		Quaternion startRotation = getAimRotation();
         float power = 0;
         float range = 0;
