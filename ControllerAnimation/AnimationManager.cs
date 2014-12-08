@@ -39,7 +39,10 @@ public class AnimationManager : MonoBehaviour
 
     public void FinisedIKUpdate()
     {
-        pawn.CurWeapon.UpdateCahedPosition();
+		if(pawn!=null&&pawn.CurWeapon!=null){
+			pawn.CurWeapon.UpdateCahedPosition();
+			
+		}
     }
     /// <summary>
     /// Задает или возвращает значение воспроизведения скорости анимации

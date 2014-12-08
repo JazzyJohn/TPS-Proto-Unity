@@ -304,6 +304,7 @@ public class MainMenuGUI : MonoBehaviour {
         {
             return;
         }
+		
 		CamMove.enabled = false;
 		Server.newRoomName = _RoomsNgui.NameNewRoom.value;
 		HideAllPanel ();

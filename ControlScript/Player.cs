@@ -205,8 +205,8 @@ public class Player : MonoBehaviour {
             {
                 winnerWallPost = true;
                 String text = TextGenerator.instance.GetSimpleText("WallPostWinner");
-                text = String.Format(text,Score.AIKill, Score.Kill );
-                Application.ExternalCall("AchivmenUnlock", text);
+                text = String.Format(text,(Score.AIKill+ Score.Kill) );
+                Application.ExternalCall("WallPost", text);
             }
             else
             {
