@@ -102,7 +102,12 @@ public class OperationGUI : MonoBehaviour {
             isDrawed = true;
             currentOperation.Fill(TournamentManager.instance.currentOperation);
         }
-        if (isDrawed&&!isWinnerDraw)
+       
+    }
+
+    public  void Update()
+    {
+          if (isDrawed&&!isWinnerDraw)
         {
            
             #if UNITY_EDITOR
@@ -146,7 +151,7 @@ public class OneOperationGUI{
         table.Reposition();
         foreach (UILabel title in titles)
         {
-            title.name = oper.name;
+            title.text = oper.name;
         }
       
         text.text = oper.desctiption;
