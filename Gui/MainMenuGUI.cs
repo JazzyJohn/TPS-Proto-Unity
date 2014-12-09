@@ -538,6 +538,16 @@ public class MainMenuGUI : MonoBehaviour {
 			_PanelsNgui.serverResponse.alpha = 0.0f;
 		}
 	}
+    public void TakeScreenShoot()
+    {
+        
+        ScreenShootManager.instance.TakeScreenshot(true);
+    }
+    public void TakeScreenShootWall()
+    {
+
+        ScreenShootManager.instance.TakeScreenshotToWall(TextGenerator.instance.GetSimpleText("i'm in red rage"));
+    }
 }
 
 

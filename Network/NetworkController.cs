@@ -75,6 +75,7 @@ public class NetworkController : MonoBehaviour {
 		}
 		return null;
 	}
+
 	public static void ClearView(int id){
 		foxViewList.Remove(id);
 	}
@@ -95,6 +96,18 @@ public class NetworkController : MonoBehaviour {
        }
         Debug.Log("IMMASTER"+smartFox.MySelf.ContainsVariable("Master"));
 	}
+
+    public Player GetLocalPlayer()
+    {
+        foreach (PlayerView view in PlayerView.allPlayer.Values)
+        {
+            if (view.isMine)
+            {
+                return view.observed;
+            }
+        }
+        return null;
+    }
 
     public static bool IsMaster()
     {
@@ -1752,6 +1765,10 @@ public class NetworkController : MonoBehaviour {
             if (player > 0)
             {
                 GetPlayer(player).Score.Kill++;
+            }
+            else
+            {
+                GetPlayer(player).Score.AIKill++;
             }
         }
 

@@ -16,6 +16,8 @@ namespace nstuff.juggerfall.extension.models
 
         public int kill;
 
+        public int aikill;
+
         public int death;
 
         public int assist;

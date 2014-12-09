@@ -9,69 +9,82 @@ public class ScreenShootManager : MonoBehaviour{
 
 	
 	public byte[]  send;
-	public void TakeScreenshotToWall(){
-		StartCoroutine(_TakeScreenshotToWall());
+    public void TakeScreenshotToWall(string message, bool anonce = false)
+    {
+        this.message = message;
+        StartCoroutine(_TakeScreenshotToWall(anonce));
 	
 	}
-	
-	public  IEnumerator _TakeScreenshotToWall()
+
+    public string message;
+
+    public IEnumerator _TakeScreenshotToWall(bool anonce)
 	{
 			yield return new WaitForEndOfFrame();
 			Texture2D photo = new Texture2D(Screen.width, Screen.height, TextureFormat.RGB24, false);
 			photo.ReadPixels(new Rect(0, 0, Screen.width, Screen.height), 0, 0);
 			photo.Apply();
-			send = tex.EncodeToPNG();
-			Application.ExternalCall ("VKGiveWallServer");		
+            send = photo.EncodeToPNG();
+            Application.ExternalCall("VKGiveWallServer", message);
+            yield return new WaitForEndOfFrame();
+            if (anonce)
+            {
+
+                GUIHelper.SendMessage(TextGenerator.instance.GetSimpleText("ScreenShoot"));
+            }
 	
 	
 	}
 	public void UploadURLToWall(string url){
 		WWWForm form = new WWWForm();
 		form.AddBinaryData("photo",send);
-		StartCourutine(_UploadScreenShootToWall(url,form));
+        StartCoroutine(_UploadScreenShootToWall(url, form));
 	}
 	
 	public IEnumerator _UploadScreenShootToWall(string url,WWWForm form){
-		WWW w = WWW(url, form);
+		WWW w = new WWW(url, form);
 		yield return w;
 		Application.ExternalCall ("VKWallPhotoPost",w.text);		
 	}
-	
-	public void TakeScreenshot(){
-		StartCoroutine(TakeScreenshot());
+
+    public void TakeScreenshot(bool anonce = false)
+    {
+        StartCoroutine(_TakeScreenshot(anonce));
 	
 	}
-	
-	public  IEnumeratorTakeScreenshot()
+
+    public IEnumerator _TakeScreenshot(bool anonce )
 	{
 			yield return new WaitForEndOfFrame();
 			Texture2D photo = new Texture2D(Screen.width, Screen.height, TextureFormat.RGB24, false);
 			photo.ReadPixels(new Rect(0, 0, Screen.width, Screen.height), 0, 0);
 			photo.Apply();
-			send = tex.EncodeToPNG();
-			Application.ExternalCall ("CreateAlbum");		
-	
+            send = photo.EncodeToPNG();
+			Application.ExternalCall ("CreateAlbum");
+            yield return new WaitForEndOfFrame();
+            if (anonce)
+            {
+              
+                GUIHelper.SendMessage(TextGenerator.instance.GetSimpleText("ScreenShoot"));
+            }
 	
 	}
-	public void UploadURLToWall(string url){
+	public void UploadURL(string url){
 		WWWForm form = new WWWForm();
 		form.AddBinaryData("photo",send);
-		StartCourutine(_UploadScreenShootToWall(url,form));
+        StartCoroutine(_UploadScreenShoot(url, form));
 	}
 	
-	public IEnumerator _UploadScreenShootToWall(string url,WWWForm form){
-		WWW w = WWW(url, form);
+	public IEnumerator _UploadScreenShoot(string url,WWWForm form){
+        Debug.Log("sending Scrennshot to" + url);
+        WWW w = new  WWW(url, form);
 		yield return w;
-		Application.ExternalCall ("VKWallPhotoPost",w.text);		
+        Application.ExternalCall("VKSaveUpload", w.text);		
 	}
 	
 	
 	public void UploadComplite(){
 	
-		if(!PlayerPrefs.HasKey("UploadComplite"){
-			PlayerPrefs.SetInt("UploadComplite", 1);	
-			GUIHelper.SendMessage(TextGenerator.instance.GetSimpleText("ScreenShoot"));
-		}
 		
 		 
 		  

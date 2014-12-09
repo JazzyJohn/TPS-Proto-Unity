@@ -10,8 +10,27 @@ public enum PawnType{PAWN,BOT};
 public enum GameClassEnum{ENGINEER,ASSAULT,SCOUT,MEDIC,ANY,ROBOTHEAVY,ROBOTMEDIUM,ROBOTLIGHT,ANYROBOT};
 
 public class Player : MonoBehaviour {
+    private static Player _localPlayer;
+	public static Player localPlayer {
+        
+          get
+        {
+              if(_localPlayer==null){
+                 _localPlayer= NetworkController.Instance.GetLocalPlayer();
+              }
+               return _localPlayer;
+        }
 
-	public static Player localPlayer;
+
+        set
+        {
+
+            _localPlayer = value;
+
+        }
+
+        
+    }
 
 	public LayerMask robotLayer =1 ;
 
@@ -204,14 +223,13 @@ public class Player : MonoBehaviour {
             if (!winnerWallPost)
             {
                 winnerWallPost = true;
-                String text = TextGenerator.instance.GetSimpleText("WallPostWinner");
-                text = String.Format(text,(Score.AIKill+ Score.Kill) );
-                Application.ExternalCall("WallPost", text);
+            
             }
             else
             {
                 winnerWallPost = false;
             }
+         
           
         }
 	}

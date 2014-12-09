@@ -1,6 +1,7 @@
 
 using UnityEngine;
 using System.Collections;
+using System;
 
 public class KillCamera : ThirdPersonCamera
 {
@@ -256,33 +257,40 @@ public class KillCamera : ThirdPersonCamera
 		
 	}
 	public bool Init(Pawn Killer){
-		
-		_pawn  =Killer;
-        Debug.Log("KILLER PAWWN" + _pawn);
-        killpawn = Killer;
-		killCamTimer = 0.0f;
-		killCamTime = Player.localPlayer.respawnTime;
-		if(_pawn !=null){
-			_target =_pawn.myTransform;
-			if(_pawn.bigTarget){
-				normalOffset =bigTargetOffset;
-			}else{
-				normalOffset =mediumTargetOffset;
-				
-			}
-			if(!_pawn.isAi){
-				killerweapon = ItemManager.instance.weaponPrefabsListbyId[_pawn.CurWeapon.SQLId];
-            }
-            else
+
+      
+            _pawn  =Killer;
+            Debug.Log("KILLER PAWWN" + _pawn);
+            killpawn = Killer;
+		    killCamTimer = 0.0f;
+            if (Player.localPlayer != null)
             {
-                killerweapon = null;
+                killCamTime = Player.localPlayer.respawnTime;
             }
-			InitOffsets();
-			return true;
-		}
+		  
+		    if(_pawn !=null){
+			    _target =_pawn.myTransform;
+			    if(_pawn.bigTarget){
+				    normalOffset =bigTargetOffset;
+			    }else{
+				    normalOffset =mediumTargetOffset;
+				
+			    }
+			    if(!_pawn.isAi){
+				    killerweapon = ItemManager.instance.weaponPrefabsListbyId[_pawn.CurWeapon.SQLId];
+                }
+                else
+                {
+                    killerweapon = null;
+                }
+			    InitOffsets();
+			    return true;
+		    }
 	
 
-		return   false;
+		    return   false;
+
+        
 	}
 	
 	

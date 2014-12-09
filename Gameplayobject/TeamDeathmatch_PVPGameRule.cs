@@ -14,8 +14,9 @@ public class TeamDeathmatch_PVPGameRule : PVPGameRule {
         }
         if (!isGameEnded && pvpmodel.isGameEnded)
         {
-            GameEnded();
             isGameEnded = true;
+            GameEnded();
+      
         }
       
     }

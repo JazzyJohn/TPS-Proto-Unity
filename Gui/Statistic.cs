@@ -272,7 +272,7 @@ public class Statistic : MonoBehaviour {
                     else
                         namer = "NoName";
 
-                    RedTeamlPlayer[countRed].message.SetStartInfo(namer, Gamer.Score.Kill, Gamer.Score.Death, Gamer.Score.Assist, Gamer);
+                    RedTeamlPlayer[countRed].message.SetStartInfo(namer, Gamer.Score.Kill + Gamer.Score.AIKill, Gamer.Score.Death, Gamer.Score.Assist, Gamer);
                     RedTeamlPlayer[countRed].message.Hide(false);
                     countRed++;
                     break;
@@ -285,7 +285,7 @@ public class Statistic : MonoBehaviour {
                     else
                         nameb = "NoName";
 
-                    BlueTeamlPlayer[countBlue].message.SetStartInfo(nameb, Gamer.Score.Kill, Gamer.Score.Death, Gamer.Score.Assist, Gamer);
+                    BlueTeamlPlayer[countBlue].message.SetStartInfo(nameb, Gamer.Score.Kill + Gamer.Score.AIKill, Gamer.Score.Death, Gamer.Score.Assist, Gamer);
                     BlueTeamlPlayer[countBlue].message.Hide(false);
                     countBlue++;
                     break;

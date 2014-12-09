@@ -810,59 +810,73 @@ public class Pawn : DamagebleObject
         {
             return;
         }
-        isDead = true;
-
-        //StartCoroutine (CoroutineRequestKillMe ());
-        Pawn killerPawn = null;
-        Player killerPlayer = null;
-        int killerID = -1;
-        if (killer != null)
+        try
         {
-            killerPawn = killer.GetComponent<Pawn>();
 
-            if (killerPawn != null)
+
+            isDead = true;
+
+            //StartCoroutine (CoroutineRequestKillMe ());
+            Pawn killerPawn = null;
+            Player killerPlayer = null;
+            int killerID = -1;
+            if (killer != null)
             {
-                killerPlayer = killerPawn.player;
-                if (killerPlayer != null)
+                killerPawn = killer.GetComponent<Pawn>();
+
+                if (killerPawn != null)
                 {
-                    killerID = killerPlayer.playerView.GetId();
-                    if (foxView.isMine && killerPawn.foxView.isMine)
+                    killerPlayer = killerPawn.player;
+                    if (killerPlayer != null)
                     {
-						RobotPawn robot = this as RobotPawn;
-						if(robot!=null){
-								killerPlayer.JuggerKill(this,player, myTransform.position,killInfo);
-						}else{
-                            killerPlayer.PawnKill(this, player, myTransform.position, killInfo);
-						}
+                        killerID = killerPlayer.playerView.GetId();
+                        if (foxView.isMine && killerPawn.foxView.isMine)
+                        {
+                            RobotPawn robot = this as RobotPawn;
+                            if (robot != null)
+                            {
+                                killerPlayer.JuggerKill(this, player, myTransform.position, killInfo);
+                            }
+                            else
+                            {
+                                killerPlayer.PawnKill(this, player, myTransform.position, killInfo);
+                            }
+                        }
                     }
                 }
+
             }
 
-        }
+            foxView.PawnDiedByKill(killerID);
 
-        foxView.PawnDiedByKill(killerID);
-
-        if (player != null)
-        {
-            if (player.GetRobot() == this)
+            if (player != null)
             {
-                player.RobotDead(killerPlayer);
+                if (player.GetRobot() == this)
+                {
+                    player.RobotDead(killerPlayer);
+                }
+                else
+                {
+                    player.PawnDead(killerPlayer, killerPawn, killInfo);
+                }
+                GA.API.Design.NewEvent("Game:PawnDead:Player:" + killInfo.weaponId);
+                GA.API.Design.NewEvent("Game:Lifetime:Player", Time.time - timeSpawned);
             }
             else
             {
-                player.PawnDead(killerPlayer, killerPawn,killInfo);
+                GA.API.Design.NewEvent("Game:PawnDead:AI:" + killInfo.weaponId);
+                GA.API.Design.NewEvent("Game:Lifetime:AI", Time.time - timeSpawned);
             }
-            GA.API.Design.NewEvent("Game:PawnDead:Player:" + killInfo.weaponId);
-            GA.API.Design.NewEvent("Game:Lifetime:Player", Time.time - timeSpawned);
+
         }
-        else
+        catch (Exception e)
         {
-            GA.API.Design.NewEvent("Game:PawnDead:AI:" + killInfo.weaponId);
-            GA.API.Design.NewEvent("Game:Lifetime:AI",Time.time -timeSpawned);
+            Debug.Log("ErrorExeption in Pawn KillIt" + e);
         }
-        
-        
-        PawnKill();
+        finally
+        {
+            PawnKill();
+        }
 
 
     }

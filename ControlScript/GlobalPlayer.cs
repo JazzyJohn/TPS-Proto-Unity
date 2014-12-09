@@ -164,6 +164,15 @@ public class GlobalPlayer : MonoBehaviour {
 			}
             ResizeCall();
 		}
+        if (Input.GetKeyDown(KeyCode.F11))
+        {
+            ScreenShootManager.instance.TakeScreenshot();
+        }
+        if (Input.GetKeyDown(KeyCode.F10))
+        {
+            ScreenShootManager.instance.TakeScreenshotToWall(TextGenerator.instance.GetSimpleText("i'm in red rage"));
+        }
+        
 		if(!isLoaded){
 			if(loadingStage>=MAXLOADSTAGE){
 				MainMenuGUI menu = FindObjectOfType<MainMenuGUI>();

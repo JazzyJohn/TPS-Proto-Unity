@@ -1,5 +1,6 @@
 ﻿using UnityEngine;
 using System.Collections;
+using System;
 
 public delegate void ShowAndTellAction(string text, Texture2D texture);
 
@@ -152,4 +153,17 @@ public class AddShops : MonoBehaviour
 			serverResponse.alpha = 0.0f;
 		}
 	}
+    public void TakeScreenShoot()
+    {
+
+        ScreenShootManager.instance.TakeScreenshot(true);
+    }
+    public void TakeScreenShootWall()
+    {
+
+        String text = TextGenerator.instance.GetSimpleText("WallPostWinner");
+        text = String.Format(text, (Player.localPlayer.Score.AIKill + Player.localPlayer.Score.Kill));
+
+        ScreenShootManager.instance.TakeScreenshotToWall(text);
+    }
 }

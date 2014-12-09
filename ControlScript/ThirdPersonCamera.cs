@@ -224,7 +224,7 @@ public class ThirdPersonCamera : PlayerCamera
 	}
 	public override void AddShake(float mod){
 		if (_pawn != null) {
-            Debug.Log(mod);
+//            Debug.Log(mod);
 			curAddShake = UnityEngine.Random.onUnitSphere/RECOIL_GLOBAL_MOD*mod;
 		}
 	}

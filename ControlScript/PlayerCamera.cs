@@ -24,10 +24,14 @@ public class PlayerCamera : MonoBehaviour {
     {
 
         CapsuleCollider characterController = _target.GetComponent<CapsuleCollider>();
-        centerOffset = characterController.bounds.center - _target.position;
-        headOffset = centerOffset;
-        headOffset.y = characterController.bounds.max.y - _target.position.y;
+        if (characterController != null)
+        {
+            centerOffset = characterController.bounds.center - _target.position;
+            headOffset = centerOffset;
+            headOffset.y = characterController.bounds.max.y - _target.position.y;
 
+        }
+  
         //Cut(_target, centerOffset);
     }
     protected virtual void Cut(Transform dummyTarget, Vector3 dummyCenter)

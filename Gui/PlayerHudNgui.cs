@@ -93,6 +93,8 @@ public class PlayerHudNgui : MonoBehaviour {
 
     public string[] additionalSprites;
 
+    public AudioClip[] additionalSounds;
+
     public UISprite annonceAddSprite;
 			
 	public AudioSource annoncePlayer;
@@ -200,8 +202,8 @@ public class PlayerHudNgui : MonoBehaviour {
 
             if (jetPackCharge) jetPackCharge.text = Stats.jetPackCharge.ToString("0.0");
             if (pumpLabel) pumpLabel.text = Stats.pumpCoef.ToString("0.0");
-     
-            if (Kills) Kills.text = LocalPlayer.Score.Kill.ToString();
+
+            if (Kills) Kills.text = (LocalPlayer.Score.Kill + LocalPlayer.Score.AIKill).ToString();
             if (Death) Death.text = LocalPlayer.Score.Death.ToString();
             if (Assists) Assists.text = LocalPlayer.Score.Assist.ToString();
 
@@ -257,7 +259,7 @@ public class PlayerHudNgui : MonoBehaviour {
             annonceLabel.text = TextGenerator.instance.GetAddAnnonceText(type, text);
         }
 		if(annonceName!=null){
-            Debug.Log(TextGenerator.instance.GetMainAnnonceText(type));
+          //  Debug.Log(TextGenerator.instance.GetMainAnnonceText(type));
             annonceName.text = TextGenerator.instance.GetMainAnnonceText(type);
 		}
 		if( annonce.spriteName !=""){
@@ -267,7 +269,15 @@ public class PlayerHudNgui : MonoBehaviour {
 		if(annonceSprites[curAnnonce].sound!=null){
 			annoncePlayer.clip = annonceSprites[curAnnonce].sound;	
 			annoncePlayer.Play();
-		}
+        }
+        else
+        {
+            if (additionalSounds[(int)newAddSprite] != null)
+            {
+                annoncePlayer.clip = additionalSounds[(int)newAddSprite];
+                annoncePlayer.Play();
+            }
+        }
 
     }
 	public void AddMoneyMessage(string text,bool gold){

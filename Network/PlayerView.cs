@@ -55,6 +55,7 @@ public class PlayerView : MonoBehaviour {
         observed.team =  player.team;
         observed.PlayerName = player.name;
         observed.Score.Kill = player.kill;
+        observed.Score.AIKill = player.aikill;
         observed.Score.Assist = player.assist;
         observed.Score.Death = player.death;
         observed.Score.RobotKill = player.robotKill;
