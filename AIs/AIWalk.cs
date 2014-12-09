@@ -1,5 +1,6 @@
 using UnityEngine;
 using System.Collections;
+using System.Collections.Generic;
 
 public enum  BattleState {Inclosing, InDangerArea,WaitForAttack,Attacking}
 
@@ -194,16 +195,17 @@ public class AIWalk : AIMovementState
 	protected void FindCover(Vector3 position){
 		float weaponDistance =controlledPawn.OptimalDistance(false); 
 		Collider[] hitColliders = Physics.OverlapSphere(position, weaponDistance);
-		  SortedSet<CoverRating> allCovers =
-                new SortedSet<CoverRating>(new ByCoverRating());
-		for(int i =0; i<hitColliders.Lenth;i++){
+        List<CoverRating> allCovers =
+                new List<CoverRating>();
+		for(int i =0; i<hitColliders.Length;i++){
 			if(hitColliders[i].CompareTag(desiredCoverTag)){
-				float distance =-(hitColliders[i].transform -controlledPawn.myTransform).magnitude -(hitColliders[i].transform -_enemy.myTransform.myTransform).magnitude ;
+                float distance = -(hitColliders[i].transform.position - controlledPawn.myTransform.position).magnitude - (hitColliders[i].transform.position - _enemy.myTransform.position).magnitude;
 				allCovers.	Add(new CoverRating(i,distance));
 			}
 		}
-		if(allCovers.Count()>0){
-			cover = hitColliders[i].transform ;
+        allCovers.Sort(new ByCoverRating());
+		if(allCovers.Count>0){
+            cover = hitColliders[allCovers[0].index].transform;
 			hasCover= true;
 		}else{
 			cover = null;

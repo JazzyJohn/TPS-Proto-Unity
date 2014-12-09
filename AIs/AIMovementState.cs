@@ -79,9 +79,10 @@ public class AIMovementState : AIState
 		     }
 	    }
 		
-		if(_strafeCoef){
+		if(_strafeCoef!=0){
+            RaycastHit hitInfo;
 			if( controlledPawn.GetVelocity().sqrMagnitude<VELOCITY_THRESHOLD){
-				if (Physics.SphereCast(controlledPawn.myTransform.position, controlledPawn.GetSize() / 2, StrafeOneTarget(),out hitInfo, velocity.magnitude * MAX_AHEAD, agent.obstacleMask))
+                if (Physics.SphereCast(controlledPawn.myTransform.position, controlledPawn.GetSize() / 2, StrafeOneTarget(), out hitInfo, MAX_AHEAD, agent.obstacleMask))
 				{
 					 ChangeStrafeCoef();
 					
