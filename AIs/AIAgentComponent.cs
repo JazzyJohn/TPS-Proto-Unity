@@ -26,7 +26,7 @@ public class AIAgentComponent : MonoBehaviour {
 	public LayerMask obstacleMask;
     public LayerMask dynamicObstacleLayer;
 	protected float pawnSpeed;
-	protected NavMeshPath path;
+    protected NavMeshAgent nativeAgent;
 	protected int curCorner;
 	protected Transform myTransform;
 	protected bool validPath;
@@ -50,7 +50,9 @@ public class AIAgentComponent : MonoBehaviour {
 		if(PathfindingEngine.Instance==null){
             type = PathType.NATIVE;
                 	myTransform =transform;
-				path = new NavMeshPath(); 
+                    nativeAgent = GetComponent<NavMeshAgent>();
+                    nativeAgent.updatePosition = false;
+                    nativeAgent.updateRotation = false;
 		}else{
 			type = PathType.PATHFINDINGENGINE;
 
@@ -81,10 +83,8 @@ public class AIAgentComponent : MonoBehaviour {
 				target = Vector3.zero;
 			break;
 			case PathType.NATIVE:
-				if(path.corners.Length>curCorner){
-				
-				}
-				pawnSpeed= speed;
+
+                nativeAgent.speed = speed;
 				break;
 			}
 	}
@@ -107,8 +107,8 @@ public class AIAgentComponent : MonoBehaviour {
 			}
 			break;
 			case PathType.NATIVE:
-				if(path.status!=NavMeshPathStatus.PathInvalid&& path.corners.Length>curCorner){
-					return path.corners[curCorner];
+				if(nativeAgent.pathStatus!=NavMeshPathStatus.PathInvalid){
+					return nativeAgent.desiredVelocity;
 				}
 				
 				break;
@@ -127,6 +127,7 @@ public class AIAgentComponent : MonoBehaviour {
 			case PathType.NATIVE:
 				jumpHeight = controlledPawn.jumpHeight;
 				stepHeight = controlledPawn.stepHeight;
+                nativeAgent.ResetPath();
 			
 			break;
 			}
@@ -156,8 +157,8 @@ public class AIAgentComponent : MonoBehaviour {
 				break;
 			case PathType.NATIVE:
                
-                curCorner = 0;
-				validPath =   NavMesh.CalculatePath(myTransform.position, target, -1, path);				
+
+                nativeAgent.SetDestination(newTarget);			
 				break;
 		
 	    }
@@ -185,9 +186,9 @@ public class AIAgentComponent : MonoBehaviour {
 			break;
 			case PathType.NATIVE:
           
-				if(validPath &&path.status!=NavMeshPathStatus.PathInvalid&& path.corners.Length>curCorner){
+				
 					GotoNextStepNative();
-				}
+				
 			break;
 		}
 		
@@ -198,7 +199,7 @@ public class AIAgentComponent : MonoBehaviour {
 			case PathType.PATHFINDINGENGINE:
 			   return 	agent.pathrejected || (!agent.search && agent.path.Count == 0);
 			break;
-            return !(validPath && path.status != NavMeshPathStatus.PathInvalid && path.corners.Length > curCorner);
+            return   nativeAgent.pathStatus==NavMeshPathStatus.PathInvalid;
 			break;
 			
 		}
@@ -255,18 +256,10 @@ public class AIAgentComponent : MonoBehaviour {
 	public void GotoNextStepNative(){
 		//if there's a path.
 	
-		if(path.corners.Length>curCorner ){
+		if(  nativeAgent.pathStatus==NavMeshPathStatus.PathComplete	 ){
 			
 			
-			while(path.corners.Length>curCorner &&IsRiched(path.corners[curCorner],myTransform.position,size)){
-				curCorner++;
-			}
-		
-            if (path.corners.Length <= curCorner)
-            {
-				recalc =true;
-                return;
-            }
+			
           /*Vector3 distance = path.corners[curCorner] - myTransform.position;
            if (distance.y==0&&Physics.Raycast(myTransform.position, distance.normalized, distance.magnitude, obstacleMask))
             {
@@ -281,34 +274,20 @@ public class AIAgentComponent : MonoBehaviour {
             */
            // Debug.Log(nextStep + "  " + agent.path[0] + "  " + agent.path.Count);
 		
-			//Get the next waypoint...
-			Vector3 point=path.corners[curCorner];
-			//...and rotate pivot towards it.
-			Vector3 dir=point-myTransform.position;
-			
-			//Calculate the distance between current pivot position and next waypoint.
-			float dist=Vector3.Distance(myTransform.position, point);
-			//Move towards the waypoint.
-			Vector3 direction=(point-myTransform.position).normalized;
-        
-            //Debug.Log((point.y - myTransform.position.y) + "  " + stepHeight);
-	
-			resultTranslate  =direction * Mathf.Min(dist, pawnSpeed * Time.deltaTime)/Time.deltaTime;
-	
-			//Assign transform position with height and pivot position.
-			//transform.parent = agent.pivot.transform;
-			//transform.position = agent.pivot.transform.position + new Vector3(0,agent.yOffset,0);
-			
-			
-			if(dir!=Vector3.zero){
-				resultRotation= Quaternion.Slerp(myTransform.rotation, Quaternion.LookRotation(dir),Time.deltaTime*15);
+		
+            resultTranslate =nativeAgent.desiredVelocity;
+
+
+
+
+            if (resultTranslate != Vector3.zero)
+            {
+                resultRotation = Quaternion.Slerp(myTransform.rotation, Quaternion.LookRotation(resultTranslate), Time.deltaTime * 15);
 			}
 			//resultRotation = transform.rotation;
 			//If the agent arrive to waypoint position, delete waypoint from the path.
 
-			if(IsRiched(path.corners[curCorner],myTransform.position,size)){
-					curCorner++;
-			}
+			
 			
 		}
 	}
@@ -409,18 +388,10 @@ public class AIAgentComponent : MonoBehaviour {
                             }
                         }
                         break;
-                    case PathType.NATIVE:
-                        if (path != null && path.corners.Length > 0)
-                        {
-                            Vector3 offset = new Vector3(0, 0.1f, 0);
-                            Gizmos.color = gizmoColorPath;
-                            Gizmos.DrawLine(myTransform.position + offset, path.corners[curCorner] + offset);
-                            for (int i = curCorner+1; i < path.corners.Length; i++)
-                            {
+                  case PathType.NATIVE:
 
-                                Gizmos.DrawLine(path.corners[i - 1] + offset, path.corners[i] + offset);
-                            }
-                        }
+                        Gizmos.DrawSphere(nativeAgent.nextPosition, 1.0f);
+                        
                         break;
                 }
             }

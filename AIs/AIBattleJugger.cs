@@ -158,7 +158,7 @@ public class AIBattleJugger : AIMovementState
                 agent.ForcedSetTarget(curPoint.GiveTarget().position);
             }
         }
-        controlledPawn.SetAiRotation(agent.GetTarget());
+        controlledPawn.SetAiRotation(controlledPawn.myTransform.position + agent.GetTarget());
 
     }
     public override bool IsEnemy(Pawn target)

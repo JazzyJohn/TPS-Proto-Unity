@@ -123,7 +123,7 @@ public class AIVipRoute : AIState {
                 agent.ForcedSetTarget(curPoint.GiveTarget().position);
             }
         }
-        controlledPawn.SetAiRotation(agent.GetTarget());
+        controlledPawn.SetAiRotation(controlledPawn.myTransform.position + agent.GetTarget());
 
     }
 

@@ -149,9 +149,9 @@ public class AIMovementState : AIState
 		agent.WalkUpdate();
 		Vector3 result = agent.GetTranslate();
 		if(result.sqrMagnitude==0){
-			result= (agent.GetFinishPoint()-controlledPawn.myTransform.position).normalized;
+			result= (agent.GetFinishPoint()-controlledPawn.myTransform.position);
 		}
-		return result;
+        return result.normalized;
 	}
 	
 	public Vector3 AvoidOneTarget(){

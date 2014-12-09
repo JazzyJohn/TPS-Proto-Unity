@@ -249,6 +249,8 @@ public class InventoryGUI : MonoBehaviour {
 		Panels.HidePanel();
 		Panels.Statistic.alpha = 1f;
 		OpenTab = Tab.Statistic;
+        detailItemGUI.item = null;
+        Destroy(detailItemGUI.gunModel);
 	}
 
 	public void LoadInventory()
