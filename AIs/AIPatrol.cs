@@ -11,6 +11,7 @@ public class AIPatrol : AIMovementState
 
 	public int step=0;
 	
+	public NavMeshAgent agent;
 
 	public override void Tick()
 	{
@@ -20,7 +21,7 @@ public class AIPatrol : AIMovementState
             return;
         }
 	//	Debug.Log (Vector3.Distance (patrolPoints [step].position, controlledPawn.myTransform.position)+"  "+agent.size);
-		if (agent.IsRiched(patrolPoints [step].position, controlledPawn.myTransform.position,agent.size*2)||agent.IsPathBad()) {
+		if (agent.remainingDistance<=agent.radius || agent.pathStatus==NavMeshPathStatus.PathInvalid) {
 			NextPoint();
 		}
 			
@@ -32,51 +33,33 @@ public class AIPatrol : AIMovementState
 			
 			step=0;
 		}
-		agent.SetTarget (patrolPoints[step].position);
+		agent.SetDestination(patrolPoints[step].position);
 
 
 	}
 
 	public override void StartState(){
-		agent = GetComponent<AIAgentComponent>();
+		agent = GetComponent<NavMeshAgent>();
+		agent.enabled= true;
 		//Debug.Log (agent);
         if (patrolPoints[step] == null)
         {
             return;
         }
 		stateSpeed =controlledPawn.groundWalkSpeed;
-        agent.SetTarget(patrolPoints[step].position);
-		agent.SetSpeed(controlledPawn.groundWalkSpeed);
-		agent.ParsePawn (controlledPawn);
+        agent.SetDestination(patrolPoints[step].position);
+		agent.speed =controlledPawn.groundWalkSpeed;
+		
 		base.StartState ();
 		
+	}
+	public override void EndState(){
+		agent.enabled= false;
 	}
 	protected void FixedUpdate(){
 		base.FixedUpdate();
      
-        if (patrolPoints[step] == null)
-        {
-            return;
-        }
-        
-			//agent.WalkUpdate ();
-           // Debug.Log("Jump" + needJump + agent.needJump);
-          
-            Vector3 translateVect = GetSteeringForce();
-            needJump = CheckJump(translateVect  );
-			if (!needJump) {
-                controlledPawn.Movement(translateVect, CharacterState.Walking);
-
-			} else {
-
-                controlledPawn.Movement(translateVect + controlledPawn.JumpVector(), CharacterState.Jumping);
-			}
-            if (translateVect.sqrMagnitude == 0)
-            {
-                //Debug.Log("recalculate");
-				agent.ForcedSetTarget(patrolPoints[step].position);
-            }
-			controlledPawn.SetAiRotation( agent.GetTarget());
+        controlledPawn.SetAiRotation( agent.GetTarget());
 		
 	}
 

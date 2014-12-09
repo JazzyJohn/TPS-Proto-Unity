@@ -13,6 +13,8 @@ public class AIWalk : AIMovementState
 
 	public float lostTime=5.0f;
 	
+	public string desiredCoverTag="Cover";
+	
 	protected bool isMoving = true;
 	
 	public float DangerRadius;
@@ -28,6 +30,10 @@ public class AIWalk : AIMovementState
 	protected bool attacking= false;
 
     protected bool hasPermission = false;
+	
+	protected bool hasCover= false;
+	
+	protected Transform cover;
 
     public bool CirleAttack = false;
 	
@@ -124,7 +130,7 @@ public class AIWalk : AIMovementState
 			if(controlledPawn.CurWeapon==null){
 				
 				
-				isMelee= true;
+				 MeleeFight();
 				return;
 			}
 			
@@ -135,7 +141,7 @@ public class AIWalk : AIMovementState
 					
 				}
                
-				isMelee = true;
+				 MeleeFight();
 			}else{
 				_enemy.attackers.Remove(controlledPawn);
 				if(isMelee){
@@ -143,24 +149,73 @@ public class AIWalk : AIMovementState
 					
 				}
                
-				isMelee= false;
+				RangeFight();
 			}
             //Debug.Log("I decide melee" + isMelee);
 			return;
 		
 		
 		}
+		
+		RangeFight();
+	}
+	protected void MeleeFight(){
+		isMelee = true;
+		
+	}
+	protected void RangeFight(){
 		isMelee = false;
-	
+		FindCover(_enemy.myTransform.position);
+	}
+	public class CoverRating{
+		public int index;
+		
+		public float rating;
+		public CoverRating(int index,float rating){
+			this.index= index;
+			this.rating = rating;
+		}
+	}
+	public class ByCoverRating: IComparer<CoverRating>
+	{
+		public int Compare(CoverRating x, CoverRating y)
+		{
+			if(x.rating==y.rating){
+				return 0;
+			}else{
+				if(x.rating>y.rating){
+					return 1;
+				}else{
+					return -1;
+				}
+			}			
+		}
+	}
+	protected void FindCover(Vector3 position){
+		float weaponDistance =controlledPawn.OptimalDistance(false); 
+		Collider[] hitColliders = Physics.OverlapSphere(position, weaponDistance);
+		  SortedSet<CoverRating> allCovers =
+                new SortedSet<CoverRating>(new ByCoverRating());
+		for(int i =0; i<hitColliders.Lenth;i++){
+			if(hitColliders[i].CompareTag(desiredCoverTag)){
+				float distance =-(hitColliders[i].transform -controlledPawn.myTransform).magnitude -(hitColliders[i].transform -_enemy.myTransform.myTransform).magnitude ;
+				allCovers.	Add(new CoverRating(i,distance));
+			}
+		}
+		if(allCovers.Count()>0){
+			cover = hitColliders[i].transform ;
+			hasCover= true;
+		}else{
+			cover = null;
+			hasCover=false;
+		}
 	}
 	public override void Tick()
     {
         if (DirectVisibility(out _distanceToTarget))
         {
             //code to animation attack
-			
-           // Debug.Log("Shot");
-            if (CirleAttack)
+			 if (CirleAttack)
             {
 				
 				
@@ -236,26 +291,34 @@ public class AIWalk : AIMovementState
 						
 						}
 					}else{
-						switch(state){
-							case BattleState.Inclosing:
-								//StopAttack();
-								//move Close to enemy
+						if(hasCover){
+							NormalMovement();
+							Attack();	
+							Vector3 coverBestPosition =cover.position+(cover.position-_enemy.myTransform.position).normalized *cover.collider.bounds.size.magnitude;
+							agent.SetTarget(coverBestPosition, true);
 								
-								StartFollow(_enemy.myTransform);
-								StopStrafe();
-								break;	
-							case BattleState.Attacking:
-								
-								StopAvoidFollow();
-								Attack();	
-								StartStrafe(_enemy.myTransform);
-							break;
-							case BattleState.InDangerArea:
-								StartAvoid(_enemy.myTransform);
-								
-								StopStrafe();
-								Attack();
-							break;
+						}else{
+							switch(state){
+								case BattleState.Inclosing:
+									//StopAttack();
+									//move Close to enemy
+									
+									StartFollow(_enemy.myTransform);
+									StopStrafe();
+									break;	
+								case BattleState.Attacking:
+									
+									StopAvoidFollow();
+									Attack();	
+									StartStrafe(_enemy.myTransform);
+								break;
+								case BattleState.InDangerArea:
+									StartAvoid(_enemy.myTransform);
+									
+									StopStrafe();
+									Attack();
+								break;
+							}		
 						}						
 					}
 				
@@ -426,22 +489,23 @@ public class AIWalk : AIMovementState
 		if (_enemy != null&&isMoving) {
            
 			//agent.WalkUpdate ();
-			//Debug.Log(agent.GetTranslate());
-           
-			Vector3 translateVect =  GetSteeringForce();
-			
-			if(translateVect.sqrMagnitude<0.1f){
-				controlledPawn.Movement (Vector3.zero,CharacterState.Idle);
+				//Debug.Log(agent.GetTranslate());
+			   
+				Vector3 translateVect =  GetSteeringForce();
+				
+				if(translateVect.sqrMagnitude<0.1f){
+					controlledPawn.Movement (Vector3.zero,CharacterState.Idle);
 
-			}else{
-                if ( JumpToEnemy(translateVect))
-                {
-					controlledPawn.Movement (translateVect +controlledPawn.JumpVector(), CharacterState.Jumping);
-					
-				} else {
-					controlledPawn.Movement (translateVect,CharacterState.Running);
+				}else{
+					if ( JumpToEnemy(translateVect))
+					{
+						controlledPawn.Movement (translateVect +controlledPawn.JumpVector(), CharacterState.Jumping);
+						
+					} else {
+						controlledPawn.Movement (translateVect,CharacterState.Running);
+					}
 				}
-			}
+		
 
 
 		}else{

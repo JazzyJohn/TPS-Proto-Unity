@@ -6,6 +6,8 @@ public class AIMovementState : AIState
 {
 	public const float MAX_AHEAD  =2.0f;
 	
+	public const float VELOCITY_THRESHOLD  =1.0f;
+	
 	protected  AIAgentComponent agent;
 	
 	protected Transform avoid;
@@ -39,8 +41,14 @@ public class AIMovementState : AIState
 	protected float _strafeCoef;
 	
 	private int starfeRandCoef;
-
-    public bool needJump = false;
+	
+	public static float STRAFE_TIME_HALF = 1.0f;
+	
+	float strafeTimer;
+	
+	float strafeTimeHalf;
+	
+	public bool needJump = false;
 
 	protected void Awake(){
 		base.Awake();
@@ -49,7 +57,8 @@ public class AIMovementState : AIState
 		_pathCoef  = pathCoef;
         _strafeCoef = strafeCoef;
 		_collAvoidCoef =collAvoidCoef;
-		
+		strafeTimeHalf=GlobalGameSetting.instance. GetAiSettings(GlobalGameSetting.STRAFE_TIMER_HALF,STRAFE_TIME_HALF);
+		strafeTimer= strafeTimeHalf+ UnityEngine.Random.Range(0,strafeTimeHalf);
 	}
 	protected float stateSpeed;
 
@@ -68,7 +77,24 @@ public class AIMovementState : AIState
 		     }else{
                  isCollisionAhead = false;
 		     }
-        }
+	    }
+		
+		if(_strafeCoef){
+			if( controlledPawn.GetVelocity().sqrMagnitude<VELOCITY_THRESHOLD){
+				if (Physics.SphereCast(controlledPawn.myTransform.position, controlledPawn.GetSize() / 2, StrafeOneTarget(),out hitInfo, velocity.magnitude * MAX_AHEAD, agent.obstacleMask))
+				{
+					 ChangeStrafeCoef();
+					
+				}
+			}
+			strafeTimer-=Time.fixedDeltaTime;
+			if(strafeTimer<=0){
+				 ChangeStrafeCoef();
+			}
+			
+			
+		
+		}
 	}
 	public Vector3 DynamicAwoidness(){
         int neighborCount = 0;
@@ -140,7 +166,10 @@ public class AIMovementState : AIState
 		}
         return Vector3.Cross(Vector3.up * starfeRandCoef, (controlledPawn.myTransform.position - strafe.position).normalized);
 	}
-	
+	public void ChangeStrafeCoef(){
+		starfeRandCoef =-starfeRandCoef;
+		strafeTimer =strafeTimeHalf+ UnityEngine.Random.Range(0,strafeTimeHalf);
+	}
 	public void StartStrafe(Transform target){
 		strafe= target;
 		_strafeCoef= strafeCoef;
@@ -175,6 +204,7 @@ public class AIMovementState : AIState
         {
 			return Vector3.zero;
 		}
+		
         Vector3 ahead = controlledPawn.myTransform.position + controlledPawn.GetVelocity() * MAX_AHEAD;
 		Vector3 avoidForce= (ahead-colliTarget.point);
         float size = controlledPawn.GetSize();

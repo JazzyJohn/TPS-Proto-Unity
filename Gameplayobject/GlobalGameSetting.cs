@@ -19,6 +19,8 @@ public class GlobalGameSetting : MonoBehaviour{
 	
 	public const string ABOVE_MELEE_MODIFICATOR ="aboveMelleMod";
 	
+	public const string STRAFE_TIMER_HALF = "strafeTimerHalf";
+	
 	void Awake(){
 		TextAsset xml = Resources.Load("GameSetting") as TextAsset;
 		XmlDocument xmlDoc = new XmlDocument();
