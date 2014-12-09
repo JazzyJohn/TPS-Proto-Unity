@@ -77,7 +77,7 @@ public class AIPatrol : AIMovementState
                 //Debug.Log("recalculate");
 				agent.ForcedSetTarget(patrolPoints[step].position);
             }
-			controlledPawn.SetAiRotation(controlledPawn.myTransform.position+ agent.GetTarget());
+			controlledPawn.SetAiRotation( agent.GetTarget());
 		
 	}
 

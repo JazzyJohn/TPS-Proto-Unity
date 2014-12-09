@@ -1628,7 +1628,11 @@ public class Pawn : DamagebleObject
     }
     public void SetAiRotation(Vector3 Target)
     {
-        aiAimRotation = Target;
+        if (Target.sqrMagnitude <0.5)
+        {
+            Target = myTransform.forward;
+        }
+        aiAimRotation = myTransform.position +Target;
     }
     public Vector3 getAimpointForWeapon(float speed)
     {

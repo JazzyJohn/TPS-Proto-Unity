@@ -148,6 +148,7 @@ public class AIAgentComponent : MonoBehaviour {
 		}
 	}
 	public void ForcedSetTarget(Vector3 newTarget){
+        Debug.Log("I recalculate path");
 		recalc= false;
 		target= newTarget;
 		switch(type){
@@ -256,7 +257,7 @@ public class AIAgentComponent : MonoBehaviour {
 	public void GotoNextStepNative(){
 		//if there's a path.
 	
-		if(  nativeAgent.pathStatus==NavMeshPathStatus.PathComplete	 ){
+		if(  nativeAgent.pathStatus!=NavMeshPathStatus.PathInvalid	 ){
 			
 			
 			
@@ -287,9 +288,14 @@ public class AIAgentComponent : MonoBehaviour {
 			//resultRotation = transform.rotation;
 			//If the agent arrive to waypoint position, delete waypoint from the path.
 
-			
-			
-		}
+
+
+        }
+        else {
+            Debug.Log(nativeAgent.pathStatus);
+        }
+        
+       
 	}
 
 	
