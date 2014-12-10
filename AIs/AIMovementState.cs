@@ -143,10 +143,11 @@ public class AIMovementState : AIState
 		
 	}
 	public Vector3 PathFollow(){
+		agent.WalkUpdate();
 		if(_pathCoef==0){
 			return Vector3.zero;
 		}
-		agent.WalkUpdate();
+		
 		Vector3 result = agent.GetTranslate();
 		if(result.sqrMagnitude==0){
 			result= (agent.GetFinishPoint()-controlledPawn.myTransform.position);
@@ -182,6 +183,10 @@ public class AIMovementState : AIState
 				starfeRandCoef = +1;
 			}
 		}
+	}
+	public void StartStrafeSpiral(Transform target){
+		StartFollow(target);
+		StartStrafe(target);
 	}
 	public void StopStrafe(){
 		strafe=null;

@@ -1628,7 +1628,7 @@ public class Pawn : DamagebleObject
     }
     public void SetAiRotation(Vector3 Target)
     {
-        if (Target.sqrMagnitude <0.5)
+        if (Target.sqrMagnitude <0.3f)
         {
             Target = myTransform.forward;
         }

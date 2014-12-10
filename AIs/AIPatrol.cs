@@ -66,7 +66,11 @@ public class AIPatrol : AIMovementState
             Vector3 translateVect = GetSteeringForce();
             needJump = CheckJump(translateVect  );
 			if (!needJump) {
-                controlledPawn.Movement(translateVect, CharacterState.Walking);
+				if(translateVect.sqrMagnitude == 0){
+                controlledPawn.Movement(translateVect, CharacterState.Idle);
+				}else{
+				controlledPawn.Movement(translateVect, CharacterState.Walking);
+				}
 
 			} else {
 

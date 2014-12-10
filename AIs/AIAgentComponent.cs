@@ -45,6 +45,8 @@ public class AIAgentComponent : MonoBehaviour {
 	protected Vector3 resultTranslate;
 	protected Quaternion resultRotation;
 	
+	protected Vector3 lastOnMeshPoint;
+	
 	public bool recalc= false;
 	void Awake(){
 		if(PathfindingEngine.Instance==null){
@@ -187,8 +189,10 @@ public class AIAgentComponent : MonoBehaviour {
 			break;
 			case PathType.NATIVE:
           
-				
-					GotoNextStepNative();
+				if(!nativeAgent.isPathStale){
+					lastOnMeshPoint = myTransform.position;
+				}
+				GotoNextStepNative();
 				
 			break;
 		}
@@ -200,7 +204,7 @@ public class AIAgentComponent : MonoBehaviour {
 			case PathType.PATHFINDINGENGINE:
 			   return 	agent.pathrejected || (!agent.search && agent.path.Count == 0);
 			break;
-            return   nativeAgent.pathStatus==NavMeshPathStatus.PathInvalid;
+            return   nativeAgent.pathStatus==NavMeshPathStatus.PathPartial;
 			break;
 			
 		}
@@ -257,43 +261,45 @@ public class AIAgentComponent : MonoBehaviour {
 	public void GotoNextStepNative(){
 		//if there's a path.
 	
-		if(  nativeAgent.pathStatus!=NavMeshPathStatus.PathInvalid	 ){
+		switch( nativeAgent.pathStatus){
 			
+		case NavMeshPathStatus.PathInvalid:
+			Vector3 direction;
+			if(lastOnMeshPoint.sqrMagnitude>0){
+				direction  = lastOnMeshPoint -myTransform.position;	
+			}else{
+				NavMeshHit hit;
+				if (agent.FindClosestEdge(out hit))
+				direction = hit.point -myTransform.position;	
 			
-			
-          /*Vector3 distance = path.corners[curCorner] - myTransform.position;
-           if (distance.y==0&&Physics.Raycast(myTransform.position, distance.normalized, distance.magnitude, obstacleMask))
-            {
-                curCorner--;
-                if (curCorner < 0)
-                {
-                    ForcedSetTarget(target);
-                    return;
-                }
-
-            }
-            */
-           // Debug.Log(nextStep + "  " + agent.path[0] + "  " + agent.path.Count);
-		
-		
-            resultTranslate =nativeAgent.desiredVelocity;
+			}
+            resultTranslate =direction;
 
 
 
 
             if (resultTranslate != Vector3.zero)
             {
+                resultRotation = Quaternion.Slerp(myTransform.rotation, Quaternion.LookRotation(direction), Time.deltaTime * 15);
+			}
+		
+		break;
+		
+		case NavMeshPathStatus.PathPartial:
+			resultTranslate= Vector3.Zero;
+		
+		break;
+		case NavMeshPathStatus.PathComplete:
+		
+            resultTranslate =nativeAgent.desiredVelocity;
+
+            if (resultTranslate != Vector3.zero)
+            {
                 resultRotation = Quaternion.Slerp(myTransform.rotation, Quaternion.LookRotation(resultTranslate), Time.deltaTime * 15);
 			}
-			//resultRotation = transform.rotation;
-			//If the agent arrive to waypoint position, delete waypoint from the path.
-
-
-
-        }
-        else {
-            Debug.Log(nativeAgent.pathStatus);
-        }
+		break;
+		}
+	
         
        
 	}

@@ -2,7 +2,7 @@ using UnityEngine;
 using System.Collections;
 using System.Collections.Generic;
 
-public enum  BattleState {Inclosing, InDangerArea,WaitForAttack,Attacking}
+public enum  BattleState {Inclosing, InDangerArea,WaitForAttack,Attacking,InclosingFromStuck, MoveToBack}
 
 public enum BattleCircleDensity{ Normal,Swarm,Lonely}
 
@@ -19,6 +19,8 @@ public class AIWalk : AIMovementState
 	protected bool isMoving = true;
 	
 	public float DangerRadius;
+	
+	public float _DangerRadius;
 
 	public BattleState state;
 	
@@ -34,7 +36,13 @@ public class AIWalk : AIMovementState
 	
 	protected bool hasCover= false;
 	
+	protected bool isStuck = false;
+	
+	protected Vector3 backPosition;
+	
 	protected Transform cover;
+	
+	
 
     public bool CirleAttack = false;
 	
@@ -68,13 +76,14 @@ public class AIWalk : AIMovementState
 		maxAttackers =GlobalGameSetting.instance. GetAiSettings(GlobalGameSetting.MAX_ATTACKERS,(int)density,maxAttackers);
         coolDown = GlobalGameSetting.instance.GetAiSettings(GlobalGameSetting.COOL_DOWN, (int)speed, coolDown);
 		aboveMeleeMod=GlobalGameSetting.instance. GetAiSettings(GlobalGameSetting.MAX_ATTACKERS,aboveMeleeMod);
+		
 	}
 	
 	
 	public void UpdateState(){
         BattleState nextstate;
 		if(isMelee){
-			if(_distanceToTarget>DangerRadius){
+			if(_distanceToTarget>_DangerRadius){
 			   DecideTacktick();
 			   nextstate = BattleState.Inclosing;
 			
@@ -97,16 +106,51 @@ public class AIWalk : AIMovementState
 			}
 		}else{
 			if( IsInWeaponRange()){
-				if(_distanceToTarget<DangerRadius){
-					if(_enemy.attackers.Count>=maxAttackers/2){
-						nextstate = BattleState.InDangerArea;
-					}else{
-						nextstate = BattleState.InDangerArea;
-						DecideTacktick();
+			
+				
+					switch(state){
+						case BattleState.InclosingFromStuck:
+							if(_distanceToTarget<_DangerRadius){
+								nextstate = BattleState.InDangerArea;
+							}else{
+								nextstate = BattleState.InclosingFromStuck;
+							}
+						break;
+						case BattleState.MoveToBack:
+								if(agent.IsRiched(backPosition, controlledPawn.myTransform.position,agent.size*2)|){
+									nextstate = BattleState.Attack;
+								}else{
+									nextstate = BattleState.MoveToBack;
+								}
+						break;
+						default:
+						if(isStuick){
+							if(_DangerRadius/2.0f>2.0f*( controlledPawn.getSize()+_enemy.getSize())){
+								_DangerRadius = _DangerRadius/2;
+								nextstate = BattleState.InDangerArea;
+							}else{
+								Vector3 direction = _enemy.myTransform.positon - controlledPawn.MyTransfrom.Position;
+								backPosition = _enemy.myTransform.positon + direction.normalized *_DangerRadius;
+								agent.SetTarget (backPosition);
+								nextState = BattleState.MoveToBack;
+							}
+					
+						}else{
+							if(_distanceToTarget<_DangerRadius){
+								if(_enemy.attackers.Count>=maxAttackers/2){
+									nextstate = BattleState.InDangerArea;
+								}else{
+									nextstate = BattleState.InDangerArea;
+									DecideTacktick();
+								}
+							}else{
+								nextstate = BattleState.Attacking;
+							}
+						}	
+						break;
 					}
-				}else{
-					nextstate = BattleState.Attacking;
-				}
+					
+				
 			}else{
 			   nextstate = BattleState.Inclosing;
 			}
@@ -300,6 +344,8 @@ public class AIWalk : AIMovementState
 							agent.SetTarget(coverBestPosition, true);
 								
 						}else{
+						
+						
 							switch(state){
 								case BattleState.Inclosing:
 									//StopAttack();
@@ -320,7 +366,16 @@ public class AIWalk : AIMovementState
 									StopStrafe();
 									Attack();
 								break;
-							}		
+								case BattleState.MoveToBack:
+									NormalMovement();
+									Attack();
+								break; 
+								case BattleState.InclosingFromStuck:
+									StartStrafeSpiral(_enemy.myTransform);
+									Attack();
+								break; 
+							}
+														
 						}						
 					}
 				
@@ -367,6 +422,8 @@ public class AIWalk : AIMovementState
         aibase.cahcedDataForTick["ALLY_COUNT"] = AITargetManager.GetAttackersCount(_enemy);
 		aibase.cahcedDataForTick["ALLY_KILL"] = 0;
     }
+	
+	
 	
 	public bool SkillUse(){
 		if(skillmanager==null){
@@ -472,7 +529,7 @@ public class AIWalk : AIMovementState
 		agent.ParsePawn (controlledPawn);
         aibase.cahcedDataForTick["ALLY_COUNT"] = AITargetManager.GetAttackersCount(_enemy);
 		aibase.cahcedDataForTick["ALLY_KILL"] = 0;
-       
+        _DangerRadius= DangerRadius;
 		base.StartState ();
 	}
 	
@@ -495,7 +552,7 @@ public class AIWalk : AIMovementState
 			   
 				Vector3 translateVect =  GetSteeringForce();
 				
-				if(translateVect.sqrMagnitude<0.1f){
+				if(translateVect.sqrMagnitude<0.3f){
 					controlledPawn.Movement (Vector3.zero,CharacterState.Idle);
 
 				}else{
@@ -507,16 +564,31 @@ public class AIWalk : AIMovementState
 						controlledPawn.Movement (translateVect,CharacterState.Running);
 					}
 				}
-		
-
-
+			
+				CheckStuck();
 		}else{
 
 			controlledPawn.Movement (Vector3.zero,CharacterState.Idle);
 		}
 		
 	}
-
+	float stuckTimer=0;
+	Vector3 lastStuckPosition= Vetcot3.zero;
+	void CheckStuck(){
+		stuckTimer += Time.fixedDeltaTime;
+		if(stuckTimer>2.0f){
+			stuckTimer= 0;
+			if((lastStuckPosition-controlledPawn.myTransform.position).sqrMagnitude<0.5f){
+				isStuck= true;
+			}else{
+				isStuck= false;
+				isInclosingFromStuck= false;
+			}
+			lastStuckPosition= controlledPawn.myTransform.position;
+		}
+		
+	}
+	
     public bool JumpToEnemy(Vector3 translateVect)
     {
 		if(!controlledPawn.canJump){
@@ -551,7 +623,7 @@ public class AIWalk : AIMovementState
 		if (_enemy != enemy) {
 				controlledPawn.PlayTaunt ();
 		}
-		
+		_DangerRadius= DangerRadius;
 		base.SetEnemy(enemy);
 
 	}
