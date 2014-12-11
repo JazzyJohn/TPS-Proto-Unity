@@ -20,7 +20,7 @@ public class AIWalk : AIMovementState
 	
 	public float DangerRadius;
 	
-	public float _DangerRadius;
+	private float _DangerRadius;
 
 	public BattleState state;
 	
@@ -105,34 +105,43 @@ public class AIWalk : AIMovementState
 				_enemy.attackers.Remove(controlledPawn);
 			}
 		}else{
+            Debug.Log(_DangerRadius);
 			if( IsInWeaponRange()){
 			
 				
 					switch(state){
 						case BattleState.InclosingFromStuck:
 							if(_distanceToTarget<_DangerRadius){
+                                Debug.Log("indanger");
 								nextstate = BattleState.InDangerArea;
 							}else{
 								nextstate = BattleState.InclosingFromStuck;
 							}
 						break;
 						case BattleState.MoveToBack:
-								if(agent.IsRiched(backPosition, controlledPawn.myTransform.position,agent.size*2)|){
-									nextstate = BattleState.Attack;
+								if(agent.IsRiched(backPosition, controlledPawn.myTransform.position,agent.size*2)){
+									nextstate = BattleState.Attacking;
 								}else{
 									nextstate = BattleState.MoveToBack;
 								}
 						break;
 						default:
-						if(isStuick){
-							if(_DangerRadius/2.0f>2.0f*( controlledPawn.getSize()+_enemy.getSize())){
-								_DangerRadius = _DangerRadius/2;
-								nextstate = BattleState.InDangerArea;
+						if(isStuck){
+                           // Debug.Log("_DangerRadius " + _DangerRadius + " controlledPawn.GetSize() " + controlledPawn.GetSize() + " _enemy.GetSize() " + _enemy.GetSize());
+                            if (_DangerRadius / 2.0f >(controlledPawn.GetSize() + _enemy.GetSize()))
+                            {
+
+                                _DangerRadius = _DangerRadius / 2.0f;
+                              
+                                nextstate = BattleState.InclosingFromStuck;
 							}else{
-								Vector3 direction = _enemy.myTransform.positon - controlledPawn.MyTransfrom.Position;
-								backPosition = _enemy.myTransform.positon + direction.normalized *_DangerRadius;
+                              //  Debug.Log("MoveToBack");
+                                _DangerRadius = DangerRadius;
+								Vector3 direction = _enemy.myTransform.position - controlledPawn.myTransform.position;
+                                backPosition = _enemy.myTransform.position + direction.normalized * _DangerRadius;
 								agent.SetTarget (backPosition);
-								nextState = BattleState.MoveToBack;
+                                nextstate = BattleState.MoveToBack;
+                              
 							}
 					
 						}else{
@@ -367,7 +376,7 @@ public class AIWalk : AIMovementState
 									Attack();
 								break;
 								case BattleState.MoveToBack:
-									NormalMovement();
+                                    MoveAround(_enemy.myTransform);
 									Attack();
 								break; 
 								case BattleState.InclosingFromStuck:
@@ -573,17 +582,19 @@ public class AIWalk : AIMovementState
 		
 	}
 	float stuckTimer=0;
-	Vector3 lastStuckPosition= Vetcot3.zero;
+	Vector3 lastStuckPosition= Vector3.zero;
 	void CheckStuck(){
 		stuckTimer += Time.fixedDeltaTime;
-		if(stuckTimer>2.0f){
+		if(stuckTimer>1.0f){
 			stuckTimer= 0;
+          
 			if((lastStuckPosition-controlledPawn.myTransform.position).sqrMagnitude<0.5f){
 				isStuck= true;
 			}else{
 				isStuck= false;
-				isInclosingFromStuck= false;
+			
 			}
+            Debug.Log("stuck check " + isStuck);
 			lastStuckPosition= controlledPawn.myTransform.position;
 		}
 		
@@ -622,8 +633,9 @@ public class AIWalk : AIMovementState
 	public override void SetEnemy(Pawn enemy){
 		if (_enemy != enemy) {
 				controlledPawn.PlayTaunt ();
+                _DangerRadius = DangerRadius;
 		}
-		_DangerRadius= DangerRadius;
+		
 		base.SetEnemy(enemy);
 
 	}

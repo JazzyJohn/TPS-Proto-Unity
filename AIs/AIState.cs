@@ -56,7 +56,8 @@ public class AIState : MonoBehaviour {
 
 	public class SeeEnemy:AITrigger{
 		public bool isTriggered(AIState owner, Params[] parametrs){
-			if (owner._enemy != null) {
+            if (owner._enemy != null && !owner._enemy.isDead)
+            {
 								return true;
 			} else {
 				return false;

@@ -260,7 +260,7 @@ public class AIAgentComponent : MonoBehaviour {
 	}
 	public void GotoNextStepNative(){
 		//if there's a path.
-	
+        Debug.Log(nativeAgent.pathStatus +"  "+nativeAgent.isPathStale);
 		switch( nativeAgent.pathStatus){
 			
 		case NavMeshPathStatus.PathInvalid:
@@ -269,11 +269,13 @@ public class AIAgentComponent : MonoBehaviour {
 				direction  = lastOnMeshPoint -myTransform.position;	
 			}else{
 				NavMeshHit hit;
-				if (agent.FindClosestEdge(out hit))
-				direction = hit.point -myTransform.position;	
+				if (nativeAgent.FindClosestEdge(out hit))
+				direction = hit.position -myTransform.position;
+                else
+                    direction = lastOnMeshPoint - myTransform.position;	
 			
 			}
-            resultTranslate =direction;
+            resultTranslate = direction;
 
 
 
@@ -286,7 +288,7 @@ public class AIAgentComponent : MonoBehaviour {
 		break;
 		
 		case NavMeshPathStatus.PathPartial:
-			resultTranslate= Vector3.Zero;
+			resultTranslate= Vector3.zero;
 		
 		break;
 		case NavMeshPathStatus.PathComplete:

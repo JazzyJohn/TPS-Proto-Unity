@@ -132,11 +132,11 @@ public class AIMovementState : AIState
 		}
 	}
     public Vector3 GetSteeringForce(){
-        /*Debug.DrawRay(controlledPawn.myTransform.position, DynamicAwoidness() * _separationCoef, Color.black);
+        Debug.DrawRay(controlledPawn.myTransform.position, DynamicAwoidness() * _separationCoef, Color.black);
         Debug.DrawRay(controlledPawn.myTransform.position, AvoidOneTarget() * _avoidCoef, Color.blue);
         Debug.DrawRay(controlledPawn.myTransform.position, StrafeOneTarget() * _strafeCoef, Color.green);
-        Debug.DrawRay(controlledPawn.myTransform.position, agent.GetTranslate()  * _pathCoef, Color.red);
-	    Debug.DrawRay(controlledPawn.myTransform.position, CollisionAvoidness()  * _collAvoidCoef, Color.yellow);*/
+        Debug.DrawRay(controlledPawn.myTransform.position, agent.GetTranslate() * _pathCoef, Color.red);
+	    Debug.DrawRay(controlledPawn.myTransform.position, CollisionAvoidness()  * _collAvoidCoef, Color.yellow);
 		Vector3 result = (PathFollow()*_pathCoef + DynamicAwoidness()*_separationCoef+AvoidOneTarget()*_avoidCoef +StrafeOneTarget()*_strafeCoef+CollisionAvoidness()*_collAvoidCoef).normalized;
 		//Debug.DrawRay(controlledPawn.myTransform.position,result, Color.white);
 		return result*stateSpeed;
@@ -169,6 +169,7 @@ public class AIMovementState : AIState
         return Vector3.Cross(Vector3.up * starfeRandCoef, (controlledPawn.myTransform.position - strafe.position).normalized);
 	}
 	public void ChangeStrafeCoef(){
+        Debug.Log("strafe");
 		starfeRandCoef =-starfeRandCoef;
 		strafeTimer =strafeTimeHalf+ UnityEngine.Random.Range(0,strafeTimeHalf);
 	}
@@ -218,7 +219,16 @@ public class AIMovementState : AIState
 			return avoidForce.normalized;
 		}else return Vector3.zero;
 	}
-	
+    public void MoveAround(Transform target)
+    {
+        avoid = target;
+        _avoidCoef = avoidCoef/2.0f;
+        StopStrafe();
+        StopAttack();
+        _separationCoef = separationCoef;
+        _pathCoef = pathCoef;
+        _collAvoidCoef = collAvoidCoef;
+    }
 	public void NormalMovement(){
         StopAvoidFollow();
 		StopStrafe();
