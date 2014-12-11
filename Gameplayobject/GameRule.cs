@@ -2,6 +2,7 @@
 using System.Collections;
 using nstuff.juggerfall.extension.models;
 using Sfs2X.Entities.Data;
+using System;
 
 public class GameRule : MonoBehaviour {
 	static public bool IsLvlChanging=false;

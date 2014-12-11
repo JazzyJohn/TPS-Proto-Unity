@@ -150,7 +150,7 @@ public class AIAgentComponent : MonoBehaviour {
 		}
 	}
 	public void ForcedSetTarget(Vector3 newTarget){
-        Debug.Log("I recalculate path");
+       // Debug.Log("I recalculate path");
 		recalc= false;
 		target= newTarget;
 		switch(type){
@@ -205,25 +205,34 @@ public class AIAgentComponent : MonoBehaviour {
 			   return 	agent.pathrejected || (!agent.search && agent.path.Count == 0);
 			break;
 			case PathType.NATIVE:
-            return   nativeAgent.pathStatus==NavMeshPathStatus.PathPartial;
+            return   nativeAgent.pathStatus==NavMeshPathStatus.PathPartial||!nativeAgent.hasPath;
 			break;
 			
 		}
 		return false;
     }
+    public void RecalculatePath()
+    {
+        nativeAgent.SetDestination(target);			
+    }
 	
 	public Vector3 GetUnStuckDirection(){
 		switch(type){
 			case PathType.PATHFINDINGENGINE:
-			   return  Vector3.Forward;
+			   return  Vector3.forward;
 			break;
 			case PathType.NATIVE:
 			    NavMeshHit hit;
-				if (!agent.Raycast(myTransform.position+ myTransform.forward*pawn.getSize()*2.0f, out hit)) {
+                if (!nativeAgent.Raycast(myTransform.position + myTransform.forward * size * 2.0f, out hit))
+                {
 					return myTransform.forward;
-				}else if(!agent.Raycast(myTransform.position- myTransform.forward*pawn.getSize()*2.0f, out hit)) {
-					return myTransform.back;
-				}else if(!agent.Raycast(myTransform.position+ myTransform.right*pawn.getSize()*2.0f, out hit)) {
+                }
+                else if (!nativeAgent.Raycast(myTransform.position - myTransform.forward *size * 2.0f, out hit))
+                {
+                    return -myTransform.forward;
+                }
+                else if (!nativeAgent.Raycast(myTransform.position + myTransform.right * size * 2.0f, out hit))
+                {
 					return myTransform.right;
 				}else {
 					return -myTransform.right;
@@ -232,7 +241,7 @@ public class AIAgentComponent : MonoBehaviour {
 			break;
 			
 		}
-		
+        return Vector3.forward;
 	}	
 	
 	public void GotoNextStepEngine(){
@@ -282,55 +291,84 @@ public class AIAgentComponent : MonoBehaviour {
 			
 		}
 	}
+  
+    void BackOnMesh()
+    {
+        Vector3 direction;
+        if (lastOnMeshPoint.sqrMagnitude > 0)
+        {
+            direction = lastOnMeshPoint - myTransform.position;
+        }
+        else
+        {
+            NavMeshHit hit;
+            if (nativeAgent.FindClosestEdge(out hit))
+                direction = hit.position - myTransform.position;
+            else
+                direction = lastOnMeshPoint - myTransform.position;
+
+        }
+        resultTranslate = direction;
+
+
+
+
+        if (resultTranslate != Vector3.zero)
+        {
+            resultRotation = Quaternion.Slerp(myTransform.rotation, Quaternion.LookRotation(direction), Time.deltaTime * 15);
+        }
+		
+    }
 	public void GotoNextStepNative(){
 		//if there's a path.
-        Debug.Log(nativeAgent.pathStatus +"  "+nativeAgent.isPathStale);
-		switch( nativeAgent.pathStatus){
-			
-		case NavMeshPathStatus.PathInvalid:
-			Vector3 direction;
-			if(lastOnMeshPoint.sqrMagnitude>0){
-				direction  = lastOnMeshPoint -myTransform.position;	
-			}else{
-				NavMeshHit hit;
-				if (nativeAgent.FindClosestEdge(out hit))
-				direction = hit.position -myTransform.position;
-                else
-                    direction = lastOnMeshPoint - myTransform.position;	
-			
-			}
-            resultTranslate = direction;
-
-
-
-
-            if (resultTranslate != Vector3.zero)
+        //Debug.Log(nativeAgent.pathStatus +"  "+nativeAgent.isPathStale);
+        if (!nativeAgent.hasPath)
+        {
+            BackOnMesh();
+        }
+        else
+        {
+            switch (nativeAgent.pathStatus)
             {
-                resultRotation = Quaternion.Slerp(myTransform.rotation, Quaternion.LookRotation(direction), Time.deltaTime * 15);
-			}
-		
-		break;
-		
-		case NavMeshPathStatus.PathPartial:
-			resultTranslate= Vector3.zero;
-		
-		break;
-		case NavMeshPathStatus.PathComplete:
-		
-            resultTranslate =nativeAgent.desiredVelocity;
 
-            if (resultTranslate != Vector3.zero)
-            {
-                resultRotation = Quaternion.Slerp(myTransform.rotation, Quaternion.LookRotation(resultTranslate), Time.deltaTime * 15);
-			}
-		break;
-		}
-	
-        
+                case NavMeshPathStatus.PathInvalid:
+                    BackOnMesh();
+                    break;
+
+                case NavMeshPathStatus.PathPartial:
+                    resultTranslate = Vector3.zero;
+
+                    break;
+                case NavMeshPathStatus.PathComplete:
+
+                    resultTranslate = nativeAgent.desiredVelocity;
+
+                    if (resultTranslate != Vector3.zero)
+                    {
+                        resultRotation = Quaternion.Slerp(myTransform.rotation, Quaternion.LookRotation(resultTranslate), Time.deltaTime * 15);
+                    }
+                    break;
+            }
+
+        }
        
 	}
 
-	
+    public void CheckPathPosition(Vector3 position)
+    {
+        switch (type)
+        {
+
+
+            case PathType.NATIVE:
+                if (IsRiched(position, nativeAgent.nextPosition,0.5f))
+                {
+                    nativeAgent.ResetPath();
+                }
+                break;
+
+        }
+    }
 	
 	public bool IsRiched(Vector3 point,Vector3 target,float inputSize){
 		//Debug.Log(Mathf.Abs (agent.pivot.transform.position.y - point.y) +"   " +"   "+size);

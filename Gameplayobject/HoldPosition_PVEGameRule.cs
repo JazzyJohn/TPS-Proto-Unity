@@ -1,4 +1,5 @@
 ﻿using UnityEngine;
+using System;
 using System.Collections;
 using Sfs2X.Entities.Data;
 using nstuff.juggerfall.extension.models;
@@ -27,7 +28,7 @@ public class HoldPosition_PVEGameRule : GameRule {
     {
         PlayerMainGui.GameStats  stats = new PlayerMainGui.GameStats();
 			stats.gameTime = gameTime-timer;
-			stats.score = new int[]{(teamScore[0] , teamScore[1] };
+			stats.score = new int[]{teamScore[0] , teamScore[1] };
 			stats.maxScore =maxScore;
 			return stats;	
 		
@@ -84,4 +85,15 @@ public class HoldPosition_PVEGameRule : GameRule {
         text = String.Format(text, (Player.localPlayer.Score.AIKill + Player.localPlayer.Score.Kill),teamScore[0]);
 		return text;
 	}
+    public void NextWave(int wave)
+    {
+        switch (wave)
+        {
+            case 1:
+                PlayerMainGui.instance.Annonce(AnnonceType.WAVEFINISHONE);
+                break;
+       
+        }
+
+    }
 }

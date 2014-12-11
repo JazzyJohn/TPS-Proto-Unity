@@ -223,7 +223,9 @@ public class Player : MonoBehaviour {
             if (!winnerWallPost)
             {
                 winnerWallPost = true;
-            
+                String text = GameRule.instance.GetWinnerText();
+
+                ScreenShootManager.instance.TakeScreenshotToWall(text);
             }
             else
             {

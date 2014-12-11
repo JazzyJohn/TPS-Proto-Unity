@@ -15,7 +15,7 @@ public class IKcontroller : MonoBehaviour {
 	public bool IsIk(){
 		return targetWeight>0.5;
 	}
-	void Start(){
+	void Awake(){
 		aim = gameObject.GetComponent<AimIK>();
         fullBody = gameObject.GetComponent<FullBodyBipedIK>();
         grounder = gameObject.GetComponent<GrounderFBBIK>();
@@ -26,6 +26,7 @@ public class IKcontroller : MonoBehaviour {
 		set{aim.solver.IKPosition = value;}
 	}
 	public void SetWeight(float weight){
+       
 			aim.solver.IKPositionWeight = weight;
           // Debug.Log("WEIGHT" + weight);
 			targetWeight = weight;

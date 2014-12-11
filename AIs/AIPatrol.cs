@@ -33,7 +33,7 @@ public class AIPatrol : AIMovementState
 			step=0;
 		}
 		agent.SetTarget (patrolPoints[step].position);
-
+        ClearStuck();
 
 	}
 
@@ -64,7 +64,7 @@ public class AIPatrol : AIMovementState
 			//agent.WalkUpdate ();
            // Debug.Log("Jump" + needJump + agent.needJump);
 			CheckStuck();
-			Vector3 translateVect 
+            Vector3 translateVect;
 			if(isStuck){
 				translateVect = GetUnStuckDirection();
 			}else{

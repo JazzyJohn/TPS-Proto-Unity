@@ -180,7 +180,7 @@ public class AIMovementState : AIState
         return Vector3.Cross(Vector3.up * starfeRandCoef, (controlledPawn.myTransform.position - strafe.position).normalized);
 	}
 	public void ChangeStrafeCoef(){
-        Debug.Log("strafe");
+        //Debug.Log("strafe");
 		starfeRandCoef =-starfeRandCoef;
 		strafeTimer =strafeTimeHalf+ UnityEngine.Random.Range(0,strafeTimeHalf);
 	}
@@ -233,7 +233,15 @@ public class AIMovementState : AIState
     public void MoveAround(Transform target)
     {
         avoid = target;
-        _avoidCoef = avoidCoef/2.0f;
+        if ((target.position - controlledPawn.myTransform.position).sqrMagnitude <= controlledPawn.GetSize() * controlledPawn.GetSize())
+        {
+            _avoidCoef = avoidCoef / 4.0f;
+        }
+        else
+        {
+            _avoidCoef = 0.0f;
+        }
+        
         StopStrafe();
         StopAttack();
         _separationCoef = separationCoef;
@@ -269,15 +277,32 @@ public class AIMovementState : AIState
 		if(stuckTimer>1.0f){
 			stuckTimer= 0;
           
-			if((lastStuckPosition-controlledPawn.myTransform.position).sqrMagnitude<0.5f){
+			if((lastStuckPosition-controlledPawn.myTransform.position).sqrMagnitude<stateSpeed/3.0f){
 				isStuck= true;
+           
 			}else{
+                if (isStuck)
+                {
+                    UnStuck();
+                }
 				isStuck= false;
 			
 			}
-            Debug.Log("stuck check " + isStuck);
+         ///s   Debug.Log("stuck check " + (lastStuckPosition - controlledPawn.myTransform.position).sqrMagnitude + "   " + stateSpeed / 2.0f);
 			lastStuckPosition= controlledPawn.myTransform.position;
+            if (isStuck)
+            {
+                agent.CheckPathPosition(lastStuckPosition);
+            }
 		}
 		
 	}
+    protected void ClearStuck()
+    {
+        stuckTimer = 0;
+        lastStuckPosition = Vector3.zero;
+    }
+    protected virtual void  UnStuck(){
+        agent.RecalculatePath();
+    }
 }

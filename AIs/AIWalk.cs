@@ -105,14 +105,14 @@ public class AIWalk : AIMovementState
 				_enemy.attackers.Remove(controlledPawn);
 			}
 		}else{
-            Debug.Log(_DangerRadius);
+            //Debug.Log(_DangerRadius);
 			if( IsInWeaponRange()){
 			
 				
 					switch(state){
 						case BattleState.InclosingFromStuck:
 							if(_distanceToTarget<_DangerRadius){
-                                Debug.Log("indanger");
+                               // Debug.Log("indanger");
 								nextstate = BattleState.InDangerArea;
 							}else{
 								nextstate = BattleState.InclosingFromStuck;
@@ -137,9 +137,7 @@ public class AIWalk : AIMovementState
 							}else{
                               //  Debug.Log("MoveToBack");
                                 _DangerRadius = DangerRadius;
-								Vector3 direction = _enemy.myTransform.position - controlledPawn.myTransform.position;
-                                backPosition = _enemy.myTransform.position + direction.normalized * _DangerRadius;
-								agent.SetTarget (backPosition);
+                                FindBackPosition();
                                 nextstate = BattleState.MoveToBack;
                               
 							}
@@ -176,6 +174,13 @@ public class AIWalk : AIMovementState
 		}
         DecideTacktickTimeLess(addToMelee);
 	}
+
+    public void FindBackPosition()
+    {
+        Vector3 direction = _enemy.myTransform.position - controlledPawn.myTransform.position;
+        backPosition = _enemy.myTransform.position + direction.normalized * _DangerRadius;
+        agent.SetTarget(backPosition);
+    }
 	protected void DecideTacktickTimeLess(float addToMelee=0.0f){
 		
 		_timeLastDecide =Time.time;
@@ -246,6 +251,8 @@ public class AIWalk : AIMovementState
 		}
 	}
 	protected void FindCover(Vector3 position){
+        	
+        Debug.Log("FindCover");
 		float weaponDistance =controlledPawn.OptimalDistance(false); 
 		Collider[] hitColliders = Physics.OverlapSphere(position, weaponDistance);
         List<CoverRating> allCovers =
@@ -264,6 +271,7 @@ public class AIWalk : AIMovementState
 			cover = null;
 			hasCover=false;
 		}
+       /// Debug.Log(cover.transform + " has cover " + hasCover);
 	}
 	public override void Tick()
     {
@@ -376,6 +384,10 @@ public class AIWalk : AIMovementState
 									Attack();
 								break;
 								case BattleState.MoveToBack:
+                                    if (agent.IsPathBad())
+                                    {
+                                        FindBackPosition();
+                                    }
                                     MoveAround(_enemy.myTransform);
 									Attack();
 								break; 
