@@ -395,6 +395,9 @@ public class SelectPlayerGUI : MonoBehaviour {
                 case GAMEMODE.PVE:
                     LocalPlayer.SetTeam(1);
                     break;
+				case GAMEMODE.PVE_HOLD:
+                    LocalPlayer.SetTeam(1);
+                    break;
                 default:
                     LocalPlayer.SetTeam(Choice._Team);
                     break;

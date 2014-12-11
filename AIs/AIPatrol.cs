@@ -38,6 +38,7 @@ public class AIPatrol : AIMovementState
 	}
 
 	public override void StartState(){
+		NormalMovement();
 		agent = GetComponent<AIAgentComponent>();
 		//Debug.Log (agent);
         if (patrolPoints[step] == null)
@@ -62,26 +63,34 @@ public class AIPatrol : AIMovementState
         
 			//agent.WalkUpdate ();
            // Debug.Log("Jump" + needJump + agent.needJump);
-          
-            Vector3 translateVect = GetSteeringForce();
-            needJump = CheckJump(translateVect  );
+			CheckStuck();
+			Vector3 translateVect 
+			if(isStuck){
+				translateVect = GetUnStuckDirection();
+			}else{
+				translateVect = GetSteeringForce();
+			}
+			needJump = CheckJump(translateVect  );
 			if (!needJump) {
 				if(translateVect.sqrMagnitude == 0){
-                controlledPawn.Movement(translateVect, CharacterState.Idle);
+				controlledPawn.Movement(translateVect, CharacterState.Idle);
 				}else{
 				controlledPawn.Movement(translateVect, CharacterState.Walking);
 				}
 
 			} else {
 
-                controlledPawn.Movement(translateVect + controlledPawn.JumpVector(), CharacterState.Jumping);
+				controlledPawn.Movement(translateVect + controlledPawn.JumpVector(), CharacterState.Jumping);
 			}
-            if (translateVect.sqrMagnitude == 0)
-            {
-                //Debug.Log("recalculate");
+			
+			if (translateVect.sqrMagnitude == 0)
+			{
+				//Debug.Log("recalculate");
 				agent.ForcedSetTarget(patrolPoints[step].position);
-            }
+			}
+			
 			controlledPawn.SetAiRotation( agent.GetTarget());
+			
 		
 	}
 

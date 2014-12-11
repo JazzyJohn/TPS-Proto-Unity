@@ -12,7 +12,7 @@ using Sfs2X.Entities.Data;
 using nstuff.juggerfall.extension.models;
 
 
-public enum GAMEMODE { PVP, PVE,RUNNER, PVPJUGGERFIGHT,PVPHUNT};
+public enum GAMEMODE { PVP, PVE,RUNNER, PVPJUGGERFIGHT,PVPHUNT,PVE_HOLD};
 
 public class RoomData
 {
@@ -29,6 +29,7 @@ public class MapData
 	public string weaponAsset;
 	public string characterAsset;
     public GameObject playerHud;
+	public GAMEMODE gameMode= GAMEMODE.PVP;
 }
 public class ServerHolder : MonoBehaviour 
 {
@@ -224,6 +225,9 @@ public class ServerHolder : MonoBehaviour
 			case GAMEMODE.PVPHUNT:
                  newRoomName = "Hunt chamber " + UnityEngine.Random.Range(100, 999);
                 break;
+			case GAMEMODE.PVE_HOLD:
+				newRoomName = "Hold chamber " + UnityEngine.Random.Range(100, 999);
+                break;
        
         }
     }
@@ -365,7 +369,7 @@ public class ServerHolder : MonoBehaviour
         map = allMaps[UnityEngine.Random.Range(0,allMaps.Length)].name;
         blockQuickStart = true;
         newRoomName = map +UnityEngine.Random.Range(1000,10000).ToString();
-        CreateNewRoom(GAMEMODE.PVP);
+        CreateNewRoom(allMaps[UnityEngine.Random.Range(0,allMaps.Length)].gameMode);
        
     }
 
@@ -426,6 +430,18 @@ public class ServerHolder : MonoBehaviour
                 break;
 			case GAMEMODE.PVPHUNT:
 				gameRule = new SFSRoomVariable("ruleClass", "nstuff.juggerfall.extension.gamerule.HuntGameRule");
+                setting.teamCount = 2;
+                setting.maxTime =0;
+                setting.maxScore= 500;
+            
+               // Debug.Log(GlobalGameSetting.instance.GetHuntScoreTable());
+				//data.Put("huntTable",new SFSDataWrapper(5,GlobalGameSetting.instance.GetHuntScoreTable()));				
+             
+				
+               
+			break;
+			case GAMEMODE.PVE_HOLD:
+				gameRule = new SFSRoomVariable("ruleClass", "nstuff.juggerfall.extension.gamerule.PVEHoldGameRule");
                 setting.teamCount = 2;
                 setting.maxTime =0;
                 setting.maxScore= 500;

@@ -204,12 +204,36 @@ public class AIAgentComponent : MonoBehaviour {
 			case PathType.PATHFINDINGENGINE:
 			   return 	agent.pathrejected || (!agent.search && agent.path.Count == 0);
 			break;
+			case PathType.NATIVE:
             return   nativeAgent.pathStatus==NavMeshPathStatus.PathPartial;
 			break;
 			
 		}
 		return false;
     }
+	
+	public Vector3 GetUnStuckDirection(){
+		switch(type){
+			case PathType.PATHFINDINGENGINE:
+			   return  Vector3.Forward;
+			break;
+			case PathType.NATIVE:
+			    NavMeshHit hit;
+				if (!agent.Raycast(myTransform.position+ myTransform.forward*pawn.getSize()*2.0f, out hit)) {
+					return myTransform.forward;
+				}else if(!agent.Raycast(myTransform.position- myTransform.forward*pawn.getSize()*2.0f, out hit)) {
+					return myTransform.back;
+				}else if(!agent.Raycast(myTransform.position+ myTransform.right*pawn.getSize()*2.0f, out hit)) {
+					return myTransform.right;
+				}else {
+					return -myTransform.right;
+				}
+				
+			break;
+			
+		}
+		
+	}	
 	
 	public void GotoNextStepEngine(){
 		//if there's a path.

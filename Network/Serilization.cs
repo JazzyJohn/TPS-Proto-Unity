@@ -257,7 +257,14 @@ namespace nstuff.juggerfall.extension.models
 		
 		public int vipID;
     }
+	[Serializable]
+    public class HoldPositionGameRuleModel : GameRuleModel
+    {
+        public bool isGameEnded;
 
+        public ArrayList teamScore;
+		
+	}
     [Serializable]
     public class PVPJuggerFightGameRuleModel : GameRuleModel
     {

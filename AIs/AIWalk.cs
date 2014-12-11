@@ -36,7 +36,7 @@ public class AIWalk : AIMovementState
 	
 	protected bool hasCover= false;
 	
-	protected bool isStuck = false;
+
 	
 	protected Vector3 backPosition;
 	
@@ -581,24 +581,7 @@ public class AIWalk : AIMovementState
 		}
 		
 	}
-	float stuckTimer=0;
-	Vector3 lastStuckPosition= Vector3.zero;
-	void CheckStuck(){
-		stuckTimer += Time.fixedDeltaTime;
-		if(stuckTimer>1.0f){
-			stuckTimer= 0;
-          
-			if((lastStuckPosition-controlledPawn.myTransform.position).sqrMagnitude<0.5f){
-				isStuck= true;
-			}else{
-				isStuck= false;
-			
-			}
-            Debug.Log("stuck check " + isStuck);
-			lastStuckPosition= controlledPawn.myTransform.position;
-		}
-		
-	}
+	
 	
     public bool JumpToEnemy(Vector3 translateVect)
     {

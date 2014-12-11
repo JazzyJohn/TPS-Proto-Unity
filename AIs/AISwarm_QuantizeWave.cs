@@ -11,7 +11,7 @@ public class AISwarm_QuantizeWave : AISwarm
 	
     public int[] needToKill;
 	
-	private int _alreadyDead;
+	protected int _alreadyDead;
 
     public override void AgentKilled(AIBase ai)
     {

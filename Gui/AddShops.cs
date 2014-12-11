@@ -161,8 +161,7 @@ public class AddShops : MonoBehaviour
     public void TakeScreenShootWall()
     {
 
-        String text = TextGenerator.instance.GetSimpleText("WallPostWinner");
-        text = String.Format(text, (Player.localPlayer.Score.AIKill + Player.localPlayer.Score.Kill));
+        String text = GameRule.instance.GetWinnerText();
 
         ScreenShootManager.instance.TakeScreenshotToWall(text);
     }

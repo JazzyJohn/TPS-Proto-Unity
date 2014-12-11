@@ -138,4 +138,10 @@ public class GameRule : MonoBehaviour {
 	public virtual bool IsPractice(){
         return false;
 	}
+	
+	public virtual string GetWinnerText(){
+		string text = TextGenerator.instance.GetSimpleText("WallPostWinner");
+        text = String.Format(text, (Player.localPlayer.Score.AIKill + Player.localPlayer.Score.Kill));
+		return text;
+	}
 }

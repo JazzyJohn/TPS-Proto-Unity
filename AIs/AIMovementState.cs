@@ -49,6 +49,12 @@ public class AIMovementState : AIState
 	float strafeTimeHalf;
 	
 	public bool needJump = false;
+	
+	float stuckTimer=0;
+	
+	Vector3 lastStuckPosition= Vector3.zero;
+	
+	protected bool isStuck = false;
 
 	protected void Awake(){
 		base.Awake();
@@ -141,6 +147,11 @@ public class AIMovementState : AIState
 		//Debug.DrawRay(controlledPawn.myTransform.position,result, Color.white);
 		return result*stateSpeed;
 		
+	}
+	
+	public Vector3 GetUnStuckDirection(){
+		return agent.GetUnStuckDirection();
+	
 	}
 	public Vector3 PathFollow(){
 		agent.WalkUpdate();
@@ -252,4 +263,21 @@ public class AIMovementState : AIState
         }*/
         return Physics.Raycast(controlledPawn.myTransform.position + Vector3.up * controlledPawn.stepHeight, translate.normalized, controlledPawn.GetSize() , agent.obstacleMask);
     }
+	
+	protected void CheckStuck(){
+		stuckTimer += Time.fixedDeltaTime;
+		if(stuckTimer>1.0f){
+			stuckTimer= 0;
+          
+			if((lastStuckPosition-controlledPawn.myTransform.position).sqrMagnitude<0.5f){
+				isStuck= true;
+			}else{
+				isStuck= false;
+			
+			}
+            Debug.Log("stuck check " + isStuck);
+			lastStuckPosition= controlledPawn.myTransform.position;
+		}
+		
+	}
 }
