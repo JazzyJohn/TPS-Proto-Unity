@@ -200,7 +200,7 @@ public class AISwarm:MonoBehaviour
 		position +=direction.normalized*PlayerManager.instance.radius;
 		return position;
 	}
-    public void SpawnBot(string prefabName, int point, Vector3 position)
+    public virtual void SpawnBot(string prefabName, int point, Vector3 position)
     {
 
 		position =NormalizePositon(position);
@@ -212,7 +212,7 @@ public class AISwarm:MonoBehaviour
         ai.Init(aiGroup, this, point);
         AfterSpawnAction(ai);
     }
-    public void SpawnBot(string prefabName, int point, Vector3 position,int team)
+    public virtual void SpawnBot(string prefabName, int point, Vector3 position,int team)
     {
 		position =NormalizePositon(position);
         GameObject obj = NetworkController.Instance.PawnForSwarmSpawnRequest(prefabName, position, respawns[point].transform.rotation, new int[0], aiGroup, point, team);

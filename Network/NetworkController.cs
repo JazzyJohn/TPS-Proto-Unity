@@ -850,10 +850,43 @@ public class NetworkController : MonoBehaviour {
     /// <summary>
     /// pawnSpawn request to server
     /// </summary>	
-    public GameObject PawnForSwarmSpawnRequest(string prefab, Vector3 vector3, Quaternion quaternion, int[] stims,int swarm,int home, int team = 0)
+    public GameObject PawnForSwarmSpawnRequest(string prefab, Vector3 vector3, Quaternion quaternion, int[] stims,int swarm,int home, int team = 0, List<CharacteristicToAdd> bonusData=null)
     {
         ISFSObject data = new SFSObject();
-
+		if(bonusData!=null){
+			ISFSArray sendBonuses = new SFSArray();
+			foreach(CharacteristicToAdd bonus in bonusData){
+				ISFSObject bonusSfs = new SFSObject();
+				bonusSfs.PutInt("characteristic",(int)bonus.characteristic);
+				Effect<float> floatEffect = bonus.addEffect as Effect<float>;
+                if (floatEffect != null)
+                {
+					bonusSfs.PutUtfString("type","float");
+					bonusSfs.PutFloat("value",floatEffect.value);
+					sendBonuses.AddSFSObject(bonusSfs);
+                    continue;
+                }
+                Effect<int> intEffect = bonus.addEffect as Effect<int>;
+                if (intEffect != null)
+                {
+                   	bonusSfs.PutUtfString("type","int");
+					bonusSfs.PutInt("value",floatEffect.value);
+					sendBonuses.AddSFSObject(bonusSfs);
+                    continue;
+                }
+                Effect<bool> boolEffect = bonus.addEffect as Effect<bool>;
+                if (boolEffect != null)
+                {
+                   	bonusSfs.PutUtfString("type","bool");
+					bonusSfs.PutBool("value",floatEffect.value);
+					sendBonuses.AddSFSObject(bonusSfs);
+                    continue;
+                }
+				 
+			}
+			data.PutSFSArray(bonus,sendBonuses);
+		}
+		
         data.PutBool("Scene", true);
         data.PutBool("isAI", true);
         data.PutIntArray("stims", stims);
@@ -867,6 +900,9 @@ public class NetworkController : MonoBehaviour {
         Debug.Log(serverHolder.gameRoom);
         ExtensionRequest request = new ExtensionRequest("pawnSpawn", data, serverHolder.gameRoom);
         smartFox.Send(request);
+		if(bonusData!=null){
+			pawn.AddExternalCharacteristic(bonusData);
+		}
         return go;
 
 
@@ -1428,8 +1464,36 @@ public class NetworkController : MonoBehaviour {
             }
         }
 		pawn.NetUpdate(sirPawn);
-		 
-		 
+		 if(dt.ContainsKey("bonus")){
+			ISFSArray sendBonuses =dt.GetSFSArray("bonus");
+			List<CharacteristicToAdd> effects = new List<CharacteristicToAdd>();
+			foreach(ISFSObject bonus in sendedBonuses){
+				CharacteristicToAdd add = new CharacteristicToAdd();
+				add.characteristic = (CharacteristicList)bonus.GetInt("characteristic");
+				string type = bonus.PutUtfString("type");
+				BaseEffect effect = null;
+				if (type == "float")
+				{
+					effect = new Effect<float>(bonus.GetFloat("value"));
+				}
+				else if (type == "int")
+				{
+					effect = new Effect<int>(bonus.GetInt("value"));
+				}
+				else
+				{
+					effect = new Effect<bool>(bonus.GetBool("value"));
+				}
+				effect.initalEffect = true;
+				add.addEffect = effect;
+				effects.Add(add);
+				
+				 
+			}
+			pawn.AddExternalCharacteristic(effects);
+		}
+		
+		
 	}
 	/// <summary>
     /// handle pawnChangeShootAnimState(  from Server

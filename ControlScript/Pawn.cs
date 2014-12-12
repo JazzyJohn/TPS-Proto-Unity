@@ -506,6 +506,9 @@ public class Pawn : DamagebleObject
         }
 
     }
+	public void AddExternalCharacteristic(List<CharacteristicToAdd> effects){
+		charMan.AddList(effects);		
+	}
     public int GetMaxHealth()
     {
         return (int)(((float)charMan.GetIntChar(CharacteristicList.MAXHEALTH)) * GetPercentValue(CharacteristicList.MAXHEALTH_PERCENT));
