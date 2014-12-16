@@ -51,7 +51,7 @@ public class HoldPosition_PVEGameRule : GameRule {
     {
         PlayerMainGui.GameStats  stats = new PlayerMainGui.GameStats();
 			stats.gameTime = gameTime-timer;
-            stats.score = new int[] { teamScore[0], Player.localPlayer.Score.WaveCnt };
+            stats.score = new int[] {gamestats.maxScore - teamScore[0], Player.localPlayer.Score.WaveCnt };
 			stats.maxScore =maxScore;
 			return stats;	
 		
@@ -89,10 +89,7 @@ public class HoldPosition_PVEGameRule : GameRule {
 	
 	}
 
-	public override void ReadMasterInfo(ISFSObject dt){
-		
-	}
-		
+	
 	public override string GetWinnerText(){
 		string text = TextGenerator.instance.GetSimpleText("WallPostHoldWinner");
         text = String.Format(text, (Player.localPlayer.Score.AIKill + Player.localPlayer.Score.Kill), Player.localPlayer.Score.WaveCnt);

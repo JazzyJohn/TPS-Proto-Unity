@@ -302,6 +302,8 @@ public class Pawn : DamagebleObject
     public InventoryManager ivnMan;
 
     public bool isAiming = false;
+	
+	public bool isFps= false;
 
     public float aimModCoef = -10.0f;
 
@@ -967,6 +969,9 @@ public class Pawn : DamagebleObject
     //EFFECCT SECTION
     void AddEffect(Vector3 position,Vector3 direction,DamageType type)
     {
+		if(isFps){
+			return;
+		}
         if (effectController != null)
         {
             effectController.DamageEffect(type,position,direction);
@@ -1583,7 +1588,8 @@ public class Pawn : DamagebleObject
     //Setting new weapon if not null try to attach it
     public void setWeapon(BaseWeapon newWeapon)
     {
-        CurWeapon = newWeapon;
+		ToggleAim(false);
+        CurWeapon = newWeapon;	
         //Debug.Log (newWeapon);
         if (CurWeapon != null)
         {
@@ -1881,8 +1887,18 @@ public class Pawn : DamagebleObject
         animator.ToggleAim(value);
         if (cameraController != null)
         {
-            cameraController.ToggleAim(value);
+            cameraController.ToggleAim(value,CurWeapon.isAimingFPS);
         }
+		isFps= false;
+		if(foxView.isMine&&CurWeapon.isAimingFPS){
+			PlayerMainGui.instance. ToggleFpsAim(value)
+			if(value){
+				isFps= true;
+				HideRenders();
+			}else{
+				ShowRenders();
+			}
+		}
     }
     public int GetAmmoInBag()
     {
@@ -3207,6 +3223,21 @@ public class Pawn : DamagebleObject
         canMove = true;
     }
 
+		
+	public void HideRenders(){
+		Renderer[] renderers = GetComponentsInChildren<Renderer>();
+        foreach (Renderer renderer in renderers) {
+            renderer.enabled = false;
+        }
+	
+	}
+	public void ShowRenders(){
+		Renderer[] renderers = GetComponentsInChildren<Renderer>();
+        foreach (Renderer renderer in renderers) {
+            renderer.enabled = false;
+        }
+	
+	}
     //END OF VISULA EFFECT
 
 

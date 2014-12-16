@@ -82,6 +82,15 @@ public class Player : MonoBehaviour {
 		public int RobotKill=0;
         public int AIKill = 0;
         public int WaveCnt=0;
+		
+		public void Reset(){
+			Assist = 0;
+			AIKill = 0;
+			Death = 0;
+			Kill = 0;
+			RobotKill = 0;
+			WaveCnt=0;
+		}
 	}
  
 	
@@ -200,11 +209,7 @@ public class Player : MonoBehaviour {
             }
         }
         DeathUpdate();
-        Score.Assist = 0;
-        Score.AIKill = 0;
-        Score.Death = 0;
-        Score.Kill = 0;
-        Score.RobotKill = 0;
+        Score.Reset();
        
         respawnTimer = 0;
 	}

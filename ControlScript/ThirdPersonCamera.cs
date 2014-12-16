@@ -36,6 +36,8 @@ public class ThirdPersonCamera : PlayerCamera
 	public Vector3 minimapOffset  = new Vector3(0.0f,40.0f,0.0f);
 
     protected bool aiming = false;
+	
+	protected bool isFps =false;
 
     public float inWallDrop;
 
@@ -87,8 +89,9 @@ public class ThirdPersonCamera : PlayerCamera
 
 	
 
-	public override void ToggleAim(bool value){
+	public override void ToggleAim(bool value,bool isFps){
 		aiming = value;
+		this.isFps = isFps;
 		
 	}
 	void  DebugDrawStuff (){
@@ -108,19 +111,26 @@ public class ThirdPersonCamera : PlayerCamera
 		/*if (!controller)
 			return;
 		*/
-
+		float lXOffset;
         if (aiming)
         {
-            targetOffset = aimingOffset;
+			if(isFps){
+				targetOffset= Vector3.Zero;
+				lXOffset =0;
+			}else{
+				lxOffset = xOffset;
+				targetOffset = aimingOffset;
+			}
             Camera.main.fieldOfView = aimFov;
         }
         else
         {
+			lxOffset = xOffset;
             targetOffset = normalOffset;
             Camera.main.fieldOfView = startFov;
         }
 		
-        Vector3 targetHead = _target.position + _pawn.headOffset +_pawn.GetDesireRotation()*Vector3.right*xOffset;
+        Vector3 targetHead = _target.position + _pawn.headOffset +_pawn.GetDesireRotation()*Vector3.right*lxOffset;
         Vector3 lOffset = _pawn.GetDesireRotation()* targetOffset;
 
         Debug.DrawLine(targetHead, targetHead + lOffset, Color.red);

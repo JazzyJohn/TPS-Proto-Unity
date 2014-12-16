@@ -105,6 +105,10 @@ public class BaseWeapon : DestroyableNetworkObject {
     /// </summary>
 	public float aimRandCoef;
 	/// <summary>
+    /// flag that tells if our gun have fps in aiming mode
+    /// </summary>
+	public bool isAimingFPS;
+	/// <summary>
     ///  Rand to Shoot direction add after one shoot;
     /// </summary>
 	public float randPerShoot;
@@ -760,7 +764,8 @@ public class BaseWeapon : DestroyableNetworkObject {
     protected void FiredEffect()
     {
 
-        if (FireStarted != null)
+		
+        if (FireStarted != null&&(!foxView.isMine||!isAimingFPS||!owner.isAiming)
         {
             FireStarted(this, EventArgs.Empty);
             //Debug.Log("fire" + FireStarted);

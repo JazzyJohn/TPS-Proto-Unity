@@ -145,7 +145,7 @@ public class PlayerHudNgui : MonoBehaviour {
 
     public UITable stimTable;
 
-    public GAMEMODE mode;
+   
     public enum HudState
     {
         Waiting = 0,
@@ -208,20 +208,10 @@ public class PlayerHudNgui : MonoBehaviour {
             if (Death) Death.text = LocalPlayer.Score.Death.ToString();
             if (Assists) Assists.text = LocalPlayer.Score.Assist.ToString();
 
-            switch (mode)
-            {
-                case GAMEMODE.PVE_HOLD:
-                    if (RedTeamScore) RedTeamScore.text = (gamestats.maxScore- gamestats.score[0]).ToString() ;
-                     if (BlueTeamScore) BlueTeamScore.text = gamestats.score[1].ToString();
-                    break;
-
-                default:
+          
                      if (RedTeamScore) RedTeamScore.text = gamestats.score[0].ToString();
                      if (BlueTeamScore) BlueTeamScore.text = gamestats.score[1].ToString();
-                    break;
-            }
-           
-
+          
             crosshair.UpdateCrosshair(Stats);
         }
         if (damageTweener != null && damageTweener.enabled)
@@ -231,6 +221,11 @@ public class PlayerHudNgui : MonoBehaviour {
         }
     }
 	
+	public void ToggleFpsAim(bool value)
+    {
+		crosshair.ToggleFpsAim(value);
+	}
+
     public void SetLocalPlayer(Player player)
     {
         LocalPlayer = player;

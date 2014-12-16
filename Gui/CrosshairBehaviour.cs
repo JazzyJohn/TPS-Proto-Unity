@@ -75,6 +75,10 @@ public class CrosshairBehaviour : MonoBehaviour {
 	public UIWidget[] crosshairParts;
 	
 	public Color[] crosshairColor;
+	
+	public UIWidget crosshairMain;
+	
+	public UIWidget  aimCrosshair;
 
 
 	public float maxCoef;
@@ -92,7 +96,16 @@ public class CrosshairBehaviour : MonoBehaviour {
 
       
 	} 
-	
+	public void ToggleFpsAim(bool value)
+    {
+		if(value){
+			crosshairMain.alpha= 0.0f;
+			aimCrosshair.alpha = 1.0f;
+		}else{
+			crosshairMain.alpha = 1.0f;
+			aimCrosshair.alpha = 0.0f;
+		}
+	}
 	public void UpdateCrosshair(   PlayerMainGui.PlayerStats gamestats){
 		BaseWeapon weapon = gamestats.gun;
         if (weapon == null)

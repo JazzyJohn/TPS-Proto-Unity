@@ -514,6 +514,10 @@ public class PlayerMainGui : MonoBehaviour {
 	
 	}
    
+	public void ToggleFpsAim(bool value)
+    {
+		hud.ToggleFpsAim(value);
+	}
 
     public void ActivateStim(List<int> activeSteampacks)
     {
@@ -719,7 +723,7 @@ public class PlayerMainGui : MonoBehaviour {
 		
 	}
 
-
+	
 
 	
 	public void AddMessage(string text,Vector3 worldPoint, MessageType type ){
