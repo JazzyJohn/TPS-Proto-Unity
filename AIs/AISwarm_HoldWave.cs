@@ -1,10 +1,11 @@
 using UnityEngine;
 using System.Collections;
+using System.Collections.Generic;
 using Sfs2X.Entities.Data;
 
 public class AISwarm_HoldWave : AISwarm_QuantizeWave
 {
-	[Serializable]
+	[System.Serializable]
 	public class WaveData{
 		public int waveCnt;
 		
@@ -16,47 +17,59 @@ public class AISwarm_HoldWave : AISwarm_QuantizeWave
 		
 		public StartFloatCharacteristic[] startFloatCharacteristic;
 		
-		public Init(){
+		public void Init(){
 			bonusData = new List<CharacteristicToAdd>();
 			for(int  i=0; i<startIntCharacteristic.Length;i++){
 				CharacteristicToAdd add = new CharacteristicToAdd();
 				add.characteristic =startIntCharacteristic[i].characteristic;
-				add.effect = new Effect<int>(startIntCharacteristic[i].startValue));
+                add.addEffect = new Effect<int>(startIntCharacteristic[i].startValue);
 				bonusData.Add(add);
 		
 			}
 			for(int  i=0; i<startBoolCharacteristic.Length;i++){
 				CharacteristicToAdd add = new CharacteristicToAdd();
 				add.characteristic =startBoolCharacteristic[i].characteristic;
-				add.effect = new Effect<bool>(startBoolCharacteristic[i].startValue));
+                add.addEffect = new Effect<bool>(startBoolCharacteristic[i].startValue);
 				bonusData.Add(add);
 			}
 			for(int  i=0; i<startFloatCharacteristic.Length;i++){
 				CharacteristicToAdd add = new CharacteristicToAdd();
 				add.characteristic =startFloatCharacteristic[i].characteristic;
-				add.effect = new Effect<float>(startFloatCharacteristic[i].startValue));
+                add.addEffect = new Effect<float>(startFloatCharacteristic[i].startValue);
 				bonusData.Add(add);
 			}
 		}
-		List<CharacteristicToAdd> bonusData;
+		public List<CharacteristicToAdd> bonusData;
 	}
 
-	protected WaveData[] waveData;
+	public  WaveData[] waveData;
+
+    public string[] bosses;
 	
 	protected int curData = -1;
 	
 	protected int oldData = -1;
+
+    public int waveWithBossCount;
 	
 	protected void Awake()
     {
         base.Awake();
-	    for(int i =0; i<waveData.Lenght;i++){
-			data.Init();
-			if(data.waveCnt==0){
-				curData= i;
-				oldData=i;
-			}
-	    }
+        for (int i = 0; i < waveData.Length; i++)
+        {
+            waveData[i].Init();
+            if (waveData[i].waveCnt == 0)
+            {
+                curData = i;
+                oldData = i;
+            }
+        }
+    }
+    public override void SendData(ISFSObject swarmSend)
+    {
+        base.SendData(swarmSend);
+        swarmSend.PutUtfStringArray("bosses", bosses);
+        swarmSend.PutInt("waveWithBossCount", waveWithBossCount);
     }
     public override void AgentKilled(AIBase ai)
     {
@@ -70,7 +83,7 @@ public class AISwarm_HoldWave : AISwarm_QuantizeWave
 		position =NormalizePositon(position);
         GameObject obj;
 		if(curData!=-1){
-			obj= NetworkController.Instance.PawnForSwarmSpawnRequest(prefabName, position, respawns[point].transform.rotation, new int[0], aiGroup, point,waveData[curData].bonusData);
+			obj= NetworkController.Instance.PawnForSwarmSpawnRequest(prefabName, position, respawns[point].transform.rotation, new int[0], aiGroup, point,0,waveData[curData].bonusData);
 		}else{
 			obj= NetworkController.Instance.PawnForSwarmSpawnRequest(prefabName, position, respawns[point].transform.rotation, new int[0], aiGroup, point);
 
@@ -84,10 +97,10 @@ public class AISwarm_HoldWave : AISwarm_QuantizeWave
         AfterSpawnAction(ai);
     }
     
-    public void NextSwarmWave()
+    public  override void NextSwarmWave()
     {
         _curWave++;
-		if(oldData==waveData.Lenght-1){
+		if(oldData==waveData.Length-1){
 			curData = oldData;
 		}else{
 			if(waveData[oldData+1].waveCnt== _curWave){
@@ -103,7 +116,7 @@ public class AISwarm_HoldWave : AISwarm_QuantizeWave
         HoldPosition_PVEGameRule rule=  GameRule.instance as HoldPosition_PVEGameRule;
         if (rule != null)
         {
-            rule.NextWave(_curWave);
+            rule.NextWaveGame(_curWave);
         }
 	}
    

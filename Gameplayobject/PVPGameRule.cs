@@ -23,12 +23,7 @@ public class PVPGameRule : GameRule {
 			
             Annonce();
             base.Update();
-            #if UNITY_EDITOR
-                        if (Input.GetKeyDown(KeyCode.L))
-                        {
-                            GameEnded();
-                        }
-            #endif
+          
 		}
 
       
@@ -101,23 +96,7 @@ public class PVPGameRule : GameRule {
 		
 		
 	
-		public void GameEnded(){
-			//PhotonNetwork.automaticallySyncScene = true;
-			
-			isGameEnded=true;
-			//Player player = GameObject.Find ("Player").GetComponent<Player> ();
-			//player.GameEnd ();
-			EventHolder.instance.FireEvent(typeof(GameListener),"EventTeamWin",Winner());
-            GlobalPlayer.instance.MathcEnd();
-            Player.localPlayer.GameEnd();
-            ItemManager.instance.RemoveOldAndExpired();
-            List<Pawn> pawns = PlayerManager.instance.FindAllPawn();
-            foreach (Pawn pawn in pawns)
-            {
-                pawn.gameEnded();
-            }
-           
-		}
+	
 
 		public bool FinalStage (){
 			for(int i=0;i<teamScore.Length;i++){

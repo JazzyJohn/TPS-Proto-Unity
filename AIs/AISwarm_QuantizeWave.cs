@@ -16,7 +16,7 @@ public class AISwarm_QuantizeWave : AISwarm
     public override void AgentKilled(AIBase ai)
     {
         base.AgentKilled(ai);
-        _alreadyDead++; 
+     
     }
 
     public override void DeActivate()
@@ -41,7 +41,7 @@ public class AISwarm_QuantizeWave : AISwarm
         }
 	}
 
-    public void NextSwarmWave()
+    public virtual  void NextSwarmWave()
     {
         _curWave++;
         _alreadyDead = 0;

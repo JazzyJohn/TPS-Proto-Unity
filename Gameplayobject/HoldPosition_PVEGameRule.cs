@@ -3,6 +3,7 @@ using System;
 using System.Collections;
 using Sfs2X.Entities.Data;
 using nstuff.juggerfall.extension.models;
+using System.Collections.Generic;
 
 public class HoldPosition_PVEGameRule : GameRule {
 
@@ -13,7 +14,7 @@ public class HoldPosition_PVEGameRule : GameRule {
 
 	// Use this for initialization
 	void Start () {
-	
+        teamScore = new int[2];
 	}
 
     void Update()
@@ -23,12 +24,34 @@ public class HoldPosition_PVEGameRule : GameRule {
         base.Update();
     }
 
+    public override void GameEnded()
+    {
+        //PhotonNetwork.automaticallySyncScene = true;
+
+        isGameEnded = true;
+        //Player player = GameObject.Find ("Player").GetComponent<Player> ();
+        //player.GameEnd ();
+
+        GlobalPlayer.instance.MathcEnd();
+        Player.localPlayer.GameEnd();
+        ItemManager.instance.RemoveOldAndExpired();
+        List<Pawn> pawns = PlayerManager.instance.FindAllPawn();
+        foreach (Pawn pawn in pawns)
+        {
+            pawn.gameEnded();
+        }
+    }
+
+    public override int Winner()
+    {
+        return Player.localPlayer.Score.WaveCnt;
+    }
     
     public override PlayerMainGui.GameStats GetStats()
     {
         PlayerMainGui.GameStats  stats = new PlayerMainGui.GameStats();
 			stats.gameTime = gameTime-timer;
-			stats.score = new int[]{teamScore[0] , teamScore[1] };
+            stats.score = new int[] { teamScore[0], Player.localPlayer.Score.WaveCnt };
 			stats.maxScore =maxScore;
 			return stats;	
 		
@@ -39,17 +62,7 @@ public class HoldPosition_PVEGameRule : GameRule {
             NetworkController.Instance.GameRuleArrivedRequest();
         }
     }
-    public override int Winner()
-    {
-        if (isArrived)
-        {
-            return 1;
-        }
-        else
-        {
-            return 0;
-        }
-    }
+  
     public override void MoveOn()
     {
         curStage = MUSIC_STAGE.EXPLORATION;
@@ -80,20 +93,15 @@ public class HoldPosition_PVEGameRule : GameRule {
 		
 	}
 		
-	public virtual string GetWinnerText(){
+	public override string GetWinnerText(){
 		string text = TextGenerator.instance.GetSimpleText("WallPostHoldWinner");
-        text = String.Format(text, (Player.localPlayer.Score.AIKill + Player.localPlayer.Score.Kill),teamScore[0]);
+        text = String.Format(text, (Player.localPlayer.Score.AIKill + Player.localPlayer.Score.Kill), Player.localPlayer.Score.WaveCnt);
 		return text;
 	}
-    public void NextWave(int wave)
+    public void NextWaveGame(int wave)
     {
-        switch (wave)
-        {
-            case 1:
-                PlayerMainGui.instance.Annonce(AnnonceType.WAVEFINISHONE);
-                break;
-       
-        }
+        PlayerMainGui.instance.Annonce(AnnonceType.WAVEFINISHONE,AnnonceAddType.NONE,wave.ToString());
+        Player.localPlayer.Score.WaveCnt++; Debug.Log("next wave" + Player.localPlayer.Score.WaveCnt);
 
     }
 }

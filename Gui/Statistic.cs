@@ -52,19 +52,26 @@ public class Statistic : MonoBehaviour {
 	void Start () 
 	{
 		timer=0;
-     
-		for (int i=0; i<TeamBlue.transform.childCount;i++)
-		{
-			BlueTeamlPlayer[i] = new TeamSlot();
-            BlueTeamlPlayer[i].message = TeamBlue.transform.GetChild(i).GetComponent<StatisticMessage>();
-            BlueTeamlPlayer[i].message.Hide(true);
-		}
-		for (int i=0; i<TeamRed.transform.childCount;i++)
-		{
-			RedTeamlPlayer[i]  = new TeamSlot();
-            RedTeamlPlayer[i].message = TeamRed.transform.GetChild(i).GetComponent<StatisticMessage>();
-            RedTeamlPlayer[i].message.Hide(true);
-		}
+        Debug.Log("Read AND BLUE" + TeamRed.activeSelf + "  " + TeamBlue.activeSelf);
+        if (TeamBlue.activeInHierarchy)
+        {
+		    for (int i=0; i<TeamBlue.transform.childCount;i++)
+		    {
+			    BlueTeamlPlayer[i] = new TeamSlot();
+                BlueTeamlPlayer[i].message = TeamBlue.transform.GetChild(i).GetComponent<StatisticMessage>();
+                BlueTeamlPlayer[i].message.Hide(true);
+		    }
+        }
+
+        if (TeamRed.activeInHierarchy)
+        {
+            for (int i = 0; i < TeamRed.transform.childCount; i++)
+            {
+                RedTeamlPlayer[i] = new TeamSlot();
+                RedTeamlPlayer[i].message = TeamRed.transform.GetChild(i).GetComponent<StatisticMessage>();
+                RedTeamlPlayer[i].message.Hide(true);
+            }
+        }
         avatar.mainTexture = GlobalPlayer.instance.avatar;
 	}
 
@@ -207,46 +214,52 @@ public class Statistic : MonoBehaviour {
             }
 
             //Изменения активных слотов
-            int RUse = countRedSlotUse;
-            int RSlot = countRed;
-            if (RSlot > RUse)
+            if (TeamRed.activeInHierarchy)
             {
-                for (int i = RUse; i < RSlot; i++)
-                {
-                    RedTeamlPlayer[i].message.Hide(false);
-                    countRedSlotUse++;
-                }
-            }
-            else if (RSlot < RUse)
-            {
+                int RUse = countRedSlotUse;
+                int RSlot = countRed;
 
-                for (int i = RSlot; i < RUse; i++)
+                if (RSlot > RUse)
                 {
-                    RedTeamlPlayer[i].message.Hide(true);
-                    countRedSlotUse--;
+                    for (int i = RUse; i < RSlot; i++)
+                    {
+                        RedTeamlPlayer[i].message.Hide(false);
+                        countRedSlotUse++;
+                    }
                 }
-            }
+                else if (RSlot < RUse)
+                {
 
-            int BUse = countBlueSlotUse;
-            int BSlot = countBlue;
-            if (BSlot > BUse)
-            {
-                for (int i = BUse; i < BSlot; i++)
-                {
-                    BlueTeamlPlayer[i].message.Hide(false);
-                    countBlueSlotUse++;
+                    for (int i = RSlot; i < RUse; i++)
+                    {
+                        RedTeamlPlayer[i].message.Hide(true);
+                        countRedSlotUse--;
+                    }
                 }
-            }
-            else if (BSlot < BUse)
-            {
 
-                for (int i = BSlot; i < BUse; i++)
+            }
+            if (TeamBlue.activeInHierarchy)
+            {
+                int BUse = countBlueSlotUse;
+                int BSlot = countBlue;
+                if (BSlot > BUse)
                 {
-                    BlueTeamlPlayer[i].message.Hide(true);
-                    countBlueSlotUse--;
+                    for (int i = BUse; i < BSlot; i++)
+                    {
+                        BlueTeamlPlayer[i].message.Hide(false);
+                        countBlueSlotUse++;
+                    }
+                }
+                else if (BSlot < BUse)
+                {
+
+                    for (int i = BSlot; i < BUse; i++)
+                    {
+                        BlueTeamlPlayer[i].message.Hide(true);
+                        countBlueSlotUse--;
+                    }
                 }
             }
-            
         
 
     }

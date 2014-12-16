@@ -44,7 +44,7 @@ public class AnimationManager : MonoBehaviour
 			
 		}
     }
-    /// <summary>
+   /* /// <summary>
     /// Задает или возвращает значение воспроизведения скорости анимации
     /// </summary>
     public float AnimationSpeed
@@ -57,7 +57,7 @@ public class AnimationManager : MonoBehaviour
         {
             animator.speed = value;
         }
-    }
+    }*/
     /// <summary>
     /// Служит для определения направления анимации, значения принимаются от -2 до +2,
     /// при этом от -1 до +1 - хотьба, от -2 до +2 - бег
@@ -79,24 +79,24 @@ public class AnimationManager : MonoBehaviour
     /// Принимает числа больше ноля. Каждое число соотсветсвует позе. 
     /// </summary>
     /// <param name="poseDeath"></param>
-    public void ApllyDeath(int poseDeath)
+  /*  public void ApllyDeath(int poseDeath)
     {
         if (poseDeath < 0)
             Debug.LogError("Posture of death can only be non-negative", this);
         animator.SetInteger("Death", poseDeath);
     }
-    /// <summary>
+    /// <summary>*/
     /// Служит для определения выбора одно из вариантов перелазанья.
     /// Может быть вызвано только при движении. Принимает числа больше ноля.
     /// Каждое число соотсветсвует позе. 
     /// </summary>
     /// <param name="climbLedgePose"></param>
-    public void ApllyClimbLedge(int climbLedgePose)
+ /*   public void ApllyClimbLedge(int climbLedgePose)
     {
         if (climbLedgePose < 0)
             Debug.LogError("Posture of clim Ledge can only be non-negative", this);
         animator.SetInteger("ClimbLedge", climbLedgePose);
-    }
+    }*/
     /// <summary>
     /// Служит для начала анимаций прыжка. Принимает значение true или false
     /// </summary>
@@ -128,21 +128,21 @@ public class AnimationManager : MonoBehaviour
 		animator.SetBool ("Grounded", false);
 	
 	}
-	public bool GetJump(){
+	/*public bool GetJump(){
 		return animator.GetBool("Jump");
-	} 
+	} */
 	
 	
     /// <summary>
     /// Reset all animation to default
     /// </summary>
-    public void ResetAnimation()
+   /* public void ResetAnimation()
     {
         animator.SetInteger("Death", 0);
         animator.SetInteger("ClimbLedge", 0);
         animator.SetBool("Jump", false);
         animator.Play("Motion");
-    }
+    }*/
 	/// <summary>
 	/// Wall run animation
 	/// </summary>
@@ -197,10 +197,10 @@ public class AnimationManager : MonoBehaviour
 	/// <summary>
     /// IS we under IK controll
     /// </summary>
-	public bool IsIk(){
+	/*public bool IsIk(){
         return aimPos != null && aimPos.IsIk();
 	
-	}
+	}*/
     /// <summary>
     /// Turn on and of IK of aiming
     /// </summary>
@@ -260,9 +260,9 @@ public class AnimationManager : MonoBehaviour
 		animator.SetBool("LongPull", longPull);
 	}
 	//Check if weapon look forward or in air because of near wall
-	public  bool isWeaponAimable(){
+	/*public  bool isWeaponAimable(){
 		return !animator.GetBool("wall_stop");
-	}
+	}*/
 	//COntol aim behavieor of object
 	public virtual void SetLookAtPosition(Vector3 position){
 		if (aimPos != null) {

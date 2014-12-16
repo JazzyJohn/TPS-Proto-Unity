@@ -3,6 +3,7 @@ using System.Collections;
 using nstuff.juggerfall.extension.models;
 using Sfs2X.Entities.Data;
 using System;
+using System.Collections.Generic;
 
 public class GameRule : MonoBehaviour {
 	static public bool IsLvlChanging=false;
@@ -13,7 +14,7 @@ public class GameRule : MonoBehaviour {
 
     protected float restartTimer = 0.0f;
 
-    protected int maxScore;
+    public int maxScore;
 
     public float gameTime;
 
@@ -52,9 +53,33 @@ public class GameRule : MonoBehaviour {
         {
             restartTimer += Time.deltaTime;
         }
-
+        #if UNITY_EDITOR
+                if (Input.GetKeyDown(KeyCode.L))
+                {
+                    GameEnded();
+                }
+        #endif
   
 	}
+
+    public virtual void GameEnded()
+    {
+        //PhotonNetwork.automaticallySyncScene = true;
+
+        isGameEnded = true;
+        //Player player = GameObject.Find ("Player").GetComponent<Player> ();
+        //player.GameEnd ();
+        EventHolder.instance.FireEvent(typeof(GameListener), "EventTeamWin", Winner());
+        GlobalPlayer.instance.MathcEnd();
+        Player.localPlayer.GameEnd();
+        ItemManager.instance.RemoveOldAndExpired();
+        List<Pawn> pawns = PlayerManager.instance.FindAllPawn();
+        foreach (Pawn pawn in pawns)
+        {
+            pawn.gameEnded();
+        }
+
+    }
 
     // s_Instance is used to cache the instance found in the scene so we don't have to look it up every time.
     private static GameRule s_Instance = null;

@@ -58,6 +58,7 @@ public class ShowOnGuiComponent : MonoBehaviour {
 		return basicShow&&addvanceShow;
 	}
 	public void SetTitle(string text){
+        
 		title = baseTitle +" " +text;
 	}
     public void SetFullTitle(string text)

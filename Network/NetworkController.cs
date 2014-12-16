@@ -870,7 +870,7 @@ public class NetworkController : MonoBehaviour {
                 if (intEffect != null)
                 {
                    	bonusSfs.PutUtfString("type","int");
-					bonusSfs.PutInt("value",floatEffect.value);
+                    bonusSfs.PutInt("value", intEffect.value);
 					sendBonuses.AddSFSObject(bonusSfs);
                     continue;
                 }
@@ -878,13 +878,13 @@ public class NetworkController : MonoBehaviour {
                 if (boolEffect != null)
                 {
                    	bonusSfs.PutUtfString("type","bool");
-					bonusSfs.PutBool("value",floatEffect.value);
+                    bonusSfs.PutBool("value", boolEffect.value);
 					sendBonuses.AddSFSObject(bonusSfs);
                     continue;
                 }
 				 
 			}
-			data.PutSFSArray(bonus,sendBonuses);
+			data.PutSFSArray("bonus",sendBonuses);
 		}
 		
         data.PutBool("Scene", true);
@@ -901,7 +901,7 @@ public class NetworkController : MonoBehaviour {
         ExtensionRequest request = new ExtensionRequest("pawnSpawn", data, serverHolder.gameRoom);
         smartFox.Send(request);
 		if(bonusData!=null){
-			pawn.AddExternalCharacteristic(bonusData);
+            go.GetComponent<Pawn>().AddExternalCharacteristic(bonusData);
 		}
         return go;
 
@@ -1467,10 +1467,11 @@ public class NetworkController : MonoBehaviour {
 		 if(dt.ContainsKey("bonus")){
 			ISFSArray sendBonuses =dt.GetSFSArray("bonus");
 			List<CharacteristicToAdd> effects = new List<CharacteristicToAdd>();
-			foreach(ISFSObject bonus in sendedBonuses){
+            foreach (ISFSObject bonus in sendBonuses)
+            {
 				CharacteristicToAdd add = new CharacteristicToAdd();
 				add.characteristic = (CharacteristicList)bonus.GetInt("characteristic");
-				string type = bonus.PutUtfString("type");
+				string type = bonus.GetUtfString("type");
 				BaseEffect effect = null;
 				if (type == "float")
 				{

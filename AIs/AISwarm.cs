@@ -55,7 +55,10 @@ public class AISwarm:MonoBehaviour
 
     protected void Awake()
     {
-        guiComponent = GetComponent<ShowOnGuiComponent>();
+        if (guiComponent == null)
+        {
+            guiComponent = GetComponent<ShowOnGuiComponent>();
+        }
     }
     public Transform[] GetPointOfInterest(int count)
     {
@@ -188,7 +191,7 @@ public class AISwarm:MonoBehaviour
             DeActivate();
         }
     }
-	Vector3 NormalizePositon( Vector3 position){
+	protected Vector3 NormalizePositon( Vector3 position){
 		Collider[] hitColliders = Physics.OverlapSphere(position,PlayerManager.instance.radius);
 				
 		Vector3 direction  = Vector3.zero;		

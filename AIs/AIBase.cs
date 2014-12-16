@@ -50,6 +50,7 @@ public class AIBase : MonoBehaviour
 	
 	
     public void Death(){
+
         if (aiSwarm != null) {
             aiSwarm.AgentKilled(this);
         }

@@ -141,7 +141,7 @@ public class GameFinished : Statistic
        moneyTable.localPosition = new Vector3((-1 * (moneyScroll.width / 2)) + 1, (moneyScroll.height/2 ) + moneyTableWid.padding.y, 0f);
         moneyTableWid.Reposition();
         AfterGameBonuses.cashBoost = totalCash;
-        winner.text = TextGenerator.instance.GetSimpleText("Team" + GameRule.instance.Winner());
+        WinnerText();
 
         if (AfterGameBonuses.wasStamined)
         {
@@ -173,6 +173,11 @@ public class GameFinished : Statistic
         GA.API.Design.NewEvent("Game:MatchEnd:PlayerReward:Gold", totalGold);
         GA.API.Design.NewEvent("Game:MatchEnd:PlayerReward:Cash", totalCash);
    
+    }
+
+    protected virtual void WinnerText()
+    {
+        winner.text = TextGenerator.instance.GetSimpleText("Team" + GameRule.instance.Winner());
     }
     public void ResolvedExpired()
     {

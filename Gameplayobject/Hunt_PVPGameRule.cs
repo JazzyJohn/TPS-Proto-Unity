@@ -27,17 +27,7 @@ public class Hunt_PVPGameRule : PVPGameRule {
 	}
 	
 	public void NextWave(int wave){
-		switch(wave){
-			case 1:
-				PlayerMainGui.instance.Annonce(AnnonceType.WAVEFINISHONE);
-			break;
-			case 2:
-				PlayerMainGui.instance.Annonce(AnnonceType.WAVEFINISHTWO);
-			break;
-			case 3:
-				PlayerMainGui.instance.Annonce(AnnonceType.WAVEFINISHTHREE);
-			break;
-		}
+        PlayerMainGui.instance.Annonce(AnnonceType.WAVEFINISHONE);
 	
 	}
 	public void LastWaveAnonce(){

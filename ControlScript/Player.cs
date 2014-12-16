@@ -81,6 +81,7 @@ public class Player : MonoBehaviour {
 		public int Assist=0;
 		public int RobotKill=0;
         public int AIKill = 0;
+        public int WaveCnt=0;
 	}
  
 	

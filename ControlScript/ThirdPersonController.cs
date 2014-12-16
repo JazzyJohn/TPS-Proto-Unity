@@ -11,20 +11,8 @@ public class ThirdPersonController : MonoBehaviour
 // Require a character controller to be attached to the same game object
 //@script RequireComponent(CharacterController)
 
-public AnimationClip idleAnimation;
-public AnimationClip walkAnimation;
-public AnimationClip runAnimation;
-public AnimationClip jumpPoseAnimation;
-
-public float walkMaxAnimationSpeed = 0.75f;
-public float trotMaxAnimationSpeed = 1.0f;
-public float runMaxAnimationSpeed = 1.0f;
-public float jumpAnimationSpeed = 1.15f;
-public float landAnimationSpeed = 1.0f;
 
 
-
-private Animation _animation;
 
 protected Pawn pawn;
 
@@ -36,7 +24,6 @@ protected CharacterState characterState;
 // when pressing "Fire3" button (cmd) we start running
 
 
-public float inAirControlAcceleration= 3.0f;
 
 
 // The gravity for the character
@@ -96,7 +83,7 @@ void  Awake ()
 	moveDirection = transform.TransformDirection(Vector3.forward);
     
 	
-	_animation = GetComponent<Animation>();
+
 	pawn= GetComponent<Pawn>();
 	myTransform = transform;
 		canJump = pawn.canJump;

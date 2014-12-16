@@ -444,7 +444,7 @@ public class ServerHolder : MonoBehaviour
 				gameRule = new SFSRoomVariable("ruleClass", "nstuff.juggerfall.extension.gamerule.PVEHoldGameRule");
                 setting.teamCount = 2;
                 setting.maxTime =0;
-                setting.maxScore= 500;
+                setting.maxScore= 5;
             
                // Debug.Log(GlobalGameSetting.instance.GetHuntScoreTable());
 				//data.Put("huntTable",new SFSDataWrapper(5,GlobalGameSetting.instance.GetHuntScoreTable()));				

@@ -1549,12 +1549,7 @@ public class Pawn : DamagebleObject
         }
 
     }
-    [RPC]
-    public void SendCharacterState(int nextrpcState, int nextwallState)
-    {
-        wallState = (WallState)nextwallState;
-        nextState = (CharacterState)nextrpcState;
-    }
+  
     //Weapon Section
     public virtual void StartFire()
     {
