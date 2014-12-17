@@ -969,6 +969,11 @@ public class Pawn : DamagebleObject
     //EFFECCT SECTION
     void AddEffect(Vector3 position,Vector3 direction,DamageType type)
     {
+        if (player != null)
+        {
+
+            player.ShowDamageIndicator(-direction);
+        }
 		if(isFps){
 			return;
 		}
@@ -976,10 +981,7 @@ public class Pawn : DamagebleObject
         {
             effectController.DamageEffect(type,position,direction);
         }
-		if(player!=null){
-          
-            player.ShowDamageIndicator(-direction);
-		}
+		
     }
 
 
@@ -1588,7 +1590,10 @@ public class Pawn : DamagebleObject
     //Setting new weapon if not null try to attach it
     public void setWeapon(BaseWeapon newWeapon)
     {
-		ToggleAim(false);
+        if (CurWeapon != null)
+        {
+            ToggleAim(false);
+        }
         CurWeapon = newWeapon;	
         //Debug.Log (newWeapon);
         if (CurWeapon != null)
@@ -1881,17 +1886,29 @@ public class Pawn : DamagebleObject
         }
         if (CurWeapon!=null)
         {
-            CurWeapon.ToggleAim(value);
+            if (CurWeapon.ToggleAim(value) && value)
+            {
+                return;
+            }
         }
         isAiming = value;
         animator.ToggleAim(value);
         if (cameraController != null)
         {
-            cameraController.ToggleAim(value,CurWeapon.isAimingFPS);
+            if (CurWeapon != null)
+            {
+                cameraController.ToggleAim(value, CurWeapon.isAimingFPS);
+            }
+            else
+            {
+                cameraController.ToggleAim(value,false);
+            }
+            
         }
 		isFps= false;
-		if(foxView.isMine&&CurWeapon.isAimingFPS){
-			PlayerMainGui.instance. ToggleFpsAim(value)
+        if (foxView.isMine && CurWeapon != null&&CurWeapon.isAimingFPS)
+        {
+            PlayerMainGui.instance.ToggleFpsAim(value);
 			if(value){
 				isFps= true;
 				HideRenders();
@@ -3234,7 +3251,7 @@ public class Pawn : DamagebleObject
 	public void ShowRenders(){
 		Renderer[] renderers = GetComponentsInChildren<Renderer>();
         foreach (Renderer renderer in renderers) {
-            renderer.enabled = false;
+            renderer.enabled = true;
         }
 	
 	}

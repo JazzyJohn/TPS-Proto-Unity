@@ -196,6 +196,9 @@ public class BaseWeapon : DestroyableNetworkObject {
 	public const float MAXDIFFERENCEINANGLE=0.7f;
 
 	private bool shootAfterReload;
+
+    private bool aimAfterReload;
+
     private bool pumpAfterReload;
 
 	//звуки
@@ -213,8 +216,8 @@ public class BaseWeapon : DestroyableNetworkObject {
     public Vector3 muzzleCached;
 
     public Vector3 muzzleCachedforward;
-  public event EventHandler FireStarted;
-  public event EventHandler FireStoped;
+    public event EventHandler FireStarted;
+    public event EventHandler FireStoped;
 
    
 	void Awake(){
@@ -579,6 +582,15 @@ public class BaseWeapon : DestroyableNetworkObject {
         alredyGunedAmmo = 0;
 		if(owner.GetComponent<InventoryManager>().HasAmmo(ammoType)){
 			isReload= true;
+            if (isAimingFPS)
+            {
+                aimAfterReload = owner.isAiming;
+                if (aimAfterReload)
+                {
+                    owner.ToggleAim(false);
+                }
+
+            }
 			reloadTimer=reloadTime;
 			if(isShooting){
 				StopFire();
@@ -765,7 +777,7 @@ public class BaseWeapon : DestroyableNetworkObject {
     {
 
 		
-        if (FireStarted != null&&(!foxView.isMine||!isAimingFPS||!owner.isAiming)
+        if (FireStarted != null&&(!foxView.isMine||!isAimingFPS||!owner.isAiming))
         {
             FireStarted(this, EventArgs.Empty);
             //Debug.Log("fire" + FireStarted);
@@ -1131,10 +1143,13 @@ public class BaseWeapon : DestroyableNetworkObject {
 
     }
 	
-	public void ToggleAim(bool value){
+	public bool ToggleAim(bool value){
+        aimAfterReload = value;
+        
 		if(shouldDrawTrajectory&&foxView.isMine){
 			drawer.gameObject.SetActive(value);
 		}
+        return isReload;
 	}
 
 

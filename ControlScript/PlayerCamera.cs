@@ -44,7 +44,7 @@ public class PlayerCamera : MonoBehaviour {
 	void Update () {
 	
 	}
-    public virtual void ToggleAim(bool value)
+    public virtual void ToggleAim(bool value,bool fps)
     {
         
 

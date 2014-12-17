@@ -115,22 +115,22 @@ public class ThirdPersonCamera : PlayerCamera
         if (aiming)
         {
 			if(isFps){
-				targetOffset= Vector3.Zero;
+				targetOffset= Vector3.zero;
 				lXOffset =0;
 			}else{
-				lxOffset = xOffset;
+                lXOffset = xOffset;
 				targetOffset = aimingOffset;
 			}
             Camera.main.fieldOfView = aimFov;
         }
         else
         {
-			lxOffset = xOffset;
+            lXOffset = xOffset;
             targetOffset = normalOffset;
             Camera.main.fieldOfView = startFov;
         }
-		
-        Vector3 targetHead = _target.position + _pawn.headOffset +_pawn.GetDesireRotation()*Vector3.right*lxOffset;
+
+        Vector3 targetHead = _target.position + _pawn.headOffset + _pawn.GetDesireRotation() * Vector3.right * lXOffset;
         Vector3 lOffset = _pawn.GetDesireRotation()* targetOffset;
 
         Debug.DrawLine(targetHead, targetHead + lOffset, Color.red);

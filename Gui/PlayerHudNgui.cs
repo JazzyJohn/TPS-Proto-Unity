@@ -131,11 +131,9 @@ public class PlayerHudNgui : MonoBehaviour {
 	
 	public Transform goldPrefab;
 
-	public Transform damageRoot;
-	
-	public UITweener damageTweener;
 
-    public Transform camTramsf;
+
+   
 	
 	public UITweener hitTweener;
 
@@ -145,7 +143,7 @@ public class PlayerHudNgui : MonoBehaviour {
 
     public UITable stimTable;
 
-   
+    public GAMEMODE mode;
     public enum HudState
     {
         Waiting = 0,
@@ -163,7 +161,7 @@ public class PlayerHudNgui : MonoBehaviour {
         StartCoroutine(LateFrameResize());
     }
 	public void Start(){
-        camTramsf =Camera.main.transform;
+      
 		annoncePlayer.loop = false;
 	}
     void Update()
@@ -208,24 +206,25 @@ public class PlayerHudNgui : MonoBehaviour {
             if (Death) Death.text = LocalPlayer.Score.Death.ToString();
             if (Assists) Assists.text = LocalPlayer.Score.Assist.ToString();
 
-          
+            switch (mode)
+            {
+                case GAMEMODE.PVE_HOLD:
+                    if (RedTeamScore) RedTeamScore.text = (gamestats.maxScore- gamestats.score[0]).ToString() ;
+                     if (BlueTeamScore) BlueTeamScore.text = gamestats.score[1].ToString();
+                    break;
+
+                default:
                      if (RedTeamScore) RedTeamScore.text = gamestats.score[0].ToString();
                      if (BlueTeamScore) BlueTeamScore.text = gamestats.score[1].ToString();
-          
+                    break;
+            }
+           
+
             crosshair.UpdateCrosshair(Stats);
         }
-        if (damageTweener != null && damageTweener.enabled)
-        {
-            RotateDamage();
-           
-        }
+       
     }
 	
-	public void ToggleFpsAim(bool value)
-    {
-		crosshair.ToggleFpsAim(value);
-	}
-
     public void SetLocalPlayer(Player player)
     {
         LocalPlayer = player;
@@ -317,22 +316,12 @@ public class PlayerHudNgui : MonoBehaviour {
         tweener.PlayForward();
         lvlView.Reposition();
 	}
-    Vector3 hitPosition;
+ 
     public void ShowDamageIndicator(Vector3 direction)
     {
-        hitPosition = direction;
-        RotateDamage();
-       
-		damageTweener.tweenFactor = 0.0f;
-        damageTweener.PlayForward();
-		
+        crosshair.ShowDamageIndicator(direction);
 	}
-    void RotateDamage(){
-         float z_angle = Quaternion.FromToRotation(camTramsf.forward, -hitPosition).eulerAngles.y;
-
-
-            damageRoot.localRotation = Quaternion.Euler(0, 0,180- z_angle);
-    }
+   
 	
 	public void ShowHit(){
 		hitTweener.tweenFactor = 0.0f;
@@ -344,6 +333,10 @@ public class PlayerHudNgui : MonoBehaviour {
 		
 	
 	}
+    public void ToggleFpsAim(bool value)
+    {
+        crosshair.ToggleFpsAim(value);
+    }
 
     public void ActivateStim(Texture2D stimTexture)
     {

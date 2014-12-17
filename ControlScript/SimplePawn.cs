@@ -71,7 +71,7 @@ public class SimplePawn : Pawn {
                     if (_rb.isKinematic) _rb.isKinematic = false;
 
                     //Debug.Log (this+ " " +velocityChange);
-                    rigidbody.AddForce(velocityChange, ForceMode.VelocityChange);
+                    //rigidbody.AddForce(velocityChange, ForceMode.VelocityChange);
 
                     if (nextState == CharacterState.Sprinting)
                     {
@@ -125,7 +125,7 @@ public class SimplePawn : Pawn {
                     }
                     if (isGrounded)
                     {
-                        rigidbody.AddForce(velocityChange, ForceMode.VelocityChange);
+                        //rigidbody.AddForce(velocityChange, ForceMode.VelocityChange);
 
                     }
                     else

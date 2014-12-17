@@ -80,24 +80,45 @@ public class CrosshairBehaviour : MonoBehaviour {
 	
 	public UIWidget  aimCrosshair;
 
+    public UIWidget allymark;
+
+    public Transform damageRoot;
+
+    public UITweener damageTweener;
+
+    public UITweener damageFPSTweener;
+
+    private Transform camTramsf;
 
 	public float maxCoef;
-   
-   public void Awake()
-    {
 
+    public bool isFps = false;
+   
+   public void Update()
+    {
+        if (damageTweener != null && damageTweener.enabled)
+        {
+            RotateDamage();
+
+        }
     }
+
+   public void Start()
+   {
+       camTramsf = Camera.main.transform;
+   }
 	public void CrosshairType(CrosshairColor color){
         foreach (UIWidget widget in crosshairParts)
         {
             widget.color = crosshairColor[(int)color];
         }
-		
+        allymark.color = crosshairColor[(int)color]; 
 
       
 	} 
 	public void ToggleFpsAim(bool value)
     {
+        isFps = value;
 		if(value){
 			crosshairMain.alpha= 0.0f;
 			aimCrosshair.alpha = 1.0f;
@@ -106,6 +127,33 @@ public class CrosshairBehaviour : MonoBehaviour {
 			aimCrosshair.alpha = 0.0f;
 		}
 	}
+
+    Vector3 hitPosition;
+    public void ShowDamageIndicator(Vector3 direction)
+    {
+        if (!isFps)
+        {
+            hitPosition = direction;
+            RotateDamage();
+
+            damageTweener.tweenFactor = 0.0f;
+            damageTweener.PlayForward();
+        }
+        else
+        {
+            damageFPSTweener.tweenFactor = 0.0f;
+            damageFPSTweener.PlayForward();
+        }
+
+    }
+
+    void RotateDamage()
+    {
+        float z_angle = Quaternion.FromToRotation(camTramsf.forward, -hitPosition).eulerAngles.y;
+
+
+        damageRoot.localRotation = Quaternion.Euler(0, 0, 180 - z_angle);
+    }
 	public void UpdateCrosshair(   PlayerMainGui.PlayerStats gamestats){
 		BaseWeapon weapon = gamestats.gun;
         if (weapon == null)

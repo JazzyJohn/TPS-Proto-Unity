@@ -51,7 +51,7 @@ public class HoldPosition_PVEGameRule : GameRule {
     {
         PlayerMainGui.GameStats  stats = new PlayerMainGui.GameStats();
 			stats.gameTime = gameTime-timer;
-            stats.score = new int[] {gamestats.maxScore - teamScore[0], Player.localPlayer.Score.WaveCnt };
+            stats.score = new int[] {maxScore - teamScore[0], Player.localPlayer.Score.WaveCnt };
 			stats.maxScore =maxScore;
 			return stats;	
 		
