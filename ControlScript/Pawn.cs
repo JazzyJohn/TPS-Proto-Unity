@@ -113,6 +113,7 @@ public class Pawn : DamagebleObject
     protected Vector3 forwardRotation;
 
     public AnimationManager animator;
+	public CharacterControllerM1A1 characterControllerM1A1;
 
     private CharacterState _characterState;
 
@@ -387,7 +388,8 @@ public class Pawn : DamagebleObject
         capsule = GetComponent<CapsuleCollider>();
         myCollider = collider;
         foxView = GetComponent<FoxView>();
-        animator = transform.GetComponentInChildren<AnimationManager>();
+		animator = transform.GetComponentInChildren<AnimationManager>();
+		characterControllerM1A1 = transform.GetComponentInChildren<CharacterControllerM1A1>();
         PlayerManager.instance.addPawn(this);
         aSource = GetComponent<AudioSource>();
         if (!isSpawned)
@@ -936,6 +938,9 @@ public class Pawn : DamagebleObject
             {
                 animator.StartDeath(AnimDirection.Front);
             }
+			if (characterControllerM1A1 != null) {
+				characterControllerM1A1.GetComponent<Animator>().SetTrigger ("Front_death");
+			}
         }
         else
         {
@@ -944,11 +949,17 @@ public class Pawn : DamagebleObject
 
             if (angle <= 0.0f)
             {
-                animator.StartDeath(AnimDirection.Front);
+				animator.StartDeath(AnimDirection.Front);
+				if (characterControllerM1A1 != null) {
+					characterControllerM1A1.GetComponent<Animator>().SetTrigger ("Front_death");
+				}
             }
             else
             {
-                animator.StartDeath(AnimDirection.Back);
+				animator.StartDeath(AnimDirection.Back);
+				if (characterControllerM1A1 != null) {
+					characterControllerM1A1.GetComponent<Animator>().SetTrigger ("Back_death");
+				}
             }
         }
         if (cameraController != null)
@@ -1241,11 +1252,17 @@ public class Pawn : DamagebleObject
                             // If last hit direction equals negative forward it's hit in face
                             if (angle <= 0)
                             {
-                                animator.StartDeath(AnimDirection.Front);
+								animator.StartDeath(AnimDirection.Front);
+								if (characterControllerM1A1 != null) {
+									characterControllerM1A1.GetComponent<Animator>().SetTrigger ("Front_death");
+								}
                             }
                             else
                             {
-                                animator.StartDeath(AnimDirection.Back);
+								animator.StartDeath(AnimDirection.Back);
+								if (characterControllerM1A1 != null) {
+									characterControllerM1A1.GetComponent<Animator>().SetTrigger ("Back_death");
+								}
                             }
 
                         }
@@ -2186,6 +2203,10 @@ public class Pawn : DamagebleObject
 
 
     //Movement section
+	public Vector3 GetNextMovement () {
+		return nextMovement;
+	}
+
     public CharacterState GetState()
     {
         return characterState;
@@ -2224,14 +2245,14 @@ public class Pawn : DamagebleObject
         }
         return 0.0f;
     }
-    protected float CalculateRepStarfe()
+    public float CalculateRepStarfe()
     {
         Vector3 velocity = replicatedVelocity;
         return Vector3.Dot(myTransform.right, velocity.normalized);
 
 
     }
-    protected float CalculateRepSpeed()
+    public float CalculateRepSpeed()
     {
         Vector3 velocity = correctPlayerPos - myTransform.position;
         velocity = velocity / (Time.deltaTime * SYNC_MULTUPLIER);
@@ -2640,7 +2661,7 @@ public class Pawn : DamagebleObject
                     if (_rb.isKinematic) _rb.isKinematic = false;
 
                     //Debug.Log (this+ " " +velocityChange);
-                    rigidbody.AddForce(velocityChange, ForceMode.VelocityChange);
+                    //rigidbody.AddForce(velocityChange, ForceMode.VelocityChange);
 
                     if (nextState == CharacterState.Sprinting)
                     {
@@ -2694,7 +2715,7 @@ public class Pawn : DamagebleObject
                     }
                     if (isGrounded)
                     {
-                        rigidbody.AddForce(velocityChange, ForceMode.VelocityChange);
+                        //rigidbody.AddForce(velocityChange, ForceMode.VelocityChange);
 
                         if (nextState == CharacterState.DoubleJump)
                         {
@@ -2752,7 +2773,7 @@ public class Pawn : DamagebleObject
                 velocityChange = nextMovement.normalized * flyForwardSpeed + Vector3.up * flySpeed - velocity;
                 animator.ApllyJump(true);
                 animator.WallAnimation(false, false, false);
-                rigidbody.AddForce(velocityChange, ForceMode.VelocityChange);
+                //rigidbody.AddForce(velocityChange, ForceMode.VelocityChange);
                 if (!jetPackEnable)
                 {
                     if (isGrounded)
@@ -3041,7 +3062,7 @@ public class Pawn : DamagebleObject
             Vector3 velocityChange = (nextMovement - velocity);
             StartJetPack();
             animator.DoubleJump();
-            rigidbody.AddForce(velocityChange, ForceMode.VelocityChange);
+            //rigidbody.AddForce(velocityChange, ForceMode.VelocityChange);
             if (player != null)
             {
                 EventHolder.instance.FireEvent(typeof(LocalPlayerListener), "EventPawnDoubleJump", player);

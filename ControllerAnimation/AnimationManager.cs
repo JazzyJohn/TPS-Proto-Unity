@@ -25,9 +25,9 @@ public class AnimationManager : MonoBehaviour
         animator = GetComponent<Animator>();
 		if (aimPos == null) {
 			aimPos = gameObject.GetComponentInChildren<IKcontroller> ();
-           
+            aimPos.AddAction(FinisedIKUpdate);
 		}
-        gameObject.GetComponentInChildren<AimIK>().solver.action = FinisedIKUpdate;
+     
         pawn =transform.root.GetComponent<Pawn>();
         if (animator == null)
             Debug.LogError("Animator not find!", this);
@@ -295,6 +295,7 @@ public class AnimationManager : MonoBehaviour
         isDead = true;
       // Debug.Log(direction);
         IKOff();
+        aimPos.IKShutDown();
 		switch(direction){
 			case AnimDirection.Front:
                 animator.SetTrigger("Front_death");

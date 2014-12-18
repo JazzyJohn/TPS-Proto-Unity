@@ -43,7 +43,10 @@ public class IKcontroller : MonoBehaviour {
 		}
 		
 	}
-
+    public void AddAction(UpdateFinished finished)
+    {
+        GetComponentInChildren<AimIK>().solver.action = finished;
+    }
 
     public void IKShutDown()
     {

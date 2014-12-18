@@ -366,10 +366,11 @@ public class ServerHolder : MonoBehaviour
         {
             return;
         }
-        map = allMaps[UnityEngine.Random.Range(0,allMaps.Length)].name;
+        MapData data = allMaps[UnityEngine.Random.Range(0, allMaps.Length)];
+        map = data.name;
         blockQuickStart = true;
-        newRoomName = map +UnityEngine.Random.Range(1000,10000).ToString();
-        CreateNewRoom(allMaps[UnityEngine.Random.Range(0,allMaps.Length)].gameMode);
+        newRoomName = map +data.ToString();
+        CreateNewRoom(data.gameMode);
        
     }
 
