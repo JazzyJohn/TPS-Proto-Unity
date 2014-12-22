@@ -1,6 +1,3 @@
-// Converted from UnityScript to C# at http://www.M2H.nl/files/js_to_c.php - by Mike Hergaarden
-// Do test the code! You usually need to change a few small bits.
-
 using UnityEngine;
 using System.Collections;
 
@@ -61,11 +58,11 @@ protected bool isMoving= false;
 // When did the user start walking (Used for going into trot after a while)
 protected float walkTimeStart= 0.0f;
 // Last time the jump button was clicked down
-private float lastJumpButtonTime= -10.0f;
+protected float lastJumpButtonTime = -10.0f;
 // Last time we performed a jump
 private float lastJumpTime= -1.0f;
 //Last time DoubleJumping
-private float lastDoubleTime = -1.0f;
+protected float lastDoubleTime = -1.0f;
 
 // the height we jumped from (Used to determine for how long to apply extra jump power after jumping.)
 private float lastJumpStartHeight= 0.0f;
@@ -76,7 +73,7 @@ private Vector3 inAirVelocity= Vector3.zero;
 private float lastGroundedTime= 0.0f;
 
 
-private bool isControllable= true;
+protected bool isControllable= true;
 
 void  Awake ()
 {
@@ -365,7 +362,7 @@ public float CalculateJumpVerticalSpeed ( float targetJumpHeight  )
     /// <summary>
     /// IS palyer Want DoubleJump
     /// </summary>
-void ApplyDoubleJumping() {
+protected virtual void ApplyDoubleJumping() {
    
         if(!pawn.isGrounded)
         {

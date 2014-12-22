@@ -9,7 +9,7 @@ public class SimplePawn : Pawn {
 
     protected bool stopSprint;
 
-    public void FixedUpdate()
+    public override void FixedUpdate()
     {
 
         if (!isActive)
@@ -125,7 +125,7 @@ public class SimplePawn : Pawn {
                     }
                     if (isGrounded)
                     {
-                        //rigidbody.AddForce(velocityChange, ForceMode.VelocityChange);
+                        //rigidbody.AddForce(velocityChange, ForceMode.VelocityChange)
 
                     }
                     else

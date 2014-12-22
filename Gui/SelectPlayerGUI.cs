@@ -387,6 +387,7 @@ public class SelectPlayerGUI : MonoBehaviour {
         {
             AutoSelectTeam();
         }
+        Debug.Log(Choice._Player + " " + Choice._Team);
         if (Choice._Player != -1 && Choice._Team != -1 )
         {
 
@@ -429,6 +430,11 @@ public class SelectPlayerGUI : MonoBehaviour {
 			models = playerManager.bundle.LoadAll(typeof(ModelForGui));
 		}else{
 			MapLoader loader = FindObjectOfType<MapLoader>();
+            if (loader == null)
+            {
+
+                return;
+            }
 			models = loader.pawnBundle.LoadAll(typeof(ModelForGui));
 		}
 			if (playerPreView != null)

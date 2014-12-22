@@ -31,7 +31,7 @@ public enum AnnonceAddType
 }
 public class PlayerHudNgui : MonoBehaviour {
 
-    private Player LocalPlayer;
+    protected Player LocalPlayer;
     public PlayerMainGui.PlayerStats Stats= null;
 
     public DeadGUI _DeadGUI;
@@ -164,7 +164,7 @@ public class PlayerHudNgui : MonoBehaviour {
       
 		annoncePlayer.loop = false;
 	}
-    void Update()
+    protected void Update()
     {
         PlayerMainGui.GameStats gamestats = GameRule.instance.GetStats();
       

@@ -199,6 +199,10 @@ public class Player : MonoBehaviour {
             playerView.SetNameUID(UID, PlayerName);
             EventHolder.instance.FireEvent(typeof(LocalPlayerListener), "EventAppear", this);
             //StatisticHandler.StartStats(UID,PlayerName);
+            if (isMine)
+            {
+                FindObjectOfType<ServerHolder>().AfterPlayerCreate();
+            }
         }
         else
         {
@@ -403,7 +407,13 @@ public class Player : MonoBehaviour {
 					//Debug.Log (currentPawn.curLookTarget);
 
 				}
-             if (InputManager.instance.GetButton("Fire2"))
+            ButtonControll();
+		}
+	
+	}
+
+    public virtual void  ButtonControll(){
+            if (InputManager.instance.GetButton("Fire2"))
              {
 				currentPawn.ToggleAim(true);
 				if(robotPawn!=null){
@@ -456,9 +466,7 @@ public class Player : MonoBehaviour {
                      StatisticHandler.SendPlayerKillbyNPC(UID, PlayerName);
                  }
 			}
-		}
-	
-	}
+    }
     public void DeathUpdate()
     {
 

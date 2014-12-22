@@ -66,7 +66,7 @@ public class Pawn : DamagebleObject
     public const float ASSIT_FORGET_TIME = 5.0f;
 
     private LayerMask groundLayers = 1;
-    private LayerMask wallRunLayers = 1;
+    protected LayerMask wallRunLayers = 1;
     private LayerMask climbLayers = 1 << 9; // Layer 9
     public LayerMask seenlist = 1;
     public bool isActive = false;
@@ -135,7 +135,7 @@ public class Pawn : DamagebleObject
 
     }
 
-    private WallState wallState;
+    protected WallState wallState;
 
     protected CharacterState nextState;
 
@@ -288,7 +288,7 @@ public class Pawn : DamagebleObject
     }
     protected float lastTimeOnWall;
 
-    private float lastJumpTime;
+    protected float lastJumpTime;
 
     private Vector3 floorNormal;
 
@@ -924,6 +924,14 @@ public class Pawn : DamagebleObject
         if (!foxView.isMine && player!=null)
         {
             player.Score.Death++;
+           
+        }
+        if (foxView.isMine)
+        {
+            if (cameraController != null)
+            {
+                PlayerMainGui.instance.ToggleFpsAim(false);
+            }
         }
 
         isDead = true;
@@ -1630,7 +1638,7 @@ public class Pawn : DamagebleObject
     }
     public void SetCurWeaponFov()
     {
-        if (cameraController != null)
+        if (cameraController != null && CurWeapon!=null)
         {
 //            Debug.Log(CurWeapon.aimFOV);
             cameraController.SetAimFOV(CurWeapon.aimFOV);
@@ -2469,7 +2477,7 @@ public class Pawn : DamagebleObject
 
     }
     // Wall run cool-down
-    void WallRunCoolDown()
+    protected void WallRunCoolDown()
     {
         _canWallRun = true;
         if (player != null)
@@ -2480,7 +2488,7 @@ public class Pawn : DamagebleObject
 
     }
     // Wall run cool-down
-    IEnumerator WallJump(float sec)
+    protected  IEnumerator WallJump(float sec)
     {
         Jump();
         SendMessage("WallJumpMessage", SendMessageOptions.DontRequireReceiver);
@@ -2491,7 +2499,7 @@ public class Pawn : DamagebleObject
         yield return new WaitForSeconds(sec);
         _canWallRun = true;
     }
-    public Vector3 WallJumpDirection(Vector3 wallNormal)
+    protected Vector3 WallJumpDirection(Vector3 wallNormal)
     {
         Vector3 direction = aimRotation - myTransform.position;
         if (Vector3.Dot(wallNormal, direction) < 0)
@@ -2599,7 +2607,7 @@ public class Pawn : DamagebleObject
         return Mathf.Sqrt(2 * targetJumpHeight * gravity);
     }
 
-    public void FixedUpdate()
+    public virtual void FixedUpdate()
     {
 
         if (!isActive)
@@ -2898,7 +2906,7 @@ public class Pawn : DamagebleObject
 
     }
 
-    public void JumpEnd(CharacterState nextState)
+    public virtual void JumpEnd(CharacterState nextState)
     {
         if (nextState == CharacterState.Jumping)
         {
@@ -2915,7 +2923,7 @@ public class Pawn : DamagebleObject
 
         return isGrounded;
     }
-    public void Jump()
+    protected virtual void Jump()
     {
         if (animator != null)
         {
@@ -3010,7 +3018,7 @@ public class Pawn : DamagebleObject
 
     }
 
-    void PullUp()
+    protected void PullUp()
     {
 
         if (!PullUpCheck())
@@ -3050,19 +3058,18 @@ public class Pawn : DamagebleObject
 
 
     }
-    void StopDoubleJump()
+    protected void StopDoubleJump()
     {
         jetPackEnable = false;
     }
-    void DoubleJump()
+    protected void DoubleJump()
     {
         if (jetPackCharge >= 1.0f)
         {
-            Vector3 velocity = _rb.velocity;
-            Vector3 velocityChange = (nextMovement - velocity);
+          
             StartJetPack();
             animator.DoubleJump();
-            //rigidbody.AddForce(velocityChange, ForceMode.VelocityChange);
+           
             if (player != null)
             {
                 EventHolder.instance.FireEvent(typeof(LocalPlayerListener), "EventPawnDoubleJump", player);

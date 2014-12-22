@@ -647,11 +647,12 @@ public class ServerHolder : MonoBehaviour
             MapDownloader downloadata = FindObjectOfType<MapDownloader>();
             menu = Instantiate(downloadata.playerHud, Vector3.zero, Quaternion.identity) as GameObject;
         }
-      
-		Camera.main.GetComponent<PlayerMainGui> ().enabled = true;
-		//menu.transform.parent = Camera.main.transform;
+
+        Camera.main.GetComponent<PlayerMainGui>().enabled = true;
+        //menu.transform.parent = Camera.main.transform;
         menu.transform.localPosition = Vector3.zero;
         menu.transform.localRotation = Quaternion.identity;
+    
         Debug.Log("Compileted Load Map");
         
         if (next)
@@ -687,7 +688,7 @@ public class ServerHolder : MonoBehaviour
             menu.transform.localPosition = Vector3.zero;
             menu.transform.localRotation = Quaternion.identity;
             Camera.main.GetComponent<PlayerMainGui>().enabled = true;
-
+        
             NetworkController.Instance.pause = false;
 		}
 		connectingToRoom = false;
@@ -697,6 +698,11 @@ public class ServerHolder : MonoBehaviour
         TimeManager.Instance.Init();
 	}
 
+
+    public virtual void AfterPlayerCreate()
+    {
+     
+    }
 	
 
 
