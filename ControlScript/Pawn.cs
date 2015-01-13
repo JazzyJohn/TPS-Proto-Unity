@@ -27,7 +27,8 @@ public enum WallState
 {
     WallL,
     WallR,
-    WallF
+    WallF,
+    WallNone
 }
 
 public class singleDPS
@@ -113,7 +114,6 @@ public class Pawn : DamagebleObject
     protected Vector3 forwardRotation;
 
     public AnimationManager animator;
-	public CharacterControllerM1A1 characterControllerM1A1;
 
     private CharacterState _characterState;
 
@@ -253,6 +253,7 @@ public class Pawn : DamagebleObject
             if (_isGrounded != value && value)
             {
                 SendMessage("DidLand", SendMessageOptions.DontRequireReceiver);
+                Land();
 
             }
 
@@ -389,7 +390,6 @@ public class Pawn : DamagebleObject
         myCollider = collider;
         foxView = GetComponent<FoxView>();
 		animator = transform.GetComponentInChildren<AnimationManager>();
-		characterControllerM1A1 = transform.GetComponentInChildren<CharacterControllerM1A1>();
         PlayerManager.instance.addPawn(this);
         aSource = GetComponent<AudioSource>();
         if (!isSpawned)
@@ -939,6 +939,7 @@ public class Pawn : DamagebleObject
         characterState = CharacterState.Dead;
         DamagerEntry last = RetrunLastDamager();
         StopKick();
+        DeadPhysics();
         //Debug.Log(last);
         if (last == null)
         {
@@ -946,9 +947,6 @@ public class Pawn : DamagebleObject
             {
                 animator.StartDeath(AnimDirection.Front);
             }
-			if (characterControllerM1A1 != null) {
-				characterControllerM1A1.GetComponent<Animator>().SetTrigger ("Front_death");
-			}
         }
         else
         {
@@ -958,16 +956,10 @@ public class Pawn : DamagebleObject
             if (angle <= 0.0f)
             {
 				animator.StartDeath(AnimDirection.Front);
-				if (characterControllerM1A1 != null) {
-					characterControllerM1A1.GetComponent<Animator>().SetTrigger ("Front_death");
-				}
             }
             else
             {
 				animator.StartDeath(AnimDirection.Back);
-				if (characterControllerM1A1 != null) {
-					characterControllerM1A1.GetComponent<Animator>().SetTrigger ("Back_death");
-				}
             }
         }
         if (cameraController != null)
@@ -1256,21 +1248,17 @@ public class Pawn : DamagebleObject
                        
                         if (characterState != CharacterState.Dead)
                         {
+                           
+                            DeadPhysics();
                             float angle = Vector3.Dot(lastHitDirection, myTransform.forward);
                             // If last hit direction equals negative forward it's hit in face
                             if (angle <= 0)
                             {
 								animator.StartDeath(AnimDirection.Front);
-								if (characterControllerM1A1 != null) {
-									characterControllerM1A1.GetComponent<Animator>().SetTrigger ("Front_death");
-								}
                             }
                             else
                             {
 								animator.StartDeath(AnimDirection.Back);
-								if (characterControllerM1A1 != null) {
-									characterControllerM1A1.GetComponent<Animator>().SetTrigger ("Back_death");
-								}
                             }
 
                         }
@@ -1296,6 +1284,16 @@ public class Pawn : DamagebleObject
          
         }
 
+    }
+
+    protected void DeadPhysics()
+    {
+        capsule.enabled = false;
+        _rb.isKinematic = true;
+        foreach (BodyHurt part in GetComponentsInChildren<BodyHurt>())
+        {
+            part.gameObject.layer = 0;
+        }
     }
     protected void LateUpdate()
     {
@@ -1419,7 +1417,7 @@ public class Pawn : DamagebleObject
                 }
                 else
                 {
-                    if (isLookingAt && characterState == CharacterState.Idle || characterState == CharacterState.DoubleJump)
+                    if (isLookingAt && ShouldRotateTorso())
                     {
 
                         if ((Math.Abs(eurler.y - myTransform.rotation.eulerAngles.y) > maxStandRotate))
@@ -1471,7 +1469,10 @@ public class Pawn : DamagebleObject
 
 
     }
-
+    protected virtual bool ShouldRotateTorso()
+    {
+        return characterState == CharacterState.Idle || characterState == CharacterState.DoubleJump;
+    }
     public virtual bool shouldRotate()
     {
         return true;
@@ -1583,6 +1584,11 @@ public class Pawn : DamagebleObject
     }
   
     //Weapon Section
+    public void ChangeWeapon()
+    {
+        ivnMan.ChangeWeapon();
+    }
+
     public virtual void StartFire()
     {
         if (CurWeapon != null)
@@ -1627,7 +1633,7 @@ public class Pawn : DamagebleObject
             if (animator != null)
             {
                 animator.SetWeaponType(CurWeapon.animType);
-            }
+			}
             weaponOffset = CurWeapon.MuzzleOffset();
            
             SetCurWeaponFov();
@@ -1644,6 +1650,8 @@ public class Pawn : DamagebleObject
             cameraController.SetAimFOV(CurWeapon.aimFOV);
         }
     }
+
+
     public void ChangeWeapon(int weaponIndex)
     {
         ivnMan.ChangeWeapon(weaponIndex);
@@ -1696,12 +1704,12 @@ public class Pawn : DamagebleObject
 
         return aimRotation;
     }
-    public Vector3 getAimpointForCamera()
+    public virtual Vector3 getAimpointForCamera()
     {
 
         return myTransform.position + headOffset + desiredRotation * Vector3.forward * aimRange;
     }
-    Quaternion desiredRotation;
+    protected Quaternion desiredRotation;
     float xAngle = 0;
     float yAngle = 0;
     public static float fromOldRotationMod =5.0f;
@@ -1724,7 +1732,7 @@ public class Pawn : DamagebleObject
 
     }
 
-    public Quaternion GetDesireRotation()
+    public virtual Quaternion GetDesireRotation()
     {
         return desiredRotation;
     }
@@ -2683,6 +2691,8 @@ public class Pawn : DamagebleObject
                     }
                     if (nextState == CharacterState.Jumping)
                     {
+                        rigidbody.AddForce(velocityChange, ForceMode.VelocityChange);
+
                         Jump();
 
                     }
@@ -2944,7 +2954,10 @@ public class Pawn : DamagebleObject
     {
         return charMan.GetFloatChar(CharacteristicList.JETPACKCHARGE);
     }
+    public virtual void Land()
+    {
 
+    }
     public void DidLand()
     {
 

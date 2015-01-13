@@ -85,6 +85,7 @@ public class SimplePawn : Pawn {
                     }
                     if (nextState == CharacterState.Jumping)
                     {
+                        rigidbody.AddForce(velocityChange, ForceMode.VelocityChange);
                         Jump();
 
                     }

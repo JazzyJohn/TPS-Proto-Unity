@@ -128,6 +128,8 @@ public class Player : MonoBehaviour {
     private bool robotAnnonce =false;
     
     public int killInRow = 0;
+
+    public int aiKillInRow = 0;
 	
 	private CharacteristicPlayerManager charMan;
 
@@ -513,7 +515,7 @@ public class Player : MonoBehaviour {
         if (killerPawn != null) {
             pawnViewId = killerPawn.foxView.viewID;                
         }
-       
+        GA.API.Design.NewEvent("Game:Player:AiKillInRow:", aiKillInRow);
         DeathUpdate();
         if (Killer != null)
         {
@@ -611,6 +613,7 @@ public class Player : MonoBehaviour {
             }
 
 		} else {
+            aiKillInRow++;
             Score.AIKill++;
             //TODO: move text to config
             PlayerMainGui.instance.Annonce(AnnonceType.AIKILL,addtype, deadPawn.publicName);
@@ -645,11 +648,11 @@ public class Player : MonoBehaviour {
 		if(achv.isMultiplie){
 			PlayerMainGui.instance.AddMessage(achv.description,Vector3.zero,PlayerMainGui.MessageType.ACHIVEMENT);
 			delayedExternalCallName ="AchivmenUnlock";
-			delayedExternalCallData = achv.description;
+			delayedExternalCallData = TextGenerator.instance.GetSimpleText("AchivmenUnlock") +achv.description;
 		}else{
 			PlayerMainGui.instance.AddMessage(achv.name+"\n"+achv.description,Vector3.zero,PlayerMainGui.MessageType.ACHIVEMENT);
 			delayedExternalCallName ="AchivmenUnlock";
-            delayedExternalCallData = achv.name + ": " + achv.description;
+            delayedExternalCallData = TextGenerator.instance.GetSimpleText("AchivmenUnlock") + achv.name + ": " + achv.description;
 		}
 		
 	}

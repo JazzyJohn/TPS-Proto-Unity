@@ -206,7 +206,8 @@ public class AnimationManager : MonoBehaviour
     /// </summary>
     public void ToggleAimPos(bool state){
        // Debug.Log(state);
-        if (aimPos != null) {
+		return;
+       /* if (aimPos != null) {
 
             if (state)
             {
@@ -214,7 +215,7 @@ public class AnimationManager : MonoBehaviour
             }else{
                 aimPos.SetWeight(0.0f);
             }
-        }
+        }*/
     }
 	/// <summary>
     /// Short cut to turn off IK
@@ -280,6 +281,7 @@ public class AnimationManager : MonoBehaviour
 	public void ReloadStart(){
 	
 		animator.SetBool ("Reload",true);
+		IKOff ();
 	}
     public void ReloadStop()
     {
@@ -296,6 +298,7 @@ public class AnimationManager : MonoBehaviour
       // Debug.Log(direction);
         IKOff();
         aimPos.IKShutDown();
+        DollOn();
 		switch(direction){
 			case AnimDirection.Front:
                 animator.SetTrigger("Front_death");
@@ -307,7 +310,10 @@ public class AnimationManager : MonoBehaviour
 		
 		}
 	}
-	
+    public void ChangeWeaponNow()
+    {
+       // pawn.ChangeWeapon();
+    }
 	public void ShootAnim(){
 		//animator.SetTrigger ("Shoot");
 	}
@@ -337,9 +343,9 @@ public class AnimationManager : MonoBehaviour
 		animator.SetBool (animName,true);
 	}
 	public void StopShootAniamtion(string animName){
-        animator.SetBool(animName,false);
+		animator.SetBool(animName,false);
 	}
-    public void KnockOut() {
+	public void KnockOut() {
         Debug.Log("KnockOut");
         DollOn();
     }

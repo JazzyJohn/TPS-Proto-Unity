@@ -14,6 +14,8 @@ public class InventoryManager : MonoBehaviour {
 	private int indexWeapon;
 	
 	protected Pawn owner;
+
+    private int cahcedIndex;
 	
 	[Serializable]
 	public class AmmoBag {
@@ -296,6 +298,8 @@ public class InventoryManager : MonoBehaviour {
 			newIndex=0;
 		}
 		//Debug.Log ("NextWeapon"+newIndex);
+        //cahcedIndex = newIndex;
+       // owner.animator.SetWeaponType(prefabWeapon[cahcedIndex].animType);
 		_ChangeWeapon(newIndex);
 	}
 	public void PrevWeapon(){
@@ -304,11 +308,19 @@ public class InventoryManager : MonoBehaviour {
 			newIndex=prefabWeapon.Length-1;
 		}
 		//Debug.Log ("PrevWeapon"+newIndex);
+        //cahcedIndex = newIndex;
+        //owner.animator.SetWeaponType(prefabWeapon[cahcedIndex].animType);
 		_ChangeWeapon(newIndex);
 	}
+
+    public void ChangeWeapon()
+    {
+        _ChangeWeapon(cahcedIndex);
+    }
 	//Change weapon in hand
 	public void ChangeWeapon(int newWeapon){
 		if (indexWeapon != newWeapon) {
+           // cahcedIndex = newWeapon;
 			_ChangeWeapon(newWeapon);	
 		}
 	}

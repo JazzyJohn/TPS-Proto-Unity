@@ -12,6 +12,7 @@ public class ModuleInfo : MonoBehaviour {
 	public infoDescription InfoDescription;
 	public infoLeftIco InfoLeftIco;
 	public infoTwoIco InfoTwoIco;
+	
 
 	// Use this for initialization
 	void Start () {
@@ -32,10 +33,7 @@ public class ModuleInfo : MonoBehaviour {
 		float x = 0f;
 		float y = 0f;
 
-		Vector3 pos = Input.mousePosition;
-
-		pos = uiCameraOrtogrpahic.ScreenToWorldPoint(pos);
-		pos.z = 0f;
+		Vector3 posNoEdit = Input.mousePosition;
 		
 		switch(Type)
 		{
@@ -43,47 +41,48 @@ public class ModuleInfo : MonoBehaviour {
 			InfoNoIco.Obj.height = 110;
 			InfoNoIco.Obj.height += 50*Mathf.FloorToInt(info[1].Length/20);
 
-			if(Input.mousePosition.x + (InfoNoIco.Obj.width/2) > uiCameraOrtogrpahic.pixelWidth)
-			{
-				if(Input.mousePosition.y - (InfoNoIco.Obj.height/2) < 0)
-					InfoNoIco.Obj.pivot = UIWidget.Pivot.BottomRight;
-				else
-					InfoNoIco.Obj.pivot = UIWidget.Pivot.TopRight;
-			}
-			else
-			{
-				if(Input.mousePosition.y - (InfoNoIco.Obj.height/2) < 0)
-					InfoNoIco.Obj.pivot = UIWidget.Pivot.BottomLeft;
-				else
-					InfoNoIco.Obj.pivot = UIWidget.Pivot.TopLeft;
-			}
-
-			InfoNoIco.Obj.transform.position = pos;
 			InfoNoIco.Show(info[0], info[1]);
+
+			FixedPosition(posNoEdit, InfoNoIco.Obj);
 			break;
 		case TypeInfo.InfoDescription: //Только текст
 			InfoDescription.Obj.height = 60;
 			InfoDescription.Obj.height += 50*Mathf.FloorToInt(info[0].Length/20);
 
-			if(Input.mousePosition.x + (InfoDescription.Obj.width/2) > uiCameraOrtogrpahic.pixelWidth)
-			{
-				if(Input.mousePosition.y - (InfoDescription.Obj.height/2) < 0)
-					InfoDescription.Obj.pivot = UIWidget.Pivot.BottomRight;
-				else
-					InfoDescription.Obj.pivot = UIWidget.Pivot.TopRight;
-			}
-			else
-			{
-				if(Input.mousePosition.y - (InfoDescription.Obj.height/2) < 0)
-					InfoDescription.Obj.pivot = UIWidget.Pivot.BottomLeft;
-				else
-					InfoDescription.Obj.pivot = UIWidget.Pivot.TopLeft;
-			}
-			
-			InfoDescription.Obj.transform.position = pos;
 			InfoDescription.Show(info[0]);
+
+			FixedPosition(posNoEdit, InfoDescription.Obj);
 			break;
 		}
+	}
+
+	public void FixedPosition(Vector3 PosMouse, UIWidget Widget)
+	{
+
+		Vector3 NewPos = uiCameraOrtogrpahic.ScreenToWorldPoint(PosMouse);
+		NewPos.z = 0f;
+
+		Transform WidgetT = Widget.transform;
+		WidgetT.position = NewPos;
+
+		if(PosMouse.x + Widget.width > uiCameraOrtogrpahic.pixelWidth)
+		{
+			WidgetT.localPosition += Vector3.left*Widget.width/2;
+		}
+		else
+		{
+			WidgetT.localPosition -= Vector3.left*Widget.width/2;
+		}
+		if(WidgetT.position.y - Widget.height < 0)
+			WidgetT.localPosition -= Vector3.up*Widget.height/2;
+		else
+			WidgetT.localPosition += Vector3.up*Widget.height/2;
+		//WidgetT.localPosition-=Vector3.up*2960;
+
+		WidgetT.localPosition = new Vector3(WidgetT.localPosition.x,
+		                                    WidgetT.localPosition.y,
+		                                    0f);
+
 	}
 
 	public void Post(TypeInfo Type, string[] info, Texture[] texture)
@@ -96,53 +95,20 @@ public class ModuleInfo : MonoBehaviour {
 		
 		Vector3 pos = Input.mousePosition;
 		
-		pos = uiCameraOrtogrpahic.ScreenToWorldPoint(pos);
-		pos.z = 0f;
-		
 		switch(Type)
 		{
 		case TypeInfo.InfoLeftIco: //Иконка слева, заголовок и текст
 			InfoLeftIco.Obj.height = 140;
 			InfoLeftIco.Obj.height += 50*Mathf.FloorToInt(info[1].Length/20);
-
-			if(Input.mousePosition.x + (InfoLeftIco.Obj.width/2) > uiCameraOrtogrpahic.pixelWidth)
-			{
-				if(Input.mousePosition.y - (InfoLeftIco.Obj.height/2) < 0)
-					InfoLeftIco.Obj.pivot = UIWidget.Pivot.BottomRight;
-				else
-					InfoLeftIco.Obj.pivot = UIWidget.Pivot.TopRight;
-			}
-			else
-			{
-				if(Input.mousePosition.y - (InfoLeftIco.Obj.height/2) < 0)
-					InfoLeftIco.Obj.pivot = UIWidget.Pivot.BottomLeft;
-				else
-					InfoLeftIco.Obj.pivot = UIWidget.Pivot.TopLeft;
-			}
 			
-			InfoLeftIco.Obj.transform.position = pos;
+			FixedPosition(pos, InfoLeftIco.Obj);
 			InfoLeftIco.Show(info[0], info[1], texture[0], info[2]);
 			break;
 		case TypeInfo.InfoTwoIco: //Иконка слева, справа, заголовок и текст
 			InfoTwoIco.Obj.height = 140;
 			InfoTwoIco.Obj.height += 50*Mathf.FloorToInt(info[1].Length/20);
-
-			if(Input.mousePosition.x + (InfoTwoIco.Obj.width/2) > uiCameraOrtogrpahic.pixelWidth)
-			{
-				if(Input.mousePosition.y - (InfoTwoIco.Obj.height/2) < 0)
-					InfoTwoIco.Obj.pivot = UIWidget.Pivot.BottomRight;
-				else
-					InfoTwoIco.Obj.pivot = UIWidget.Pivot.TopRight;
-			}
-			else
-			{
-				if(Input.mousePosition.y - (InfoTwoIco.Obj.height/2) < 0)
-					InfoTwoIco.Obj.pivot = UIWidget.Pivot.BottomLeft;
-				else
-					InfoTwoIco.Obj.pivot = UIWidget.Pivot.TopLeft;
-			}
 			
-			InfoTwoIco.Obj.transform.position = pos;
+			FixedPosition(pos, InfoTwoIco.Obj);
 			InfoTwoIco.Show(info[0], info[1], texture[0], info[2], texture[1], info[3]);
 			break;
 		}
@@ -174,6 +140,7 @@ public class infoNoIco
 		Name.text = name;
 		Text.text = "";
 		int CharNum = 0;
+
 		for(int i = 0; i < text.Length; i++)
 		{
 			if(CharNum > 20)
@@ -185,6 +152,7 @@ public class infoNoIco
 			Text.text += text[i];
 			CharNum++;
 		}
+
 		PlayTween.Play(true);
 	}
 }

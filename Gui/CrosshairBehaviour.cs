@@ -94,6 +94,32 @@ public class CrosshairBehaviour : MonoBehaviour {
 
     public bool isFps = false;
    
+	public UITexture Blood1;
+	public UITexture Blood2;
+	public UITexture Crosshair;
+
+	int w1;
+	int w2;
+
+	float WScreen;
+
+	void ReSize()
+	{
+		WScreen = Screen.width;
+		w1 = Blood1.width;
+		w2 = Blood2.width;
+		int H1 = Blood1.height;
+
+		float newW = 1f*w1/H1;
+		float newW2 = 1f*w2/Blood2.height;
+		float newW3 = 1f*Crosshair.width/Crosshair.height;
+
+		Blood1.uvRect = new Rect(-(newW-1)/2, 0f, newW, 1f);
+		Blood2.uvRect = new Rect(-(newW2-1)/2, 0f, newW2, 1f);
+		Crosshair.uvRect = new Rect(-(newW3-1)/2, 0f, newW3, 1f);
+	}
+
+
    public void Update()
     {
         if (damageTweener != null && damageTweener.enabled)
@@ -101,11 +127,15 @@ public class CrosshairBehaviour : MonoBehaviour {
             RotateDamage();
 
         }
+
+		if(WScreen != Screen.width)
+			ReSize();
     }
 
    public void Start()
    {
-       camTramsf = Camera.main.transform;
+       	camTramsf = Camera.main.transform;
+		ReSize();
    }
 	public void CrosshairType(CrosshairColor color){
         foreach (UIWidget widget in crosshairParts)

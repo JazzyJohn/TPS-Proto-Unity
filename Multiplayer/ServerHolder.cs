@@ -703,9 +703,22 @@ public class ServerHolder : MonoBehaviour
     {
      
     }
-	
 
 
+    void Awake()
+    {
+        instance = this;
+    }
+
+    private static ServerHolder instance;
+
+    public static ServerHolder Instance
+    {
+        get
+        {
+            return instance;
+        }
+    }
 
 
 

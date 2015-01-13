@@ -166,9 +166,8 @@ public virtual void UpdateSmoothedMovementDirection ()
 			// Otherwise smoothly turn towards it
 			else
 			{
-				moveDirection = Vector3.RotateTowards(moveDirection, targetDirection, rotateSpeed * Mathf.Deg2Rad * Time.deltaTime, 1000);
 				
-				moveDirection = moveDirection.normalized;
+                moveDirection = targetDirection.normalized;
 			}
 		}
 		
@@ -213,8 +212,8 @@ public virtual void UpdateSmoothedMovementDirection ()
 				characterState = CharacterState.Idle;
 			}
 		}
-		
-		moveSpeed = Mathf.Lerp(moveSpeed, targetSpeed, curSmooth);
+
+        moveSpeed = targetSpeed;
 	
 		// Reset walk time start when we slow down
 		if (moveSpeed < pawn.groundWalkSpeed * 0.3f)
@@ -418,12 +417,13 @@ void FixedUpdate ()
     ApplyDoubleJumping();
    
 	Vector3 movement= moveDirection * moveSpeed + new Vector3 (0, verticalSpeed, 0) + inAirVelocity;
-	
+
+   // Debug.Log("inController" + movement);
 		//Debug.Log (movement.magnitude);
 		pawn.Movement (movement, characterState);
 
 
-			
+		
 	
 
 	// ANIMATION sector

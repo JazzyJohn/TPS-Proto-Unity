@@ -68,7 +68,7 @@ public class MoveNGUICamer : MonoBehaviour {
         {
             cameraTransform.localPosition = Vector3.Lerp(cameraTransform.localPosition, targetPosition, Time.deltaTime);
         }
-		if(Panel.alpha != 1)
+        if (Panel==null||Panel.alpha != 1)
 			return;
 
 		posMouse = cam.ScreenToViewportPoint(Input.mousePosition);

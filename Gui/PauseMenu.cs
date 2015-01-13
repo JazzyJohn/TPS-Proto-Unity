@@ -46,12 +46,18 @@ public class PauseMenu : MonoBehaviour {
 	
 	public void GoToMainMenu()
 	{
-        GA.API.Design.NewEvent("GUI:Pause:MainMenu" ); 
+      
+        if (ServerHolder.Instance.connectingToRoom)
+        {
+            return;
+        }
+        GA.API.Design.NewEvent("GUI:Pause:MainMenu");
 		Pause = false;
         if (effect != null)
         {
             effect.enabled = false;
         }
+        
 		Screen.lockCursor = false;
         NetworkController.Instance.LeaveRoomReuqest();
      

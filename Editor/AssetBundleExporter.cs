@@ -70,6 +70,10 @@ public class AssetBundleExporter : EditorWindow
 		
 		//file path list area
 		GUILayout.BeginHorizontal();
+        if (window == null)
+        {
+            return;
+        }
 		scrollPosition = GUILayout.BeginScrollView(scrollPosition, GUILayout.Width( window.position.width ), GUILayout.Height( window.position.height-150 ));
 		string objPathList = "";
 		foreach(var obj in mObjectsPathList) 

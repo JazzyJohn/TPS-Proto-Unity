@@ -4,7 +4,7 @@
 using UnityEngine;
 using System.Collections;
 
-public class ThirdPersonCamera : PlayerCamera
+public class JumpPersonCamera : PlayerCamera
 {
 
 	
@@ -130,7 +130,7 @@ public class ThirdPersonCamera : PlayerCamera
             Camera.main.fieldOfView = startFov;
         }
 
-        Vector3 targetHead = _target.position + _pawn.headOffset + _pawn.GetDesireRotation() * Vector3.right * lXOffset;
+        Vector3 targetHead = _target.position + Quaternion.Euler(_pawn.myTransform.eulerAngles.x, 0, 0) * _pawn.headOffset + _pawn.GetDesireRotation() * Vector3.right * lXOffset;
         Vector3 lOffset = _pawn.GetDesireRotation()* targetOffset;
 
         Debug.DrawLine(targetHead, targetHead + lOffset, Color.red);
@@ -142,7 +142,7 @@ public class ThirdPersonCamera : PlayerCamera
         //	Debug.DrawRay (wallRay.origin, wallRay.direction);
         float magnitude = distance * distance + 10.0f;
         //Debug.DrawLine (wallRay.origin,wallRay.origin+ wallRay.direction*distance);
-        bool needOclusion = false;
+
         foreach (RaycastHit target in Physics.RaycastAll(wallRay, distance, cameraLayer))
         {
 
@@ -163,7 +163,6 @@ public class ThirdPersonCamera : PlayerCamera
                 Vector3 offsetDirection = (target.point - wallRay.origin);
 
                 resultcameraPos = target.point - offsetDirection.normalized * 1.0f;
-                needOclusion = true;
             }
 
         }
@@ -188,7 +187,6 @@ public class ThirdPersonCamera : PlayerCamera
                 Vector3 offsetDirection = (target.point - wallRay.origin);
 
                 resultcameraPos = target.point - offsetDirection.normalized * 1.0f;
-                needOclusion = true;
             }
 
         }
@@ -202,11 +200,6 @@ public class ThirdPersonCamera : PlayerCamera
         {
             resultcameraPos = targetHead + lOffset.normalized * inWallDrop;
             direction = _pawn.getAimpointForCamera() - (resultcameraPos + GetShaker());
-            
-        }
-       
-        if (needOclusion)
-        {
             if (mainCamera.useOcclusionCulling)
             {
                 mainCamera.useOcclusionCulling = false;
@@ -223,8 +216,8 @@ public class ThirdPersonCamera : PlayerCamera
 
         cameraTransform.position = resultcameraPos + GetShaker();
         // Always look at the target	
-     
-        cameraTransform.rotation = Quaternion.LookRotation(direction);
+
+        cameraTransform.rotation = Quaternion.LookRotation(direction, _pawn.myTransform.up);
 	}
 
     protected Vector3 GetShaker()

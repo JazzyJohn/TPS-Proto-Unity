@@ -203,8 +203,13 @@ public class SelectPlayerGUI : MonoBehaviour {
         GA.API.Design.NewEvent("GUI:Select:AutoSelect"); 
         switch (mode) { 
             case GAMEMODE.PVE:
+            case GAMEMODE.PVE_HOLD:
+
                 Choice._Team = 1;
-                team[Choice._Team - 1].value = true;
+                if (team.Length > Choice._Team - 1 && team[Choice._Team - 1] != null)
+                {
+                    team[Choice._Team - 1].value = true;
+                }
                 break;
 
             case GAMEMODE.PVP:

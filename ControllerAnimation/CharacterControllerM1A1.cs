@@ -34,6 +34,8 @@ public class CharacterControllerM1A1 : MonoBehaviour {
 	public float HorizontalDampTime;
 	public float VerticalDampTime;
 
+    private bool isStart=false;
+
 	private float speedAimFactor = 1f;
 	private float speedSprintFactor = 1f;
 
@@ -46,6 +48,9 @@ public class CharacterControllerM1A1 : MonoBehaviour {
 	private Quaternion lookRotation;
 
 	private bool isCrouch;
+
+	private float IsNotAim;
+	private float upperWeight;
 
 	// Use this for initialization
 	void Awake () {
@@ -63,9 +68,18 @@ public class CharacterControllerM1A1 : MonoBehaviour {
         {
             return;
         }
-		Vector3 velocity = animator.deltaPosition / Time.deltaTime;
-		velocity.y = characterRigidbody.velocity.y;
-		characterRigidbody.velocity = velocity;
+        switch (character.GetState())
+        {
+            case CharacterState.Running:
+            case CharacterState.Walking:
+            case CharacterState.Sprinting:
+            case CharacterState.Idle:
+                Vector3 velocity = animator.deltaPosition / Time.deltaTime;
+		        velocity.y = characterRigidbody.velocity.y;
+		        characterRigidbody.velocity = velocity;
+                break;
+        }
+		
 	}
 	
 	// Update is called once per frame
@@ -73,9 +87,10 @@ public class CharacterControllerM1A1 : MonoBehaviour {
        
 		GetAnimatorVariables ();
 		GetInput ();
-		if (inputMagnitude < 0.35f) {
+        if (isStart)
+        {
 			walkStartAngle = inputAngle;
-			horAimAngle = inputAngle;
+			//horAimAngle = inputAngle;
 		}
 		if (inputMagnitude > 0.7f) walkStopAngle = inputAngle;
 		
@@ -105,10 +120,23 @@ public class CharacterControllerM1A1 : MonoBehaviour {
                 }
              
             }
-         
-            Horizontal = Vector3.Dot(nextMovement.normalized, transform.right);
-            Vertical = Vector3.Dot(nextMovement.normalized, transform.forward);
-            
+
+            Horizontal = Vector3.Dot(nextMovement.normalized, character.myTransform.right);
+            Vertical = Vector3.Dot(nextMovement.normalized, character.myTransform.forward);
+            if (Mathf.Abs(Horizontal) < 0.1f)
+            {
+                Horizontal = 0.0f;
+            }
+            if (Mathf.Abs(Vertical)< 0.1f)
+            {
+                Vertical = 0.0f;
+            }
+            if (!character.isAi)
+            {
+                
+
+               // Debug.Log("Horizontal " + Horizontal + " Vertical " + Vertical);
+            }
 			//set inputMagnitude
 			Vector2 speedVec =  new Vector2 (Horizontal, Vertical);
 			inputMagnitude = Mathf.Clamp (speedVec.magnitude, 0, 1);
@@ -125,6 +153,7 @@ public class CharacterControllerM1A1 : MonoBehaviour {
 			Vector3 moveDirection;
 
 			moveDirection = nextMovement.normalized;
+            isStart = false;
             if (moveDirection.sqrMagnitude == 0)
             {
                 inputAngle=0;
@@ -132,7 +161,10 @@ public class CharacterControllerM1A1 : MonoBehaviour {
              else
             {
                 Vector3 axis = Vector3.Cross(transform.forward, moveDirection);
-
+                if (inputAngle == 0)
+                {
+                    isStart = true;
+                }
                 inputAngle = Vector3.Angle(transform.forward, moveDirection) * (axis.y < 0 ? -1 : 1);
             }
 			
@@ -207,6 +239,7 @@ public class CharacterControllerM1A1 : MonoBehaviour {
 	
 	void GetAnimatorVariables () {
 		IsRU = animator.GetFloat (Animator.StringToHash ("IsRU"));
+		IsNotAim = animator.GetFloat (Animator.StringToHash ("IsNotAim"));
 	}
 	
 	void SetAnimatorVariables () {
@@ -244,10 +277,13 @@ public class CharacterControllerM1A1 : MonoBehaviour {
 	void SetAimWeight () {
 		if (Vertical > 1.1f) {
 			IKWeight = Mathf.Lerp (IKWeight, 0f, Time.deltaTime * 8f);
+			upperWeight = IKWeight;
 		}
 		else {
-			IKWeight = Mathf.Lerp (IKWeight, 1f, Time.deltaTime * 8f);
+			IKWeight = 1f - IsNotAim;
+			upperWeight = Mathf.Lerp (upperWeight, 1f, Time.deltaTime * 8f);
 		}
 		ik.SetWeight (IKWeight);
+		animator.SetLayerWeight (1, upperWeight);
 	}
 }

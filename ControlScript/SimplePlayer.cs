@@ -51,6 +51,7 @@ public class SimplePlayer : Player {
             //TODO: move text to config
             victimName= deadPawn.publicName;
             Score.AIKill++;
+            aiKillInRow++;
             EventHolder.instance.FireEvent(typeof(LocalPlayerListener), "EventPawnKillAI", this, killinfo);
             StatisticHandler.SendPlayerKillNPC(UID, PlayerName);
         }

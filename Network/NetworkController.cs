@@ -207,6 +207,7 @@ public class NetworkController : MonoBehaviour {
            
             _smartFox.AddEventListener(SFSEvent.USER_VARIABLES_UPDATE, OnVariablesUpdate);
 			_smartFox.AddEventListener(SFSEvent.USER_EXIT_ROOM, HandlePlayerLeaveEvent);
+           
             _smartFox.AddLogListener(LogLevel.DEBUG, OnDebugMessage);
           /*  myThread = new Thread(new ThreadStart(this.SendLoop));
             myThread.Start();	*/	
@@ -1890,6 +1891,7 @@ public class NetworkController : MonoBehaviour {
 				Destroy(view.gameObject);
 			}
 		}
+        Debug.Log("LEave romme");
 
     }
 	

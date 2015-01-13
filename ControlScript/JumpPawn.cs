@@ -89,7 +89,7 @@ class JumpPawn :Pawn
                     {
                         newvelocity =groundRunSpeed*myTransform.forward*nextMovement.normalized.magnitude;
                     }else{
-                        newvelocity = JumpAssist.GetMeFlat(velocity).magnitude * myTransform.forward;
+                        newvelocity = JumpAssist.GetMeFlat(velocity).magnitude * myTransform.forward * nextMovement.normalized.magnitude;
                     }
                     characterState = nextState;
                   
@@ -275,10 +275,11 @@ class JumpPawn :Pawn
         }
         //Debug.Log(_rb.isKinematic);
         */
-        isGrounded = false;
+        isGrounded = CheckGrounded();
+     
         velocity = newvelocity;
        // myTransform.position += velocity;
-      //  Debug.Log(velocity);
+       Debug.Log(characterState +"  " +wallState);
         if (!_rb.isKinematic)
         {
             _rb.velocity = velocity;
@@ -286,6 +287,20 @@ class JumpPawn :Pawn
         velocity = _rb.velocity;
     }
 
+    bool CheckGrounded()
+    {
+        if (lastJumpTime + 0.1f > Time.time)
+        {
+            return false;
+        }
+        Ray ray = new Ray(myTransform.position,Vector3.down);
+        RaycastHit hitInfo;
+        return Physics.SphereCast(ray, capsule.radius,out hitInfo, capsule.height / 2 , floorLayer);
+    }
+    protected override bool ShouldRotateTorso()
+    {
+        return false;
+    }
     Vector3 GetWallRunVelocity()
     {
         return wallRunVelocity;
@@ -297,6 +312,7 @@ class JumpPawn :Pawn
         //if (isGrounded) return false;
         if (lastTimeOnWall + 0.5f > Time.time)
         {
+            wallState = WallState.WallNone;
             return false;
         }
 
@@ -312,11 +328,12 @@ class JumpPawn :Pawn
         {
             characterState = CharacterState.Jumping;
             lastTimeOnWall = Time.time;
-
+            wallState = WallState.WallNone;
             return false;
         }
         if (characterState != CharacterState.DoubleJump && characterState != CharacterState.Sprinting && characterState != CharacterState.WallRunning && characterState != CharacterState.Jumping)
         {
+            wallState = WallState.WallNone;
             return false;
         }
         //Debug.Log (characterState);
@@ -327,29 +344,43 @@ class JumpPawn :Pawn
                                       (-1 * myTransform.right).normalized, out leftH, capsule.radius + 0.4f, wallRunLayers);
         bool rightW = Physics.Raycast(myTransform.position,
                                        (myTransform.right).normalized, out rightH, capsule.radius + 0.4f, wallRunLayers);
-        bool frontW = Physics.Raycast(myTransform.position,
-                                       myTransform.forward, out frontH, capsule.radius + 0.2f, wallRunLayers);
+        bool frontW;
+        if(  wallState == WallState.WallF){
+            frontW = Physics.Raycast(myTransform.position,
+                                    -myTransform.up, out frontH, capsule.height/2 + 0.2f, wallRunLayers);
+           /* Debug.DrawRay(myTransform.position,
+            -myTransform.up,Color.white,10.0f);*/
 
-        Debug.DrawLine(myTransform.position,
+        }else{
+            frontW = Physics.Raycast(myTransform.position,
+                                       myTransform.forward, out frontH, capsule.radius + 0.2f, wallRunLayers);
+          /*  Debug.DrawRay (myTransform.position,
+             myTransform.forward, Color.black,10.0f);*/
+
+        }
+    
+
+   /* Debug.DrawLine(myTransform.position,
                         myTransform.position + (-myTransform.right).normalized * (capsule.radius + 0.2f));
 
         Debug.DrawLine(myTransform.position,
-                        myTransform.position + (myTransform.right).normalized * (capsule.radius + 0.2f));
+                        myTransform.position + (myTransform.right).normalized * (capsule.radius + 0.2f));*/
 
-        //Debug.DrawLine (myTransform.position,
-        // myTransform.forward);
-
+      
        
 
         Vector3 tangVect = Vector3.zero, normal = Vector3.zero;
-
+       
         if (!animator.animator.IsInTransition(0) && !_rb.isKinematic)
         {
+
+           
             if (leftW)
             {
-
+               
                 normal = leftH.normal;
                 tangVect = Vector3.Cross(leftH.normal, Vector3.up);
+                myTransform.rotation = Quaternion.LookRotation(tangVect);
                 //tangVect = Vector3.Project(movement,tangVect).normalized;
                 wallRunVelocity = tangVect * velocity.magnitude;
                 if (!(characterState == CharacterState.WallRunning))
@@ -372,8 +403,10 @@ class JumpPawn :Pawn
 
             else if (rightW)
             {
+            
                 normal = rightH.normal;
                 tangVect = -Vector3.Cross(rightH.normal, Vector3.up);
+                myTransform.rotation = Quaternion.LookRotation(tangVect);
                 //tangVect = Vector3.Project(movement,tangVect).normalized;
                 wallRunVelocity = tangVect * velocity.magnitude;
                 if (!(characterState == CharacterState.WallRunning))
@@ -396,9 +429,20 @@ class JumpPawn :Pawn
 
             else if (frontW)
             {
-                wallRunVelocity =  myTransform.up * velocity.magnitude; 
+                
                 normal = frontH.normal;
+
+                Vector3 forwardonWall = Vector3.Cross( myTransform.right,normal);
+
+             
+
                 tangVect = frontH.normal * -1;
+
+            
+
+                myTransform.rotation = Quaternion.LookRotation(forwardonWall, normal);
+             
+                wallRunVelocity = myTransform.forward * velocity.magnitude; 
                 if (!(characterState == CharacterState.WallRunning))
                 {
                     StartJetPack();
@@ -419,28 +463,18 @@ class JumpPawn :Pawn
             {
                 if (characterState == CharacterState.WallRunning)
                 {
+                 
                     characterState = CharacterState.Jumping;
                     lastTimeOnWall = Time.time;
                     jetPackEnable = false;
                     //Debug.Log("nOhIT");
                 }
-
+                wallState = WallState.WallNone;
             }
             float angle = Mathf.Abs(Vector3.Dot(normal, Vector3.up));
 
-            if (angle > 0.5f)
-            {
-                characterState = CharacterState.Jumping;
-                lastTimeOnWall = Time.time;
-                jetPackEnable = false;
-                return false;
-            }
-
-            forwardRotation = tangVect;
-            if (forwardRotation.sqrMagnitude > 0)
-            {
-                myTransform.rotation = Quaternion.LookRotation(forwardRotation);
-            }
+          
+         
             //Debug.Log(forwardRotation);
             // Debug.DrawRay(myTransform.position,forwardRotation,Color.green);
             //animator.WallAnimation(leftW,rightW,frontW);
@@ -448,13 +482,16 @@ class JumpPawn :Pawn
 
             return leftW || rightW || frontW;
         }
+        wallState = WallState.WallNone;
         return false;
 
     }
 
-    public float jumpPulse =5.0f;
+    public float jumpPulseVertical =5.0f;
 
     public float AfterJumpWallRunDelay=1.0f;
+
+    public float jumpPulseHorizontal = 5.0f;
     protected  Vector3 Jump( )
     {
         if (animator != null)
@@ -471,17 +508,17 @@ class JumpPawn :Pawn
     }
 
     public Vector3 _Jump(Vector3 direction){
-     
+  
 
         if (Time.time - timeGrounded < timeForImpulseJump)
         {
-         
-            return JumpAssist.FlatAdd(direction, velocity, jumpPulse) + Vector3.up*direction.y * jumpPulse;
+
+            return JumpAssist.FlatAdd(direction, velocity, jumpPulseHorizontal) + Vector3.up * direction.y * jumpPulseVertical;
         }
         else
         {
-            Vector3 resultSpeed = JumpAssist.FlatAdd(direction, velocity) + Vector3.up * direction.y * jumpPulse;
-            Vector3 simpelSpeed = direction * jumpPulse;
+            Vector3 resultSpeed = JumpAssist.FlatAdd(direction, velocity) + Vector3.up * direction.y * jumpPulseVertical;
+            Vector3 simpelSpeed = Vector3.up * direction.y * jumpPulseVertical + JumpAssist.GetMeFlat(direction) * jumpPulseHorizontal;
             if (resultSpeed.sqrMagnitude < simpelSpeed.sqrMagnitude)
             {
                 return simpelSpeed;
@@ -520,7 +557,7 @@ class JumpPawn :Pawn
         }
         Land();
     }
-    public   void  Land(){
+    public override   void  Land(){
         timeGrounded = Time.time;
         velocity.y = 0;
     }
@@ -528,7 +565,16 @@ class JumpPawn :Pawn
     {
 
     }
- 
+    public override Vector3 getAimpointForCamera()
+    {
+
+        return myTransform.position + Quaternion.Euler(myTransform.eulerAngles.x, 0, myTransform.eulerAngles.z) * headOffset + desiredRotation * Quaternion.Euler(myTransform.eulerAngles.x, 0, 0) * Vector3.forward * aimRange;
+    }
+
+    public override Quaternion GetDesireRotation()
+    {
+        return desiredRotation * Quaternion.Euler(myTransform.eulerAngles.x, 0, myTransform.eulerAngles.z);
+    }
 }
 
 public static class  JumpAssist{
@@ -540,6 +586,6 @@ public static class  JumpAssist{
     }
     public static Vector3 FlatAdd(Vector3 direction, Vector3 velocity, float addd = 0.0f)
     {
-       return GetMeFlat(direction) *(GetMeFlat(velocity).magnitude+addd);
+       return GetMeFlat(direction).normalized *(GetMeFlat(velocity).magnitude+addd);
     }
 }

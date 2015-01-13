@@ -14,6 +14,10 @@ public class JumpPlayer : Player {
 	}
     public override void ButtonControll()
     {
+        if (Input.GetKeyDown(KeyCode.R))
+        {
+            ((JumpPawn)GetCurrentPawn()).MoveToStart();
+        }
     }
 
 
