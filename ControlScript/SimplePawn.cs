@@ -64,6 +64,7 @@ public class SimplePawn : Pawn {
             case CharacterState.Idle:
             case CharacterState.Running:
             case CharacterState.Walking:
+			case CharacterState.Crouching:
                 if (isGrounded)
                 {
                     jetPackEnable = false;

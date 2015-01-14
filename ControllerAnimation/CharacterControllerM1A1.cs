@@ -185,6 +185,15 @@ public class CharacterControllerM1A1 : MonoBehaviour {
 			
 			Horizontal *= speedAimFactor * speedSprintFactor;
 			Vertical *= speedAimFactor * speedSprintFactor;
+			
+			if (character.IsCrouch()&&!isCrouch) {
+				isCrouch = true;
+				animator.SetTrigger (Animator.StringToHash ("CrouchTrigger"));
+			}
+			if(!character.IsCrouch()&&isCrouch)
+				isCrouch = false;
+				animator.SetTrigger (Animator.StringToHash ("UpTrigger"));
+			}
 		/*}
 		else {
 			Horizontal = Input.GetAxis ("Horizontal");
@@ -229,11 +238,7 @@ public class CharacterControllerM1A1 : MonoBehaviour {
 			Horizontal *= speedAimFactor * speedSprintFactor;
 			Vertical *= speedAimFactor * speedSprintFactor;
 			*/
-			/*if (Input.GetKeyDown (KeyCode.LeftControl)) {
-				isCrouch = !isCrouch;
-				if (isCrouch) animator.SetTrigger (Animator.StringToHash ("CrouchTrigger"));
-				else animator.SetTrigger (Animator.StringToHash ("UpTrigger"));
-			}*/
+			
 		
 	}
 	

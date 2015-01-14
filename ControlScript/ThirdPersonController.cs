@@ -182,11 +182,21 @@ public virtual void UpdateSmoothedMovementDirection ()
 		
 		// Pick speed modifier
 		//Debug.Log (!Input.GetKey (KeyCode.LeftShift) &&! Input.GetKey (KeyCode.RightShift));
+		
+		bool crouch = InputManager.instance.GetButton("Crouch") 
+		
 		if (pawn.isAiming ) {
-			targetSpeed *= pawn.groundWalkSpeed;
+			
 			if(isMoving){
-				characterState = CharacterState.Walking;
+				if(crouch){
+					targetSpeed *= pawn.groundCrouchSpeed;
+					characterState = CharacterState.Crouching;
+				}else{
+					targetSpeed *= pawn.groundWalkSpeed;
+					characterState = CharacterState.Walking;
+				}
 			}else{
+			    targetSpeed *= 0;
 				characterState = CharacterState.Idle;
 			}
 
@@ -205,10 +215,17 @@ public virtual void UpdateSmoothedMovementDirection ()
 		else
 		{
 
-			targetSpeed *= pawn.groundRunSpeed;
+			
 			if(isMoving){
-				characterState = CharacterState.Running;
+				if(crouch){
+					targetSpeed *= pawn.groundCrouchSpeed;
+					characterState = CharacterState.Crouching;
+				}else{
+					targetSpeed *= pawn.groundRunSpeed;
+					characterState = CharacterState.Running;
+				}
 			}else{
+				targetSpeed *= 0;
 				characterState = CharacterState.Idle;
 			}
 		}
@@ -291,10 +308,21 @@ public float CalculateJumpVerticalSpeed ( float targetJumpHeight  )
 				
 								pawn.StartFire ();
 			}
+			
             if (InputManager.instance.GetButtonUp("Fire1"))
             {
 				
 								pawn.StopFire ();
+			}
+			 if (InputManager.instance.GetButtonDown("Grenade"))
+            {
+				
+								pawn.StartGrenadeThrow ();
+			}
+			 if (InputManager.instance.GetButtonUp("Grenade"))
+            {
+				
+								pawn.ThrowGrenade ();
 			}
             if (InputManager.instance.GetButtonDown("PreFire"))
             {

@@ -582,7 +582,9 @@ public class NetworkController : MonoBehaviour {
 				case "changeWeaponShootState":
 					HandleChangeWeaponShootState(dt);
 					break;
-
+				case "changeWeaponState":
+					HandleChangeWeaponState(dt);
+					break;
 
             }
         }
@@ -1419,7 +1421,19 @@ public class NetworkController : MonoBehaviour {
 
     }
 	
+	 /// <summary>
+    /// changeWeaponState request to server
+    /// </summary>	
 	
+	public void ChangeWeaponStateRequest(int weaponId,bool state)
+    {
+        ISFSObject data = new SFSObject();
+        data.PutInt("id", weaponId);
+        data.PutBool("state", state);
+        ExtensionRequest request = new ExtensionRequest("changeWeaponState", data, serverHolder.gameRoom);
+		smartFox.Send(request);
+
+    }
 	
 
 	
@@ -2069,6 +2083,17 @@ public class NetworkController : MonoBehaviour {
 			weapon.StopFire();
 		}
     }
-
+	/// <summary>
+    /// handle changeWeaponState  request to server
+    /// </summary>	
+    public void HandleChangeWeaponState(ISFSObject dt)
+    {
+        BaseWeapon weapon = GetView(dt.GetInt("id")).weapon;
+		if(dt.GetBool("state")){
+			weapon.TakeInHand();
+		}else{
+			weapon.PutAway();
+		}
+    }
 }
 

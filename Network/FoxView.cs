@@ -203,6 +203,14 @@ public class FoxView : MonoBehaviour {
         sendProj.AddSFSObject(data);
 		//NetworkController.Instance.WeaponShootRequest(data);
 	}
+	public void TakeInHand(){
+		NetworkController.Instance.ChangeWeaponStateRequest(viewID,true);
+	}
+	
+	public void PutAway(){
+		NetworkController.Instance.ChangeWeaponStateRequest(viewID,false);
+	}
+	
 	public void SkillCastEffect(string name){
         NetworkController.Instance.SkillCastEffectRequest(viewID, name);
 	}

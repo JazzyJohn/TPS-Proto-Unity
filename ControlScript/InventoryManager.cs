@@ -1,17 +1,21 @@
 using UnityEngine;
 using System;
 
-public enum AMMOTYPE{PISTOL,RIFLE,ROCKETS,MACHINEGUN,SHOOTGUNSHEELL,FUEL};
+public enum AMMOTYPE{PISTOL,RIFLE,ROCKETS,MACHINEGUN,SHOOTGUNSHEELL,FUEL,GRENADE};
 
 [RequireComponent (typeof (Pawn))]
 public class InventoryManager : MonoBehaviour {
 
-	public BaseWeapon[] prefabWeapon;
+	private BaseWeapon[] myWeapons;
     public string[] weaponNames;
 
 	private BaseWeapon currentWeapon;
 	
 	private int indexWeapon;
+	
+	private int grenadeSlot;
+	
+	private int beforeGrenade;
 	
 	protected Pawn owner;
 
@@ -34,45 +38,14 @@ public class InventoryManager : MonoBehaviour {
         prefabWeapon = new BaseWeapon[weaponNames.Length];
         for (int i =0;i<weaponNames.Length;i++)
         {
-
-            GameObject resourceGameObject = null;
-            if (PhotonResourceWrapper.allobject.ContainsKey(weaponNames[i]))
-            {
-                resourceGameObject = PhotonResourceWrapper.allobject[ weaponNames[i]];
-            }
-            else
-            {
-
-
-                resourceGameObject = (GameObject)Resources.Load( weaponNames[i], typeof(GameObject));
-
-
-
-            }
-            prefabWeapon[i] = resourceGameObject.GetComponent<BaseWeapon>() ;
+			
+			myWeapons[i] = NetworkController.Instance.WeaponSpawn(weaponNames[i] transform.position, Quaternion.identity,owner.foxView.isChildScene(),owner.foxView.viewID).GetComponent<BaseWeapon>();
+			if(prefab.slotType==BaseWeapon.SLOTTYPE.GRENADE){
+				greandeSlot=i;
+			}
         }
     }
 	
-	public class WeaponBackUp {
-	
-			public  AMMOTYPE type;
-			
-			public int amount;
-			
-			public WeaponBackUp(int inAmount, AMMOTYPE intType){
-				amount =inAmount;
-				type=intType;
-			}
-			public WeaponBackUp(WeaponBackUp oldInfo){
-				amount =oldInfo.amount;
-				type=oldInfo.type;
-			}	
-			
-		
-			
-	}
-	
-	public WeaponBackUp[] weaponInfo;
 	
 	
 	private AmmoBag[] allAmmo;
@@ -84,7 +57,7 @@ public class InventoryManager : MonoBehaviour {
 			if (owner.foxView.isMine) {
 				
 				GenerateBag ();
-				GenerateInfo ();
+			
 				
 			}
 		}
@@ -92,11 +65,24 @@ public class InventoryManager : MonoBehaviour {
 	//Start Weapon generation
 	public void GenerateWeaponStart(){
 		if (owner.foxView.isMine) {
-			for(int i=0;i<prefabWeapon.Length;i++){
-				if(prefabWeapon[i].slotType==BaseWeapon.SLOTTYPE.MAIN){
+			for(int i=0;i<myWeapons.Length;i++){
+				if(myWeapons[i].slotType==BaseWeapon.SLOTTYPE.MAIN){
 						_ChangeWeapon (i);
 				}
 			}
+		}
+	}
+	
+	public void TakeGrenade(){
+		if (owner.foxView.isMine) {
+			beforeGrenade =indexWeapon;
+			_ChangeWeapon(grenadeSlot);
+		}
+	}
+	public void PutGrenadeAway(){
+		if (owner.foxView.isMine) {
+	
+			_ChangeWeapon(beforeGrenade);
 		}
 	}
 	//Destroy weapon and make pawn empty handed
@@ -185,96 +171,47 @@ public class InventoryManager : MonoBehaviour {
         }
 
     }
-	
+	public virtual void HasGrenade(){
+		return myWeapons[grenadeSlot].curAmmo>0;
+	}
 	//AMMO BAG SECTION END
 	
 	
-	//INGAMEINFO SECTION
-	/*Generate cahche info for bag
-		We don't store all weapon just important info about it when player put  weapon down
-	*/
-
-
-	protected void 	GenerateInfo(){
-		weaponInfo = new WeaponBackUp[prefabWeapon.Length];
-		for(int i=0;i<prefabWeapon.Length;i++){
-			weaponInfo[i]=new WeaponBackUp(prefabWeapon[i].clipSize,prefabWeapon[i].ammoType);
-		
-		}
-	}
-	//save old info about weapon
-	void SaveOldInfo(int index,BaseWeapon gun){
-		//Debug.Log (index);
-		weaponInfo[index].amount  = gun.curAmmo;
 	
-	}
-	//load cur weapon info
-	void LoadOldInfo(){
-		LoadOldInfo(indexWeapon,currentWeapon);
-	}
-	//Load needed weapon info
-	void LoadOldInfo(int index,BaseWeapon gun){
-        if (weaponInfo[index].amount == prefabWeapon[index].clipSize)
-        {
-			gun.curAmmo=gun.clipSize;
-		}else{
-			gun.curAmmo=weaponInfo[index].amount;
-		}
-		
-	}
-	
-	
-	//INGAMEINFO SECTION END
 	
 	
 	
 	//WEAPON CHANGE SECTION
 	
+	
+	
 	public void SetSlot( BaseWeapon prefab){
         GA.API.Design.NewEvent("Game:Weapon:Choice:" + prefab.SQLId);
-		for(int i=0;i<prefabWeapon.Length;i++){
-			if(prefabWeapon[i].slotType==prefab.slotType){
-				prefabWeapon[i]=prefab;
-				weaponInfo[i]=new WeaponBackUp(prefabWeapon[i].clipSize, prefabWeapon[i].ammoType);
+		for(int i=0;i<myWeapons.Length;i++){
+			if(myWeapons[i].slotType==prefab.slotType){
+				myWeapons[i]=NetworkController.Instance.WeaponSpawn(prefab.name,transform.position, Quaternion.identity,owner.foxView.isChildScene(),owner.foxView.viewID).GetComponent<BaseWeapon>();
+				if(prefab.slotType==BaseWeapon.SLOTTYPE.GRENADE){
+					greandeSlot=i;
+				}
 				return;
 			}
 		}
-		BaseWeapon[] oldprefabWeapon = prefabWeapon;
-		WeaponBackUp[] oldweaponInfo = weaponInfo;
-		prefabWeapon = new BaseWeapon[oldprefabWeapon.Length+1];
-		weaponInfo = new WeaponBackUp[prefabWeapon.Length];
+		BaseWeapon[] oldprefabWeapon = myWeapons;
+		myWeapons = new BaseWeapon[oldprefabWeapon.Length+1];
+
 		for(int i=0;i<oldprefabWeapon.Length;i++){
-			prefabWeapon[i]= oldprefabWeapon[i];
-			weaponInfo[i]=new WeaponBackUp(oldweaponInfo[i]);
-			
+			myWeapons[i]= oldprefabWeapon[i];
 		}
-		prefabWeapon[prefabWeapon.Length-1] = prefab;
-		weaponInfo[prefabWeapon.Length-1]=new WeaponBackUp(prefabWeapon[prefabWeapon.Length-1].clipSize, prefabWeapon[prefabWeapon.Length-1].ammoType);
+		myWeapons[myWeapons.Length-1] = NetworkController.Instance.WeaponSpawn(prefab.name,transform.position, Quaternion.identity,owner.foxView.isChildScene(),owner.foxView.viewID).GetComponent<BaseWeapon>();
+		if(prefab.slotType==BaseWeapon.SLOTTYPE.GRENADE){
+					grenadeSlot=myWeapons.Length-1;
+		}
 	}
 	
 	
 	//Change weapon in inventory 
 	public void ChangePrefab(BaseWeapon newWeapon,WeaponBackUp weaponAddInfo){
-		for(int i=0;i<prefabWeapon.Length;i++){
-			if(prefabWeapon[i].slotType==newWeapon.slotType){
-				DropWeapon(prefabWeapon[i],weaponInfo[i]);
-				prefabWeapon[i]=newWeapon;
-				weaponInfo[i]=new WeaponBackUp(prefabWeapon[i].clipSize, prefabWeapon[i].ammoType);
-				_ChangeWeapon(i);
-				return;
-			}
-		}
-		BaseWeapon[] oldprefabWeapon = prefabWeapon;
-		WeaponBackUp[] oldweaponInfo = weaponInfo;
-		prefabWeapon = new BaseWeapon[oldprefabWeapon.Length+1];
-		weaponInfo = new WeaponBackUp[prefabWeapon.Length];
-		for(int i=0;i<oldprefabWeapon.Length;i++){
-			prefabWeapon[i]= oldprefabWeapon[i];
-			weaponInfo[i]=new WeaponBackUp(oldweaponInfo[i]);
-			
-		}
-		prefabWeapon[prefabWeapon.Length-1] = newWeapon;
-		weaponInfo[prefabWeapon.Length-1]=weaponAddInfo;;
+	
 		return;
 	}
 		//Change weapon in inventory 
@@ -293,9 +230,14 @@ public class InventoryManager : MonoBehaviour {
 	
 	public void NextWeapon(){
 		int newIndex = indexWeapon+1;
-
-		if(newIndex>=prefabWeapon.Length){
+		if(newIndex==grenadeSlot){
+			newIndex++;
+		}
+		if(newIndex>=myWeapons.Length){
 			newIndex=0;
+		}
+		if(newIndex==grenadeSlot){
+			newIndex++;
 		}
 		//Debug.Log ("NextWeapon"+newIndex);
         //cahcedIndex = newIndex;
@@ -304,8 +246,14 @@ public class InventoryManager : MonoBehaviour {
 	}
 	public void PrevWeapon(){
 		int newIndex = indexWeapon-1;
+		if(newIndex==grenadeSlot){
+			newIndex--;
+		}
 		if(newIndex<0){
-			newIndex=prefabWeapon.Length-1;
+			newIndex=myWeapons.Length-1;
+		}
+		if(newIndex==grenadeSlot){
+			newIndex--;
 		}
 		//Debug.Log ("PrevWeapon"+newIndex);
         //cahcedIndex = newIndex;
@@ -326,35 +274,24 @@ public class InventoryManager : MonoBehaviour {
 	}
 
 	protected void _ChangeWeapon(int newWeapon){
-		if(prefabWeapon.Length<=newWeapon){
+		if(myWeapons.Length<=newWeapon|| newWeapon<0){
 			Debug.Log("Selected weapon doesn't exist in current inventory manager");
 			return;
 		}
-		BaseWeapon firstWeapon;
-        if (owner.foxView.isChildScene())
-        {
-            firstWeapon = NetworkController.Instance.WeaponSpawn(prefabWeapon[newWeapon].name, transform.position, Quaternion.identity,true,owner.foxView.viewID).GetComponent<BaseWeapon>();
-            //Debug.Log("Turret weapon spawn");
-        }
-        else
-        {
-            firstWeapon = NetworkController.Instance.WeaponSpawn(prefabWeapon[newWeapon].name, transform.position, Quaternion.identity,false,owner.foxView.viewID).GetComponent<BaseWeapon>();
-        }
-
+		BaseWeapon firstWeapon = myWeapons[newWeapon];
+     
 	
 	
 		if(currentWeapon!=null){
-			if(indexWeapon!=newWeapon){
-				SaveOldInfo(indexWeapon,currentWeapon);
-			}
-			currentWeapon.RequestKillMe();
+			
+			currentWeapon.PutAway();
 		}
 
 		//TakeWeaponAway ();
 		indexWeapon=newWeapon;
 		currentWeapon=firstWeapon;
 		owner.setWeapon(firstWeapon);
-		LoadOldInfo();
+		firstWeapon.TakeInHand();
 			
 
 	}

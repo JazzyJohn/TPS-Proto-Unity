@@ -274,10 +274,8 @@ public class BaseWeapon : DestroyableNetworkObject {
 		}
 		owner = inowner;
 
-		curTransform.parent = weaponSlot;
-		curTransform.localPosition = Offset;
-		//Debug.Log (name + weaponRotator);
-		curTransform.localRotation = weaponRotator;
+		TakeInHand(weaponSlot,Offset,weaponRotator);
+	
         
 		//RemoteAttachWeapon(inowner);
 		reloadTime =reloadTime*owner.GetPercentValue(CharacteristicList.RELOAD_SPEED);
@@ -315,11 +313,12 @@ public class BaseWeapon : DestroyableNetworkObject {
 			Destroy(gameObject);
             return;
 		}
-		owner.setWeapon (this);
+		curTransform.parent = owner.GetSlotForWeapon(slotType);
 		if (rifleParticleController != null) {
 			rifleParticleController.SetOwner (owner.collider);
 		}
 		init = true;
+		enabled = false;
 	}
     void Update()
     {
@@ -954,14 +953,18 @@ public class BaseWeapon : DestroyableNetworkObject {
     /// Generate random distribution coef for projectile
     /// </summary>
 	public float GetRandomeDirectionCoef(){
-		float effAimRandCoef = _randShootCoef;
+		float effAimRandCoef =0;
+		
 		if (owner.isAiming) {
 			effAimRandCoef+=aimRandCoef;
 		}else{
 			effAimRandCoef+=normalRandCoef;
 		}
-
+		effAimRandCoef*= owner.AimingCoefMultiplier ();
+		
+		effAimRandCoef+=_randShootCoef
 		effAimRandCoef+= owner.AimingCoef ();
+		
 		if(effAimRandCoef>maxRandEffect){
 			effAimRandCoef =maxRandEffect;
 		}
@@ -977,7 +980,7 @@ public class BaseWeapon : DestroyableNetworkObject {
 	}
     public bool IsRandMax()
     {
-        float effAimRandCoef = _randShootCoef;
+        float effAimRandCoef = 0;
         if (owner.isAiming)
         {
             effAimRandCoef += aimRandCoef;
@@ -986,8 +989,11 @@ public class BaseWeapon : DestroyableNetworkObject {
         {
             effAimRandCoef += normalRandCoef;
         }
-
+		effAimRandCoef*= owner.AimingCoefMultiplier ();
+		
+		effAimRandCoef+=_randShootCoef
         effAimRandCoef += owner.AimingCoef();
+		
         return effAimRandCoef > maxRandEffect;
         
     }
@@ -1104,7 +1110,7 @@ public class BaseWeapon : DestroyableNetworkObject {
 		return projScript;
 	}
   
-	protected Quaternion getAimRotation(){
+	protected virtual Quaternion getAimRotation(){
 		/*Vector3 randVec = Random.onUnitSphere;
 		Vector3 normalDirection  = owner.getAimRotation(weaponRange)-muzzlePoint.position;
 		normalDirection =normalDirection + randVec.normalized * normalDirection.magnitude * aimRandCoef / 100;*/
@@ -1151,6 +1157,30 @@ public class BaseWeapon : DestroyableNetworkObject {
 		}
         return isReload;
 	}
-
+	
+	public void PutAway(){
+		enabled = false;
+		curTransform.parent = owner.GetSlotForWeapon(slotType);
+		StopFire();
+		if(foxView.isMine){
+			foxView.PutAway();
+		}
+	}
+	public void TakeInHand(){
+		enabled = true;
+		if(foxView.isMine){
+			//owner.ForcedWeaponAttach(this);
+			foxView.TakeInHand();
+		}else{
+			owner.setWeapon(this);
+		}
+	}
+	public void TakeInHand(Transform weaponSlot,Vector3 Offset, Quaternion weaponRotator){
+		enabled = true;
+		curTransform.parent = weaponSlot;
+		curTransform.localPosition = Offset;
+		//Debug.Log (name + weaponRotator);
+		curTransform.localRotation = weaponRotator;
+	}
 
 }

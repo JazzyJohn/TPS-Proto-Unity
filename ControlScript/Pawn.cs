@@ -22,6 +22,8 @@ public enum CharacterState
     DeActivate = 8,
     Activate = 9,
     Dead = 10,
+	
+	Crouching = 11,
 }
 public enum WallState
 {
@@ -83,6 +85,8 @@ public class Pawn : DamagebleObject
     public BaseWeapon CurWeapon;
 
     public Transform weaponSlot;
+	
+	public Transform[] putAwaySlots;
 
     //Nautaral weapons like hand or claws
 
@@ -204,6 +208,8 @@ public class Pawn : DamagebleObject
     public float groundSprintSpeed;
 
     public float groundRunSpeed;
+	
+	public float groundCrouchSpeed;
 
     public float flySpeed;
 
@@ -308,6 +314,10 @@ public class Pawn : DamagebleObject
 	public bool isFps= false;
 
     public float aimModCoef = -10.0f;
+	
+	public float aimCrouchPercentMultiplier =0.1f;
+	
+	public float aimJumpPercentMultiplier=0.1f;
 
     public bool isLookingAt = true;
 
@@ -494,7 +504,6 @@ public class Pawn : DamagebleObject
 
         if (isAi)
         {
-            ivnMan.Init();
             AfterSpawnAction();
         }
         //Debug.Log (distToGround);
@@ -533,6 +542,8 @@ public class Pawn : DamagebleObject
 
         groundWalkSpeed = groundWalkSpeed * GetPercentValue(CharacteristicList.SPEED);
 
+		groundCrouchSpeed = groundCrouchSpeed  * GetPercentValue(CharacteristicList.SPEED);
+		
         jumpHeight = jumpHeight * GetPercentValue(CharacteristicList.JUMPHEIGHT);
     }
     public float GetSize()
@@ -1591,7 +1602,7 @@ public class Pawn : DamagebleObject
 
     public virtual void StartFire()
     {
-        if (CurWeapon != null)
+        if (CurWeapon != null&&CurWeapon.slotType!=BaseWeapon.SLOTTYPE.GRENADE)
         {
             CurWeapon.StartFire();
         }
@@ -1618,6 +1629,29 @@ public class Pawn : DamagebleObject
             CurWeapon.StopPumping();
         }
     }
+	
+	public virtual void StopGrenadeThrow(){
+		if(CurWeapon.slotType==BaseWeapon.SLOTTYPE.GRENADE){
+			invMan.PutGrenadeAway();
+		}
+	}
+	
+	public virtual void StartGrenadeThrow(){
+		if(CanUseGrenade()){
+		
+		}
+		invMan.TakeGrenade();
+		
+	}
+	public virtual bool CanUseGrenade(){
+		return characterState == CharacterState.Sprinting||characterState == CharacterState.Jumping||invMan.HasGrenade();
+	}
+	public virtual void ThrowGrenade(){
+		if(CurWeapon.slotType==BaseWeapon.SLOTTYPE.GRENADE){
+			curWeapon.StartFire();
+			invMan.PutGrenadeAway();
+		}
+	}
     //Setting new weapon if not null try to attach it
     public void setWeapon(BaseWeapon newWeapon)
     {
@@ -1629,7 +1663,7 @@ public class Pawn : DamagebleObject
         //Debug.Log (newWeapon);
         if (CurWeapon != null)
         {
-            CurWeapon.AttachWeapon(weaponSlot, Vector3.zero, Quaternion.Euler(weaponRotatorOffset), this);
+			ForcedWeaponAttach(CurWeapon);
             if (animator != null)
             {
                 animator.SetWeaponType(CurWeapon.animType);
@@ -1642,6 +1676,11 @@ public class Pawn : DamagebleObject
             if (invisible) MakeWeaponInvisible();
         }
     }
+	
+	public void ForcedWeaponAttach(BaseWeapon newWeapon){
+	
+	     newWeapon.AttachWeapon(weaponSlot, Vector3.zero, Quaternion.Euler(weaponRotatorOffset), this);
+	}
     public void SetCurWeaponFov()
     {
         if (cameraController != null && CurWeapon!=null)
@@ -1651,6 +1690,12 @@ public class Pawn : DamagebleObject
         }
     }
 
+	public Transform GetSlotForWeapon(BaseWeapon.SLOTTYPE type){
+		if(putAwaySlots.Lenght<=(int)type){
+			return myTransform;
+		}
+		return putAwaySlots[(int)type];
+	}
 
     public void ChangeWeapon(int weaponIndex)
     {
@@ -1909,6 +1954,26 @@ public class Pawn : DamagebleObject
         }
         return 0.0f;
     }
+	
+
+	
+	public float AimingCoefMultiplier(){
+		float mult= 1.0f;
+		   switch (characterState)
+        {
+           
+			case CharacterState.Crouching:
+				mult-=aimCrouchPercentMultiplier;
+            break;
+          
+            case CharacterState.Jumping:
+				mult+=aimJumpPercentMultiplier;
+			break;
+		}
+		return mult;
+		
+	
+	}
 
 
     public virtual void ToggleAim(bool value)
@@ -1917,6 +1982,7 @@ public class Pawn : DamagebleObject
         {
             return;
         }
+	
         if (CurWeapon!=null)
         {
             if (CurWeapon.ToggleAim(value) && value)
@@ -1924,6 +1990,7 @@ public class Pawn : DamagebleObject
                 return;
             }
         }
+		
         isAiming = value;
         animator.ToggleAim(value);
         if (cameraController != null)
@@ -2594,6 +2661,7 @@ public class Pawn : DamagebleObject
         if (jetPackCharge >= 1.0f)
         {
             StartJetPack();
+			StopGrenadeThrow();
             characterState = CharacterState.Sprinting;
         }
 
@@ -2671,6 +2739,7 @@ public class Pawn : DamagebleObject
             case CharacterState.Idle:
             case CharacterState.Running:
             case CharacterState.Walking:
+			case CharacterState.Crouching:
                 if (isGrounded)
                 {
                     jetPackEnable = false;
