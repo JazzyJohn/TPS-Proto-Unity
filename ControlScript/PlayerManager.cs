@@ -68,7 +68,7 @@ public class PlayerManager : MonoBehaviour {
 
 	
 		
-        localPlayer = (Pawn)NetworkController.Instance.PawnSpawnRequest(newPalyerClass, targetPos.position, targetPos.rotation, false, stims,false).GetComponent<Pawn>();
+        localPlayer = (Pawn)NetworkController.Instance.BeginPawnSpawnRequest(newPalyerClass, targetPos.position, targetPos.rotation, false, stims,false).GetComponent<Pawn>();
 
 		return localPlayer;
     }
@@ -76,9 +76,9 @@ public class PlayerManager : MonoBehaviour {
 
     public Pawn SpawmBot(Pawn newPalyerClass, Vector3 position,Quaternion rotation ,int[] stims) {
 		Pawn localPlayer;
-	
-	
-		localPlayer =NetworkController.Instance.PawnSpawnRequest(newPalyerClass.name,position,rotation, false, stims,false).GetComponent<Pawn>();
+
+
+        localPlayer = NetworkController.Instance.BeginPawnSpawnRequest(newPalyerClass.name, position, rotation, false, stims, false).GetComponent<Pawn>();
 		
 		return localPlayer;
     }

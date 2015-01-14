@@ -83,6 +83,14 @@
   </keys>
   <keys>
     <name>Skill1</name>
+    <default>R</default>
+  </keys>
+  <keys>
+    <name>Grenade</name>
     <default>G</default>
+  </keys>
+<keys>
+    <name>Crouch</name>
+    <default>C</default>
   </keys>
 </input>

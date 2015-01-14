@@ -8,7 +8,6 @@ public class WeaponPicker : UseObject {
 
 	public int WeaponId;
 
-	public InventoryManager.WeaponBackUp info;
 
 	protected void Start(){
 		prefabWeapon = ItemManager.instance.weaponPrefabsListbyId [WeaponId];
@@ -17,25 +16,12 @@ public class WeaponPicker : UseObject {
 	}
 
 	override public bool ActualUse(Pawn target){
-		if (info == null) {
-			target.GetComponent<InventoryManager> ().ChangePrefab (prefabWeapon);		
-		} else {
-			target.GetComponent<InventoryManager> ().ChangePrefab (prefabWeapon,info);
-		}
+		
+		target.GetComponent<InventoryManager> ().ChangePrefab (prefabWeapon);		
+	
 		return base.ActualUse(target);
 	}
 
-	public void SetNewData( InventoryManager.WeaponBackUp info){
-
-//todo Puicker
-        //foxView.RPC("RPCSetPicker", PhotonTargets.All, info.amount, (int)info.type);
-
-	}
-	[RPC] 
-	public void RPCSetPicker(int amount,int type){
-		info = new InventoryManager.WeaponBackUp (amount,(AMMOTYPE)type);
-
-	}
-		
+	
 
 }

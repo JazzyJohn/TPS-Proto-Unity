@@ -297,7 +297,7 @@ public class Player : MonoBehaviour {
                     prefabBot = PlayerManager.instance.avaibleBots[selectedBot];
                     prefabGhostBot = PlayerManager.instance.ghostsBots[selectedBot];
                 }
-
+                NetworkController.Instance.EndPawnSpawnRequest();
 			}
 			robotTime =  charMan.GetFloatChar(CharacteristicList.PLAYER_JUGGER_TIME);
 			canSpamBot=true;

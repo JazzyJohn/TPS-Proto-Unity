@@ -422,6 +422,7 @@ public class Pawn : DamagebleObject
         yAngle = desiredRotation.eulerAngles.y;
         Invoke("SpawnImmortalityEnd", spawnImortalityDuration);
         timeSpawned = Time.time;
+        ivnMan.Init();
     }
 	public void SpawnImmortalityEnd(){
 		isSpawnImortality= false;
@@ -484,7 +485,7 @@ public class Pawn : DamagebleObject
 
         correctPlayerPos = transform.position;
 
-        ivnMan.Init();
+    
         centerOffset = capsule.bounds.center - myTransform.position;
         headOffset = centerOffset;
         headOffset.y = capsule.bounds.max.y - myTransform.position.y- headOddsetFloat;
@@ -580,7 +581,7 @@ public class Pawn : DamagebleObject
         idMain = Choice._Main[myId],
         idExtra = Choice._Extra[myId],
         idTaunt = Choice._Taunt[myId];
-        ivnMan.Init();
+      
         if (!idPersonal.IsSameIndex(WeaponIndex.Zero))
         {
             ivnMan.SetSlot(ItemManager.instance.GetWeaponprefabByID(idPersonal));
@@ -1632,24 +1633,25 @@ public class Pawn : DamagebleObject
 	
 	public virtual void StopGrenadeThrow(){
 		if(CurWeapon.slotType==BaseWeapon.SLOTTYPE.GRENADE){
-			invMan.PutGrenadeAway();
+
+            ivnMan.PutGrenadeAway();
 		}
 	}
 	
 	public virtual void StartGrenadeThrow(){
 		if(CanUseGrenade()){
-		
-		}
-		invMan.TakeGrenade();
+            ivnMan.TakeGrenade();
+        } 
+   
 		
 	}
 	public virtual bool CanUseGrenade(){
-		return characterState == CharacterState.Sprinting||characterState == CharacterState.Jumping||invMan.HasGrenade();
+        return characterState == CharacterState.Sprinting || characterState == CharacterState.Jumping || ivnMan.HasGrenade();
 	}
 	public virtual void ThrowGrenade(){
 		if(CurWeapon.slotType==BaseWeapon.SLOTTYPE.GRENADE){
-			curWeapon.StartFire();
-			invMan.PutGrenadeAway();
+            CurWeapon.StartFire();
+            ivnMan.PutGrenadeAway();
 		}
 	}
     //Setting new weapon if not null try to attach it
@@ -1691,7 +1693,7 @@ public class Pawn : DamagebleObject
     }
 
 	public Transform GetSlotForWeapon(BaseWeapon.SLOTTYPE type){
-		if(putAwaySlots.Lenght<=(int)type){
+		if(putAwaySlots.Length<=(int)type){
 			return myTransform;
 		}
 		return putAwaySlots[(int)type];
@@ -2389,6 +2391,11 @@ public class Pawn : DamagebleObject
         return characterState == CharacterState.Sprinting;
 
     }
+    public bool IsCrouch()
+    {
+        return characterState == CharacterState.Crouching;
+
+    }
     public virtual bool CanSprint()
     {
         return jetPackCharge >= 1.0f || characterState == CharacterState.Sprinting;
@@ -2711,7 +2718,7 @@ public class Pawn : DamagebleObject
         {
             KillIt(null);
         }
-       // Debug.Log(characterState +" " +isGrounded);
+//        Debug.Log(characterState +" " +isGrounded);
         Vector3 velocity = _rb.velocity;
         /* if(nextMovement.y==0){
              nextMovement.y = velocity.y;

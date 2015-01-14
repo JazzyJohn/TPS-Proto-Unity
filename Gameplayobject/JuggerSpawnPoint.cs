@@ -31,8 +31,8 @@ public class JuggerSpawnPoint : MonoBehaviour {
 		}
 	}	
 	void SpawnJugger(){
-		spawnedObject = NetworkController.Instance.PawnSpawnRequest(juggerName, transform.position, transform.rotation, false, new int[0],true);
-                 
+        spawnedObject = NetworkController.Instance.BeginPawnSpawnRequest(juggerName, transform.position, transform.rotation, false, new int[0], true);
+        NetworkController.Instance.EndPawnSpawnRequest();      
 	}
 	
 	void OnMasterClientSwitched(){

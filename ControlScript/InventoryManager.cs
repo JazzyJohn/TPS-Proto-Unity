@@ -6,14 +6,14 @@ public enum AMMOTYPE{PISTOL,RIFLE,ROCKETS,MACHINEGUN,SHOOTGUNSHEELL,FUEL,GRENADE
 [RequireComponent (typeof (Pawn))]
 public class InventoryManager : MonoBehaviour {
 
-	private BaseWeapon[] myWeapons;
+	private BaseWeapon[] myWeapons = new BaseWeapon[0] ;
     public string[] weaponNames;
 
 	private BaseWeapon currentWeapon;
 	
 	private int indexWeapon;
 	
-	private int grenadeSlot;
+	private int grenadeSlot=-1;
 	
 	private int beforeGrenade;
 	
@@ -35,32 +35,42 @@ public class InventoryManager : MonoBehaviour {
 
     public void Awake()
     {
-        prefabWeapon = new BaseWeapon[weaponNames.Length];
-        for (int i =0;i<weaponNames.Length;i++)
-        {
-			
-			myWeapons[i] = NetworkController.Instance.WeaponSpawn(weaponNames[i] transform.position, Quaternion.identity,owner.foxView.isChildScene(),owner.foxView.viewID).GetComponent<BaseWeapon>();
-			if(prefab.slotType==BaseWeapon.SLOTTYPE.GRENADE){
-				greandeSlot=i;
-			}
-        }
+       
     }
 	
 	
 	
 	private AmmoBag[] allAmmo;
-	 	
 
-	public virtual void Init(){
-		if (owner == null) {
-			owner = GetComponent<Pawn> ();
-			if (owner.foxView.isMine) {
-				
-				GenerateBag ();
-			
-				
-			}
-		}
+
+    public virtual void Init()
+    {
+        if (owner == null)
+        {
+            owner = GetComponent<Pawn>();
+           
+
+            GenerateBag();
+
+
+        }
+        SpawnWeaponFromNameList();
+    }
+
+    protected void SpawnWeaponFromNameList(){
+        if (weaponNames.Length > 0)
+        {
+            myWeapons = new BaseWeapon[weaponNames.Length];
+        }
+        for (int i = 0; i < weaponNames.Length; i++)
+        {
+
+            myWeapons[i] = NetworkController.Instance.WeaponSpawn(weaponNames[i], transform.position, Quaternion.identity, owner.foxView.isChildScene(), owner.foxView.viewID).GetComponent<BaseWeapon>();
+            if (myWeapons[i].slotType == BaseWeapon.SLOTTYPE.GRENADE)
+            {
+                grenadeSlot = i;
+            }
+        }
 	}
 	//Start Weapon generation
 	public void GenerateWeaponStart(){
@@ -171,7 +181,7 @@ public class InventoryManager : MonoBehaviour {
         }
 
     }
-	public virtual void HasGrenade(){
+	public virtual bool HasGrenade(){
 		return myWeapons[grenadeSlot].curAmmo>0;
 	}
 	//AMMO BAG SECTION END
@@ -191,8 +201,9 @@ public class InventoryManager : MonoBehaviour {
 			if(myWeapons[i].slotType==prefab.slotType){
 				myWeapons[i]=NetworkController.Instance.WeaponSpawn(prefab.name,transform.position, Quaternion.identity,owner.foxView.isChildScene(),owner.foxView.viewID).GetComponent<BaseWeapon>();
 				if(prefab.slotType==BaseWeapon.SLOTTYPE.GRENADE){
-					greandeSlot=i;
+                    grenadeSlot = i;
 				}
+                myWeapons[myWeapons.Length - 1].AttachWeaponToChar(owner);
 				return;
 			}
 		}
@@ -206,24 +217,22 @@ public class InventoryManager : MonoBehaviour {
 		if(prefab.slotType==BaseWeapon.SLOTTYPE.GRENADE){
 					grenadeSlot=myWeapons.Length-1;
 		}
+        myWeapons[myWeapons.Length - 1].AttachWeaponToChar(owner);
 	}
 	
 	
 	//Change weapon in inventory 
-	public void ChangePrefab(BaseWeapon newWeapon,WeaponBackUp weaponAddInfo){
+	public void ChangePrefab(BaseWeapon newWeapon){
 	
 		return;
 	}
-		//Change weapon in inventory 
-	public void ChangePrefab(BaseWeapon newWeapon){
-		ChangePrefab (newWeapon, new WeaponBackUp (newWeapon.clipSize, newWeapon.ammoType));
-	}
+	
 	//implementation of dropping weapon on ground after picking another one 
-	void DropWeapon(BaseWeapon oldWeapon,WeaponBackUp weaponinfo){
+	void DropWeapon(BaseWeapon oldWeapon){
 
 		GameObject droppedWeapon =NetworkController.Instance.SimplePrefabSpawn(oldWeapon.pickupPrefabPrefab.name,transform.position,transform.rotation);
 		WeaponPicker picker = droppedWeapon.GetComponent<WeaponPicker>();
-		picker.SetNewData (weaponinfo);
+	
 		//picker.info =weaponinfo;
 
 	}

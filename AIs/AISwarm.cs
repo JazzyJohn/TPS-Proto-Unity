@@ -207,24 +207,26 @@ public class AISwarm:MonoBehaviour
     {
 
 		position =NormalizePositon(position);
-        GameObject obj = NetworkController.Instance.PawnForSwarmSpawnRequest(prefabName, position, respawns[point].transform.rotation, new int[0], aiGroup, point);
+        GameObject obj = NetworkController.Instance.BeginPawnForSwarmSpawnRequest(prefabName, position, respawns[point].transform.rotation, new int[0], aiGroup, point);
         Pawn pawn = obj.GetComponent<Pawn>();
         pawn.SetTeam(0);
 
         AIBase ai = obj.GetComponent<AIBase>();
         ai.Init(aiGroup, this, point);
         AfterSpawnAction(ai);
+        NetworkController.Instance.EndPawnSpawnRequest();
     }
     public virtual void SpawnBot(string prefabName, int point, Vector3 position,int team)
     {
 		position =NormalizePositon(position);
-        GameObject obj = NetworkController.Instance.PawnForSwarmSpawnRequest(prefabName, position, respawns[point].transform.rotation, new int[0], aiGroup, point, team);
+        GameObject obj = NetworkController.Instance.BeginPawnForSwarmSpawnRequest(prefabName, position, respawns[point].transform.rotation, new int[0], aiGroup, point, team);
         Pawn pawn = obj.GetComponent<Pawn>();
         pawn.SetTeam(team);
 
         AIBase ai = obj.GetComponent<AIBase>();
         ai.Init(aiGroup, this, point);
         AfterSpawnAction(ai);
+        NetworkController.Instance.EndPawnSpawnRequest();
     }
     public virtual  void SendData(ISFSObject swarmSend)
     {

@@ -13,8 +13,8 @@ public class TurretSkill : SkillBehaviour
     {
         if (foxView.isMine)
         {
-         
-            Pawn _turret = NetworkController.Instance.PawnSpawnRequest(turret, target + Vector3.up * 2, owner.myTransform.rotation, true, new int[0], false).GetComponent<Pawn>();
+
+            Pawn _turret = NetworkController.Instance.BeginPawnSpawnRequest(turret, target + Vector3.up * 2, owner.myTransform.rotation, true, new int[0], false).GetComponent<Pawn>();
             _turret.SetTeam(owner.team);
             _turret.player = owner.player;
             if (owner.player.building != null)
@@ -22,6 +22,7 @@ public class TurretSkill : SkillBehaviour
                 owner.player.building.RequestKillMe();
             }
             owner.player.building = _turret;
+            NetworkController.Instance.EndPawnSpawnRequest();
         }
     }
 

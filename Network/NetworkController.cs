@@ -829,23 +829,23 @@ public class NetworkController : MonoBehaviour {
 
 
     }
-
+    public ISFSObject pawnSpawnData = new SFSObject();
     /// <summary>
     /// pawnSpawn request to server
+    /// 
     /// </summary>	
-    public GameObject PawnSpawnRequest(string prefab, Vector3 vector3,Quaternion quaternion,bool isAI,int[] stims,bool scene)
+    public GameObject BeginPawnSpawnRequest(string prefab, Vector3 vector3, Quaternion quaternion, bool isAI, int[] stims, bool scene)
     {
-        ISFSObject data = new SFSObject();
-       
-        data.PutBool("Scene", scene);
-        data.PutBool("isAI", isAI);
-		data.PutIntArray("stims", stims);
-        GameObject go = InstantiateNetPrefab(prefab, vector3, quaternion, data,scene);
+
+
+        pawnSpawnData.PutBool("Scene", scene);
+        pawnSpawnData.PutBool("isAI", isAI);
+        pawnSpawnData.PutIntArray("stims", stims);
+        GameObject go = InstantiateNetPrefab(prefab, vector3, quaternion, pawnSpawnData, scene);
         PawnModel pawn = go.GetComponent<Pawn>().GetSerilizedData();
-		pawn.type = prefab;
-        data.PutClass("pawn",pawn);
-        ExtensionRequest request = new ExtensionRequest("pawnSpawn", data, serverHolder.gameRoom);
-        smartFox.Send(request);
+        pawn.type = prefab;
+        pawnSpawnData.PutClass("pawn", pawn);
+      
         return go;
 
 
@@ -853,9 +853,9 @@ public class NetworkController : MonoBehaviour {
     /// <summary>
     /// pawnSpawn request to server
     /// </summary>	
-    public GameObject PawnForSwarmSpawnRequest(string prefab, Vector3 vector3, Quaternion quaternion, int[] stims,int swarm,int home, int team = 0, List<CharacteristicToAdd> bonusData=null)
+    public GameObject BeginPawnForSwarmSpawnRequest(string prefab, Vector3 vector3, Quaternion quaternion, int[] stims,int swarm,int home, int team = 0, List<CharacteristicToAdd> bonusData=null)
     {
-        ISFSObject data = new SFSObject();
+      
 		if(bonusData!=null){
 			ISFSArray sendBonuses = new SFSArray();
 			foreach(CharacteristicToAdd bonus in bonusData){
@@ -887,28 +887,38 @@ public class NetworkController : MonoBehaviour {
                 }
 				 
 			}
-			data.PutSFSArray("bonus",sendBonuses);
+            pawnSpawnData.PutSFSArray("bonus", sendBonuses);
 		}
-		
-        data.PutBool("Scene", true);
-        data.PutBool("isAI", true);
-        data.PutIntArray("stims", stims);
-        GameObject go = InstantiateNetPrefab(prefab, vector3, quaternion, data, true);
+
+        pawnSpawnData.PutBool("Scene", true);
+        pawnSpawnData.PutBool("isAI", true);
+        pawnSpawnData.PutIntArray("stims", stims);
+        GameObject go = InstantiateNetPrefab(prefab, vector3, quaternion, pawnSpawnData, true);
         PawnModel pawn = go.GetComponent<Pawn>().GetSerilizedData();
         pawn.type = prefab;
         pawn.team = team;
-        data.PutClass("pawn", pawn);
-        data.PutInt("group", swarm);
-        data.PutInt("home", home);
+        pawnSpawnData.PutClass("pawn", pawn);
+        pawnSpawnData.PutInt("group", swarm);
+        pawnSpawnData.PutInt("home", home);
         Debug.Log(serverHolder.gameRoom);
-        ExtensionRequest request = new ExtensionRequest("pawnSpawn", data, serverHolder.gameRoom);
-        smartFox.Send(request);
+      
+        
 		if(bonusData!=null){
             go.GetComponent<Pawn>().AddExternalCharacteristic(bonusData);
 		}
         return go;
 
 
+    }
+
+
+    public void EndPawnSpawnRequest()
+    {
+        if (pawnSpawnData != null)
+        {
+            ExtensionRequest request = new ExtensionRequest("pawnSpawn", pawnSpawnData, serverHolder.gameRoom);
+            smartFox.Send(request);
+        }
     }
     /// <summary>
     /// pawnChangeShootAnimState request to server
@@ -2089,6 +2099,7 @@ public class NetworkController : MonoBehaviour {
     public void HandleChangeWeaponState(ISFSObject dt)
     {
         BaseWeapon weapon = GetView(dt.GetInt("id")).weapon;
+        Debug.Log("HandleChangeWeaponState");
 		if(dt.GetBool("state")){
 			weapon.TakeInHand();
 		}else{

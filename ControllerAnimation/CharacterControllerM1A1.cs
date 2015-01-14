@@ -74,6 +74,7 @@ public class CharacterControllerM1A1 : MonoBehaviour {
             case CharacterState.Walking:
             case CharacterState.Sprinting:
             case CharacterState.Idle:
+            case CharacterState.Crouching:
                 Vector3 velocity = animator.deltaPosition / Time.deltaTime;
 		        velocity.y = characterRigidbody.velocity.y;
 		        characterRigidbody.velocity = velocity;
@@ -185,12 +186,14 @@ public class CharacterControllerM1A1 : MonoBehaviour {
 			
 			Horizontal *= speedAimFactor * speedSprintFactor;
 			Vertical *= speedAimFactor * speedSprintFactor;
-			
+
+
+            Debug.Log(character.IsCrouch());
 			if (character.IsCrouch()&&!isCrouch) {
 				isCrouch = true;
 				animator.SetTrigger (Animator.StringToHash ("CrouchTrigger"));
 			}
-			if(!character.IsCrouch()&&isCrouch)
+			if(!character.IsCrouch()&&isCrouch){
 				isCrouch = false;
 				animator.SetTrigger (Animator.StringToHash ("UpTrigger"));
 			}

@@ -264,7 +264,34 @@ public class BaseWeapon : DestroyableNetworkObject {
 			rifleParticleController.SetOwner (owner.collider);
 		}
 	}
-
+    public void AttachWeaponToChar(Pawn newowner)
+    {
+        if (curTransform == null)
+        {
+            curTransform = transform;
+        }
+        owner = newowner;
+        if (owner == null)
+        {
+            //Destroy(photonView);
+            Debug.Log("DestoroyATTACHEs");
+            Destroy(gameObject);
+            return;
+        }
+        curTransform.parent = owner.GetSlotForWeapon(slotType);
+        curTransform.localPosition = Vector3.zero;
+        curTransform.localRotation = Quaternion.identity;
+        if (rifleParticleController != null)
+        {
+            rifleParticleController.SetOwner(owner.collider);
+        }
+        init = true;
+        enabled = false;
+        if(foxView.isMine){
+            curAmmo = owner.GetComponent<InventoryManager>().GiveAmmo(ammoType, clipSize - curAmmo);
+        }
+      
+    }
 	public virtual void AttachWeapon(Transform weaponSlot,Vector3 Offset, Quaternion weaponRotator,Pawn inowner){
 		if (curTransform == null) {
 			curTransform = transform;		
@@ -303,22 +330,7 @@ public class BaseWeapon : DestroyableNetworkObject {
 	}
 
 	public void RemoteAttachWeapon(Pawn newowner){
-		if (curTransform == null) {
-			curTransform = transform;		
-		}
-		owner =newowner;
-		if (owner == null) {
-			//Destroy(photonView);
-			Debug.Log ("DestoroyATTACHEs");
-			Destroy(gameObject);
-            return;
-		}
-		curTransform.parent = owner.GetSlotForWeapon(slotType);
-		if (rifleParticleController != null) {
-			rifleParticleController.SetOwner (owner.collider);
-		}
-		init = true;
-		enabled = false;
+       AttachWeaponToChar(newowner);
 	}
     void Update()
     {
@@ -961,8 +973,8 @@ public class BaseWeapon : DestroyableNetworkObject {
 			effAimRandCoef+=normalRandCoef;
 		}
 		effAimRandCoef*= owner.AimingCoefMultiplier ();
-		
-		effAimRandCoef+=_randShootCoef
+
+        effAimRandCoef += _randShootCoef;
 		effAimRandCoef+= owner.AimingCoef ();
 		
 		if(effAimRandCoef>maxRandEffect){
@@ -990,8 +1002,8 @@ public class BaseWeapon : DestroyableNetworkObject {
             effAimRandCoef += normalRandCoef;
         }
 		effAimRandCoef*= owner.AimingCoefMultiplier ();
-		
-		effAimRandCoef+=_randShootCoef
+
+        effAimRandCoef += _randShootCoef;
         effAimRandCoef += owner.AimingCoef();
 		
         return effAimRandCoef > maxRandEffect;
@@ -1161,6 +1173,8 @@ public class BaseWeapon : DestroyableNetworkObject {
 	public void PutAway(){
 		enabled = false;
 		curTransform.parent = owner.GetSlotForWeapon(slotType);
+        curTransform.localPosition = Vector3.zero;
+        curTransform.localRotation = Quaternion.identity;
 		StopFire();
 		if(foxView.isMine){
 			foxView.PutAway();

@@ -182,23 +182,27 @@ public virtual void UpdateSmoothedMovementDirection ()
 		
 		// Pick speed modifier
 		//Debug.Log (!Input.GetKey (KeyCode.LeftShift) &&! Input.GetKey (KeyCode.RightShift));
-		
-		bool crouch = InputManager.instance.GetButton("Crouch") 
+
+        bool crouch = InputManager.instance.GetButton("Crouch");
 		
 		if (pawn.isAiming ) {
 			
-			if(isMoving){
+			
 				if(crouch){
 					targetSpeed *= pawn.groundCrouchSpeed;
-					characterState = CharacterState.Crouching;
+                    characterState = CharacterState.Crouching;
 				}else{
-					targetSpeed *= pawn.groundWalkSpeed;
-					characterState = CharacterState.Walking;
+                    if(isMoving){
+					    targetSpeed *= pawn.groundWalkSpeed;
+					    characterState = CharacterState.Walking;
+                    }
+                    else
+                    {
+                        targetSpeed *= 0;
+                        characterState = CharacterState.Idle;
+                    }
 				}
-			}else{
-			    targetSpeed *= 0;
-				characterState = CharacterState.Idle;
-			}
+			
 
         }
         else if (InputManager.instance.GetButton("Sprint") && pawn.CanSprint())
@@ -216,18 +220,21 @@ public virtual void UpdateSmoothedMovementDirection ()
 		{
 
 			
-			if(isMoving){
+	
 				if(crouch){
 					targetSpeed *= pawn.groundCrouchSpeed;
 					characterState = CharacterState.Crouching;
 				}else{
-					targetSpeed *= pawn.groundRunSpeed;
-					characterState = CharacterState.Running;
+                    if (isMoving)
+                    {
+					    targetSpeed *= pawn.groundRunSpeed;
+					    characterState = CharacterState.Running;
+                    }else{
+				        targetSpeed *= 0;
+				        characterState = CharacterState.Idle;
+			        }
 				}
-			}else{
-				targetSpeed *= 0;
-				characterState = CharacterState.Idle;
-			}
+			
 		}
 
         moveSpeed = targetSpeed;
@@ -446,7 +453,7 @@ void FixedUpdate ()
    
 	Vector3 movement= moveDirection * moveSpeed + new Vector3 (0, verticalSpeed, 0) + inAirVelocity;
 
-   // Debug.Log("inController" + movement);
+//    Debug.Log("inController" + movement);
 		//Debug.Log (movement.magnitude);
 		pawn.Movement (movement, characterState);
 

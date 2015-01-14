@@ -83,9 +83,9 @@ public class AISwarm_HoldWave : AISwarm_QuantizeWave
 		position =NormalizePositon(position);
         GameObject obj;
 		if(curData!=-1){
-			obj= NetworkController.Instance.PawnForSwarmSpawnRequest(prefabName, position, respawns[point].transform.rotation, new int[0], aiGroup, point,0,waveData[curData].bonusData);
+            obj = NetworkController.Instance.BeginPawnForSwarmSpawnRequest(prefabName, position, respawns[point].transform.rotation, new int[0], aiGroup, point, 0, waveData[curData].bonusData);
 		}else{
-			obj= NetworkController.Instance.PawnForSwarmSpawnRequest(prefabName, position, respawns[point].transform.rotation, new int[0], aiGroup, point);
+            obj = NetworkController.Instance.BeginPawnForSwarmSpawnRequest(prefabName, position, respawns[point].transform.rotation, new int[0], aiGroup, point);
 
 		}
 		
@@ -95,6 +95,7 @@ public class AISwarm_HoldWave : AISwarm_QuantizeWave
         AIBase ai = obj.GetComponent<AIBase>();
         ai.Init(aiGroup, this, point);
         AfterSpawnAction(ai);
+        NetworkController.Instance.EndPawnSpawnRequest();
     }
     
     public  override void NextSwarmWave()
