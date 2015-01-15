@@ -90,7 +90,7 @@ public class GameRule : MonoBehaviour {
     {
         get
         {
-            if (s_Instance == null)
+            if (Application.loadedLevel !=0 && s_Instance == null)
             {
                 // This is where the magic happens.
                 //  FindObjectOfType(...) returns the first AManager object in the scene.

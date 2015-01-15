@@ -57,7 +57,7 @@ public class MusicHolder : MonoBehaviour {
 			StartSong();
 		}
 
-        if (GameRule.instance != null && curStageInt != (int)GameRule.instance.curStage)
+        if ( GameRule.instance != null && curStageInt != (int)GameRule.instance.curStage)
         {
             curStageInt = (int)GameRule.instance.curStage;
 			NextStage();
