@@ -331,9 +331,9 @@ public class BaseWeapon : DestroyableNetworkObject {
 
 	public void RemoteAttachWeapon(Pawn newowner,bool state){
 		if(state){
-			AttachWeaponToChar(newowner);
+            newowner.setWeapon(this); 
 		}else{
-			newowner.setWeapon(this);
+            AttachWeaponToChar(newowner);
 		}
 	}
     void Update()
@@ -1029,7 +1029,7 @@ public class BaseWeapon : DestroyableNetworkObject {
         //Debug.DrawLine(transform.position,proj.transform.position, Color.blue, 10);
 		BaseProjectile projScript =proj.GetComponent<BaseProjectile>();
 		float power=0;
-		float range = 0;
+		float range = weaponRange;
 		int viewId = 0;
 		switch(prefiretype){
 			case PREFIRETYPE.ChargedPower:
@@ -1066,7 +1066,7 @@ public class BaseWeapon : DestroyableNetworkObject {
 		projScript.damage =new BaseDamage(damageAmount) ;
 		projScript.owner = owner.gameObject;
 		projScript.damage.Damage+=power;
-		projScript.range+=range;
+		projScript.range=range;
         projScript.Init();
 	}
 	public virtual void  RemoteShot(Vector3 position, Quaternion rotation, float power, float range, int viewId, int projId, long timeShoot)
@@ -1093,7 +1093,7 @@ public class BaseWeapon : DestroyableNetworkObject {
 			}
             proj.projId = projId;
 			proj.damage.Damage+=power;
-			proj.range+=range;
+			proj.range=range;
 			switch(prefiretype){
 				case PREFIRETYPE.Guidance:
 					if(viewId!=0){

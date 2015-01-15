@@ -963,7 +963,7 @@ public class NetworkController : MonoBehaviour {
 			SFSArray sendWeapon = new SFSArray();
 			
        
-			for(WeaponModel model in pawnWeapons){
+			foreach(WeaponModel model in pawnWeapons){
 				sendWeapon.AddClass(model);
 			}
 			pawnSpawnData.PutSFSArray("weapons",sendWeapon);
@@ -1550,19 +1550,19 @@ public class NetworkController : MonoBehaviour {
 			}
 			pawn.AddExternalCharacteristic(effects);
 		}
-		ISFSArray weapons = allDt.GetSFSArray("weapons");
+		ISFSArray weapons = dt.GetSFSArray("weapons");
 		foreach (WeaponModel weaponModel in weapons)
-		{  
-			GameObject go =RemoteInstantiateNetPrefab(sirWeapon.type, Vector3.zero,Quaternion.identity,sirWeapon.id);
-			if (go == null)
+		{
+            GameObject wepGo = RemoteInstantiateNetPrefab(weaponModel.type, Vector3.zero, Quaternion.identity, weaponModel.id);
+            if (wepGo == null)
 			{
 				continue;
 			}
 
-			BaseWeapon weapon = go.GetComponent<BaseWeapon>();
-			weapon.NetUpdate(sirWeapon);
+            BaseWeapon weapon = wepGo.GetComponent<BaseWeapon>();
+            weapon.NetUpdate(weaponModel);
 			//  Debug.Log("PAwn" + pawn + " View" + GetView(dt.GetInt("pawnId")) + "ID" + dt.GetInt("pawnId"));
-			weapon.RemoteAttachWeapon(pawn,sirWeapon.state);
+            weapon.RemoteAttachWeapon(pawn, weaponModel.state);
 		}
 		
 	}

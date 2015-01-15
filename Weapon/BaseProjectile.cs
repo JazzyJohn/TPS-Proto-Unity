@@ -15,6 +15,7 @@ public enum DamageType{
 [Serializable]
 public class BaseDamage{
 	public float Damage;
+    public float minDamage;
 	public bool isVsArmor;
 	public float pushForce;
 	public bool knockOut= false;
@@ -42,6 +43,7 @@ public class BaseDamage{
     }
 	public BaseDamage(BaseDamage old){
 		Damage = old.Damage;
+        minDamage = old.minDamage;
 		isVsArmor = old.isVsArmor;
 		pushForce = old.pushForce;
         knockOut = old.knockOut;
@@ -72,7 +74,7 @@ public class BaseProjectile : MonoBehaviour
     public Transform target;
     public Vector3 targetOffset; 
     public float range;
-    public float minDamageRange;
+    
     static float minimunProcent = 0.1f;
     public Vector3 startPosition;
 	
@@ -399,17 +401,17 @@ public class BaseProjectile : MonoBehaviour
         Vector3 exploPosition = hit.point + hit.normal;
         if (obj != null)
         {
-		
-			float distance = (startPosition - mTransform.position).magnitude;
-			BaseDamage ldamage = new BaseDamage(damage);
-			if (range < distance)
+
+            float distance = (startPosition - hit.point).magnitude;
+            Debug.Log("Distance " + distance + " Range " + range);
+            BaseDamage ldamage = new BaseDamage(damage);
+            if (range * 2 < distance)
+            {
+                ldamage.Damage = damage.minDamage;
+            }else if (range < distance)
 			{
-				float coef = 1 - (distance - range) / minDamageRange;
-				if (coef < minimunProcent)
-				{
-					coef = minimunProcent;
-				}
-				ldamage.Damage = damage.Damage * coef;
+				
+				ldamage.Damage = damage.Damage  - (distance - range)* (damage.Damage -damage.minDamage)/range;
 			}
 
 			ldamage.pushDirection = mTransform.forward;

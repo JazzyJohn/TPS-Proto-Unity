@@ -66,6 +66,8 @@ public class InventoryManager : MonoBehaviour {
         {
 
             myWeapons[i] = NetworkController.Instance.WeaponSpawn(weaponNames[i], transform.position, Quaternion.identity, owner.foxView.isChildScene(), owner.foxView.viewID).GetComponent<BaseWeapon>();
+            myWeapons[i].AttachWeaponToChar(owner);
+            
             if (myWeapons[i].slotType == BaseWeapon.SLOTTYPE.GRENADE)
             {
                 grenadeSlot = i;

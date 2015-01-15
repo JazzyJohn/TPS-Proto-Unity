@@ -2,40 +2,33 @@ using UnityEngine;
 using System.Collections;
 
 public class HitCounter : MonoBehaviour {
-		private int count;
-		private Pawn killer;
-		private int startCount=0;
-		private float lastTimeHit;
+        private float count;
+        private bool runTime=false;
+        private float time;
+		
 		public TextMesh textMesh;
-		public void ShootCnt(GameObject newkiller){
-			Pawn killerp =newkiller.GetComponent<Pawn>();
-			if(killerp!=killer){
-				
-				killer=killerp;
-			//-1 because  we must count first shoot before enter
-				startCount=killer.statistic.shootCnt-1;
-				
-				count=0;
-			}
-			count++;
-			lastTimeHit=  Time.time;
+		public void ShootCnt(float dmg){
+                if (!runTime)
+                {
+                    count = 0;
+                   runTime = true;
+               }
+               count += dmg;
+			
 				
 		}
 		void Update(){
-			if(lastTimeHit+5.0f< Time.time){
-				killer= null;
-				count=0;
+            if (runTime)
+            {
+                time += Time.deltaTime;
+                if (time > 1.0f)
+                {
+                    time = 0;
+                    runTime = false;
+                }
 			}
-			float accuracy=0;
-			
-			if(killer!=null){
-				float shootCnt =killer.statistic.shootCnt- startCount;
-				if(shootCnt!=0){
-					accuracy= count/shootCnt*100;
-				}
-			}
-			
-			textMesh.text = accuracy +"%";
+
+            textMesh.text = count + "DPS";
 			
 		}
 }

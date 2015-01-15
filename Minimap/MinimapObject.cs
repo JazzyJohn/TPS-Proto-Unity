@@ -36,13 +36,13 @@ public class MinimapObject : MonoBehaviour {
 	
 	public int team;
 	
-	public myTransform;
+	public Transform myTransform;
 	
 	public void Awake(){
 		MinimapManager.allMinimapObject.Add(this);
 		myTransform= transform;
 		switch(type){
-			case TYPE.PAWN;
+			case TYPE.PAWN:
 				pawn= GetComponent<Pawn>();
 			break;	
 		}
@@ -55,7 +55,7 @@ public class MinimapObject : MonoBehaviour {
 	
 	public bool SeeMe(int team){
 		switch(type){
-			case TYPE.PAWN;
+			case TYPE.PAWN:
 				switch(MinimapManager.mode){
 					case MinimapManager.MODE.NONE:
 						return false;
@@ -71,10 +71,10 @@ public class MinimapObject : MonoBehaviour {
 				
 				}
 			break;	
-			case TYPE.TARGET;
+			case TYPE.TARGET:
 				return this.team ==team;
 			break;
-			case TYPE.INFO;
+			case TYPE.INFO:
 				return true;
 			break;
 			default:
@@ -89,20 +89,20 @@ public class MinimapObject : MonoBehaviour {
 	
 	public Quaternion RelativeDirection(){
 		switch(type){
-			case TYPE.PAWN;
+			case TYPE.PAWN:
 				switch(MinimapManager.mode){
 					case MinimapManager.MODE.ALLANDHP:
 					case MinimapManager.MODE.ALLANDROTATION:
 						return myTransform.rotation;					
 					break;					
 					default:
-						return  Quaternion.indenity;
+						return  Quaternion.identity;
 					break;
 				
 				}
 			break;	
 			default:
-			return Quaternion.indenity;
+            return Quaternion.identity;
 			break;
 		}
 	
@@ -110,10 +110,10 @@ public class MinimapObject : MonoBehaviour {
 	
 	public String AddInfo(){
 		switch(type){
-			case TYPE.PAWN;
+			case TYPE.PAWN:
 				switch(MinimapManager.mode){
 					case MinimapManager.MODE.ALLANDHP:
-						return pawn.health.ToStriong("0");
+						return pawn.health.ToString("0");
 					
 					break;
 					

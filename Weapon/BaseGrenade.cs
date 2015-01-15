@@ -9,6 +9,8 @@ using Random = UnityEngine.Random;
 public class BaseGrenade : BaseWeapon {
 	
 	public Quaternion addAngle;
+
+    public Vector3 eluer;
 	
 	public override void StartFire(){
 		Fire();
@@ -19,6 +21,8 @@ public class BaseGrenade : BaseWeapon {
 		/*Vector3 randVec = Random.onUnitSphere;
 		Vector3 normalDirection  = owner.getAimRotation(weaponRange)-muzzlePoint.position;
 		normalDirection =normalDirection + randVec.normalized * normalDirection.magnitude * aimRandCoef / 100;*/
+
+        Debug.Log(Quaternion.Euler(eluer));
         if (projectileClass != null)
         {
 

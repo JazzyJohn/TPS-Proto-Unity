@@ -9,7 +9,7 @@ public class BaseShootgun : BaseWeapon {
         Vector3 startPoint = muzzleCached + muzzleOffset;
 		Quaternion startRotation = getAimRotation();
         float power = 0;
-        float range = 0;
+        float range = weaponRange;
         int viewId = 0;
         Transform target = null;
         switch (prefiretype)
@@ -56,7 +56,7 @@ public class BaseShootgun : BaseWeapon {
 				projScript.damage = new BaseDamage (damageAmount);
 				projScript.owner = owner.gameObject;
 				projScript.damage.Damage+=power;
-				projScript.range+=range;
+				projScript.range=range;
 				projScript.Init();
 		}
 	}
