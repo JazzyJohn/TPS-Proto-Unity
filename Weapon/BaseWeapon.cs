@@ -329,8 +329,12 @@ public class BaseWeapon : DestroyableNetworkObject {
 		damageAmount.weapon= true;
 	}
 
-	public void RemoteAttachWeapon(Pawn newowner){
-       AttachWeaponToChar(newowner);
+	public void RemoteAttachWeapon(Pawn newowner,bool state){
+		if(state){
+			AttachWeaponToChar(newowner);
+		}else{
+			newowner.setWeapon(this);
+		}
 	}
     void Update()
     {

@@ -75,6 +75,8 @@ namespace nstuff.juggerfall.extension.models
         public int id;
 		 
         public string type;
+		
+		public bool state;
 
         public WeaponModel()
         {

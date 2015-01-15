@@ -57,7 +57,7 @@ public class InventoryManager : MonoBehaviour {
         SpawnWeaponFromNameList();
     }
 
-    protected void SpawnWeaponFromNameList(){
+    protected virtual void SpawnWeaponFromNameList(){
         if (weaponNames.Length > 0)
         {
             myWeapons = new BaseWeapon[weaponNames.Length];
@@ -70,6 +70,11 @@ public class InventoryManager : MonoBehaviour {
             {
                 grenadeSlot = i;
             }
+			 if (myWeapons[i].slotType == BaseWeapon.SLOTTYPE.MAIN)
+            {
+				NetworkController.Instance.LastSpawnWeaponMakeInHand();
+			}
+			
         }
 	}
 	//Start Weapon generation
@@ -203,6 +208,10 @@ public class InventoryManager : MonoBehaviour {
 				if(prefab.slotType==BaseWeapon.SLOTTYPE.GRENADE){
                     grenadeSlot = i;
 				}
+				 if (prefab.slotType == BaseWeapon.SLOTTYPE.MAIN)
+				{
+					NetworkController.Instance.LastSpawnWeaponMakeInHand();
+				}
                 myWeapons[myWeapons.Length - 1].AttachWeaponToChar(owner);
 				return;
 			}
@@ -217,6 +226,10 @@ public class InventoryManager : MonoBehaviour {
 		if(prefab.slotType==BaseWeapon.SLOTTYPE.GRENADE){
 					grenadeSlot=myWeapons.Length-1;
 		}
+		 if (prefab.slotType == BaseWeapon.SLOTTYPE.MAIN)
+				{
+					NetworkController.Instance.LastSpawnWeaponMakeInHand();
+				}
         myWeapons[myWeapons.Length - 1].AttachWeaponToChar(owner);
 	}
 	

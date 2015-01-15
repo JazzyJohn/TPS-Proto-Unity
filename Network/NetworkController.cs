@@ -829,15 +829,17 @@ public class NetworkController : MonoBehaviour {
 
 
     }
-    public ISFSObject pawnSpawnData = new SFSObject();
+    public ISFSObject pawnSpawnData;
+	
+	public List<WeaponModel> pawnWeapons = new List<WeaponModel>();
     /// <summary>
     /// pawnSpawn request to server
     /// 
     /// </summary>	
     public GameObject BeginPawnSpawnRequest(string prefab, Vector3 vector3, Quaternion quaternion, bool isAI, int[] stims, bool scene)
     {
-
-
+		pawnSpawnData= new SFSObject();
+		pawnWeapons.Clear();
         pawnSpawnData.PutBool("Scene", scene);
         pawnSpawnData.PutBool("isAI", isAI);
         pawnSpawnData.PutIntArray("stims", stims);
@@ -855,7 +857,8 @@ public class NetworkController : MonoBehaviour {
     /// </summary>	
     public GameObject BeginPawnForSwarmSpawnRequest(string prefab, Vector3 vector3, Quaternion quaternion, int[] stims,int swarm,int home, int team = 0, List<CharacteristicToAdd> bonusData=null)
     {
-      
+		pawnSpawnData= new SFSObject();
+		pawnWeapons.Clear();
 		if(bonusData!=null){
 			ISFSArray sendBonuses = new SFSArray();
 			foreach(CharacteristicToAdd bonus in bonusData){
@@ -910,12 +913,60 @@ public class NetworkController : MonoBehaviour {
 
 
     }
+	/// <summary>
+    /// weaponSpawn request to server
+    /// </summary>	
+	
+	public GameObject WeaponSpawn(string prefab, Vector3 vector3,Quaternion quaternion,bool isAI,int pawnId)
+    {
+        ISFSObject data = new SFSObject();
 
+       
+        GameObject go = InstantiateNetPrefab(prefab, vector3, quaternion, data,isAI);
+        WeaponModel weapon = go.GetComponent<BaseWeapon>().GetSerilizedData();
+		weapon.type = prefab;
+		pawnWeapons.Add(weapon);
+      
+        return go;
+
+
+    }
+	/// <summary>
+    /// weaponSpawn request to server
+    /// </summary>	
+	
+	public GameObject InstantWeaponSpawnRequest(string prefab, Vector3 vector3,Quaternion quaternion,bool isAI,int pawnId)
+    {
+        ISFSObject data = new SFSObject();
+		
+       
+        GameObject go = InstantiateNetPrefab(prefab, vector3, quaternion, data,isAI);
+        WeaponModel weapon = go.GetComponent<BaseWeapon>().GetSerilizedData();
+		weapon.type = prefab;
+        data.PutClass("weapon",weapon);
+		data.PutInt("pawnId",pawnId);
+        ExtensionRequest request = new ExtensionRequest("weaponSpawn", data, serverHolder.gameRoom);
+        smartFox.Send(request);
+        return go;
+
+
+    }
+	
+	public void LastSpawnWeaponMakeInHand(){
+		pawnWeapons[pawnWeapons.Count-1].state = true;
+	}
 
     public void EndPawnSpawnRequest()
     {
         if (pawnSpawnData != null)
         {
+			SFSArray sendWeapon = new SFSArray();
+			
+       
+			for(WeaponModel model in pawnWeapons){
+				sendWeapon.AddClass(model);
+			}
+			pawnSpawnData.PutSFSArray("weapons",sendWeapon);
             ExtensionRequest request = new ExtensionRequest("pawnSpawn", pawnSpawnData, serverHolder.gameRoom);
             smartFox.Send(request);
         }
@@ -1030,26 +1081,7 @@ public class NetworkController : MonoBehaviour {
         smartFox.Send(request);
 
     }
-	/// <summary>
-    /// weaponSpawn request to server
-    /// </summary>	
 	
-	public GameObject WeaponSpawn(string prefab, Vector3 vector3,Quaternion quaternion,bool isAI,int pawnId)
-    {
-        ISFSObject data = new SFSObject();
-
-       
-        GameObject go = InstantiateNetPrefab(prefab, vector3, quaternion, data,isAI);
-        WeaponModel weapon = go.GetComponent<BaseWeapon>().GetSerilizedData();
-		weapon.type = prefab;
-        data.PutClass("weapon",weapon);
-		data.PutInt("pawnId",pawnId);
-        ExtensionRequest request = new ExtensionRequest("weaponSpawn", data, serverHolder.gameRoom);
-        smartFox.Send(request);
-        return go;
-
-
-    }
 	/// <summary>
     /// weaponShoot request to server
     /// </summary>	
@@ -1518,7 +1550,20 @@ public class NetworkController : MonoBehaviour {
 			}
 			pawn.AddExternalCharacteristic(effects);
 		}
-		
+		ISFSArray weapons = allDt.GetSFSArray("weapons");
+		foreach (WeaponModel weaponModel in weapons)
+		{  
+			GameObject go =RemoteInstantiateNetPrefab(sirWeapon.type, Vector3.zero,Quaternion.identity,sirWeapon.id);
+			if (go == null)
+			{
+				continue;
+			}
+
+			BaseWeapon weapon = go.GetComponent<BaseWeapon>();
+			weapon.NetUpdate(sirWeapon);
+			//  Debug.Log("PAwn" + pawn + " View" + GetView(dt.GetInt("pawnId")) + "ID" + dt.GetInt("pawnId"));
+			weapon.RemoteAttachWeapon(pawn,sirWeapon.state);
+		}
 		
 	}
 	/// <summary>
@@ -1647,7 +1692,7 @@ public class NetworkController : MonoBehaviour {
 		weapon.NetUpdate(sirWeapon);
 		Pawn pawn  =  GetView(dt.GetInt("pawnId")).pawn;
       //  Debug.Log("PAwn" + pawn + " View" + GetView(dt.GetInt("pawnId")) + "ID" + dt.GetInt("pawnId"));
-		weapon.RemoteAttachWeapon(pawn);
+		weapon.RemoteAttachWeapon(pawn,sirWeapon.state);
 	
 		
 		 

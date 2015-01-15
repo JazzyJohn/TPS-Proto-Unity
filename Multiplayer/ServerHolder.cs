@@ -703,7 +703,9 @@ public class ServerHolder : MonoBehaviour
     {
      
     }
-
+	void OnLevelWasLoaded(int level) {
+		MinimapManager.allMinimapObject.Clear();
+	}
 
     void Awake()
     {
