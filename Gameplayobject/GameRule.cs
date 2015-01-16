@@ -46,6 +46,18 @@ public class GameRule : MonoBehaviour {
 	
 	}
 	
+        public void Annonce() {
+            if (teamScore[0] > teamScore[1] && type!=AnnonceType.INTERGRALEAD)
+            {
+                type = AnnonceType.INTERGRALEAD;
+                PlayerMainGui.instance.Annonce(type);
+            }
+            if (teamScore[0] < teamScore[1] && type != AnnonceType.RESLEAD)
+            {
+                type = AnnonceType.RESLEAD;
+                PlayerMainGui.instance.Annonce(type);
+            }
+        }
 	// Update is called once per frame
 	protected void Update () {
         timer += Time.deltaTime;
@@ -170,4 +182,17 @@ public class GameRule : MonoBehaviour {
         text = String.Format(text, (Player.localPlayer.Score.AIKill + Player.localPlayer.Score.Kill));
 		return text;
 	}
+	
+	public virtual void PointChangeOwner(int team){
+	
+	}
+	public virtual void PointChangeConquare(int team){
+	
+	}
+	public virtual bool IsGameEnded(){
+			if(timer>gameTime){
+				return true;
+			}
+			return false;
+		}
 }

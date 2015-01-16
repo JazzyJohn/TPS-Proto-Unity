@@ -1476,8 +1476,26 @@ public class NetworkController : MonoBehaviour {
 		smartFox.Send(request);
 
     }
+	 /// <summary>
+    /// gamePointData request to server
+    /// </summary>	
 	
+	public void GamePointDataRequest(ISFSArray sendPoint ){
+		ISFSObject data = new SFSObject();
+		data.PutSFSArray("points",sendPoint);
+		
+		ExtensionRequest request = new ExtensionRequest("gamePointData", data, serverHolder.gameRoom);
+		smartFox.Send(request);
 
+	}
+		
+	
+	
+	
+	
+	
+	
+	
 	
 	
 	
@@ -2003,7 +2021,7 @@ public class NetworkController : MonoBehaviour {
     }
 	
 	/// <summary>
-    ///handle  remoteDamageOnPawn request to server
+    ///handle  remoteDamageOnPawn request from server
     /// </summary>	
 
     public void HandleRemoteDamageOnPawn(ISFSObject dt)
@@ -2015,7 +2033,7 @@ public class NetworkController : MonoBehaviour {
     
     }
 	/// <summary>
-    ///handle enterRobot request to server
+    ///handle enterRobot request from server
     /// </summary>	
 
     public void  HandleEnterRobot(ISFSObject dt)
@@ -2031,7 +2049,7 @@ public class NetworkController : MonoBehaviour {
 		
     }
 	/// <summary>
-    ///handle enterRobotSuccess request to server
+    ///handle enterRobotSuccess request from server
     /// </summary>	
 
     public void  HandleEnterRobotSuccess(ISFSObject dt)
@@ -2064,7 +2082,7 @@ public class NetworkController : MonoBehaviour {
 
 
     /// <summary>
-    /// handle customAnimStart  request to server
+    /// handle customAnimStart  request from server
     /// </summary>	
 
     public void HandleCustomAnimStar(ISFSObject dt)
@@ -2077,7 +2095,7 @@ public class NetworkController : MonoBehaviour {
     }
 
     /// <summary>
-    /// handle AISwarmUpdate  request to server
+    /// handle AISwarmUpdate  request from server
     /// </summary>	
 
 
@@ -2090,7 +2108,7 @@ public class NetworkController : MonoBehaviour {
 
     }
       /// <summary>
-    /// handle AINextWave  request to server
+    /// handle AINextWave  request from server
     /// </summary>	
 
 
@@ -2106,7 +2124,7 @@ public class NetworkController : MonoBehaviour {
 
     }
      /// <summary>
-    /// handle AISpawnBot  request to server
+    /// handle AISpawnBot  request from server
     /// </summary>	
 
 
@@ -2127,7 +2145,7 @@ public class NetworkController : MonoBehaviour {
 
     }
 	 /// <summary>
-    /// handle changeWeaponShootState  request to server
+    /// handle changeWeaponShootState  request from server
     /// </summary>	
     public void HandleChangeWeaponShootState(ISFSObject dt)
     {
@@ -2139,7 +2157,7 @@ public class NetworkController : MonoBehaviour {
 		}
     }
 	/// <summary>
-    /// handle changeWeaponState  request to server
+    /// handle changeWeaponState  request from server
     /// </summary>	
     public void HandleChangeWeaponState(ISFSObject dt)
     {
@@ -2151,5 +2169,20 @@ public class NetworkController : MonoBehaviour {
 			weapon.PutAway();
 		}
     }
+	
+	 /// <summary>
+    ///handle  gamePointData request from server
+    /// </summary>	
+	
+	public void GamePointDataRequest(ISFSArray sendPoint ){
+	
+		ISFSArray points = allDt.GetSFSArray("points");
+		foreach(AssaultPointModel point in points){
+			((PointGameRule)GameRule.instance).PointUpdate(point);
+		}
+
+	}
+		
+	
 }
 

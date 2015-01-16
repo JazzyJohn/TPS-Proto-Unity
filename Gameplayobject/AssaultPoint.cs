@@ -3,177 +3,102 @@ using System.Collections;
 using System.Collections.Generic;
 
 public class AssaultPoint : MonoBehaviour {
-	private List<Player> invaders = new List<Player> ();
-	public int[] points = new int[2];
-	private int currentOwner;
-	private float nextTick;
-
-	//times when points will be disappear
-	private float timeToCountdownRed;
-	private float timeToCountdownBlue;
-
-	public float timeToCountdown;
-	public int pointsToGoal;//how much points team should earn for own this point.
-	public int owner;//team who owning this point at start
-
-	// Use this for initialization
-	void Start () {
-		for (int i=0; i<2; i++)
-			points[i] = 0;
-
-		setCurrentOwner (owner);
-		nextTick = Time.time;
-		timeToCountdownRed = timeToCountdownBlue = Time.time;
-	}
-
-	public int getCurrentOwner()//team witch own this point
-	{
-		return currentOwner;
-	}
-	public void setCurrentOwner(int team)
-	{
-		currentOwner = team;
-	}
-
-	public void OnTriggerEnter(Collider other)
-	{
-		if (other.CompareTag("Player"))	
-		{
-			Player pl = other.GetComponent<Pawn>().player;
-
-			if(!pl)
-				return;
-
-			invaders.Add(pl);
-			Debug.Log( pl.team);
-			Debug.Log ("Somebody touch this");
+	
+	public int id;
+	
+	public AssaultPoint[] lockedBy;
+	
+	public float scorePoint;
+	
+	public float needToScore;
+	
+	public int owner=0;
+	
+	public int peopleCnt = 0;
+	
+    public int teamConquering =0;
+	
+	public AssaultPointModel model = new AssaultPointModel();
+	
+	public ShowOnGuiComponent guiElement;
+	
+	private int[] teamCnt = new int[2]{0,0};
+	
+	private bool send = true;
+	
+	public void Init(){
+		model.id =id;
+		model.lockedBy = new ArrayList();
+		for(int i=0;i<lockedBy.Lenght];i++){
+			model.lockedBy.Add(lockedBy[i]);
 		}
 	}
-
-	public void OnTriggerExit(Collider other)
-	{
-		if (other.CompareTag("Player"))	
-		{
-			Player pl = other.GetComponent<Pawn>().player;
-
-			if(!pl)
-				return;
-
-			invaders.Remove(pl);
-			Debug.Log(pl.team);
-			Debug.Log ("Somebody untouch this");
-		}
-	}
-
-	public int countRedInvaders()
-	{
-		int iRet = 0;
-		for (int i=0; i<invaders.Count; i++)
-			if (invaders [i] && invaders [i].team == 1)
-			iRet++;
-
-		return iRet;
-	}
-
-	public int countBlueInvaders()
-	{
-		int iRet = 0;
-		for (int i=0; i<invaders.Count; i++)
-			if (invaders [i] && invaders [i].team == 2)
-				iRet++;
+	
+	
+	void OnTriggerStay(Collider other) {
+        if (other.CompareTag("Player")){
+			Pawn pawn =other.GetComponent<Pawn>();
+			if(pawn!=null&& !pawn.isDead&&pawn.team!=0){
+				teamCnt[pawn.team-1]++;
+			}
+		}       
+    }
+	
+	void FixedUpdate(){
+		int newPeopleCnt=0;
+		teamConquering=0;
+		for(int i=0;i<teamCnt.Lenght;i++){
+			if(teamCnt[i]>0){
+				if(newPeopleCnt>0){
+					newPeopleCnt=0;
+					teamConquering=0;
+					break;
+				}else{
+					newPeopleCnt=teamCnt[i];
+					teamConquering= i;
+				}
+			}
+			teamCnt[i] =0;
 		
-		return iRet;
-	}
-
-	public void clearScores()
-	{
-		points [0] = points [1] = 0;
-		setCurrentOwner (owner);
-	}
-
-	public int getPoints(int team)
-	{
-		return points [team-1];
-	}
-
-	// Update is called once per frame
-	void Update () 
-	{
-		if (Time.time < nextTick)
-						return;
-
-		nextTick = Time.time + 0.5f;//ticking every 0.5s
-
-		int addPointRed = 0;
-		int addPointBlue = 0;
-
-		for (int i=0; i<invaders.Count; i++) 
-		{
-			if(!invaders[i]) continue;
-
-			if(invaders[i].team == 1)
-			{
-				addPointRed+=1;
-				//TODO: get player class and add extra points
-			}
-			else if(invaders[i].team == 2)
-			{
-				addPointBlue+=1;
-				//TODO: get player class and add extra points
-			}
 		}
 
-		addPointBlue = Mathf.Min (addPointBlue, 5);//maximum 5 points per 0.5s
-		addPointRed = Mathf.Min (addPointRed, 5);//maximum 5 points per 0.5s
-
-		points [0] += addPointRed;
-		points [1] += addPointBlue;
+		if(peopleCnt!=newPeopleCnt){
+			send= true;
+		}
+		peopleCnt= newPeopleCnt;
+		
+	}
 	
-		Debug.Log ("Times: " + timeToCountdownRed + " .. " + timeToCountdownBlue);
-		//If nobody staying on the point in red/blue command, the process of invade will be decreasing every 0.5s by 2 points.
+	public bool NeedUpdate(){
+		return send;	
 
-		if (countRedInvaders () == 0 && (timeToCountdownRed < Time.time))
-			points [0] -= 2;
-		if (countBlueInvaders () == 0 && (timeToCountdownBlue < Time.time))
-			points [1] -= 2;
-
-		points [0] = Mathf.Clamp (points [0], 0,pointsToGoal);
-		points [1] = Mathf.Clamp (points [1], 0,pointsToGoal);
-
-		if (points [0] >= pointsToGoal)
-			teamInvadePoint (1);//red.
-		else if (points [1] >= pointsToGoal)
-			teamInvadePoint (2);//blue
+	}
+	public AssaultPointModel GetModel(){
+		model.needPoint = needToScore;
+		model.owner = owner;
+		model.peopleCnt = peopleCnt;
+		model.teamConquering = teamConquering;
+		send=false;
+		return model;	
 
 	}
 	
-	void teamInvadePoint(int team)
-	{
-		if (getCurrentOwner () == team)
-			return;
-
-		team--;
-
-		if (team < 0 || team > 1)
-			return;
-
-		points [1 - team] = 0;//clear enemy points
-
-		if (team == 0)
-			timeToCountdownRed = Time.time + timeToCountdown;
-		else if (team == 1)
-			timeToCountdownBlue = Time.time + timeToCountdown;
-
-		Debug.Log ("Team " + team + " Invaded this point");
-		setCurrentOwner(team + 1);
-
-		PointControll_GameRule gameRules = FindObjectOfType<PointControll_GameRule>();
-		if (!gameRules)
-		{	
-			Debug.LogError("No PointControll_GameRule");
-			return;
+	public void NetUpdate(AssaultPointModel model){
+		needPoint =model.needPoint;
+		if(owner!=model.owner){
+			GameRule.instance.PointChangeOwner(model.owner);
 		}
+		owner =model.owner;
+		peopleCnt =model.peopleCnt;
+		if(teamConquering!=model.teamConquering){
+			GameRule.instance.PointChangeConquare(model.teamConquering);
+		}
+		teamConquering = model.teamConquering;
 
-		gameRules.pointHasBeenTaken (this, team + 1);
+	}
+	public void Update(){
+		guiElement.SetTitle(scorePoint +"/" + needToScore);
+		guiElement.team =owner;
+	
 	}
 }

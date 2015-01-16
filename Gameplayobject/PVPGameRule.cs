@@ -27,24 +27,7 @@ public class PVPGameRule : GameRule {
 		}
 
       
-        public void Annonce() {
-            if (teamScore[0] > teamScore[1] && type!=AnnonceType.INTERGRALEAD)
-            {
-                type = AnnonceType.INTERGRALEAD;
-                PlayerMainGui.instance.Annonce(type);
-            }
-            if (teamScore[0] < teamScore[1] && type != AnnonceType.RESLEAD)
-            {
-                type = AnnonceType.RESLEAD;
-                PlayerMainGui.instance.Annonce(type);
-            }
-        }
-		public virtual bool IsGameEnded(){
-			if(timer>gameTime){
-				return true;
-			}
-			return false;
-		}
+		
 		public override PlayerMainGui.GameStats GetStats(){
 			PlayerMainGui.GameStats  stats = new PlayerMainGui.GameStats();
 			stats.gameTime = gameTime-timer;

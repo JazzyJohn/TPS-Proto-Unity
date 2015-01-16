@@ -188,7 +188,7 @@ public class CharacterControllerM1A1 : MonoBehaviour {
 			Vertical *= speedAimFactor * speedSprintFactor;
 
 
-            Debug.Log(character.IsCrouch());
+          //  Debug.Log(character.IsCrouch());
 			if (character.IsCrouch()&&!isCrouch) {
 				isCrouch = true;
 				animator.SetTrigger (Animator.StringToHash ("CrouchTrigger"));

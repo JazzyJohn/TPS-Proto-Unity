@@ -301,6 +301,25 @@ namespace nstuff.juggerfall.extension.models
 		public int owner;
 		
 	}
+	
+	[Serializable]
+    public class AssaultPointModel  : SerializableSFSType{
+	
+		public float scorePoint;
+	
+		public float needPoint;
+		
+		public int owner;
+		
+		public int id;
+		
+		public int people;
+		
+		public int teamConquering;
+		
+		public ArrayList lockedBy;
+		
+	}
 	[Serializable]
     public class GameSettingModel  : SerializableSFSType{
 		public int teamCount;
