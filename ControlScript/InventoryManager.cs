@@ -20,6 +20,8 @@ public class InventoryManager : MonoBehaviour {
 	protected Pawn owner;
 
     private int cahcedIndex;
+
+    public static float GRENADE_ADD_COEF = 10.0f;
 	
 	[Serializable]
 	public class AmmoBag {
@@ -177,11 +179,27 @@ public class InventoryManager : MonoBehaviour {
         for (int i = 0; i < allAmmo.Length; i++)
         {
 
-            //Debug.Log(((float)allAmmo[i].maxSize) * percent/100);
-                allAmmo[i].amount +=((float)allAmmo[i].maxSize) * percent/100;
+                if (allAmmo[i].type == AMMOTYPE.GRENADE && grenadeSlot != -1 )
+                {
+                    if( myWeapons[grenadeSlot].curAmmo >= 1){
+                        continue;
+                    }else{
+                        allAmmo[i].amount += ((float)allAmmo[i].maxSize) * percent * GRENADE_ADD_COEF / 100;
+                    }
+                    Debug.Log(allAmmo[i].amount);
+                }
+                else
+                {
+                    allAmmo[i].amount += ((float)allAmmo[i].maxSize) * percent / 100;
+                }
                 if (allAmmo[i].amount > allAmmo[i].maxSize)
                 {
+                    
                     allAmmo[i].amount = allAmmo[i].maxSize;
+                    if (allAmmo[i].type == AMMOTYPE.GRENADE&&grenadeSlot!=-1)
+                    {
+                        myWeapons[grenadeSlot].Reload();
+                    }
                   
                 }
             

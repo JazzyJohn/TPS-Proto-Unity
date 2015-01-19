@@ -137,7 +137,7 @@ public class BaseWeapon : DestroyableNetworkObject {
 	
 	public bool shouldDrawTrajectory;
 	
-	private TrajectoryDrawer drawer;
+	protected TrajectoryDrawer drawer;
 
 	public GameObject projectilePrefab;
 
@@ -283,7 +283,7 @@ public class BaseWeapon : DestroyableNetworkObject {
         curTransform.parent = owner.GetSlotForWeapon(slotType);
         curTransform.localPosition = Vector3.zero;
         curTransform.localRotation = Quaternion.identity;
-		curTransform.localRotation=  Vector3.one;
+        curTransform.localScale = Vector3.one;
         if (rifleParticleController != null)
         {
             rifleParticleController.SetOwner(owner.collider);
@@ -1185,7 +1185,7 @@ public class BaseWeapon : DestroyableNetworkObject {
 		curTransform.parent = owner.GetSlotForWeapon(slotType);
         curTransform.localPosition = Vector3.zero;
         curTransform.localRotation = Quaternion.identity;
-		curTransform.localRotation=  Vector3.one;
+		curTransform.localScale=  Vector3.one;
 		StopFire();
 		if(foxView.isMine){
 			foxView.PutAway();
@@ -1203,7 +1203,7 @@ public class BaseWeapon : DestroyableNetworkObject {
 	public void TakeInHand(Transform weaponSlot,Vector3 Offset, Quaternion weaponRotator){
 		enabled = true;
 		curTransform.parent = weaponSlot;
-		curTransform.localRotation=  Vector3.one;
+        curTransform.localScale = Vector3.one;
 		curTransform.localPosition = Offset;
 		//Debug.Log (name + weaponRotator);
 		curTransform.localRotation = weaponRotator;

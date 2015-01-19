@@ -21,47 +21,46 @@ public static class MinimapManager{
 
 	public static Pawn MainPawn;
 
+	public static Camera UICam;
+
 	public static void SetStatus(bool spawn)
 	{
-		MiniMap.GetComponent<GUIAnchor>().uiCamera.enabled = spawn;
 		if(spawn)
 		{
 			foreach(MinimapObject obj in allMinimapObject)
 			{
-				if(!obj.main)
+				switch(obj.type)
 				{
-					obj.MainPawn = MainPawn;
-					
-					if(obj.MainPawn.team == obj.team)
-						obj.ThisIndex = obj.IndexItem.IndexOf("Frend");
-					else
-						obj.ThisIndex = obj.IndexItem.IndexOf("Enemy");
-					
-					obj.Select = true;
-					obj.Item.type = obj.ThisIndex;
+				case MinimapObject.TYPE.PAWN:
+					if(!obj.main)
+					{
+						obj.MainPawn = MainPawn;
+
+						obj.GetNewStatus = true;
+					}
+					break;
 				}
 			}
+			MinimapManager.UICam.enabled = true;
 		}
 		else
 		{
 			foreach(MinimapObject obj in allMinimapObject)
 			{					
 				obj.ThisIndex = 0;
-				
-				obj.Select = false;
 				obj.Item.type = obj.ThisIndex;
 			}
 		}
 	}
 
 	public static UIMiniMapOnGUI MiniMap; 
+
+	public static List<string> IndexItem = new List<string>();
 }
 
 
 public class MinimapObject : MonoBehaviour {
 
-
-	
 	public enum TYPE{
 		PAWN,
 		TARGET,
@@ -69,8 +68,6 @@ public class MinimapObject : MonoBehaviour {
 	}
 
 	Player player;
-
-	public List<string> IndexItem;
 
 	public TYPE type;
 	
@@ -80,17 +77,17 @@ public class MinimapObject : MonoBehaviour {
 	
 	public int team;
 
-	public bool Select = false;
-	
 	Transform myTransform;
 
-	public bool main = false;
+	[HideInInspector] public bool main = false;
 
 	public int ThisIndex;
 
 	public Pawn MainPawn;
 
 	public bool MainPawnSpawn;
+
+	[HideInInspector] public bool GetNewStatus = false;
 
 	public void Awake()
 	{
@@ -111,15 +108,15 @@ public class MinimapObject : MonoBehaviour {
 			Item.enabled = false;
 			return;
 		}
-
-		if(!MinimapManager.MiniMap)
+		else if(!MinimapManager.MiniMap)
 			MinimapManager.MiniMap = Transform.FindObjectOfType<UIMiniMapOnGUI>();
 		
 		if(!Item)
 			Item = gameObject.AddComponent<NJGMapItem>();
+
 		Item.type = 0;
 
-		IndexItem.AddRange(NJGMapOnGUI.instance.mapItemTypes);
+
 
 		switch(type)
 		{
@@ -129,24 +126,24 @@ public class MinimapObject : MonoBehaviour {
 			MainPawn = Player.localPlayer.GetActivePawn();
 			if(MainPawn == pawn)
 			{
+				if(!MinimapManager.UICam)
+					MinimapManager.UICam = MinimapManager.MiniMap.GetComponent<GUIAnchor>().uiCamera;
+				MinimapManager.mode = MinimapManager.MODE.ALLPALYER;
+
 				main = true;
 				MinimapManager.MainPawn = pawn;
 				MinimapManager.MainPlayerSpawn = true;
 				MinimapManager.MiniMap.target = transform;
-				ThisIndex = IndexItem.IndexOf("Player");
+				ThisIndex = MinimapManager.IndexItem.IndexOf("Player");
 				Item.type = ThisIndex;
+
 				MinimapManager.SetStatus(true);
 			}
 			else if(MinimapManager.MainPlayerSpawn && !main)
 			{
 				MainPawn = MinimapManager.MainPawn;
 
-				if(MainPawn.team == team)
-					ThisIndex = IndexItem.IndexOf("Frend");
-				else
-					ThisIndex = IndexItem.IndexOf("Enemy");
-
-				Select = true;
+				GetStatus();
 			}
 			break;
 		}
@@ -156,8 +153,10 @@ public class MinimapObject : MonoBehaviour {
 	{
 		if(main)
 		{
+			MinimapManager.UICam.enabled = false;
 			MinimapManager.MainPlayerSpawn = false;
 			MinimapManager.SetStatus(false);
+			main = false;
 		}
 	}
 
@@ -221,15 +220,63 @@ public class MinimapObject : MonoBehaviour {
 		
 	}
 
-	public void FixedUpdate()
+	void GetStatus()
+	{
+		switch(type)
+		{
+		case TYPE.PAWN:
+			switch(MinimapManager.mode)
+			{
+			case MinimapManager.MODE.NONE:
+				ThisIndex = 0;
+				break;
+			case MinimapManager.MODE.TEAMMATE:
+				if(MainPawn.team == team)
+					ThisIndex = MinimapManager.IndexItem.IndexOf("Frend");
+				else
+					ThisIndex = 0;
+				break;
+			case MinimapManager.MODE.ALLPALYER:
+				if(MainPawn.team == team)
+					ThisIndex = MinimapManager.IndexItem.IndexOf("Frend");
+				else
+					ThisIndex = MinimapManager.IndexItem.IndexOf("Enemy");
+				break;
+			case MinimapManager.MODE.ALLANDROTATION:
+				if(MainPawn.team == team)
+					ThisIndex = MinimapManager.IndexItem.IndexOf("FrendR");
+				else
+					ThisIndex = MinimapManager.IndexItem.IndexOf("EnemyR");
+				break;
+			}
+			break;
+		}
+	}
+
+	public void Update()
 	{
 		switch(type)
 		{
 		case TYPE.PAWN:
 			MainPawnSpawn = MinimapManager.MainPlayerSpawn;
 
+			if(GetNewStatus)
+			{
+				GetNewStatus = false;
+				GetStatus();
+			}
+
 			if(pawn.isDead)
-				ThisIndex = IndexItem.IndexOf("Dead");
+			{
+				ThisIndex = MinimapManager.IndexItem.IndexOf("Dead");
+				if(main)
+				{
+					main = false;
+					MinimapManager.UICam.enabled = false;
+					MinimapManager.MainPlayerSpawn = false;
+					MinimapManager.SetStatus(false);
+				}
+			}
 			break;
 		}
 

@@ -20,6 +20,9 @@ public class BaseGrenade : BaseWeapon {
 			foreach (Renderer renderer in renderers) {
 				renderer.enabled = false;
 			}
+            if(drawer!=null){
+                drawer.GetComponent<Renderer>().enabled = false;
+            }
 		}
 	}
 	public override void ReloadStart(){
@@ -33,6 +36,10 @@ public class BaseGrenade : BaseWeapon {
 			foreach (Renderer renderer in renderers) {
 				renderer.enabled = true;
 			}
+            if (drawer != null)
+            {
+                drawer.GetComponent<Renderer>().enabled = true;
+            }
 		}
 	}
 	protected override Quaternion getAimRotation(){

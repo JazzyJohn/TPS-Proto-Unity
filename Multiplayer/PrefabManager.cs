@@ -105,7 +105,11 @@ public class PrefabManager : MonoBehaviour {
 
 	public void Start(){
 		if (onStart) {
-				StartCoroutine (DownloadAndCache());
+            if (isPawns)
+            {
+                StartCoroutine(DownloadAndCache());
+            }
+
 		}
 	}
 	public GameObject[] getObjects()
@@ -113,6 +117,14 @@ public class PrefabManager : MonoBehaviour {
 		return objects.ToArray();
 	}
 	void Update(){
+        if (onStart)
+        {
+            if (!isPawns && GlobalPlayer.instance.loadingStage >= 2 && bundle==null)
+            {
+                StartCoroutine(DownloadAndCache());
+            }
+
+        }
        try
         {
             if (inProgress && www != null)
@@ -129,7 +141,7 @@ public class PrefabManager : MonoBehaviour {
 
             inProgress = false;
         }
-
+      
 	}
 	public void DownLoad()
 	{

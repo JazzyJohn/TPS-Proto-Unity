@@ -9,7 +9,7 @@ public class DummyTarget : DamagebleObject {
 		public override void Damage(BaseDamage damage,GameObject killer){
 				float dmgflaot =damage.Damage;
 				if(Critical){
-					dmgflaot*=2;
+                    dmgflaot *= BodyHurt.HEAD_SHOOT_MULTIPLIER;
 				}
 				//Debug.Log (killer.ToString()+ damage);
 				hitCounter.ShootCnt(dmgflaot);
