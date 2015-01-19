@@ -189,7 +189,14 @@ public class InventoryManager : MonoBehaviour {
 
     }
 	public virtual bool HasGrenade(){
-		return myWeapons[grenadeSlot].curAmmo>0;
+		if(myWeapons[grenadeSlot].curAmmo>0){
+			return true;
+		}
+		if(HasAmmo(AMMOTYPE.GRENADE)){
+			myWeapons[grenadeSlot].Reload();
+			return true;
+		}
+		return false;
 	}
 	//AMMO BAG SECTION END
 	
