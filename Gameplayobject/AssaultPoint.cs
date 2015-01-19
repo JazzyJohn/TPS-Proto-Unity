@@ -1,6 +1,7 @@
 ﻿using UnityEngine;
 using System.Collections;
 using System.Collections.Generic;
+using nstuff.juggerfall.extension.models;
 
 public class AssaultPoint : MonoBehaviour {
 	
@@ -29,7 +30,7 @@ public class AssaultPoint : MonoBehaviour {
 	public void Init(){
 		model.id =id;
 		model.lockedBy = new ArrayList();
-		for(int i=0;i<lockedBy.Lenght];i++){
+		for(int i=0;i<lockedBy.Length;i++){
 			model.lockedBy.Add(lockedBy[i]);
 		}
 	}
@@ -47,7 +48,7 @@ public class AssaultPoint : MonoBehaviour {
 	void FixedUpdate(){
 		int newPeopleCnt=0;
 		teamConquering=0;
-		for(int i=0;i<teamCnt.Lenght;i++){
+		for(int i=0;i<teamCnt.Length;i++){
 			if(teamCnt[i]>0){
 				if(newPeopleCnt>0){
 					newPeopleCnt=0;
@@ -76,7 +77,7 @@ public class AssaultPoint : MonoBehaviour {
 	public AssaultPointModel GetModel(){
 		model.needPoint = needToScore;
 		model.owner = owner;
-		model.peopleCnt = peopleCnt;
+		model.people = peopleCnt;
 		model.teamConquering = teamConquering;
 		send=false;
 		return model;	
@@ -84,12 +85,12 @@ public class AssaultPoint : MonoBehaviour {
 	}
 	
 	public void NetUpdate(AssaultPointModel model){
-		needPoint =model.needPoint;
+        needToScore = model.needPoint;
 		if(owner!=model.owner){
 			GameRule.instance.PointChangeOwner(model.owner);
 		}
 		owner =model.owner;
-		peopleCnt =model.peopleCnt;
+        peopleCnt = model.people;
 		if(teamConquering!=model.teamConquering){
 			GameRule.instance.PointChangeConquare(model.teamConquering);
 		}

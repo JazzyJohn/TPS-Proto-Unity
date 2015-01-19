@@ -153,6 +153,8 @@ public class BaseWeapon : DestroyableNetworkObject {
 
 	public float weaponRange;
 
+    public float weaponMinRange;
+
 	public int curAmmo;
     /// <summary>
     ///  Ammo that ready to shot in barrel in other word
@@ -274,7 +276,7 @@ public class BaseWeapon : DestroyableNetworkObject {
         if (owner == null)
         {
             //Destroy(photonView);
-            Debug.Log("DestoroyATTACHEs");
+            //Debug.Log("DestoroyATTACHEs");
             Destroy(gameObject);
             return;
         }
@@ -872,7 +874,7 @@ public class BaseWeapon : DestroyableNetworkObject {
 		float angle = Vector3.Dot (aimDir, realDir);
 
 		if (angle < MAXDIFFERENCEINANGLE) {
-            Debug.Log("angle");
+           /// Debug.Log("angle");
 			//return false;		
 		}
 
@@ -952,7 +954,7 @@ public class BaseWeapon : DestroyableNetworkObject {
 				target.Damage(dmg ,owner.gameObject);
 			}
 	}
-	public virtual void RemoteSimpleHit(Vector3 position, Quaternion rotation, float power, float range, int viewId, int projId, long timeShoot)
+    public virtual void RemoteSimpleHit(Vector3 position, Quaternion rotation, float power, float range, float minRange, int viewId, int projId, long timeShoot)
     {
 		Vector3 direction = rotation *Vector3.forward;
 		Ray centerRay=new Ray(position,direction);
@@ -1030,6 +1032,7 @@ public class BaseWeapon : DestroyableNetworkObject {
 		BaseProjectile projScript =proj.GetComponent<BaseProjectile>();
 		float power=0;
 		float range = weaponRange;
+        float minRange = weaponMinRange;
 		int viewId = 0;
 		switch(prefiretype){
 			case PREFIRETYPE.ChargedPower:
@@ -1059,7 +1062,7 @@ public class BaseWeapon : DestroyableNetworkObject {
         projScript.projId = ProjectileManager.instance.GetNextId();
         projScript.replication = false;
 		if (foxView.isMine) {
-            foxView.PrepareShoot(startPoint, startRotation, power, range, viewId, projScript.projId);
+            foxView.PrepareShoot(startPoint, startRotation, power, range, weaponMinRange, viewId, projScript.projId);
 		}
 		
 		
@@ -1067,24 +1070,25 @@ public class BaseWeapon : DestroyableNetworkObject {
 		projScript.owner = owner.gameObject;
 		projScript.damage.Damage+=power;
 		projScript.range=range;
+        projScript.minRange = minRange;
         projScript.Init();
 	}
-	public virtual void  RemoteShot(Vector3 position, Quaternion rotation, float power, float range, int viewId, int projId, long timeShoot)
+	public virtual void  RemoteShot(Vector3 position, Quaternion rotation, float power, float range,float minRange, int viewId, int projId, long timeShoot)
     {
 		switch (amunitionType)
         {
             case AMUNITONTYPE.SIMPLEHIT:
-                RemoteSimpleHit(position, rotation, power, range, viewId, projId, timeShoot);
+                RemoteSimpleHit(position, rotation, power, range, minRange,viewId, projId, timeShoot);
                 break;
             case AMUNITONTYPE.PROJECTILE:
-				RemoteGenerate(position, rotation, power, range, viewId, projId, timeShoot);
+				RemoteGenerate(position, rotation, power, range,minRange, viewId, projId, timeShoot);
                 break;
       
           
 
         }
 	}
-    public virtual void RemoteGenerate(Vector3 position, Quaternion rotation, float power, float range, int viewId, int projId, long timeShoot)
+    public virtual void RemoteGenerate(Vector3 position, Quaternion rotation, float power, float range,float minRange, int viewId, int projId, long timeShoot)
     {
         lastShootTime = Time.time;
         BaseProjectile proj = GenerateProjectileRep(position, rotation, timeShoot);
@@ -1094,6 +1098,7 @@ public class BaseWeapon : DestroyableNetworkObject {
             proj.projId = projId;
 			proj.damage.Damage+=power;
 			proj.range=range;
+            proj.minRange = minRange;
 			switch(prefiretype){
 				case PREFIRETYPE.Guidance:
 					if(viewId!=0){

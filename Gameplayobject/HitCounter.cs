@@ -5,6 +5,7 @@ public class HitCounter : MonoBehaviour {
         private float count;
         private bool runTime=false;
         private float time;
+    
 		
 		public TextMesh textMesh;
 		public void ShootCnt(float dmg){
@@ -28,7 +29,7 @@ public class HitCounter : MonoBehaviour {
                 }
 			}
 
-            textMesh.text = count + "DPS";
+            textMesh.text = count+ "DPS";
 			
 		}
 }

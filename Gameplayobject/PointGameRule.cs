@@ -2,6 +2,7 @@ using UnityEngine;
 using System.Collections;
 using nstuff.juggerfall.extension.models;
 using System.Collections.Generic;
+using Sfs2X.Entities.Data;
 
 public class PointGameRule : GameRule {
 
@@ -14,7 +15,7 @@ public class PointGameRule : GameRule {
 		
 		teamScore= new int[PlayerManager.instance.MaxTeam];
 		foreach(AssaultPoint point in points){
-			pointsDictionary[point.id] = point;]
+			pointsDictionary[point.id] = point;
 			point.Init();
 		}
 	}
@@ -42,7 +43,7 @@ public class PointGameRule : GameRule {
 					sendData.AddClass(point.GetModel());				
 				}
 			}
-			if(sendData.size()>0){
+			if(sendData.Size()>0){
 				NetworkController.Instance.GamePointDataRequest(sendData);
 			}
 		

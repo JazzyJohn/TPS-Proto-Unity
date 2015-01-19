@@ -14,8 +14,47 @@ public static class MinimapManager{
 		ALLANDROTATION,
 		ALLANDHP
 	}
-	
+
+	public static bool MainPlayerSpawn = false;
+
 	public static MODE mode;
+
+	public static Pawn MainPawn;
+
+	public static void SetStatus(bool spawn)
+	{
+		MiniMap.GetComponent<GUIAnchor>().uiCamera.enabled = spawn;
+		if(spawn)
+		{
+			foreach(MinimapObject obj in allMinimapObject)
+			{
+				if(!obj.main)
+				{
+					obj.MainPawn = MainPawn;
+					
+					if(obj.MainPawn.team == obj.team)
+						obj.ThisIndex = obj.IndexItem.IndexOf("Frend");
+					else
+						obj.ThisIndex = obj.IndexItem.IndexOf("Enemy");
+					
+					obj.Select = true;
+					obj.Item.type = obj.ThisIndex;
+				}
+			}
+		}
+		else
+		{
+			foreach(MinimapObject obj in allMinimapObject)
+			{					
+				obj.ThisIndex = 0;
+				
+				obj.Select = false;
+				obj.Item.type = obj.ThisIndex;
+			}
+		}
+	}
+
+	public static UIMiniMapOnGUI MiniMap; 
 }
 
 
@@ -28,29 +67,102 @@ public class MinimapObject : MonoBehaviour {
 		TARGET,
 		INFO
 	}
-	
-	
+
+	Player player;
+
+	public List<string> IndexItem;
+
 	public TYPE type;
 	
 	public Pawn pawn;
+
+	public NJGMapItem Item;
 	
 	public int team;
+
+	public bool Select = false;
 	
-	public Transform myTransform;
-	
-	public void Awake(){
+	Transform myTransform;
+
+	public bool main = false;
+
+	public int ThisIndex;
+
+	public Pawn MainPawn;
+
+	public bool MainPawnSpawn;
+
+	public void Awake()
+	{
 		MinimapManager.allMinimapObject.Add(this);
 		myTransform= transform;
 		switch(type){
-			case TYPE.PAWN:
-				pawn= GetComponent<Pawn>();
+		case TYPE.PAWN:
+			pawn= GetComponent<Pawn>();
 			break;	
+		}
+	}
+
+	public void Start()
+	{
+		if(!Transform.FindObjectOfType<UIMiniMapOnGUI>())
+		{
+			this.enabled = false;
+			Item.enabled = false;
+			return;
+		}
+
+		if(!MinimapManager.MiniMap)
+			MinimapManager.MiniMap = Transform.FindObjectOfType<UIMiniMapOnGUI>();
+		
+		if(!Item)
+			Item = gameObject.AddComponent<NJGMapItem>();
+		Item.type = 0;
+
+		IndexItem.AddRange(NJGMapOnGUI.instance.mapItemTypes);
+
+		switch(type)
+		{
+		case TYPE.PAWN:
+			team = pawn.team;
+
+			MainPawn = Player.localPlayer.GetActivePawn();
+			if(MainPawn == pawn)
+			{
+				main = true;
+				MinimapManager.MainPawn = pawn;
+				MinimapManager.MainPlayerSpawn = true;
+				MinimapManager.MiniMap.target = transform;
+				ThisIndex = IndexItem.IndexOf("Player");
+				Item.type = ThisIndex;
+				MinimapManager.SetStatus(true);
+			}
+			else if(MinimapManager.MainPlayerSpawn && !main)
+			{
+				MainPawn = MinimapManager.MainPawn;
+
+				if(MainPawn.team == team)
+					ThisIndex = IndexItem.IndexOf("Frend");
+				else
+					ThisIndex = IndexItem.IndexOf("Enemy");
+
+				Select = true;
+			}
+			break;
+		}
+	}
+
+	void OnDestroy()
+	{
+		if(main)
+		{
+			MinimapManager.MainPlayerSpawn = false;
+			MinimapManager.SetStatus(false);
 		}
 	}
 
 	public void OnRemove(){
 		MinimapManager.allMinimapObject.Remove(this);
-	
 	}
 	
 	public bool SeeMe(int team){
@@ -87,27 +199,6 @@ public class MinimapObject : MonoBehaviour {
 		return myTransform.position - position;
 	}
 	
-	public Quaternion RelativeDirection(){
-		switch(type){
-			case TYPE.PAWN:
-				switch(MinimapManager.mode){
-					case MinimapManager.MODE.ALLANDHP:
-					case MinimapManager.MODE.ALLANDROTATION:
-						return myTransform.rotation;					
-					break;					
-					default:
-						return  Quaternion.identity;
-					break;
-				
-				}
-			break;	
-			default:
-            return Quaternion.identity;
-			break;
-		}
-	
-	}
-	
 	public String AddInfo(){
 		switch(type){
 			case TYPE.PAWN:
@@ -128,5 +219,23 @@ public class MinimapObject : MonoBehaviour {
 			break;
 		}
 		
+	}
+
+	public void FixedUpdate()
+	{
+		switch(type)
+		{
+		case TYPE.PAWN:
+			MainPawnSpawn = MinimapManager.MainPlayerSpawn;
+
+			if(pawn.isDead)
+				ThisIndex = IndexItem.IndexOf("Dead");
+			break;
+		}
+
+		if(ThisIndex != Item.type)
+		{
+			Item.type = ThisIndex;
+		}
 	}
 }

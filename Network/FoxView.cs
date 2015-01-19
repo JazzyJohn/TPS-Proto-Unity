@@ -183,7 +183,7 @@ public class FoxView : MonoBehaviour {
     {
         NetworkController.Instance.DetonateRequest(viewID);
     }
-    public void PrepareShoot(Vector3 position, Quaternion rotation, float power, float range, int viewId, int projId)
+    public void PrepareShoot(Vector3 position, Quaternion rotation, float power, float range, float minRange, int viewId, int projId)
     {
 		
 		ISFSObject data = new SFSObject();
@@ -192,6 +192,7 @@ public class FoxView : MonoBehaviour {
 		data.PutClass("direction",new QuaternionModel(rotation));
 		data.PutFloat("power", power);
 		data.PutFloat("range", range);
+        data.PutFloat("minRange", minRange);
         data.PutInt("viewId", viewId);
         data.PutInt("projId", projId);
         data.PutLong("timeShoot", TimeManager.Instance.NetworkTime);

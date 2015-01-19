@@ -10,6 +10,7 @@ public class BaseShootgun : BaseWeapon {
 		Quaternion startRotation = getAimRotation();
         float power = 0;
         float range = weaponRange;
+        float minRange = weaponMinRange;
         int viewId = 0;
         Transform target = null;
         switch (prefiretype)
@@ -49,7 +50,7 @@ public class BaseShootgun : BaseWeapon {
                 projScript.projId = ProjectileManager.instance.GetNextId();
                 projScript.replication = false;
 				if (foxView.isMine) {
-                    foxView.PrepareShoot(startPoint, startRotation, power, range, viewId, projScript.projId);
+                    foxView.PrepareShoot(startPoint, startRotation, power, range,minRange, viewId, projScript.projId);
 				}
 				
                
@@ -57,6 +58,7 @@ public class BaseShootgun : BaseWeapon {
 				projScript.owner = owner.gameObject;
 				projScript.damage.Damage+=power;
 				projScript.range=range;
+                projScript.minRange = minRange;
 				projScript.Init();
 		}
 	}

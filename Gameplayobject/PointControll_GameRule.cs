@@ -10,7 +10,7 @@ public class PointControll_GameRule : PVPGameRule {
 
 
 
-	public int getPoints(int team)//how much points have team.
+/*	public int getPoints(int team)//how much points have team.
 	{
 		int iRet = 0;
 		foreach (AssaultPoint aPoint in cPoints) 
@@ -25,7 +25,7 @@ public class PointControll_GameRule : PVPGameRule {
 		foreach (AssaultPoint aPoint in cPoints) 
 			aPoint.clearScores ();
 	}
-
+    */
 	public void redTeamWon()
 	{
 		//TODO: make won.
@@ -60,14 +60,14 @@ public class PointControll_GameRule : PVPGameRule {
 	// Use this for initialization
 	void Start () {
 		cPoints = FindObjectsOfType(typeof(AssaultPoint)) as AssaultPoint[];
-		StartCoroutine("Tick");
+	//	StartCoroutine("Tick");
 	}
 	
 	// Update is called once per frame
 	void Update () {
 	
 	}
-	private IEnumerator Tick()
+	/*private IEnumerator Tick()
 	{
 		while (true)
 		{
@@ -89,5 +89,5 @@ public class PointControll_GameRule : PVPGameRule {
 			yield return new WaitForSeconds(tick);
 			//Debug.Log("Work");
 		}
-	}
+	}*/
 }

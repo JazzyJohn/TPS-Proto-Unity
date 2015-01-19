@@ -1734,7 +1734,7 @@ public class NetworkController : MonoBehaviour {
 		
 			weapon.RemoteShot(((Vector3Model)dt.GetClass("position")).GetVector(),
 								((QuaternionModel)dt.GetClass("direction")).GetQuat(),
-								dt.GetFloat("power"),dt.GetFloat("range"),dt.GetInt("viewId"),dt.GetInt("projId"),dt.GetLong("timeShoot"));
+                                dt.GetFloat("power"), dt.GetFloat("range"), dt.GetFloat("minRange"), dt.GetInt("viewId"), dt.GetInt("projId"), dt.GetLong("timeShoot"));
 		}
 		
 								
@@ -2173,10 +2173,11 @@ public class NetworkController : MonoBehaviour {
 	 /// <summary>
     ///handle  gamePointData request from server
     /// </summary>	
-	
-	public void GamePointDataRequest(ISFSArray sendPoint ){
-	
-		ISFSArray points = allDt.GetSFSArray("points");
+
+    public void GamePointDataRequest(ISFSObject dt)
+    {
+
+        ISFSArray points = dt.GetSFSArray("points");
 		foreach(AssaultPointModel point in points){
 			((PointGameRule)GameRule.instance).PointUpdate(point);
 		}

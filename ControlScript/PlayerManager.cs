@@ -169,7 +169,7 @@ public class PlayerManager : MonoBehaviour {
         if (updateTimer > updateDelay)
         {
             updateTimer = 0.0f;
-            PawnUpdate();
+          //  PawnUpdate();
         }
 	}
 	

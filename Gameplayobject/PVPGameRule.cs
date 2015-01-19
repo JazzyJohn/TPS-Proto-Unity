@@ -8,7 +8,6 @@ public class PVPGameRule : GameRule {
 		protected int[] teamKill;
 		
 		
-		public AnnonceType type;
 		
 
 		

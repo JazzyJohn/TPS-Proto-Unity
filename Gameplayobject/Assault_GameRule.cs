@@ -10,7 +10,7 @@ public class Assault_GameRule : PVPGameRule {
 	
 	
 	
-	public int getPoints(int team)//how much points have team.
+/*	public int getPoints(int team)//how much points have team.
 	{
 		int iRet = 0;
 		foreach (AssaultPoint aPoint in cPoints) 
@@ -25,7 +25,7 @@ public class Assault_GameRule : PVPGameRule {
 		foreach (AssaultPoint aPoint in cPoints) 
 			aPoint.clearScores ();
 	}
-	
+	*/
 	public void redTeamWon()
 	{
 		//TODO: make won.
@@ -49,7 +49,7 @@ public class Assault_GameRule : PVPGameRule {
 	//the game will be ended when any team will take $pointsToGoal$ points.
 	public override bool IsGameEnded()
 	{
-		if (getPoints (1) >= pointsToGoal) 
+/*		if (getPoints (1) >= pointsToGoal) 
 		{
 			redTeamWon ();
 			return true;
@@ -59,7 +59,7 @@ public class Assault_GameRule : PVPGameRule {
 			blueTeamWon();
 			return true;
 		}
-		
+		*/
 		return false;
 	}
 	

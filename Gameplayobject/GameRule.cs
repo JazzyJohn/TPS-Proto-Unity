@@ -33,6 +33,9 @@ public class GameRule : MonoBehaviour {
 
     public float DeathY= -50f;
 
+    public AnnonceType type;
+		
+
     protected void Awake()
     {
         curStage = MUSIC_STAGE.BATLLE;
@@ -102,7 +105,7 @@ public class GameRule : MonoBehaviour {
     {
         get
         {
-            if (Application.loadedLevel !=0 && s_Instance == null)
+            if (s_Instance == null&&ServerHolder.Instance.gameRoom!=null)
             {
                 // This is where the magic happens.
                 //  FindObjectOfType(...) returns the first AManager object in the scene.

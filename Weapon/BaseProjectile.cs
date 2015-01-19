@@ -74,6 +74,8 @@ public class BaseProjectile : MonoBehaviour
     public Transform target;
     public Vector3 targetOffset; 
     public float range;
+
+    public float minRange;
     
     static float minimunProcent = 0.1f;
     public Vector3 startPosition;
@@ -403,15 +405,15 @@ public class BaseProjectile : MonoBehaviour
         {
 
             float distance = (startPosition - hit.point).magnitude;
-            Debug.Log("Distance " + distance + " Range " + range);
+//            Debug.Log("Distance " + distance + " Range " + range);
             BaseDamage ldamage = new BaseDamage(damage);
-            if (range * 2 < distance)
+            if (minRange+range < distance)
             {
                 ldamage.Damage = damage.minDamage;
             }else if (range < distance)
 			{
-				
-				ldamage.Damage = damage.Damage  - (distance - range)* (damage.Damage -damage.minDamage)/range;
+
+                ldamage.Damage = damage.Damage - (distance - range) * (damage.Damage - damage.minDamage) / minRange;
 			}
 
 			ldamage.pushDirection = mTransform.forward;
