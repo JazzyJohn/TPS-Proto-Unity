@@ -531,10 +531,7 @@ public class BaseProjectile : MonoBehaviour
             {
                 case HITEFFECT.Destruction:
                     used = true;
-                    if (hitParticle != null)
-                    {
-                        hitParticle.Spawn( hit.point, Quaternion.LookRotation(hit.normal));
-                    }
+                    SpawnAfterEffect(exploPosition);
                     ExplosionDamage(exploPosition);
                  
                     break;
@@ -676,10 +673,7 @@ public class BaseProjectile : MonoBehaviour
         }
         if (!used)
         {
-            if (hitParticle != null)
-            {
-                hitParticle.Spawn( Position, mTransform.rotation);
-            }
+			 SpawnAfterEffect(Position);
 
         }
         if (!replication)
@@ -688,6 +682,13 @@ public class BaseProjectile : MonoBehaviour
         }
         Invoke("DeActivate", 0.1f);
     }
+	public virtual void SpawnAfterEffect(Vector3 Position){
+	
+			if (hitParticle != null)
+            {
+                hitParticle.Spawn( Position, mTransform.rotation);
+            }
+	}
 	public void DeActivate(){
 		active= false;
 		foreach(GameObject go in inactiveObjectInEffectStage){

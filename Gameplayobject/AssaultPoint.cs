@@ -7,18 +7,26 @@ public class AssaultPoint : MonoBehaviour {
 	
 	public int id;
 	
-	public AssaultPoint[] lockedBy;
+	public int startOwner;
 	
+	public float aiRadius;
+	
+	public Transform[] aiRoamPoint;
+	[HideInInspector] 
+	public Transform myTransform;
+	
+	public AssaultPoint[] lockedBy;
+	[HideInInspector] 
 	public float scorePoint;
 	
 	public float needToScore;
-	
+	[HideInInspector] 
 	public int owner=0;
-	
+	[HideInInspector] 
 	public int peopleCnt = 0;
-	
+	[HideInInspector] 
     public int teamConquering =0;
-	
+	[HideInInspector] 
 	public AssaultPointModel model = new AssaultPointModel();
 	
 	public ShowOnGuiComponent guiElement;
@@ -27,6 +35,11 @@ public class AssaultPoint : MonoBehaviour {
 	
 	private bool send = true;
 	
+	public void Awake(){
+		myTransform = transfrom;
+		owner =startOwner;
+	}
+	
 	public void Init(){
 		model.id =id;
 		model.lockedBy = new ArrayList();
@@ -34,7 +47,10 @@ public class AssaultPoint : MonoBehaviour {
 			model.lockedBy.Add(lockedBy[i]);
 		}
 	}
+	public Transform GetRoamTarget(){
+		return aiRoamPoint[(int)(UnityEngine.Random.value * aiRoamPoint.Length)];
 	
+	}
 	
 	void OnTriggerStay(Collider other) {
         if (other.CompareTag("Player")){

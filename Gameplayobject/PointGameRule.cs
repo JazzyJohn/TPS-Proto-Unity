@@ -53,7 +53,37 @@ public class PointGameRule : GameRule {
 	public void PointUpdate(AssaultPointModel point){
 		pointsDictionary[point.id].NetUpdate(point);
 	}
+	public override int Winner(){
+			int maxScore = 0;
+			int winner = 0;
+			for(int i=0;i<teamScore.Length;i++){
+				if(maxScore<teamScore[i]){
+					maxScore=teamScore[i];
+					winner = i;
+				}
+			}
+			return (winner+1);
+		}
+		
+		
 	
+	
+	public override void SetFromModel(GameRuleModel model)
+	{
+		PointGameRule pvpmodel = (PointGameRule)model;
+		for (int i = 0; i < pvpmodel.teamKill.Count; i++)
+		{
+			
+			teamScore[i] = (int)pvpmodel.teamScore[i];
+		}
+	  
+		if (!isGameEnded && pvpmodel.isGameEnded)
+		{
+			GameEnded();
+			isGameEnded = true;
+		}
+		
+        }
 	
 
 

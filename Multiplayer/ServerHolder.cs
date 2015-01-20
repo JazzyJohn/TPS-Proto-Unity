@@ -12,7 +12,7 @@ using Sfs2X.Entities.Data;
 using nstuff.juggerfall.extension.models;
 
 
-public enum GAMEMODE { PVP, PVE,RUNNER, PVPJUGGERFIGHT,PVPHUNT,PVE_HOLD};
+public enum GAMEMODE { PVP, PVE,RUNNER, PVPJUGGERFIGHT,PVPHUNT,PVE_HOLD,SEQUENCE_POINTGAME};
 
 public class RoomData
 {
@@ -227,6 +227,10 @@ public class ServerHolder : MonoBehaviour
                 break;
 			case GAMEMODE.PVE_HOLD:
 				newRoomName = "Hold chamber " + UnityEngine.Random.Range(100, 999);
+                break;
+				
+			case GAMEMODE.SCORE_POINTGAME:
+				newRoomName = "Score point chamber " + UnityEngine.Random.Range(100, 999);
                 break;
        
         }
@@ -452,6 +456,12 @@ public class ServerHolder : MonoBehaviour
              
 				
                
+			break;
+			case GAMEMODE.SEQUENCE_POINTGAME:
+				gameRule = new SFSRoomVariable("ruleClass", "nstuff.juggerfall.extension.gamerule.SequencePointGameRule");
+                setting.teamCount = 2;
+                setting.maxTime =0;
+                setting.maxScore= 0;
 			break;
         }
         SFSObject data = new SFSObject();

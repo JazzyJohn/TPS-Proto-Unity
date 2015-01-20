@@ -78,6 +78,10 @@ public class AISwarm:MonoBehaviour
         }
         return returnTransform;
     }
+	public virtual Transform[] GetPointOfInterest(int count,int team)
+    {
+         return GetPointOfInterest( count);
+    }
 
 	void Update(){
 		DrawCheck();
