@@ -244,7 +244,7 @@ namespace nstuff.juggerfall.extension.models
 	   
     }
 	 [Serializable]
-    public class PointGameRule : GameRuleModel
+    public class PointGameRuleModel : GameRuleModel
     {
         public bool isGameEnded;
 

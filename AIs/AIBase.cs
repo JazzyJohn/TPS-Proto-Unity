@@ -122,8 +122,8 @@ public class AIBase : MonoBehaviour
 			if(patrolPoints.Length==0){
 				patrolPoints = aiSwarm.GetPointOfInterest(PatrolPointCount,controlledPawn.team);
 			}
-			_currentState.AngleRange = AngleRange;	
-			((AIPatrol)_currentState).SetAttackPoints(patrolPoints);
+			_currentState.AngleRange = AngleRange;
+            ((AIPointAttack)_currentState).SetAttackPoints(patrolPoints);
 		}
 			break;
         case "AIBattleJugger":

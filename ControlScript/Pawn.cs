@@ -1616,6 +1616,13 @@ public class Pawn : DamagebleObject
             CurWeapon.StopFire();
         }
     }
+    public virtual void StopReload()
+    {
+        if (CurWeapon != null)
+        {
+            CurWeapon.StopReload();
+        }
+    }
     public virtual void StartPumping()
     {
         if (CurWeapon != null)

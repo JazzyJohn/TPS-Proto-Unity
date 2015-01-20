@@ -14,8 +14,9 @@ public class AIPointAttack : AIMovementState
 	public int step=0;
 	
 	public void SetAttackPoints(Transform[] attackPoints){
-		this.attackPoints = new AssaultPoint[attackPoints.Lenght];
-		for(int i =0; i<attackPoints.Lenght;i++){
+		this.attackPoints = new AssaultPoint[attackPoints.Length];
+        for (int i = 0; i < attackPoints.Length; i++)
+        {
 			this.attackPoints[i] = attackPoints[i].GetComponent<AssaultPoint>();		
 		}
 		
@@ -31,7 +32,7 @@ public class AIPointAttack : AIMovementState
 		CheckPoint();
 	//	Debug.Log (Vector3.Distance (patrolPoints [step].position, controlledPawn.myTransform.position)+"  "+agent.size);
 		if(roaming){
-			if (agent.IsRiched(roamTarget, controlledPawn.myTransform.position,agent.size*2)||agent.IsPathBad()) {
+			if (agent.IsRiched(roamTarget.position, controlledPawn.myTransform.position,agent.size*2)||agent.IsPathBad()) {
 				StartRoam();
 			}
 		
@@ -46,16 +47,20 @@ public class AIPointAttack : AIMovementState
 	}
 	protected void CheckPoint(){
 		int oldstep= step;
-		for(int i =0; i<attackPoints.Lenght;i++){
-			if(attackPoint[i].startOwner ==0 ||attackPoint[i].startOwner==controlledPawn.team){
+        for (int i = 0; i < attackPoints.Length; i++)
+        {
+            if (attackPoints[i].startOwner == 0 || attackPoints[i].startOwner == controlledPawn.team)
+            {
 				//home or neutral  Logic Defend
-				if(attackPoint[i].owner!=controlledPawn.team){
+                if (attackPoints[i].owner != controlledPawn.team)
+                {
 					step= i;
 					break;
 				}				
 			}else{
 				//EnemyPoint ignore for now( later count defender if more then needed then attack)
-				if(attackPoint[i].owner==controlledPawn.team){
+                if (attackPoints[i].owner == controlledPawn.team)
+                {
 					step= i;
 					break;
 				}else{
@@ -71,7 +76,7 @@ public class AIPointAttack : AIMovementState
 	public void StartRoam(){
 		roamTarget = attackPoints [step].GetRoamTarget();
 		roaming = true;
-		agent.SetTarget(roamTarget);
+		agent.SetTarget(roamTarget.position);
 	}
 	public override void StartState(){
 		NormalMovement();
@@ -91,8 +96,8 @@ public class AIPointAttack : AIMovementState
 	}
 	protected void FixedUpdate(){
 		base.FixedUpdate();
-     
-        if (patrolPoints[step] == null)
+
+        if (attackPoints[step] == null)
         {
             return;
         }
@@ -123,9 +128,9 @@ public class AIPointAttack : AIMovementState
 			{
 				//Debug.Log("recalculate");
 				if(roaming){
-					agent.ForcedSetTarget(roamTarget);
+					agent.ForcedSetTarget(roamTarget.position);
 				}else{
-					agent.ForcedSetTarget(patrolPoints[step].myTransform.position);
+                    agent.ForcedSetTarget(attackPoints[step].myTransform.position);
 				}
 			}
 			

@@ -20,18 +20,7 @@ public class PointGameRule : GameRule {
 		}
 	}
 	
-	
-	public override int Winner(){
-		int maxScore = 0;
-		int winner = 0;
-		for(int i=0;i<teamScore.Length;i++){
-			if(maxScore<teamScore[i]){
-				maxScore=teamScore[i];
-				winner = i;
-			}
-		}
-		return (winner+1);
-	}
+
 		
 		
 	public void Update(){
@@ -70,8 +59,8 @@ public class PointGameRule : GameRule {
 	
 	public override void SetFromModel(GameRuleModel model)
 	{
-		PointGameRule pvpmodel = (PointGameRule)model;
-		for (int i = 0; i < pvpmodel.teamKill.Count; i++)
+        PointGameRuleModel pvpmodel = (PointGameRuleModel)model;
+        for (int i = 0; i < pvpmodel.teamScore.Count; i++)
 		{
 			
 			teamScore[i] = (int)pvpmodel.teamScore[i];

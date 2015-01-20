@@ -229,7 +229,7 @@ public class ServerHolder : MonoBehaviour
 				newRoomName = "Hold chamber " + UnityEngine.Random.Range(100, 999);
                 break;
 				
-			case GAMEMODE.SCORE_POINTGAME:
+			case GAMEMODE.SEQUENCE_POINTGAME:
 				newRoomName = "Score point chamber " + UnityEngine.Random.Range(100, 999);
                 break;
        

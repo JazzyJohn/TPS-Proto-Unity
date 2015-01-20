@@ -155,7 +155,7 @@ public class BaseWeapon : DestroyableNetworkObject {
 
     public float weaponMinRange;
 
-	public int curAmmo;
+	public float curAmmo;
     /// <summary>
     ///  Ammo that ready to shot in barrel in other word
     /// </summary>
@@ -184,6 +184,12 @@ public class BaseWeapon : DestroyableNetworkObject {
 	private float fireTimer =  0.0f;
 	
 	private float reloadTimer =  0.0f;
+    /// <summary>
+    ///  Is reload one clip at time during reload timer
+    ///      /// </summary>
+    public bool isContinuousReload;
+
+    private float reloaderCounter=0.0f;
 
 	protected RifleParticleController rifleParticleController;
 
@@ -291,7 +297,7 @@ public class BaseWeapon : DestroyableNetworkObject {
         init = true;
         enabled = false;
         if(foxView.isMine){
-            curAmmo = owner.GetComponent<InventoryManager>().GiveAmmo(ammoType, clipSize - curAmmo);
+            curAmmo = owner.GetComponent<InventoryManager>().GiveAmmo(ammoType, clipSize - (int)curAmmo);
         }
       
     }
@@ -406,11 +412,33 @@ public class BaseWeapon : DestroyableNetworkObject {
 		}
 
 		if(isReload){
-			if(reloadTimer<0){
-				Reload();
-			}
             reloadTimer -= deltaTime;
-			return;
+            if (isContinuousReload)
+            {
+                reloaderCounter += deltaTime * ((float)clipSize) / reloadTime;
+                Reload();
+                if (reloadTimer < 0)
+                {
+                    //double for time accuracy of float
+                    reloaderCounter=1.0f;
+                    Reload();
+                    ReloadFinish();
+                }
+                if(isShooting&&curAmmo>=1){
+                    ReloadFinish();
+                }
+
+            }
+            else
+            {
+                if (reloadTimer < 0)
+                {
+                    Reload();
+                }
+               
+                
+            }
+            return;
 		}
         if (fireTimer >= 0)
         {
@@ -609,7 +637,14 @@ public class BaseWeapon : DestroyableNetworkObject {
                 }
 
             }
-			reloadTimer=reloadTime;
+            if (isContinuousReload)
+            {
+                reloadTimer = reloadTime *((float)clipSize - curAmmo)/(float)clipSize;
+            }
+            else
+            {
+                reloadTimer = reloadTime;
+            }
 			if(isShooting){
 				StopFire();
 				shootAfterReload = true;
@@ -635,24 +670,57 @@ public class BaseWeapon : DestroyableNetworkObject {
     {
         owner.animator.ReloadStop();
     }
-	public virtual void Reload(){
-      
-		isReload = false;
-        owner.animator.ReloadStop();
-		int oldClip = curAmmo;
-		curAmmo =owner.GetComponent<InventoryManager>().GiveAmmo(ammoType,clipSize-curAmmo)+oldClip;	
-		if (shootAfterReload) {
-			shootAfterReload=false;
-      //if (IsFired != null) IsFired(this, EventArgs.Empty);
-			StartFire();
-		}
-        if (pumpAfterReload) {
+
+    public void StopReload()
+    {
+        isReload = false;
+        shootAfterReload = false;
+    }
+    public void ReloadFinish()
+    {
+        isReload = false;
+
+        if (shootAfterReload)
+        {
+            shootAfterReload = false;
+            //if (IsFired != null) IsFired(this, EventArgs.Empty);
+            StartFire();
+        }
+        if (pumpAfterReload)
+        {
             pumpAfterReload = false;
             StartPumping();
         }
-		if (owner.player != null) {
-			EventHolder.instance.FireEvent (typeof(LocalPlayerListener), "EventPawnReload", owner.player);
-		}
+        if (owner.player != null)
+        {
+            EventHolder.instance.FireEvent(typeof(LocalPlayerListener), "EventPawnReload", owner.player);
+        }
+    }
+	public virtual void Reload(){
+        if (isContinuousReload)
+        {
+            if (reloaderCounter >= 1.0f)
+            {
+                int oldClip = (int)curAmmo;
+                if (curAmmo >= clipSize)
+                {
+                    return;
+                }
+                curAmmo = owner.GetComponent<InventoryManager>().GiveAmmo(ammoType, 1) + oldClip;
+                if (curAmmo == oldClip)
+                {
+                    ReloadFinish();
+                }
+                reloaderCounter = 0.0f;
+            }
+        }
+        else
+        {
+            owner.animator.ReloadStop();
+            int oldClip = (int)curAmmo;
+            curAmmo = owner.GetComponent<InventoryManager>().GiveAmmo(ammoType, clipSize - (int)curAmmo) + oldClip;
+            ReloadFinish();
+        }
 
 		//curAmmo =owner.GetComponent<InventoryManager>().GiveAmmo(ammoType,clipSize);
 

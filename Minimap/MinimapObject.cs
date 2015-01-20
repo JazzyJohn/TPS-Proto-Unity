@@ -34,8 +34,6 @@ public static class MinimapManager{
 				case MinimapObject.TYPE.PAWN:
 					if(!obj.main)
 					{
-						obj.MainPawn = MainPawn;
-
 						obj.GetNewStatus = true;
 					}
 					break;
@@ -56,6 +54,8 @@ public static class MinimapManager{
 	public static UIMiniMapOnGUI MiniMap; 
 
 	public static List<string> IndexItem = new List<string>();
+
+	public static bool needUpdateStatus = false;
 }
 
 
@@ -82,8 +82,6 @@ public class MinimapObject : MonoBehaviour {
 	[HideInInspector] public bool main = false;
 
 	public int ThisIndex;
-
-	public Pawn MainPawn;
 
 	public bool MainPawnSpawn;
 
@@ -123,8 +121,7 @@ public class MinimapObject : MonoBehaviour {
 		case TYPE.PAWN:
 			team = pawn.team;
 
-			MainPawn = Player.localPlayer.GetActivePawn();
-			if(MainPawn == pawn)
+			if(Player.localPlayer.GetActivePawn() == pawn)
 			{
 				if(!MinimapManager.UICam)
 					MinimapManager.UICam = MinimapManager.MiniMap.GetComponent<GUIAnchor>().uiCamera;
@@ -137,16 +134,27 @@ public class MinimapObject : MonoBehaviour {
 				ThisIndex = MinimapManager.IndexItem.IndexOf("Player");
 				Item.type = ThisIndex;
 
+				StartCoroutine(TimeUpdateStatus());
+
 				MinimapManager.SetStatus(true);
 			}
 			else if(MinimapManager.MainPlayerSpawn && !main)
 			{
-				MainPawn = MinimapManager.MainPawn;
-
 				GetStatus();
 			}
 			break;
 		}
+	}
+
+	IEnumerator TimeUpdateStatus()
+	{
+		MinimapManager.needUpdateStatus = true;
+		yield return new WaitForEndOfFrame(); //немного идуского кода, но писать for ради 5 кадров...
+		yield return new WaitForEndOfFrame();
+		yield return new WaitForEndOfFrame();
+		yield return new WaitForEndOfFrame();
+		yield return new WaitForEndOfFrame();
+		MinimapManager.needUpdateStatus = false;
 	}
 
 	void OnDestroy()
@@ -231,19 +239,19 @@ public class MinimapObject : MonoBehaviour {
 				ThisIndex = 0;
 				break;
 			case MinimapManager.MODE.TEAMMATE:
-				if(MainPawn.team == team)
+				if(MinimapManager.MainPawn.team == team)
 					ThisIndex = MinimapManager.IndexItem.IndexOf("Frend");
 				else
 					ThisIndex = 0;
 				break;
 			case MinimapManager.MODE.ALLPALYER:
-				if(MainPawn.team == team)
+				if(MinimapManager.MainPawn.team == team)
 					ThisIndex = MinimapManager.IndexItem.IndexOf("Frend");
 				else
 					ThisIndex = MinimapManager.IndexItem.IndexOf("Enemy");
 				break;
 			case MinimapManager.MODE.ALLANDROTATION:
-				if(MainPawn.team == team)
+				if(MinimapManager.MainPawn.team == team)
 					ThisIndex = MinimapManager.IndexItem.IndexOf("FrendR");
 				else
 					ThisIndex = MinimapManager.IndexItem.IndexOf("EnemyR");
@@ -251,10 +259,16 @@ public class MinimapObject : MonoBehaviour {
 			}
 			break;
 		}
+		Item.newColorGet(ThisIndex);
 	}
 
 	public void Update()
 	{
+		if(ThisIndex != Item.type)
+		{
+			Item.type = ThisIndex;
+		}
+
 		switch(type)
 		{
 		case TYPE.PAWN:
@@ -278,11 +292,6 @@ public class MinimapObject : MonoBehaviour {
 				}
 			}
 			break;
-		}
-
-		if(ThisIndex != Item.type)
-		{
-			Item.type = ThisIndex;
 		}
 	}
 }

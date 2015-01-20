@@ -38,9 +38,10 @@ public class StationaryDamager : MonoBehaviour {
 			}
 			objectToDmg.Clear();
 		}
-	   void OnParticleCollision(GameObject other) {
-           Debug.Log("hit " + other);
-			DamagebleObject obj =other.GetComponent<DamagebleObject>();
+        void OnTriggerStay(Collider other)
+        {
+        //   Debug.Log("hit " + other.gameObject);
+           DamagebleObject obj = other.GetComponent<DamagebleObject>();
 			if(obj!=null){
 				objectToDmg.Add(obj);
 			}

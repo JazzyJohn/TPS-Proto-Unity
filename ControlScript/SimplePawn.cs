@@ -77,6 +77,7 @@ public class SimplePawn : Pawn {
                     if (nextState == CharacterState.Sprinting)
                     {
                         StopFire();
+                        StopReload();
                         StartSprint();
 
                     }
@@ -178,5 +179,7 @@ public class SimplePawn : Pawn {
     {
         return base.CanSprint() && !CurWeapon.IsShooting();
     }
+
+   
 	
 }

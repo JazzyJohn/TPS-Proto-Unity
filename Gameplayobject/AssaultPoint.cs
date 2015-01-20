@@ -36,7 +36,7 @@ public class AssaultPoint : MonoBehaviour {
 	private bool send = true;
 	
 	public void Awake(){
-		myTransform = transfrom;
+		myTransform = transform;
 		owner =startOwner;
 	}
 	
