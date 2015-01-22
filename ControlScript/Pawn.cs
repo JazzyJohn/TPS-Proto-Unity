@@ -1598,7 +1598,10 @@ public class Pawn : DamagebleObject
     //Weapon Section
     public void ChangeWeapon()
     {
-        ivnMan.ChangeWeapon();
+	
+		if(characterState != CharacterState.Sprinting){
+			ivnMan.ChangeWeapon();
+		}
     }
 
     public virtual void StartFire()
@@ -1653,7 +1656,7 @@ public class Pawn : DamagebleObject
 		
 	}
 	public virtual bool CanUseGrenade(){
-        return characterState == CharacterState.Sprinting || characterState == CharacterState.Jumping || ivnMan.HasGrenade();
+        return characterState != CharacterState.Sprinting && characterState != CharacterState.Jumping && ivnMan.HasGrenade();
 	}
 	public virtual void ThrowGrenade(){
 		if(CurWeapon.slotType==BaseWeapon.SLOTTYPE.GRENADE){
@@ -2061,7 +2064,8 @@ public class Pawn : DamagebleObject
     }
     public void Reload()
     {
-        if (CurWeapon != null)
+	
+        if (CurWeapon != null&&characterState != CharacterState.Sprinting)
         {
             CurWeapon.ReloadStart();
 
