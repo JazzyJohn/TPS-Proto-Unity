@@ -38,6 +38,10 @@ public class AssaultPoint : MonoBehaviour {
 	public void Awake(){
 		myTransform = transform;
 		owner =startOwner;
+        if (startOwner != 0)
+        {
+            scorePoint = needToScore;
+        }
 	}
 	
 	public void Init(){
@@ -53,6 +57,7 @@ public class AssaultPoint : MonoBehaviour {
 	}
 	
 	void OnTriggerStay(Collider other) {
+        //Debug.Log(other.name);
         if (other.CompareTag("Player")){
 			Pawn pawn =other.GetComponent<Pawn>();
 			if(pawn!=null&& !pawn.isDead&&pawn.team!=0){
@@ -66,13 +71,14 @@ public class AssaultPoint : MonoBehaviour {
 		teamConquering=0;
 		for(int i=0;i<teamCnt.Length;i++){
 			if(teamCnt[i]>0){
+                
 				if(newPeopleCnt>0){
 					newPeopleCnt=0;
 					teamConquering=0;
 					break;
 				}else{
 					newPeopleCnt=teamCnt[i];
-					teamConquering= i;
+					teamConquering= i+1;
 				}
 			}
 			teamCnt[i] =0;
@@ -102,6 +108,7 @@ public class AssaultPoint : MonoBehaviour {
 	
 	public void NetUpdate(AssaultPointModel model){
         needToScore = model.needPoint;
+        scorePoint = model.scorePoint;
 		if(owner!=model.owner){
 			GameRule.instance.PointChangeOwner(model.owner);
 		}
@@ -111,11 +118,12 @@ public class AssaultPoint : MonoBehaviour {
 			GameRule.instance.PointChangeConquare(model.teamConquering);
 		}
 		teamConquering = model.teamConquering;
+      
 
 	}
 	public void Update(){
-		guiElement.SetTitle(scorePoint +"/" + needToScore);
-		guiElement.team =owner;
+        guiElement.SetTitle(scorePoint + "/" + needToScore, owner);
+	
 	
 	}
 }

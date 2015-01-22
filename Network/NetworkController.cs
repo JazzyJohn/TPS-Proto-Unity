@@ -585,6 +585,9 @@ public class NetworkController : MonoBehaviour {
 				case "changeWeaponState":
 					HandleChangeWeaponState(dt);
 					break;
+                case "gamePointData":
+                    HandleGamePointData(dt);
+                    break;
 
             }
         }
@@ -2174,9 +2177,9 @@ public class NetworkController : MonoBehaviour {
     ///handle  gamePointData request from server
     /// </summary>	
 
-    public void GamePointDataRequest(ISFSObject dt)
+    public void HandleGamePointData(ISFSObject dt)
     {
-
+        
         ISFSArray points = dt.GetSFSArray("points");
 		foreach(AssaultPointModel point in points){
 			((PointGameRule)GameRule.instance).PointUpdate(point);

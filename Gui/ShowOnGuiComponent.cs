@@ -65,7 +65,7 @@ public class ShowOnGuiComponent : MonoBehaviour {
     {
         title = text;
     }
-	public void SetTitle(string text,int team){
+	public virtual void SetTitle(string text,int team){
 		title = baseTitle +" " +text;
 		this.team =team;
 	}

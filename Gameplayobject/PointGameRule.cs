@@ -40,6 +40,7 @@ public class PointGameRule : GameRule {
 	
 	}
 	public void PointUpdate(AssaultPointModel point){
+     
 		pointsDictionary[point.id].NetUpdate(point);
 	}
 	public override int Winner(){
@@ -73,7 +74,14 @@ public class PointGameRule : GameRule {
 		}
 		
         }
-	
 
 
+    public override PlayerMainGui.GameStats GetStats()
+    {
+        PlayerMainGui.GameStats stats = new PlayerMainGui.GameStats();
+        stats.gameTime = gameTime - timer;
+        stats.score = new int[] { 0, 0 };
+        stats.maxScore = maxScore;
+        return stats;
+    }
 }

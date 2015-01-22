@@ -3,6 +3,16 @@ using System.Collections;
 using Sfs2X.Entities.Data;
 
 public class AISwarm_PointAttack : AISwarm_PVPBots {
+
+    public int secondTeamSpawnCount;
+
+    public override void SendData(ISFSObject swarmSend)
+    {
+        base.SendData(swarmSend);
+        swarmSend.PutInt("secondTeamSpawnCount", secondTeamSpawnCount);
+
+
+    }
 	
 	public override Transform[] GetPointOfInterest(int count,int team)
     {
