@@ -39,6 +39,14 @@ public class PointGameRule : GameRule {
 		}	
 	
 	}
+	public override void ReadData(ISFSObject dt){
+		if(	dt.ContainsKey("points"){
+			ISFSArray points = dt.GetSFSArray("points");
+			foreach(AssaultPointModel point in points){
+				PointUpdate(point);
+			}
+		}
+	}
 	public void PointUpdate(AssaultPointModel point){
      
 		pointsDictionary[point.id].NetUpdate(point);

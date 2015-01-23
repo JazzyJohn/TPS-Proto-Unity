@@ -123,6 +123,12 @@ public class Player : MonoBehaviour {
 
 	public const float SQUERED_RADIUS_OF_ACTION = 16.0f;
 	
+	public static float BASE_SHOWTIME =3.0f;
+	
+	public static float BASE_MARKTIME =5.0f;
+	
+	public static float BASE_MINIMAPSHOWTIME =5.0f;
+	
 	public GlobalPlayer globalPlayer;
 
     private bool robotAnnonce =false;
@@ -255,7 +261,11 @@ public class Player : MonoBehaviour {
 			return PlayerManager.instance.SpawmPlayer(PlayerManager.instance.pawnName[selected],team,GetBuffs());
 	}
 	void OnDestroy(){
-		localPlayer= null;
+		if (playerView.isMine)
+        {
+			localPlayer= null;
+			
+		}
 	}
 	public int[] GetBuffs(){
 		List <int> allbuff = new List<int>();
@@ -454,6 +464,17 @@ public class Player : MonoBehaviour {
 					currentPawn.ChangeWeapon (2);
 				}
 			}
+			  if (InputManager.instance.GetButtonDown("Mark"))
+             {
+				
+		 
+				if(	GetActivePawn().curLookTarget!=null){
+					Pawn target = GetActivePawn().curLookTarget.root.GetComponent<Pawn>();
+					if(target!=null){
+						target.InitMark();
+					}
+				}
+			 }
              if (InputManager.instance.GetButtonDown("Suicide"))
              {
                  if (!inBot)
@@ -884,7 +905,16 @@ public class Player : MonoBehaviour {
 		charMan.Reload();
 	}*/
 
-
-
-  
+	//NON SHOT SKILLS
+	
+	
+	public float GetShowTime(Player player){
+		return BASE_SHOWTIME;
+	}
+	public float GetMarkTime(Player player){
+		return BASE_MARKTIME;
+	}
+	public float GetMiniMapShowTime(Player player){
+		return BASE_MINIMAPSHOWTIME;
+	}
 }

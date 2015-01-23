@@ -15,7 +15,10 @@ public class AssaultPoint : MonoBehaviour {
 	[HideInInspector] 
 	public Transform myTransform;
 	
-	public AssaultPoint[] lockedBy;
+	public AssaultPoint[] lockedByOneTeam;
+	
+	public AssaultPoint[] lockedBySecondTeam;
+	
 	[HideInInspector] 
 	public float scorePoint;
 	
@@ -29,26 +32,29 @@ public class AssaultPoint : MonoBehaviour {
 	[HideInInspector] 
 	public AssaultPointModel model = new AssaultPointModel();
 	
-	public ShowOnGuiComponent guiElement;
+	public PointOnGuiComponent guiElement;
 	
 	private int[] teamCnt = new int[2]{0,0};
 	
 	private bool send = true;
 	
-	public void Awake(){
+	private bool firstTime = true;
+
+	public void Init(){
 		myTransform = transform;
 		owner =startOwner;
         if (startOwner != 0)
         {
             scorePoint = needToScore;
         }
-	}
-	
-	public void Init(){
 		model.id =id;
-		model.lockedBy = new ArrayList();
-		for(int i=0;i<lockedBy.Length;i++){
-			model.lockedBy.Add(lockedBy[i]);
+		model.lockedByOneTeam = new ArrayList();
+		for(int i=0;i<lockedByOneTeam.Length;i++){
+			model.lockedByOneTeam.Add(lockedByOneTeam[i]);
+		}
+		model.lockedBySecondTeam = new ArrayList();
+		for(int i=0;i<lockedBySecondTeam.Length;i++){
+			model.lockedBySecondTeam.Add(lockedBySecondTeam[i]);
 		}
 	}
 	public Transform GetRoamTarget(){
@@ -102,6 +108,11 @@ public class AssaultPoint : MonoBehaviour {
 		model.people = peopleCnt;
 		model.teamConquering = teamConquering;
 		send=false;
+		if(!firstTime){
+			model.lockedByOneTeam = null;
+			model.lockedBySecondTeam = null;
+		}
+		firstTime = false;
 		return model;	
 
 	}
@@ -122,7 +133,7 @@ public class AssaultPoint : MonoBehaviour {
 
 	}
 	public void Update(){
-        guiElement.SetTitle(scorePoint + "/" + needToScore, owner);
+        guiElement.SetTitle(scorePoint + "/" + needToScore, owner,teamConquering);
 	
 	
 	}

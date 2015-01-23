@@ -466,6 +466,7 @@ public class NetworkController : MonoBehaviour {
                     {
                         ReadMapData(dt);
                     }
+					GameRule.instance.ReadData(dt);
                 
                     break;
                 case "updatePlayerInfo":
@@ -588,6 +589,9 @@ public class NetworkController : MonoBehaviour {
                 case "gamePointData":
                     HandleGamePointData(dt);
                     break;
+				case "sendMark":
+					HandleSendMark(dt);
+					break;
 
             }
         }
@@ -1492,8 +1496,16 @@ public class NetworkController : MonoBehaviour {
 
 	}
 		
-	
-	
+	 /// <summary>
+    /// sendMark request to server
+    /// </summary>
+	public void SendMarkRequest(int pawnId)
+    {
+        ISFSObject data = new SFSObject();
+		 data.PutInt("id", pawnId);
+		  ExtensionRequest request = new ExtensionRequest("sendMark", data, serverHolder.gameRoom);
+		smartFox.Send(request);
+	}
 	
 	
 	
@@ -2186,7 +2198,12 @@ public class NetworkController : MonoBehaviour {
 		}
 
 	}
-		
-	
+	/// <summary>
+    ///handle  sendMark request from server
+    /// </summary>	
+	public void HandleSendMark(){
+		Pawn pawn = GetView(dt.GetInt("id")).pawn;
+		pawn.MarkMe();
+	}
 }
 

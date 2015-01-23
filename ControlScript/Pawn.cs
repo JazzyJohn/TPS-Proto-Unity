@@ -1009,7 +1009,74 @@ public class Pawn : DamagebleObject
 
 
     //END OF EFFECT SECTIOn
-
+	
+	//MiniMAp and seen section
+	
+	
+	
+	
+	protected bool isMarked = false;
+	
+	private timeMarked = 0.0f;
+	
+	private timeShow = 0.0f;
+	
+	private timeMiniMapShow = 0.0f;
+	
+	protected void UpdateMarkedLogic(){
+		if(timeMarked>0){
+			timeMarked-= Time.deltaTime;
+		}else{
+			if(isMarked){
+				isMarked=false;
+			}
+		}
+		if(timeShow>0){
+			timeShow-= Time.deltaTime;
+		}
+		if(timeMiniMapShow>0){
+			timeMiniMapShow -= Time.deltaTime;
+		}
+	}
+	
+	protected void ResetShowTimer(){
+		timeShow = Player.localPlayer.GetShowTime(player);
+	}
+	
+	public void InitMark(){
+		foxView.SendMark();
+		MarkMe();
+	}
+	
+	protected void MarkMe(){
+		isMarked= true;
+		timeMarked = Player.localPlayer.GetMarkTime(player);
+	}
+	protected void ResetMiniMapShowTimer(){
+			timeMiniMapShow = Player.localPlayer.GetMiniMapShowTime(player);
+	}
+	protected bool SeeMe(bool state){
+		if(state){
+			ResetShowTimer();
+			return state;
+		}
+		return isMarked||timeShow>0;
+	
+	}
+	protected bool OnMinimapShow(){
+		if(characterState == CharacterState.Sprinting){
+			timeMiniMapShow = Player.localPlayer.GetMiniMapShowTime(player);
+			return true;
+		}
+		if(timeMiniMapShow>0){
+			return true;
+		}
+		if ( isMarked||timeShow>0){
+			return true;
+		}
+		return false;
+	}
+	//END of MiniMap and seen section
     // Update is called once per frame
 
     protected void UpdateSeenList()
@@ -1081,8 +1148,10 @@ public class Pawn : DamagebleObject
     {
         if (guiComponent != null)
         {
-            guiComponent.LocalPlayerSeeMe(distance, team, state);
+            guiComponent.LocalPlayerSeeMe(distance, team, IsSeeMe(state));
         }
+		
+		
     }
     protected virtual void UpdateAnimator()
     {
@@ -1344,7 +1413,7 @@ public class Pawn : DamagebleObject
                 isSpawn = false;//то освобождаем все движения и повреждения
             }
         }
-
+		UpdateMarkedLogic();
 
         if (foxView.isMine)
         {
@@ -2061,6 +2130,7 @@ public class Pawn : DamagebleObject
         {
             cameraController.AddShake(RecoilMod());
         }
+		 ResetMiniMapShowTimer();
     }
     public void Reload()
     {

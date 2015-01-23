@@ -134,7 +134,7 @@ public class MinimapObject : MonoBehaviour {
 				ThisIndex = MinimapManager.IndexItem.IndexOf("Player");
 				Item.type = ThisIndex;
 
-				StartCoroutine(TimeUpdateStatus());
+			
 
 				MinimapManager.SetStatus(true);
 			}
@@ -143,20 +143,11 @@ public class MinimapObject : MonoBehaviour {
 				GetStatus();
 			}
 			break;
+			
 		}
 	}
 
-	IEnumerator TimeUpdateStatus()
-	{
-		MinimapManager.needUpdateStatus = true;
-		yield return new WaitForEndOfFrame(); //немного идуского кода, но писать for ради 5 кадров...
-		yield return new WaitForEndOfFrame();
-		yield return new WaitForEndOfFrame();
-		yield return new WaitForEndOfFrame();
-		yield return new WaitForEndOfFrame();
-		MinimapManager.needUpdateStatus = false;
-	}
-
+	
 	void OnDestroy()
 	{
 		if(main)
@@ -181,7 +172,7 @@ public class MinimapObject : MonoBehaviour {
 					
 					break;
 					case MinimapManager.MODE.TEAMMATE:
-						return pawn.team==team;
+						return pawn.team==team||OnMinimapShow();
 					
 					break;
 					default:
@@ -202,10 +193,7 @@ public class MinimapObject : MonoBehaviour {
 		}
 	}
 	
-	public Vector3 RelativePosition(Vector3 position){
-		return myTransform.position - position;
-	}
-	
+		
 	public String AddInfo(){
 		switch(type){
 			case TYPE.PAWN:
@@ -239,10 +227,7 @@ public class MinimapObject : MonoBehaviour {
 				ThisIndex = 0;
 				break;
 			case MinimapManager.MODE.TEAMMATE:
-				if(MinimapManager.MainPawn.team == team)
 					ThisIndex = MinimapManager.IndexItem.IndexOf("Frend");
-				else
-					ThisIndex = 0;
 				break;
 			case MinimapManager.MODE.ALLPALYER:
 				if(MinimapManager.MainPawn.team == team)
@@ -269,29 +254,39 @@ public class MinimapObject : MonoBehaviour {
 			Item.type = ThisIndex;
 		}
 
-		switch(type)
-		{
-		case TYPE.PAWN:
-			MainPawnSpawn = MinimapManager.MainPlayerSpawn;
-
-			if(GetNewStatus)
+		if(!SeeMe(MinimapManager.MainPawn.team)){
+			ThisIndex = 0;
+			Item.newColorGet(ThisIndex);
+			GetNewStatus = true;			
+		}else{
+			switch(type)
 			{
-				GetNewStatus = false;
-				GetStatus();
-			}
+			case TYPE.PAWN:
+				MainPawnSpawn = MinimapManager.MainPlayerSpawn;
 
-			if(pawn.isDead)
-			{
-				ThisIndex = MinimapManager.IndexItem.IndexOf("Dead");
-				if(main)
+				
+				
+				if(GetNewStatus)
 				{
-					main = false;
-					MinimapManager.UICam.enabled = false;
-					MinimapManager.MainPlayerSpawn = false;
-					MinimapManager.SetStatus(false);
+					GetNewStatus = false;
+					GetStatus();
 				}
+
+				if(pawn.isDead)
+				{
+					ThisIndex = MinimapManager.IndexItem.IndexOf("Dead");
+					if(main)
+					{
+						main = false;
+						MinimapManager.UICam.enabled = false;
+						MinimapManager.MainPlayerSpawn = false;
+						MinimapManager.SetStatus(false);
+					}
+				}
+				break;
 			}
-			break;
+		
 		}
+		
 	}
 }

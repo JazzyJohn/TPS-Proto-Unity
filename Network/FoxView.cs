@@ -295,5 +295,8 @@ public class FoxView : MonoBehaviour {
     {
         NetworkController.Instance.RemoteDamageOnPawnRequest(new BaseDamageModel(damage), viewID,killerId);
     }
-	
+	public void SendMark(){
+		
+	   NetworkController.Instance.SendMarkRequest(viewID);
+	}
 }

@@ -327,8 +327,9 @@ namespace nstuff.juggerfall.extension.models
 		
 		public int teamConquering;
 		
-		public ArrayList lockedBy;
+		public ArrayList lockedByOneTeam;
 		
+		public ArrayList lockedBySecondTeam;
 	}
 	[Serializable]
     public class GameSettingModel  : SerializableSFSType{
