@@ -366,10 +366,10 @@ public float CalculateJumpVerticalSpeed ( float targetJumpHeight  )
 			float wheel = Input.GetAxis ("Mouse ScrollWheel");
 		
 			if (wheel < 0) {
-					pawn.GetComponent<InventoryManager> ().PrevWeapon ();
+					pawn.PrevWeapon ();
 			}
 			if (wheel > 0) {
-					pawn.GetComponent<InventoryManager> ().NextWeapon ();
+					pawn.NextWeapon ();
 			}
             if (InputManager.instance.GetButtonUp("Taunt"))
             {

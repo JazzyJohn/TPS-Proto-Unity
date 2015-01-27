@@ -391,6 +391,15 @@ public class Pawn : DamagebleObject
     public SpecialEventsHandler eventHandler;
     public float timeSpawned;
 
+    //see and mark vars
+    protected bool isMarked = false;
+
+    private float timeMarked = 0.0f;
+
+    private float timeShow = 0.0f;
+
+    private float timeMiniMapShow = 0.0f;
+	
     protected void Awake()
     {
         myTransform = transform;
@@ -1015,14 +1024,7 @@ public class Pawn : DamagebleObject
 	
 	
 	
-	protected bool isMarked = false;
-	
-	private timeMarked = 0.0f;
-	
-	private timeShow = 0.0f;
-	
-	private timeMiniMapShow = 0.0f;
-	
+
 	protected void UpdateMarkedLogic(){
 		if(timeMarked>0){
 			timeMarked-= Time.deltaTime;
@@ -1047,23 +1049,24 @@ public class Pawn : DamagebleObject
 		foxView.SendMark();
 		MarkMe();
 	}
-	
-	protected void MarkMe(){
+
+    public void MarkMe()
+    {
 		isMarked= true;
 		timeMarked = Player.localPlayer.GetMarkTime(player);
 	}
 	protected void ResetMiniMapShowTimer(){
 			timeMiniMapShow = Player.localPlayer.GetMiniMapShowTime(player);
 	}
-	protected bool SeeMe(bool state){
+	protected bool IsSeeMe(bool state){
 		if(state){
-			ResetShowTimer();
+		//	ResetShowTimer();
 			return state;
 		}
 		return isMarked||timeShow>0;
 	
 	}
-	protected bool OnMinimapShow(){
+	public bool OnMinimapShow(){
 		if(characterState == CharacterState.Sprinting){
 			timeMiniMapShow = Player.localPlayer.GetMiniMapShowTime(player);
 			return true;
@@ -1733,6 +1736,24 @@ public class Pawn : DamagebleObject
             ivnMan.PutGrenadeAway();
 		}
 	}
+    public bool CanChange()
+    {
+        return characterState != CharacterState.Sprinting;
+    }
+    public void PrevWeapon()
+    {
+        if (CanChange())
+        {
+            ivnMan.PrevWeapon();
+        }
+    }
+    public void NextWeapon()
+    {
+        if (CanChange())
+        {
+            ivnMan.NextWeapon();
+        }
+    }
     //Setting new weapon if not null try to attach it
     public void setWeapon(BaseWeapon newWeapon)
     {

@@ -38,7 +38,6 @@ public class AssaultPoint : MonoBehaviour {
 	
 	private bool send = true;
 	
-	private bool firstTime = true;
 
 	public void Init(){
 		myTransform = transform;
@@ -50,11 +49,11 @@ public class AssaultPoint : MonoBehaviour {
 		model.id =id;
 		model.lockedByOneTeam = new ArrayList();
 		for(int i=0;i<lockedByOneTeam.Length;i++){
-			model.lockedByOneTeam.Add(lockedByOneTeam[i]);
+			model.lockedByOneTeam.Add(lockedByOneTeam[i].id);
 		}
 		model.lockedBySecondTeam = new ArrayList();
 		for(int i=0;i<lockedBySecondTeam.Length;i++){
-			model.lockedBySecondTeam.Add(lockedBySecondTeam[i]);
+            model.lockedBySecondTeam.Add(lockedBySecondTeam[i].id);
 		}
 	}
 	public Transform GetRoamTarget(){
@@ -102,17 +101,19 @@ public class AssaultPoint : MonoBehaviour {
 		return send;	
 
 	}
-	public AssaultPointModel GetModel(){
+	public AssaultPointModel GetModel(bool firstSend = false){
 		model.needPoint = needToScore;
 		model.owner = owner;
 		model.people = peopleCnt;
 		model.teamConquering = teamConquering;
 		send=false;
-		if(!firstTime){
+        if (!firstSend)
+        {
 			model.lockedByOneTeam = null;
 			model.lockedBySecondTeam = null;
-		}
-		firstTime = false;
+        }
+       
+	
 		return model;	
 
 	}

@@ -19,7 +19,7 @@ public class PointOnGuiComponent : ShowOnGuiComponent
 
                 if (hudentry.Sprite.spriteName != sprite)
                 {
-                    Debug.Log(team + " " + sprite);
+                  
                     hudentry.Sprite.spriteName = sprite;
                     hudentry.defSpriteName = sprite;
                 }
@@ -34,7 +34,7 @@ public class PointOnGuiComponent : ShowOnGuiComponent
 			}
 			
 		}
-		else if (conquerTeam ==Playr.localPlayer.team )
+		else if (conquerTeam ==Player.localPlayer.team )
 		{
 			if(hudentry.label!=null){
 				hudentry.label.color = ally;

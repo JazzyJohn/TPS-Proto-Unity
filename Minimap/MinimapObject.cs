@@ -118,14 +118,14 @@ public class MinimapObject : MonoBehaviour {
 
 		switch(type)
 		{
-		case TYPE.PAWN:
+		    case TYPE.PAWN:
 			team = pawn.team;
 
 			if(Player.localPlayer.GetActivePawn() == pawn)
 			{
 				if(!MinimapManager.UICam)
 					MinimapManager.UICam = MinimapManager.MiniMap.GetComponent<GUIAnchor>().uiCamera;
-				MinimapManager.mode = MinimapManager.MODE.ALLPALYER;
+				MinimapManager.mode = MinimapManager.MODE.TEAMMATE;
 
 				main = true;
 				MinimapManager.MainPawn = pawn;
@@ -143,7 +143,10 @@ public class MinimapObject : MonoBehaviour {
 				GetStatus();
 			}
 			break;
-			
+            case TYPE.TARGET:
+                 ThisIndex = MinimapManager.IndexItem.IndexOf("Target");
+				Item.type = ThisIndex;
+            break;
 		}
 	}
 
@@ -172,7 +175,7 @@ public class MinimapObject : MonoBehaviour {
 					
 					break;
 					case MinimapManager.MODE.TEAMMATE:
-						return pawn.team==team||OnMinimapShow();
+						return pawn.team==team||pawn.OnMinimapShow();
 					
 					break;
 					default:
@@ -227,7 +230,12 @@ public class MinimapObject : MonoBehaviour {
 				ThisIndex = 0;
 				break;
 			case MinimapManager.MODE.TEAMMATE:
+                if (MinimapManager.MainPawn.team == team)
 					ThisIndex = MinimapManager.IndexItem.IndexOf("Frend");
+                 
+                else
+					ThisIndex = MinimapManager.IndexItem.IndexOf("Enemy");
+				break;
 				break;
 			case MinimapManager.MODE.ALLPALYER:
 				if(MinimapManager.MainPawn.team == team)
@@ -253,7 +261,10 @@ public class MinimapObject : MonoBehaviour {
 		{
 			Item.type = ThisIndex;
 		}
-
+        if (MinimapManager.MainPawn == null)
+        {
+            return;
+        }
 		if(!SeeMe(MinimapManager.MainPawn.team)){
 			ThisIndex = 0;
 			Item.newColorGet(ThisIndex);

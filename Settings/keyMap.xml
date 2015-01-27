@@ -93,4 +93,9 @@
     <name>Crouch</name>
     <default>C</default>
   </keys>
+
+<keys>
+    <name>Mark</name>
+    <default>F</default>
+  </keys>
 </input>

@@ -216,7 +216,7 @@ public class SettingGUI : MonoBehaviour {
 	{
 		string value = (ScrollArg.value * 100f).ToString("0");
 		IntArg.text = value;
-        Debug.Log("SET SET SET");
+        
         if (panel.alpha == 1.0f)
         {
             if (ScrollArg == volumes.SoundFxScroll)

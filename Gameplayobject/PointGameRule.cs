@@ -19,7 +19,23 @@ public class PointGameRule : GameRule {
 			point.Init();
 		}
 	}
-	
+
+    public override void StartGame()
+    {
+        base.StartGame();
+        ISFSArray sendData = new SFSArray();
+        foreach (AssaultPoint point in points)
+        {
+           
+                sendData.AddClass(point.GetModel(true));
+          
+        }
+
+        if (sendData.Size() > 0)
+        {
+            NetworkController.Instance.GamePointDataRequest(sendData);
+        }
+    }
 
 		
 		
@@ -32,6 +48,7 @@ public class PointGameRule : GameRule {
 					sendData.AddClass(point.GetModel());				
 				}
 			}
+          
 			if(sendData.Size()>0){
 				NetworkController.Instance.GamePointDataRequest(sendData);
 			}
@@ -40,7 +57,7 @@ public class PointGameRule : GameRule {
 	
 	}
 	public override void ReadData(ISFSObject dt){
-		if(	dt.ContainsKey("points"){
+		if(	dt.ContainsKey("points")){
 			ISFSArray points = dt.GetSFSArray("points");
 			foreach(AssaultPointModel point in points){
 				PointUpdate(point);

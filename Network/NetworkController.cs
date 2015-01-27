@@ -2201,7 +2201,8 @@ public class NetworkController : MonoBehaviour {
 	/// <summary>
     ///handle  sendMark request from server
     /// </summary>	
-	public void HandleSendMark(){
+    public void HandleSendMark(ISFSObject dt)
+    {
 		Pawn pawn = GetView(dt.GetInt("id")).pawn;
 		pawn.MarkMe();
 	}
