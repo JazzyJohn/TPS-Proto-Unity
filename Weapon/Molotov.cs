@@ -10,13 +10,14 @@ using System.Collections.Generic;
 public class Molotov : BaseProjectile
 {
 
-	
-	
-	public override void SpawnAfterEffect(Vector3 Position){
+
+
+    public override void SpawnAfterEffect(Vector3 forward)
+    {
 	
 			if (hitParticle != null)
             {
-               GameObject flame =  hitParticle.Spawn( Position, mTransform.rotation);
+                GameObject flame = hitParticle.Spawn(effectPosition,Quaternion.LookRotation(forward));
 			   
 			   StationaryDamager damager = flame.GetComponent<StationaryDamager>(); 
 			   if(damager!=null){

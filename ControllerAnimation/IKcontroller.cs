@@ -47,7 +47,28 @@ public class IKcontroller : MonoBehaviour {
     {
         GetComponentInChildren<AimIK>().solver.action = finished;
     }
-
+    public bool  ActiveAim()
+    {
+        if (aim != null)
+        {
+            return aim.enabled;
+        }
+        return false;
+    }
+    public void AimOff()
+    {
+        if (aim != null)
+        {
+            aim.enabled = false;
+        }
+    }
+    public void AimOn()
+    {
+        if (aim != null)
+        {
+            aim.enabled = true;
+        }
+    }
     public void IKShutDown()
     {
         if (aim != null)
@@ -77,5 +98,11 @@ public class IKcontroller : MonoBehaviour {
         {
             grounder.enabled = true;
         }
+    }
+
+     public void SetMuzzle(Transform point)
+    {
+        aim.solver.transform = point;
+       
     }
 }

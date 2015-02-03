@@ -326,11 +326,11 @@ public float CalculateJumpVerticalSpeed ( float targetJumpHeight  )
 				
 								pawn.StartGrenadeThrow ();
 			}
-			 if (InputManager.instance.GetButtonUp("Grenade"))
+		/*	 if (InputManager.instance.GetButtonUp("Grenade"))
             {
 				
 								pawn.ThrowGrenade ();
-			}
+			}*/
             if (InputManager.instance.GetButtonDown("PreFire"))
             {
 

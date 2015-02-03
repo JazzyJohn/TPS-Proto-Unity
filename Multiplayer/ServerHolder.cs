@@ -374,6 +374,7 @@ public class ServerHolder : MonoBehaviour
         map = data.name;
         blockQuickStart = true;
         newRoomName = map +data.ToString();
+        Debug.Log("start");
         CreateNewRoom(data.gameMode);
        
     }
@@ -450,8 +451,7 @@ public class ServerHolder : MonoBehaviour
                 setting.teamCount = 2;
                 setting.maxTime =0;
                 setting.maxScore= 5;
-            
-               // Debug.Log(GlobalGameSetting.instance.GetHuntScoreTable());
+
 				//data.Put("huntTable",new SFSDataWrapper(5,GlobalGameSetting.instance.GetHuntScoreTable()));				
              
 				
@@ -464,6 +464,8 @@ public class ServerHolder : MonoBehaviour
                 setting.maxScore= 0;
 			break;
         }
+
+        Debug.Log(gameRule.GetStringValue());
         SFSObject data = new SFSObject();
 		data.PutClass("gameSetting",setting);
         settings.Variables.Add(new SFSRoomVariable("gameVar", data));

@@ -119,9 +119,14 @@ public class PrefabManager : MonoBehaviour {
 	void Update(){
         if (onStart)
         {
-            if (!isPawns && GlobalPlayer.instance.loadingStage >= 2 && bundle==null)
+            if (!isPawns && GlobalPlayer.instance.loadingStage >= 2 && bundle == null && !inProgress)
             {
                 StartCoroutine(DownloadAndCache());
+            }
+            if (inProgress && www != null)
+            {
+               Debug.Log(BundleURL + " " + www.progress.ToString("0.00"));
+
             }
 
         }

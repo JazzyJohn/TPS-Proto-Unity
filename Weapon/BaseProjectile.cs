@@ -161,6 +161,8 @@ public class BaseProjectile : MonoBehaviour
 
     public bool shouldInit= false;
 
+    public Vector3 effectPosition;
+
 	void Awake(){
 		aSource = GetComponent<AudioSource>();	
 		sControl = new soundControl(aSource);//создаем обьект контроллера звука и передаем указатель на источник
@@ -176,6 +178,7 @@ public class BaseProjectile : MonoBehaviour
         boomed = false;
         mRigidBody.velocity = Vector3.zero;
 		foreach(GameObject go in inactiveObjectInEffectStage){
+            if (go!=null)
 			go.SetActive(true);
 		}
     }
@@ -401,6 +404,7 @@ public class BaseProjectile : MonoBehaviour
         DamagebleObject obj = hit.transform.gameObject.GetComponent<DamagebleObject>();
         //move explosion center from surface so raycast dont hit it
         Vector3 exploPosition = hit.point + hit.normal;
+        effectPosition = hit.point + hit.normal*0.1f;
         if (obj != null)
         {
 
@@ -531,7 +535,7 @@ public class BaseProjectile : MonoBehaviour
             {
                 case HITEFFECT.Destruction:
                     used = true;
-                    SpawnAfterEffect(exploPosition);
+                    SpawnAfterEffect(-hit.normal);
                     ExplosionDamage(exploPosition);
                  
                     break;
@@ -673,7 +677,7 @@ public class BaseProjectile : MonoBehaviour
         }
         if (!used)
         {
-			 SpawnAfterEffect(Position);
+			 SpawnAfterEffect(mTransform.forward);
 
         }
         if (!replication)
@@ -682,16 +686,17 @@ public class BaseProjectile : MonoBehaviour
         }
         Invoke("DeActivate", 0.1f);
     }
-	public virtual void SpawnAfterEffect(Vector3 Position){
+	public virtual void SpawnAfterEffect(Vector3 forward){
 	
 			if (hitParticle != null)
             {
-                hitParticle.Spawn( Position, mTransform.rotation);
+                hitParticle.Spawn(effectPosition,Quaternion.LookRotation(forward));
             }
 	}
 	public void DeActivate(){
 		active= false;
 		foreach(GameObject go in inactiveObjectInEffectStage){
+            if (go!=null)
 			go.SetActive(false);
 		}
 		 Invoke("_DeActivate", disableEffectDelay);

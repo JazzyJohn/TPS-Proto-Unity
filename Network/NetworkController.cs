@@ -182,6 +182,11 @@ public class NetworkController : MonoBehaviour {
         Connect();
     }
     public void Connect(){
+        if (_smartFox != null)
+        {
+            //_smartFox.KillConnection();
+           // _smartFox.Disconnect();
+        }
         if (SmartFoxConnection.IsInitialized)
         {
             _smartFox = SmartFoxConnection.Connection;
@@ -309,7 +314,9 @@ public class NetworkController : MonoBehaviour {
 
     public void OnConnectionLost(BaseEvent evt)
     {
-        
+
+        Debug.Log("On Connection lost");
+
         UnsubscribeDelegates();
         this.Connect();
     }

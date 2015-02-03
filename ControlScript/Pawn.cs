@@ -1671,14 +1671,14 @@ public class Pawn : DamagebleObject
     public void ChangeWeapon()
     {
 	
-		if(characterState != CharacterState.Sprinting){
+		
 			ivnMan.ChangeWeapon();
-		}
+		
     }
 
     public virtual void StartFire()
     {
-        if (CurWeapon != null&&CurWeapon.slotType!=BaseWeapon.SLOTTYPE.GRENADE)
+        if (CurWeapon != null)
         {
             CurWeapon.StartFire();
         }
@@ -1733,7 +1733,7 @@ public class Pawn : DamagebleObject
 	public virtual void ThrowGrenade(){
 		if(CurWeapon.slotType==BaseWeapon.SLOTTYPE.GRENADE){
             CurWeapon.StartFire();
-            ivnMan.PutGrenadeAway();
+           
 		}
 	}
     public bool CanChange()

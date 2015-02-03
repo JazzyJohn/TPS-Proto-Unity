@@ -23,13 +23,14 @@ public class buildbundle : EditorWindow
     {
         List<string> Levels = new List<string>();
         EditorBuildSettingsScene[] Scenes = EditorBuildSettings.scenes;
+        string version = (AssetDatabase.LoadAssetAtPath("Assets/Prefab/MainPlayer.prefab", typeof(GameObject)) as GameObject).GetComponent<ServerHolder>().version;
 
         foreach (EditorBuildSettingsScene Scene in Scenes)
         {
             if (!Scene.enabled)
             {
                 Levels.Add(Scene.path);
-                BuildPipeline.BuildStreamedSceneAssetBundle(Levels.ToArray(), Path.GetDirectoryName(path) + "/" + Path.GetFileNameWithoutExtension(Scene.path) +".unity3d", EditorUserBuildSettings.activeBuildTarget);
+                BuildPipeline.BuildStreamedSceneAssetBundle(Levels.ToArray(), Path.GetDirectoryName(path) + "/" + Path.GetFileNameWithoutExtension(Scene.path) + version + ".unity3d", EditorUserBuildSettings.activeBuildTarget);
                 Levels.Clear();
             }
         }

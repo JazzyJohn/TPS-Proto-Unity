@@ -390,7 +390,7 @@ public class BaseWeapon : DestroyableNetworkObject {
         }
       
     }
-    void UpdateWeapon(float deltaTime){
+   protected void UpdateWeapon(float deltaTime){
 		if(init&&owner==null) {
 			RequestKillMe();
 
@@ -627,6 +627,10 @@ public class BaseWeapon : DestroyableNetworkObject {
 		}
         alredyGunedAmmo = 0;
 		if(owner.GetComponent<InventoryManager>().HasAmmo(ammoType)){
+            if (curAmmo == clipSize)
+            {
+                return;
+            }
 			isReload= true;
             if (isAimingFPS)
             {
@@ -675,11 +679,12 @@ public class BaseWeapon : DestroyableNetworkObject {
     {
         isReload = false;
         shootAfterReload = false;
+        owner.animator.ReloadStop();
     }
     public void ReloadFinish()
     {
         isReload = false;
-
+        owner.animator.ReloadStop();
         if (shootAfterReload)
         {
             shootAfterReload = false;
@@ -709,6 +714,7 @@ public class BaseWeapon : DestroyableNetworkObject {
                 curAmmo = owner.GetComponent<InventoryManager>().GiveAmmo(ammoType, 1) + oldClip;
                 if (curAmmo == oldClip)
                 {
+                   
                     ReloadFinish();
                 }
                 reloaderCounter = 0.0f;
@@ -716,7 +722,7 @@ public class BaseWeapon : DestroyableNetworkObject {
         }
         else
         {
-            owner.animator.ReloadStop();
+            //owner.animator.ReloadStop();
             int oldClip = (int)curAmmo;
             curAmmo = owner.GetComponent<InventoryManager>().GiveAmmo(ammoType, clipSize - (int)curAmmo) + oldClip;
             ReloadFinish();
@@ -1247,14 +1253,16 @@ public class BaseWeapon : DestroyableNetworkObject {
 		}
         return isReload;
 	}
-	
-	public void PutAway(){
+
+    public virtual void PutAway()
+    {
 		enabled = false;
 		curTransform.parent = owner.GetSlotForWeapon(slotType);
         curTransform.localPosition = Vector3.zero;
         curTransform.localRotation = Quaternion.identity;
 		curTransform.localScale=  Vector3.one;
 		StopFire();
+        StopReload();
 		if(foxView.isMine){
 			foxView.PutAway();
 		}
@@ -1268,13 +1276,14 @@ public class BaseWeapon : DestroyableNetworkObject {
 			owner.setWeapon(this);
 		}
 	}
-	public void TakeInHand(Transform weaponSlot,Vector3 Offset, Quaternion weaponRotator){
+	public virtual void TakeInHand(Transform weaponSlot,Vector3 Offset, Quaternion weaponRotator){
 		enabled = true;
 		curTransform.parent = weaponSlot;
         curTransform.localScale = Vector3.one;
 		curTransform.localPosition = Offset;
 		//Debug.Log (name + weaponRotator);
 		curTransform.localRotation = weaponRotator;
+        owner.animator.SetMuzzle(muzzlePoint);
 	}
 
 }

@@ -312,7 +312,8 @@ public class AnimationManager : MonoBehaviour
 	}
     public void ChangeWeaponNow()
     {
-       // pawn.ChangeWeapon();
+       
+        //pawn.ChangeWeapon();
     }
 	public void ShootAnim(){
 		//animator.SetTrigger ("Shoot");
@@ -389,6 +390,24 @@ public class AnimationManager : MonoBehaviour
         DollOff();
         SetNotMainLayer(1.0f);
         transform.parent.SendMessage("StandUpFinish", SendMessageOptions.DontRequireReceiver);
+    }
+    public void SetMuzzle(Transform point)
+    {
+        aimPos.SetMuzzle( point);
+    }
+
+    void Update()
+    {
+        if (!aimPos.ActiveAim()&& pawn != null && pawn.CurWeapon != null)
+        {
+            pawn.CurWeapon.UpdateCahedPosition();
+
+        }
+    }
+    public void PutGrenadeAway()
+    {
+        Debug.Log("PutGrenadeAway");
+        pawn.StopGrenadeThrow();
     }
 	/*[Serializable]
 	public class Leg

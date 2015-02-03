@@ -10,10 +10,11 @@ using System.Collections.Generic;
 public class FlashBang : BaseProjectile
 {
 
-	
-	public override void SpawnAfterEffect(Vector3 position){
-		base.SpawnAfterEffect(position);
-		Vector3 direction = position -Camera.main.transform.position;
+
+    public override void SpawnAfterEffect(Vector3 forward)
+    {
+        base.SpawnAfterEffect(forward);
+        Vector3 direction = effectPosition - Camera.main.transform.position;
 		if(direction.magnitude<splashRadius&& Vector3.Angle(direction.normalized,Camera.main.transform.forward)>0&&!Physics.Raycast(Camera.main.transform.position,direction,direction.magnitude-0.2f,explosionLayerBlock)){
             Debug.Log("Flash");
 			FlashTween tween =Camera.main.GetComponent<FlashTween>();
