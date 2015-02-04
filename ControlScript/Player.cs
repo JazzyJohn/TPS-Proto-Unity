@@ -499,6 +499,7 @@ public class Player : MonoBehaviour {
         isDead = true; 
         charMan.DeathUpdate();
         ItemManager.instance.RestartStimPack();
+		ItemManager.instance.SendChargeData();
     }
 	public void RobotDead(Player Killer){
 		robotTimer=0;

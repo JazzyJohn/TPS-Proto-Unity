@@ -7,6 +7,7 @@ using Random = UnityEngine.Random;
 
 
 public class BaseWeapon : DestroyableNetworkObject {
+
 	
 	private static LayerMask layer = -123909;
 	
@@ -23,6 +24,22 @@ public class BaseWeapon : DestroyableNetworkObject {
 	public SLOTTYPE slotType;
 	
 	public AMMOTYPE ammoType;
+	//ROOT OF ALL EVIL SECTION
+	
+    /// <summary>
+    /// Charge that lowers gun efficiency
+    /// </summary>
+    private int charge;
+	 /// <summary>
+    ///How many shoots up charge
+    /// </summary>
+    public int shootPerCharge=30
+	
+	private int shootCounter= 0;
+	
+	
+	//END MONEY SECTION
+
     //SHOOT LOGIC
 
     /// <summary>
@@ -244,7 +261,8 @@ public class BaseWeapon : DestroyableNetworkObject {
             drawer.gameObject.SetActive(false);
 		}
   
-  
+		charge = Itemmanager.instance.GetCharge(SQLId);
+		
 	}
 
     public Pawn GetOwner()
@@ -761,6 +779,7 @@ public class BaseWeapon : DestroyableNetworkObject {
 		if(afterPumpAction!=AFTERPUMPACTION.Wait){
 			return _pumpAmount>=pumpAmount&&!isShooting;
 		}
+		
 		return false;
 	
 	}
@@ -934,6 +953,11 @@ public class BaseWeapon : DestroyableNetworkObject {
         {
             alredyGunedAmmo = 0;
         }
+		shootCounter++;
+		if(shootCounter>=shootPerCharge){
+			shootCounter= 0;
+			charge= Itemmanager.instance.LowerCharge(SQLId);
+		}
 		
     }
 	public virtual bool CanShoot (){
