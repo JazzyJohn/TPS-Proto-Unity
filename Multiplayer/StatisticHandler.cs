@@ -64,7 +64,7 @@ public class StatisticHandler : MonoBehaviour {
 	
 	public static string LOWER_STAMINA = "lowerstamina";
 	
-	public static string CHARGE_DATA ="charge_data";
+	public static string CHARGE_DATA ="chargedata";
 	
 	public static string REGISTRATION = "registration";
 

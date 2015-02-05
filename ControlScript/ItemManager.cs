@@ -78,14 +78,20 @@ public enum BuyMode
 {
     NONE, FOR_KP,FOR_KP_UNBREAK ,FOR_GOLD_TIME, FOR_GOLD_FOREVER
 }
+public enum BuyPrice
+{
+    KP_PRICE,GOLD_PRICE_1,GOLD_PRICE_2,GOLD_PRICE_3,GOLD_PRICE_FOREVER,GOLD_PRICE_UNBREAKE
+}
 public class PricePart{
-	public BuyMode mode;
+	public BuyPrice type;
 	
 	public int amount;
 }
 public class Price{
 
-	public BuyMode mode;
+	public BuyPrice type;
+	
+	public string id;
 	
 	public PricePart[] parts ;
 }
@@ -177,7 +183,16 @@ public class InventorySlot  : SimpleSlot{
 		return _gameId;
 	}
 	public virtual bool isAvailable(){
-		return BuyMode.NONE!=buyMode;
+		if( BuyMode.NONE==buyMode){
+			return false;
+		}
+		if( BuyMode.FOR_KP==buyMode||BuyMode.FOR_KP_UNBREAK==buyMode||BuyMode.FOR_GOLD_FOREVER==buyMode){
+			return true;
+		}
+		if( BuyMode.FOR_KP==buyMode||BuyMode.FOR_KP_UNBREAK){
+			return true;
+		}
+		return timeEnd> DateTime.Now;
 	}
 	public virtual int UpCharge(){
 		if(BuyMode.FOR_KP!=buyMode){
@@ -208,6 +223,7 @@ public class InventorySlot  : SimpleSlot{
    }
     public int GetMissingCharge(){
 		if(BuyMode.FOR_KP!=buyMode){
+		
 			return charge;
 		}
 		return 0;
@@ -431,11 +447,12 @@ public class ItemManager : MonoBehaviour {
 				XmlNodeList types =onePrice.SelectNodes("type");
 				
 				price.parts = new  PricePart[amounts.Count];
-				price.mode =(BuyMode)Enum.Parse(typeof(BuyMode),types[0].InnerText);
+				price.type =(BuyPrice)Enum.Parse(typeof(BuyPrice),types[0].InnerText);
+				price.id =onePrice.SelectSingleNode("id").InnerText;
 				for(int k=0;k<amounts.Count;k++){
 						price.parts[k] = new PricePart();
 						price.parts[k].amount =int.Parse(amounts[k].InnerText);
-						price.parts[k].mode = (BuyMode)Enum.Parse(typeof(BuyMode),types[k].InnerText);
+						price.parts[k].type = (BuyPrice)Enum.Parse(typeof(BuyPrice),types[k].InnerText);
 				}
 				 slot.prices[j]= price;
 		   }
@@ -681,7 +698,7 @@ public class ItemManager : MonoBehaviour {
 		{
           //  Debug.Log(Choice.ForGuiSlot(i).ToString());
           
-			form.AddField ("default["+pair.Key+"]", pair.Value);
+			form.AddField ("charge["+pair.Key+"]", pair.Value);
           
 		}
 	 	StatisticHandler.instance.StartCoroutine(StatisticHandler.SendForm (form,StatisticHandler.CHARGE_DATA));

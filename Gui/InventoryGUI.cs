@@ -17,11 +17,17 @@ public class InventoryGUI : MonoBehaviour {
 	public MainMenuGUI MainMenu;
 
 	public UIPanel Detail;
+	
 	public UIPanel Inventory;
+	
+	public UIPanel lotItem;
 
 	public InvItems InvItem;
 
     public DetailItemGUI detailItemGUI; 
+	
+	public LotItemGUI lotItemGUI;
+	
 	public UIScrollBar Scroll;
 	
 	public UIPanel repair;
@@ -65,6 +71,20 @@ public class InventoryGUI : MonoBehaviour {
 		
 	
 	}
+	public void ShowLot(InvItemGUI item)
+	{
+		lotItem.alpha = 1f;
+      /*  for (int i = 0; i < ShopItem.AllItems.Count; i++)
+        {
+            if (ShopItem.AllItems[i].ItemInfo.item == LotGUI_item.item)
+                LotGUI_item.numToItem = i;
+        }*/
+        lotItemGUI.SetItem(item.item);
+        MainMenu.CamMove.RideTo(1);
+		
+	
+	}
+
 	public void CloseLot()
 	{
 		Detail.alpha = 0f;

@@ -8,17 +8,24 @@ public class LotItemGUI : MonoBehaviour
     public CharSection weaponSection;
 
     public ShopGUI Shop;
-    public ShopSlot item;
+    public InventorySlot item;
     public UILabel Name;
-    public UILabel PriceKP;
-	public UIWidget PriceKPBox;
-    public UILabel PriceGITP;
     public UILabel Description;
     public Transform gun;
     public GameObject gunModel;
     public UIWidget Box;
     public UILabel loading;
     public UILabel buyLabel;
+	
+	public UIWidget forGold;
+	
+	public UILabel[] goldPrices;
+	
+	public UIWidget forKP;
+	
+	public UILabel[] kpPrices;
+	
+	
     [HideInInspector]
     public int numToItem;
 
@@ -49,19 +56,25 @@ public class LotItemGUI : MonoBehaviour
         }
     }
 
-    public void SetItem(ShopSlot _item)
+    public void SetItem(InventorySlot _item)
     {
         item = _item;
+		if(item.prices[0].type==KP_PRICE){
+			forGold.alpha = 0.0f;
+			forKP.alpha = 1.0f;
+			for(int i =0;i< item.prices.lenght;i++){
+				kpPrices[i] =item.prices[i].parts[0].amount;
+			}
+		}else{
+			forGold.alpha = 1.0f;
+			forKP.alpha = 0.0f;
+			for(int i =0;i< item.prices.lenght;i++){
+				goldPrices[i] =item.prices[i].parts[0].amount;
+			}
+		}
         GA.API.Design.NewEvent("GUI:MainMenu:Shop:SelectItem:" + _item.engName);
         Name.text = item.name;
-		if( item.cashCost ==0){
-			
-			PriceKPBox.alpha = 0.0f;
-		}else{
-			PriceKPBox.alpha = 1.0f;
-		}
-        PriceKP.text = item.cashCost.ToString() ;
-        PriceGITP.text = item.goldCost.ToString(); 
+		
         Description.text = item.description;
 
         if (gunModel != null)
@@ -86,18 +99,17 @@ public class LotItemGUI : MonoBehaviour
         }
         loading.alpha = 1.0f;
     }
-    public void KPBuy()
+    public void Buy(int key)
     {
-
-        GA.API.Business.NewEvent("Shop:BUYItem:" + item.engName, "GASH", item.cashCost);
-        StartCoroutine( ItemManager.instance.BuyItem(item.cashSlot,this));
+		int amount = item.prices[key].parts[0].amount;
+		if(item.prices[0].type==KP_PRICE){
+			GA.API.Business.NewEvent("Shop:BUYItem:" + item.engName, "GASH", amount);
+		}else{
+		  GA.API.Business.NewEvent("Shop:BUYItem:" + item.engName, "GOLD", amount);
+		}
+        StartCoroutine( ItemManager.instance.BuyItem(item.prices[key].id,this));
     }
-    public void GITPBuy()
-    {
-
-        GA.API.Business.NewEvent("Shop:BUYItem:" + item.engName, "GOLD", item.goldCost);
-       StartCoroutine( ItemManager.instance.BuyItem(item.goldSlot,this));
-    }
+   
 
     public void SetError(string error)
     {
