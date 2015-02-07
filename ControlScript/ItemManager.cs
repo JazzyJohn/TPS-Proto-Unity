@@ -175,7 +175,11 @@ public class InventorySlot  : SimpleSlot{
 
 	public int maxcharge;
 
-	public int gameId{
+    public int sid;
+
+    public InventoryGroup invGroup;
+
+	public int gameType{
 		get{ return getGameType();}
 		set{  _gameId = value;}
 	}
@@ -189,9 +193,7 @@ public class InventorySlot  : SimpleSlot{
 		if( BuyMode.FOR_KP==buyMode||BuyMode.FOR_KP_UNBREAK==buyMode||BuyMode.FOR_GOLD_FOREVER==buyMode){
 			return true;
 		}
-		if( BuyMode.FOR_KP==buyMode||BuyMode.FOR_KP_UNBREAK){
-			return true;
-		}
+      
 		return timeEnd> DateTime.Now;
 	}
 	public virtual int UpCharge(){
@@ -209,8 +211,9 @@ public class InventorySlot  : SimpleSlot{
 	public WeaponChar chars;
    
  }
- 
- public class WeaponInventorySlot : SimpleSlot{
+
+public class WeaponInventorySlot : InventorySlot
+{
  	public int weaponId;
 	
 	
@@ -269,7 +272,9 @@ public class ItemManager : MonoBehaviour {
 
 	public List<string> markedItems = new List<string>();
 
-	public Dictionary<int,WeaponInventorySlot>  weaponIndexTable = new Dictionary<int,FromDBWeapon>();
+    public Dictionary<int, WeaponInventorySlot> weaponIndexTable = new Dictionary<int, WeaponInventorySlot>();
+
+
 	
 	public  Dictionary<int,FromDBAnims> animsIndexTable= new Dictionary<int,FromDBAnims>();
 
@@ -302,11 +307,11 @@ public class ItemManager : MonoBehaviour {
       
 		foreach (WeaponInventorySlot weapon in weaponIndexTable.Values)
 		{
-			if (weaponPrefabsListbyId[weapon.ingamekey] != null)
+            if (weaponPrefabsListbyId[weapon.weaponId] != null)
 			{
-				weapon.gameSlot = weaponPrefabsListbyId[weapon.ingamekey].slotType;
+                weapon.gameSlot = weaponPrefabsListbyId[weapon.weaponId].slotType;
 			//		Debug.Log(weapon.name + " " + weapon.gameType);
-				weaponPrefabsListbyId[weapon.ingamekey].HUDIcon = weapon.texture;
+                weaponPrefabsListbyId[weapon.weaponId].HUDIcon = weapon.texture;
 			}
 		}
 
@@ -329,15 +334,22 @@ public class ItemManager : MonoBehaviour {
     }
 
 	public int LowerCharge(int id){
-		if(!toSendLower.ContainsKey(id){
+        if (!weaponIndexTable.ContainsKey(id))
+        {
+            return 0;
+        }
+		if(!toSendLower.ContainsKey(id)){
 			toSendLower[id] = 0;
 		}
 		toSendLower[id]= toSendLower[id]+1;
-		return weaponIndexTable[id].LowerCharge();
+		return weaponIndexTable[id].UpCharge();
 	}
 	public int GetCharge(int id){
-		
-		return weaponIndexTable[id].charge();
+		if (!weaponIndexTable.ContainsKey(id))
+        {
+            return 0;
+        }
+		return weaponIndexTable[id].charge;
 	}
 	public WeaponInventorySlot GetSlot(int id){
 		return weaponIndexTable[id];
@@ -380,136 +392,174 @@ public class ItemManager : MonoBehaviour {
 		xmlDoc.LoadXml(XML);
 
 		int i = 0;
-	
-		foreach (XmlNode node in xmlDoc.SelectNodes("items/slots")) {
-			InventorySlot slot;
-		     switch (slot.type)
+
+        foreach (XmlNode node in xmlDoc.SelectNodes("items/inventory/item"))
+        {
+			
+            String id=node.SelectSingleNode("id").InnerText;
+            if (allShopSlot.ContainsKey(id))
             {
-                case ShopSlotType.WEAPON:
-					WeaponInventorySlot weaponslot = new WeaponInventorySlot();
-					slot= weaponslot;
-					
-					
-					weaponIndexTable[weaponslot.weaponId]=weaponslot;
-					
-					weaponslot.weaponId = int.Parse (node.SelectSingleNode ("ingame_mysqlid").InnerText);
-					
-					weaponslot.group =int.Parse (node.SelectSingleNode ("ingame_type").InnerText);
-					if (node.SelectSingleNode("aim") != null)
+                InventorySlot slot = allShopSlot[id];
+                slot.buyMode = (BuyMode)Enum.Parse(typeof(BuyMode), node.SelectSingleNode("buytype").InnerText);
+             
+                slot.charge = int.Parse(node.SelectSingleNode("charge").InnerText);
+                if (node.SelectSingleNode("time_end").InnerText != "")
+                {
+                    try
                     {
-                        slot.chars = new WeaponChar();
-                        slot.chars.aim = float.Parse(node.SelectSingleNode("aim").InnerText);
-                        slot.chars.dmg = float.Parse(node.SelectSingleNode("damage").InnerText);
-                        slot.chars.speed = float.Parse(node.SelectSingleNode("speed").InnerText);
-                        slot.chars.reload = float.Parse(node.SelectSingleNode("reload").InnerText);
-                        slot.chars.magazine = int.Parse(node.SelectSingleNode("magazine").InnerText);
-                        slot.chars.gunMode = node.SelectSingleNode("mode").InnerText;
+                        slot.timeEnd = DateTime.Parse(node.SelectSingleNode("time_end").InnerText);
+
                     }
-				default:
-					slot = new InventorySlot();
-				break;
-			}
-			
-			
-			slot.gameClass = (GameClassEnum)Enum.Parse(typeof(GameClassEnum), node.SelectSingleNode("class").InnerText);
-            slot.type = (ShopSlotType)Enum.Parse(typeof(ShopSlotType), node.SelectSingleNode("type").InnerText);
-			slot.buyMode = (BuyMode)Enum.Parse(typeof(BuyMode), node.SelectSingleNode("buytype").InnerText);
-            slot.id =node.SelectSingleNode("game_id").InnerText;
-			slot.maxcharge= int.Parse(node.SelectSingleNode("maxcharge").InnerText);
-			slot.charge= int.Parse(node.SelectSingleNode("charge").InnerText);
-			if (node.SelectSingleNode("time_end").InnerText != "")
-			{
-				try
-				{
-					slot.timeEnd = DateTime.Parse(node.SelectSingleNode("time_end").InnerText);
-					slot.isTimed = true;
-				}
-				catch (Exception)
-				{
-					slot.isTimed = false;
-					Debug.LogError("date format  exeption");
-				}
+                    catch (Exception)
+                    {
 
-			}
-            slot.name = node.SelectSingleNode("name").InnerText;
-            slot.engName = slot.name.Unidecode();
-            slot.description = node.SelectSingleNode("description").InnerText;
-            slot.shopicon = node.SelectSingleNode("shopicon").InnerText;
-            slot.model = node.SelectSingleNode("model").InnerText;
-			
-           
-           XmlNodeList prices =xmlDoc.SelectNodes("price");
-		   slot.prices = new Price[prices.Count];
-		   for(int j=0;j<prices.Count;j++){
-				XmlNode onePrice =prices[i];
-				price = new Price();
-				XmlNodeList amounts =onePrice.SelectNodes("amount");
-				XmlNodeList types =onePrice.SelectNodes("type");
-				
-				price.parts = new  PricePart[amounts.Count];
-				price.type =(BuyPrice)Enum.Parse(typeof(BuyPrice),types[0].InnerText);
-				price.id =onePrice.SelectSingleNode("id").InnerText;
-				for(int k=0;k<amounts.Count;k++){
-						price.parts[k] = new PricePart();
-						price.parts[k].amount =int.Parse(amounts[k].InnerText);
-						price.parts[k].type = (BuyPrice)Enum.Parse(typeof(BuyPrice),types[k].InnerText);
-				}
-				 slot.prices[j]= price;
-		   }
-            /*slot.gameClasses = new GameClassEnum[node.SelectNodes("items/weapon").Count];
-            int i=0;
-            foreach (XmlNode gameClass in node.SelectNodes("class")) {
-                    slot.gameClasses[i++]=	(GameClassEnum)int.Parse(gameClass.InnerText);			f yt
+                        Debug.LogError("date format  exeption");
+                    }
+
+                }
             }
-
-            WWW www = null;
-            if (String.Compare(Application.absoluteURL, 0, "https", 0,5) != 0) {
-				
-                Debug.Log ("STATS HTTP SEND" + StatisticHandler.STATISTIC_PHP_HTTPS + StatisticHandler.LOAD_SHOP);
-                www = new WWW (StatisticHandler.GetSTATISTIC_PHP()+  node.SelectSingleNode ("imageurl").InnerText);
-            }
-            else{
-                Debug.Log ("STATS HTTPS SEND"+StatisticHandler.STATISTIC_PHP_HTTPS + StatisticHandler.LOAD_ITEMS);
-                www = new WWW (StatisticHandler.STATISTIC_PHP_HTTPS +  node.SelectSingleNode ("imageurl").InnerText);
-            }*/
-
-
-
-			// wait until the download is done
-			/*yield return www;
-
-			// assign the downloaded image to the texture of the slot
-			www.LoadImageIntoTexture(slot.texture);*/
-			
-            if (!shopItems.ContainsKey(slot.type))
+            else
             {
-                shopItems[slot.type] = new List<InventorySlot>();
-            }
-            shopItems[slot.type].Add(slot);
-			allShopSlot[slot.id] = slot;
-						
-			WWW www = StatisticHandler.GetMeRightWWW( node.SelectSingleNode ("textureGUIName").InnerText);
-		
-			yield return www;
-			slot.texture= new Texture2D(www.texture.width, www.texture.height);
-			www.LoadImageIntoTexture(entry.texture);
-		//	Debug.Log (entry.name + " " +entry.textureGUI + " " +entry.weaponId );
-			
-		/*	TODO: strange shit?????;
-			if(bool.Parse(node.SelectSingleNode ("default").InnerText)){
-				switch(slot.gameClass){
-					case GameClassEnum.ANY:
-			
-						for(int j=0;j<Choice._Personal.Length;j++){
-							Choice.SetChoice((int)slot.gameSlot, j, new WeaponIndex(slot.weaponId,""));
-						}
-					break;
-					default:
-                    Choice.SetChoice((int)slot.gameSlot, (int)slot.gameClass, new WeaponIndex(slot.weaponId, ""));
-					break;
+                InventorySlot slot;
+                ShopSlotType type = (ShopSlotType)Enum.Parse(typeof(ShopSlotType), node.SelectSingleNode("type").InnerText);
+                switch (type)
+                {
+                    case ShopSlotType.WEAPON:
+                        WeaponInventorySlot weaponslot = new WeaponInventorySlot();
+                        slot = weaponslot;
 
-				}
-			}*/
+                        weaponslot.weaponId = int.Parse(node.SelectSingleNode("ingame_mysqlid").InnerText);
+                        weaponIndexTable[weaponslot.weaponId] = weaponslot;
+
+
+
+                        weaponslot.group = int.Parse(node.SelectSingleNode("ingame_type").InnerText);
+                        if (node.SelectSingleNode("aim") != null)
+                        {
+                            slot.chars = new WeaponChar();
+                            slot.chars.aim = float.Parse(node.SelectSingleNode("aim").InnerText);
+                            slot.chars.dmg = float.Parse(node.SelectSingleNode("damage").InnerText);
+                            slot.chars.speed = float.Parse(node.SelectSingleNode("speed").InnerText);
+                            slot.chars.reload = float.Parse(node.SelectSingleNode("reload").InnerText);
+                            slot.chars.magazine = int.Parse(node.SelectSingleNode("magazine").InnerText);
+                            slot.chars.gunMode = node.SelectSingleNode("mode").InnerText;
+                        }
+                        break;
+                    default:
+                        slot = new InventorySlot();
+                        break;
+                }
+
+
+                slot.gameClass = (GameClassEnum)Enum.Parse(typeof(GameClassEnum), node.SelectSingleNode("class").InnerText);
+                slot.type = type;
+                slot.buyMode = (BuyMode)Enum.Parse(typeof(BuyMode), node.SelectSingleNode("buytype").InnerText);
+                slot.invGroup = (InventoryGroup)Enum.Parse(typeof(InventoryGroup), node.SelectSingleNode("inv_group").InnerText);
+                slot.id = id;
+                slot.sid = int.Parse(node.SelectSingleNode("sid").InnerText); 
+                slot.maxcharge = int.Parse(node.SelectSingleNode("maxcharge").InnerText);
+                slot.charge = int.Parse(node.SelectSingleNode("charge").InnerText);
+                if (node.SelectSingleNode("time_end").InnerText != "")
+                {
+                    try
+                    {
+                        slot.timeEnd = DateTime.Parse(node.SelectSingleNode("time_end").InnerText);
+
+                    }
+                    catch (Exception)
+                    {
+
+                        Debug.LogError("date format  exeption");
+                    }
+
+                }
+                slot.name = node.SelectSingleNode("name").InnerText;
+                slot.engName = slot.name.Unidecode();
+                slot.description = node.SelectSingleNode("description").InnerText;
+                slot.shopicon = node.SelectSingleNode("shopicon").InnerText;
+                slot.model = node.SelectSingleNode("model").InnerText;
+
+
+                XmlNodeList prices = xmlDoc.SelectNodes("price");
+                slot.prices = new Price[prices.Count];
+                for (int j = 0; j < prices.Count; j++)
+                {
+                    XmlNode onePrice = prices[i];
+                    Price price = new Price();
+                    XmlNodeList amounts = onePrice.SelectNodes("amount");
+                    XmlNodeList types = onePrice.SelectNodes("type");
+
+                    price.parts = new PricePart[amounts.Count];
+                    price.type = (BuyPrice)Enum.Parse(typeof(BuyPrice), types[0].InnerText);
+                    price.id = onePrice.SelectSingleNode("id").InnerText;
+                    for (int k = 0; k < amounts.Count; k++)
+                    {
+                        price.parts[k] = new PricePart();
+                        price.parts[k].amount = int.Parse(amounts[k].InnerText);
+                        price.parts[k].type = (BuyPrice)Enum.Parse(typeof(BuyPrice), types[k].InnerText);
+                    }
+                    slot.prices[j] = price;
+                }
+                /*slot.gameClasses = new GameClassEnum[node.SelectNodes("items/weapon").Count];
+                int i=0;
+                foreach (XmlNode gameClass in node.SelectNodes("class")) {
+                        slot.gameClasses[i++]=	(GameClassEnum)int.Parse(gameClass.InnerText);			f yt
+                }
+
+                WWW www = null;
+                if (String.Compare(Application.absoluteURL, 0, "https", 0,5) != 0) {
+				
+                    Debug.Log ("STATS HTTP SEND" + StatisticHandler.STATISTIC_PHP_HTTPS + StatisticHandler.LOAD_SHOP);
+                    www = new WWW (StatisticHandler.GetSTATISTIC_PHP()+  node.SelectSingleNode ("imageurl").InnerText);
+                }
+                else{
+                    Debug.Log ("STATS HTTPS SEND"+StatisticHandler.STATISTIC_PHP_HTTPS + StatisticHandler.LOAD_ITEMS);
+                    www = new WWW (StatisticHandler.STATISTIC_PHP_HTTPS +  node.SelectSingleNode ("imageurl").InnerText);
+                }*/
+
+
+
+                // wait until the download is done
+                /*yield return www;
+
+                // assign the downloaded image to the texture of the slot
+                www.LoadImageIntoTexture(slot.texture);*/
+
+                if (!shopItems.ContainsKey(slot.type))
+                {
+                    shopItems[slot.type] = new List<InventorySlot>();
+                }
+                shopItems[slot.type].Add(slot);
+                if (!groupedItems.ContainsKey(slot.invGroup))
+                {
+                    groupedItems[slot.invGroup] = new List<InventorySlot>();
+                }
+                shopItems[slot.type].Add(slot);
+                allShopSlot[slot.id] = slot;
+
+                WWW www = StatisticHandler.GetMeRightWWW(slot.shopicon);
+
+                yield return www;
+                slot.texture = new Texture2D(www.texture.width, www.texture.height);
+                www.LoadImageIntoTexture(slot.texture);
+                //	Debug.Log (entry.name + " " +entry.textureGUI + " " +entry.weaponId );
+
+                /*	TODO: strange shit?????;
+                    if(bool.Parse(node.SelectSingleNode ("default").InnerText)){
+                        switch(slot.gameClass){
+                            case GameClassEnum.ANY:
+			
+                                for(int j=0;j<Choice._Personal.Length;j++){
+                                    Choice.SetChoice((int)slot.gameSlot, j, new WeaponIndex(slot.weaponId,""));
+                                }
+                            break;
+                            default:
+                            Choice.SetChoice((int)slot.gameSlot, (int)slot.gameClass, new WeaponIndex(slot.weaponId, ""));
+                            break;
+
+                        }
+                    }*/
+            }
 		}
 	
 	    i = 0;
@@ -595,20 +645,26 @@ public class ItemManager : MonoBehaviour {
             
            
         }
-        cachedIndex.Clear();
-		foreach (XmlNode node in xmlDoc.SelectNodes("items/default")) {
-            WeaponIndex index = new WeaponIndex(node.SelectSingleNode("weaponId").InnerText);
-            index.gameClass = int.Parse(node.SelectSingleNode("gameClass").InnerText);
-           
-            cachedIndex.Add(index);
-           
-		}
-		foreach (XmlNode node in xmlDoc.SelectNodes("items/marked")) {
-			if(!markedItems.Contains(node.InnerText)){
-				markedItems.Add(node.InnerText);
-			}
-           
-		}
+        if (xmlDoc.SelectSingleNode("items/default") != null)
+        {
+            cachedIndex.Clear();
+            foreach (XmlNode node in xmlDoc.SelectNodes("items/default"))
+            {
+                WeaponIndex index = new WeaponIndex(node.SelectSingleNode("weaponId").InnerText);
+                index.gameClass = int.Parse(node.SelectSingleNode("gameClass").InnerText);
+
+                cachedIndex.Add(index);
+
+            }
+            foreach (XmlNode node in xmlDoc.SelectNodes("items/marked"))
+            {
+                if (!markedItems.Contains(node.InnerText))
+                {
+                    markedItems.Add(node.InnerText);
+                }
+
+            }
+        }
         Debug.Log("Inventory Loaded");
 		GlobalPlayer.instance.loadingStage++;
 		
@@ -763,8 +819,9 @@ public class ItemManager : MonoBehaviour {
         {
             foreach (InventorySlot slot in items)
             {
+                
 				if(slot.isAvailable()){
-					if (slot.gameType == gameSlot && (slot.gameClass == GameClassEnum.ANY || slot.gameClass == gameClass))
+                    if (slot.gameType == gameSlot && (slot.gameClass == GameClassEnum.ANY || slot.gameClass == gameClass))
 					{
 					  
 						GUIItem gui = new GUIItem();
@@ -814,7 +871,7 @@ public class ItemManager : MonoBehaviour {
 		for(int i=5;i<=8;i++){
 			WeaponIndex index = Choice.ForGuiSlot(i);
 			if(!index.IsSameIndex(WeaponIndex.Zero)){
-					answer.Add(allitems[index.itemId].ingamekey);
+                answer.Add(allShopSlot[index.itemId].ingamekey);
 			}
 		}
 		return answer;
@@ -827,24 +884,28 @@ public class ItemManager : MonoBehaviour {
 	public bool isShopLoading;
 
     public Dictionary<ShopSlotType, List<InventorySlot>> shopItems = new Dictionary<ShopSlotType, List<InventorySlot> >();
+
+    public Dictionary<InventoryGroup, List<InventorySlot>> groupedItems = new Dictionary<InventoryGroup, List<InventorySlot>>();
 	
 	
 	public Dictionary<string,InventorySlot> allShopSlot = new Dictionary<string,InventorySlot>();
 
     public List<InventorySlot> cachedShopList = new List<InventorySlot>();
 
-    public ShopGUI shop;
+    public InventoryGUI shop;
 
-	public IEnumerator  LoadShop(ShopGUI _shop){
-        shop = _shop;		
-	}
 
-	
-	
-    public IEnumerator GenerateList(GameClassEnum gameClass,ShopSlotType type)
+    public void SetInventoryGui(InventoryGUI shop)
     {
-        List<ShopSlot> result = new List<ShopSlot>();
-        if (!shopItems.ContainsKey(type))
+        this.shop = shop;
+    }
+
+
+
+    public IEnumerator GenerateList(GameClassEnum gameClass, InventoryGroup type, int setId)
+    {
+        List<InventorySlot> result = new List<InventorySlot>();
+        if (!groupedItems.ContainsKey(type))
         {
             shop.OpenList(result);
             yield return null;
@@ -852,7 +913,7 @@ public class ItemManager : MonoBehaviour {
         else
         {
 
-            List<ShopSlot> list = shopItems[type];
+            List<InventorySlot> list = groupedItems[type];
             if (list == null)
             {
                 shop.OpenList(result);
@@ -861,15 +922,15 @@ public class ItemManager : MonoBehaviour {
             else
             {
 
-                foreach (ShopSlot slot in list)
+                foreach (InventorySlot slot in list)
                 {
-                    if (gameClass == slot.gameClass || slot.gameClass == GameClassEnum.ANY)
+                    if ((gameClass == slot.gameClass || slot.gameClass == GameClassEnum.ANY)&&slot.sid ==setId)
                     {
                         result.Add(slot);
                     }
                 }
                 shop.OpenList(result);
-                foreach (ShopSlot slot in result)
+                foreach (InventorySlot slot in result)
                 {
                     if (slot.texture == null)
                     {
@@ -887,13 +948,13 @@ public class ItemManager : MonoBehaviour {
     }
     public IEnumerator GenerateMarkedList(GameClassEnum gameClass,ShopSlotType type)
     {
-        List<ShopSlot> result = new List<ShopSlot>();
+        List<InventorySlot> result = new List<InventorySlot>();
 		foreach(string id in markedItems){
 			result.Add(allShopSlot[id]);
 		}
 	
 		shop.OpenList(result);
-		foreach (ShopSlot slot in result)
+        foreach (InventorySlot slot in result)
 		{
 			if (slot.texture == null)
 			{
@@ -907,12 +968,13 @@ public class ItemManager : MonoBehaviour {
 
 		}
     }
+    //TODO: starnge
 	public void MarkedCost(out  int cash, out int gold){
         cash=0;
         gold= 0;
 		foreach(string id in markedItems){
-			cash +=allShopSlot[id].cashCost;
-			gold +=allShopSlot[id].goldCost;
+		/*	cash +=allShopSlot[id].cashCost;
+			gold +=allShopSlot[id].goldCost;*/
 		}
 	
 	}
@@ -1003,6 +1065,8 @@ public class ItemManager : MonoBehaviour {
         }
        
     }
+    //TODO MArked
+    /*
 	public IEnumerator BuyMarkeditems(MarkItemGui gui,bool gold){
 		int totalCost = 0;
 		foreach(string id in markedItems){
@@ -1058,7 +1122,7 @@ public class ItemManager : MonoBehaviour {
 		
 		}
 	}
-	
+	*/
 	public IEnumerator BuyItem(string itemId,LotItemGUI gui){
 		if(buyBlock){
 			yield break;		
@@ -1132,7 +1196,7 @@ public class ItemManager : MonoBehaviour {
         yield return w;
         useBlock = false;
        
-        IEnumerator numenator = ParseInventory(w.text); 
+        IEnumerator numenator = ParseList(w.text); 
 
         while (numenator.MoveNext())
         {
@@ -1147,14 +1211,14 @@ public class ItemManager : MonoBehaviour {
             id = -1;
             return false;
         }
-		id =allitems[itemId].ingamekey;
+		id =allShopSlot[itemId].ingamekey;
         //Debug.Log("use");
 		if(!stimPackDictionary[id].active){
-            allitems[itemId].charge--;
+            allShopSlot[itemId].charge--;
 			stimPackDictionary[id].active = true;
             
             StartCoroutine(UseItem(new string[] { itemId}));
-            GUIHelper.SendMessage(TextGenerator.instance.GetSimpleText("UseItem") + allitems[itemId].name, allitems[itemId].texture);
+            GUIHelper.SendMessage(TextGenerator.instance.GetSimpleText("UseItem") + allShopSlot[itemId].name, allShopSlot[itemId].texture);
 			return true;
 		}
 		return false;
@@ -1185,7 +1249,7 @@ public class ItemManager : MonoBehaviour {
         Debug.Log(w.text);
 		if(xmlDoc.SelectSingleNode("result/error").InnerText=="0"){
 			gui.HideRepair();
-			IEnumerator numenator = ParseInventory(w.text);
+			IEnumerator numenator = ParseList(w.text);
 
 			while (numenator.MoveNext())
 			{
@@ -1226,13 +1290,13 @@ public class ItemManager : MonoBehaviour {
         Debug.Log(w.text);
 		if(xmlDoc.SelectSingleNode("result/error").InnerText=="0"){
 			gui.HideRepair();
-			IEnumerator numenator = ParseInventory(w.text);
+			IEnumerator numenator = ParseList(w.text);
 
 			while (numenator.MoveNext())
 			{
 				yield return numenator.Current;
 			}
-            RemoveInventoryItem(xmlDoc.SelectSingleNode("result/kit_id").InnerText);
+           // RemoveInventoryItem(xmlDoc.SelectSingleNode("result/kit_id").InnerText);
             gui.ReloadCategory();
             gui.CloseLot();
         }
@@ -1275,7 +1339,7 @@ public class ItemManager : MonoBehaviour {
             gui.SetMoneyMessage(xmlDoc.SelectSingleNode("result/cash").InnerText , xmlDoc.SelectSingleNode("result/gold").InnerText);
             gui.CloseLot();
             gui.HideRepair();
-            RemoveInventoryItem(id);
+          //  RemoveInventoryItem(id);
             gui.ReloadCategory();
 
         }
@@ -1316,7 +1380,7 @@ public class ItemManager : MonoBehaviour {
 	}
 	
 	public IEnumerator _GetItem(string item,ShowAndTellAction action){
-		ShopSlot slot = allShopSlot[item];
+		InventorySlot slot = allShopSlot[item];
 		if(slot.texture==null){
 			WWW www = StatisticHandler.GetMeRightWWW(slot.shopicon);
 		   
@@ -1341,10 +1405,11 @@ public class ItemManager : MonoBehaviour {
 		List<SmallShopData> allstims = new List<SmallShopData>();
 		foreach(StimPack pack in stimPackDictionary){
 			SmallShopData data=null;
-			if(invItems.ContainsKey(ShopSlotType.ETC)){
-				foreach(InventorySlot slot in 	invItems[ShopSlotType.ETC]){
+			if(shopItems.ContainsKey(ShopSlotType.ETC)){
+                foreach (InventorySlot slot in shopItems[ShopSlotType.ETC])
+                {
                  //   Debug.Log(slot.gameId + "   " + pack.mysqlId);
-					if(slot.gameId==pack.mysqlId){
+					if(slot.gameType==pack.mysqlId){
 					
 						if(data==null){
 							data= new SmallShopData();
@@ -1360,29 +1425,7 @@ public class ItemManager : MonoBehaviour {
 				}			
 			}
 			
-			if(shopItems.ContainsKey(ShopSlotType.ETC)){
-				foreach(ShopSlot slot in 	shopItems[ShopSlotType.ETC]){
-                  
-					if(slot.id==pack.mysqlId.ToString()){
-                        if (data == null)
-                        {
-                            data = new SmallShopData();
-                            data.name = slot.name;
-                            data.engName = slot.engName;
-                            data.amount = 0;
-                             data.descr = slot.description;
-
-                            data.textureGUI = pack.textureGUI;
-                        }
-						data.cashSlot= slot.cashSlot; 
-						data.goldSlot= slot.goldSlot;
-                        data.cashCost = slot.cashCost;
-                        data.goldCost = slot.goldCost;
-						break;
-						
-					}
-				}
-			}
+			
 			if(data==null){
 				continue;
 			}

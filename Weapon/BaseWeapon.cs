@@ -33,7 +33,7 @@ public class BaseWeapon : DestroyableNetworkObject {
 	 /// <summary>
     ///How many shoots up charge
     /// </summary>
-    public int shootPerCharge=30
+    public int shootPerCharge = 30;
 	
 	private int shootCounter= 0;
 	
@@ -261,7 +261,7 @@ public class BaseWeapon : DestroyableNetworkObject {
             drawer.gameObject.SetActive(false);
 		}
   
-		charge = Itemmanager.instance.GetCharge(SQLId);
+		charge = ItemManager.instance.GetCharge(SQLId);
 		
 	}
 
@@ -956,7 +956,7 @@ public class BaseWeapon : DestroyableNetworkObject {
 		shootCounter++;
 		if(shootCounter>=shootPerCharge){
 			shootCounter= 0;
-			charge= Itemmanager.instance.LowerCharge(SQLId);
+            charge = ItemManager.instance.LowerCharge(SQLId);
 		}
 		
     }

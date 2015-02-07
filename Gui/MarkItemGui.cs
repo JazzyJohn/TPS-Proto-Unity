@@ -23,12 +23,12 @@ public class MarkItemGui : MonoBehaviour {
 	public void BuyForGold(){
 	
 	
-		StartCoroutine(ItemManager.instance.BuyMarkeditems(this,true));
+//		StartCoroutine(ItemManager.instance.BuyMarkeditems(this,true));
 	}
 	
 	public void BuyForCash(){
 	
-		StartCoroutine(ItemManager.instance.BuyMarkeditems(this,false));
+		//StartCoroutine(ItemManager.instance.BuyMarkeditems(this,false));
 	}
 	public void MoneyError(){
 	

@@ -34,7 +34,7 @@ public class HoldPosition_PVEGameRule : GameRule {
 
         GlobalPlayer.instance.MathcEnd();
         Player.localPlayer.GameEnd();
-        ItemManager.instance.RemoveOldAndExpired();
+        ItemManager.instance.SendChargeData();
         List<Pawn> pawns = PlayerManager.instance.FindAllPawn();
         foreach (Pawn pawn in pawns)
         {

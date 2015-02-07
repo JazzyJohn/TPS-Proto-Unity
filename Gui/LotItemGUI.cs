@@ -7,7 +7,7 @@ public class LotItemGUI : MonoBehaviour
 
     public CharSection weaponSection;
 
-    public ShopGUI Shop;
+    public InventoryGUI Shop;
     public InventorySlot item;
     public UILabel Name;
     public UILabel Description;
@@ -59,17 +59,18 @@ public class LotItemGUI : MonoBehaviour
     public void SetItem(InventorySlot _item)
     {
         item = _item;
-		if(item.prices[0].type==KP_PRICE){
+		if(item.prices[0].type==BuyPrice.KP_PRICE){
 			forGold.alpha = 0.0f;
 			forKP.alpha = 1.0f;
-			for(int i =0;i< item.prices.lenght;i++){
-				kpPrices[i] =item.prices[i].parts[0].amount;
+            for (int i = 0; i < item.prices.Length; i++)
+            {
+				kpPrices[i].text =item.prices[i].parts[0].amount.ToString();
 			}
 		}else{
 			forGold.alpha = 1.0f;
 			forKP.alpha = 0.0f;
-			for(int i =0;i< item.prices.lenght;i++){
-				goldPrices[i] =item.prices[i].parts[0].amount;
+			for(int i =0;i< item.prices.Length;i++){
+                goldPrices[i].text = item.prices[i].parts[0].amount.ToString();
 			}
 		}
         GA.API.Design.NewEvent("GUI:MainMenu:Shop:SelectItem:" + _item.engName);
@@ -102,7 +103,7 @@ public class LotItemGUI : MonoBehaviour
     public void Buy(int key)
     {
 		int amount = item.prices[key].parts[0].amount;
-		if(item.prices[0].type==KP_PRICE){
+		if(item.prices[0].type==BuyPrice.KP_PRICE){
 			GA.API.Business.NewEvent("Shop:BUYItem:" + item.engName, "GASH", amount);
 		}else{
 		  GA.API.Business.NewEvent("Shop:BUYItem:" + item.engName, "GOLD", amount);

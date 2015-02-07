@@ -66,7 +66,7 @@ public class GameFinished : Statistic
             resolved = true;
             //Invoke("RewardResolve", 1.0f);
             RewardResolve();
-            ResolvedExpired();
+            //ResolvedExpired();
         }
     }
     public void Update()
@@ -179,35 +179,6 @@ public class GameFinished : Statistic
     {
         winner.text = TextGenerator.instance.GetSimpleText("Team" + GameRule.instance.Winner());
     }
-    public void ResolvedExpired()
-    {
-        List<InventorySlot> ended = ItemManager.instance.GetMeDelete();
-        foreach (InventorySlot item in ended)
-        {
-            if (item.type == ShopSlotType.WEAPON)
-            {
-                Transform newTrans = Instantiate(itemEntry) as Transform;
-                newTrans.parent = itemTable;
-                newTrans.localScale = new Vector3(1f, 1f, 1f);
-                newTrans.localEulerAngles = new Vector3(0f, 0f, 0f);
-                newTrans.localPosition = new Vector3(0f, 0f, 0f);
-                NGUIExpired script = newTrans.GetComponent<NGUIExpired>();
-                script.texture.mainTexture = item.texture;
-                if (item.personal)
-                {
-                    script.text.text = TextGenerator.instance.GetSimpleText("NeedRepair");
-                }
-                else
-                {
-                    script.text.text = TextGenerator.instance.GetSimpleText("Expired");
-                }
-                script.box.height = (int)Math.Truncate(itemScroll.height);
-            }    
-        }
-
-        itemTable.localPosition = new Vector3((-1 * (itemScroll.width / 2)) + 1, (itemScroll.height / 2) + moneyTableWid.padding.y, 0f);
-        itemGridWid.Reposition();
-         ItemManager.instance.ClearMyDelete();
-    }
+  
 }
 

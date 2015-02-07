@@ -34,13 +34,13 @@ public class InvItemGUI : MonoBehaviour {
         GA.API.Design.NewEvent("GUI:MainMenu:Inventory:SelectItem:" + _item.engName);
         Texture.mainTexture = null;
 
-        if (_item.personal)
+        if (_item.buyMode ==BuyMode.FOR_KP)
         {
             chargeLabel.text = _item.charge.ToString();
         }
         else
         {
-            if (_item.isTimed)
+            if (_item.buyMode == BuyMode.FOR_GOLD_TIME)
             {
                 chargeLabel.text = _item.timeEnd.ToString("g");
             }

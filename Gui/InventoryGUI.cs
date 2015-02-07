@@ -16,7 +16,7 @@ public class InventoryGUI : MonoBehaviour {
 	public UIScrollView ItemsScroll;
 	public MainMenuGUI MainMenu;
 
-	public UIPanel Detail;
+
 	
 	public UIPanel Inventory;
 	
@@ -38,15 +38,18 @@ public class InventoryGUI : MonoBehaviour {
 
 	public MainMenuStatistic statistic;
 
-    public ShopGUI shop;
+    
 
     bool[] allowedReapair = new bool[3];
 	// Use this for initialization
+    void Awake(){
+        ItemManager.instance.SetInventoryGui(this);
+    }
 	void Start () 
 	{
 		InvItem.Main = this;
         statistic.Main = this;
-        Detail.alpha = 0f;
+      
         repair.alpha = 0f;
 
         statistic.AllStat.AddRange(statistic.AllStatGrild.transform.GetComponentsInChildren<UILabel>());
@@ -60,17 +63,10 @@ public class InventoryGUI : MonoBehaviour {
 
 	public void HideAllPanel()
 	{
-		Detail.alpha = 0f;
+		
 		repair.alpha = 0f;
 	}
-	public void ShowLot(InvItemGUI item)
-	{
-		Detail.alpha = 1f;
-        detailItemGUI.SetItem(item.item);
 
-		
-	
-	}
 	public void ShowLot(InvItemGUI item)
 	{
 		lotItem.alpha = 1f;
@@ -87,7 +83,7 @@ public class InventoryGUI : MonoBehaviour {
 
 	public void CloseLot()
 	{
-		Detail.alpha = 0f;
+	
         detailItemGUI.item = null;
         Destroy(detailItemGUI.gunModel);
 	}
@@ -126,34 +122,7 @@ public class InventoryGUI : MonoBehaviour {
 		ItemManager.instance.UseRepairKit(detailItemGUI.item.id,id,this);
 	
 	}
-	public void SmallRepair(){
-        if (!allowedReapair[0])
-        {
-            shop.ShowCategory(2);
-            return;
-        }
-        GA.API.Design.NewEvent("GUI:MainMenu:Inventory:RepairKit:Small");
-		Repair(ItemManager.smallRepairId);
 	
-	}
-	public void NormalRepair(){
-        if (!allowedReapair[1])
-        {
-            shop.ShowCategory(2);
-            return;
-        }
-        GA.API.Design.NewEvent("GUI:MainMenu:Inventory:RepairKit:Normal");
-		Repair(ItemManager.normalRepairId);
-	}
-	public void MaximumRepair(){
-        if (!allowedReapair[2])
-        {
-            shop.ShowCategory(2);
-            return;
-        }
-        GA.API.Design.NewEvent("GUI:MainMenu:Inventory:RepairKit:Big");
-		Repair(ItemManager.maximumRepairId);
-	}
 	public void HideRepair(){
 		repair.alpha= 0.0f;
 	}
@@ -174,18 +143,7 @@ public class InventoryGUI : MonoBehaviour {
     }
 
  
-	public void ShowRepair(){
-		repair.alpha= 1.0f;
-		int[] cnt = ItemManager.instance.GetAllRepair();
-        for (int i = 0; i < 3; i++)
-        {
-            allowedReapair[i] = cnt[i] > 0;
-        }
-        GA.API.Design.NewEvent("GUI:MainMenu:Inventory:ShowRepair");
-         repairGui.smallCnt.text = cnt[0].ToString();
-        repairGui.mediumCnt.text = cnt[1].ToString();
-        repairGui.maxCnt.text = cnt[2].ToString();
-	}
+
 
 	public void ReSIZE()
 	{
@@ -234,7 +192,7 @@ public class InventoryGUI : MonoBehaviour {
 		switch(OpenTab)
 		{
 		case Tab.Inventory:
-			InvItem.EditCategory();
+			InvItem.EditCategory(InventoryGroup.WEAPON);
 			break;
 		case Tab.Statistic:
 
@@ -334,7 +292,10 @@ public class PanelInvGUI
 		Inventory.alpha = 0f;
 	}
 }
-
+public enum InventoryGroup
+{
+    WEAPON, ARMOR, STUFF
+}
 [Serializable]
 public class InvItems
 {
@@ -345,15 +306,16 @@ public class InvItems
 
 	public int Page;
 	public int ItemsCount;
-	
+
+    public int setId;
     public List<InvItem> AllItems;
     
-	public void EditCategory() //Смена закладки(категории или класса)
+	public void EditCategory(InventoryGroup group) //Смена закладки(категории или класса)
 	{
 		if(Main.ItemsPanel.alpha == 1f)
-			Main.ItemsPanel.alpha = 0f;        
-		
-		Main.StartCoroutine(ItemManager.instance.GenerateInvList(Main.gameClass, Main));
+			Main.ItemsPanel.alpha = 0f;
+
+        Main.StartCoroutine(ItemManager.instance.GenerateList(Main.gameClass, group, setId));
 		
 		/*if (SelectCategory == Category)
 			OldCategory = true;

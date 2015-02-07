@@ -517,7 +517,7 @@ public class ServerHolder : MonoBehaviour
 		GameObject loadingScreen = null; 
 		if (mainMenu != null) {
 				Destroy (mainMenu.gameObject);
-				ItemManager.instance.ClearShop();
+//				ItemManager.instance.ClearShop();
 				loadingScreen = Instantiate(mainMenu.loadingScreen, Vector3.zero, Quaternion.identity) as GameObject;
              
 
