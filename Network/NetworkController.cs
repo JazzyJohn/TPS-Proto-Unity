@@ -636,6 +636,7 @@ public class NetworkController : MonoBehaviour {
             view.viewID = AllocateViewID(FoxView.SCENE_OWNER_ID);
 		}
         foxViewList.Add(view.viewID, view);
+
         return newObject;
     }
 	 private GameObject RemoteInstantiateNetPrefab(string prefab, Vector3 vector3, Quaternion quaternion, int viewId)
@@ -966,9 +967,21 @@ public class NetworkController : MonoBehaviour {
 
     }
 	
-	public void LastSpawnWeaponMakeInHand(){
-		pawnWeapons[pawnWeapons.Count-1].state = true;
+	public void ThisSpawnWeaponMakeInHand(int i){
+        foreach (WeaponModel model in pawnWeapons)
+        {
+            model.state = false;
+        }
+		pawnWeapons[i].state = true;
 	}
+    public void LastSpawnWeaponMakeInHand()
+    {
+        foreach (WeaponModel model in pawnWeapons)
+        {
+            model.state = false;
+        }
+        pawnWeapons[pawnWeapons.Count-1].state = true;
+    }
 
     public void EndPawnSpawnRequest()
     {
@@ -1538,7 +1551,7 @@ public class NetworkController : MonoBehaviour {
             return;
         }
         Debug.Log("Pawn Spawn" + sirPawn.type + "ID:"+ sirPawn.id);
-		GameObject go =RemoteInstantiateNetPrefab(sirPawn.type, Vector3.zero,Quaternion.identity,sirPawn.id);
+        GameObject go = RemoteInstantiateNetPrefab(sirPawn.type, sirPawn.position.GetVector(), sirPawn.rotation.GetQuat(), sirPawn.id);
         if (go == null)
         {
             return;
@@ -1590,7 +1603,9 @@ public class NetworkController : MonoBehaviour {
 			}
 			pawn.AddExternalCharacteristic(effects);
 		}
+        
 		ISFSArray weapons = dt.GetSFSArray("weapons");
+       
 		foreach (WeaponModel weaponModel in weapons)
 		{
             GameObject wepGo = RemoteInstantiateNetPrefab(weaponModel.type, Vector3.zero, Quaternion.identity, weaponModel.id);
@@ -1601,7 +1616,7 @@ public class NetworkController : MonoBehaviour {
 
             BaseWeapon weapon = wepGo.GetComponent<BaseWeapon>();
             weapon.NetUpdate(weaponModel);
-			//  Debug.Log("PAwn" + pawn + " View" + GetView(dt.GetInt("pawnId")) + "ID" + dt.GetInt("pawnId"));
+			Debug.Log("PAwn" + pawn + " View" + GetView(dt.GetInt("pawnId")) + "ID" + dt.GetInt("pawnId"));
             weapon.RemoteAttachWeapon(pawn, weaponModel.state);
 		}
 		
@@ -1721,7 +1736,10 @@ public class NetworkController : MonoBehaviour {
             
             return;
         }
-
+        if (foxViewList.ContainsKey(sirWeapon.id))
+        {
+            return;
+        }
 		GameObject go =RemoteInstantiateNetPrefab(sirWeapon.type, Vector3.zero,Quaternion.identity,sirWeapon.id);
         if (go == null)
         {
@@ -1731,7 +1749,7 @@ public class NetworkController : MonoBehaviour {
 		BaseWeapon weapon = go.GetComponent<BaseWeapon>();
 		weapon.NetUpdate(sirWeapon);
 		Pawn pawn  =  GetView(dt.GetInt("pawnId")).pawn;
-      //  Debug.Log("PAwn" + pawn + " View" + GetView(dt.GetInt("pawnId")) + "ID" + dt.GetInt("pawnId"));
+        Debug.Log("PAwn" + pawn + " View" + GetView(dt.GetInt("pawnId")) + "ID" + sirWeapon.id);
 		weapon.RemoteAttachWeapon(pawn,sirWeapon.state);
 	
 		

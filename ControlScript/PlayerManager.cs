@@ -69,7 +69,7 @@ public class PlayerManager : MonoBehaviour {
 	
 		
         localPlayer = (Pawn)NetworkController.Instance.BeginPawnSpawnRequest(newPalyerClass, targetPos.position, targetPos.rotation, false, stims,false).GetComponent<Pawn>();
-
+        localPlayer.AfterAwake();
 		return localPlayer;
     }
 	
@@ -169,7 +169,7 @@ public class PlayerManager : MonoBehaviour {
         if (updateTimer > updateDelay)
         {
             updateTimer = 0.0f;
-          //  PawnUpdate();
+            PawnUpdate();
         }
 	}
 	

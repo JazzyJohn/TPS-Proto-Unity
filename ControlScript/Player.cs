@@ -295,7 +295,7 @@ public class Player : MonoBehaviour {
                 isStarted = false;
 				respawnTimer=respawnTime;
 				currentPawn = GetNewPawn();
-				
+             
 				ItemManager.instance.SaveItemForSlot();
 				//PVPGameRule.instance.Spawn(team);
 				AfterSpawnSetting(currentPawn,GetBuffs());

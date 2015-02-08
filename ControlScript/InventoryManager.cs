@@ -74,21 +74,46 @@ public class InventoryManager : MonoBehaviour {
             {
                 grenadeSlot = i;
             }
-			 if (myWeapons[i].slotType == BaseWeapon.SLOTTYPE.MAIN)
-            {
-				NetworkController.Instance.LastSpawnWeaponMakeInHand();
-			}
+			 
 			
         }
+        for (int i = 0; i < myWeapons.Length; i++)
+        {
+            if (myWeapons[i].slotType == BaseWeapon.SLOTTYPE.MAIN)
+            {
+                NetworkController.Instance.ThisSpawnWeaponMakeInHand(i);
+                return;
+            }
+        }
+        for (int i = 0; i < myWeapons.Length; i++)
+        {
+            if (myWeapons[i].slotType == BaseWeapon.SLOTTYPE.PERSONAL)
+            {
+                NetworkController.Instance.ThisSpawnWeaponMakeInHand(i);
+                return;
+            }
+        }
 	}
+
+
 	//Start Weapon generation
 	public void GenerateWeaponStart(){
 		if (owner.foxView.isMine) {
 			for(int i=0;i<myWeapons.Length;i++){
 				if(myWeapons[i].slotType==BaseWeapon.SLOTTYPE.MAIN){
 						_ChangeWeapon (i);
+                        return;
 				}
 			}
+            for (int i = 0; i < myWeapons.Length; i++)
+            {
+                if (myWeapons[i].slotType == BaseWeapon.SLOTTYPE.PERSONAL)
+                {
+                    _ChangeWeapon(i);
+                    return;
+                }
+            }
+            _ChangeWeapon(0);
 		}
 	}
 	
@@ -224,8 +249,19 @@ public class InventoryManager : MonoBehaviour {
 	
 	
 	//WEAPON CHANGE SECTION
-	
-	
+
+    bool isThereMain()
+    {
+        for (int i = 0; i < myWeapons.Length; i++)
+        {
+            if (myWeapons[i].slotType == BaseWeapon.SLOTTYPE.MAIN)
+            {
+
+                return true;
+            }
+        }
+        return false;
+    }
 	
 	public void SetSlot( BaseWeapon prefab){
         GA.API.Design.NewEvent("Game:Weapon:Choice:" + prefab.SQLId);
@@ -239,6 +275,10 @@ public class InventoryManager : MonoBehaviour {
 				{
 					NetworkController.Instance.LastSpawnWeaponMakeInHand();
 				}
+                 if (!isThereMain() && prefab.slotType == BaseWeapon.SLOTTYPE.PERSONAL)
+                 {
+                     NetworkController.Instance.LastSpawnWeaponMakeInHand();
+                 }
                 myWeapons[myWeapons.Length - 1].AttachWeaponToChar(owner);
 				return;
 			}
@@ -257,6 +297,10 @@ public class InventoryManager : MonoBehaviour {
 				{
 					NetworkController.Instance.LastSpawnWeaponMakeInHand();
 				}
+         if (!isThereMain() && prefab.slotType == BaseWeapon.SLOTTYPE.PERSONAL)
+         {
+             NetworkController.Instance.LastSpawnWeaponMakeInHand();
+         }
         myWeapons[myWeapons.Length - 1].AttachWeaponToChar(owner);
 	}
 	

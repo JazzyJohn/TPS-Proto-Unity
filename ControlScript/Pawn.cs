@@ -431,7 +431,14 @@ public class Pawn : DamagebleObject
         yAngle = desiredRotation.eulerAngles.y;
         Invoke("SpawnImmortalityEnd", spawnImortalityDuration);
         timeSpawned = Time.time;
-        ivnMan.Init();
+      
+    }
+    public void AfterAwake()
+    {
+        if (foxView.isMine)
+        {
+            ivnMan.Init();
+        }
     }
 	public void SpawnImmortalityEnd(){
 		isSpawnImortality= false;
@@ -3569,7 +3576,7 @@ public class Pawn : DamagebleObject
 
         correctPlayerPos = pawn.position.MakeVector(correctPlayerPos);
         correctPlayerRot = pawn.rotation.MakeQuaternion(correctPlayerRot);
-     
+//        Debug.Log("SPAWN IN"+correctPlayerPos); 
         aimRotation = pawn.aimRotation.MakeVector(aimRotation);
         ToggleAim(pawn.isAiming);
         team = pawn.team;
