@@ -36,10 +36,22 @@ public class BaseWeapon : DestroyableNetworkObject {
     public int shootPerCharge = 30;
 	
 	private int shootCounter= 0;
-	
-	
+
+    private static float DAMAGE_BROKE_PERCEN = 10.0f;
+
+    private static float DAMAGE_BROKE_COEF = 5f;
+
+    private static float DAMAGE_BROKE_MAX = 0.5f;
+
+    private static float AIM_BROKE_PERCEN = 30.0f;
+
+    private static float AIM_BROKE_COEF = 5f;
+
+ 
+    
 	//END MONEY SECTION
 
+    public bool initStats = false;
     //SHOOT LOGIC
 
     /// <summary>
@@ -317,6 +329,7 @@ public class BaseWeapon : DestroyableNetworkObject {
         if(foxView.isMine){
             curAmmo = owner.GetComponent<InventoryManager>().GiveAmmo(ammoType, clipSize - (int)curAmmo);
         }
+        InitStats();
       
     }
 	public virtual void AttachWeapon(Transform weaponSlot,Vector3 Offset, Quaternion weaponRotator,Pawn inowner){
@@ -332,30 +345,51 @@ public class BaseWeapon : DestroyableNetworkObject {
 	
         
 		//RemoteAttachWeapon(inowner);
-		reloadTime =reloadTime*owner.GetPercentValue(CharacteristicList.RELOAD_SPEED);
+        InitStats();
+		
+
+
+	}
+    protected void InitStats()
+    {
+        if (initStats)
+        {
+            return;
+
+        }
+        initStats = true;
+        reloadTime = reloadTime * owner.GetPercentValue(CharacteristicList.RELOAD_SPEED);
         fireInterval = fireInterval * owner.GetPercentValue(CharacteristicList.FIRE_RATE);
 
-        clipSize =  Mathf.RoundToInt(clipSize * owner.GetPercentValue(CharacteristicList.AMMO_AMOUNT));
-				
-        float recoilmod = owner.GetValue(CharacteristicList.RECOIL_ALL);	
-		switch(descriptionType){
-			
-				
-			
-			case DESCRIPTIONTYPE.MACHINE_GUN:
-                recoilmod += owner.GetValue(CharacteristicList.RECOIL_MACHINEGUN);	
-			break;
-            case DESCRIPTIONTYPE.ROCKET_LAUNCHER:
-            recoilmod += owner.GetValue(CharacteristicList.RECOIL_ROCKET);	
-			break;
-		}
-		recoilmod =((float)recoilmod)/100f+1f;
-		normalRandCoef=normalRandCoef*recoilmod;
-		aimRandCoef = aimRandCoef*recoilmod;
-        damageAmount.Damage = damageAmount.Damage * owner.GetPercentValue(CharacteristicList.DAMAGE_ALL);
-		damageAmount.weapon= true;
-	}
+        clipSize = Mathf.RoundToInt(clipSize * owner.GetPercentValue(CharacteristicList.AMMO_AMOUNT));
 
+        float recoilmod = owner.GetValue(CharacteristicList.RECOIL_ALL);
+        switch (descriptionType)
+        {
+
+
+
+            case DESCRIPTIONTYPE.MACHINE_GUN:
+                recoilmod += owner.GetValue(CharacteristicList.RECOIL_MACHINEGUN);
+                break;
+            case DESCRIPTIONTYPE.ROCKET_LAUNCHER:
+                recoilmod += owner.GetValue(CharacteristicList.RECOIL_ROCKET);
+                break;
+        }
+        recoilmod = ((float)recoilmod) / 100f + 1f;
+        normalRandCoef = normalRandCoef * recoilmod;
+        aimRandCoef = aimRandCoef * recoilmod;
+        damageAmount.Damage = damageAmount.Damage * owner.GetPercentValue(CharacteristicList.DAMAGE_ALL);
+        damageAmount.weapon = true;
+        float damageMode = ((float)charge) / DAMAGE_BROKE_PERCEN * DAMAGE_BROKE_COEF / 100;
+        if (damageMode > DAMAGE_BROKE_MAX)
+        {
+            damageMode = DAMAGE_BROKE_MAX;
+        }
+        damageAmount.Damage -= damageAmount.Damage * damageMode;
+        float aimMode = ((float)charge) / AIM_BROKE_PERCEN * AIM_BROKE_COEF / 100;
+        recoilmod += aimMode * recoilmod;
+    }
 	public void RemoteAttachWeapon(Pawn newowner,bool state){
 		if(state){
             newowner.setWeapon(this); 

@@ -286,7 +286,7 @@ public class ItemManager : MonoBehaviour {
 	private string UID ="";
 	
 	
-	private Dictionary<int,int> toSendLower = new  Dictionary<int,int> ();
+	private Dictionary<string,int> toSendLower = new  Dictionary<string,int> ();
 	
 	public void Init(string uid){
 			UID = uid;
@@ -334,14 +334,17 @@ public class ItemManager : MonoBehaviour {
     }
 
 	public int LowerCharge(int id){
+        Debug.Log("lowercharge");
         if (!weaponIndexTable.ContainsKey(id))
         {
             return 0;
         }
-		if(!toSendLower.ContainsKey(id)){
-			toSendLower[id] = 0;
+        
+         string acttualID = weaponIndexTable[id].id;
+		if(!toSendLower.ContainsKey(acttualID)){
+			toSendLower[acttualID] = 0;
 		}
-		toSendLower[id]= toSendLower[id]+1;
+		toSendLower[acttualID]= toSendLower[acttualID]+1;
 		return weaponIndexTable[id].UpCharge();
 	}
 	public int GetCharge(int id){
@@ -750,13 +753,14 @@ public class ItemManager : MonoBehaviour {
 			
 		form.AddField ("uid", UID);
 		
-		foreach (KeyValuePair<int, int> pair in toSendLower)
+		foreach (KeyValuePair<string, int> pair in toSendLower)
 		{
-          //  Debug.Log(Choice.ForGuiSlot(i).ToString());
+            Debug.Log("charge[" + pair.Key + "]"+ pair.Value);
           
 			form.AddField ("charge["+pair.Key+"]", pair.Value);
           
 		}
+        toSendLower.Clear();
 	 	StatisticHandler.instance.StartCoroutine(StatisticHandler.SendForm (form,StatisticHandler.CHARGE_DATA));
 	}
 	public List<GUIItem> GetItemForSlot(GameClassEnum gameClass, int gameSlot){
