@@ -218,6 +218,7 @@ public class AISwarm:MonoBehaviour
         AIBase ai = obj.GetComponent<AIBase>();
         ai.Init(aiGroup, this, point);
         AfterSpawnAction(ai);
+        pawn.AfterAwake();
         NetworkController.Instance.EndPawnSpawnRequest();
     }
     public virtual void SpawnBot(string prefabName, int point, Vector3 position,int team)
@@ -230,6 +231,7 @@ public class AISwarm:MonoBehaviour
         AIBase ai = obj.GetComponent<AIBase>();
         ai.Init(aiGroup, this, point);
         AfterSpawnAction(ai);
+        pawn.AfterAwake();
         NetworkController.Instance.EndPawnSpawnRequest();
     }
     public virtual  void SendData(ISFSObject swarmSend)
