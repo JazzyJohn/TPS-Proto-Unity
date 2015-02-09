@@ -274,7 +274,7 @@ public class BaseWeapon : DestroyableNetworkObject {
 		}
   
 		charge = ItemManager.instance.GetCharge(SQLId);
-		
+		shootCounter = ItemManager.instance.GetShootCounter(SQLId);
 	}
 
     public Pawn GetOwner()
@@ -390,6 +390,10 @@ public class BaseWeapon : DestroyableNetworkObject {
         float aimMode = ((float)charge) / AIM_BROKE_PERCEN * AIM_BROKE_COEF / 100;
         recoilmod += aimMode * recoilmod;
     }
+	
+	public void PawnDeath(){
+		 ItemManager.instance.SetShootCount(SQLId,shootCounter);
+	}
 	public void RemoteAttachWeapon(Pawn newowner,bool state){
 		if(state){
             newowner.setWeapon(this); 
@@ -987,10 +991,12 @@ public class BaseWeapon : DestroyableNetworkObject {
         {
             alredyGunedAmmo = 0;
         }
-		shootCounter++;
-		if(shootCounter>=shootPerCharge){
-			shootCounter= 0;
-            charge = ItemManager.instance.LowerCharge(SQLId);
+		if(foxView.isMine&&!owner.isAi){
+			shootCounter++;
+			if(shootCounter>=shootPerCharge){
+				shootCounter= 0;
+				charge = ItemManager.instance.LowerCharge(SQLId);
+			}
 		}
 		
     }

@@ -58,6 +58,11 @@ public class InventoryManager : MonoBehaviour {
         }
         SpawnWeaponFromNameList();
     }
+	public virtual void PawnDeath(){
+		foreach(BaseWeapon weapon in myWeapons){
+			weapon.PawnDeath();
+		}
+	}
 
     protected virtual void SpawnWeaponFromNameList(){
         if (weaponNames.Length > 0)

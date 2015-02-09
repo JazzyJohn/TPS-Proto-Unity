@@ -198,7 +198,7 @@ public class InventorySlot  : SimpleSlot{
 	}
 	public virtual int UpCharge(){
 		if(BuyMode.FOR_KP!=buyMode){
-			if(charge<0){
+			if(charge<maxcharge){
 				charge++;
 			}
 		}
@@ -285,8 +285,14 @@ public class ItemManager : MonoBehaviour {
     public Dictionary<int, Buff> allBuff = new Dictionary<int, Buff>();
 	private string UID ="";
 	
+	class ShootData{
+		public int chargeSpend =0;
+		
+		public int shootCounter = 0;
+		
+	}
 	
-	private Dictionary<string,int> toSendLower = new  Dictionary<string,int> ();
+	private Dictionary<string,ShootData> toSendLower = new  Dictionary<string,ShootData> ();
 	
 	public void Init(string uid){
 			UID = uid;
@@ -342,9 +348,10 @@ public class ItemManager : MonoBehaviour {
         
          string acttualID = weaponIndexTable[id].id;
 		if(!toSendLower.ContainsKey(acttualID)){
-			toSendLower[acttualID] = 0;
+			toSendLower[acttualID] = new ShootData();
 		}
-		toSendLower[acttualID]= toSendLower[acttualID]+1;
+		toSendLower[acttualID].chargeSpend= toSendLower[acttualID].chargeSpend+1;
+		toSendLower[acttualID].shootCounter=0;
 		return weaponIndexTable[id].UpCharge();
 	}
 	public int GetCharge(int id){
@@ -354,11 +361,38 @@ public class ItemManager : MonoBehaviour {
         }
 		return weaponIndexTable[id].charge;
 	}
+	public void SetShootCount(int id, int shootCounter){
+		if (!weaponIndexTable.ContainsKey(id))
+        {
+            return;
+        }
+        
+        string acttualID = weaponIndexTable[id].id;
+		if(!toSendLower.ContainsKey(acttualID)){
+			toSendLower[acttualID] = new ShootData();
+		}
+		
+		toSendLower[acttualID].shootCounter=shootCounter;
+	}
+	public int GetShootCounter(int id){
+		if (!weaponIndexTable.ContainsKey(id))
+        {
+            return 0;
+        }
+		string acttualID = weaponIndexTable[id].id;
+		if(!toSendLower.ContainsKey(acttualID)){
+			 return 0;
+		}
+		return 	toSendLower[acttualID].shootCounter;
+	}
 	public WeaponInventorySlot GetSlot(int id){
 		return weaponIndexTable[id];
 	}
 	public void ReloadItem(){
 	 StartCoroutine(ReLoadItemsSync());
+	}
+	public InventorySlot GetItem(string id){
+		return allShopSlot[id];
 	}
 	public IEnumerator ReLoadItemsSync(){
 		
@@ -420,6 +454,9 @@ public class ItemManager : MonoBehaviour {
                     }
 
                 }
+				if(shop!=null){
+					shop.TryUpdate(slot);
+				}
             }
             else
             {
@@ -669,6 +706,9 @@ public class ItemManager : MonoBehaviour {
             }
         }
         Debug.Log("Inventory Loaded");
+		if(shop!=null){
+			shop.Init();
+		}
 		GlobalPlayer.instance.loadingStage++;
 		
 	}	
@@ -755,12 +795,14 @@ public class ItemManager : MonoBehaviour {
 		
 		foreach (KeyValuePair<string, int> pair in toSendLower)
 		{
-            Debug.Log("charge[" + pair.Key + "]"+ pair.Value);
-          
-			form.AddField ("charge["+pair.Key+"]", pair.Value);
-          
+            Debug.Log("charge[" + pair.Key + "]"+ pair.Value.chargeSpend);
+			if(pair.Value.chargeSpend==0){
+				continue;
+			}
+			form.AddField ("charge["+pair.Key+"]", pair.Value.chargeSpend);
+			pair.Value.chargeSpend= 0;
 		}
-        toSendLower.Clear();
+     
 	 	StatisticHandler.instance.StartCoroutine(StatisticHandler.SendForm (form,StatisticHandler.CHARGE_DATA));
 	}
 	public List<GUIItem> GetItemForSlot(GameClassEnum gameClass, int gameSlot){
@@ -906,50 +948,7 @@ public class ItemManager : MonoBehaviour {
 
 
 
-    public IEnumerator GenerateList(GameClassEnum gameClass, InventoryGroup type, int setId)
-    {
-        List<InventorySlot> result = new List<InventorySlot>();
-        if (!groupedItems.ContainsKey(type))
-        {
-            shop.OpenList(result);
-            yield return null;
-        }
-        else
-        {
-
-            List<InventorySlot> list = groupedItems[type];
-            if (list == null)
-            {
-                shop.OpenList(result);
-                yield return null;
-            }
-            else
-            {
-
-                foreach (InventorySlot slot in list)
-                {
-                    if ((gameClass == slot.gameClass || slot.gameClass == GameClassEnum.ANY)&&slot.sid ==setId)
-                    {
-                        result.Add(slot);
-                    }
-                }
-                shop.OpenList(result);
-                foreach (InventorySlot slot in result)
-                {
-                    if (slot.texture == null)
-                    {
-                        WWW www = StatisticHandler.GetMeRightWWW(slot.shopicon);
-                       
-                        yield return www;
-                        slot.texture = new Texture2D(138, 58);
-                        www.LoadImageIntoTexture(slot.texture);
-                    }
-
-
-                }
-            }
-        }
-    }
+    
     public IEnumerator GenerateMarkedList(GameClassEnum gameClass,ShopSlotType type)
     {
         List<InventorySlot> result = new List<InventorySlot>();
