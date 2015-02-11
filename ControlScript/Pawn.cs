@@ -933,7 +933,7 @@ public class Pawn : DamagebleObject
         {
             mainAi.Death();
         }
-		ivn.PawnDeath():
+        ivnMan.PawnDeath();
 
         ActualKillMe();
     }

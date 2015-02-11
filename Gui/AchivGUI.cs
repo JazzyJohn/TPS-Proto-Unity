@@ -8,7 +8,7 @@ public class AchivGUI : MonoBehaviour {
 
 	public int numObj;
 
-    public InventoryGUI Main;
+    public StatisticGUI Main;
 	public UIWidget Widget;
 	public UILabel nameAndDescription;
     public UILabel progress;

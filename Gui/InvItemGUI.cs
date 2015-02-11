@@ -7,8 +7,10 @@ public class InvItemGUI : MonoBehaviour {
     public InventorySlot item;
 
 	public UITexture Texture;
-    public UIWidget Box;
-    public UILabel chargeLabel;
+  
+    public UILabel name;
+
+    public string id;
     
 
 	[HideInInspector]
@@ -33,23 +35,7 @@ public class InvItemGUI : MonoBehaviour {
         item = _item;
         GA.API.Design.NewEvent("GUI:MainMenu:Inventory:SelectItem:" + _item.engName);
         Texture.mainTexture = null;
-
-        if (_item.buyMode ==BuyMode.FOR_KP)
-        {
-            chargeLabel.text = _item.charge.ToString();
-        }
-        else
-        {
-            if (_item.buyMode == BuyMode.FOR_GOLD_TIME)
-            {
-                chargeLabel.text = _item.timeEnd.ToString("g");
-            }
-            else
-            {
-                chargeLabel.text = "";
-            }
-            
-        }
+        name.text = _item.name;
         
     }
         

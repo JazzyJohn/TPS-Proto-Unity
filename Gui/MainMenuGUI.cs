@@ -93,15 +93,15 @@ public class MainMenuGUI : MonoBehaviour {
 	void Start () 
 	{
 
-		_PanelsNgui.SliderPanel.alpha = 1f;
+		
 
         Screen.lockCursor = false;
 		//Поправить размер формы
-		ReSize();
+	
         _playerInfo.Player = FindObjectOfType<GlobalPlayer>();
 		//Получение с сервера комнат
 		Server = _playerInfo.Player.GetComponent<ServerHolder>();
-        
+        ReSize();
 		AddMessageToChat("Система", "Добро пожаловать !");
 
 		if (Server.allRooms != null) {
@@ -121,6 +121,7 @@ public class MainMenuGUI : MonoBehaviour {
 				_RoomsNgui.ScrollBar.barSize = 0;
 			}
 		}
+        _PanelsNgui.SliderPanel.alpha = 1f;
 	}
 	public void HideAllPanel(){
 		foreach(UIRect panel in MainPanels){
@@ -369,7 +370,7 @@ public class MainMenuGUI : MonoBehaviour {
 	public void SetPlayerInfoInGUI() //Запись значений игрока в ГУИ
 	{
 		_PlayerComponent.Name.text = _playerInfo.playerName;
-		_PlayerComponent.Lvl.text = "Lvl " + _playerInfo.playerLvl;
+		_PlayerComponent.Lvl.text =  _playerInfo.playerLvl.ToString();
 		_PlayerComponent.Exp.text = _playerInfo.playerExp + " / " + _playerInfo.playerExpNeed;
 		_PlayerComponent.ExpBar.value = _playerInfo.playerProcent /100f;
 		_PlayerComponent.KP.text = _playerInfo.KP.ToString();

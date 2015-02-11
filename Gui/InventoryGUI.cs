@@ -9,10 +9,7 @@ public class InventoryGUI : MonoBehaviour {
 	
 	public GameClassEnum gameClass = GameClassEnum.ENGINEER;
 
-	public Transform TableTransform;
-	public UITable Table;
-	public UIPanel ItemsPanel;
-	public UIScrollView ItemsScroll;
+	
 	public MainMenuGUI MainMenu;
 
 
@@ -21,7 +18,7 @@ public class InventoryGUI : MonoBehaviour {
 	
 	public UIPanel lotItem;
 
-	public InvItems InvItem;
+
 
     public DetailItemGUI detailItemGUI; 
 	
@@ -35,11 +32,15 @@ public class InventoryGUI : MonoBehaviour {
 
 	public AskWindow askWindow;
 
-	public UIPanel[] allSetPanels
+    public UIWidget[] weaponsPanels;
+
+    public UIWidget[] itemPanels;
+
+    public InventoryGroup group;
 	
 	
 	
-    public Dictionary<string,InvItem> AllItems= new Dictionary<string,InvItem>();
+    public Dictionary<string,InvItemGUI> AllItems= new Dictionary<string,InvItemGUI>();
 	
     public int curSet = 0;
 
@@ -50,14 +51,11 @@ public class InventoryGUI : MonoBehaviour {
     }
 	void Start () 
 	{
-		InvItem.Main = this;
-       
+	 
       
         repair.alpha = 0f;
 
-        InvItemGUI ItemInfo = NewItem.Obj.GetComponent<InvItemGUI>();
-		ItemInfo.Shop = Main;
-        ItemInfo.SetItem(item) ;
+      
 		//ShopItem.EditCategory(ShopItem.SelectCategory, ShopItem.SelectClass);
 		
 	}
@@ -65,27 +63,71 @@ public class InventoryGUI : MonoBehaviour {
 	public void Init(){
 		InvItemGUI[] items = GetComponentsInChildren<InvItemGUI>();
 		foreach(InvItemGUI itemInfo  in items){
-			itemInfo.Shop = Main;
-			ItemInfo.SetItem(ItemManager.instance.GetItem(itemInfo.id));
+			itemInfo.Shop = this;
+			itemInfo.SetItem(ItemManager.instance.GetItem(itemInfo.id));
 		}
 		
 	}
 
-	public void HideAllPanel()
-	{
-		foreach(UIPanel panel in allSetPanels){
-			panel.alpha =0f;
-		}
-		allSetPanels[curSet].alpha=1.0f;
-		repair.alpha = 0f;
-	}
+    public void HideAllPanel()
+    {
+        switch (group)
+        {
+            case InventoryGroup.WEAPON:
+                foreach (UIWidget panel in weaponsPanels)
+                {
+                    panel.alpha = 0f;
+                }
+                weaponsPanels[curSet].alpha = 1.0f;
+                repair.alpha = 0f;
+
+                break;
+            case InventoryGroup.STUFF:
+                foreach (UIWidget panel in itemPanels)
+                {
+                    panel.alpha = 0f;
+                }
+                itemPanels[curSet].alpha = 1.0f;
+                repair.alpha = 0f;
+
+                break;
+        }
+    }
+		
 
 	public void ShowSet(int needSet){
-		allSetPanels[curSet].alpha=0.0f;
-		curSet = needSet;
-		allSetPanels[curSet].alpha=1.0f;
+        switch (group)
+        {
+            case InventoryGroup.WEAPON:
+                weaponsPanels[curSet].alpha = 0.0f;
+                curSet = needSet;
+                weaponsPanels[curSet].alpha = 1.0f;
+                break;
+            case InventoryGroup.STUFF:
+                itemPanels[curSet].alpha = 0.0f;
+                curSet = needSet;
+                itemPanels[curSet].alpha = 1.0f;
+                break;
+        }
 	}
-	
+    public void ShowGroup(int newGroup)
+    {
+        group = (InventoryGroup)newGroup;
+        switch (group)
+        {
+            case InventoryGroup.WEAPON:
+                itemPanels[curSet].alpha = 0.0f;
+                
+                weaponsPanels[curSet].alpha = 1.0f;
+                break;
+            case InventoryGroup.STUFF:
+                weaponsPanels[curSet].alpha = 0.0f;
+                
+                itemPanels[curSet].alpha = 1.0f;
+                break;
+        }
+
+    }
 	public void ShowLot(InvItemGUI item)
 	{
 		lotItem.alpha = 1f;
@@ -110,29 +152,14 @@ public class InventoryGUI : MonoBehaviour {
 	public void ShowInv()
 	{
     
-		if (Inventory.alpha > 0f)
-		{
-			MainMenu.HideAllPanel();
-			MainMenu._PanelsNgui.SliderPanel.alpha = 1f;
-		}
-		else
-		{
-			MainMenu.HideAllPanel();
-			HideAllPanel();
-			Inventory.alpha= 1.0f;
 	
-		}
       
 	}
     void Update()
     {
 
-        if (Inventory.alpha== 0f)
-        {
-            CloseLot();
-        }
-        if(InvItem.AllItems.Count > 0)
-			TestSizeScreen();
+        
+      
 	
     }
 	void Repair(string id){
@@ -164,27 +191,7 @@ public class InventoryGUI : MonoBehaviour {
  
 
 
-	public void ReSIZE()
-	{
-		if(ItemsPanel.alpha == 1f)
-			ItemsPanel.alpha = 0f;
 
-        foreach (InvItem obj in InvItem.AllItems)
-		{
-			obj.Box.width=(int)Math.Truncate((ItemsPanel.width/Table.columns)-Table.padding.x*(Table.columns+1));
-			obj.Box.height=(int)Math.Truncate((ItemsPanel.height/2)-Table.padding.y*3);
-		}
-		StartCoroutine(Reposition());
-	}
-
-	IEnumerator Reposition()
-	{
-		yield return new WaitForEndOfFrame();
-		Table.Reposition();
-		ItemsScroll.ResetPosition();
-		TableTransform.localPosition = new Vector3((-1*(ItemsPanel.width/2))+1, (ItemsPanel.height/2)+Table.padding.y, 0f);
-		ItemsPanel.alpha = 1f;
-	}
 
 	bool ReSizeRedy = false;
 
@@ -200,7 +207,7 @@ public class InventoryGUI : MonoBehaviour {
 		{
 			xScreen=Screen.currentResolution.width;
 			yScreen=Screen.currentResolution.height;
-			ReSIZE();
+			
 		}
 	}
 
@@ -217,13 +224,21 @@ public class InventoryGUI : MonoBehaviour {
 	}
     public void ReloadCategory()
     {
-        EditClass((int)gameClass);
+       
     }
 
-	
 
-	
-	
+
+
+
+
+    public void TryUpdate(InventorySlot slot)
+    {
+        if (AllItems.ContainsKey(slot.id))
+        {
+            AllItems[slot.id].SetItem(slot);
+        }
+    }
 }
 
 

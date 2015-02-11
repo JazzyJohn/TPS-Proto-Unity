@@ -8,7 +8,9 @@ public class StatisticGUI : MonoBehaviour {
 	public MainMenuStatistic statistic;
 
 	public UIPanel statisticPanel;
-	
+
+    public MainMenuGUI MainMenu;
+
 	void Start(){
 	
 		statistic.Main = this;	
@@ -22,8 +24,8 @@ public class StatisticGUI : MonoBehaviour {
 	}
 	public void ShowProfile()
 	{
-    
-		if (Inventory.alpha > 0f)
+
+        if (statisticPanel.alpha > 0f)
 		{
 			MainMenu.HideAllPanel();
 			MainMenu._PanelsNgui.SliderPanel.alpha = 1f;
@@ -37,6 +39,10 @@ public class StatisticGUI : MonoBehaviour {
 		}
       
 	}
+    public void HideAllPanel()
+    {
+
+    }
 	public void EditCategoryStat(int num)
 	{
         statistic.OpenTab = (MainMenuStatistic.Tab)num;
@@ -82,7 +88,7 @@ public class StatisticGUI : MonoBehaviour {
 public class MainMenuStatistic
 {
     [HideInInspector]
-    public InventoryGUI Main;
+    public StatisticGUI Main;
 	public UISprite Background;
 	public UITable[] Tables;
 	public int CoutColl;

@@ -793,7 +793,7 @@ public class ItemManager : MonoBehaviour {
 			
 		form.AddField ("uid", UID);
 		
-		foreach (KeyValuePair<string, int> pair in toSendLower)
+		foreach (KeyValuePair<string, ShootData> pair in toSendLower)
 		{
             Debug.Log("charge[" + pair.Key + "]"+ pair.Value.chargeSpend);
 			if(pair.Value.chargeSpend==0){
@@ -956,7 +956,7 @@ public class ItemManager : MonoBehaviour {
 			result.Add(allShopSlot[id]);
 		}
 	
-		shop.OpenList(result);
+		//shop.OpenList(result);
         foreach (InventorySlot slot in result)
 		{
 			if (slot.texture == null)
