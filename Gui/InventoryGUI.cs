@@ -16,12 +16,10 @@ public class InventoryGUI : MonoBehaviour {
 	
 	public UIPanel Inventory;
 	
-	public UIPanel lotItem;
+	public UIWidget lotItem;
 
 
 
-    public DetailItemGUI detailItemGUI; 
-	
 	public LotItemGUI lotItemGUI;
 	
 	public UIScrollBar Scroll;
@@ -141,12 +139,17 @@ public class InventoryGUI : MonoBehaviour {
 		
 	
 	}
+    public void UpdateLot()
+    {
+        lotItemGUI.SetItem(lotItemGUI.item);
+    }
 
 	public void CloseLot()
 	{
-	
-        detailItemGUI.item = null;
-        Destroy(detailItemGUI.gunModel);
+
+        lotItemGUI.item = null;
+        lotItem.alpha = 0f;
+        Destroy(lotItemGUI.gunModel);
 	}
 
 	public void ShowInv()
@@ -163,9 +166,9 @@ public class InventoryGUI : MonoBehaviour {
 	
     }
 	void Repair(string id){
-        GA.API.Design.NewEvent("GUI:MainMenu:Inventory:Repair:" + detailItemGUI.item.engName, 1);
+        GA.API.Design.NewEvent("GUI:MainMenu:Inventory:Repair:" + lotItemGUI.item.engName, 1);
        
-		ItemManager.instance.UseRepairKit(detailItemGUI.item.id,id,this);
+		ItemManager.instance.UseRepairKit(lotItemGUI.item.id,id,this);
 	
 	}
 	
@@ -184,8 +187,8 @@ public class InventoryGUI : MonoBehaviour {
 	
     public void Disentegrate()
     {
-        GA.API.Design.NewEvent("GUI:MainMenu:Inventory:Disentegrate:" + detailItemGUI.item.engName, 1);
-        ItemManager.instance.DesintegrateItem(detailItemGUI.item.id,  this);
+        GA.API.Design.NewEvent("GUI:MainMenu:Inventory:Disentegrate:" + lotItemGUI.item.engName, 1);
+        ItemManager.instance.DesintegrateItem(lotItemGUI.item.id, this);
     }
 
  

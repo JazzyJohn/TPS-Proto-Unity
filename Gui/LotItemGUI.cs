@@ -22,6 +22,12 @@ public class LotItemGUI : MonoBehaviour
 	public UILabel[] goldPrices;
 	
 	public UIWidget forKP;
+
+    public UIWidget buyKP;
+
+    public UIWidget repairKP;
+
+    public UIWidget useItem;
 	
 	public UILabel[] kpPrices;
 	
@@ -59,6 +65,35 @@ public class LotItemGUI : MonoBehaviour
     public void SetItem(InventorySlot _item)
     {
         item = _item;
+        Debug.Log(item.buyMode);
+        if (item.buyMode == BuyMode.FOR_KP)
+        {
+            buyKP.alpha = 0.0f;
+            repairKP.alpha = 1.0f;
+
+        }
+        else if(item.buyMode ==BuyMode.FOR_KP_UNBREAK)
+        {
+            buyKP.alpha = 0.0f;
+            repairKP.alpha = 0.0f;
+        }
+        else
+        {
+            buyKP.alpha = 1.0f;
+            repairKP.alpha = 0.0f;
+        }
+
+        if (item.buyMode != BuyMode.NONE)
+        {
+            useItem.alpha = 1.0f;
+
+        }
+        else
+        {
+            useItem.alpha = 0.0f;
+        }
+
+
 		if(item.prices[0].type==BuyPrice.KP_PRICE){
 			forGold.alpha = 0.0f;
 			forKP.alpha = 1.0f;
@@ -73,6 +108,8 @@ public class LotItemGUI : MonoBehaviour
                 goldPrices[i].text = item.prices[i].parts[0].amount.ToString();
 			}
 		}
+
+        
         GA.API.Design.NewEvent("GUI:MainMenu:Shop:SelectItem:" + _item.engName);
         Name.text = item.name;
 		

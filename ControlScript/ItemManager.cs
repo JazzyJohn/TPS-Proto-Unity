@@ -520,11 +520,11 @@ public class ItemManager : MonoBehaviour {
                 slot.model = node.SelectSingleNode("model").InnerText;
 
 
-                XmlNodeList prices = xmlDoc.SelectNodes("price");
+                XmlNodeList prices = node.SelectNodes("price");
                 slot.prices = new Price[prices.Count];
                 for (int j = 0; j < prices.Count; j++)
                 {
-                    XmlNode onePrice = prices[i];
+                    XmlNode onePrice = prices[j];
                     Price price = new Price();
                     XmlNodeList amounts = onePrice.SelectNodes("amount");
                     XmlNodeList types = onePrice.SelectNodes("type");
@@ -538,6 +538,7 @@ public class ItemManager : MonoBehaviour {
                         price.parts[k].amount = int.Parse(amounts[k].InnerText);
                         price.parts[k].type = (BuyPrice)Enum.Parse(typeof(BuyPrice), types[k].InnerText);
                     }
+                   // Debug.Log(slot.name + " " + price.type);
                     slot.prices[j] = price;
                 }
                 /*slot.gameClasses = new GameClassEnum[node.SelectNodes("items/weapon").Count];
@@ -1164,11 +1165,13 @@ public class ItemManager : MonoBehaviour {
             }
             if (gui != null)
             {
-                gui.Shop.CloseLot();
+                gui.Shop.UpdateLot();
             }
+            buyBlock = false;
         }
         else
         {
+            buyBlock = false;
             if (gui != null)
             {
                 if (xmlDoc.SelectSingleNode("result/error").InnerText == "2")
@@ -1179,7 +1182,7 @@ public class ItemManager : MonoBehaviour {
             }
         }
         GUIHelper.ConnectionStop();
-		buyBlock =false;
+		//buyBlock =false;
 	}
 	
 	
