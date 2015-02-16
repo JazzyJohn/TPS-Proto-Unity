@@ -35,6 +35,8 @@ public class LotItemGUI : MonoBehaviour
     [HideInInspector]
     public int numToItem;
 
+	private int priceKey;
+	
   
     // Use this for initialization
     void Start()
@@ -139,13 +141,25 @@ public class LotItemGUI : MonoBehaviour
     }
     public void Buy(int key)
     {
-		int amount = item.prices[key].parts[0].amount;
+			priceKey = key;
+			Shop.AskWindow.action = Buy;
+			if(item.prices[0].type==BuyPrice.KP_PRICE){
+				Shop.AskWindow.text.text = TextGenerator.instance.GetMoneyText("buyKPprice", item.prices[key].parts[0].amount);
+			}else{
+				Shop.AskWindow.text.text = TextGenerator.instance.GetMoneyText("buyGoldPrice", item.prices[key].parts[0].amount);
+			}
+			
+	
+	}
+	
+	public void Buy(){
+		int amount = item.prices[priceKey].parts[0].amount;
 		if(item.prices[0].type==BuyPrice.KP_PRICE){
 			GA.API.Business.NewEvent("Shop:BUYItem:" + item.engName, "GASH", amount);
 		}else{
 		  GA.API.Business.NewEvent("Shop:BUYItem:" + item.engName, "GOLD", amount);
 		}
-        StartCoroutine( ItemManager.instance.BuyItem(item.prices[key].id,this));
+        StartCoroutine( ItemManager.instance.BuyItem(item.prices[priceKey].id,this));
     }
    
 

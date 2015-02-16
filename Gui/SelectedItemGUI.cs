@@ -1,0 +1,55 @@
+using UnityEngine;
+using System.Collections;
+
+public class SelectedItemGUI : MonoBehaviour {
+
+	public InventoryGUI Shop;
+    public InventorySlot item;
+
+	public UITexture Texture;
+  
+    public UILabel name;
+
+    public int slot;
+    
+
+	[HideInInspector]
+	public int numToItem;
+
+	// Use this for initialization
+	void Start () {
+	
+	}
+
+	// Update is called once per frame
+	void Update () {
+        if (item != null &&item.texture!=null&& Texture.mainTexture == null)
+        {
+            Texture.mainTexture= item.texture;
+           
+        }
+	}
+
+    public void SetItem()
+    {
+		InventorySlot _item=null;
+		WeaponIndex choice = Choice.ForGuiSlot(j);
+		if (!choice.IsSameIndex( WeaponIndex.Zero))
+		{
+			_item =ItemManager.instance.GetWeaponprefabByID(choice);
+		}
+		if(_item==null)
+		{
+			_item =ItemManager.instance.GetFirstItemForSlot((GameClassEnum)Choice._Player, j);
+		}
+		if(_item==null){
+			return;
+		}
+        item = _item;
+        GA.API.Design.NewEvent("GUI:MainMenu:Inventory:SelectItem:" + _item.engName);
+        Texture.mainTexture = null;
+        name.text = _item.name;
+        
+    }
+        
+}

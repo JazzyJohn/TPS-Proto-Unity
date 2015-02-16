@@ -20,8 +20,9 @@ public class AskWindow  : MonoBehaviour{
 	public void Accept(){
         GA.API.Design.NewEvent("GUI:AskWindow:" + action.ToString()+":Yes", 1); 
 		panel.alpha = 0.0f;
+		action();
 		MainMenu.CamMove.RideTo(backPosition);
-        action();
+       
 	}
 	
 	

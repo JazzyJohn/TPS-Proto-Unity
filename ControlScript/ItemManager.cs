@@ -164,6 +164,8 @@ public class SmallShopData{
 public class InventorySlot  : SimpleSlot{
 
 	public int charge;
+	
+	public int repairCost;
 
 	public DateTime timeEnd;
 	
@@ -315,7 +317,7 @@ public class ItemManager : MonoBehaviour {
 		{
             if (weaponPrefabsListbyId[weapon.weaponId] != null)
 			{
-                weapon.gameSlot = weaponPrefabsListbyId[weapon.weaponId].slotType;
+           //     weapon.gameSlot = weaponPrefabsListbyId[weapon.weaponId].slotType;
 			//		Debug.Log(weapon.name + " " + weapon.gameType);
                 weaponPrefabsListbyId[weapon.weaponId].HUDIcon = weapon.texture;
 			}
@@ -473,7 +475,7 @@ public class ItemManager : MonoBehaviour {
 
 
 
-                        weaponslot.group = int.Parse(node.SelectSingleNode("ingame_type").InnerText);
+                        weaponslot.slotType = (BaseWeapon.SLOTTYPE)int.Parse(node.SelectSingleNode("ingame_type").InnerText);
                         if (node.SelectSingleNode("aim") != null)
                         {
                             slot.chars = new WeaponChar();
@@ -499,6 +501,8 @@ public class ItemManager : MonoBehaviour {
                 slot.sid = int.Parse(node.SelectSingleNode("sid").InnerText); 
                 slot.maxcharge = int.Parse(node.SelectSingleNode("maxcharge").InnerText);
                 slot.charge = int.Parse(node.SelectSingleNode("charge").InnerText);
+				slot.repairCost = int.Parse(node.SelectSingleNode("repair_cost").InnerText);
+				
                 if (node.SelectSingleNode("time_end").InnerText != "")
                 {
                     try
@@ -723,7 +727,11 @@ public class ItemManager : MonoBehaviour {
 	public BaseWeapon GetWeaponprefabByID(WeaponIndex index){
         if (weaponPrefabsListbyId[index.prefabId]!=null)
         {
-			return weaponPrefabsListbyId[index.prefabId];
+			if(weaponIndexTable[index.prefabId].isAvailable()){
+				return weaponPrefabsListbyId[index.prefabId];
+			}else{
+				return null;
+			}
 		}else{
 			return weaponPrefabsListbyId[0];
 		}
@@ -806,6 +814,65 @@ public class ItemManager : MonoBehaviour {
      
 	 	StatisticHandler.instance.StartCoroutine(StatisticHandler.SendForm (form,StatisticHandler.CHARGE_DATA));
 	}
+	
+	public InventorySlot GetFirstItemForSlot(GameClassEnum gameClass, int gameSlot){
+	
+				
+		//Debug.Log (gameClass +"  "+ gameSlot);
+			switch(gameSlot){
+				//Taunt section look WeaponPlayer.cs for details
+				/*case 5:
+						return  GetAnimationForSlot( gameClass);*/
+			    case 6:
+				case 7:
+				case 8:
+				case 9:
+						List<InventorySlot> items = null;
+						if (shopItems.ContainsKey(ShopSlotType.ARMOR))
+						{
+							items = shopItems[ShopSlotType.ARMOR];
+						}
+						
+						if (items != null)
+						{
+							foreach (InventorySlot slot in items)
+							{
+								
+								if(slot.isAvailable()){
+									if (slot.gameType == gameSlot && (slot.gameClass == GameClassEnum.ANY || slot.gameClass == gameClass))
+									{
+									  
+										return slot;
+
+									}
+								}
+							}
+						}
+				default:
+				
+					  BaseWeapon.SLOTTYPE slotType=  (BaseWeapon.SLOTTYPE)gameSlot
+						GameClassEnum MyANY = GameClassEnum.ANY;
+						if((int)gameClass>(int) GameClassEnum.ANY){
+							MyANY = GameClassEnum.ANYROBOT;
+						}
+						foreach(WeaponInventorySlot slot  in weaponIndexTable.Values){
+							if(slot.isAvailable()){
+								if (slot.gameSlot ==slotType && (slot.gameClass == MyANY || slot.gameClass == gameClass))
+								{
+									return slot
+								
+								}
+							}
+						}
+						
+			}
+			
+					
+			
+			
+		return null;
+	}
+	
 	public List<GUIItem> GetItemForSlot(GameClassEnum gameClass, int gameSlot){
 		
 		//Debug.Log (gameClass +"  "+ gameSlot);
@@ -1262,7 +1329,7 @@ public class ItemManager : MonoBehaviour {
 				yield return numenator.Current;
 			}
             gui.ReloadCategory();
-            gui.CloseLot();
+            gui.CloseRepair();
         }
         else
         {

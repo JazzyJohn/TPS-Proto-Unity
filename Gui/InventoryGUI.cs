@@ -24,7 +24,7 @@ public class InventoryGUI : MonoBehaviour {
 	
 	public UIScrollBar Scroll;
 	
-	public UIPanel repair;
+
 
 	public RepairGUI repairGui;
 
@@ -40,6 +40,8 @@ public class InventoryGUI : MonoBehaviour {
 	
     public Dictionary<string,InvItemGUI> AllItems= new Dictionary<string,InvItemGUI>();
 	
+	 public Dictionary<string,SelectedItemGUI> slots= new Dictionary<string,SelectedItemGUI>();
+	
     public int curSet = 0;
 
     bool[] allowedReapair = new bool[3];
@@ -50,8 +52,7 @@ public class InventoryGUI : MonoBehaviour {
 	void Start () 
 	{
 	 
-      
-        repair.alpha = 0f;
+     
 
       
 		//ShopItem.EditCategory(ShopItem.SelectCategory, ShopItem.SelectClass);
@@ -63,8 +64,23 @@ public class InventoryGUI : MonoBehaviour {
 		foreach(InvItemGUI itemInfo  in items){
 			itemInfo.Shop = this;
 			itemInfo.SetItem(ItemManager.instance.GetItem(itemInfo.id));
+			AllItems[itemInfo.id] =itemInfo;
 		}
-		
+		SelectedItemGUI[] items = GetComponentsInChildren<SelectedItemGUI>();
+		foreach(SelectedItemGUI itemInfo  in items){
+			itemInfo.Shop = this;
+			itemInfo.SetItem();
+			slots[itemInfo.slot]= itemInfo;
+		}
+	}
+	public void SetItemForChoiseSet(string id){
+		InventorySlot slot = ItemManager.instance.GetItem(id);
+		WeaponInventorySlot weapon = (WeaponInventorySlot) slot;
+		if(weapon!=null){
+			int slotType = (int)weapon.slotType;
+			Choice.SetChoice(slotType, Choice._Player, new WeaponIndex(slot.weaponId, "");
+			slots[slotType].SetItem();
+		}
 	}
 
     public void HideAllPanel()
@@ -77,7 +93,7 @@ public class InventoryGUI : MonoBehaviour {
                     panel.alpha = 0f;
                 }
                 weaponsPanels[curSet].alpha = 1.0f;
-                repair.alpha = 0f;
+             
 
                 break;
             case InventoryGroup.STUFF:
@@ -86,13 +102,15 @@ public class InventoryGUI : MonoBehaviour {
                     panel.alpha = 0f;
                 }
                 itemPanels[curSet].alpha = 1.0f;
-                repair.alpha = 0f;
+              
 
                 break;
         }
     }
 		
-
+	public void CloseRepair(){
+		repairGui.Close();
+	}
 	public void ShowSet(int needSet){
         switch (group)
         {

@@ -549,6 +549,8 @@ public class MainMenuGUI : MonoBehaviour {
 
         ScreenShootManager.instance.TakeScreenshotToWall(TextGenerator.instance.GetSimpleText("i'm in red rage"));
     }
+	
+
 }
 
 
