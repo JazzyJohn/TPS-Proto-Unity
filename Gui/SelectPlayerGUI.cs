@@ -515,7 +515,7 @@ public class _PlayerClass
 
 public static class Choice
 {
-    public static int _Player = -1;
+    public static int _Player = 0;
 	public static int _Robot=-1;
 	public static int _Team=-1;
 	

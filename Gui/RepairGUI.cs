@@ -4,7 +4,8 @@ using System.Collections;
 public class RepairGUI : MonoBehaviour {
 
 	public UIWidget repairWindow;
-	
+
+    public InventoryGUI shop;	
 	
 	public UILabel repairLabel;
 	
@@ -15,30 +16,46 @@ public class RepairGUI : MonoBehaviour {
     public InventorySlot item;
 	
 	public void ShowRepair(InventorySlot item){
-		repairWindow.aplha = 1.0f;
-		repairScroll.value = (float)item.charge/(float)item.maxCharge;
+        this.item = item;
+		repairWindow.alpha = 1.0f;
+        repairScroll.value = (float)(item.maxcharge-item.charge) / (float)item.maxcharge;
+       
 		
 	}
 	
-	public void SetValueVolume(UIScrollBar ScrollArg) //Установка звука (Текст)
+	public void SetValue(UIScrollBar ScrollArg) //Установка звука (Текст)
 	{
-		int value = ScrollArg.value*(float)item.maxCharge;
-		if(	value <item.charge){
-			value = item.charge;
-		}
-		ScrollArg.value= value;
-		amount= value;
-		repairLabel.text  =repairCost*(value-item.charge);
+        if (item == null)
+        {
+            Debug.Log("no item");
+            return;
+        }
+        int value = Mathf.RoundToInt( ScrollArg.value * (float)item.maxcharge);
+//        Debug.Log(value);
+        if (value < (item.maxcharge - item.charge))
+        {
+            ScrollArg.value = (float)(item.maxcharge - item.charge) / (float)item.maxcharge; 
+            //ScrollArg.value = Mathf.RoundToInt((float)(item.maxcharge - item.charge) / (float)item.maxcharge);
+            repairLabel.text = "0";
+            amount = 0;
+        }
+        else
+        {
+
+
+            repairLabel.text = (item.repairCost * (value - (item.maxcharge - item.charge))).ToString();
+            amount = (value - (item.maxcharge - item.charge));
+        }
 		
 	}
 	
 	public void Close(){
-		repairWindow.aplha = 0.0f;	
+		repairWindow.alpha = 0.0f;	
 	}
 	
 	public void Repair(){
-			GA.API.Business.NewEvent("Shop:RepairItem:" + item.engName, "GASH", repairCost*(amount-item.charge));
-		  StartCoroutine( ItemManager.instance.UseRepairKit(item.id,amount,this));
+        GA.API.Business.NewEvent("Shop:RepairItem:" + item.engName, "GASH", item.repairCost * (amount - item.charge));
+		  ItemManager.instance.UseRepairKit(item.id,amount,shop);
 	}
 
 	

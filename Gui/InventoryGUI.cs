@@ -39,8 +39,8 @@ public class InventoryGUI : MonoBehaviour {
 	
 	
     public Dictionary<string,InvItemGUI> AllItems= new Dictionary<string,InvItemGUI>();
-	
-	 public Dictionary<string,SelectedItemGUI> slots= new Dictionary<string,SelectedItemGUI>();
+
+    public Dictionary<int, SelectedItemGUI> slots = new Dictionary<int, SelectedItemGUI>();
 	
     public int curSet = 0;
 
@@ -66,19 +66,21 @@ public class InventoryGUI : MonoBehaviour {
 			itemInfo.SetItem(ItemManager.instance.GetItem(itemInfo.id));
 			AllItems[itemInfo.id] =itemInfo;
 		}
-		SelectedItemGUI[] items = GetComponentsInChildren<SelectedItemGUI>();
-		foreach(SelectedItemGUI itemInfo  in items){
+		SelectedItemGUI[] selected = GetComponentsInChildren<SelectedItemGUI>();
+        foreach (SelectedItemGUI itemInfo in selected)
+        {
 			itemInfo.Shop = this;
 			itemInfo.SetItem();
 			slots[itemInfo.slot]= itemInfo;
 		}
 	}
-	public void SetItemForChoiseSet(string id){
-		InventorySlot slot = ItemManager.instance.GetItem(id);
+    public void SetItemForChoiseSet(InventorySlot slot)
+    {
+		
 		WeaponInventorySlot weapon = (WeaponInventorySlot) slot;
 		if(weapon!=null){
-			int slotType = (int)weapon.slotType;
-			Choice.SetChoice(slotType, Choice._Player, new WeaponIndex(slot.weaponId, "");
+			int slotType = (int)weapon.gameSlot;
+			Choice.SetChoice(slotType, Choice._Player, new WeaponIndex(weapon.weaponId, ""));
 			slots[slotType].SetItem();
 		}
 	}
@@ -190,9 +192,6 @@ public class InventoryGUI : MonoBehaviour {
 	
 	}
 	
-	public void HideRepair(){
-		repair.alpha= 0.0f;
-	}
 	
 	public void DisentegrateAsk(){
 		askWindow.text.text =  TextGenerator.instance.GetSimpleText("DisentegrateAsk");

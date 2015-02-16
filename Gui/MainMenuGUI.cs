@@ -185,12 +185,14 @@ public class MainMenuGUI : MonoBehaviour {
 		}
 	}
 
+   
+
 	public void CreateRoom(){
 		HideAllPanel ();
 		_RoomsNgui.CreateRoom.alpha = 1f;
-
+        _RoomsNgui.mainpanel.alpha = 1f;
 		
-		_RoomsNgui.NameNewRoom.value = Server.newRoomName;
+		//_RoomsNgui.NameNewRoom.value = Server.newRoomName;
 
 	}
 	public void LoginPage(){
@@ -345,7 +347,9 @@ public class MainMenuGUI : MonoBehaviour {
 	}
 
 	public void ShowGameList(){
-
+        HideAllPanel();
+        _RoomsNgui.mainpanel.alpha = 1f;
+        _RoomsNgui.RoomsFound.alpha = 1f;
 	}
 	public void GetPlayerInfo() // Получение значений игрока
 	{
@@ -630,6 +634,7 @@ public class RoomsNgui
 
 	public UIWidget RoomsFound;
 	public UIWidget CreateRoom;
+    public UIPanel mainpanel;
 	public UIWidget Loading;
 	public UIProgressBar LoadingProgress;
 	public UILabel LoadingProcent;

@@ -33,14 +33,14 @@ public class SelectedItemGUI : MonoBehaviour {
     public void SetItem()
     {
 		InventorySlot _item=null;
-		WeaponIndex choice = Choice.ForGuiSlot(j);
+		WeaponIndex choice = Choice.ForGuiSlot(slot);
 		if (!choice.IsSameIndex( WeaponIndex.Zero))
 		{
-			_item =ItemManager.instance.GetWeaponprefabByID(choice);
+            _item = ItemManager.instance.GetWeaponSlotbByID(choice);
 		}
 		if(_item==null)
 		{
-			_item =ItemManager.instance.GetFirstItemForSlot((GameClassEnum)Choice._Player, j);
+			_item =ItemManager.instance.GetFirstItemForSlot((GameClassEnum)Choice._Player, slot);
 		}
 		if(_item==null){
 			return;

@@ -47,7 +47,7 @@ public class DetailItemGUI : MonoBehaviour
     }
 	//LoL SetSetOfItemToSetOfSets
 	public void SetToSet(){
-		Shop SetItemForChoiseSet(item.id);
+		Shop.SetItemForChoiseSet(item);
 	}
 	
     public void SetItem(InventorySlot _item)

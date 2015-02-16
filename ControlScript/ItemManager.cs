@@ -475,7 +475,7 @@ public class ItemManager : MonoBehaviour {
 
 
 
-                        weaponslot.slotType = (BaseWeapon.SLOTTYPE)int.Parse(node.SelectSingleNode("ingame_type").InnerText);
+                        weaponslot.gameSlot = (BaseWeapon.SLOTTYPE)int.Parse(node.SelectSingleNode("ingame_type").InnerText);
                         if (node.SelectSingleNode("aim") != null)
                         {
                             slot.chars = new WeaponChar();
@@ -736,6 +736,11 @@ public class ItemManager : MonoBehaviour {
 			return weaponPrefabsListbyId[0];
 		}
 	}
+    public WeaponInventorySlot GetWeaponSlotbByID(WeaponIndex index)
+    {
+        return weaponIndexTable[index.prefabId];
+
+    }
 	public static GameClassEnum gameClassPase(string text){
 		switch (text) {
 			case "ENGINEER":
@@ -848,9 +853,10 @@ public class ItemManager : MonoBehaviour {
 								}
 							}
 						}
+                    break;
 				default:
-				
-					  BaseWeapon.SLOTTYPE slotType=  (BaseWeapon.SLOTTYPE)gameSlot
+
+                    BaseWeapon.SLOTTYPE slotType = (BaseWeapon.SLOTTYPE)gameSlot;
 						GameClassEnum MyANY = GameClassEnum.ANY;
 						if((int)gameClass>(int) GameClassEnum.ANY){
 							MyANY = GameClassEnum.ANYROBOT;
@@ -859,11 +865,12 @@ public class ItemManager : MonoBehaviour {
 							if(slot.isAvailable()){
 								if (slot.gameSlot ==slotType && (slot.gameClass == MyANY || slot.gameClass == gameClass))
 								{
-									return slot
+									return slot;
 								
 								}
 							}
 						}
+                    break;
 						
 			}
 			
@@ -1321,7 +1328,7 @@ public class ItemManager : MonoBehaviour {
 		xmlDoc.LoadXml(w.text);
         Debug.Log(w.text);
 		if(xmlDoc.SelectSingleNode("result/error").InnerText=="0"){
-			gui.HideRepair();
+			
 			IEnumerator numenator = ParseList(w.text);
 
 			while (numenator.MoveNext())
@@ -1362,7 +1369,7 @@ public class ItemManager : MonoBehaviour {
 		xmlDoc.LoadXml(w.text);
         Debug.Log(w.text);
 		if(xmlDoc.SelectSingleNode("result/error").InnerText=="0"){
-			gui.HideRepair();
+			//gui.HideRepair();
 			IEnumerator numenator = ParseList(w.text);
 
 			while (numenator.MoveNext())
@@ -1411,7 +1418,7 @@ public class ItemManager : MonoBehaviour {
             }
             gui.SetMoneyMessage(xmlDoc.SelectSingleNode("result/cash").InnerText , xmlDoc.SelectSingleNode("result/gold").InnerText);
             gui.CloseLot();
-            gui.HideRepair();
+           // gui.HideRepair();
           //  RemoveInventoryItem(id);
             gui.ReloadCategory();
 

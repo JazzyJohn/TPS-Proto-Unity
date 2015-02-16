@@ -142,17 +142,21 @@ public class LotItemGUI : MonoBehaviour
     public void Buy(int key)
     {
 			priceKey = key;
-			Shop.AskWindow.action = Buy;
+            Shop.askWindow.action = FinishBuy;
+            string text;
 			if(item.prices[0].type==BuyPrice.KP_PRICE){
-				Shop.AskWindow.text.text = TextGenerator.instance.GetMoneyText("buyKPprice", item.prices[key].parts[0].amount);
+                text = TextGenerator.instance.GetMoneyText("buyKPprice", item.prices[key].parts[0].amount);
 			}else{
-				Shop.AskWindow.text.text = TextGenerator.instance.GetMoneyText("buyGoldPrice", item.prices[key].parts[0].amount);
+                text = TextGenerator.instance.GetMoneyText("buyGoldPrice", item.prices[key].parts[0].amount);
 			}
-			
-	
+
+            Shop.askWindow.Show(text);
 	}
-	
-	public void Buy(){
+    public void Choice()
+    {
+        Shop.SetItemForChoiseSet(item);
+    }
+	public void FinishBuy(){
 		int amount = item.prices[priceKey].parts[0].amount;
 		if(item.prices[0].type==BuyPrice.KP_PRICE){
 			GA.API.Business.NewEvent("Shop:BUYItem:" + item.engName, "GASH", amount);
@@ -161,8 +165,11 @@ public class LotItemGUI : MonoBehaviour
 		}
         StartCoroutine( ItemManager.instance.BuyItem(item.prices[priceKey].id,this));
     }
-   
 
+    public void Repair()
+    {
+        Shop.repairGui.ShowRepair(item);
+    }
     public void SetError(string error)
     {
         GA.API.Business.NewEvent("Shop:BUYError", error, 0);
