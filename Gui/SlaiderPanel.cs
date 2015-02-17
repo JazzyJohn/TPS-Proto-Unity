@@ -28,7 +28,7 @@ public class SlaiderPanel : MonoBehaviour {
 	
 	private float slideTimer =0.0f;
 
-	private float offset;
+    public float offset;
 
     public bool isActive = false;
 
@@ -47,6 +47,8 @@ public class SlaiderPanel : MonoBehaviour {
 		if(newsCount==0&& NewsManager.instance. finished){
 				GenerateNewsBoxes();
 				main.ShowNews();
+                isActive = true;
+                SetNewsMomentum(newsCount - 1);
 		}	
 
 		if(newsCount!=0&&isActive){
@@ -84,6 +86,21 @@ public class SlaiderPanel : MonoBehaviour {
 		slideTimer=0;
 		SetButtons ();
 	}
+    public void SetNewsMomentum(int i)
+    {
+        curItem = i;
+        IsSliding = true;
+        if (curItem >= newsCount)
+        {
+            curItem = 0;
+        }
+        slideTimer = 0;
+        SetButtons();
+        Vector3 target = new Vector3(-curItem * offset, 0, 0);
+        allNewsPivot.localPosition =target;
+        IsSliding = false;
+        
+    }
 	public void SetButtons(){
 
 		newsbtns [curItem].value = true;
@@ -99,7 +116,7 @@ public class SlaiderPanel : MonoBehaviour {
 	}
 	void GenerateNewsBoxes(){
 
-		offset = oneNewPrefab.GetComponent<UIWidget> ().width;
+		//offset = oneNewPrefab.GetComponent<UIWidget> ().width;
 		float btnoffset = onewNewButton.GetComponent<UISprite> ().width;
 		List<NewUpdate> news = NewsManager.instance. getNewsList();
         newsCount = news.Count + addnews.Length;

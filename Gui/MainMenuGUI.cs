@@ -35,7 +35,7 @@ public class MainMenuGUI : MonoBehaviour {
 
 	public Timer _timer;
 
-	public List<string, AnyRoom> Rooms = new Dictionary<string, AnyRoom>();
+    public Dictionary<string, AnyRoom> Rooms = new Dictionary<string, AnyRoom>();
 
 	public UIRect[] MainPanels;
 
@@ -47,10 +47,7 @@ public class MainMenuGUI : MonoBehaviour {
 
     public void LoadingFinish()
     {
-		if(loadingWidget!=null){
-			Destroy(loadingWidget.gameObject);
-			loadingWidget=null;
-		}
+		
         allWWidget.alpha = 1.0f;
 		int count =ItemManager.instance.MarkedAmount();
         if (_PanelsNgui.markedPanel != null)
@@ -66,7 +63,7 @@ public class MainMenuGUI : MonoBehaviour {
             }
         }
 		_PanelsNgui.SliderPanel.alpha= 0.0f;
-        FindObjectOfType<SlaiderPanel>().isActive = true;
+       
     }
 
 
@@ -76,20 +73,39 @@ public class MainMenuGUI : MonoBehaviour {
 	}
     void Update()
     {
-
-        if (PremiumManager.instance.IsPremium())
+        if (_PlayerComponent.premium != null)
         {
-          
-            _PlayerComponent.premium.text = TextGenerator.instance.GetSimpleText("PremiumLeft",PremiumManager.instance.TimeLeft());
+            if (PremiumManager.instance.IsPremium())
+            {
 
+                _PlayerComponent.premium.text = TextGenerator.instance.GetSimpleText("PremiumLeft", PremiumManager.instance.TimeLeft());
+
+            }
+            else
+            {
+                _PlayerComponent.premium.text = TextGenerator.instance.GetSimpleText("NoPremiumTitle");
+            }
         }
-        else
+        _timer.timer += Time.deltaTime;
+        if (_timer.timer >= _timer.TimeRefresh)
         {
-            _PlayerComponent.premium.text = TextGenerator.instance.GetSimpleText("NoPremiumTitle");
+            RefreshRoom();
+            _timer.timer = 0;
+            if (LevelingManager.instance.isLoaded)
+            {
+                LoadData();
+
+            }
         }
+
 		
     }
 	public void ShowNews(){
+        if (loadingWidget != null)
+        {
+            Destroy(loadingWidget.gameObject);
+            loadingWidget = null;
+        }
 		_PanelsNgui.SliderPanel.alpha= 1.0f;
 	}
 
@@ -148,7 +164,8 @@ public class MainMenuGUI : MonoBehaviour {
 		StartCoroutine(PausePlay());
 	}
 	public void  JoinRoom(RoomData room){
-		if(room.playerCount <   roomData.maxPlayers ) {
+        if (room.playerCount < room.maxPlayers)
+        {
 				//PhotonNetwork.JoinRoom (room.name);
 				Server.JoinRoom(room);
 				HideAllPanel();
@@ -166,7 +183,7 @@ public class MainMenuGUI : MonoBehaviour {
         GA.API.Design.NewEvent("GUI:MainMenu:Play", 1); 
    
 		if (ActivBut != null) {
-			switch (ActivBut.GetComponent<AnyRoom> ()._TypeRoom) {
+			/*switch (ActivBut.GetComponent<AnyRoom> ()._TypeRoom) {
 			case AnyRoom.TypeRoom.JoinRoom:
 				foreach (RoomData room in Server.allRooms)
 				{
@@ -183,7 +200,7 @@ public class MainMenuGUI : MonoBehaviour {
 			case AnyRoom.TypeRoom.NewRoom:
 				CreateRoom();
 				break;
-			}
+			}*/
 			
 		} else {
 			if(Server.allRooms.Count>0){
@@ -295,10 +312,12 @@ public class MainMenuGUI : MonoBehaviour {
 		}
 	}
 	public void ToggleMap(string mapName) {
+    
 		if (_RoomsNgui.CreateRoom.alpha == 1.0f)
 		{
-			Server.map = mapName;
-			
+          
+			Server.SetMap(mapName);
+            _RoomsNgui.NameNewRoom.value = Server.newRoomName;
 		}
 	}
 
@@ -322,12 +341,13 @@ public class MainMenuGUI : MonoBehaviour {
             return;
         }
 		
-		CamMove.enabled = false;
+		
 		Server.newRoomName = _RoomsNgui.NameNewRoom.value;
 		HideAllPanel ();
 		_RoomsNgui.Loading.alpha = 1f;
       //  _PanelsNgui.SliderPanel.alpha = 1f;
-		Server.CreateNewRoom(gameMode);
+        Server.CreateNewRoom(Server.map);
+        CamMove.enabled = false;
 	}
 
 	public void BackBut() //Вернуться к выбору комнат
@@ -339,9 +359,11 @@ public class MainMenuGUI : MonoBehaviour {
 
 	public void RefreshRoom() // Обновления списка комнат
 	{
+        int i = 0;
         foreach (RoomData room in Server.allRooms)
 		{
-			if (!Rooms.ContainsValue(room.name))
+            i++;
+			if (!Rooms.ContainsKey(room.name))
 			{
 				
 				AnyRoom NewRoom = (Instantiate(_RoomsNgui.ShablonRoom) as GameObject).GetComponent<AnyRoom>();
@@ -355,7 +377,7 @@ public class MainMenuGUI : MonoBehaviour {
 				_RoomsNgui.Grid.Reposition();
 				_RoomsNgui.ScrollBar.barSize = 0;
 			}
-			Rooms[room.name].UpdateData(room);
+            Rooms[room.name].UpdateRoom(room, i);
 			
 		}
 	}
@@ -455,26 +477,7 @@ public class MainMenuGUI : MonoBehaviour {
 		ChatComponent.TextInput.value = null;
 	}
 	
-	// Update is called once per frame
-	void Update () 
-	{
-		_timer.timer+=Time.deltaTime;
-		if (_timer.timer>=_timer.TimeRefresh)
-		{
-			RefreshRoom();
-			_timer.timer = 0;
-			if (LevelingManager.instance.isLoaded) {
-				LoadData();		
-		
-			}
-		}
-
 	
-	
-
-
-
-	}
     
 	public void ShowRoomList(){
 
@@ -528,7 +531,7 @@ public class MainMenuGUI : MonoBehaviour {
     {
         GA.API.Design.NewEvent("GUI:MainMenu:MoneyBuyShow", 1); 
         CamMove.RideTo(2);
-        _PanelsNgui.askAboutMoneyPanel.alpha = 0.0f;
+      //  _PanelsNgui.askAboutMoneyPanel.alpha = 0.0f;
         _PanelsNgui.moneyBuyPanel.alpha = 1f;
     }
     public void MoneyBuyHide()
@@ -663,7 +666,7 @@ public class RoomsNgui
 [System.Serializable]
 public class PanelsNgui
 {
-	public UIWidget SliderPanel;
+    public UIPanel SliderPanel;
 	public SlaiderPanel slaiderPanel;
     public UIPanel mainpanel;
     public UIPanel settings;
@@ -671,7 +674,7 @@ public class PanelsNgui
     public UITweener annonceTweener;
 	public UIPanel markedPanel;
     public UIPanel askAboutMoneyPanel;
-    public UIPanel moneyBuyPanel;
+    public UIRect moneyBuyPanel;
     public UIPanel serverResponse;
 }
 [System.Serializable]

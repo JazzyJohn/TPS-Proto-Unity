@@ -578,9 +578,9 @@ public class Player : MonoBehaviour {
 		Score.Assist++;
 		if (victim != null) {
 			
-            EventHolder.instance.FireEvent(typeof(LocalPlayerListener), "EventPawnKillAssistPlayer", this, killinfo);
+            EventHolder.instance.FireEvent(typeof(LocalPlayerListener), "EventPawnKillAssistPlayer", this);
 		}else{
-			EventHolder.instance.FireEvent(typeof(LocalPlayerListener), "EventPawnKillAssistAI", this, killinfo);
+			EventHolder.instance.FireEvent(typeof(LocalPlayerListener), "EventPawnKillAssistAI", this);
 		}
 		 
 	}
@@ -893,7 +893,7 @@ public class Player : MonoBehaviour {
 	public void ActivateStimpack(string id){
 		int stimId;
 		if(ItemManager.instance.TryUseStim(id, out stimId)){
-            AchievementManager.instance.UnEvnetAchive(AchievementManager.PARAM_STIM_PACK,1.0f);
+            AchievementManager.instance.UnEvnetAchive(ParamLibrary.PARAM_STIM_PACK,1.0f);
 			activeSteampacks.Add(stimId);
 		}
 	

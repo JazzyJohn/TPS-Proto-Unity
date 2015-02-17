@@ -370,7 +370,7 @@ public class GlobalPlayer : MonoBehaviour {
 	{
 
 		UID = uid;
-		LoadAll();
+		//LoadAll();
 	
 	}
 	
@@ -382,7 +382,7 @@ public class GlobalPlayer : MonoBehaviour {
 		ItemManager.instance.Init(UID);
         FindObjectOfType<RewardManager>().Init(UID);
         NetworkController.Instance.SetLogin(UID);
-        GA.SettingsGA.SetCustomUserID(uid);
+        GA.SettingsGA.SetCustomUserID(UID);
 	}
 	public void SetSid(string sid){
 		StatisticHandler.SID = sid;

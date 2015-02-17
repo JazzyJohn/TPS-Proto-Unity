@@ -514,4 +514,12 @@ public class TournamentManager : MonoBehaviour, LocalPlayerListener, GameListene
     {
       
     }
+    public void EventPawnKillAssistPlayer(Player target)
+    {
+       
+    }
+    public void EventPawnKillAssistAI(Player target)
+    {
+        
+    }
 }

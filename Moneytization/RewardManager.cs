@@ -38,7 +38,12 @@ public static class ParamLibrary{
     public static string PARAM_STIM_PACK = "StimPack";
 	public static string PARAM_WALL_RUN = "WallRun";
 	public static string PARAM_ASSIST= "Assist"; 
-	public static string PARAM_ASSIST_AI= "AssistAI"; 
+	public static string PARAM_ASSIST_AI= "AssistAI";
+    public static string PARAM_DOUBLE_JUMP = "DoubeJump";
+    public static string PARAM_RELOAD = "Reload";
+    public static string PARAM_JUMP = "Jump";
+
+
 	
 }
 
@@ -196,6 +201,7 @@ public class  RewardManager : MonoBehaviour, LocalPlayerListener,GameListener{
 	}
 	//Event Section
 	private Player myPlayer;
+    private int playerStrike;
 	public void EventAppear(Player target){
 		if (target.isMine) {
 			myPlayer = target;

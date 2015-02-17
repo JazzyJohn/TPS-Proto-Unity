@@ -3,9 +3,13 @@ using System.Collections;
 
 public class AnyRoom : MonoBehaviour {
 
-	public string RoomData room ; 
+	public  RoomData room ;
+
+    public UILabel Number;
 
 	public UILabel Name;
+
+    public UILabel  MapName;
 
 	public UILabel GameMode;
 	
@@ -25,20 +29,21 @@ public class AnyRoom : MonoBehaviour {
 	// Update is called once per frame
 	
 	void Update(){
-		if(!Server.allRoom.Contains(room)){
+		if(room!=null&&!Server.allRooms.Contains(room)){
 			MainScriptGUI.Rooms.Remove(room.name);
 			Destroy(this.gameObject);
 		}
 		
 	}
 	
-	void UpdateRoom (RoomData room ) 
+	public void UpdateRoom (RoomData room,int i ) 
 	{
 		this.room =room;	
 		Name.text = room.name;
 		SizeRoom.text = room.playerCount + " / " + room.maxPlayers;
-		GameMode.test =  TextGenerator.instance.GetSimpleText(room.mode);
-			
+		GameMode.text =  TextGenerator.instance.GetSimpleText(room.mode);
+        MapName.text = room.map;
+        Number.text = i.ToString();
 	}
 
 	public void SelectBut()

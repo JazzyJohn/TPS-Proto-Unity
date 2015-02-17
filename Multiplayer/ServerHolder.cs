@@ -21,6 +21,7 @@ public class RoomData
     public int playerCount;
     public int maxPlayers;
 	public string mode;
+    public string map;
 }
 [Serializable]
 public class MapData
@@ -190,8 +191,12 @@ public class ServerHolder : MonoBehaviour
             roomData.name = room.Name;
             roomData.playerCount = room.UserCount;
             roomData.maxPlayers = room.MaxUsers;
-			string[] temp =room.GetVariable("gameRule").GetStringValue().Split('.');
-			roomData.mode  = temp[temp.Length-1];
+            if (room.GetVariable("gameRule") != null)
+            {
+                string[] temp = room.GetVariable("gameRule").GetStringValue().Split('.');
+                roomData.mode = temp[temp.Length - 1];
+                roomData.map = room.GetVariable("map").GetStringValue();
+            }
             allRooms.Add(roomData);
             ///Debug.Log("Room id: " + room.Id + " has name: " + room.Name +"map" +room.GetVariable("map").GetStringValue());
 
@@ -344,7 +349,7 @@ public class ServerHolder : MonoBehaviour
 
             if (GUILayout.Button("Создать комнату", GUILayout.Width(150), GUILayout.Height(25)))
             {
-                CreateNewRoom(DefaultGameMode);
+                CreateNewRoom(map);
             }
             if (GUILayout.Button("Войти в комнату", GUILayout.Width(150), GUILayout.Height(25)))
             {
@@ -378,22 +383,35 @@ public class ServerHolder : MonoBehaviour
         blockQuickStart = true;
         newRoomName = map +data.ToString();
         Debug.Log("start");
-        CreateNewRoom(data.gameMode);
+        CreateNewRoom(data.name);
        
+    }
+    public void SetMap(string mapName)
+    {
+        MapData mapData = null;
+        map = mapName;
+        foreach (MapData iterdata in allMaps)
+        {
+            if (iterdata.name == mapName)
+            {
+                RoomNewName(iterdata.gameMode);
+                return;
+            }
+        }
+
     }
 
 
-	public void CreateNewRoom(GAMEMODE mode) //Создание комноты (+)
+    public void CreateNewRoom(string mapName) //Создание комноты (+)
 	{
-        if (map == "")
+        MapData mapData = null;
+        foreach (MapData iterdata in allMaps)
         {
-            Debug.Log("emptyMap");
-			MainMenuGUI mainMenu = FindObjectOfType<MainMenuGUI> ();
-			if (mainMenu != null) {
-				mainMenu.SetMessage("Не выбрана карта");
-				mainMenu. CreateRoom();
-			}
-            return;
+            if (iterdata.name == mapName)
+            {
+                mapData = iterdata;
+                break;
+            }
         }
 		/*ExitGames.Client.Photon.Hashtable customProps = new ExitGames.Client.Photon.Hashtable();
         customProps["MapName"] = map;
@@ -401,7 +419,8 @@ public class ServerHolder : MonoBehaviour
 		exposedProps[0] = "MapName";
        
         */
-		lastMode= mode;
+        lastMode = mapData.gameMode;
+        GAMEMODE mode = mapData.gameMode;
         bool isVisible = true;
         int roomCnt = newRoomMaxPlayers;
         RoomSettings settings = new RoomSettings(newRoomName);
@@ -476,6 +495,7 @@ public class ServerHolder : MonoBehaviour
         settings.GroupId = "games";
         settings.IsGame = true;
         RoomVariable mapVar = new SFSRoomVariable("map", map);
+        mapVar.IsPrivate = false;
         settings.Variables.Add(mapVar);
         RoomVariable visVar = new SFSRoomVariable("visible", isVisible);
         settings.Variables.Add(visVar);
@@ -503,7 +523,7 @@ public class ServerHolder : MonoBehaviour
 		return ((float)progress.finishedLoader)/progress.allLoader*100f +progress.curLoader/progress.allLoader;
 	}
 	public void RetryRoomCreate(){
-		CreateNewRoom(lastMode);
+		CreateNewRoom(map);
 		
 	}
 	

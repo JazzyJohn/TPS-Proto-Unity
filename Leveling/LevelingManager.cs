@@ -279,6 +279,7 @@ public class LevelingManager : MonoBehaviour, LocalPlayerListener,GameListener{
 					break;
 				default:
 					UpExp(ParamLibrary.PARAM_RAMPAGE_GOING_KILL,target.selected);
+                    break;
 					
 			}
 			

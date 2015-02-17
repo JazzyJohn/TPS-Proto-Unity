@@ -360,11 +360,11 @@ public class NetworkController : MonoBehaviour {
         else
         {
             Debug.Log("UDP ok");
-
+            GlobalPlayer.instance.loadingStage++;
             // On to the lobby
             serverHolder = GetComponent<ServerHolder>();
             serverHolder.Connect();
-            GlobalPlayer.instance.loadingStage++;
+           
         }
     }
    
