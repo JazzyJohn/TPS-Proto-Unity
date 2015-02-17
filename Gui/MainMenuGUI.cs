@@ -35,7 +35,7 @@ public class MainMenuGUI : MonoBehaviour {
 
 	public Timer _timer;
 
-	public Dictionary<string, string> Rooms = new Dictionary<string, string>();
+	public List<string, AnyRoom> Rooms = new Dictionary<string, AnyRoom>();
 
 	public UIRect[] MainPanels;
 
@@ -65,6 +65,7 @@ public class MainMenuGUI : MonoBehaviour {
                 _PanelsNgui.markedPanel.alpha = 0.0f;
             }
         }
+		_PanelsNgui.SliderPanel.alpha= 0.0f;
         FindObjectOfType<SlaiderPanel>().isActive = true;
     }
 
@@ -86,8 +87,11 @@ public class MainMenuGUI : MonoBehaviour {
         {
             _PlayerComponent.premium.text = TextGenerator.instance.GetSimpleText("NoPremiumTitle");
         }
-
+		
     }
+	public void ShowNews(){
+		_PanelsNgui.SliderPanel.alpha= 1.0f;
+	}
 
 	// Use this for initialization
 	void Start () 
@@ -121,7 +125,7 @@ public class MainMenuGUI : MonoBehaviour {
 				_RoomsNgui.ScrollBar.barSize = 0;
 			}
 		}
-        _PanelsNgui.SliderPanel.alpha = 1f;
+        //_PanelsNgui.SliderPanel.alpha = 1f;
 	}
 	public void HideAllPanel(){
 		foreach(UIRect panel in MainPanels){
@@ -143,7 +147,18 @@ public class MainMenuGUI : MonoBehaviour {
 	{
 		StartCoroutine(PausePlay());
 	}
-
+	public void  JoinRoom(RoomData room){
+		if(room.playerCount <   roomData.maxPlayers ) {
+				//PhotonNetwork.JoinRoom (room.name);
+				Server.JoinRoom(room);
+				HideAllPanel();
+				_RoomsNgui.Loading.alpha = 1f;
+				//_PanelsNgui.SliderPanel.alpha = 1f;
+				
+		}
+		
+	
+	}
 	public IEnumerator PausePlay()
 	{
 		yield return new WaitForSeconds(0.05f);
@@ -160,7 +175,7 @@ public class MainMenuGUI : MonoBehaviour {
 						Server.JoinRoom(room);
 						HideAllPanel();
 						_RoomsNgui.Loading.alpha = 1f;
-						_PanelsNgui.SliderPanel.alpha = 1f;
+						//_PanelsNgui.SliderPanel.alpha = 1f;
 						
 					}
 				}
@@ -175,7 +190,7 @@ public class MainMenuGUI : MonoBehaviour {
 				Server.JoinRoom(Server.allRooms[UnityEngine.Random.Range(0,Server.allRooms.Count)]);
 				HideAllPanel();
 				_RoomsNgui.Loading.alpha = 1f;
-				_PanelsNgui.SliderPanel.alpha = 1f;
+				//_PanelsNgui.SliderPanel.alpha = 1f;
 			}else{
 
                 Server.CreateNewRoom();
@@ -287,16 +302,15 @@ public class MainMenuGUI : MonoBehaviour {
 		}
 	}
 
-	public void Loading() //Изменения процентов при загрузке(вызывает прогресс бар)
+	public void LoadingScreen() //Изменения процентов при загрузке(вызывает прогресс бар)
 	{
-		if (_RoomsNgui.Loading.alpha != 1f && ActivBut != null)
-		{
-			HideAllPanel();
-			_RoomsNgui.Loading.alpha = 1f;
-            _PanelsNgui.SliderPanel.alpha = 1f;
-		}
-      
-		_RoomsNgui.LoadingProcent.text = (_RoomsNgui.LoadingProgress.value*100).ToString("f0") + "%";
+		_PanelsNgui.SliderPanel.alpha= 1.0f;
+		_RoomsNgui.Loading.alpha = 1f;
+	}
+	public void HideLoadingScreen() //Изменения процентов при загрузке(вызывает прогресс бар)
+	{
+		_PanelsNgui.SliderPanel.alpha= 0.0f;
+		_RoomsNgui.Loading.alpha = 0.0f;
 	}
 
 	public void StartBut() //Создать комнату
@@ -312,7 +326,7 @@ public class MainMenuGUI : MonoBehaviour {
 		Server.newRoomName = _RoomsNgui.NameNewRoom.value;
 		HideAllPanel ();
 		_RoomsNgui.Loading.alpha = 1f;
-        _PanelsNgui.SliderPanel.alpha = 1f;
+      //  _PanelsNgui.SliderPanel.alpha = 1f;
 		Server.CreateNewRoom(gameMode);
 	}
 
@@ -329,20 +343,20 @@ public class MainMenuGUI : MonoBehaviour {
 		{
 			if (!Rooms.ContainsValue(room.name))
 			{
-				Rooms.Add(room.name, room.name);
 				
 				AnyRoom NewRoom = (Instantiate(_RoomsNgui.ShablonRoom) as GameObject).GetComponent<AnyRoom>();
+				Rooms.Add(room.name,NewRoom );
+				
 				NewRoom.transform.parent = _RoomsNgui.AllRoom.transform;
-				NewRoom.name = room.name;
-				NewRoom.shablon = false;
-				NewRoom.Name.text = room.name;
-				NewRoom.SizeRoom.text = room.playerCount + " / " + room.maxPlayers;
+				
 				NewRoom.transform.localScale = new Vector3(1f, 1f, 1f);
 				NewRoom.transform.localPosition = new Vector3(0f, 0f, 0f);
 				
 				_RoomsNgui.Grid.Reposition();
 				_RoomsNgui.ScrollBar.barSize = 0;
 			}
+			Rooms[room.name].UpdateData(room);
+			
 		}
 	}
 
@@ -442,20 +456,21 @@ public class MainMenuGUI : MonoBehaviour {
 	}
 	
 	// Update is called once per frame
-	void FixedUpdate () 
+	void Update () 
 	{
 		_timer.timer+=Time.deltaTime;
 		if (_timer.timer>=_timer.TimeRefresh)
 		{
 			RefreshRoom();
 			_timer.timer = 0;
+			if (LevelingManager.instance.isLoaded) {
+				LoadData();		
+		
+			}
 		}
 
 	
-		if (LevelingManager.instance.isLoaded) {
-			LoadData();		
-		
-		}
+	
 
 
 
@@ -466,7 +481,7 @@ public class MainMenuGUI : MonoBehaviour {
 		//Debug.Log (_RoomsNgui.RoomsFound.alpha);
 		if (_RoomsNgui.RoomsFound.alpha >0f) {
 			HideAllPanel();
-			_PanelsNgui.SliderPanel.alpha= 1f;
+		//	_PanelsNgui.SliderPanel.alpha= 1f;
 		} else {
 			HideAllPanel();
 			_RoomsNgui.RoomsFound.alpha = 1f;
@@ -648,7 +663,7 @@ public class RoomsNgui
 [System.Serializable]
 public class PanelsNgui
 {
-	public UIPanel SliderPanel;
+	public UIWidget SliderPanel;
 	public SlaiderPanel slaiderPanel;
     public UIPanel mainpanel;
     public UIPanel settings;

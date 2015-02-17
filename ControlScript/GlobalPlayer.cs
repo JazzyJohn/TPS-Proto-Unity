@@ -79,6 +79,8 @@ public class GlobalPlayer : MonoBehaviour {
 	
 	public bool isLoaded = false;
 	
+	public bool loaded = false;
+	
 	public void SetFaceBookInit() {
 		if(FB.IsLoggedIn) {
 			UID ="FB"+FB.UserId;
@@ -156,6 +158,10 @@ public class GlobalPlayer : MonoBehaviour {
     }
 
 	void Update(){
+		if(UID!=""&&!loaded&&(NewsManager.instance==null||(NewsManager.instance!=null&&NewsManager.instance.finished))){
+			LoadAll();
+		
+		}
 		if(InputManager.instance.GetButtonDown("FullScreen")){
 			if(Screen.fullScreen){
 				Screen.SetResolution(960, 600, false);
@@ -364,7 +370,12 @@ public class GlobalPlayer : MonoBehaviour {
 	{
 
 		UID = uid;
-      
+		LoadAll();
+	
+	}
+	
+	public void LoadAll(){
+		loaded= true;
 		StartCoroutine(StartStats(UID,PlayerName));
 		LevelingManager.instance.Init(UID);
 		AchievementManager.instance.Init(UID);

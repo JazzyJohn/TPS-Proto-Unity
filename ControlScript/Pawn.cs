@@ -869,12 +869,14 @@ public class Pawn : DamagebleObject
                             {
                                 killerPlayer.PawnKill(this, player, myTransform.position, killInfo);
                             }
+							
                         }
                     }
                 }
 
             }
-
+		
+			
             foxView.PawnDiedByKill(killerID);
 
             if (player != null)
@@ -934,8 +936,15 @@ public class Pawn : DamagebleObject
             mainAi.Death();
         }
         ivnMan.PawnDeath();
-
+		
         ActualKillMe();
+		//AssistLogic
+		DamagerEntry entry = damagers.Find(delegate(DamagerEntry searchentry) { return searchentry.pawn.player == Player.localPlayer; });
+
+		if (entry != null)
+		{
+			Player.localPlayer.PawnKillAssist(this,player);
+		}
     }
 
     protected override void ActualKillMe()

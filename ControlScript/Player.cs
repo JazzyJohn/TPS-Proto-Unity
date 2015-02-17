@@ -573,7 +573,17 @@ public class Player : MonoBehaviour {
             EventHolder.instance.FireEvent(typeof(LocalPlayerListener), "EventJuggerKill", this, killinfo);
 		}
 	}
-
+	public virtual void PawnKillAssist(Pawn deadPawn,Player victim)
+    {
+		Score.Assist++;
+		if (victim != null) {
+			
+            EventHolder.instance.FireEvent(typeof(LocalPlayerListener), "EventPawnKillAssistPlayer", this, killinfo);
+		}else{
+			EventHolder.instance.FireEvent(typeof(LocalPlayerListener), "EventPawnKillAssistAI", this, killinfo);
+		}
+		 
+	}
     public virtual void PawnKill(Pawn deadPawn,Player victim, Vector3 position, KillInfo killinfo)
     {
 		if (!playerView.isMine)

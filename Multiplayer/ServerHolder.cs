@@ -20,6 +20,7 @@ public class RoomData
     public int id;
     public int playerCount;
     public int maxPlayers;
+	public string mode;
 }
 [Serializable]
 public class MapData
@@ -189,6 +190,8 @@ public class ServerHolder : MonoBehaviour
             roomData.name = room.Name;
             roomData.playerCount = room.UserCount;
             roomData.maxPlayers = room.MaxUsers;
+			string[] temp =room.GetVariable("gameRule").GetStringValue().Split('.');
+			roomData.mode  = temp[temp.Length-1];
             allRooms.Add(roomData);
             ///Debug.Log("Room id: " + room.Id + " has name: " + room.Name +"map" +room.GetVariable("map").GetStringValue());
 
@@ -466,6 +469,7 @@ public class ServerHolder : MonoBehaviour
         }
 
         Debug.Log(gameRule.GetStringValue());
+		gameRule.IsPrivate  = false;
         SFSObject data = new SFSObject();
 		data.PutClass("gameSetting",setting);
         settings.Variables.Add(new SFSRoomVariable("gameVar", data));
@@ -514,11 +518,11 @@ public class ServerHolder : MonoBehaviour
         AfterGameBonuses.Clear();
 		
 		MainMenuGUI mainMenu = FindObjectOfType<MainMenuGUI> ();
-		GameObject loadingScreen = null; 
+	
 		if (mainMenu != null) {
-				Destroy (mainMenu.gameObject);
+				
 //				ItemManager.instance.ClearShop();
-				loadingScreen = Instantiate(mainMenu.loadingScreen, Vector3.zero, Quaternion.identity) as GameObject;
+				mainMenu.LoadingScreen();
              
 
 		}
@@ -642,8 +646,8 @@ public class ServerHolder : MonoBehaviour
         ItemManager.instance.ConnectToPrefab();
 
      
-		if(loadingScreen!=null){
-			Destroy(loadingScreen);
+		if(mainMenu!=null){
+			mainMenu.HideLoadingScreen();
 		}
       
 		FinishLoad ();

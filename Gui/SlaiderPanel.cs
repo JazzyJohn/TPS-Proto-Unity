@@ -3,7 +3,7 @@ using System.Collections;
 using System.Collections.Generic;
 public class SlaiderPanel : MonoBehaviour {
 
-
+	public MainMenuGUI main;
 	public GameObject oneNewPrefab;
 
 	public GameObject onewNewButton;
@@ -46,6 +46,7 @@ public class SlaiderPanel : MonoBehaviour {
 	void Update(){
 		if(newsCount==0&& NewsManager.instance. finished){
 				GenerateNewsBoxes();
+				main.ShowNews();
 		}	
 
 		if(newsCount!=0&&isActive){

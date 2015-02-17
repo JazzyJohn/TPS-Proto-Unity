@@ -51,21 +51,7 @@ public class Achievement{
 }
 public class AchievementManager : MonoBehaviour, LocalPlayerListener, GameListener{
 	//Its here because it's clearly parse params and this calss for parse www data
-	public static string PARAM_DEATH = "Death";
-    public static string PARAM_DEATH_AI = "DeathAI";
-    public static string PARAM_KILL = "Kill";
-    public static string PARAM_KILL_AI = "KillAi";
-    public static string PARAM_DOUBLE_JUMP = "DoubeJump";
-    public static string PARAM_JUMP = "Jump";
-    public static string PARAM_WALL_RUN = "WallRun";
-    public static string PARAM_RELOAD = "Reload";
-    public static string PARAM_KILL_FRIEND = "KillFriend";
-    public static string PARAM_KILL_BY_FRIEND = "KilledByFriend";
-    public static string PARAM_ROOM_FINISHED = "RoomFinished";
-    public static string PARAM_HEAD_SHOOT = "HeadShoot";
-    public static string PARAM_HEAD_SHOOT_AI = "HeadShootAI";
-    public static string PARAM_WIN = "Win";
-    public static string PARAM_STIM_PACK = "StimPack";
+	
 	struct IncomingMessage{
 		public string param;
 		public float delta;
@@ -337,12 +323,12 @@ public class AchievementManager : MonoBehaviour, LocalPlayerListener, GameListen
 		if (target == myPlayer) {
 			IncomingMessage mess = new IncomingMessage();
 			mess.delta=1.0f;
-			mess.param =PARAM_DEATH;
+			mess.param =ParamLibrary.PARAM_DEATH;
 		
 			incomeQueue.Enqueue(mess);
 			mess = new IncomingMessage();
 			mess.delta=1.0f;
-            mess.param = PARAM_DEATH + "by" + killinfo.weaponId.ToString();
+            mess.param = ParamLibrary.PARAM_DEATH + "by" + killinfo.weaponId.ToString();
 		
 			incomeQueue.Enqueue(mess);
 
@@ -354,12 +340,12 @@ public class AchievementManager : MonoBehaviour, LocalPlayerListener, GameListen
 		if (target == myPlayer) {
 			IncomingMessage mess = new IncomingMessage();
 			mess.delta=1.0f;
-			mess.param =PARAM_DEATH_AI;
+			mess.param =ParamLibrary.PARAM_DEATH_AI;
 		
 			incomeQueue.Enqueue(mess);
             mess = new IncomingMessage();
             mess.delta = 1.0f;
-            mess.param = PARAM_DEATH;
+            mess.param = ParamLibrary.PARAM_DEATH;
 
             incomeQueue.Enqueue(mess);
 		}
@@ -369,18 +355,18 @@ public class AchievementManager : MonoBehaviour, LocalPlayerListener, GameListen
 		if (target == myPlayer) {
 			IncomingMessage mess = new IncomingMessage();
 			mess.delta=1.0f;
-			mess.param =PARAM_KILL;
+			mess.param =ParamLibrary.PARAM_KILL;
 			incomeQueue.Enqueue(mess);
 			mess = new IncomingMessage();
 			mess.delta=1.0f;
-            mess.param = PARAM_KILL + "by" + killinfo.weaponId.ToString();
+            mess.param = ParamLibrary.PARAM_KILL + "by" + killinfo.weaponId.ToString();
 		
 			incomeQueue.Enqueue(mess);
             if (killinfo.isHeadShoot)
             {
                 mess = new IncomingMessage();
                 mess.delta = 1.0f;
-                mess.param = PARAM_HEAD_SHOOT;
+                mess.param = ParamLibrary.PARAM_HEAD_SHOOT;
                 incomeQueue.Enqueue(mess);
             }
 		}
@@ -391,7 +377,7 @@ public class AchievementManager : MonoBehaviour, LocalPlayerListener, GameListen
 		if (target == myPlayer) {
 			IncomingMessage mess = new IncomingMessage();
 			mess.delta=1.0f;
-			mess.param =PARAM_KILL_BY_FRIEND;
+			mess.param =ParamLibrary.PARAM_KILL_BY_FRIEND;
 			incomeQueue.Enqueue(mess);
 		}
 	}
@@ -400,7 +386,7 @@ public class AchievementManager : MonoBehaviour, LocalPlayerListener, GameListen
 		if (target == myPlayer) {
 			IncomingMessage mess = new IncomingMessage();
 			mess.delta=1.0f;
-			mess.param =PARAM_KILL_FRIEND;
+			mess.param =ParamLibrary.PARAM_KILL_FRIEND;
 			incomeQueue.Enqueue(mess);
 		}
 	}
@@ -410,18 +396,18 @@ public class AchievementManager : MonoBehaviour, LocalPlayerListener, GameListen
 		if (target == myPlayer) {
 			IncomingMessage mess = new IncomingMessage();
 			mess.delta=1.0f;
-			mess.param =PARAM_KILL_AI;
+			mess.param =ParamLibrary.PARAM_KILL_AI;
 			incomeQueue.Enqueue(mess);
 			mess = new IncomingMessage();
 			mess.delta=1.0f;
-            mess.param = PARAM_KILL_AI + "by" + killinfo.weaponId.ToString();
+            mess.param = ParamLibrary.PARAM_KILL_AI + "by" + killinfo.weaponId.ToString();
 		
 			incomeQueue.Enqueue(mess);
             if (killinfo.isHeadShoot)
             {
                 mess = new IncomingMessage();
                 mess.delta = 1.0f;
-                mess.param = PARAM_HEAD_SHOOT_AI;
+                mess.param = ParamLibrary.PARAM_HEAD_SHOOT_AI;
                 incomeQueue.Enqueue(mess);
             }
 		}
@@ -433,7 +419,7 @@ public class AchievementManager : MonoBehaviour, LocalPlayerListener, GameListen
 		if (target == myPlayer) {
 			IncomingMessage mess = new IncomingMessage();
 			mess.delta=1.0f;
-			mess.param =PARAM_DOUBLE_JUMP;
+			mess.param =ParamLibrary.PARAM_DOUBLE_JUMP;
 			incomeQueue.Enqueue(mess);
 		}
 	}
@@ -456,6 +442,13 @@ public class AchievementManager : MonoBehaviour, LocalPlayerListener, GameListen
     {
 	
 	}
+	
+	public void EventPawnKillAssistPlayer(Player target){
+	
+	}
+    public void EventPawnKillAssistAI(Player target){
+	
+	}
 	public void EventEndWallRun(Player target, Vector3 position){
 		if (target == myPlayer) {
 			if(wallRunningStartPosition.sqrMagnitude==0){
@@ -465,7 +458,7 @@ public class AchievementManager : MonoBehaviour, LocalPlayerListener, GameListen
 			mess.delta=(wallRunningStartPosition -position).magnitude;
 			//Debug.Log (mess.delta);
 			wallRunningStartPosition = Vector3.zero;
-			mess.param =PARAM_WALL_RUN;
+			mess.param =ParamLibrary.PARAM_WALL_RUN;
 			incomeQueue.Enqueue(mess);
 			
 		}
@@ -474,14 +467,14 @@ public class AchievementManager : MonoBehaviour, LocalPlayerListener, GameListen
 		if (target == myPlayer) {
 			IncomingMessage mess = new IncomingMessage();
 			mess.delta=1.0f;
-			mess.param =PARAM_RELOAD;
+			mess.param =ParamLibrary.PARAM_RELOAD;
 			incomeQueue.Enqueue(mess);
 		}
 	}
 	public void EventRoomFinished(){
 			IncomingMessage mess = new IncomingMessage();
 			mess.delta=1.0f;
-			mess.param =PARAM_ROOM_FINISHED;
+			mess.param =ParamLibrary.PARAM_ROOM_FINISHED;
 			incomeQueue.Enqueue(mess);
 	
 	
@@ -501,7 +494,7 @@ public class AchievementManager : MonoBehaviour, LocalPlayerListener, GameListen
 
             IncomingMessage mess = new IncomingMessage();
 			mess.delta=1.0f;
-            mess.param = PARAM_WIN;
+            mess.param = ParamLibrary.PARAM_WIN;
 			incomeQueue.Enqueue(mess);
         }
     }
