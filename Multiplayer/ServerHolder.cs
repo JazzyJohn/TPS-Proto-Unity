@@ -75,6 +75,7 @@ public class ServerHolder : MonoBehaviour
 		public float curLoader;
 		
 	}
+    public int autoMapChoise;
 
     public string ExtName = "fps";  // The server extension we work with
     public string ExtClass = "dk.fullcontrol.fps.FpsExtension"; // The class name of the extension
@@ -370,7 +371,7 @@ public class ServerHolder : MonoBehaviour
         {
             return;
         }
-        MapData data = allMaps[UnityEngine.Random.Range(0, allMaps.Length)];
+        MapData data = allMaps[autoMapChoise];
         map = data.name;
         blockQuickStart = true;
         newRoomName = map +data.ToString();

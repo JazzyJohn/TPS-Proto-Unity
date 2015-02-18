@@ -46,6 +46,7 @@ public class SlaiderPanel : MonoBehaviour {
 	void Update(){
 		if(newsCount==0&& NewsManager.instance. finished){
 				GenerateNewsBoxes();
+                SetNewsMomentum(newsCount-1);
 		}	
 
 		if(newsCount!=0&&isActive){
@@ -83,6 +84,22 @@ public class SlaiderPanel : MonoBehaviour {
 		slideTimer=0;
 		SetButtons ();
 	}
+    public void SetNewsMomentum(int i)
+    {
+        curItem = i;
+        IsSliding = true;
+        if (curItem >= newsCount)
+        {
+            curItem = 0;
+        }
+        slideTimer = 0;
+        SetButtons();
+        Vector3 target = new Vector3(-curItem * offset, 0, 0);
+        allNewsPivot.localPosition = target;
+        IsSliding = false;
+
+    }
+
 	public void SetButtons(){
 
 		newsbtns [curItem].value = true;
