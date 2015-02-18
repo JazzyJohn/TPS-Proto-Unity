@@ -666,9 +666,7 @@ public class ServerHolder : MonoBehaviour
         ItemManager.instance.ConnectToPrefab();
 
      
-		if(mainMenu!=null){
-			mainMenu.HideLoadingScreen();
-		}
+		
       
 		FinishLoad ();
 		
@@ -688,7 +686,13 @@ public class ServerHolder : MonoBehaviour
         //menu.transform.parent = Camera.main.transform;
         menu.transform.localPosition = Vector3.zero;
         menu.transform.localRotation = Quaternion.identity;
-    
+		if(mainMenu!=null){
+		
+		
+			mainMenu.PlayerGUI=Camera.main.GetComponent<PlayerMainGui>();
+			
+			mainMenu.FinishLvlLoad();
+		}
         Debug.Log("Compileted Load Map");
         
         if (next)

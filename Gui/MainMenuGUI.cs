@@ -38,6 +38,10 @@ public class MainMenuGUI : MonoBehaviour {
     public Dictionary<string, AnyRoom> Rooms = new Dictionary<string, AnyRoom>();
 
 	public UIRect[] MainPanels;
+	
+	public UIRect[] HideInGamePanels;
+	
+	public UIRect[] ShowInGamePanels;
 
     public GAMEMODE gameMode = GAMEMODE.PVP;
 
@@ -45,6 +49,8 @@ public class MainMenuGUI : MonoBehaviour {
 
     public UIWidget allWWidget;
 
+	public bool inGame =false;
+	
     public void LoadingFinish()
     {
 		
@@ -68,6 +74,10 @@ public class MainMenuGUI : MonoBehaviour {
 
 
 	void Awake(){
+		if(FindObjectsOfType<MainMenuGUI>().Length>1){
+			Destroy(gameObject);
+			return;
+		}
 		HideAllPanel();
 		DontDestroyOnLoad(transform.gameObject);
 	}
@@ -164,6 +174,9 @@ public class MainMenuGUI : MonoBehaviour {
 		StartCoroutine(PausePlay());
 	}
 	public void  JoinRoom(RoomData room){
+		if(inGame){
+			return;
+		}
         if (room.playerCount < room.maxPlayers)
         {
 				//PhotonNetwork.JoinRoom (room.name);
@@ -178,6 +191,9 @@ public class MainMenuGUI : MonoBehaviour {
 	}
 	public IEnumerator PausePlay()
 	{
+		if(inGame){
+			return;
+		}
 		yield return new WaitForSeconds(0.05f);
 		Debug.Log ("PLAY");
         GA.API.Design.NewEvent("GUI:MainMenu:Play", 1); 
@@ -220,12 +236,16 @@ public class MainMenuGUI : MonoBehaviour {
    
 
 	public void CreateRoom(){
+		if(inGame){
+			return;
+		}
+	
 		HideAllPanel ();
 		_RoomsNgui.CreateRoom.alpha = 1f;
         _RoomsNgui.mainpanel.alpha = 1f;
 		
 		//_RoomsNgui.NameNewRoom.value = Server.newRoomName;
-
+		
 	}
 	public void LoginPage(){
 		allWWidget.alpha = 0.0f;
@@ -326,12 +346,7 @@ public class MainMenuGUI : MonoBehaviour {
 		_PanelsNgui.SliderPanel.alpha= 1.0f;
 		_RoomsNgui.Loading.alpha = 1f;
 	}
-	public void HideLoadingScreen() //Изменения процентов при загрузке(вызывает прогресс бар)
-	{
-		_PanelsNgui.SliderPanel.alpha= 0.0f;
-		_RoomsNgui.Loading.alpha = 0.0f;
-	}
-
+	
 	public void StartBut() //Создать комнату
 	{
 
@@ -572,6 +587,96 @@ public class MainMenuGUI : MonoBehaviour {
         ScreenShootManager.instance.TakeScreenshotToWall(TextGenerator.instance.GetSimpleText("i'm in red rage"));
     }
 	
+	//IN GAME SECTION 
+	
+	public UIPanel PlayGUI;	
+
+	private PlayerMainGui PlayerGUI;
+	
+	
+	
+	
+	public void FinishLvlLoad() //Изменения процентов при загрузке(вызывает прогресс бар)
+	{
+		_PanelsNgui.SliderPanel.alpha= 0.0f;
+		_RoomsNgui.Loading.alpha = 0.0f;
+		allWWidget.alpha = 0.0f;
+		inGame= true;
+		foreach(UIRecr panel in HideInGamePanels){
+			panel.gameObject.SetActive(false);
+		}
+		foreach(UIRecr panel in ShowInGamePanels){
+			panel.gameObject.SetActive(true);
+		}
+		PlayGUI = PlayerGUI.PlayGUI;
+	}
+
+	 public void ActivateMenu(){
+         if (allWWidget.alpha == 0f)
+         {
+                GA.API.Design.NewEvent("GUI:Pause:Show"); 
+                Pause = true;
+                if (effect != null)
+                {
+                    effect.enabled = true;
+                }
+				PlayerGUI.guiState = PlayerMainGui.GUIState.Pause;
+				Screen.lockCursor = false;
+				PlayGUI.alpha = 0f;
+				VisableSetting = false;
+				allWWidget.alpha = 1f;
+			
+		}
+    }
+     public bool IsActive()
+     {
+         if (InputManager.instance.GetButtonDown("Pause")||Input.GetKeyDown(KeyCode.Escape))
+         {
+         
+             return !Pause;
+         }
+         return Pause;
+     }
+	public void BackToGame()
+	{
+          
+            Pause = false;
+            if (effect != null)
+            {
+                effect.enabled = false;
+            }
+            PlayerGUI.guiState = PlayerMainGui.GUIState.Normal;
+            if (Setting != null)
+            {
+                Setting.CearControlls();
+            }
+			allWWidget.alpha = 0f;
+            PlayGUI.alpha = 1f;
+
+        
+	}
+	public void GoToMainMenu()
+	{
+		if (ServerHolder.Instance.connectingToRoom)
+        {
+            return;
+        }
+        GA.API.Design.NewEvent("GUI:Pause:MainMenu");
+		Pause = false;
+             
+		Screen.lockCursor = false;
+        NetworkController.Instance.LeaveRoomReuqest();
+		Destroy(PlayerGUI.gameObject);
+        Application.LoadLevel(0);
+		allWWidget.alpha = 1.0f;
+		inGame= true;
+		foreach(UIRecr panel in HideInGamePanels){
+			panel. gameObject.SetActive(true);
+		}
+		foreach(UIRecr panel in ShowInGamePanels){
+			panel. gameObject.SetActive(false);
+		}
+	}
 
 }
 

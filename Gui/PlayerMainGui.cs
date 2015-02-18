@@ -128,9 +128,11 @@ public class PlayerMainGui : MonoBehaviour {
 
     private SelectPlayerGUI respawnMenu;
 
-    private PauseMenu pausegui;
+    private MainMenu pausegui;
 
 	private PlayerHudNgui hud;
+	
+	public UIPanel PlayGUI;
 	
     public GameFinished finished;
 	private ChatHolder[] chats;
