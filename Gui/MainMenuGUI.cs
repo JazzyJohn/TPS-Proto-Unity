@@ -171,6 +171,10 @@ public class MainMenuGUI : MonoBehaviour {
 
 	public void PlayBut() //Вход или создание новой комнаты
 	{
+        if (inGame)
+        {
+            return;
+        }
 		StartCoroutine(PausePlay());
 	}
 	public void  JoinRoom(RoomData room){
@@ -191,9 +195,7 @@ public class MainMenuGUI : MonoBehaviour {
 	}
 	public IEnumerator PausePlay()
 	{
-		if(inGame){
-			return;
-		}
+		
 		yield return new WaitForSeconds(0.05f);
 		Debug.Log ("PLAY");
         GA.API.Design.NewEvent("GUI:MainMenu:Play", 1); 
@@ -589,10 +591,11 @@ public class MainMenuGUI : MonoBehaviour {
 	
 	//IN GAME SECTION 
 	
-	public UIPanel PlayGUI;	
+	public UIPanel PlayGUI;
 
-	private PlayerMainGui PlayerGUI;
-	
+    public PlayerMainGui PlayerGUI;
+
+    private bool Pause;
 	
 	
 	
@@ -600,31 +603,31 @@ public class MainMenuGUI : MonoBehaviour {
 	{
 		_PanelsNgui.SliderPanel.alpha= 0.0f;
 		_RoomsNgui.Loading.alpha = 0.0f;
-		allWWidget.alpha = 0.0f;
+        gameObject.SetActive(false);
+        allWWidget.alpha = 1.0f;
 		inGame= true;
-		foreach(UIRecr panel in HideInGamePanels){
+		foreach(UIRect panel in HideInGamePanels){
 			panel.gameObject.SetActive(false);
 		}
-		foreach(UIRecr panel in ShowInGamePanels){
+        foreach (UIRect panel in ShowInGamePanels)
+        {
 			panel.gameObject.SetActive(true);
 		}
 		PlayGUI = PlayerGUI.PlayGUI;
+        PlayerGUI.pausegui = this;
 	}
 
 	 public void ActivateMenu(){
-         if (allWWidget.alpha == 0f)
+         if (!gameObject.activeSelf)
          {
                 GA.API.Design.NewEvent("GUI:Pause:Show"); 
                 Pause = true;
-                if (effect != null)
-                {
-                    effect.enabled = true;
-                }
+               
 				PlayerGUI.guiState = PlayerMainGui.GUIState.Pause;
 				Screen.lockCursor = false;
-				PlayGUI.alpha = 0f;
-				VisableSetting = false;
-				allWWidget.alpha = 1f;
+				PlayGUI.gameObject.SetActive(false);
+
+                gameObject.SetActive(true);
 			
 		}
     }
@@ -641,17 +644,12 @@ public class MainMenuGUI : MonoBehaviour {
 	{
           
             Pause = false;
-            if (effect != null)
-            {
-                effect.enabled = false;
-            }
+          
             PlayerGUI.guiState = PlayerMainGui.GUIState.Normal;
-            if (Setting != null)
-            {
-                Setting.CearControlls();
-            }
-			allWWidget.alpha = 0f;
-            PlayGUI.alpha = 1f;
+
+		
+            gameObject.SetActive(false);
+            PlayGUI.gameObject.SetActive(true);
 
         
 	}
@@ -666,14 +664,14 @@ public class MainMenuGUI : MonoBehaviour {
              
 		Screen.lockCursor = false;
         NetworkController.Instance.LeaveRoomReuqest();
-		Destroy(PlayerGUI.gameObject);
+        Destroy(FindObjectOfType<HUDHolder>().gameObject);
         Application.LoadLevel(0);
-		allWWidget.alpha = 1.0f;
+        gameObject.SetActive(true);
 		inGame= true;
-		foreach(UIRecr panel in HideInGamePanels){
+		foreach(UIRect panel in HideInGamePanels){
 			panel. gameObject.SetActive(true);
 		}
-		foreach(UIRecr panel in ShowInGamePanels){
+		foreach(UIRect panel in ShowInGamePanels){
 			panel. gameObject.SetActive(false);
 		}
 	}

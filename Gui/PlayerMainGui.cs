@@ -128,7 +128,7 @@ public class PlayerMainGui : MonoBehaviour {
 
     private SelectPlayerGUI respawnMenu;
 
-    private MainMenu pausegui;
+    public MainMenuGUI pausegui;
 
 	private PlayerHudNgui hud;
 	
@@ -184,7 +184,7 @@ public class PlayerMainGui : MonoBehaviour {
 		hud = Transform.FindObjectOfType<PlayerHudNgui> ();
 		hud.SetLocalPlayer(LocalPlayer);
 		respawnMenu = Transform.FindObjectOfType<SelectPlayerGUI>();
-		pausegui = Transform.FindObjectOfType<PauseMenu>();
+		//pausegui = Transform.FindObjectOfType<MainMenuGUI>();
        
         respawnMenu.SetLocalPlayer(LocalPlayer);
 		ChageState(GUIState.Respawn);

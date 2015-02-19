@@ -648,7 +648,7 @@ public class ServerHolder : MonoBehaviour
 
                     PrefabManager[] managers = FindObjectsOfType<PrefabManager>();
                     progress.allLoader = 2 + managers.Length;
-                    Debug.Log("Загрузка завершена.");
+                   
 
                     progress.finishedLoader++;
                     progress.curLoader = 0;
@@ -665,8 +665,8 @@ public class ServerHolder : MonoBehaviour
             }
         ItemManager.instance.ConnectToPrefab();
 
-     
-		
+
+        Debug.Log("Загрузка завершена.");
       
 		FinishLoad ();
 		
@@ -683,7 +683,10 @@ public class ServerHolder : MonoBehaviour
         }
 
         Camera.main.GetComponent<PlayerMainGui>().enabled = true;
-        //menu.transform.parent = Camera.main.transform;
+        HUDHolder holder =FindObjectOfType<HUDHolder>();
+        Camera.main.GetComponent<PlayerMainGui>().PlayGUI = holder.PlayPanel;
+        holder.cameraForMark.transform.parent = Camera.main.transform;
+        menu.transform.parent = FindObjectOfType<GUIRootHolder>().transform;
         menu.transform.localPosition = Vector3.zero;
         menu.transform.localRotation = Quaternion.identity;
 		if(mainMenu!=null){
