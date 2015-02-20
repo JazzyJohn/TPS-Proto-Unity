@@ -511,10 +511,14 @@ public class _PlayerClass
 	public UISprite Sprite;
 }
 
+public  class ChoiceSet{
+	public  WeaponIndex[] slots =  new WeaponIndex[Choice.SLOT_CNT];
 
+}
 
 public static class Choice
 {
+	public const int SLOT_CNT=9;
     public static int _Player = 0;
 	public static int _Robot=-1;
 	public static int _Team=-1;
@@ -530,7 +534,12 @@ public static class Choice
     public static WeaponIndex[] _HandImplant = new WeaponIndex[4] { WeaponIndex.Zero, WeaponIndex.Zero, WeaponIndex.Zero, WeaponIndex.Zero };
     public static WeaponIndex[] _ArmImplant = new WeaponIndex[4] { WeaponIndex.Zero, WeaponIndex.Zero, WeaponIndex.Zero, WeaponIndex.Zero };
 
-
+	
+	
+	
+	public static ChoiceSet[] ChoiceSet = new ChoiceSet[4]{ new ChoiceSet(), new ChoiceSet(), new ChoiceSet()};
+	
+	public static int curSet=0;
 	 
     public static int[][] _GUIChoice = new int[][] 
     {
@@ -540,7 +549,12 @@ public static class Choice
         new int[5],
     };
 
-
+	public static ChangeSet(int set,int gameClass){
+		curSet= set;
+		for(i=0;i<Choice.SLOT_CNT;i++){
+			_SetChoice(i, _Player,ChoiceSet[curSet].slots[i] );
+		}
+	}
     public static WeaponIndex ForGuiSlot(int slot)
     {
 		switch(slot){
@@ -576,8 +590,22 @@ public static class Choice
 	}
     public static void SetChoice(int slot, int gameClass, WeaponIndex index)
     {
+		ChoiceSet[curSet].slots[slot] =index;
+		_SetChoice(slot, gameClass, index);
+	}
+	public static void SetChoice(int slot, int gameClass, WeaponIndex index,int set)
+    {
+		ChoiceSet[set].slots[slot] =index;
+		if(set==0){
+			_SetChoice(slot, gameClass, index);
+		}
+	}
+	 private static void _SetChoice(int slot, int gameClass, WeaponIndex index)
+    {
+		
 		switch(slot){
 		case 0:
+			
 			_Personal[gameClass]=index;
 			break;
 		case 1:

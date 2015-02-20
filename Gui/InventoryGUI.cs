@@ -67,11 +67,24 @@ public class InventoryGUI : MonoBehaviour {
 			AllItems[itemInfo.id] =itemInfo;
 		}
 		SelectedItemGUI[] selected = GetComponentsInChildren<SelectedItemGUI>();
+		ReloadSelectedItem();
+	}
+	
+	void ReloadSelectedItem(){
+		
         foreach (SelectedItemGUI itemInfo in selected)
         {
 			itemInfo.Shop = this;
 			itemInfo.SetItem();
 			slots[itemInfo.slot]= itemInfo;
+		}
+	}
+	public void ChangeSet(int i){
+		if( PremiumManager.instance. GetSetSize()>=i){
+			return;
+		}else{
+			Choice.ChangeSet(i,0);
+			 ReloadSelectedItem();
 		}
 	}
     public void SetItemForChoiseSet(InventorySlot slot)

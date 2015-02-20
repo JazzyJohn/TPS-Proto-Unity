@@ -11,6 +11,8 @@ public class PremiumManager : MonoBehaviour {
 	
 	public static int PREMIUM_MULTIPLIER= 2;
 	
+	int setSize =1;
+	
 	bool isPremium = false;
 	
 	bool buyBlock = false;
@@ -105,7 +107,13 @@ public class PremiumManager : MonoBehaviour {
        
 		
 	}
+	public void SetSetSize(int setSize){
+		this.setSize =setSize;
+	}
 	
+	public int GetSetSize(){
+		return setSize;
+	}
     private static PremiumManager s_Instance = null;
 
 	public static PremiumManager instance

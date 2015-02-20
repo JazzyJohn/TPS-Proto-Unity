@@ -324,20 +324,7 @@ public class ItemManager : MonoBehaviour {
 		}
 
        
-        foreach (WeaponIndex index in cachedIndex)
-        {
-           
-            if (index.prefabId != -1)
-            {
-                if (weaponPrefabsListbyId[index.prefabId] != null)
-                {
-					int gameSlot = (int)weaponPrefabsListbyId[index.prefabId].slotType;
-					Choice.SetChoice(gameSlot, index.gameClass, index);
-				
-				}
-                   
-            }
-        }
+        
      
     }
 
@@ -692,13 +679,16 @@ public class ItemManager : MonoBehaviour {
         }
         if (xmlDoc.SelectSingleNode("items/default") != null)
         {
-            cachedIndex.Clear();
+           
             foreach (XmlNode node in xmlDoc.SelectNodes("items/default"))
             {
                 WeaponIndex index = new WeaponIndex(node.SelectSingleNode("weaponId").InnerText);
                 index.gameClass = int.Parse(node.SelectSingleNode("gameClass").InnerText);
-
-                cachedIndex.Add(index);
+				
+				int gameSlot =(int)weaponIndexTable[index.prefabId].gameSlot;
+				int set = int.Parse(node.SelectSingleNode("set").InnerText);
+				Choice.SetChoice(gameSlot, index.gameClass, index,set);
+               
 
             }
             foreach (XmlNode node in xmlDoc.SelectNodes("items/marked"))
@@ -782,14 +772,17 @@ public class ItemManager : MonoBehaviour {
 		form.AddField ("uid", UID);
 		form.AddField ("class", Choice._Player);
 		form.AddField ("robotclass", Choice._Robot);
-		for(int i = 0;i<4;i++){
-          //  Debug.Log(Choice.ForGuiSlot(i).ToString());
-            WeaponIndex index = Choice.ForGuiSlot(i);
-				form.AddField ("default[]", index.ToString());
-            if(index.itemId!=null&&index.itemId!=""){
-               // Debug.Log("ITEM"+index.itemId);
-                form.AddField("usedInvItem[]", index.itemId);
-            }
+		int setSize = PremiumManager.instance. GetSetSize();
+		for(int j= 0;j<setSize;j++){
+			for(int i = 0;i<Choice.SLOT_CNT;i++){
+			  //  Debug.Log(Choice.ForGuiSlot(i).ToString());
+				WeaponIndex index = Choice.ForGuiSlot(i);
+				if(!index.IsSameIndex( WeaponIndex.Zero)){
+					form.AddField ("default[]", index.ToString() + "@set"+j);
+				
+				}
+			
+			}
 		}
     
         

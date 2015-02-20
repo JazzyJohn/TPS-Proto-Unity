@@ -403,6 +403,7 @@ public class BaseWeapon : DestroyableNetworkObject {
 	}
     void Update()
     {
+		UpdateCahedPosition();
         UpdateWeapon(Time.deltaTime);
         if (foxView.isMine)
         {
