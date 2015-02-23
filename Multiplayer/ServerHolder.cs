@@ -686,8 +686,8 @@ public class ServerHolder : MonoBehaviour
         HUDHolder holder =FindObjectOfType<HUDHolder>();
         Camera.main.GetComponent<PlayerMainGui>().PlayGUI = holder.PlayPanel;
         holder.cameraForMark.transform.parent = Camera.main.transform;
-		holder.cameraForMark.localPosition = Vector3.zero;
-		holder.cameraForMark.localRotation = Quaternion.identity;
+        holder.cameraForMark.transform.localPosition = Vector3.zero;
+        holder.cameraForMark.transform.localRotation = Quaternion.identity;
         menu.transform.parent = FindObjectOfType<GUIRootHolder>().transform;
         menu.transform.localPosition = Vector3.zero;
         menu.transform.localRotation = Quaternion.identity;

@@ -11,7 +11,7 @@ public class PremiumManager : MonoBehaviour {
 	
 	public static int PREMIUM_MULTIPLIER= 2;
 	
-	int setSize =1;
+	int setSize =   2;
 	
 	bool isPremium = false;
 	

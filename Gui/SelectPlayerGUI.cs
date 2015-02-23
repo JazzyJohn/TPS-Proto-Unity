@@ -512,6 +512,13 @@ public class _PlayerClass
 }
 
 public  class ChoiceSet{
+    public ChoiceSet()
+    {
+        for (int i = 0; i < Choice.SLOT_CNT; i++)
+        {
+            slots[i] = WeaponIndex.Zero;
+        }
+    }
 	public  WeaponIndex[] slots =  new WeaponIndex[Choice.SLOT_CNT];
 
 }
@@ -534,10 +541,10 @@ public static class Choice
     public static WeaponIndex[] _HandImplant = new WeaponIndex[4] { WeaponIndex.Zero, WeaponIndex.Zero, WeaponIndex.Zero, WeaponIndex.Zero };
     public static WeaponIndex[] _ArmImplant = new WeaponIndex[4] { WeaponIndex.Zero, WeaponIndex.Zero, WeaponIndex.Zero, WeaponIndex.Zero };
 
-	
-	
-	
-	public static ChoiceSet[] ChoiceSet = new ChoiceSet[4]{ new ChoiceSet(), new ChoiceSet(), new ChoiceSet()};
+
+
+
+    public static ChoiceSet[] ChoiceSet = new ChoiceSet[4] { new ChoiceSet(), new ChoiceSet(), new ChoiceSet(), new ChoiceSet() };
 	
 	public static int curSet=0;
 	 
@@ -549,9 +556,9 @@ public static class Choice
         new int[5],
     };
 
-	public static ChangeSet(int set,int gameClass){
+	public static void  ChangeSet(int set,int gameClass){
 		curSet= set;
-		for(i=0;i<Choice.SLOT_CNT;i++){
+		for( int i=0;i<Choice.SLOT_CNT;i++){
 			_SetChoice(i, _Player,ChoiceSet[curSet].slots[i] );
 		}
 	}

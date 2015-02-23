@@ -35,12 +35,16 @@ public class InventoryGUI : MonoBehaviour {
     public UIWidget[] itemPanels;
 
     public InventoryGroup group;
-	
-	
-	
-    public Dictionary<string,InvItemGUI> AllItems= new Dictionary<string,InvItemGUI>();
 
-    public Dictionary<int, SelectedItemGUI> slots = new Dictionary<int, SelectedItemGUI>();
+    public UILabel setLabel;
+	
+	
+	
+    Dictionary<string,InvItemGUI> AllItems= new Dictionary<string,InvItemGUI>();
+
+    Dictionary<int, SelectedItemGUI> slots = new Dictionary<int, SelectedItemGUI>();
+
+    SelectedItemGUI[] selected;
 	
     public int curSet = 0;
 
@@ -66,7 +70,7 @@ public class InventoryGUI : MonoBehaviour {
 			itemInfo.SetItem(ItemManager.instance.GetItem(itemInfo.id));
 			AllItems[itemInfo.id] =itemInfo;
 		}
-		SelectedItemGUI[] selected = GetComponentsInChildren<SelectedItemGUI>();
+		selected = GetComponentsInChildren<SelectedItemGUI>();
 		ReloadSelectedItem();
 	}
 	
@@ -79,11 +83,17 @@ public class InventoryGUI : MonoBehaviour {
 			slots[itemInfo.slot]= itemInfo;
 		}
 	}
+    public void ChangeSetGUI(UIPopupList list)
+    {
+        ChangeSet(int.Parse(list.value.Split(' ')[1])-1);
+    }
 	public void ChangeSet(int i){
-		if( PremiumManager.instance. GetSetSize()>=i){
+		if( PremiumManager.instance. GetSetSize()<=i){
 			return;
 		}else{
+            setLabel.text = TextGenerator.instance.GetMoneyText("SetNumber", i + 1);
 			Choice.ChangeSet(i,0);
+           
 			 ReloadSelectedItem();
 		}
 	}
