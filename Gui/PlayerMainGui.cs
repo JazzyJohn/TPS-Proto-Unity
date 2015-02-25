@@ -285,7 +285,7 @@ public class PlayerMainGui : MonoBehaviour {
         {
             case GUIState.Normal:
                 hud._DeadGUI.DeActivate();
-                 pausegui.BackToGame();
+                pausegui.BackToGame();
                 stat.DeActivate();
                 respawnMenu.DeActivate();
                 hud.Activate();

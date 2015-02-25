@@ -69,6 +69,14 @@ public class MainMenuGUI : MonoBehaviour {
             }
         }
 		_PanelsNgui.SliderPanel.alpha= 0.0f;
+        foreach (UIRect panel in HideInGamePanels)
+        {
+            panel.gameObject.SetActive(true);
+        }
+        foreach (UIRect panel in ShowInGamePanels)
+        {
+            panel.gameObject.SetActive(false);
+        }
        
     }
 

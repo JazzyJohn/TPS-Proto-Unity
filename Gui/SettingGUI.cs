@@ -211,6 +211,33 @@ public class SettingGUI : MonoBehaviour {
 	public void SetMouseLabel() {
 		Control.mouseLabel.text = (Control.mouseSensitivity.value * 100f).ToString("0");
 	}
+    float oldVolumeScroll=1.0f;
+    float oldSoundFxScroll = 1.0f;
+    float oldMusicScroll = 1.0f;
+    public void ToggleSound()
+    {
+        if (volumes.VolumeScroll.value!=0)
+        {
+            oldVolumeScroll = volumes.VolumeScroll.value;
+            volumes.VolumeScroll.value = 0.0f;
+            oldSoundFxScroll = volumes.SoundFxScroll.value;
+            volumes.SoundFxScroll.value = 0.0f;
+            oldMusicScroll = volumes.MusicScroll.value;
+            volumes.MusicScroll.value = 0.0f;
+
+        }
+        else
+        {
+            volumes.VolumeScroll.value = oldVolumeScroll;
+            volumes.SoundFxScroll.value = oldSoundFxScroll;
+            volumes.MusicScroll.value = oldMusicScroll;
+        }
+        AudioListener.volume = volumes.SoundFxScroll.value * volumes.VolumeScroll.value;
+        MusicHolder.SetVolume(volumes.MusicScroll.value * volumes.VolumeScroll.value);
+        PlayerPrefs.SetFloat("OverallVolume", volumes.VolumeScroll.value);
+        PlayerPrefs.SetFloat("SoundFX", volumes.SoundFxScroll.value);
+        PlayerPrefs.SetFloat("Music", volumes.MusicScroll.value);
+    }
 	
 	public void SetValueVolume(UILabel IntArg, UIScrollBar ScrollArg) //Установка звука (Текст)
 	{

@@ -49,6 +49,8 @@ public class InventoryGUI : MonoBehaviour {
     public int curSet = 0;
 
     bool[] allowedReapair = new bool[3];
+
+    public bool init = false;
 	// Use this for initialization
     void Awake(){
         ItemManager.instance.SetInventoryGui(this);
@@ -72,6 +74,7 @@ public class InventoryGUI : MonoBehaviour {
 		}
 		selected = GetComponentsInChildren<SelectedItemGUI>();
 		ReloadSelectedItem();
+        init = true;
 	}
 	
 	void ReloadSelectedItem(){
@@ -88,6 +91,10 @@ public class InventoryGUI : MonoBehaviour {
         ChangeSet(int.Parse(list.value.Split(' ')[1])-1);
     }
 	public void ChangeSet(int i){
+        if (!init)
+        {
+            return;
+        }
 		if( PremiumManager.instance. GetSetSize()<=i){
 			return;
 		}else{

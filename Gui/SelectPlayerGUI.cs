@@ -70,8 +70,10 @@ public class SelectPlayerGUI : MonoBehaviour {
     }
     public void DrawStims() {
 		List<SmallShopData> allStims = ItemManager.instance.GetAllStim();
+
         for (int i = 0; i < MenuElements.Stims.Length; i++)
         {
+       
             if (allStims.Count > i)
             {
                 MenuElements.Stims[i].SetObject(allStims[i]);
@@ -307,7 +309,10 @@ public class SelectPlayerGUI : MonoBehaviour {
         if (listOfItems[TypeW].Count == 0) {
             return;
         }
-
+        if (MenuElements.Weapon.Length == 0||MenuElements.Weapon[TypeW]==null)
+        {
+            return;
+        }
         GUIItem item =  listOfItems[TypeW][choice];
         MenuElements.Weapon[TypeW].mainTexture = item.texture;
 
@@ -368,14 +373,17 @@ public class SelectPlayerGUI : MonoBehaviour {
                 MenuElements.Blue.text = Blue.ToString();
             }
             DateTime saveNow = DateTime.Now;
-            for (int i = 0; i < MenuElements.WeaponText.Length;i++ )
+            if (MenuElements.WeaponSelect.Length > 0)
             {
-                if (MenuElements.WeaponSelect[i].isTimed)
+                for (int i = 0; i < MenuElements.WeaponText.Length; i++)
                 {
-                    TimeSpan timeSpan = MenuElements.WeaponSelect[i].timeend.Subtract(saveNow);
-                    MenuElements.WeaponText[i].text = string.Format("{0:D2}:{1:D2}:{2:D2}", timeSpan.Hours, timeSpan.Minutes, timeSpan.Seconds);
-                }
+                    if (MenuElements.WeaponSelect[i].isTimed)
+                    {
+                        TimeSpan timeSpan = MenuElements.WeaponSelect[i].timeend.Subtract(saveNow);
+                        MenuElements.WeaponText[i].text = string.Format("{0:D2}:{1:D2}:{2:D2}", timeSpan.Hours, timeSpan.Minutes, timeSpan.Seconds);
+                    }
 
+                }
             }
 		
 	}
@@ -492,7 +500,7 @@ public class _MenuElements
 
 	public UITexture[] Weapon;
     public UISprite[] WeaponBack;
-    public GUIItem[] WeaponSelect= new GUIItem[8];
+    public GUIItem[] WeaponSelect= new GUIItem[0];
     public UILabel[] WeaponText;
     public UILabel[] WeaponTitle;
     public CharSection[] WeaponBars;

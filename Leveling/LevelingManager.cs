@@ -257,6 +257,7 @@ public class LevelingManager : MonoBehaviour, LocalPlayerListener,GameListener{
 	private int playerStrike;
 	
 	public void EventAppear(Player target){
+        //Debug.Log("PLAYER SPAWM"+   target);
 		if (target.isMine) {
 			myPlayer = target;
 			
@@ -317,6 +318,7 @@ public class LevelingManager : MonoBehaviour, LocalPlayerListener,GameListener{
 	}
 	public void EventTeamWin(int teamNumber){
 		//if we not winner so no change in exp, or we a winner but no send were initiate we sync data 
+        
 		if ((myPlayer.team	!= teamNumber&&!UpExp(ParamLibrary.PARAM_LOSE))||(myPlayer.team == teamNumber&&!UpExp(ParamLibrary.PARAM_WIN))) {
 			SyncLvl();
 		}

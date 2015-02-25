@@ -5,6 +5,8 @@ public class HUDHolder : MonoBehaviour {
 
     public UIPanel PlayPanel;
     public Camera cameraForMark;
+
+    public Vector3 scale;
 	// Use this for initialization
 	void Start () {
 	

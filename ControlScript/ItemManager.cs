@@ -329,7 +329,7 @@ public class ItemManager : MonoBehaviour {
     }
 
 	public int LowerCharge(int id){
-        Debug.Log("lowercharge");
+//        Debug.Log("lowercharge");
         if (!weaponIndexTable.ContainsKey(id))
         {
             return 0;
@@ -802,7 +802,7 @@ public class ItemManager : MonoBehaviour {
 		
 		foreach (KeyValuePair<string, ShootData> pair in toSendLower)
 		{
-            Debug.Log("charge[" + pair.Key + "]"+ pair.Value.chargeSpend);
+//            Debug.Log("charge[" + pair.Key + "]"+ pair.Value.chargeSpend);
 			if(pair.Value.chargeSpend==0){
 				continue;
 			}
