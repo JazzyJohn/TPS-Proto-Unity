@@ -209,9 +209,9 @@ public class PlayerMainGui : MonoBehaviour {
 		if (guiState == GUIState.Dedicated) {
 			return;
 		}
-	
-		
-        if (pausegui.IsActive())
+
+
+        if (pausegui!=null&&pausegui.IsActive())
         
         {
 
@@ -285,7 +285,10 @@ public class PlayerMainGui : MonoBehaviour {
         {
             case GUIState.Normal:
                 hud._DeadGUI.DeActivate();
-                pausegui.BackToGame();
+                if (pausegui != null)
+                {
+                    pausegui.BackToGame();
+                }
                 stat.DeActivate();
                 respawnMenu.DeActivate();
                 hud.Activate();
@@ -293,7 +296,10 @@ public class PlayerMainGui : MonoBehaviour {
                 break;
             case GUIState.Respawn:
                 hud._DeadGUI.DeActivate();
-                pausegui.BackToGame();
+                if (pausegui != null)
+                {
+                    pausegui.BackToGame();
+                }
                 stat.DeActivate();
                 hud.DeActivate();
                 respawnMenu.Activate();
@@ -301,7 +307,10 @@ public class PlayerMainGui : MonoBehaviour {
                 break;
             case GUIState.Playerlist:
                 hud._DeadGUI.DeActivate();
-                pausegui.BackToGame();
+                if (pausegui != null)
+                {
+                    pausegui.BackToGame();
+                }
                 hud.DeActivate();
                 respawnMenu.DeActivate();
                 finished.DeActivate();
@@ -309,7 +318,10 @@ public class PlayerMainGui : MonoBehaviour {
                 break;
             case GUIState.KillCam:
                 hud._DeadGUI.Activate();
-                pausegui.BackToGame();
+                if (pausegui != null)
+                {
+                    pausegui.BackToGame();
+                }
                 stat.DeActivate();
                 respawnMenu.DeActivate();
                 finished.DeActivate();
@@ -317,7 +329,10 @@ public class PlayerMainGui : MonoBehaviour {
                 break;
             case GUIState.GameResult:
                 hud._DeadGUI.DeActivate();
-                pausegui.BackToGame();
+                if (pausegui != null)
+                {
+                    pausegui.BackToGame();
+                }
                 stat.DeActivate();
                 respawnMenu.DeActivate();
                 hud.DeActivate();
@@ -329,7 +344,10 @@ public class PlayerMainGui : MonoBehaviour {
                 respawnMenu.DeActivate();
                 hud.DeActivate();
                 finished.DeActivate();
-                pausegui.ActivateMenu();
+                if (pausegui != null)
+                {
+                    pausegui.ActivateMenu();
+                }
                 break;
             
             

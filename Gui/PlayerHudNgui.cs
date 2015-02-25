@@ -242,7 +242,10 @@ public class PlayerHudNgui : MonoBehaviour {
       
 		if (!hudpanel.enabled) {
 			hudpanel.enabled = true;
-            mapCamera.enabled = true;
+            if (mapCamera != null)
+            {
+                mapCamera.enabled = true;
+            }
 		}
 	}
 	public void DeActivate(){
@@ -250,9 +253,11 @@ public class PlayerHudNgui : MonoBehaviour {
         if (hudpanel.enabled)
         {
             hudpanel.enabled = false;
+            if (mapCamera != null)
+            {
 
-          
-            mapCamera.enabled = false;
+                mapCamera.enabled = false;
+            }
 
         }
 	}

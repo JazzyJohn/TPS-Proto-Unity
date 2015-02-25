@@ -184,8 +184,8 @@ public class NetworkController : MonoBehaviour {
     public void Connect(){
         if (_smartFox != null)
         {
-            //_smartFox.KillConnection();
-           // _smartFox.Disconnect();
+            
+            _smartFox.Disconnect();
         }
         if (SmartFoxConnection.IsInitialized)
         {
@@ -289,7 +289,7 @@ public class NetworkController : MonoBehaviour {
     public void OnConnection(BaseEvent evt)
     {
         bool success = (bool)evt.Params["success"];
-        string error = (string)evt.Params["error"];
+        string error = (string)evt.Params["errorMessage"];
 
         Debug.Log("On Connection callback got: " + success + " (error : <" + error + ">)");
 

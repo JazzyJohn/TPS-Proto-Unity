@@ -729,10 +729,11 @@ public class ServerHolder : MonoBehaviour
 		if(!shouldLoad){
             MapDownloader loader = FindObjectOfType<MapDownloader>();
             GameObject menu = Instantiate(loader.playerHud, Vector3.zero, Quaternion.identity) as GameObject;
-
-            menu.transform.parent = Camera.main.transform;
+            HUDHolder holder = FindObjectOfType<HUDHolder>();
+            menu.transform.parent = FindObjectOfType<GUIRootHolder>().transform;
             menu.transform.localPosition = Vector3.zero;
             menu.transform.localRotation = Quaternion.identity;
+            menu.transform.localScale = holder.scale;
             Camera.main.GetComponent<PlayerMainGui>().enabled = true;
         
             NetworkController.Instance.pause = false;
