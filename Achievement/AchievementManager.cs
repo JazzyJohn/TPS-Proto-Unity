@@ -14,6 +14,12 @@ public class AchievementParam{
 
 
 }
+public enum AchievementType{
+	ACHIEVEMENT,
+	DAYLIC,
+	TASK
+
+}
 public class Achievement{
 	public Dictionary<string,AchievementParam> achivParams = new Dictionary<string, AchievementParam>();
 	public String name;
@@ -21,6 +27,7 @@ public class Achievement{
 	public String description;
   	public int achievementId;
 	public Texture2D textureIcon;
+	public AchievementType type;
 	public bool isDone = false;
 	public int amount  =0;
 	public bool isMultiplie = false;
@@ -119,6 +126,7 @@ public class AchievementManager : MonoBehaviour, LocalPlayerListener, GameListen
 			bool open = bool.Parse(node.SelectSingleNode("open").InnerText);
             achivment.isDone = open;
             achivment.isMultiplie = bool.Parse(node.SelectSingleNode("multiplie").InnerText);
+			achivment.type = (AchievementType)Enum.Parse(typeof(AchievementType), node.SelectSingleNode("type").InnerText);
 			//Debug.Log(open);
             ongoingAchivment.Add(achivment);
 			if(open){
@@ -228,6 +236,9 @@ public class AchievementManager : MonoBehaviour, LocalPlayerListener, GameListen
 		}
 	}
 	
+	
+	
+	
 	void OnDestroy(){
 		if (myThread != null) {
 			myThread.Abort ();
@@ -276,7 +287,20 @@ public class AchievementManager : MonoBehaviour, LocalPlayerListener, GameListen
         for (int i = 0; i < ongoingAchivment.Count; i++)
         {
           //  Debug.Log(ongoingAchivment[i].name +"  " + ongoingAchivment[i].isMultiplie);
-            if (ongoingAchivment[i].isMultiplie)
+            if (ongoingAchivment[i].type == AchievementType.DAYLIC)
+            {
+                list.Add(ongoingAchivment[i]);
+            }
+        }
+        return list;
+    }
+	public List<Achievement> GetTask()
+    {
+        List<Achievement> list = new List<Achievement>();
+        for (int i = 0; i < ongoingAchivment.Count; i++)
+        {
+          //  Debug.Log(ongoingAchivment[i].name +"  " + ongoingAchivment[i].isMultiplie);
+            if (ongoingAchivment[i].type == AchievementType.TASK)
             {
                 list.Add(ongoingAchivment[i]);
             }
