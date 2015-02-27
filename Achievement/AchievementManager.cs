@@ -95,6 +95,8 @@ public class AchievementManager : MonoBehaviour, LocalPlayerListener, GameListen
 	}
 	//parse XML string to normal Achivment Pattern
 	protected IEnumerator ParseList(string XML){
+		incomeQueue.clear();
+		outcomeQueue.clear();
 		XmlDocument xmlDoc = new XmlDocument();
 		xmlDoc.LoadXml(XML);
 //       Debug.Log(XML);
@@ -174,21 +176,31 @@ public class AchievementManager : MonoBehaviour, LocalPlayerListener, GameListen
 								if(IsPractice){
 									continue;
 								}
-								foreach (Achievement achiv in ongoingAchivment) {
-                                        if (achiv.isDone)
-                                        {
-                                            continue;
-                                        }
-										if (achiv.achivParams.ContainsKey (mess.param)) {
-                                            //Debug.Log(mess.param + "  " + mess.delta + "  " + achiv.achivParams[mess.param].current);
-												achiv.achivParams [mess.param].current += mess.delta;
-										}
-										foreach(AchievementParam param in achiv.achivParams.Values ) {
-											if(param.resetEvent==mess.param){
-												param.current =0;
+								if(mess.param==PARAM_TASK_RESET){
+									foreach (Achievement achiv in ongoingAchivment) {
+										  if (achiv.type == AchievementType.DAYLIC){
+												foreach(AchievementParam param in achiv.achivParams.Values ) {
+													param.current =0;
+												}
+										  }
+									}
+								}else{
+									foreach (Achievement achiv in ongoingAchivment) {
+											if (achiv.isDone)
+											{
+												continue;
 											}
-										
-										}
+											if (achiv.achivParams.ContainsKey (mess.param)) {
+												//Debug.Log(mess.param + "  " + mess.delta + "  " + achiv.achivParams[mess.param].current);
+													achiv.achivParams [mess.param].current += mess.delta;
+											}
+											foreach(AchievementParam param in achiv.achivParams.Values ) {
+												if(param.resetEvent==mess.param){
+													param.current =0;
+												}										
+											}
+											
+									}
 								}
 						}
 						ongoingAchivment.ForEach (delegate(Achievement obj) {
@@ -236,9 +248,65 @@ public class AchievementManager : MonoBehaviour, LocalPlayerListener, GameListen
 		}
 	}
 	
+	IEnumerator SkipAchive(int id){
+		WWWForm form = new WWWForm ();
+			
+		form.AddField ("uid", UID);
+		form.AddField ("id", id);
+        WWW w = StatisticHandler.GetMeRightWWW(form, StatisticHandler.SKIP_ACHIVE);
+		yield return w;
+        Debug.Log(w.text);
+		XmlDocument xmlDoc = new XmlDocument();
+		xmlDoc.LoadXml(w.text);
+		
+		if(xmlDoc.SelectSingleNode("result/error").InnerText=="0"){
+			myThread.Abort ();
+			form = new WWWForm ();
+			
+			form.AddField ("uid", UID);
+			WWW w = StatisticHandler.GetMeRightWWW(form, StatisticHandler.LOAD_ACHIVE);
+		
+			yield return w;
+			//Debug.Log (w.text);
+			IEnumerator numenator = ParseList (w.text);
+
+			while(numenator.MoveNext()){
+				yield return numenator.Current;
+			}
+		}else{
+		
+		}
+	}
 	
+	IEnumerator UpdateTask(){
+		WWWForm form = new WWWForm ();
+			
+		form.AddField ("uid", UID);
 	
-	
+        WWW w = StatisticHandler.GetMeRightWWW(form, StatisticHandler.UPDATE_ACHIVE);
+		yield return w;
+        Debug.Log(w.text);
+		XmlDocument xmlDoc = new XmlDocument();
+		xmlDoc.LoadXml(w.text);
+		
+		if(xmlDoc.SelectSingleNode("result/error").InnerText=="0"){
+			myThread.Abort ();
+			form = new WWWForm ();
+			
+			form.AddField ("uid", UID);
+			WWW w = StatisticHandler.GetMeRightWWW(form, StatisticHandler.LOAD_ACHIVE);
+		
+			yield return w;
+			//Debug.Log (w.text);
+			IEnumerator numenator = ParseList (w.text);
+
+			while(numenator.MoveNext()){
+				yield return numenator.Current;
+			}
+		}else{
+		
+		}
+	}
 	void OnDestroy(){
 		if (myThread != null) {
 			myThread.Abort ();

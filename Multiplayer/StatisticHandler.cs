@@ -67,6 +67,12 @@ public class StatisticHandler : MonoBehaviour {
 	public static string CHARGE_DATA ="chargedata";
 	
 	public static string REGISTRATION = "registration";
+	
+	public static string STATISTIC_DATA = "statisticdata";
+	
+	public static string SKIP_ACHIVE = "skipTask";
+	
+	public static string UPDATE_ACHIVE = "finishTask";
 
 	public static string LOGIN = "login";
 	

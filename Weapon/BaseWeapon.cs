@@ -36,6 +36,10 @@ public class BaseWeapon : DestroyableNetworkObject {
     public int shootPerCharge = 30;
 	
 	private int shootCounter= 0;
+	
+	private int hitCounter=0;
+	
+	private int totalShootCount=0;
 
     private static float DAMAGE_BROKE_PERCEN = 10.0f;
 
@@ -392,7 +396,11 @@ public class BaseWeapon : DestroyableNetworkObject {
     }
 	
 	public void PawnDeath(){
-		 ItemManager.instance.SetShootCount(SQLId,shootCounter);
+		if(foxView.isMine&&!owner.isAi){
+			ItemManager.instance.SetShootCount(SQLId,shootCounter);
+			StatisticManager.instance.AmmoSpent(totalShootCount);
+			StatisticManager.instance.AmmoHit(hitCounter);
+		}
 	}
 	public void RemoteAttachWeapon(Pawn newowner,bool state){
 		if(state){
@@ -994,6 +1002,7 @@ public class BaseWeapon : DestroyableNetworkObject {
         }
 		if(foxView.isMine&&!owner.isAi){
 			shootCounter++;
+			totalShootCount++;
 			if(shootCounter>=shootPerCharge){
 				shootCounter= 0;
 				charge = ItemManager.instance.LowerCharge(SQLId);
@@ -1001,6 +1010,13 @@ public class BaseWeapon : DestroyableNetworkObject {
 		}
 		
     }
+	
+	public virtual void HitWithProjectile(){
+		if(foxView.isMine&&!owner.isAi){
+			hitCounter++;
+			
+		}
+	}
 	public virtual bool CanShoot (){
         if (_waitForRelease)
         {

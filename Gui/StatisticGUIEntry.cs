@@ -21,7 +21,9 @@ public class StatisticGUIEntry : MonoBehaviour {
             string formated = string.Format("{0:D2} : {1:D2} : {2:D2} ", duration.Hours, duration.Minutes, duration.Seconds);
 
             label.text = formated;
-        }
+        }else if(key=="accuracy"){
+			label.text = value.ToString()+"%";
+		}
         else
         {
             label.text = value.ToString();

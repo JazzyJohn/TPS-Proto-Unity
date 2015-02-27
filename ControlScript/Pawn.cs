@@ -719,11 +719,13 @@ public class Pawn : DamagebleObject
 				AddEffect(damage.hitPosition,damage.pushDirection ,damage.type);
 			}
 			if(CanBeDamaged()){
+				StatisticManager.instance.AddDamage(damage.Damage);
 				base.Damage(damage, killer);
 			}
         }
         if (killerPawn != null && killerPawn.foxView.isMine)
         {
+			StatisticManager.instance.AddDamageDeliver(damage.Damage);
             if (foxView.isMine)
             {
    			    if (damage.sendMessage)
@@ -781,12 +783,14 @@ public class Pawn : DamagebleObject
         {
             eventHandler.Damage(killer, damage.Damage);
         }
+		
         //Debug.Log ("DAMAGE");
 		if (damage.sendMessage)
 		{
 			AddEffect(damage.hitPosition,damage.pushDirection ,damage.type);
 		}
 		if(CanBeDamaged()){
+			StatisticManager.instance.AddDamage(damage.Damage);
 			base.Damage(damage, killer);
 		}
     }

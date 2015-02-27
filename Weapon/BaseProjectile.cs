@@ -70,6 +70,8 @@ public class BaseProjectile : MonoBehaviour
     private float curSpeed;
 	[HideInInspector]
     public GameObject owner;
+	
+	public BaseWeapon shoota;
 	[HideInInspector]
     public Transform target;
     public Vector3 targetOffset; 
@@ -229,6 +231,7 @@ public class BaseProjectile : MonoBehaviour
         }
 	//	Debug.Log("id " + projId+ " position " + mTransform.position + " rotation "+ mTransform.rotation);
        // mRigidBody.useGravity = false;
+		shoota= owner.GetComponent<Pawn>().curWeapon;
     }
 	
 	public float GetSpeedChange(){
@@ -389,7 +392,7 @@ public class BaseProjectile : MonoBehaviour
     {
 
         obj.Damage(inDamage, owner);
-       
+		shoota.HitWithProjectile();
         //Debug.Log ("HADISH INTO SOME PLAYER! " + hit.transform.gameObject.name);
         //Destroy (gameObject, 0.1f);
     }

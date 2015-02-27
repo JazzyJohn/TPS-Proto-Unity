@@ -486,7 +486,7 @@ public class Player : MonoBehaviour {
                      }
                      PVPGameRule.instance.PlayerDeath();
                      DeathUpdate();
-                     StatisticHandler.SendPlayerKillbyNPC(UID, PlayerName);
+                    // StatisticHandler.SendPlayerKillbyNPC(UID, PlayerName);
                  }
 			}
     }
@@ -548,7 +548,7 @@ public class Player : MonoBehaviour {
                 EventHolder.instance.FireEvent(typeof(LocalPlayerListener), "EventKilledByFriend", this, Killer);
             }
 
-            StatisticHandler.SendPlayerKillbyPlayer(UID, PlayerName, Killer.UID, Killer.PlayerName);
+            //StatisticHandler.SendPlayerKillbyPlayer(UID, PlayerName, Killer.UID, Killer.PlayerName);
         }
         else
         {
@@ -556,7 +556,7 @@ public class Player : MonoBehaviour {
             {
                 Pawn killer = NetworkController.GetView(pawnViewId).GetComponent<Pawn>();
                 PlayerMainGui.instance.InitKillCam(killer);
-                StatisticHandler.SendPlayerKillbyNPC(UID, PlayerName);
+               // StatisticHandler.SendPlayerKillbyNPC(UID, PlayerName);
             }
         }	
 
@@ -650,7 +650,7 @@ public class Player : MonoBehaviour {
             //TODO: move text to config
             PlayerMainGui.instance.Annonce(AnnonceType.AIKILL,addtype, deadPawn.publicName);
             EventHolder.instance.FireEvent(typeof(LocalPlayerListener), "EventPawnKillAI", this, killinfo);
-            StatisticHandler.SendPlayerKillNPC(UID, PlayerName);
+           // StatisticHandler.SendPlayerKillNPC(UID, PlayerName);
 		}
 
 

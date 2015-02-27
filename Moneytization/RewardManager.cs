@@ -42,9 +42,13 @@ public static class ParamLibrary{
     public static string PARAM_DOUBLE_JUMP = "DoubeJump";
     public static string PARAM_RELOAD = "Reload";
     public static string PARAM_JUMP = "Jump";
-
-
+	public static string PARAM_GRENADE_KILL = "GrenadeKill";
+	public static string PARAM_DAMAGE = "Damage";
+	public static string PARAM_DAMAGE_DELIVER= "DamageDeliver";
+	public static string PARAM_AMMO_SPENT= "AmmoSpent";
+	public static string PARAM_AMMO_HIT= "AmmoHit";
 	
+	public static string PARAM_TASK_RESET= "taskReset";
 }
 
 public class  RewardManager : MonoBehaviour, LocalPlayerListener,GameListener{ 
