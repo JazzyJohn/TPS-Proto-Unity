@@ -77,6 +77,7 @@ public class MainMenuGUI : MonoBehaviour {
         {
             panel.gameObject.SetActive(false);
         }
+        FindObjectOfType<StatisticGUI>().Init();
        
     }
 

@@ -45,7 +45,9 @@ public class BaseSocEvent{
 	public int[] goldReward;
 	
 	public int[] cashReward;
-		
+
+    public int[] expReward;
+
 	public Winner[] winners;
 }
 
@@ -59,6 +61,8 @@ public class Operation : BaseSocEvent
     public int toSendCounter;
 
     public int myCounter;
+
+    public int myPlace;
 
     public void Increment(){
         myCounter++;
@@ -243,6 +247,8 @@ public class TournamentManager : MonoBehaviour, LocalPlayerListener, GameListene
         {
             oper.goldReward[i] = int.Parse(rewards[i].InnerText);
         }
+
+        oper.expReward = new int[oper.prizePlaces+1];
         XmlNodeList winners = node.SelectNodes("winners");
         oper.winners = new Winner[winners.Count];
         for (int j = 0; j < winners.Count; j++)
@@ -257,6 +263,7 @@ public class TournamentManager : MonoBehaviour, LocalPlayerListener, GameListene
         oper.desctiption = node.SelectSingleNode("desctiption").InnerText;
         oper.counterEvent = node.SelectSingleNode("counterEvent").InnerText;
         oper.myCounter = int.Parse(node.SelectSingleNode("myCounter").InnerText);
+        oper.myPlace = int.Parse(node.SelectSingleNode("myPlace").InnerText);
     }
 	
 	public SocUser GetUser(string uid){

@@ -27,7 +27,7 @@ public class AchivGUI : MonoBehaviour {
         }
        
         picture.mainTexture = achivment.textureIcon;
-		Main.statistic.GetParent(this);
+//		Main.statistic.GetParent(this);
 	}
 
 	// Use this for initialization

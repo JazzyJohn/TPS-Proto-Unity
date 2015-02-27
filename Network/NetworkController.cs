@@ -289,7 +289,7 @@ public class NetworkController : MonoBehaviour {
     public void OnConnection(BaseEvent evt)
     {
         bool success = (bool)evt.Params["success"];
-        string error = (string)evt.Params["errorMessage"];
+        string error = (string)evt.Params["error"];
 
         Debug.Log("On Connection callback got: " + success + " (error : <" + error + ">)");
 

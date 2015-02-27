@@ -50,6 +50,8 @@ public class GlobalPlayer : MonoBehaviour {
 	}
 	public List<string> friendsInfo = new List<string>();
 
+    private Dictionary<string, int> statisticData = new Dictionary<string, int>();
+
 	public string PlayerName="VK NAME";
 
 	public PLATFORMTYPE platformType;
@@ -267,9 +269,25 @@ public class GlobalPlayer : MonoBehaviour {
 				break;
 			}
 		}
-		
+        list = xmlDoc.SelectNodes("player/statistic/entry");
+        foreach (XmlNode node in list)
+        {
+            statisticData.Add(node.SelectSingleNode("key").InnerText, int.Parse(node.SelectSingleNode("value").InnerText));
+
+        }
 		TournamentManager.instance.ParseData(xmlDoc);
 	}
+
+
+    public int GetStatisticData(string key)
+    {
+
+        if (statisticData.ContainsKey(key))
+        {
+            return statisticData[key];
+        }
+        return 0;
+    }
 	
 	public void MathcEnd(){
         if (stamina > 0&& !GameRule.instance.IsPractice())
