@@ -11,20 +11,17 @@ public class StatisticGUI : MonoBehaviour {
 
     public MainMenuGUI MainMenu;
 
-	public void Init(){
+	
+	public void ShowProfile()
+	{
         StatisticGUIEntry[] etnrys = FindObjectsOfType<StatisticGUIEntry>();
         foreach (StatisticGUIEntry entry in etnrys)
         {
             entry.Init(GlobalPlayer.instance.GetStatisticData(entry.key));
         }
 		
-	
-	}
-	public void ShowProfile()
-	{
-
      
-			statisticPanel.alpha= 1.0f;
+		statisticPanel.alpha= 1.0f;
 	
       
 	}

@@ -191,9 +191,9 @@ public class ServerHolder : MonoBehaviour
             roomData.name = room.Name;
             roomData.playerCount = room.UserCount;
             roomData.maxPlayers = room.MaxUsers;
-            if (room.GetVariable("gameRule") != null)
+            if (room.GetVariable("ruleClass") != null)
             {
-                string[] temp = room.GetVariable("gameRule").GetStringValue().Split('.');
+                string[] temp = room.GetVariable("ruleClass").GetStringValue().Split('.');
                 roomData.mode = temp[temp.Length - 1];
                 roomData.map = room.GetVariable("map").GetStringValue();
             }

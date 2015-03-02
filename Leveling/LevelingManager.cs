@@ -234,7 +234,13 @@ public class LevelingManager : MonoBehaviour, LocalPlayerListener,GameListener{
             ItemManager.instance.ReloadItem();
 			
 		}
-		
+        node = xmlDoc.SelectSingleNode("result/open_set");
+        if (node != null)
+        {
+
+            GlobalPlayer.instance.open_set = int.Parse(node.InnerText);
+
+        }
 
 	}
 

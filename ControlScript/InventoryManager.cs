@@ -130,6 +130,22 @@ public class InventoryManager : MonoBehaviour {
 			allAmmo[i].maxSize = allTypeInGame[i].maxSize;
 		}
 	}
+    public void RewrtieMaxAmmo(int newMax, AMMOTYPE type)
+    {
+        if (newMax == 0)
+        {
+            return;
+        }
+        for (int i = 0; i < allAmmo.Length; i++)
+        {
+            if (allAmmo[i].type == type)
+            {
+                allAmmo[i].maxSize = newMax;
+                allAmmo[i].amount = newMax;
+                return;
+            }
+        }
+    }
 	//Check is there ammo in bag
 	public virtual bool HasAmmo(AMMOTYPE ammo){
 		for(int i=0;i<allAmmo.Length;i++){

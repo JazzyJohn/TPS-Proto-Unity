@@ -10,6 +10,7 @@ public class OperationGUI : MonoBehaviour {
 
     public UIPanel mainPanel;
 
+    public MissionGUI mission;
 
     public Transform winnerPrefab;
 
@@ -21,6 +22,7 @@ public class OperationGUI : MonoBehaviour {
     {
         mainPanel.alpha = 1.0f;
         DrawOperations();
+        mission.Draw();
     }
     public void CloseOperation()
     {

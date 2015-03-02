@@ -381,6 +381,10 @@ public class ItemManager : MonoBehaviour {
 	 StartCoroutine(ReLoadItemsSync());
 	}
 	public InventorySlot GetItem(string id){
+        if (!allShopSlot.ContainsKey(id))
+        {
+            return null;
+        }
 		return allShopSlot[id];
 	}
 	public IEnumerator ReLoadItemsSync(){
@@ -684,10 +688,13 @@ public class ItemManager : MonoBehaviour {
             {
                 WeaponIndex index = new WeaponIndex(node.SelectSingleNode("weaponId").InnerText);
                 index.gameClass = int.Parse(node.SelectSingleNode("gameClass").InnerText);
+                if (weaponIndexTable.ContainsKey(index.prefabId))
+                {
+                    int gameSlot = (int)weaponIndexTable[index.prefabId].gameSlot;
+                    int set = int.Parse(node.SelectSingleNode("set").InnerText);
+                    Choice.SetChoice(gameSlot, index.gameClass, index, set);
+                }
 				
-				int gameSlot =(int)weaponIndexTable[index.prefabId].gameSlot;
-				int set = int.Parse(node.SelectSingleNode("set").InnerText);
-				Choice.SetChoice(gameSlot, index.gameClass, index,set);
                
 
             }
@@ -726,6 +733,13 @@ public class ItemManager : MonoBehaviour {
 			return weaponPrefabsListbyId[0];
 		}
 	}
+
+    public BaseWeapon GetWeaponprefabByID(int index)
+    {
+   
+            return weaponPrefabsListbyId[index];
+       
+    }
     public WeaponInventorySlot GetWeaponSlotbByID(WeaponIndex index)
     {
         return weaponIndexTable[index.prefabId];
@@ -1235,9 +1249,12 @@ public class ItemManager : MonoBehaviour {
                 gui.Shop.UpdateLot();
             }
             buyBlock = false;
+            ///yield return new WaitForSeconds(10.0f);
+            GUIHelper.ConnectionStop();
         }
         else
         {
+            GUIHelper.ConnectionStop();
             buyBlock = false;
             if (gui != null)
             {
@@ -1248,7 +1265,7 @@ public class ItemManager : MonoBehaviour {
                 gui.SetError(xmlDoc.SelectSingleNode("result/errortext").InnerText);
             }
         }
-        GUIHelper.ConnectionStop();
+        
 		//buyBlock =false;
 	}
 	
@@ -1346,7 +1363,7 @@ public class ItemManager : MonoBehaviour {
         StartCoroutine(_UseRepairKit(itemId, kit_id, gui));
 	
 	}
-	
+ 
 	IEnumerator _UseRepairKit(string id,string kit_id,InventoryGUI gui){
 		repairBlock= true;
 		WWWForm form = new WWWForm();
@@ -1380,7 +1397,36 @@ public class ItemManager : MonoBehaviour {
         GUIHelper.ConnectionStop();
 		repairBlock= false;
 	}
+    public void BuyNextSet()
+    {
+        StartCoroutine(_BuyNextSet());
+    }
 
+    IEnumerator _BuyNextSet()
+    {
+        repairBlock= true;
+		WWWForm form = new WWWForm();
+        GUIHelper.ShowConnectionStart();
+        form.AddField("uid", UID);
+       
+        WWW w = StatisticHandler.GetMeRightWWW(form,StatisticHandler.BUY_NEXT_SET);
+      
+        yield return w;
+		
+		XmlDocument xmlDoc = new XmlDocument();
+		xmlDoc.LoadXml(w.text);
+        Debug.Log(w.text);
+        if (xmlDoc.SelectSingleNode("result/error").InnerText == "0")
+        {
+            GlobalPlayer.instance.open_set++;
+            GlobalPlayer.instance.gold -= int.Parse(xmlDoc.SelectSingleNode("result/price").InnerText);
+            shop.ResetSet();
+        }
+        else
+        {
+
+        }
+    }
     public void DesintegrateItem(string id, InventoryGUI gui)
     {
 		if(desintegrateBlock){
@@ -1476,6 +1522,9 @@ public class ItemManager : MonoBehaviour {
 
 	 public List<SmallShopData> GetAllStim(){
 		List<SmallShopData> allstims = new List<SmallShopData>();
+        if (stimPackDictionary==null){
+            return allstims;
+        }
 		foreach(StimPack pack in stimPackDictionary){
 			SmallShopData data=null;
 			if(shopItems.ContainsKey(ShopSlotType.ETC)){

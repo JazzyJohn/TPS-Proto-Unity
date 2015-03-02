@@ -41,11 +41,18 @@ public class InvItemGUI : MonoBehaviour {
 
     public void SetItem(InventorySlot _item)
     {
+        if (_item == null)
+        {
+            return;
+        }
         
         item = _item;
         GA.API.Design.NewEvent("GUI:MainMenu:Inventory:SelectItem:" + _item.engName);
         Texture.mainTexture = null;
-        name.text = _item.name;
+        if (name != null)
+        {
+            name.text = _item.name;
+        }
         if (item.isAvailable())
         {
             if (item.prices[0].type == BuyPrice.KP_PRICE)

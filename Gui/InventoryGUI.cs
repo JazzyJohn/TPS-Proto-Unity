@@ -37,8 +37,14 @@ public class InventoryGUI : MonoBehaviour {
     public InventoryGroup group;
 
     public UILabel setLabel;
+
+    public UIRect canBuy;
+
+    public UILabel canBuyText;
+
+    public UIRect mustOpen;
 	
-	
+    public UILabel  mustOpenText;
 	
     Dictionary<string,InvItemGUI> AllItems= new Dictionary<string,InvItemGUI>();
 
@@ -157,7 +163,27 @@ public class InventoryGUI : MonoBehaviour {
                 itemPanels[curSet].alpha = 1.0f;
                 break;
         }
+        mustOpen.alpha = 0.0f;
+        canBuy.alpha = 0.0f;
+        if (curSet+1 > GlobalPlayer.instance.open_set)
+        {
+            if (curSet+1  > GlobalPlayer.instance.open_set+1)
+            {
+                mustOpenText.text = TextGenerator.instance.GetMoneyText("openSet", curSet * 10);
+                mustOpen.alpha = 1.0f;
+            }
+            else
+            {
+                canBuyText.text = TextGenerator.instance.GetMoneyText("openSet", curSet * 10);
+                canBuy.alpha = 1.0f;
+            }
+
+        }
 	}
+    public void ResetSet()
+    {
+        ShowSet(curSet);
+    }
     public void ShowGroup(int newGroup)
     {
         group = (InventoryGroup)newGroup;
@@ -221,7 +247,12 @@ public class InventoryGUI : MonoBehaviour {
 		ItemManager.instance.UseRepairKit(lotItemGUI.item.id,id,this);
 	
 	}
-	
+    public void BuyNextSet()
+    {
+        GA.API.Design.NewEvent("GUI:MainMenu:Inventory:BuySet:" +(curSet+1).ToString(), 1);
+
+        ItemManager.instance.BuyNextSet();
+    }
 	
 	public void DisentegrateAsk(){
 		askWindow.text.text =  TextGenerator.instance.GetSimpleText("DisentegrateAsk");

@@ -186,7 +186,8 @@ public class BaseProjectile : MonoBehaviour
     }
    public void Init(){
         shouldInit = false;
-
+        shoota = owner.GetComponent<Pawn>().CurWeapon;
+//        Debug.Log(owner.GetComponent<Pawn>().CurWeapon);
 		switch (attraction)
         {
           
@@ -231,7 +232,7 @@ public class BaseProjectile : MonoBehaviour
         }
 	//	Debug.Log("id " + projId+ " position " + mTransform.position + " rotation "+ mTransform.rotation);
        // mRigidBody.useGravity = false;
-		shoota= owner.GetComponent<Pawn>().curWeapon;
+		
     }
 	
 	public float GetSpeedChange(){

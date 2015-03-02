@@ -43,12 +43,13 @@ public class SelectedItemGUI : MonoBehaviour {
 			_item =ItemManager.instance.GetFirstItemForSlot((GameClassEnum)Choice._Player, slot);
 		}
 		if(_item==null){
+            name.alpha = 1.0f;
 			return;
 		}
         item = _item;
         GA.API.Design.NewEvent("GUI:MainMenu:Inventory:SelectItem:" + _item.engName);
         Texture.mainTexture = null;
-        name.text = _item.name;
+        name.alpha = 0.0f;
         
     }
         

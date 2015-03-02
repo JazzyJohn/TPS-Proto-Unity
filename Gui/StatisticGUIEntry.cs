@@ -17,7 +17,7 @@ public class StatisticGUIEntry : MonoBehaviour {
     {
         if (key == "time")
         {
-            TimeSpan duration = new TimeSpan(value);
+            TimeSpan duration = TimeSpan.FromSeconds(value);
             string formated = string.Format("{0:D2} : {1:D2} : {2:D2} ", duration.Hours, duration.Minutes, duration.Seconds);
 
             label.text = formated;

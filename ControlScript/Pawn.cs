@@ -719,13 +719,13 @@ public class Pawn : DamagebleObject
 				AddEffect(damage.hitPosition,damage.pushDirection ,damage.type);
 			}
 			if(CanBeDamaged()){
-				StatisticManager.instance.AddDamage(damage.Damage);
+				StatisticManager.instance.AddDamage(Mathf.RoundToInt(damage.Damage));
 				base.Damage(damage, killer);
 			}
         }
         if (killerPawn != null && killerPawn.foxView.isMine)
         {
-			StatisticManager.instance.AddDamageDeliver(damage.Damage);
+			StatisticManager.instance.AddDamageDeliver(Mathf.RoundToInt(damage.Damage));
             if (foxView.isMine)
             {
    			    if (damage.sendMessage)
@@ -790,7 +790,7 @@ public class Pawn : DamagebleObject
 			AddEffect(damage.hitPosition,damage.pushDirection ,damage.type);
 		}
 		if(CanBeDamaged()){
-			StatisticManager.instance.AddDamage(damage.Damage);
+			StatisticManager.instance.AddDamage(Mathf.RoundToInt(damage.Damage));
 			base.Damage(damage, killer);
 		}
     }

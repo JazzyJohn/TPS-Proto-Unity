@@ -24,6 +24,11 @@ public class BaseWeapon : DestroyableNetworkObject {
 	public SLOTTYPE slotType;
 	
 	public AMMOTYPE ammoType;
+    /// <summary>
+    /// maxAmmmo for rewriting
+    /// </summary>
+    public int maxAmmoAmount;
+
 	//ROOT OF ALL EVIL SECTION
 	
     /// <summary>
@@ -362,6 +367,9 @@ public class BaseWeapon : DestroyableNetworkObject {
 
         }
         initStats = true;
+
+        owner.ivnMan.RewrtieMaxAmmo(maxAmmoAmount,ammoType);
+
         reloadTime = reloadTime * owner.GetPercentValue(CharacteristicList.RELOAD_SPEED);
         fireInterval = fireInterval * owner.GetPercentValue(CharacteristicList.FIRE_RATE);
 

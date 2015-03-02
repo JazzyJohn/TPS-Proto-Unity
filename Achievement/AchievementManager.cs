@@ -20,11 +20,20 @@ public enum AchievementType{
 	TASK
 
 }
+public struct AchievementReward
+{
+    public int cash;
+    public int gold;
+    public int skill;
+}
 public class Achievement{
 	public Dictionary<string,AchievementParam> achivParams = new Dictionary<string, AchievementParam>();
 	public String name;
     public String engName;
 	public String description;
+    public Achievement next;
+    public AchievementReward reward = new AchievementReward();
+    public int order;
   	public int achievementId;
 	public Texture2D textureIcon;
 	public AchievementType type;
@@ -95,8 +104,8 @@ public class AchievementManager : MonoBehaviour, LocalPlayerListener, GameListen
 	}
 	//parse XML string to normal Achivment Pattern
 	protected IEnumerator ParseList(string XML){
-		incomeQueue.clear();
-		outcomeQueue.clear();
+        incomeQueue.Clear();
+		outcomeQueue.Clear();
 		XmlDocument xmlDoc = new XmlDocument();
 		xmlDoc.LoadXml(XML);
 //       Debug.Log(XML);
@@ -108,8 +117,21 @@ public class AchievementManager : MonoBehaviour, LocalPlayerListener, GameListen
 			achivment.name = node.SelectSingleNode("name").InnerText;
             achivment.engName = achivment.name.Unidecode();
 			achivment.description = node.SelectSingleNode("description").InnerText;
-           
+            if (node.SelectSingleNode("nextdescription") != null)
+            {
+                	Achievement nextachivment = new Achievement();
+                    nextachivment.description = node.SelectSingleNode("nextdescription").InnerText;
+                    nextachivment.name = node.SelectSingleNode("name").InnerText;
+                    achivment.next = nextachivment;
+                    nextachivment.reward.cash = int.Parse(node.SelectSingleNode("nextcashreward").InnerText);
+                    nextachivment.reward.gold = int.Parse(node.SelectSingleNode("nextgoldreward").InnerText);
+                    nextachivment.reward.skill = int.Parse(node.SelectSingleNode("nextskillreward").InnerText);
+            }
+            achivment.reward.cash = int.Parse(node.SelectSingleNode("cashreward").InnerText);
+            achivment.reward.gold = int.Parse(node.SelectSingleNode("goldreward").InnerText);
+            achivment.reward.skill = int.Parse(node.SelectSingleNode("skillreward").InnerText);
 			achivment.achievementId = int.Parse(node.SelectSingleNode("id").InnerText);
+            achivment.order = int.Parse(node.SelectSingleNode("order").InnerText);
 			WWW www = StatisticHandler.GetMeRightWWW( node.SelectSingleNode ("icon").InnerText);
 		
 			yield return www;
@@ -176,7 +198,8 @@ public class AchievementManager : MonoBehaviour, LocalPlayerListener, GameListen
 								if(IsPractice){
 									continue;
 								}
-								if(mess.param==PARAM_TASK_RESET){
+                                if (mess.param == ParamLibrary.PARAM_TASK_RESET)
+                                {
 									foreach (Achievement achiv in ongoingAchivment) {
 										  if (achiv.type == AchievementType.DAYLIC){
 												foreach(AchievementParam param in achiv.achivParams.Values ) {
@@ -248,7 +271,7 @@ public class AchievementManager : MonoBehaviour, LocalPlayerListener, GameListen
 		}
 	}
 	
-	IEnumerator SkipAchive(int id){
+	public IEnumerator SkipAchive(int id){
 		WWWForm form = new WWWForm ();
 			
 		form.AddField ("uid", UID);
@@ -264,7 +287,7 @@ public class AchievementManager : MonoBehaviour, LocalPlayerListener, GameListen
 			form = new WWWForm ();
 			
 			form.AddField ("uid", UID);
-			WWW w = StatisticHandler.GetMeRightWWW(form, StatisticHandler.LOAD_ACHIVE);
+			w = StatisticHandler.GetMeRightWWW(form, StatisticHandler.LOAD_ACHIVE);
 		
 			yield return w;
 			//Debug.Log (w.text);
@@ -273,12 +296,19 @@ public class AchievementManager : MonoBehaviour, LocalPlayerListener, GameListen
 			while(numenator.MoveNext()){
 				yield return numenator.Current;
 			}
+            GlobalPlayer.instance.gold -= int.Parse(xmlDoc.SelectSingleNode("result/price").InnerText);
+            MissionGUI gui = FindObjectOfType<MissionGUI>();
+            if (gui != null)
+            {
+                gui.Draw();
+            }
 		}else{
 		
 		}
 	}
-	
-	IEnumerator UpdateTask(){
+
+    public IEnumerator UpdateTask()
+    {
 		WWWForm form = new WWWForm ();
 			
 		form.AddField ("uid", UID);
@@ -294,7 +324,7 @@ public class AchievementManager : MonoBehaviour, LocalPlayerListener, GameListen
 			form = new WWWForm ();
 			
 			form.AddField ("uid", UID);
-			WWW w = StatisticHandler.GetMeRightWWW(form, StatisticHandler.LOAD_ACHIVE);
+			w = StatisticHandler.GetMeRightWWW(form, StatisticHandler.LOAD_ACHIVE);
 		
 			yield return w;
 			//Debug.Log (w.text);
@@ -303,6 +333,12 @@ public class AchievementManager : MonoBehaviour, LocalPlayerListener, GameListen
 			while(numenator.MoveNext()){
 				yield return numenator.Current;
 			}
+            GlobalPlayer.instance.gold -= int.Parse(xmlDoc.SelectSingleNode("result/price").InnerText);
+            MissionGUI gui = FindObjectOfType<MissionGUI>();
+            if (gui != null)
+            {
+                gui.Draw();
+            }
 		}else{
 		
 		}
@@ -362,15 +398,15 @@ public class AchievementManager : MonoBehaviour, LocalPlayerListener, GameListen
         }
         return list;
     }
-	public List<Achievement> GetTask()
+	public Achievement[] GetTask()
     {
-        List<Achievement> list = new List<Achievement>();
+        Achievement[] list = new Achievement[3];
         for (int i = 0; i < ongoingAchivment.Count; i++)
         {
           //  Debug.Log(ongoingAchivment[i].name +"  " + ongoingAchivment[i].isMultiplie);
             if (ongoingAchivment[i].type == AchievementType.TASK)
             {
-                list.Add(ongoingAchivment[i]);
+                list[ongoingAchivment[i].order-1] =ongoingAchivment[i];
             }
         }
         return list;

@@ -247,6 +247,10 @@ public class PlayerHudNgui : MonoBehaviour {
                 mapCamera.enabled = true;
             }
 		}
+        if (!this.enabled)
+        {
+            this.enabled = true;
+        }
 	}
 	public void DeActivate(){
     

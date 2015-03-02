@@ -9,18 +9,20 @@ public class StatisticManager : MonoBehaviour, LocalPlayerListener,GameListener{
 	
 	private Dictionary<string, int> toSendData = new Dictionary<string, int>();
 	
-   private float timerDelay =0.0f;
+    private float timerDelay =0.0f;
 	
 	private static float SEND_TIME = 60;
-	
+
+    public string UID ;
+
 	public void Init(string uid){
 		EventHolder.instance.Bind (this);
 		DontDestroyOnLoad(transform.gameObject);
-		
+        UID = uid;
 	
 	}
 	void Update(){
-		timerDelay += Time.delatTime;
+		timerDelay += Time.deltaTime;
 		if(timerDelay>SEND_TIME){
 
 			timerDelay= 0;
@@ -32,7 +34,7 @@ public class StatisticManager : MonoBehaviour, LocalPlayerListener,GameListener{
 		WWWForm form = new WWWForm ();
 			
 		form.AddField ("uid", UID);
-		form.AddField ("data[time]", SEND_TIME);
+		form.AddField ("data[time]", SEND_TIME.ToString("0"));
 		foreach (KeyValuePair<string, int> pair in toSendData)
 		{
 //            Debug.Log("charge[" + pair.Key + "]"+ pair.Value.chargeSpend);
@@ -40,9 +42,9 @@ public class StatisticManager : MonoBehaviour, LocalPlayerListener,GameListener{
 				continue;
 			}
 			form.AddField ("data["+pair.Key+"]", pair.Value);
-			pair.Value= 0;
+			
 		}
-     
+        toSendData.Clear();
 	 	StatisticHandler.instance.StartCoroutine(StatisticHandler.SendForm (form,StatisticHandler.STATISTIC_DATA));
 	
 	}
@@ -85,10 +87,10 @@ public class StatisticManager : MonoBehaviour, LocalPlayerListener,GameListener{
 			
             if (killinfo.isHeadShoot)
             {
-                UpData(ParamLibrary.PARAM_HEAD_SHOOT)
+                UpData(ParamLibrary.PARAM_HEAD_SHOOT);
             }
-			if(ItemManger.instance.GetWeaponprefabByID(killinfo.weaponId).slotType==SLOTTYPE.GRENADE){
-				UpData(ParamLibrary.PARAM_GRENADE_KILL)
+			if(ItemManager.instance.GetWeaponprefabByID(killinfo.weaponId).slotType==BaseWeapon.SLOTTYPE.GRENADE){
+                UpData(ParamLibrary.PARAM_GRENADE_KILL);
 			}
 		}
 	}
@@ -101,7 +103,7 @@ public class StatisticManager : MonoBehaviour, LocalPlayerListener,GameListener{
 	}
 	public void EventPawnKillAssistPlayer(Player target){
 		if (target == myPlayer) {
-			UpData(ParamLibrary.PARAM_ASSIST)
+            UpData(ParamLibrary.PARAM_ASSIST);
 		}
 	}
     public void EventPawnKillAssistAI(Player target){
@@ -143,7 +145,7 @@ public class StatisticManager : MonoBehaviour, LocalPlayerListener,GameListener{
 	}
 	public void EventStart(){}
 	public void EventRestart(){
-			SyncLvl();
+			
 	}
 	public	void EventJuggerTake(Player target){
 	

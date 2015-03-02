@@ -77,7 +77,7 @@ public class MainMenuGUI : MonoBehaviour {
         {
             panel.gameObject.SetActive(false);
         }
-        FindObjectOfType<StatisticGUI>().Init();
+        
        
     }
 
@@ -787,7 +787,7 @@ public class PanelsNgui
 	public UIPanel markedPanel;
     public UIPanel askAboutMoneyPanel;
     public UIRect moneyBuyPanel;
-    public UIPanel serverResponse;
+    public UIRect serverResponse;
 }
 [System.Serializable]
 public class LoginPanel

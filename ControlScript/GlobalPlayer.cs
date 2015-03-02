@@ -62,6 +62,8 @@ public class GlobalPlayer : MonoBehaviour {
 	
 	public int cash;
 
+    public int open_set;
+
 	public int stamina;
 	
     public Texture2D avatar;
@@ -257,8 +259,8 @@ public class GlobalPlayer : MonoBehaviour {
 		DateTime timeEnd= DateTime.Parse((xmlDoc.SelectSingleNode ("player/premiumEnd").InnerText));
 		PremiumManager.instance.SetPremium(isPremium,timeEnd);
 		XmlNodeList list = xmlDoc.SelectNodes("player/notify");
-       
 
+        open_set = int.Parse(xmlDoc.SelectSingleNode("player/open_set").InnerText);
         foreach (XmlNode node in list)
         {
 			AsyncNotify type = (AsyncNotify)Enum.Parse(typeof(AsyncNotify), node.SelectSingleNode("type").InnerText);
@@ -270,6 +272,7 @@ public class GlobalPlayer : MonoBehaviour {
 			}
 		}
         list = xmlDoc.SelectNodes("player/statistic/entry");
+        statisticData.Clear();
         foreach (XmlNode node in list)
         {
             statisticData.Add(node.SelectSingleNode("key").InnerText, int.Parse(node.SelectSingleNode("value").InnerText));
@@ -400,6 +403,7 @@ public class GlobalPlayer : MonoBehaviour {
 		ItemManager.instance.Init(UID);
         FindObjectOfType<RewardManager>().Init(UID);
         NetworkController.Instance.SetLogin(UID);
+        StatisticManager.instance.Init(UID);
         GA.SettingsGA.SetCustomUserID(UID);
 	}
 	public void SetSid(string sid){

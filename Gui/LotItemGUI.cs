@@ -17,6 +17,8 @@ public class LotItemGUI : MonoBehaviour
     public UILabel loading;
     public UILabel buyLabel;
 	
+   
+
 	public UIWidget forGold;
 	
 	public UILabel[] goldPrices;
@@ -24,6 +26,8 @@ public class LotItemGUI : MonoBehaviour
 	public UIWidget forKP;
 
     public UIWidget buyKP;
+
+    public UIWidget buyUnbreake;
 
     public UIWidget repairKP;
 
@@ -71,16 +75,19 @@ public class LotItemGUI : MonoBehaviour
         if (item.buyMode == BuyMode.FOR_KP)
         {
             buyKP.alpha = 0.0f;
+            buyUnbreake.alpha = 1.0f;
             repairKP.alpha = 1.0f;
 
         }
         else if(item.buyMode ==BuyMode.FOR_KP_UNBREAK)
         {
             buyKP.alpha = 0.0f;
+            buyUnbreake.alpha = 0.0f;
             repairKP.alpha = 0.0f;
-        }
+        }             
         else
         {
+            buyUnbreake.alpha = 0.0f;
             buyKP.alpha = 1.0f;
             repairKP.alpha = 0.0f;
         }
@@ -104,11 +111,18 @@ public class LotItemGUI : MonoBehaviour
 				kpPrices[i].text =item.prices[i].parts[0].amount.ToString();
 			}
 		}else{
-			forGold.alpha = 1.0f;
-			forKP.alpha = 0.0f;
-			for(int i =0;i< item.prices.Length;i++){
-                goldPrices[i].text = item.prices[i].parts[0].amount.ToString();
-			}
+            if (item.buyMode == BuyMode.FOR_GOLD_FOREVER)
+            {
+                forGold.alpha = 0.0f;
+                forKP.alpha = 0.0f;
+            }
+            else{
+			    forGold.alpha = 1.0f;
+			    forKP.alpha = 0.0f;
+			    for(int i =0;i< item.prices.Length;i++){
+                    goldPrices[i].text = item.prices[i].parts[0].amount.ToString();
+			    }
+            }
 		}
 
         
