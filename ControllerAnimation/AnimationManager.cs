@@ -310,11 +310,16 @@ public class AnimationManager : MonoBehaviour
 		
 		}
 	}
-    public void ChangeWeaponNow()
-    {
-       
-        //pawn.ChangeWeapon();
-    }
+	public void EquipWeaponNow()
+	{
+		
+		//pawn.ChangeWeapon();
+	}
+	public void UnEquipWeaponNow()
+	{
+		
+		//pawn.ChangeWeapon();
+	}
 	public void ShootAnim(){
 		//animator.SetTrigger ("Shoot");
 	}

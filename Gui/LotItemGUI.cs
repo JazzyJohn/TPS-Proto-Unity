@@ -7,21 +7,40 @@ public class LotItemGUI : MonoBehaviour
 
     public CharSection weaponSection;
 
-    public ShopGUI Shop;
-    public ShopSlot item;
+    public InventoryGUI Shop;
+    public InventorySlot item;
     public UILabel Name;
-    public UILabel PriceKP;
-	public UIWidget PriceKPBox;
-    public UILabel PriceGITP;
     public UILabel Description;
     public Transform gun;
     public GameObject gunModel;
     public UIWidget Box;
     public UILabel loading;
     public UILabel buyLabel;
+	
+   
+
+	public UIWidget forGold;
+	
+	public UILabel[] goldPrices;
+	
+	public UIWidget forKP;
+
+    public UIWidget buyKP;
+
+    public UIWidget buyUnbreake;
+
+    public UIWidget repairKP;
+
+    public UIWidget useItem;
+	
+	public UILabel[] kpPrices;
+	
+	
     [HideInInspector]
     public int numToItem;
 
+	private int priceKey;
+	
   
     // Use this for initialization
     void Start()
@@ -49,19 +68,67 @@ public class LotItemGUI : MonoBehaviour
         }
     }
 
-    public void SetItem(ShopSlot _item)
+    public void SetItem(InventorySlot _item)
     {
         item = _item;
+        Debug.Log(item.buyMode);
+        if (item.buyMode == BuyMode.FOR_KP)
+        {
+            buyKP.alpha = 0.0f;
+            buyUnbreake.alpha = 1.0f;
+            repairKP.alpha = 1.0f;
+
+        }
+        else if(item.buyMode ==BuyMode.FOR_KP_UNBREAK)
+        {
+            buyKP.alpha = 0.0f;
+            buyUnbreake.alpha = 0.0f;
+            repairKP.alpha = 0.0f;
+        }             
+        else
+        {
+            buyUnbreake.alpha = 0.0f;
+            buyKP.alpha = 1.0f;
+            repairKP.alpha = 0.0f;
+        }
+
+        if (item.buyMode != BuyMode.NONE)
+        {
+            useItem.alpha = 1.0f;
+
+        }
+        else
+        {
+            useItem.alpha = 0.0f;
+        }
+
+
+		if(item.prices[0].type==BuyPrice.KP_PRICE){
+			forGold.alpha = 0.0f;
+			forKP.alpha = 1.0f;
+            for (int i = 0; i < item.prices.Length; i++)
+            {
+				kpPrices[i].text =item.prices[i].parts[0].amount.ToString();
+			}
+		}else{
+            if (item.buyMode == BuyMode.FOR_GOLD_FOREVER)
+            {
+                forGold.alpha = 0.0f;
+                forKP.alpha = 0.0f;
+            }
+            else{
+			    forGold.alpha = 1.0f;
+			    forKP.alpha = 0.0f;
+			    for(int i =0;i< item.prices.Length;i++){
+                    goldPrices[i].text = item.prices[i].parts[0].amount.ToString();
+			    }
+            }
+		}
+
+        
         GA.API.Design.NewEvent("GUI:MainMenu:Shop:SelectItem:" + _item.engName);
         Name.text = item.name;
-		if( item.cashCost ==0){
-			
-			PriceKPBox.alpha = 0.0f;
-		}else{
-			PriceKPBox.alpha = 1.0f;
-		}
-        PriceKP.text = item.cashCost.ToString() ;
-        PriceGITP.text = item.goldCost.ToString(); 
+		
         Description.text = item.description;
 
         if (gunModel != null)
@@ -86,19 +153,37 @@ public class LotItemGUI : MonoBehaviour
         }
         loading.alpha = 1.0f;
     }
-    public void KPBuy()
+    public void Buy(int key)
     {
+			priceKey = key;
+            Shop.askWindow.action = FinishBuy;
+            string text;
+			if(item.prices[0].type==BuyPrice.KP_PRICE){
+                text = TextGenerator.instance.GetMoneyText("buyKPprice", item.prices[key].parts[0].amount);
+			}else{
+                text = TextGenerator.instance.GetMoneyText("buyGoldPrice", item.prices[key].parts[0].amount);
+			}
 
-        GA.API.Business.NewEvent("Shop:BUYItem:" + item.engName, "GASH", item.cashCost);
-        StartCoroutine( ItemManager.instance.BuyItem(item.cashSlot,this));
-    }
-    public void GITPBuy()
+            Shop.askWindow.Show(text);
+	}
+    public void Choice()
     {
-
-        GA.API.Business.NewEvent("Shop:BUYItem:" + item.engName, "GOLD", item.goldCost);
-       StartCoroutine( ItemManager.instance.BuyItem(item.goldSlot,this));
+        Shop.SetItemForChoiseSet(item);
+    }
+	public void FinishBuy(){
+		int amount = item.prices[priceKey].parts[0].amount;
+		if(item.prices[0].type==BuyPrice.KP_PRICE){
+			GA.API.Business.NewEvent("Shop:BUYItem:" + item.engName, "GASH", amount);
+		}else{
+		  GA.API.Business.NewEvent("Shop:BUYItem:" + item.engName, "GOLD", amount);
+		}
+        StartCoroutine( ItemManager.instance.BuyItem(item.prices[priceKey].id,this));
     }
 
+    public void Repair()
+    {
+        Shop.repairGui.ShowRepair(item);
+    }
     public void SetError(string error)
     {
         GA.API.Business.NewEvent("Shop:BUYError", error, 0);

@@ -35,9 +35,13 @@ public class MainMenuGUI : MonoBehaviour {
 
 	public Timer _timer;
 
-	public Dictionary<string, string> Rooms = new Dictionary<string, string>();
+    public Dictionary<string, AnyRoom> Rooms = new Dictionary<string, AnyRoom>();
 
 	public UIRect[] MainPanels;
+	
+	public UIRect[] HideInGamePanels;
+	
+	public UIRect[] ShowInGamePanels;
 
     public GAMEMODE gameMode = GAMEMODE.PVP;
 
@@ -45,12 +49,14 @@ public class MainMenuGUI : MonoBehaviour {
 
     public UIWidget allWWidget;
 
+	public bool inGame =false;
+
+    public AskWindow askWindow;
+
+	
     public void LoadingFinish()
     {
-		if(loadingWidget!=null){
-			Destroy(loadingWidget.gameObject);
-			loadingWidget=null;
-		}
+		
         allWWidget.alpha = 1.0f;
 		int count =ItemManager.instance.MarkedAmount();
         if (_PanelsNgui.markedPanel != null)
@@ -65,43 +71,73 @@ public class MainMenuGUI : MonoBehaviour {
                 _PanelsNgui.markedPanel.alpha = 0.0f;
             }
         }
-        FindObjectOfType<SlaiderPanel>().isActive = true;
+		_PanelsNgui.SliderPanel.alpha= 0.0f;
+        foreach (UIRect panel in HideInGamePanels)
+        {
+            panel.gameObject.SetActive(true);
+        }
+        foreach (UIRect panel in ShowInGamePanels)
+        {
+            panel.gameObject.SetActive(false);
+        }
+        
+       
     }
 
 
 	void Awake(){
+	
 		HideAllPanel();
 		DontDestroyOnLoad(transform.gameObject);
 	}
     void Update()
     {
-
-        if (PremiumManager.instance.IsPremium())
+        if (_PlayerComponent.premium != null)
         {
-          
-            _PlayerComponent.premium.text = TextGenerator.instance.GetSimpleText("PremiumLeft",PremiumManager.instance.TimeLeft());
+            if (PremiumManager.instance.IsPremium())
+            {
+
+                _PlayerComponent.premium.text = TextGenerator.instance.GetSimpleText("PremiumLeft", PremiumManager.instance.TimeLeft());
+
+            }
+            else
+            {
+                _PlayerComponent.premium.text = TextGenerator.instance.GetSimpleText("NoPremiumTitle");
+            }
+        }
+        
+        RefreshRoom();
+     
+        if (LevelingManager.instance.isLoaded)
+        {
+            LoadData();
 
         }
-        else
-        {
-            _PlayerComponent.premium.text = TextGenerator.instance.GetSimpleText("NoPremiumTitle");
-        }
-
+        
+		
     }
+	public void ShowNews(){
+        if (loadingWidget != null)
+        {
+            Destroy(loadingWidget.gameObject);
+            loadingWidget = null;
+        }
+		_PanelsNgui.SliderPanel.alpha= 1.0f;
+	}
 
 	// Use this for initialization
 	void Start () 
 	{
 
-		_PanelsNgui.SliderPanel.alpha = 1f;
+		
 
         Screen.lockCursor = false;
 		//Поправить размер формы
-		ReSize();
+	
         _playerInfo.Player = FindObjectOfType<GlobalPlayer>();
 		//Получение с сервера комнат
 		Server = _playerInfo.Player.GetComponent<ServerHolder>();
-        
+        ReSize();
 		AddMessageToChat("Система", "Добро пожаловать !");
 
 		if (Server.allRooms != null) {
@@ -121,6 +157,7 @@ public class MainMenuGUI : MonoBehaviour {
 				_RoomsNgui.ScrollBar.barSize = 0;
 			}
 		}
+        //_PanelsNgui.SliderPanel.alpha = 1f;
 	}
 	public void HideAllPanel(){
 		foreach(UIRect panel in MainPanels){
@@ -140,17 +177,37 @@ public class MainMenuGUI : MonoBehaviour {
 
 	public void PlayBut() //Вход или создание новой комнаты
 	{
+        if (inGame)
+        {
+            return;
+        }
 		StartCoroutine(PausePlay());
 	}
-
+	public void  JoinRoom(RoomData room){
+		if(inGame){
+			return;
+		}
+        if (room.playerCount < room.maxPlayers)
+        {
+				//PhotonNetwork.JoinRoom (room.name);
+				Server.JoinRoom(room);
+				HideAllPanel();
+				_RoomsNgui.Loading.alpha = 1f;
+				//_PanelsNgui.SliderPanel.alpha = 1f;
+				
+		}
+		
+	
+	}
 	public IEnumerator PausePlay()
 	{
+		
 		yield return new WaitForSeconds(0.05f);
 		Debug.Log ("PLAY");
         GA.API.Design.NewEvent("GUI:MainMenu:Play", 1); 
    
 		if (ActivBut != null) {
-			switch (ActivBut.GetComponent<AnyRoom> ()._TypeRoom) {
+			/*switch (ActivBut.GetComponent<AnyRoom> ()._TypeRoom) {
 			case AnyRoom.TypeRoom.JoinRoom:
 				foreach (RoomData room in Server.allRooms)
 				{
@@ -159,7 +216,7 @@ public class MainMenuGUI : MonoBehaviour {
 						Server.JoinRoom(room);
 						HideAllPanel();
 						_RoomsNgui.Loading.alpha = 1f;
-						_PanelsNgui.SliderPanel.alpha = 1f;
+						//_PanelsNgui.SliderPanel.alpha = 1f;
 						
 					}
 				}
@@ -167,14 +224,14 @@ public class MainMenuGUI : MonoBehaviour {
 			case AnyRoom.TypeRoom.NewRoom:
 				CreateRoom();
 				break;
-			}
+			}*/
 			
 		} else {
 			if(Server.allRooms.Count>0){
 				Server.JoinRoom(Server.allRooms[UnityEngine.Random.Range(0,Server.allRooms.Count)]);
 				HideAllPanel();
 				_RoomsNgui.Loading.alpha = 1f;
-				_PanelsNgui.SliderPanel.alpha = 1f;
+				//_PanelsNgui.SliderPanel.alpha = 1f;
 			}else{
 
                 Server.CreateNewRoom();
@@ -184,13 +241,19 @@ public class MainMenuGUI : MonoBehaviour {
 		}
 	}
 
+   
+
 	public void CreateRoom(){
+		if(inGame){
+			return;
+		}
+	
 		HideAllPanel ();
 		_RoomsNgui.CreateRoom.alpha = 1f;
-
+        _RoomsNgui.mainpanel.alpha = 1f;
 		
-		_RoomsNgui.NameNewRoom.value = Server.newRoomName;
-
+		//_RoomsNgui.NameNewRoom.value = Server.newRoomName;
+		
 	}
 	public void LoginPage(){
 		allWWidget.alpha = 0.0f;
@@ -277,25 +340,29 @@ public class MainMenuGUI : MonoBehaviour {
 		}
 	}
 	public void ToggleMap(string mapName) {
+    
 		if (_RoomsNgui.CreateRoom.alpha == 1.0f)
 		{
-			Server.map = mapName;
-			
+          
+			Server.SetMap(mapName);
+            _RoomsNgui.NameNewRoom.value = Server.newRoomName;
 		}
 	}
+    public void NextMap()
+    {
+        ServerHolder.Instance.NextMap();
+    }
+    public void PrevMap()
+    {
+        ServerHolder.Instance.PrevMap();
+    }
 
-	public void Loading() //Изменения процентов при загрузке(вызывает прогресс бар)
+	public void LoadingScreen() //Изменения процентов при загрузке(вызывает прогресс бар)
 	{
-		if (_RoomsNgui.Loading.alpha != 1f && ActivBut != null)
-		{
-			HideAllPanel();
-			_RoomsNgui.Loading.alpha = 1f;
-            _PanelsNgui.SliderPanel.alpha = 1f;
-		}
-      
-		_RoomsNgui.LoadingProcent.text = (_RoomsNgui.LoadingProgress.value*100).ToString("f0") + "%";
+		//_PanelsNgui.SliderPanel.alpha= 1.0f;
+		_RoomsNgui.Loading.alpha = 1f;
 	}
-
+	
 	public void StartBut() //Создать комнату
 	{
 
@@ -305,12 +372,13 @@ public class MainMenuGUI : MonoBehaviour {
             return;
         }
 		
-		CamMove.enabled = false;
+		
 		Server.newRoomName = _RoomsNgui.NameNewRoom.value;
 		HideAllPanel ();
 		_RoomsNgui.Loading.alpha = 1f;
-        _PanelsNgui.SliderPanel.alpha = 1f;
-		Server.CreateNewRoom(gameMode);
+      //  _PanelsNgui.SliderPanel.alpha = 1f;
+        Server.CreateNewRoom(Server.map);
+        CamMove.enabled = false;
 	}
 
 	public void BackBut() //Вернуться к выбору комнат
@@ -322,29 +390,33 @@ public class MainMenuGUI : MonoBehaviour {
 
 	public void RefreshRoom() // Обновления списка комнат
 	{
+        int i = 0;
         foreach (RoomData room in Server.allRooms)
 		{
-			if (!Rooms.ContainsValue(room.name))
+            i++;
+			if (!Rooms.ContainsKey(room.name))
 			{
-				Rooms.Add(room.name, room.name);
 				
 				AnyRoom NewRoom = (Instantiate(_RoomsNgui.ShablonRoom) as GameObject).GetComponent<AnyRoom>();
+				Rooms.Add(room.name,NewRoom );
+				
 				NewRoom.transform.parent = _RoomsNgui.AllRoom.transform;
-				NewRoom.name = room.name;
-				NewRoom.shablon = false;
-				NewRoom.Name.text = room.name;
-				NewRoom.SizeRoom.text = room.playerCount + " / " + room.maxPlayers;
+				
 				NewRoom.transform.localScale = new Vector3(1f, 1f, 1f);
 				NewRoom.transform.localPosition = new Vector3(0f, 0f, 0f);
 				
 				_RoomsNgui.Grid.Reposition();
-				_RoomsNgui.ScrollBar.barSize = 0;
+				//_RoomsNgui.ScrollBar.barSize = 0;
 			}
+            Rooms[room.name].UpdateRoom(room, i);
+			
 		}
 	}
 
 	public void ShowGameList(){
-
+        HideAllPanel();
+        _RoomsNgui.mainpanel.alpha = 1f;
+        _RoomsNgui.RoomsFound.alpha = 1f;
 	}
 	public void GetPlayerInfo() // Получение значений игрока
 	{
@@ -369,7 +441,7 @@ public class MainMenuGUI : MonoBehaviour {
 	public void SetPlayerInfoInGUI() //Запись значений игрока в ГУИ
 	{
 		_PlayerComponent.Name.text = _playerInfo.playerName;
-		_PlayerComponent.Lvl.text = "Lvl " + _playerInfo.playerLvl;
+		_PlayerComponent.Lvl.text =  _playerInfo.playerLvl.ToString();
 		_PlayerComponent.Exp.text = _playerInfo.playerExp + " / " + _playerInfo.playerExpNeed;
 		_PlayerComponent.ExpBar.value = _playerInfo.playerProcent /100f;
 		_PlayerComponent.KP.text = _playerInfo.KP.ToString();
@@ -436,32 +508,14 @@ public class MainMenuGUI : MonoBehaviour {
 		ChatComponent.TextInput.value = null;
 	}
 	
-	// Update is called once per frame
-	void FixedUpdate () 
-	{
-		_timer.timer+=Time.deltaTime;
-		if (_timer.timer>=_timer.TimeRefresh)
-		{
-			RefreshRoom();
-			_timer.timer = 0;
-		}
-
 	
-		if (LevelingManager.instance.isLoaded) {
-			LoadData();		
-		
-		}
-
-
-
-	}
     
 	public void ShowRoomList(){
 
 		//Debug.Log (_RoomsNgui.RoomsFound.alpha);
 		if (_RoomsNgui.RoomsFound.alpha >0f) {
 			HideAllPanel();
-			_PanelsNgui.SliderPanel.alpha= 1f;
+		//	_PanelsNgui.SliderPanel.alpha= 1f;
 		} else {
 			HideAllPanel();
 			_RoomsNgui.RoomsFound.alpha = 1f;
@@ -490,25 +544,16 @@ public class MainMenuGUI : MonoBehaviour {
 
     public void MoneyError()
     {
-        AskMoneyShow();
+        askWindow.action = MoneyBuyShow;
+     
+        askWindow.Show(TextGenerator.instance.GetSimpleText("NoMoney"));
     }
-    public void AskMoneyShow()
-    {
-        GA.API.Design.NewEvent("GUI:MainMenu:AskMoneyShow", 1); 
-        CamMove.RideTo(1);
-        _PanelsNgui.askAboutMoneyPanel.alpha = 1f;
-    }
-    public void AskMoneyHide()
-    {
-        CamMove.Reset();
-        
-        _PanelsNgui.askAboutMoneyPanel.alpha = 0.0f;
-    }
+  
     public void MoneyBuyShow()
     {
         GA.API.Design.NewEvent("GUI:MainMenu:MoneyBuyShow", 1); 
         CamMove.RideTo(2);
-        _PanelsNgui.askAboutMoneyPanel.alpha = 0.0f;
+      //  _PanelsNgui.askAboutMoneyPanel.alpha = 0.0f;
         _PanelsNgui.moneyBuyPanel.alpha = 1f;
     }
     public void MoneyBuyHide()
@@ -520,6 +565,7 @@ public class MainMenuGUI : MonoBehaviour {
     {
         GA.API.Design.NewEvent("GUI:MainMenu:AskExternalBuy:" + item, 1); 
         GlobalPlayer.instance.AskJsForMagazine(item);
+        MoneyBuyHide();
     }
 
     public void SetAvatar(Texture2D avatar)
@@ -547,6 +593,110 @@ public class MainMenuGUI : MonoBehaviour {
     {
 
         ScreenShootManager.instance.TakeScreenshotToWall(TextGenerator.instance.GetSimpleText("i'm in red rage"));
+    }
+	
+	//IN GAME SECTION 
+	
+	public UIPanel PlayGUI;
+
+    public PlayerMainGui PlayerGUI;
+
+    private bool Pause;
+	
+	
+	
+	public void FinishLvlLoad() //Изменения процентов при загрузке(вызывает прогресс бар)
+	{
+		//_PanelsNgui.SliderPanel.alpha= 0.0f;
+		_RoomsNgui.Loading.alpha = 0.0f;
+        gameObject.SetActive(false);
+        allWWidget.alpha = 1.0f;
+		inGame= true;
+		foreach(UIRect panel in HideInGamePanels){
+			panel.gameObject.SetActive(false);
+		}
+        foreach (UIRect panel in ShowInGamePanels)
+        {
+			panel.gameObject.SetActive(true);
+		}
+		PlayGUI = PlayerGUI.PlayGUI;
+        PlayerGUI.pausegui = this;
+	}
+
+	 public void ActivateMenu(){
+         if (!gameObject.activeSelf)
+         {
+                GA.API.Design.NewEvent("GUI:Pause:Show"); 
+                Pause = true;
+               
+				PlayerGUI.guiState = PlayerMainGui.GUIState.Pause;
+				Screen.lockCursor = false;
+				PlayGUI.gameObject.SetActive(false);
+
+                gameObject.SetActive(true);
+			
+		}
+    }
+     public bool IsActive()
+     {
+         if (InputManager.instance.GetButtonDown("Pause")||Input.GetKeyDown(KeyCode.Escape))
+         {
+         
+             return !Pause;
+         }
+         return Pause;
+     }
+	public void BackToGame()
+	{
+          
+            Pause = false;
+          
+            PlayerGUI.guiState = PlayerMainGui.GUIState.Normal;
+
+		
+            gameObject.SetActive(false);
+            PlayGUI.gameObject.SetActive(true);
+
+        
+	}
+	public void GoToMainMenu()
+	{
+		if (ServerHolder.Instance.connectingToRoom)
+        {
+            return;
+        }
+        GA.API.Design.NewEvent("GUI:Pause:MainMenu");
+		Pause = true;
+             
+		Screen.lockCursor = false;
+        NetworkController.Instance.LeaveRoomReuqest();
+        Destroy(FindObjectOfType<HUDHolder>().gameObject);
+        Application.LoadLevel(0);
+        gameObject.SetActive(true);
+		inGame= true;
+		foreach(UIRect panel in HideInGamePanels){
+			panel. gameObject.SetActive(true);
+		}
+		foreach(UIRect panel in ShowInGamePanels){
+			panel. gameObject.SetActive(false);
+		}
+       
+	}
+    void OnLevelWasLoaded(int level)
+    {
+        if(level==0){
+            FindObjectOfType<MusicHolder>().SetStage( MUSIC_STAGE.MAIN_MENU_LOOP);
+            gameObject.SetActive(true);
+            inGame = false;
+            foreach (UIRect panel in HideInGamePanels)
+            {
+                panel.gameObject.SetActive(true);
+            }
+            foreach (UIRect panel in ShowInGamePanels)
+            {
+                panel.gameObject.SetActive(false);
+            }
+        }
     }
 }
 
@@ -627,6 +777,7 @@ public class RoomsNgui
 
 	public UIWidget RoomsFound;
 	public UIWidget CreateRoom;
+    public UIPanel mainpanel;
 	public UIWidget Loading;
 	public UIProgressBar LoadingProgress;
 	public UILabel LoadingProcent;
@@ -640,7 +791,7 @@ public class RoomsNgui
 [System.Serializable]
 public class PanelsNgui
 {
-	public UIPanel SliderPanel;
+    public UIWidget SliderPanel;
 	public SlaiderPanel slaiderPanel;
     public UIPanel mainpanel;
     public UIPanel settings;
@@ -648,8 +799,8 @@ public class PanelsNgui
     public UITweener annonceTweener;
 	public UIPanel markedPanel;
     public UIPanel askAboutMoneyPanel;
-    public UIPanel moneyBuyPanel;
-    public UIPanel serverResponse;
+    public UIRect moneyBuyPanel;
+    public UIRect serverResponse;
 }
 [System.Serializable]
 public class LoginPanel

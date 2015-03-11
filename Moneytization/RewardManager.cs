@@ -18,17 +18,42 @@ public class Reward{
 	}
 
 }
+public static class ParamLibrary{
+	public static string PARAM_KILL = "Kill";
+    public static string PARAM_DOUBLE_KILL = "DoubleKill";
+	public static string PARAM_TRIPLE_KILL = "TripleKill";
+	public static string PARAM_RAMPAGE_KILL = "Rampage";
+	public static string PARAM_RAMPAGE_GOING_KILL = "RampageGoing";
+	public static string PARAM_WIN = "Win";
+	public static string PARAM_LOSE = "Lose";
+	public static string PARAM_KILL_AI= "KillAI"; 
+	public static string PARAM_KILL_FRIEND = "KillFriend";
+	public static string PARAM_KILL_BY_FRIEND= "KilledByFriend";
+    public static string PARAM_ROOM_FINISHED = "RoomFinished";
+	public static string PARAM_JUGGER_TAKE= "JuggerTake";
+    public static string PARAM_JUGGER_KILL= "JuggerKill";
+	public static string PARAM_HEAD_SHOOT = "HeadShoot";
+    public static string PARAM_HEAD_SHOOT_AI = "HeadShootAI";
+	public static string PARAM_DEATH = "Death";
+    public static string PARAM_DEATH_AI = "DeathAI";
+    public static string PARAM_STIM_PACK = "StimPack";
+	public static string PARAM_WALL_RUN = "WallRun";
+	public static string PARAM_ASSIST= "Assist"; 
+	public static string PARAM_ASSIST_AI= "AssistAI";
+    public static string PARAM_DOUBLE_JUMP = "DoubeJump";
+    public static string PARAM_RELOAD = "Reload";
+    public static string PARAM_JUMP = "Jump";
+	public static string PARAM_GRENADE_KILL = "GrenadeKill";
+	public static string PARAM_DAMAGE = "Damage";
+	public static string PARAM_DAMAGE_DELIVER= "DamageDeliver";
+	public static string PARAM_AMMO_SPENT= "AmmoSpent";
+	public static string PARAM_AMMO_HIT= "AmmoHit";
+	
+	public static string PARAM_TASK_RESET= "taskReset";
+}
+
 public class  RewardManager : MonoBehaviour, LocalPlayerListener,GameListener{ 
 		
-	public const string PARAM_KILL = "Kill";
-	public const string PARAM_WIN = "Win";
-	public const string PARAM_LOSE = "Lose";
-	public const string PARAM_KILL_AI= "KillAI"; 
-	public const string PARAM_KILL_FRIEND = "KillFriend";
-	public const string PARAM_KILL_BY_FRIEND= "KilledByFriend";
-    public const string PARAM_ROOM_FINISHED = "RoomFinished";
-	public const string PARAM_JUGGER_TAKE= "JuggerTake";
-    public const string PARAM_JUGGER_KILL= "JuggerKill";
 	
    
 
@@ -181,6 +206,7 @@ public class  RewardManager : MonoBehaviour, LocalPlayerListener,GameListener{
 	}
 	//Event Section
 	private Player myPlayer;
+    private int playerStrike;
 	public void EventAppear(Player target){
 		if (target.isMine) {
 			myPlayer = target;
@@ -190,7 +216,25 @@ public class  RewardManager : MonoBehaviour, LocalPlayerListener,GameListener{
     public void EventPawnKillPlayer(Player target, KillInfo killinfo)
     {
 		if (target == myPlayer) {
-			UpMoney(PARAM_KILL);	
+			playerStrike++;
+			switch(playerStrike){
+				case 1:
+				case 2:
+					UpMoney(ParamLibrary.PARAM_KILL);	
+					break;
+				case 3:
+					UpMoney(ParamLibrary.PARAM_TRIPLE_KILL);
+					break;
+				case 4:
+					UpMoney(ParamLibrary.PARAM_RAMPAGE_KILL);
+					break;
+				default:
+					UpMoney(ParamLibrary.PARAM_RAMPAGE_GOING_KILL);
+					break;
+					
+			}
+			
+			
 		}
 	}
     public void EventPawnKillAI(Player target, KillInfo killinfo)
@@ -199,30 +243,42 @@ public class  RewardManager : MonoBehaviour, LocalPlayerListener,GameListener{
 
 		if (target == myPlayer) {
 
-			UpMoney(PARAM_KILL_AI);	
+			UpMoney(ParamLibrary.PARAM_KILL_AI);	
 		}
 	
+	}
+	public void EventPawnKillAssistPlayer(Player target){
+		if (target == myPlayer) {
+
+			UpMoney(ParamLibrary.PARAM_ASSIST);	
+		}
+	}
+    public void EventPawnKillAssistAI(Player target){
+		if (target == myPlayer) {
+
+			UpMoney(ParamLibrary.PARAM_ASSIST_AI);	
+		}
 	}
 	public void EventTeamWin(int teamNumber){
 		//if we not winner so no change in exp, or we a winner but no send were initiate we sync data 
 		if (myPlayer.team	== teamNumber) {
-            UpMoney(PARAM_WIN);
+            UpMoney(ParamLibrary.PARAM_WIN);
 			SyncReward();
 		}else{
-		   UpMoney(PARAM_LOSE);
+		   UpMoney(ParamLibrary.PARAM_LOSE);
 			SyncReward();
 		}
 		
 	}
 	public void EventKilledByFriend(Player target,Player friend){
 		if (target == myPlayer) {
-			UpMoney(PARAM_KILL_BY_FRIEND);	
+			UpMoney(ParamLibrary.PARAM_KILL_BY_FRIEND);	
 		}
 	}
     public void EventKilledAFriend(Player target, Player friend, KillInfo killinfo)
     {
 		if (target == myPlayer) {
-			UpMoney(PARAM_KILL_FRIEND);	
+			UpMoney(ParamLibrary.PARAM_KILL_FRIEND);	
 		}
 	}
     public void EventPawnDeadByPlayer(Player target, KillInfo killinfo)
@@ -250,7 +306,7 @@ public class  RewardManager : MonoBehaviour, LocalPlayerListener,GameListener{
 	public void EventRestart(){}
     public void EventRoomFinished()
     {
-        UpMoney(PARAM_ROOM_FINISHED);	
+        UpMoney(ParamLibrary.PARAM_ROOM_FINISHED);	
 
     }
 

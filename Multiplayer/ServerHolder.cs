@@ -20,6 +20,8 @@ public class RoomData
     public int id;
     public int playerCount;
     public int maxPlayers;
+	public string mode;
+    public string map;
 }
 [Serializable]
 public class MapData
@@ -43,6 +45,8 @@ public class ServerHolder : MonoBehaviour
 	public bool connectingToRoom = false;
 
     public string map = "kaspi_map_c_2_test";
+
+    public static string currentMap;
 	string playerName;
 	public string newRoomName;
 	public int newRoomMaxPlayers;
@@ -190,8 +194,14 @@ public class ServerHolder : MonoBehaviour
             roomData.name = room.Name;
             roomData.playerCount = room.UserCount;
             roomData.maxPlayers = room.MaxUsers;
+           
+          
+            roomData.map = room.GetVariable("map").GetStringValue();
+               
+            roomData.mode = GetRuleClass(roomData.map);
+            
             allRooms.Add(roomData);
-            ///Debug.Log("Room id: " + room.Id + " has name: " + room.Name +"map" +room.GetVariable("map").GetStringValue());
+            
 
         }
 
@@ -253,7 +263,7 @@ public class ServerHolder : MonoBehaviour
 				nextUpdateTime += updateRate;
 			}
 		}*/
-        SetupRoomList();
+        //SetupRoomList();
 	}
 	
 	void OnReceivedRoomList()
@@ -342,7 +352,7 @@ public class ServerHolder : MonoBehaviour
 
             if (GUILayout.Button("Создать комнату", GUILayout.Width(150), GUILayout.Height(25)))
             {
-                CreateNewRoom(DefaultGameMode);
+                CreateNewRoom(map);
             }
             if (GUILayout.Button("Войти в комнату", GUILayout.Width(150), GUILayout.Height(25)))
             {
@@ -376,22 +386,115 @@ public class ServerHolder : MonoBehaviour
         blockQuickStart = true;
         newRoomName = map +data.ToString();
         Debug.Log("start");
-        CreateNewRoom(data.gameMode);
+        CreateNewRoom(data.name);
        
     }
-
-
-	public void CreateNewRoom(GAMEMODE mode) //Создание комноты (+)
-	{
-        if (map == "")
+    private int mapIndex=-1;
+    public void SetMap(string mapName)
+    {
+        MapData mapData = null;
+        map = mapName;
+        for(int i =0;i<allMaps.Length;i++)
         {
-            Debug.Log("emptyMap");
-			MainMenuGUI mainMenu = FindObjectOfType<MainMenuGUI> ();
-			if (mainMenu != null) {
-				mainMenu.SetMessage("Не выбрана карта");
-				mainMenu. CreateRoom();
-			}
-            return;
+            MapData iterdata = allMaps[i];
+            if (iterdata.name == mapName)
+            {
+                mapIndex = i;
+                RoomNewName(iterdata.gameMode);
+                return;
+            }
+        }
+
+    }
+    public void NextMap()
+    {
+        if (mapIndex == -1)
+        {
+            mapIndex = 0;
+        }
+        else
+        {
+            mapIndex++;
+            if (mapIndex >= allMaps.Length)
+            {
+                mapIndex = 0;
+            }
+        }
+        map = allMaps[mapIndex].name;
+        RoomNewName(allMaps[mapIndex].gameMode);
+    }
+    public void PrevMap()
+    {
+        if (mapIndex == -1)
+        {
+            mapIndex = allMaps.Length-1;
+        }
+        else
+        {
+            mapIndex--;
+            if (mapIndex <0)
+            {
+                mapIndex = allMaps.Length-1;
+            }
+        }
+        map = allMaps[mapIndex].name;
+        RoomNewName(allMaps[mapIndex].gameMode);
+    }
+
+    public string GetRuleClass(String name)
+    {
+        MapData mapData = null;
+        foreach (MapData iterdata in allMaps)
+        {
+            if (iterdata.name == name)
+            {
+                mapData = iterdata;
+                break;
+            }
+        }
+        if (mapData == null)
+        {
+            return "PVEGameRule";
+        }
+        switch (mapData.gameMode)
+        {
+            case GAMEMODE.PVE:
+                return "PVEGameRule";
+              
+            case GAMEMODE.RUNNER:
+                return "RunnerGameRule";
+               
+            case GAMEMODE.PVP:
+                return "PVPGameRule";
+               
+            case GAMEMODE.PVPJUGGERFIGHT:
+               
+                return "PVPJuggerFightGameRule";
+            case GAMEMODE.PVPHUNT:
+
+                return "HuntGameRule";
+             
+             
+            case GAMEMODE.PVE_HOLD:
+                return "PVEHoldGameRule";
+             
+            case GAMEMODE.SEQUENCE_POINTGAME:
+                return "SequencePointGameRule";
+               
+        }
+        return "PVEGameRule";
+    }
+
+    public void CreateNewRoom(string mapName) //Создание комноты (+)
+	{
+        MapData mapData = null;
+        foreach (MapData iterdata in allMaps)
+        {
+            if (iterdata.name == mapName)
+            {
+                mapData = iterdata;
+                break;
+            }
         }
 		/*ExitGames.Client.Photon.Hashtable customProps = new ExitGames.Client.Photon.Hashtable();
         customProps["MapName"] = map;
@@ -399,7 +502,9 @@ public class ServerHolder : MonoBehaviour
 		exposedProps[0] = "MapName";
        
         */
-		lastMode= mode;
+        //Debug.Log("MAp " + mapName);
+        lastMode = mapData.gameMode;
+        GAMEMODE mode = mapData.gameMode;
         bool isVisible = true;
         int roomCnt = newRoomMaxPlayers;
         RoomSettings settings = new RoomSettings(newRoomName);
@@ -467,16 +572,20 @@ public class ServerHolder : MonoBehaviour
         }
 
         Debug.Log(gameRule.GetStringValue());
+		gameRule.IsPrivate  = false;
+       
         SFSObject data = new SFSObject();
 		data.PutClass("gameSetting",setting);
         settings.Variables.Add(new SFSRoomVariable("gameVar", data));
         settings.GroupId = "games";
         settings.IsGame = true;
         RoomVariable mapVar = new SFSRoomVariable("map", map);
+        mapVar.IsPrivate = false;
         settings.Variables.Add(mapVar);
         RoomVariable visVar = new SFSRoomVariable("visible", isVisible);
         settings.Variables.Add(visVar);
         settings.Variables.Add(gameRule);
+        
         settings.MaxUsers =(short)roomCnt;
         settings.MaxSpectators = 0;
         settings.Extension = new RoomExtension(ExtName, ExtClass);
@@ -500,13 +609,15 @@ public class ServerHolder : MonoBehaviour
 		return ((float)progress.finishedLoader)/progress.allLoader*100f +progress.curLoader/progress.allLoader;
 	}
 	public void RetryRoomCreate(){
-		CreateNewRoom(lastMode);
+		CreateNewRoom(map);
 		
 	}
 	
 	
 	IEnumerator LoadMap (string mapName,bool next =false)
 	{
+        currentMap = mapName;
+        Debug.Log("LOAD MAP" + currentMap);
 		//AsyncOperation async;
         progress.allLoader = 4;
         progress.finishedLoader = 1;
@@ -515,11 +626,11 @@ public class ServerHolder : MonoBehaviour
         AfterGameBonuses.Clear();
 		
 		MainMenuGUI mainMenu = FindObjectOfType<MainMenuGUI> ();
-		GameObject loadingScreen = null; 
+	
 		if (mainMenu != null) {
-				Destroy (mainMenu.gameObject);
-				ItemManager.instance.ClearShop();
-				loadingScreen = Instantiate(mainMenu.loadingScreen, Vector3.zero, Quaternion.identity) as GameObject;
+				
+//				ItemManager.instance.ClearShop();
+				mainMenu.LoadingScreen();
              
 
 		}
@@ -625,7 +736,7 @@ public class ServerHolder : MonoBehaviour
 
                     PrefabManager[] managers = FindObjectsOfType<PrefabManager>();
                     progress.allLoader = 2 + managers.Length;
-                    Debug.Log("Загрузка завершена.");
+                   
 
                     progress.finishedLoader++;
                     progress.curLoader = 0;
@@ -642,10 +753,8 @@ public class ServerHolder : MonoBehaviour
             }
         ItemManager.instance.ConnectToPrefab();
 
-     
-		if(loadingScreen!=null){
-			Destroy(loadingScreen);
-		}
+
+        Debug.Log("Загрузка завершена.");
       
 		FinishLoad ();
 		
@@ -662,10 +771,23 @@ public class ServerHolder : MonoBehaviour
         }
 
         Camera.main.GetComponent<PlayerMainGui>().enabled = true;
-        //menu.transform.parent = Camera.main.transform;
+        HUDHolder holder =FindObjectOfType<HUDHolder>();
+        Camera.main.GetComponent<PlayerMainGui>().PlayGUI = holder.PlayPanel;
+//        holder.cameraForMark.transform.parent = Camera.main.transform;
+    //    holder.cameraForMark.transform.localPosition = Vector3.zero;
+  //      holder.cameraForMark.transform.localRotation = Quaternion.identity;
+        menu.transform.parent = FindObjectOfType<GUIRootHolder>().transform;
         menu.transform.localPosition = Vector3.zero;
         menu.transform.localRotation = Quaternion.identity;
-    
+        menu.transform.localScale = holder.scale;
+		if(mainMenu!=null){
+		
+		
+			mainMenu.PlayerGUI=Camera.main.GetComponent<PlayerMainGui>();
+			
+			mainMenu.FinishLvlLoad();
+		}
+        GameRule.instance.curStage = MUSIC_STAGE.BATLLE;
         Debug.Log("Compileted Load Map");
         
         if (next)
@@ -696,10 +818,11 @@ public class ServerHolder : MonoBehaviour
 		if(!shouldLoad){
             MapDownloader loader = FindObjectOfType<MapDownloader>();
             GameObject menu = Instantiate(loader.playerHud, Vector3.zero, Quaternion.identity) as GameObject;
-
-            menu.transform.parent = Camera.main.transform;
+            HUDHolder holder = FindObjectOfType<HUDHolder>();
+            menu.transform.parent = FindObjectOfType<GUIRootHolder>().transform;
             menu.transform.localPosition = Vector3.zero;
             menu.transform.localRotation = Quaternion.identity;
+            menu.transform.localScale = holder.scale;
             Camera.main.GetComponent<PlayerMainGui>().enabled = true;
         
             NetworkController.Instance.pause = false;

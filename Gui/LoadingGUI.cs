@@ -23,6 +23,8 @@ public class LoadingGUI : MonoBehaviour {
 
     public UILabel secondLablel;
 
+    public UIWidget main;
+
     public ServerHolder Server;
     void Awake()
     {
@@ -103,11 +105,14 @@ public class LoadingGUI : MonoBehaviour {
 
 	void Update(){
 		//TODO:LoadMap
-
-        if (TournamentManager.instance.isLoaded)
+        if (main.alpha == 0)
+        {
+            return;
+        }
+        /*if (TournamentManager.instance.isLoaded)
         {
             LoadTop();
-        }
+        }*/
         if (Server.connectingToRoom)
         {
 				float percent =Server.LoadProcent();

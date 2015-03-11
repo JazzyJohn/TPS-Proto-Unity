@@ -27,7 +27,7 @@ public class GameRule : MonoBehaviour {
     public bool CanUseRobot = true;
 
     [HideInInspector]
-    public MUSIC_STAGE curStage = MUSIC_STAGE.BATLLE;
+    public MUSIC_STAGE curStage = MUSIC_STAGE.MAIN_MENU_LOOP;
 
     public bool start = false;
 
@@ -87,7 +87,7 @@ public class GameRule : MonoBehaviour {
         EventHolder.instance.FireEvent(typeof(GameListener), "EventTeamWin", Winner());
         GlobalPlayer.instance.MathcEnd();
         Player.localPlayer.GameEnd();
-        ItemManager.instance.RemoveOldAndExpired();
+        ItemManager.instance.SendChargeData();
         List<Pawn> pawns = PlayerManager.instance.FindAllPawn();
         foreach (Pawn pawn in pawns)
         {

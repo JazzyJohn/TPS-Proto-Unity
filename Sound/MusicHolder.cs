@@ -2,7 +2,9 @@
 using System.Collections;
 
 public enum MUSIC_STAGE{
-	MAIN_MENU,
+    NONE,
+    MAIN_MENU,
+	MAIN_MENU_LOOP,
 	BATLLE,
 	EXPLORATION,
 }
@@ -10,6 +12,8 @@ public enum MUSIC_STAGE{
 public class MusizStage{
 
 	public AudioClip[] clips;
+
+    public bool withIntro=false;
 	
 }
 public class MusicHolder : MonoBehaviour {
@@ -22,21 +26,29 @@ public class MusicHolder : MonoBehaviour {
 	public AudioSource musicPlayer;
 
     public MusizStage curStage;
-	
-	public int curStageInt;
+
+    public MUSIC_STAGE curStageEnum;
+
+    public int curStageInt;
 	
 	AudioClip curMusic;
 			
 	private static float volume = 1.0f;
+
+    public bool wasIntro;
 	
 	public static void  SetVolume(float newVolume){
-		if(volume!=newVolume){
-			volume = newVolume;
-			MusicHolder holder = FindObjectOfType(typeof (MusicHolder)) as MusicHolder;
-			if(holder!=null){
+	
+		
+		MusicHolder holder = FindObjectOfType(typeof (MusicHolder)) as MusicHolder;
+		if(holder!=null){
+            if (holder.musicPlayer.volume != newVolume)
+            {
+                volume = newVolume;
                 holder.musicPlayer.volume = volume;
-			}
+            }
 		}
+		
 	
 	}
 	
@@ -54,21 +66,54 @@ public class MusicHolder : MonoBehaviour {
      
         if (!musicPlayer.isPlaying && MusicInStage.Length > 0)
         {
+            switch (curStageEnum)
+            {
+                case MUSIC_STAGE.NONE:
+                    SetStage(MUSIC_STAGE.MAIN_MENU);
+                    break;
+                case MUSIC_STAGE.MAIN_MENU:
+                    SetStage(MUSIC_STAGE.MAIN_MENU_LOOP);
+                    break;
+            }
+            
 			StartSong();
 		}
 
-        if ( GameRule.instance != null && curStageInt != (int)GameRule.instance.curStage)
+        if (GameRule.instance != null && curStageEnum != GameRule.instance.curStage)
         {
-            curStageInt = (int)GameRule.instance.curStage;
+            
+            SetStage(GameRule.instance.curStage);
+           
 			NextStage();
 		}
 	}
-	
+
+    public void SetStage(MUSIC_STAGE nextStage)
+    {
+        wasIntro = false;
+        curStageEnum = nextStage;
+        StartSong();
+    }
 	public void StartSong(){
-		
-		int	curMusicInt = (int)UnityEngine.Random.Range (0, curStage.clips.Length);
+        curStageInt = (int)curStageEnum;
+        curStage = MusicInStage[curStageInt  ];
+         int curMusicInt;
+        if (curStage.withIntro)
+        {
+            if (wasIntro)
+            {
+                curMusicInt = (int)UnityEngine.Random.Range(1, curStage.clips.Length);
+            }
+            else
+            {
+                wasIntro = true;
+                curMusicInt = 0;
+            }
+        }else{
+            curMusicInt = (int)UnityEngine.Random.Range(0, curStage.clips.Length);
+        }
 		curMusic = curStage.clips[curMusicInt];
-        Debug.Log("NOW PLAY" + curMusic); 
+//        Debug.Log("NOW PLAY" + curMusic); 
         musicPlayer.clip = curMusic;
 		musicPlayer.PlayDelayed (musicTimeOut);
 
@@ -77,8 +122,8 @@ public class MusicHolder : MonoBehaviour {
 	public void NextStage(){
         Debug.Log("NEW STAGE " + MusicInStage.Length);
 		if (curStageInt <MusicInStage.Length ) {
-            curStage = MusicInStage[curStageInt];
-		    StartSong();
+            SetStage((MUSIC_STAGE)curStageInt);
+            
 		}
 	}
 }

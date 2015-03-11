@@ -37,6 +37,8 @@ public class StatisticHandler : MonoBehaviour {
     public static string USE_ITEM = "useItem";
 	
 	public static string REPAIR_ITEM ="repairItem";
+
+    public static string BUY_NEXT_SET = "buynextset";
 	
 	public static string DISENTEGRATE_ITEM = "disentegrateItem";
 
@@ -64,7 +66,15 @@ public class StatisticHandler : MonoBehaviour {
 	
 	public static string LOWER_STAMINA = "lowerstamina";
 	
+	public static string CHARGE_DATA ="chargedata";
+	
 	public static string REGISTRATION = "registration";
+	
+	public static string STATISTIC_DATA = "statisticdata";
+	
+	public static string SKIP_ACHIVE = "skipTask";
+	
+	public static string UPDATE_ACHIVE = "finishTask";
 
 	public static string LOGIN = "login";
 	

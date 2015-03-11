@@ -184,8 +184,8 @@ public class NetworkController : MonoBehaviour {
     public void Connect(){
         if (_smartFox != null)
         {
-            //_smartFox.KillConnection();
-           // _smartFox.Disconnect();
+            
+            _smartFox.Disconnect();
         }
         if (SmartFoxConnection.IsInitialized)
         {
@@ -360,11 +360,11 @@ public class NetworkController : MonoBehaviour {
         else
         {
             Debug.Log("UDP ok");
-
+            GlobalPlayer.instance.loadingStage++;
             // On to the lobby
             serverHolder = GetComponent<ServerHolder>();
             serverHolder.Connect();
-            GlobalPlayer.instance.loadingStage++;
+           
         }
     }
    
@@ -1939,7 +1939,7 @@ public class NetworkController : MonoBehaviour {
             return;
         }
         Pawn pawn = GetView(dt.GetInt("viewId")).pawn;
-        pawn.PawnKill();
+       
         int player = dt.GetInt("player");
         if (player == _smartFox.MySelf.Id)
         {
@@ -1950,19 +1950,21 @@ public class NetworkController : MonoBehaviour {
             }
             KillInfo info = new KillInfo(dt.GetInt("weaponId"), headShoot);
             GetPlayer(player).PawnKill(pawn, pawn.player, pawn.myTransform.position, info);
-
+            pawn.PawnKill(GetPlayer(player));
 
         }
         else
         {
             if (player > 0)
             {
-                GetPlayer(player).Score.Kill++;
+                pawn.PawnKill(GetPlayer(player));
             }
-            else
+            
+            if (pawn.player != null && !pawn.isAi)
             {
-                GetPlayer(player).Score.AIKill++;
+                pawn.player.Score.Death++;
             }
+           
         }
 
        

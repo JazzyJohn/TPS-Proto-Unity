@@ -53,7 +53,7 @@ public class SimplePlayer : Player {
             Score.AIKill++;
             aiKillInRow++;
             EventHolder.instance.FireEvent(typeof(LocalPlayerListener), "EventPawnKillAI", this, killinfo);
-            StatisticHandler.SendPlayerKillNPC(UID, PlayerName);
+         //   StatisticHandler.SendPlayerKillNPC(UID, PlayerName);
         }
         killInRow++;
         switch (killInRow)

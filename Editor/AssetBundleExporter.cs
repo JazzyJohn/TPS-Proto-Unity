@@ -20,6 +20,7 @@ public class AssetBundleExporter : EditorWindow
 	bool mMakeCompressedAsset = false;
 	bool mSplitPacksGroup = true;
 	bool mDumpExportedFilesInFile = true;
+    bool mMakeSepareteFiles = false;
 	bool mVerifyAssetBundleAfterBuild = true;
 	float mSplitPacksSize = 2.0f; //2 mb
 	
@@ -59,6 +60,7 @@ public class AssetBundleExporter : EditorWindow
 		
 		//options area
 		mMakeCompressedAsset = EditorGUILayout.Toggle("Make compressed asset", mMakeCompressedAsset);
+        mMakeSepareteFiles = EditorGUILayout.Toggle("Make seareted files", mMakeSepareteFiles);
 		mDumpExportedFilesInFile = EditorGUILayout.Toggle("Dump file names in file", mDumpExportedFilesInFile);
 		mVerifyAssetBundleAfterBuild = EditorGUILayout.Toggle("Verify asset bundles", mVerifyAssetBundleAfterBuild);
 		mTargetPlatform = (ETARGET_PLATFORM)EditorGUILayout.EnumPopup("Target Platform", mTargetPlatform);
@@ -183,64 +185,82 @@ public class AssetBundleExporter : EditorWindow
 		}
 		
 		//generate objects list
-		List<Object> objList = new List<Object>();
-		foreach (var filepath in filesForAsset) 
-		{
-			Object obj = AssetDatabase.LoadMainAssetAtPath(filepath);
-			if(obj != null)
-			{
-				objList.Add(obj);
-			}
-		}
-		
-		//build AssetBundle
-		try {
-			BuildAssetBundleOptions options = BuildAssetBundleOptions.CompleteAssets;
+	
+
+        for (int i = 0; i < filesForAsset.Count; i++)
+        {
+            string fileName = assetFilePath;
            
-			options |= BuildAssetBundleOptions.CollectDependencies;
-			if(!mMakeCompressedAsset) {
-				options |= BuildAssetBundleOptions.UncompressedAssetBundle;
-			}
-			if(mTargetPlatform != ETARGET_PLATFORM.Current) {
-				BuildPipeline.BuildAssetBundle(objList[0], objList.ToArray(), assetFilePath, options, (BuildTarget)mTargetPlatform);
-			}
-			else
-			{
-				BuildPipeline.BuildAssetBundle(objList[0], objList.ToArray(), assetFilePath, options);
-			}
-		}
-		catch (System.Exception ex) 
-		{
-			LogToWindow("Failed to create Asset Bundle woth error: " + ex.Message);
-			return;
-		}
+            List<Object> objList = new List<Object>();
+            for (; i < filesForAsset.Count; i++)
+            {
+                string filepath = filesForAsset[i];
+                Object obj = AssetDatabase.LoadMainAssetAtPath(filepath);
+                if (obj != null)
+                {
+                    objList.Add(obj);
+                }
+                if (mMakeSepareteFiles)
+                {
+                    fileName = Path.GetDirectoryName(assetFilePath) + "/" + Path.GetFileNameWithoutExtension(filepath) + ".unity3d";
+                    break;
+                }
+            }
+          
+            //build AssetBundle
+            try
+            {
+                BuildAssetBundleOptions options = BuildAssetBundleOptions.CompleteAssets;
+
+                options |= BuildAssetBundleOptions.CollectDependencies;
+                if (!mMakeCompressedAsset)
+                {
+                    options |= BuildAssetBundleOptions.UncompressedAssetBundle;
+                }
+                if (mTargetPlatform != ETARGET_PLATFORM.Current)
+                {
+                    BuildPipeline.BuildAssetBundle(objList[0], objList.ToArray(), fileName, options, (BuildTarget)mTargetPlatform);
+                }
+                else
+                {
+                    BuildPipeline.BuildAssetBundle(objList[0], objList.ToArray(), fileName, options);
+                }
+            }
+            catch (System.Exception ex)
+            {
+                LogToWindow("Failed to create Asset Bundle woth error: " + ex.Message);
+                return;
+            }
+            //dump in file
+            if (mDumpExportedFilesInFile)
+            {
+                using (StreamWriter writer = new StreamWriter(fileName + ".txt", false))
+                {
+                    foreach (var obj in objList)
+                    {
+                        string path = AssetDatabase.GetAssetPath(obj);
+                        string nameWithExt = Path.GetFileName(path);
+                        writer.WriteLine(nameWithExt);
+                    }
+                }
+            }
+
+            //verify asset bundle
+            if (mVerifyAssetBundleAfterBuild && !mMakeCompressedAsset)
+            {
+                bool res = TestAssetBundle(fileName, objList.ToArray());
+                if (res)
+                {
+                    //LogToWindow("Asset Bundle passes tests");
+                }
+                else
+                {
+                    LogToWindow("Asset Bundle test filed. Asset Bundle may be invalid");
+                }
+            }
 		
-		//dump in file
-		if(mDumpExportedFilesInFile) 
-		{
-			using(StreamWriter writer = new StreamWriter(assetFilePath + ".txt", false))
-			{
-				foreach(var obj in objList)
-				{
-					string path = AssetDatabase.GetAssetPath(obj);
-					string nameWithExt = Path.GetFileName(path);
-					writer.WriteLine(nameWithExt);
-				}
-			}
-		}
+        }
 		
-		//verify asset bundle
-		if(mVerifyAssetBundleAfterBuild && !mMakeCompressedAsset) 
-		{
-			bool res = TestAssetBundle(assetFilePath, objList.ToArray());
-			if(res) {
-				//LogToWindow("Asset Bundle passes tests");
-			}
-			else 
-			{
-				LogToWindow("Asset Bundle test filed. Asset Bundle may be invalid");
-			}
-		}
 		
 		LogToWindow("Asset Bundle was created");
 	}

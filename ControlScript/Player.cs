@@ -486,7 +486,7 @@ public class Player : MonoBehaviour {
                      }
                      PVPGameRule.instance.PlayerDeath();
                      DeathUpdate();
-                     StatisticHandler.SendPlayerKillbyNPC(UID, PlayerName);
+                    // StatisticHandler.SendPlayerKillbyNPC(UID, PlayerName);
                  }
 			}
     }
@@ -499,6 +499,7 @@ public class Player : MonoBehaviour {
         isDead = true; 
         charMan.DeathUpdate();
         ItemManager.instance.RestartStimPack();
+		ItemManager.instance.SendChargeData();
     }
 	public void RobotDead(Player Killer){
 		robotTimer=0;
@@ -547,7 +548,7 @@ public class Player : MonoBehaviour {
                 EventHolder.instance.FireEvent(typeof(LocalPlayerListener), "EventKilledByFriend", this, Killer);
             }
 
-            StatisticHandler.SendPlayerKillbyPlayer(UID, PlayerName, Killer.UID, Killer.PlayerName);
+            //StatisticHandler.SendPlayerKillbyPlayer(UID, PlayerName, Killer.UID, Killer.PlayerName);
         }
         else
         {
@@ -555,7 +556,7 @@ public class Player : MonoBehaviour {
             {
                 Pawn killer = NetworkController.GetView(pawnViewId).GetComponent<Pawn>();
                 PlayerMainGui.instance.InitKillCam(killer);
-                StatisticHandler.SendPlayerKillbyNPC(UID, PlayerName);
+               // StatisticHandler.SendPlayerKillbyNPC(UID, PlayerName);
             }
         }	
 
@@ -572,7 +573,17 @@ public class Player : MonoBehaviour {
             EventHolder.instance.FireEvent(typeof(LocalPlayerListener), "EventJuggerKill", this, killinfo);
 		}
 	}
-
+	public virtual void PawnKillAssist(Pawn deadPawn,Player victim)
+    {
+		Score.Assist++;
+		if (victim != null) {
+			
+            EventHolder.instance.FireEvent(typeof(LocalPlayerListener), "EventPawnKillAssistPlayer", this);
+		}else{
+			EventHolder.instance.FireEvent(typeof(LocalPlayerListener), "EventPawnKillAssistAI", this);
+		}
+		 
+	}
     public virtual void PawnKill(Pawn deadPawn,Player victim, Vector3 position, KillInfo killinfo)
     {
 		if (!playerView.isMine)
@@ -639,7 +650,7 @@ public class Player : MonoBehaviour {
             //TODO: move text to config
             PlayerMainGui.instance.Annonce(AnnonceType.AIKILL,addtype, deadPawn.publicName);
             EventHolder.instance.FireEvent(typeof(LocalPlayerListener), "EventPawnKillAI", this, killinfo);
-            StatisticHandler.SendPlayerKillNPC(UID, PlayerName);
+           // StatisticHandler.SendPlayerKillNPC(UID, PlayerName);
 		}
 
 
@@ -882,7 +893,7 @@ public class Player : MonoBehaviour {
 	public void ActivateStimpack(string id){
 		int stimId;
 		if(ItemManager.instance.TryUseStim(id, out stimId)){
-            AchievementManager.instance.UnEvnetAchive(AchievementManager.PARAM_STIM_PACK,1.0f);
+            AchievementManager.instance.UnEvnetAchive(ParamLibrary.PARAM_STIM_PACK,1.0f);
 			activeSteampacks.Add(stimId);
 		}
 	

@@ -7,14 +7,7 @@ using System.Threading;
 
 public class LevelingManager : MonoBehaviour, LocalPlayerListener,GameListener{ 
 	
-	public const string PARAM_KILL = "Kill";
-	public const string PARAM_WIN = "Win";
-	public const string PARAM_LOSE = "Lose";
-	public const string PARAM_KILL_AI= "KillAI"; 
-	public const string PARAM_KILL_FRIEND = "KillFriend";
-	public const string PARAM_KILL_BY_FRIEND= "KilledByFriend";
-    public const string PARAM_HEAD_SHOOT = "HeadShoot";
-    public const string PARAM_HEAD_SHOOT_AI = "HeadShootAI";
+
 		
 	public int playerLvl = 0;
 	
@@ -164,7 +157,12 @@ public class LevelingManager : MonoBehaviour, LocalPlayerListener,GameListener{
 					classExp[i++]= int.Parse(node.SelectSingleNode("exp").InnerText);
 		}
         StartCoroutine(PassiveSkillManager.instance.InitSkillTree(XML));
+        if (!isLoaded)
+        {
+            GlobalPlayer.instance.loadingStage++;
+        }
 		isLoaded = true;
+        
 	}
 	//adding exp to current
 	public bool UpExp(string cause,int selected=-1){
@@ -241,7 +239,13 @@ public class LevelingManager : MonoBehaviour, LocalPlayerListener,GameListener{
             ItemManager.instance.ReloadItem();
 			
 		}
-		
+        node = xmlDoc.SelectSingleNode("result/open_set");
+        if (node != null)
+        {
+
+            GlobalPlayer.instance.open_set = int.Parse(node.InnerText);
+
+        }
 
 	}
 
@@ -261,7 +265,10 @@ public class LevelingManager : MonoBehaviour, LocalPlayerListener,GameListener{
 	
 	//Event Section
 	private Player myPlayer;
+	private int playerStrike;
+	
 	public void EventAppear(Player target){
+        //Debug.Log("PLAYER SPAWM"+   target);
 		if (target.isMine) {
 			myPlayer = target;
 			
@@ -270,10 +277,27 @@ public class LevelingManager : MonoBehaviour, LocalPlayerListener,GameListener{
     public void EventPawnKillPlayer(Player target, KillInfo killinfo)
     {
 		if (target == myPlayer) {
-			UpExp(PARAM_KILL,target.selected);
+			playerStrike++;
+			switch(playerStrike){
+				case 1:
+				case 2:
+					UpExp(ParamLibrary.PARAM_KILL,target.selected);
+					break;
+				case 3:
+					UpExp(ParamLibrary.PARAM_TRIPLE_KILL,target.selected);
+					break;
+				case 4:
+					UpExp(ParamLibrary.PARAM_RAMPAGE_KILL,target.selected);
+					break;
+				default:
+					UpExp(ParamLibrary.PARAM_RAMPAGE_GOING_KILL,target.selected);
+                    break;
+					
+			}
+			
             if (killinfo.isHeadShoot)
             {
-                UpExp(PARAM_HEAD_SHOOT, target.selected);
+                UpExp(ParamLibrary.PARAM_HEAD_SHOOT, target.selected);
             }
 		}
 	}
@@ -283,34 +307,51 @@ public class LevelingManager : MonoBehaviour, LocalPlayerListener,GameListener{
 
 		if (target == myPlayer) {
 
-			UpExp(PARAM_KILL_AI,target.selected);
+			UpExp(ParamLibrary.PARAM_KILL_AI,target.selected);
             if (killinfo.isHeadShoot)
             {
-                UpExp(PARAM_HEAD_SHOOT_AI, target.selected);
+                UpExp(ParamLibrary.PARAM_HEAD_SHOOT_AI, target.selected);
             }
 		}
 	
 	}
+	public void EventPawnKillAssistPlayer(Player target){
+		if (target == myPlayer) {
+
+			UpExp(ParamLibrary.PARAM_ASSIST, target.selected);	
+		}
+	}
+    public void EventPawnKillAssistAI(Player target){
+		if (target == myPlayer) {
+
+			UpExp(ParamLibrary.PARAM_ASSIST_AI, target.selected);	
+		}
+	}
 	public void EventTeamWin(int teamNumber){
 		//if we not winner so no change in exp, or we a winner but no send were initiate we sync data 
-		if ((myPlayer.team	!= teamNumber&&!UpExp(PARAM_LOSE))||(myPlayer.team == teamNumber&&!UpExp(PARAM_WIN))) {
+        
+		if ((myPlayer.team	!= teamNumber&&!UpExp(ParamLibrary.PARAM_LOSE))||(myPlayer.team == teamNumber&&!UpExp(ParamLibrary.PARAM_WIN))) {
 			SyncLvl();
 		}
 		
 	}
 	public void EventKilledByFriend(Player target,Player friend){
 		if (target == myPlayer) {
-			UpExp(PARAM_KILL_BY_FRIEND,target.selected);	
+			UpExp(ParamLibrary.PARAM_KILL_BY_FRIEND,target.selected);	
 		}
 	}
     public void EventKilledAFriend(Player target, Player friend, KillInfo killinfo)
     {
 		if (target == myPlayer) {
-			UpExp(PARAM_KILL_FRIEND,target.selected);	
+			UpExp(ParamLibrary.PARAM_KILL_FRIEND,target.selected);	
 		}
 	}
-    public void EventPawnDeadByPlayer(Player target, KillInfo killinfo) { }
-	public void EventPawnDeadByAI(Player target){}
+    public void EventPawnDeadByPlayer(Player target, KillInfo killinfo) { 
+		playerStrike=0;
+	}
+	public void EventPawnDeadByAI(Player target){
+		playerStrike=0;
+	}
 	public void EventPawnGround(Player target){	}
 	public void EventPawnDoubleJump(Player target){}
 	public void EventStartWallRun(Player target,Vector3 position){}

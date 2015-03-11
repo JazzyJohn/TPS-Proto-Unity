@@ -11,7 +11,7 @@ public class AskWindow  : MonoBehaviour{
 	
 	public UILabel text;
 	
-	public UIPanel panel;
+	public UIRect panel;
 	
 	public ConfirmAction action;
 	
@@ -20,8 +20,9 @@ public class AskWindow  : MonoBehaviour{
 	public void Accept(){
         GA.API.Design.NewEvent("GUI:AskWindow:" + action.ToString()+":Yes", 1); 
 		panel.alpha = 0.0f;
+		action();
 		MainMenu.CamMove.RideTo(backPosition);
-        action();
+       
 	}
 	
 	
@@ -30,5 +31,11 @@ public class AskWindow  : MonoBehaviour{
 		panel.alpha = 0.0f;
 		MainMenu.CamMove.RideTo(backPosition);
 	}
-	
+
+
+    public  void Show(string text)
+    {
+        panel.alpha = 1.0f;
+        this.text.text = text;
+    }
 }

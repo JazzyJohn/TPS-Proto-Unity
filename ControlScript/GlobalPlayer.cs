@@ -50,6 +50,8 @@ public class GlobalPlayer : MonoBehaviour {
 	}
 	public List<string> friendsInfo = new List<string>();
 
+    private Dictionary<string, int> statisticData = new Dictionary<string, int>();
+
 	public string PlayerName="VK NAME";
 
 	public PLATFORMTYPE platformType;
@@ -59,6 +61,8 @@ public class GlobalPlayer : MonoBehaviour {
 	public int gold;
 	
 	public int cash;
+
+    public int open_set;
 
 	public int stamina;
 	
@@ -73,11 +77,13 @@ public class GlobalPlayer : MonoBehaviour {
 	
 	//this is for loading screen every long loading after loading increment  loadingStage when it's reached 
 	//MAXLOADSTAGE load finish;
-	private const int MAXLOADSTAGE =2;
+	private const int MAXLOADSTAGE =3;
 	
 	
 	
 	public bool isLoaded = false;
+	
+	public bool loaded = false;
 	
 	public void SetFaceBookInit() {
 		if(FB.IsLoggedIn) {
@@ -156,6 +162,10 @@ public class GlobalPlayer : MonoBehaviour {
     }
 
 	void Update(){
+		if(UID!=""&&!loaded&&(NewsManager.instance==null||(NewsManager.instance!=null&&NewsManager.instance.finished))){
+			LoadAll();
+		
+		}
 		if(InputManager.instance.GetButtonDown("FullScreen")){
 			if(Screen.fullScreen){
 				Screen.SetResolution(960, 600, false);
@@ -249,8 +259,8 @@ public class GlobalPlayer : MonoBehaviour {
 		DateTime timeEnd= DateTime.Parse((xmlDoc.SelectSingleNode ("player/premiumEnd").InnerText));
 		PremiumManager.instance.SetPremium(isPremium,timeEnd);
 		XmlNodeList list = xmlDoc.SelectNodes("player/notify");
-       
 
+        open_set = int.Parse(xmlDoc.SelectSingleNode("player/open_set").InnerText);
         foreach (XmlNode node in list)
         {
 			AsyncNotify type = (AsyncNotify)Enum.Parse(typeof(AsyncNotify), node.SelectSingleNode("type").InnerText);
@@ -261,9 +271,26 @@ public class GlobalPlayer : MonoBehaviour {
 				break;
 			}
 		}
-		
+        list = xmlDoc.SelectNodes("player/statistic/entry");
+        statisticData.Clear();
+        foreach (XmlNode node in list)
+        {
+            statisticData.Add(node.SelectSingleNode("key").InnerText, int.Parse(node.SelectSingleNode("value").InnerText));
+
+        }
 		TournamentManager.instance.ParseData(xmlDoc);
 	}
+
+
+    public int GetStatisticData(string key)
+    {
+
+        if (statisticData.ContainsKey(key))
+        {
+            return statisticData[key];
+        }
+        return 0;
+    }
 	
 	public void MathcEnd(){
         if (stamina > 0&& !GameRule.instance.IsPractice())
@@ -364,14 +391,20 @@ public class GlobalPlayer : MonoBehaviour {
 	{
 
 		UID = uid;
-      
+		//LoadAll();
+	
+	}
+	
+	public void LoadAll(){
+		loaded= true;
 		StartCoroutine(StartStats(UID,PlayerName));
 		LevelingManager.instance.Init(UID);
 		AchievementManager.instance.Init(UID);
 		ItemManager.instance.Init(UID);
         FindObjectOfType<RewardManager>().Init(UID);
         NetworkController.Instance.SetLogin(UID);
-        GA.SettingsGA.SetCustomUserID(uid);
+        StatisticManager.instance.Init(UID);
+        GA.SettingsGA.SetCustomUserID(UID);
 	}
 	public void SetSid(string sid){
 		StatisticHandler.SID = sid;

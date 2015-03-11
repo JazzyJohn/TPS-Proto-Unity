@@ -7,6 +7,7 @@ using Random = UnityEngine.Random;
 
 
 public class BaseWeapon : DestroyableNetworkObject {
+
 	
 	private static LayerMask layer = -123909;
 	
@@ -23,6 +24,43 @@ public class BaseWeapon : DestroyableNetworkObject {
 	public SLOTTYPE slotType;
 	
 	public AMMOTYPE ammoType;
+    /// <summary>
+    /// maxAmmmo for rewriting
+    /// </summary>
+    public int maxAmmoAmount;
+
+	//ROOT OF ALL EVIL SECTION
+	
+    /// <summary>
+    /// Charge that lowers gun efficiency
+    /// </summary>
+    private int charge;
+	 /// <summary>
+    ///How many shoots up charge
+    /// </summary>
+    public int shootPerCharge = 30;
+	
+	private int shootCounter= 0;
+	
+	private int hitCounter=0;
+	
+	private int totalShootCount=0;
+
+    private static float DAMAGE_BROKE_PERCEN = 10.0f;
+
+    private static float DAMAGE_BROKE_COEF = 5f;
+
+    private static float DAMAGE_BROKE_MAX = 0.5f;
+
+    private static float AIM_BROKE_PERCEN = 30.0f;
+
+    private static float AIM_BROKE_COEF = 5f;
+
+ 
+    
+	//END MONEY SECTION
+
+    public bool initStats = false;
     //SHOOT LOGIC
 
     /// <summary>
@@ -244,7 +282,8 @@ public class BaseWeapon : DestroyableNetworkObject {
             drawer.gameObject.SetActive(false);
 		}
   
-  
+		charge = ItemManager.instance.GetCharge(SQLId);
+		shootCounter = ItemManager.instance.GetShootCounter(SQLId);
 	}
 
     public Pawn GetOwner()
@@ -299,6 +338,7 @@ public class BaseWeapon : DestroyableNetworkObject {
         if(foxView.isMine){
             curAmmo = owner.GetComponent<InventoryManager>().GiveAmmo(ammoType, clipSize - (int)curAmmo);
         }
+        InitStats();
       
     }
 	public virtual void AttachWeapon(Transform weaponSlot,Vector3 Offset, Quaternion weaponRotator,Pawn inowner){
@@ -314,30 +354,62 @@ public class BaseWeapon : DestroyableNetworkObject {
 	
         
 		//RemoteAttachWeapon(inowner);
-		reloadTime =reloadTime*owner.GetPercentValue(CharacteristicList.RELOAD_SPEED);
+        InitStats();
+		
+
+
+	}
+    protected void InitStats()
+    {
+        if (initStats)
+        {
+            return;
+
+        }
+        initStats = true;
+
+        owner.ivnMan.RewrtieMaxAmmo(maxAmmoAmount,ammoType);
+
+        reloadTime = reloadTime * owner.GetPercentValue(CharacteristicList.RELOAD_SPEED);
         fireInterval = fireInterval * owner.GetPercentValue(CharacteristicList.FIRE_RATE);
 
-        clipSize =  Mathf.RoundToInt(clipSize * owner.GetPercentValue(CharacteristicList.AMMO_AMOUNT));
-				
-        float recoilmod = owner.GetValue(CharacteristicList.RECOIL_ALL);	
-		switch(descriptionType){
-			
-				
-			
-			case DESCRIPTIONTYPE.MACHINE_GUN:
-                recoilmod += owner.GetValue(CharacteristicList.RECOIL_MACHINEGUN);	
-			break;
-            case DESCRIPTIONTYPE.ROCKET_LAUNCHER:
-            recoilmod += owner.GetValue(CharacteristicList.RECOIL_ROCKET);	
-			break;
-		}
-		recoilmod =((float)recoilmod)/100f+1f;
-		normalRandCoef=normalRandCoef*recoilmod;
-		aimRandCoef = aimRandCoef*recoilmod;
-        damageAmount.Damage = damageAmount.Damage * owner.GetPercentValue(CharacteristicList.DAMAGE_ALL);
-		damageAmount.weapon= true;
-	}
+        clipSize = Mathf.RoundToInt(clipSize * owner.GetPercentValue(CharacteristicList.AMMO_AMOUNT));
 
+        float recoilmod = owner.GetValue(CharacteristicList.RECOIL_ALL);
+        switch (descriptionType)
+        {
+
+
+
+            case DESCRIPTIONTYPE.MACHINE_GUN:
+                recoilmod += owner.GetValue(CharacteristicList.RECOIL_MACHINEGUN);
+                break;
+            case DESCRIPTIONTYPE.ROCKET_LAUNCHER:
+                recoilmod += owner.GetValue(CharacteristicList.RECOIL_ROCKET);
+                break;
+        }
+        recoilmod = ((float)recoilmod) / 100f + 1f;
+        normalRandCoef = normalRandCoef * recoilmod;
+        aimRandCoef = aimRandCoef * recoilmod;
+        damageAmount.Damage = damageAmount.Damage * owner.GetPercentValue(CharacteristicList.DAMAGE_ALL);
+        damageAmount.weapon = true;
+        float damageMode = ((float)charge) / DAMAGE_BROKE_PERCEN * DAMAGE_BROKE_COEF / 100;
+        if (damageMode > DAMAGE_BROKE_MAX)
+        {
+            damageMode = DAMAGE_BROKE_MAX;
+        }
+        damageAmount.Damage -= damageAmount.Damage * damageMode;
+        float aimMode = ((float)charge) / AIM_BROKE_PERCEN * AIM_BROKE_COEF / 100;
+        recoilmod += aimMode * recoilmod;
+    }
+	
+	public void PawnDeath(){
+		if(foxView.isMine&&!owner.isAi){
+			ItemManager.instance.SetShootCount(SQLId,shootCounter);
+			StatisticManager.instance.AmmoSpent(totalShootCount);
+			StatisticManager.instance.AmmoHit(hitCounter);
+		}
+	}
 	public void RemoteAttachWeapon(Pawn newowner,bool state){
 		if(state){
             newowner.setWeapon(this); 
@@ -347,6 +419,7 @@ public class BaseWeapon : DestroyableNetworkObject {
 	}
     void Update()
     {
+		UpdateCahedPosition();
         UpdateWeapon(Time.deltaTime);
         if (foxView.isMine)
         {
@@ -761,6 +834,7 @@ public class BaseWeapon : DestroyableNetworkObject {
 		if(afterPumpAction!=AFTERPUMPACTION.Wait){
 			return _pumpAmount>=pumpAmount&&!isShooting;
 		}
+		
 		return false;
 	
 	}
@@ -934,8 +1008,23 @@ public class BaseWeapon : DestroyableNetworkObject {
         {
             alredyGunedAmmo = 0;
         }
+		if(foxView.isMine&&!owner.isAi){
+			shootCounter++;
+			totalShootCount++;
+			if(shootCounter>=shootPerCharge){
+				shootCounter= 0;
+				charge = ItemManager.instance.LowerCharge(SQLId);
+			}
+		}
 		
     }
+	
+	public virtual void HitWithProjectile(){
+		if(foxView.isMine&&!owner.isAi){
+			hitCounter++;
+			
+		}
+	}
 	public virtual bool CanShoot (){
         if (_waitForRelease)
         {

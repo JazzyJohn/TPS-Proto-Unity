@@ -3,10 +3,16 @@ using System.Collections;
 
 public class AnyRoom : MonoBehaviour {
 
-	public enum TypeRoom{NewRoom, JoinRoom};
-	public TypeRoom _TypeRoom;
+	public  RoomData room ;
+
+    public UILabel Number;
 
 	public UILabel Name;
+
+    public UILabel  MapName;
+
+	public UILabel GameMode;
+	
 	public UILabel SizeRoom;
 
 	public MainMenuGUI MainScriptGUI;
@@ -21,32 +27,28 @@ public class AnyRoom : MonoBehaviour {
 	}
    
 	// Update is called once per frame
-	void FixedUpdate () 
-	{
-		if (!shablon)
-		{
-			have = false;
-			if(Server.allRooms!=null){
-				foreach(RoomData room in Server.allRooms)
-				{
-					if(gameObject.name == room.name)
-					{
-						SizeRoom.text = room.playerCount + " / " + room.maxPlayers;
-						have=true;
-					}
-				}
-			}
-			if (!have)
-			{
-				MainScriptGUI.Rooms.Remove(gameObject.name);
-				Destroy(this.gameObject);
-			}
+	
+	void Update(){
+		if(room!=null&&!Server.allRooms.Contains(room)){
+			MainScriptGUI.Rooms.Remove(room.name);
+			Destroy(this.gameObject);
 		}
+		
+	}
+	
+	public void UpdateRoom (RoomData room,int i ) 
+	{
+		this.room =room;	
+		Name.text = room.name;
+		SizeRoom.text = room.playerCount + " / " + room.maxPlayers;
+		GameMode.text =  TextGenerator.instance.GetSimpleText(room.mode);
+        MapName.text = room.map;
+        Number.text = i.ToString();
 	}
 
 	public void SelectBut()
 	{
-		MainScriptGUI.ActivBut = this.gameObject;
+		MainScriptGUI.JoinRoom(room);
 	}
 
 

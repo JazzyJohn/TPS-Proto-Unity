@@ -10,6 +10,8 @@ public interface  LocalPlayerListener{
 	void EventPawnDeadByAI(Player target);
     void EventPawnKillPlayer(Player target, KillInfo killinfo);
     void EventPawnKillAI(Player target, KillInfo killinfo);
+	void EventPawnKillAssistPlayer(Player target);
+    void EventPawnKillAssistAI(Player target);
     void EventJuggerKill(Player target, KillInfo killinfo);
 	void EventJuggerTake(Player target);	
 	void EventPawnGround(Player target);

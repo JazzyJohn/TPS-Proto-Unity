@@ -45,7 +45,11 @@ public class DetailItemGUI : MonoBehaviour
            
         }
     }
-
+	//LoL SetSetOfItemToSetOfSets
+	public void SetToSet(){
+		Shop.SetItemForChoiseSet(item);
+	}
+	
     public void SetItem(InventorySlot _item)
     {
         item = _item;
@@ -61,7 +65,7 @@ public class DetailItemGUI : MonoBehaviour
         gunModel = null;
         ItemManager.instance.LoadModel(item);
         loading.alpha = 1.0f;
-        if (item.personal)
+        if (item.buyMode == BuyMode.FOR_KP)
         {
             repair.alpha = 1.0f;
         }

@@ -13,7 +13,7 @@ public class SettingGUI : MonoBehaviour {
 	
 	[SerializeField]
 	private bool _Visable;
-	private UIPanel panel;
+    public UIPanel panel;
 	private PauseMenu Pause;
 	
 	public bool Visable
@@ -40,13 +40,13 @@ public class SettingGUI : MonoBehaviour {
 
 	public _Control Control;
 
-	private MainMenuGUI MainMenu;
+    public MainMenuGUI MainMenu;
 
 	[System.Serializable]
 	public class _Control
 	{
 		public List<SettingCommand> controls = new List<SettingCommand>();
-		public List<GameObject> toggleList;
+		public ControlButton[] toggleList;
 
 		public class SettingCommand{
 			public UIToggle codename;
@@ -192,6 +192,7 @@ public class SettingGUI : MonoBehaviour {
 		Dictionary<string, KeyCode> map = InputManager.instance.GetMap();
 		foreach (_Control.SettingCommand setCommand in Control.controls)
 		{
+            Debug.Log(setCommand.command);
 			setCommand.keyname.text = map[setCommand.command].ToString();				
 		}
 		Control.mouseSensitivity.value = InputManager.instance.GetSensitivity() / 2f;
@@ -211,6 +212,33 @@ public class SettingGUI : MonoBehaviour {
 	public void SetMouseLabel() {
 		Control.mouseLabel.text = (Control.mouseSensitivity.value * 100f).ToString("0");
 	}
+    float oldVolumeScroll=1.0f;
+    float oldSoundFxScroll = 1.0f;
+    float oldMusicScroll = 1.0f;
+    public void ToggleSound()
+    {
+        if (volumes.VolumeScroll.value!=0)
+        {
+            oldVolumeScroll = volumes.VolumeScroll.value;
+            volumes.VolumeScroll.value = 0.0f;
+            oldSoundFxScroll = volumes.SoundFxScroll.value;
+            volumes.SoundFxScroll.value = 0.0f;
+            oldMusicScroll = volumes.MusicScroll.value;
+            volumes.MusicScroll.value = 0.0f;
+
+        }
+        else
+        {
+            volumes.VolumeScroll.value = oldVolumeScroll;
+            volumes.SoundFxScroll.value = oldSoundFxScroll;
+            volumes.MusicScroll.value = oldMusicScroll;
+        }
+        AudioListener.volume = volumes.SoundFxScroll.value * volumes.VolumeScroll.value;
+        MusicHolder.SetVolume(volumes.MusicScroll.value * volumes.VolumeScroll.value);
+        PlayerPrefs.SetFloat("OverallVolume", volumes.VolumeScroll.value);
+        PlayerPrefs.SetFloat("SoundFX", volumes.SoundFxScroll.value);
+        PlayerPrefs.SetFloat("Music", volumes.MusicScroll.value);
+    }
 	
 	public void SetValueVolume(UILabel IntArg, UIScrollBar ScrollArg) //Установка звука (Текст)
 	{
@@ -355,51 +383,41 @@ public class SettingGUI : MonoBehaviour {
 
 	void Awake()
 	{
-		foreach (GameObject onContrl in Control.toggleList) {
+        Control.toggleList = GetComponentsInChildren<ControlButton>();
+		foreach (ControlButton onContrl in Control.toggleList) {
 			_Control.SettingCommand commandClass = new _Control.SettingCommand();
 			commandClass.codename = onContrl.GetComponent<UIToggle>();
 			commandClass.command = onContrl.GetComponent<ControlButton>().command;
 			commandClass.keyname = onContrl.transform.GetChild(0).GetComponent<UILabel>();
 			Control.controls.Add(commandClass);
 		}
-		panel = this.GetComponent<UIPanel>();
+		
 	}
 
 	public void ShowSetting()
 	{
-		if(TypeSettingPanel == _TypeSettingPanel.MainMenu)
-		{
-		//Debug.Log (_RoomsNgui.RoomsFound.alpha);
-			if (panel.alpha > 0f) {
-				MainMenu.HideAllPanel();
-				MainMenu._PanelsNgui.SliderPanel.alpha = 1f;
-				
-			}
-			else
-			{
+		
 				MainMenu.HideAllPanel();
 				panel.alpha = 1f;
 				if (control.alpha == 1)
 				{
 					CearControlls();
 				}
-			}
-		}
-		else
-		{
-			Pause.VisableSetting = !Pause.VisableSetting;
-		}
 	}
+    public void HideSetting()
+    {
+
+       
+        panel.alpha = 0f;
+      
+    }
 
 	// Use this for initialization
 	void Start () 
 	{
 
 		FullScreen_Z = Screen.fullScreen;
-		if(TypeSettingPanel == _TypeSettingPanel.MainMenu)
-			MainMenu = FindObjectOfType<MainMenuGUI>();
-		else
-			Pause = FindObjectOfType<PauseMenu>();
+		
 
 		Resolution[] resolutions = Screen.resolutions;
 		AllResolution.Clear();
@@ -428,6 +446,9 @@ public class SettingGUI : MonoBehaviour {
             volumes.VolumeScroll.value = PlayerPrefs.GetFloat("OverallVolume");
             volumes.SoundFxScroll.value = PlayerPrefs.GetFloat("SoundFX");
             volumes.MusicScroll.value = PlayerPrefs.GetFloat("Music");
+           // Debug.Log(volumes.MusicScroll.value + "  " + volumes.VolumeScroll.value);
+            AudioListener.volume = volumes.SoundFxScroll.value * volumes.VolumeScroll.value;
+            MusicHolder.SetVolume(volumes.MusicScroll.value * volumes.VolumeScroll.value);
             StartCoroutine(SetDefoltGraphic(1));
         }
         else

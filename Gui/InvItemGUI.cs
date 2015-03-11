@@ -7,16 +7,31 @@ public class InvItemGUI : MonoBehaviour {
     public InventorySlot item;
 
 	public UITexture Texture;
-    public UIWidget Box;
-    public UILabel chargeLabel;
-    
+
+    public Color open =Color.white;
+
+    public Color close =Color.gray;
+
+    public Color goldOpen = Color.yellow;
+
+    public Color goldClose = Color.yellow;
+    public UILabel name;
+
+    public string id;
+
+    public UIWidget box;
 
 	[HideInInspector]
 	public int numToItem;
 
 	// Use this for initialization
 	void Start () {
-	
+        GetComponent<UIButton>().onClick.Add(new EventDelegate(OpenLot));
+        box = GetComponent<UIWidget>();
+        if (Texture == null)
+        {
+            Texture = GetComponentInChildren<UITexture>();
+        }
 	}
 
 	// Update is called once per frame
@@ -30,27 +45,49 @@ public class InvItemGUI : MonoBehaviour {
 
     public void SetItem(InventorySlot _item)
     {
+        if (_item == null)
+        {
+            return;
+        }
+        
         item = _item;
         GA.API.Design.NewEvent("GUI:MainMenu:Inventory:SelectItem:" + _item.engName);
         Texture.mainTexture = null;
-
-        if (_item.personal)
+        if (name != null)
         {
-            chargeLabel.text = _item.charge.ToString();
+            name.text = _item.name;
         }
-        else
+        if (item.isAvailable())
         {
-            if (_item.isTimed)
+            if (item.prices[0].type == BuyPrice.KP_PRICE)
             {
-                chargeLabel.text = _item.timeEnd.ToString("g");
+                GetComponent<UIButton>().defaultColor = open;
+                box.color = open;
             }
             else
             {
-                chargeLabel.text = "";
+                GetComponent<UIButton>().defaultColor = goldOpen;
+                box.color = goldOpen;
             }
-            
+        }
+        else
+        {
+            if (item.prices[0].type == BuyPrice.KP_PRICE)
+            {
+                GetComponent<UIButton>().defaultColor = close;
+                box.color = close;
+            }
+            else
+            {
+                GetComponent<UIButton>().defaultColor = goldClose;
+                box.color = goldClose;
+            }
         }
         
+    }
+    public void OpenLot()
+    {
+        Shop.ShowLot(this);
     }
         
 }

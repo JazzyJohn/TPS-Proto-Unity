@@ -8,7 +8,7 @@ public class AchivGUI : MonoBehaviour {
 
 	public int numObj;
 
-    public InventoryGUI Main;
+    public StatisticGUI Main;
 	public UIWidget Widget;
 	public UILabel nameAndDescription;
     public UILabel progress;
@@ -27,7 +27,7 @@ public class AchivGUI : MonoBehaviour {
         }
        
         picture.mainTexture = achivment.textureIcon;
-		Main.statistic.GetParent(this);
+//		Main.statistic.GetParent(this);
 	}
 
 	// Use this for initialization

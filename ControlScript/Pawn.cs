@@ -66,7 +66,7 @@ public class Pawn : DamagebleObject
 
     public const int SYNC_MULTUPLIER = 5;
 
-    public const float ASSIT_FORGET_TIME = 5.0f;
+    public const float ASSIT_FORGET_TIME = 30.0f;
 
     private LayerMask groundLayers = 1;
     protected LayerMask wallRunLayers = 1;
@@ -692,6 +692,7 @@ public class Pawn : DamagebleObject
                     entry = new DamagerEntry(killerPawn);
                     damagers.Add(entry);
                 }
+               
                 entry.forgetTime = Time.time + ASSIT_FORGET_TIME;
                 entry.amount += damage.Damage;
                 entry.lastHitDirection = damage.pushDirection;
@@ -726,11 +727,13 @@ public class Pawn : DamagebleObject
 				AddEffect(damage.hitPosition,damage.pushDirection ,damage.type);
 			}
 			if(CanBeDamaged()){
+				StatisticManager.instance.AddDamage(Mathf.RoundToInt(damage.Damage));
 				base.Damage(damage, killer);
 			}
         }
         if (killerPawn != null && killerPawn.foxView.isMine)
         {
+			StatisticManager.instance.AddDamageDeliver(Mathf.RoundToInt(damage.Damage));
             if (foxView.isMine)
             {
    			    if (damage.sendMessage)
@@ -788,12 +791,14 @@ public class Pawn : DamagebleObject
         {
             eventHandler.Damage(killer, damage.Damage);
         }
+		
         //Debug.Log ("DAMAGE");
 		if (damage.sendMessage)
 		{
 			AddEffect(damage.hitPosition,damage.pushDirection ,damage.type);
 		}
 		if(CanBeDamaged()){
+			StatisticManager.instance.AddDamage(Mathf.RoundToInt(damage.Damage));
 			base.Damage(damage, killer);
 		}
     }
@@ -845,6 +850,7 @@ public class Pawn : DamagebleObject
         {
             return;
         }
+        Player killerPlayer = null;
         try
         {
 
@@ -853,7 +859,7 @@ public class Pawn : DamagebleObject
 
             //StartCoroutine (CoroutineRequestKillMe ());
             Pawn killerPawn = null;
-            Player killerPlayer = null;
+       
             int killerID = -1;
             if (killer != null)
             {
@@ -876,12 +882,14 @@ public class Pawn : DamagebleObject
                             {
                                 killerPlayer.PawnKill(this, player, myTransform.position, killInfo);
                             }
+							
                         }
                     }
                 }
 
             }
-
+		
+			
             foxView.PawnDiedByKill(killerID);
 
             if (player != null)
@@ -910,7 +918,7 @@ public class Pawn : DamagebleObject
         }
         finally
         {
-            PawnKill();
+            PawnKill(killerPlayer);
         }
 
 
@@ -934,14 +942,29 @@ public class Pawn : DamagebleObject
         }
 
     }
-    public void PawnKill()
+    public void PawnKill(Player killerPlayer)
     {
         if (isAi && mainAi != null)
         {
             mainAi.Death();
         }
-
+        ivnMan.PawnDeath();
+		
         ActualKillMe();
+		//AssistLogic
+        if (killerPlayer != Player.localPlayer)
+        {
+            DamagerEntry entry = damagers.Find(delegate(DamagerEntry searchentry) {
+//                Debug.Log("PLAYER ASSIST" + searchentry.pawn.player + " " + (searchentry.pawn.player == Player.localPlayer));
+                return searchentry.pawn.player == Player.localPlayer; 
+            
+            });
+  //          Debug.Log("PLAYER ASSIST" +entry);
+            if (entry != null)
+            {
+                Player.localPlayer.PawnKillAssist(this, player);
+            }
+        }
     }
 
     protected override void ActualKillMe()
@@ -3126,7 +3149,7 @@ public class Pawn : DamagebleObject
             //звук прыжка
             sControl.playClip(jumpSound);
         }
-        AchievementManager.instance.UnEvnetAchive(AchievementManager.PARAM_JUMP, 1.0f);
+        AchievementManager.instance.UnEvnetAchive(ParamLibrary.PARAM_JUMP, 1.0f);
         lastJumpTime = Time.time;
         //photonView.RPC("JumpChange",PhotonTargets.OthersBuffered,true);
     }

@@ -14,13 +14,29 @@ public class AchievementParam{
 
 
 }
+public enum AchievementType{
+	ACHIEVEMENT,
+	DAYLIC,
+	TASK
+
+}
+public struct AchievementReward
+{
+    public int cash;
+    public int gold;
+    public int skill;
+}
 public class Achievement{
 	public Dictionary<string,AchievementParam> achivParams = new Dictionary<string, AchievementParam>();
 	public String name;
     public String engName;
 	public String description;
+    public Achievement next;
+    public AchievementReward reward = new AchievementReward();
+    public int order;
   	public int achievementId;
 	public Texture2D textureIcon;
+	public AchievementType type;
 	public bool isDone = false;
 	public int amount  =0;
 	public bool isMultiplie = false;
@@ -48,27 +64,28 @@ public class Achievement{
         }
         return cnt.ToString("0") +"/"+max.ToString("0");
     }
+    public float GetFloatProgress()
+    {
+        float cnt = 0.0f;
+        foreach (KeyValuePair<string, AchievementParam> entry in achivParams)
+        {
+            cnt += entry.Value.current;
+            
+
+        }
+        return cnt;
+    }
 }
 public class AchievementManager : MonoBehaviour, LocalPlayerListener, GameListener{
 	//Its here because it's clearly parse params and this calss for parse www data
-	public static string PARAM_DEATH = "Death";
-    public static string PARAM_DEATH_AI = "DeathAI";
-    public static string PARAM_KILL = "Kill";
-    public static string PARAM_KILL_AI = "KillAi";
-    public static string PARAM_DOUBLE_JUMP = "DoubeJump";
-    public static string PARAM_JUMP = "Jump";
-    public static string PARAM_WALL_RUN = "WallRun";
-    public static string PARAM_RELOAD = "Reload";
-    public static string PARAM_KILL_FRIEND = "KillFriend";
-    public static string PARAM_KILL_BY_FRIEND = "KilledByFriend";
-    public static string PARAM_ROOM_FINISHED = "RoomFinished";
-    public static string PARAM_HEAD_SHOOT = "HeadShoot";
-    public static string PARAM_HEAD_SHOOT_AI = "HeadShootAI";
-    public static string PARAM_WIN = "Win";
-    public static string PARAM_STIM_PACK = "StimPack";
+	
 	struct IncomingMessage{
 		public string param;
 		public float delta;
+        public string mapContext;
+        public string gunContext;
+        public int teamContext;
+        public int weaponType;
 
 	}
 		
@@ -102,6 +119,8 @@ public class AchievementManager : MonoBehaviour, LocalPlayerListener, GameListen
 	}
 	//parse XML string to normal Achivment Pattern
 	protected IEnumerator ParseList(string XML){
+        incomeQueue.Clear();
+		outcomeQueue.Clear();
 		XmlDocument xmlDoc = new XmlDocument();
 		xmlDoc.LoadXml(XML);
 //       Debug.Log(XML);
@@ -113,8 +132,21 @@ public class AchievementManager : MonoBehaviour, LocalPlayerListener, GameListen
 			achivment.name = node.SelectSingleNode("name").InnerText;
             achivment.engName = achivment.name.Unidecode();
 			achivment.description = node.SelectSingleNode("description").InnerText;
-           
+            if (node.SelectSingleNode("nextdescription") != null)
+            {
+                	Achievement nextachivment = new Achievement();
+                    nextachivment.description = node.SelectSingleNode("nextdescription").InnerText;
+                    nextachivment.name = node.SelectSingleNode("name").InnerText;
+                    achivment.next = nextachivment;
+                    nextachivment.reward.cash = int.Parse(node.SelectSingleNode("nextcashreward").InnerText);
+                    nextachivment.reward.gold = int.Parse(node.SelectSingleNode("nextgoldreward").InnerText);
+                    nextachivment.reward.skill = int.Parse(node.SelectSingleNode("nextskillreward").InnerText);
+            }
+            achivment.reward.cash = int.Parse(node.SelectSingleNode("cashreward").InnerText);
+            achivment.reward.gold = int.Parse(node.SelectSingleNode("goldreward").InnerText);
+            achivment.reward.skill = int.Parse(node.SelectSingleNode("skillreward").InnerText);
 			achivment.achievementId = int.Parse(node.SelectSingleNode("id").InnerText);
+            achivment.order = int.Parse(node.SelectSingleNode("order").InnerText);
 			WWW www = StatisticHandler.GetMeRightWWW( node.SelectSingleNode ("icon").InnerText);
 		
 			yield return www;
@@ -123,7 +155,10 @@ public class AchievementManager : MonoBehaviour, LocalPlayerListener, GameListen
 			
 			foreach (XmlNode paramNode in node.SelectNodes("param")) {
 				AchievementParam param = new AchievementParam();
-				param.current =0.0f;
+                if (node.SelectSingleNode("progress") != null)
+                {
+                    param.current = float.Parse(node.SelectSingleNode("progress").InnerText);
+                }
 				param.needed = float.Parse(paramNode.SelectSingleNode("value").InnerText);
 				param.resetEvent = paramNode.SelectSingleNode("resetname").InnerText;
 				achivment.achivParams.Add(paramNode.SelectSingleNode("name").InnerText,param);
@@ -133,6 +168,7 @@ public class AchievementManager : MonoBehaviour, LocalPlayerListener, GameListen
 			bool open = bool.Parse(node.SelectSingleNode("open").InnerText);
             achivment.isDone = open;
             achivment.isMultiplie = bool.Parse(node.SelectSingleNode("multiplie").InnerText);
+			achivment.type = (AchievementType)Enum.Parse(typeof(AchievementType), node.SelectSingleNode("type").InnerText);
 			//Debug.Log(open);
             ongoingAchivment.Add(achivment);
 			if(open){
@@ -174,27 +210,63 @@ public class AchievementManager : MonoBehaviour, LocalPlayerListener, GameListen
 		while (true) {
 			//Debug.Log (incomeQueue.Count	);
 			try{
+                bool wasChange = false;
 						while (incomeQueue.Count>0) {
 								IncomingMessage mess = incomeQueue.Dequeue ();
                                 //Debug.Log(mess.param);
 								if(IsPractice){
 									continue;
 								}
-								foreach (Achievement achiv in ongoingAchivment) {
-                                        if (achiv.isDone)
+
+                          
+                                if (mess.param == ParamLibrary.PARAM_TASK_RESET)
+                                {
+									foreach (Achievement achiv in ongoingAchivment) {
+										  if (achiv.type == AchievementType.DAYLIC){
+												foreach(AchievementParam param in achiv.achivParams.Values ) {
+													param.current =0;
+												}
+										  }
+									}
+								}else{
+
+                                    string[] events  = new string[9]{
+                                            mess.param,
+                                            mess.param + "by"+ mess.gunContext,
+                                            mess.param + "with"+ mess.weaponType,
+                                            mess.param + "on" + mess.mapContext,
+                                            mess.param + "team"+mess.teamContext.ToString(),
+                                            mess.param + "by"+ mess.gunContext + "on" +  mess.mapContext,
+                                            mess.param + "by"+ mess.gunContext + "team" +  mess.teamContext.ToString(),
+                                            mess.param + "on"+ mess.gunContext + "team" +  mess.teamContext.ToString(),
+                                            mess.param + "by"+ mess.gunContext + "on"+ mess.mapContext + "team" +  mess.teamContext.ToString(),
+                                                };
+                                    foreach (string eventStr in events)
+                                    {
+
+                                        Debug.Log(eventStr);
+                                        foreach (Achievement achiv in ongoingAchivment)
                                         {
-                                            continue;
+                                            if (achiv.isDone)
+                                            {
+                                                continue;
+                                            }
+                                            if (achiv.achivParams.ContainsKey(eventStr))
+                                            {
+                                                //Debug.Log(mess.param + "  " + mess.delta + "  " + achiv.achivParams[mess.param].current);
+                                                wasChange = true;
+                                                achiv.achivParams[mess.param].current += mess.delta;
+                                            }
+                                            foreach (AchievementParam param in achiv.achivParams.Values)
+                                            {
+                                                if (param.resetEvent == eventStr)
+                                                {
+                                                    param.current = 0;
+                                                }
+                                            }
+
                                         }
-										if (achiv.achivParams.ContainsKey (mess.param)) {
-                                            //Debug.Log(mess.param + "  " + mess.delta + "  " + achiv.achivParams[mess.param].current);
-												achiv.achivParams [mess.param].current += mess.delta;
-										}
-										foreach(AchievementParam param in achiv.achivParams.Values ) {
-											if(param.resetEvent==mess.param){
-												param.current =0;
-											}
-										
-										}
+                                    }
 								}
 						}
 						ongoingAchivment.ForEach (delegate(Achievement obj) {
@@ -210,21 +282,32 @@ public class AchievementManager : MonoBehaviour, LocalPlayerListener, GameListen
 						});
 
 						//	
-					
+                        if (wasChange)
+                        {
+                            needupdate = true;
+                        }
 						Thread.Sleep (1000);
 					}catch( Exception e){
                         Debug.LogError(e);
 					}
 				}
 	}
-	protected void SyncAchievement(List<int> syncAchivment){
+	protected void SyncAchievement(List<int> syncAchivment,List<Achievement> daylics){
 		WWWForm form = new WWWForm ();
 			
 		form.AddField ("uid", UID);
 		foreach(int id in syncAchivment){
 			form.AddField ("ids[]", id);
 		}
+
+        foreach (Achievement daylic in daylics)
+        {
+            form.AddField("daylicProggress["+daylic.order+"]", daylic.GetFloatProgress().ToString("0.0"));
+
+        }
 		
+
+
 		StatisticHandler.instance.StartCoroutine(SendAchive(form));
 		
 	}
@@ -242,6 +325,78 @@ public class AchievementManager : MonoBehaviour, LocalPlayerListener, GameListen
 		}
 	}
 	
+	public IEnumerator SkipAchive(int id){
+		WWWForm form = new WWWForm ();
+			
+		form.AddField ("uid", UID);
+		form.AddField ("id", id);
+        WWW w = StatisticHandler.GetMeRightWWW(form, StatisticHandler.SKIP_ACHIVE);
+		yield return w;
+        Debug.Log(w.text);
+		XmlDocument xmlDoc = new XmlDocument();
+		xmlDoc.LoadXml(w.text);
+		
+		if(xmlDoc.SelectSingleNode("result/error").InnerText=="0"){
+			myThread.Abort ();
+			form = new WWWForm ();
+			
+			form.AddField ("uid", UID);
+			w = StatisticHandler.GetMeRightWWW(form, StatisticHandler.LOAD_ACHIVE);
+		
+			yield return w;
+			//Debug.Log (w.text);
+			IEnumerator numenator = ParseList (w.text);
+
+			while(numenator.MoveNext()){
+				yield return numenator.Current;
+			}
+            GlobalPlayer.instance.gold -= int.Parse(xmlDoc.SelectSingleNode("result/price").InnerText);
+            MissionGUI gui = FindObjectOfType<MissionGUI>();
+            if (gui != null)
+            {
+                gui.Draw();
+            }
+		}else{
+		
+		}
+	}
+
+    public IEnumerator UpdateTask()
+    {
+		WWWForm form = new WWWForm ();
+			
+		form.AddField ("uid", UID);
+	
+        WWW w = StatisticHandler.GetMeRightWWW(form, StatisticHandler.UPDATE_ACHIVE);
+		yield return w;
+        Debug.Log(w.text);
+		XmlDocument xmlDoc = new XmlDocument();
+		xmlDoc.LoadXml(w.text);
+		
+		if(xmlDoc.SelectSingleNode("result/error").InnerText=="0"){
+			myThread.Abort ();
+			form = new WWWForm ();
+			
+			form.AddField ("uid", UID);
+			w = StatisticHandler.GetMeRightWWW(form, StatisticHandler.LOAD_ACHIVE);
+		
+			yield return w;
+			//Debug.Log (w.text);
+			IEnumerator numenator = ParseList (w.text);
+
+			while(numenator.MoveNext()){
+				yield return numenator.Current;
+			}
+            GlobalPlayer.instance.gold -= int.Parse(xmlDoc.SelectSingleNode("result/price").InnerText);
+            MissionGUI gui = FindObjectOfType<MissionGUI>();
+            if (gui != null)
+            {
+                gui.Draw();
+            }
+		}else{
+		
+		}
+	}
 	void OnDestroy(){
 		if (myThread != null) {
 			myThread.Abort ();
@@ -249,6 +404,12 @@ public class AchievementManager : MonoBehaviour, LocalPlayerListener, GameListen
 		
 	}
     private bool IsPractice;
+
+    private bool needupdate = false;
+
+    private int time =-10;
+
+    private const int TIME_DELAY = 10;
 	void Update(){
         if (GameRule.instance != null)
         {
@@ -274,8 +435,18 @@ public class AchievementManager : MonoBehaviour, LocalPlayerListener, GameListen
           
 			syncAchivment.Add(finished.achievementId);
 		}
+
+        if (needupdate && time+TIME_DELAY<Time.time)
+        {
+            time = Mathf.RoundToInt(Time.time);
+            needupdate = false;
+            SyncAchievement(new List<int>(),GetDaylics());	
+        }
+        
 		if (syncAchivment.Count > 0) {
-			SyncAchievement (syncAchivment);		
+            time = Mathf.RoundToInt(Time.time);
+            needupdate = false;
+			SyncAchievement (syncAchivment,GetDaylics());		
 		}
 		//Debug.Log (onFinishedAchivment.Count);
 	}
@@ -290,9 +461,22 @@ public class AchievementManager : MonoBehaviour, LocalPlayerListener, GameListen
         for (int i = 0; i < ongoingAchivment.Count; i++)
         {
           //  Debug.Log(ongoingAchivment[i].name +"  " + ongoingAchivment[i].isMultiplie);
-            if (ongoingAchivment[i].isMultiplie)
+            if (ongoingAchivment[i].type == AchievementType.DAYLIC)
             {
                 list.Add(ongoingAchivment[i]);
+            }
+        }
+        return list;
+    }
+	public Achievement[] GetTask()
+    {
+        Achievement[] list = new Achievement[3];
+        for (int i = 0; i < ongoingAchivment.Count; i++)
+        {
+          //  Debug.Log(ongoingAchivment[i].name +"  " + ongoingAchivment[i].isMultiplie);
+            if (ongoingAchivment[i].type == AchievementType.TASK)
+            {
+                list[ongoingAchivment[i].order-1] =ongoingAchivment[i];
             }
         }
         return list;
@@ -324,6 +508,7 @@ public class AchievementManager : MonoBehaviour, LocalPlayerListener, GameListen
 	public Player myPlayer;
 	public string UID;
 	public Vector3 wallRunningStartPosition;
+    private int killCnt;
 
 	public void EventAppear(Player target){
 		if (target.isMine) {
@@ -332,19 +517,17 @@ public class AchievementManager : MonoBehaviour, LocalPlayerListener, GameListen
 
 		}
 	}
-
+    
 	public void EventPawnDeadByPlayer(Player target,KillInfo killinfo){
 		if (target == myPlayer) {
 			IncomingMessage mess = new IncomingMessage();
 			mess.delta=1.0f;
-			mess.param =PARAM_DEATH;
-		
+			mess.param =ParamLibrary.PARAM_DEATH;
+            mess.gunContext = killinfo.weaponId.ToString();
+            mess.mapContext = ServerHolder.currentMap;
+            mess.teamContext = myPlayer.team;
 			incomeQueue.Enqueue(mess);
-			mess = new IncomingMessage();
-			mess.delta=1.0f;
-            mess.param = PARAM_DEATH + "by" + killinfo.weaponId.ToString();
-		
-			incomeQueue.Enqueue(mess);
+            killCnt = 0;
 
 
 		}
@@ -354,14 +537,17 @@ public class AchievementManager : MonoBehaviour, LocalPlayerListener, GameListen
 		if (target == myPlayer) {
 			IncomingMessage mess = new IncomingMessage();
 			mess.delta=1.0f;
-			mess.param =PARAM_DEATH_AI;
-		
+			mess.param =ParamLibrary.PARAM_DEATH_AI;
+		    mess.mapContext = ServerHolder.currentMap;
+            mess.teamContext = myPlayer.team;
 			incomeQueue.Enqueue(mess);
             mess = new IncomingMessage();
             mess.delta = 1.0f;
-            mess.param = PARAM_DEATH;
-
+            mess.param = ParamLibrary.PARAM_DEATH;
+            mess.mapContext = ServerHolder.currentMap;
+            mess.teamContext = myPlayer.team;
             incomeQueue.Enqueue(mess);
+            killCnt = 0;
 		}
 	}
     public void EventPawnKillPlayer(Player target, KillInfo killinfo)
@@ -369,19 +555,56 @@ public class AchievementManager : MonoBehaviour, LocalPlayerListener, GameListen
 		if (target == myPlayer) {
 			IncomingMessage mess = new IncomingMessage();
 			mess.delta=1.0f;
-			mess.param =PARAM_KILL;
-			incomeQueue.Enqueue(mess);
-			mess = new IncomingMessage();
-			mess.delta=1.0f;
-            mess.param = PARAM_KILL + "by" + killinfo.weaponId.ToString();
-		
+			mess.param =ParamLibrary.PARAM_KILL;
+            mess.gunContext = killinfo.weaponId.ToString();
+            mess.mapContext = ServerHolder.currentMap;
+            mess.teamContext = myPlayer.team;
+            mess.weaponType = (int)ItemManager.instance.GetWeaponprefabByID(killinfo.weaponId).slotType;
 			incomeQueue.Enqueue(mess);
             if (killinfo.isHeadShoot)
             {
                 mess = new IncomingMessage();
                 mess.delta = 1.0f;
-                mess.param = PARAM_HEAD_SHOOT;
+                mess.param = ParamLibrary.PARAM_HEAD_SHOOT;
+                mess.gunContext = killinfo.weaponId.ToString();
+                mess.mapContext = ServerHolder.currentMap;
+                mess.teamContext = myPlayer.team;
+                mess.weaponType = (int)ItemManager.instance.GetWeaponprefabByID(killinfo.weaponId).slotType;
                 incomeQueue.Enqueue(mess);
+            }
+            killCnt++;
+            switch (killCnt)
+            {
+                case 2:
+                    mess = new IncomingMessage();
+			        mess.delta=1.0f;
+                    mess.param = ParamLibrary.PARAM_DOUBLE_KILL;
+                    mess.gunContext = killinfo.weaponId.ToString();
+                    mess.mapContext = ServerHolder.currentMap;
+                    mess.teamContext = myPlayer.team;
+                    mess.weaponType = (int)ItemManager.instance.GetWeaponprefabByID(killinfo.weaponId).slotType;
+			        incomeQueue.Enqueue(mess);
+                    break;
+                case 3:
+                    mess = new IncomingMessage();
+			        mess.delta=1.0f;
+                    mess.param = ParamLibrary.PARAM_TRIPLE_KILL;
+                    mess.gunContext = killinfo.weaponId.ToString();
+                    mess.mapContext = ServerHolder.currentMap;
+                    mess.teamContext = myPlayer.team;
+                    mess.weaponType = (int)ItemManager.instance.GetWeaponprefabByID(killinfo.weaponId).slotType;
+			        incomeQueue.Enqueue(mess);
+                    break;
+                case 4:
+                    mess = new IncomingMessage();
+			        mess.delta=1.0f;
+                    mess.param = ParamLibrary.PARAM_RAMPAGE_KILL;
+                    mess.gunContext = killinfo.weaponId.ToString();
+                    mess.mapContext = ServerHolder.currentMap;
+                    mess.teamContext = myPlayer.team;
+                    mess.weaponType = (int)ItemManager.instance.GetWeaponprefabByID(killinfo.weaponId).slotType;
+			        incomeQueue.Enqueue(mess);
+                    break;
             }
 		}
 	}
@@ -391,7 +614,7 @@ public class AchievementManager : MonoBehaviour, LocalPlayerListener, GameListen
 		if (target == myPlayer) {
 			IncomingMessage mess = new IncomingMessage();
 			mess.delta=1.0f;
-			mess.param =PARAM_KILL_BY_FRIEND;
+			mess.param =ParamLibrary.PARAM_KILL_BY_FRIEND;
 			incomeQueue.Enqueue(mess);
 		}
 	}
@@ -400,7 +623,10 @@ public class AchievementManager : MonoBehaviour, LocalPlayerListener, GameListen
 		if (target == myPlayer) {
 			IncomingMessage mess = new IncomingMessage();
 			mess.delta=1.0f;
-			mess.param =PARAM_KILL_FRIEND;
+            mess.gunContext = killinfo.weaponId.ToString();
+            mess.mapContext = ServerHolder.currentMap;
+			mess.param =ParamLibrary.PARAM_KILL_FRIEND;
+            mess.teamContext = myPlayer.team;
 			incomeQueue.Enqueue(mess);
 		}
 	}
@@ -410,19 +636,56 @@ public class AchievementManager : MonoBehaviour, LocalPlayerListener, GameListen
 		if (target == myPlayer) {
 			IncomingMessage mess = new IncomingMessage();
 			mess.delta=1.0f;
-			mess.param =PARAM_KILL_AI;
-			incomeQueue.Enqueue(mess);
-			mess = new IncomingMessage();
-			mess.delta=1.0f;
-            mess.param = PARAM_KILL_AI + "by" + killinfo.weaponId.ToString();
-		
+			mess.param =ParamLibrary.PARAM_KILL;
+            mess.gunContext = killinfo.weaponId.ToString();
+            mess.mapContext = ServerHolder.currentMap;
+            mess.teamContext = myPlayer.team;
+            mess.weaponType = (int)ItemManager.instance.GetWeaponprefabByID(killinfo.weaponId).slotType;
 			incomeQueue.Enqueue(mess);
             if (killinfo.isHeadShoot)
             {
                 mess = new IncomingMessage();
                 mess.delta = 1.0f;
-                mess.param = PARAM_HEAD_SHOOT_AI;
+                mess.param = ParamLibrary.PARAM_HEAD_SHOOT;
+                mess.gunContext = killinfo.weaponId.ToString();
+                mess.mapContext = ServerHolder.currentMap;
+                mess.teamContext = myPlayer.team;
+                mess.weaponType = (int)ItemManager.instance.GetWeaponprefabByID(killinfo.weaponId).slotType;
                 incomeQueue.Enqueue(mess);
+            }
+            killCnt++;
+            switch (killCnt)
+            {
+                case 2:
+                    mess = new IncomingMessage();
+                    mess.delta = 1.0f;
+                    mess.param = ParamLibrary.PARAM_DOUBLE_KILL;
+                    mess.gunContext = killinfo.weaponId.ToString();
+                    mess.mapContext = ServerHolder.currentMap;
+                    mess.teamContext = myPlayer.team;
+                    mess.weaponType = (int)ItemManager.instance.GetWeaponprefabByID(killinfo.weaponId).slotType;
+                    incomeQueue.Enqueue(mess);
+                    break;
+                case 3:
+                    mess = new IncomingMessage();
+                    mess.delta = 1.0f;
+                    mess.param = ParamLibrary.PARAM_TRIPLE_KILL;
+                    mess.gunContext = killinfo.weaponId.ToString();
+                    mess.mapContext = ServerHolder.currentMap;
+                    mess.teamContext = myPlayer.team;
+                    mess.weaponType = (int)ItemManager.instance.GetWeaponprefabByID(killinfo.weaponId).slotType;
+                    incomeQueue.Enqueue(mess);
+                    break;
+                case 4:
+                    mess = new IncomingMessage();
+                    mess.delta = 1.0f;
+                    mess.param = ParamLibrary.PARAM_RAMPAGE_KILL;
+                    mess.gunContext = killinfo.weaponId.ToString();
+                    mess.mapContext = ServerHolder.currentMap;
+                    mess.teamContext = myPlayer.team;
+                    mess.weaponType = (int)ItemManager.instance.GetWeaponprefabByID(killinfo.weaponId).slotType;
+                    incomeQueue.Enqueue(mess);
+                    break;
             }
 		}
 	}
@@ -433,7 +696,7 @@ public class AchievementManager : MonoBehaviour, LocalPlayerListener, GameListen
 		if (target == myPlayer) {
 			IncomingMessage mess = new IncomingMessage();
 			mess.delta=1.0f;
-			mess.param =PARAM_DOUBLE_JUMP;
+			mess.param =ParamLibrary.PARAM_DOUBLE_JUMP;
 			incomeQueue.Enqueue(mess);
 		}
 	}
@@ -456,6 +719,13 @@ public class AchievementManager : MonoBehaviour, LocalPlayerListener, GameListen
     {
 	
 	}
+	
+	public void EventPawnKillAssistPlayer(Player target){
+	
+	}
+    public void EventPawnKillAssistAI(Player target){
+	
+	}
 	public void EventEndWallRun(Player target, Vector3 position){
 		if (target == myPlayer) {
 			if(wallRunningStartPosition.sqrMagnitude==0){
@@ -465,7 +735,7 @@ public class AchievementManager : MonoBehaviour, LocalPlayerListener, GameListen
 			mess.delta=(wallRunningStartPosition -position).magnitude;
 			//Debug.Log (mess.delta);
 			wallRunningStartPosition = Vector3.zero;
-			mess.param =PARAM_WALL_RUN;
+			mess.param =ParamLibrary.PARAM_WALL_RUN;
 			incomeQueue.Enqueue(mess);
 			
 		}
@@ -474,14 +744,14 @@ public class AchievementManager : MonoBehaviour, LocalPlayerListener, GameListen
 		if (target == myPlayer) {
 			IncomingMessage mess = new IncomingMessage();
 			mess.delta=1.0f;
-			mess.param =PARAM_RELOAD;
+			mess.param =ParamLibrary.PARAM_RELOAD;
 			incomeQueue.Enqueue(mess);
 		}
 	}
 	public void EventRoomFinished(){
 			IncomingMessage mess = new IncomingMessage();
 			mess.delta=1.0f;
-			mess.param =PARAM_ROOM_FINISHED;
+			mess.param =ParamLibrary.PARAM_ROOM_FINISHED;
 			incomeQueue.Enqueue(mess);
 	
 	
@@ -501,8 +771,11 @@ public class AchievementManager : MonoBehaviour, LocalPlayerListener, GameListen
 
             IncomingMessage mess = new IncomingMessage();
 			mess.delta=1.0f;
-            mess.param = PARAM_WIN;
+            mess.param = ParamLibrary.PARAM_WIN;
+            mess.teamContext = myPlayer.team;
+            mess.mapContext = ServerHolder.currentMap;
 			incomeQueue.Enqueue(mess);
+            killCnt = 0;
         }
     }
     public void EventRestart() { }

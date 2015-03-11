@@ -144,6 +144,8 @@ public class PlayerHudNgui : MonoBehaviour {
     public UITable stimTable;
 
     public GAMEMODE mode;
+
+    public Camera mapCamera;
     public enum HudState
     {
         Waiting = 0,
@@ -159,6 +161,11 @@ public class PlayerHudNgui : MonoBehaviour {
 
 
         StartCoroutine(LateFrameResize());
+    }
+    public void Awake()
+    {
+
+        mapCamera = FindObjectOfType<NJGMapOnGUI>().GetComponentInChildren<Camera>();
     }
 	public void Start(){
       
@@ -232,14 +239,30 @@ public class PlayerHudNgui : MonoBehaviour {
         Stats = player.GetPlayerStats();
     }
 	public void Activate(){
+      
 		if (!hudpanel.enabled) {
 			hudpanel.enabled = true;
+            if (mapCamera != null)
+            {
+                mapCamera.enabled = true;
+            }
 		}
+        if (!this.enabled)
+        {
+            this.enabled = true;
+        }
 	}
 	public void DeActivate(){
+    
         if (hudpanel.enabled)
         {
             hudpanel.enabled = false;
+            if (mapCamera != null)
+            {
+
+                mapCamera.enabled = false;
+            }
+
         }
 	}
 
