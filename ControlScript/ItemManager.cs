@@ -416,14 +416,14 @@ public class ItemManager : MonoBehaviour {
 	
 	}
 	//parse XML string to normal Achivment Pattern
-	protected IEnumerator ParseList(string XML){
+	protected IEnumerator ParseList(string XML,string startTag = "items"){
 		//Debug.Log (XML);
 	  	XmlDocument xmlDoc = new XmlDocument();
 		xmlDoc.LoadXml(XML);
 
 		int i = 0;
 
-        foreach (XmlNode node in xmlDoc.SelectNodes("items/inventory/item"))
+        foreach (XmlNode node in xmlDoc.SelectNodes(startTag+"/inventory/item"))
         {
 			
             String id=node.SelectSingleNode("id").InnerText;
@@ -433,6 +433,7 @@ public class ItemManager : MonoBehaviour {
                 slot.buyMode = (BuyMode)Enum.Parse(typeof(BuyMode), node.SelectSingleNode("buytype").InnerText);
              
                 slot.charge = int.Parse(node.SelectSingleNode("charge").InnerText);
+             //   Debug.Log("repari" + slot.charge);
                 if (node.SelectSingleNode("time_end").InnerText != "")
                 {
                     try
@@ -600,7 +601,7 @@ public class ItemManager : MonoBehaviour {
 	
 	    i = 0;
 
-		foreach (XmlNode node in xmlDoc.SelectNodes("items/anims")) {
+		foreach (XmlNode node in xmlDoc.SelectNodes(startTag+ "/anims")) {
 			FromDBAnims entry = new FromDBAnims();
 			entry.animationId = node.SelectSingleNode ("animationId").InnerText;
 			entry.gameClass =  gameClassPase(node.SelectSingleNode ("gameClass").InnerText);
@@ -617,7 +618,7 @@ public class ItemManager : MonoBehaviour {
 
 		
 		}
-        XmlNodeList stims = xmlDoc.SelectNodes("items/stim");
+        XmlNodeList stims = xmlDoc.SelectNodes(startTag+"/stim");
 		if(stimPackDictionary==null){
 			stimPackDictionary = new StimPack[stims.Count];
 		}
@@ -642,7 +643,7 @@ public class ItemManager : MonoBehaviour {
             }
 		
 		}
-        XmlNodeList buffs = xmlDoc.SelectNodes("items/buff");
+        XmlNodeList buffs = xmlDoc.SelectNodes(startTag+"/buff");
         foreach (XmlNode nodeBuff in buffs)
         {
             int id = int.Parse(nodeBuff.SelectSingleNode("buffId").InnerText);
@@ -681,10 +682,10 @@ public class ItemManager : MonoBehaviour {
             
            
         }
-        if (xmlDoc.SelectSingleNode("items/default") != null)
+        if (xmlDoc.SelectSingleNode(startTag+"/default") != null)
         {
            
-            foreach (XmlNode node in xmlDoc.SelectNodes("items/default"))
+            foreach (XmlNode node in xmlDoc.SelectNodes(startTag+"/default"))
             {
                 WeaponIndex index = new WeaponIndex(node.SelectSingleNode("weaponId").InnerText);
                 index.gameClass = int.Parse(node.SelectSingleNode("gameClass").InnerText);
@@ -790,7 +791,7 @@ public class ItemManager : MonoBehaviour {
 		for(int j= 0;j<setSize;j++){
 			for(int i = 0;i<Choice.SLOT_CNT;i++){
 			  //  Debug.Log(Choice.ForGuiSlot(i).ToString());
-				WeaponIndex index = Choice.ForGuiSlot(i);
+                WeaponIndex index = Choice.ForSaveSLot(i,j);
 				if(!index.IsSameIndex( WeaponIndex.Zero)){
 					form.AddField ("default[]", index.ToString() + "@set"+j);
 				
@@ -1339,7 +1340,7 @@ public class ItemManager : MonoBehaviour {
         Debug.Log(w.text);
 		if(xmlDoc.SelectSingleNode("result/error").InnerText=="0"){
 			
-			IEnumerator numenator = ParseList(w.text);
+			IEnumerator numenator = ParseList(w.text,"result");
 
 			while (numenator.MoveNext())
 			{
@@ -1425,7 +1426,9 @@ public class ItemManager : MonoBehaviour {
         else
         {
 
+            GUIHelper.SendMessage(xmlDoc.SelectSingleNode("result/errortext").InnerText);
         }
+        GUIHelper.ConnectionStop();
     }
     public void DesintegrateItem(string id, InventoryGUI gui)
     {

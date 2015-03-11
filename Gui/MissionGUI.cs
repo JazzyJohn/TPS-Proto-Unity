@@ -9,6 +9,10 @@ public class MissionGUI : MonoBehaviour {
 
     public UILabel time;
 
+    public AskWindow ask;
+
+    public int cashId;
+
     public void Draw()
     {
         Achievement[] list =  AchievementManager.instance.GetTask();
@@ -27,9 +31,32 @@ public class MissionGUI : MonoBehaviour {
     }
     public void Skip(int id)
     {
-        StartCoroutine(AchievementManager.instance.SkipAchive(tasks[id].id));
+        ask.action = ActualSkip;
+
+        string text = TextGenerator.instance.GetSimpleText("skipTaskText");
+      
+
+        ask.Show(text);
+        cashId = tasks[id].id;
     }
     public void UpdateTask()
+    {
+        ask.action = ActualUpdateTask;
+
+        string text = TextGenerator.instance.GetSimpleText("UpdateTaskText");
+
+
+        ask.Show(text);
+       
+      
+    }
+
+    public void ActualSkip()
+    {
+        StartCoroutine(AchievementManager.instance.SkipAchive(cashId));
+    }
+
+    public void ActualUpdateTask()
     {
         StartCoroutine(AchievementManager.instance.UpdateTask());
     }
@@ -39,7 +66,7 @@ public class TaskGUI
 {
     public UIRect main;
 
-    public UILabel name;
+    public UILabel prtogress;
     public UILabel descr;
 
     public UIWidget cashReward;
@@ -77,10 +104,10 @@ public class TaskGUI
             main.alpha = 0.0f;
             return;
         }
-        
-        if (name != null)
+
+        if (prtogress != null)
         {
-            name.text = achiv.name;
+            prtogress.text = achiv.GetProgress();
         }
         if (achiv.isDone)
         {

@@ -66,7 +66,7 @@ public class Pawn : DamagebleObject
 
     public const int SYNC_MULTUPLIER = 5;
 
-    public const float ASSIT_FORGET_TIME = 5.0f;
+    public const float ASSIT_FORGET_TIME = 30.0f;
 
     private LayerMask groundLayers = 1;
     protected LayerMask wallRunLayers = 1;
@@ -685,6 +685,7 @@ public class Pawn : DamagebleObject
                     entry = new DamagerEntry(killerPawn);
                     damagers.Add(entry);
                 }
+               
                 entry.forgetTime = Time.time + ASSIT_FORGET_TIME;
                 entry.amount += damage.Damage;
                 entry.lastHitDirection = damage.pushDirection;
@@ -842,6 +843,7 @@ public class Pawn : DamagebleObject
         {
             return;
         }
+        Player killerPlayer = null;
         try
         {
 
@@ -850,7 +852,7 @@ public class Pawn : DamagebleObject
 
             //StartCoroutine (CoroutineRequestKillMe ());
             Pawn killerPawn = null;
-            Player killerPlayer = null;
+       
             int killerID = -1;
             if (killer != null)
             {
@@ -909,7 +911,7 @@ public class Pawn : DamagebleObject
         }
         finally
         {
-            PawnKill();
+            PawnKill(killerPlayer);
         }
 
 
@@ -933,7 +935,7 @@ public class Pawn : DamagebleObject
         }
 
     }
-    public void PawnKill()
+    public void PawnKill(Player killerPlayer)
     {
         if (isAi && mainAi != null)
         {
@@ -943,12 +945,19 @@ public class Pawn : DamagebleObject
 		
         ActualKillMe();
 		//AssistLogic
-		DamagerEntry entry = damagers.Find(delegate(DamagerEntry searchentry) { return searchentry.pawn.player == Player.localPlayer; });
-
-		if (entry != null)
-		{
-			Player.localPlayer.PawnKillAssist(this,player);
-		}
+        if (killerPlayer != Player.localPlayer)
+        {
+            DamagerEntry entry = damagers.Find(delegate(DamagerEntry searchentry) {
+//                Debug.Log("PLAYER ASSIST" + searchentry.pawn.player + " " + (searchentry.pawn.player == Player.localPlayer));
+                return searchentry.pawn.player == Player.localPlayer; 
+            
+            });
+  //          Debug.Log("PLAYER ASSIST" +entry);
+            if (entry != null)
+            {
+                Player.localPlayer.PawnKillAssist(this, player);
+            }
+        }
     }
 
     protected override void ActualKillMe()

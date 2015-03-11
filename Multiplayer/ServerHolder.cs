@@ -45,6 +45,8 @@ public class ServerHolder : MonoBehaviour
 	public bool connectingToRoom = false;
 
     public string map = "kaspi_map_c_2_test";
+
+    public static string currentMap;
 	string playerName;
 	public string newRoomName;
 	public int newRoomMaxPlayers;
@@ -191,14 +193,14 @@ public class ServerHolder : MonoBehaviour
             roomData.name = room.Name;
             roomData.playerCount = room.UserCount;
             roomData.maxPlayers = room.MaxUsers;
-            if (room.GetVariable("ruleClass") != null)
-            {
-                string[] temp = room.GetVariable("ruleClass").GetStringValue().Split('.');
-                roomData.mode = temp[temp.Length - 1];
-                roomData.map = room.GetVariable("map").GetStringValue();
-            }
+           
+          
+            roomData.map = room.GetVariable("map").GetStringValue();
+               
+            roomData.mode = GetRuleClass(roomData.map);
+            
             allRooms.Add(roomData);
-            ///Debug.Log("Room id: " + room.Id + " has name: " + room.Name +"map" +room.GetVariable("map").GetStringValue());
+            
 
         }
 
@@ -260,7 +262,7 @@ public class ServerHolder : MonoBehaviour
 				nextUpdateTime += updateRate;
 			}
 		}*/
-        SetupRoomList();
+        //SetupRoomList();
 	}
 	
 	void OnReceivedRoomList()
@@ -386,21 +388,101 @@ public class ServerHolder : MonoBehaviour
         CreateNewRoom(data.name);
        
     }
+    private int mapIndex=-1;
     public void SetMap(string mapName)
     {
         MapData mapData = null;
         map = mapName;
-        foreach (MapData iterdata in allMaps)
+        for(int i =0;i<allMaps.Length;i++)
         {
+            MapData iterdata = allMaps[i];
             if (iterdata.name == mapName)
             {
+                mapIndex = i;
                 RoomNewName(iterdata.gameMode);
                 return;
             }
         }
 
     }
+    public void NextMap()
+    {
+        if (mapIndex == -1)
+        {
+            mapIndex = 0;
+        }
+        else
+        {
+            mapIndex++;
+            if (mapIndex >= allMaps.Length)
+            {
+                mapIndex = 0;
+            }
+        }
+        map = allMaps[mapIndex].name;
+        RoomNewName(allMaps[mapIndex].gameMode);
+    }
+    public void PrevMap()
+    {
+        if (mapIndex == -1)
+        {
+            mapIndex = allMaps.Length-1;
+        }
+        else
+        {
+            mapIndex--;
+            if (mapIndex <0)
+            {
+                mapIndex = allMaps.Length-1;
+            }
+        }
+        map = allMaps[mapIndex].name;
+        RoomNewName(allMaps[mapIndex].gameMode);
+    }
 
+    public string GetRuleClass(String name)
+    {
+        MapData mapData = null;
+        foreach (MapData iterdata in allMaps)
+        {
+            if (iterdata.name == name)
+            {
+                mapData = iterdata;
+                break;
+            }
+        }
+        if (mapData == null)
+        {
+            return "PVEGameRule";
+        }
+        switch (mapData.gameMode)
+        {
+            case GAMEMODE.PVE:
+                return "PVEGameRule";
+              
+            case GAMEMODE.RUNNER:
+                return "RunnerGameRule";
+               
+            case GAMEMODE.PVP:
+                return "PVPGameRule";
+               
+            case GAMEMODE.PVPJUGGERFIGHT:
+               
+                return "PVPJuggerFightGameRule";
+            case GAMEMODE.PVPHUNT:
+
+                return "HuntGameRule";
+             
+             
+            case GAMEMODE.PVE_HOLD:
+                return "PVEHoldGameRule";
+             
+            case GAMEMODE.SEQUENCE_POINTGAME:
+                return "SequencePointGameRule";
+               
+        }
+        return "PVEGameRule";
+    }
 
     public void CreateNewRoom(string mapName) //Создание комноты (+)
 	{
@@ -419,6 +501,7 @@ public class ServerHolder : MonoBehaviour
 		exposedProps[0] = "MapName";
        
         */
+        //Debug.Log("MAp " + mapName);
         lastMode = mapData.gameMode;
         GAMEMODE mode = mapData.gameMode;
         bool isVisible = true;
@@ -489,6 +572,7 @@ public class ServerHolder : MonoBehaviour
 
         Debug.Log(gameRule.GetStringValue());
 		gameRule.IsPrivate  = false;
+       
         SFSObject data = new SFSObject();
 		data.PutClass("gameSetting",setting);
         settings.Variables.Add(new SFSRoomVariable("gameVar", data));
@@ -500,6 +584,7 @@ public class ServerHolder : MonoBehaviour
         RoomVariable visVar = new SFSRoomVariable("visible", isVisible);
         settings.Variables.Add(visVar);
         settings.Variables.Add(gameRule);
+        
         settings.MaxUsers =(short)roomCnt;
         settings.MaxSpectators = 0;
         settings.Extension = new RoomExtension(ExtName, ExtClass);
@@ -530,6 +615,8 @@ public class ServerHolder : MonoBehaviour
 	
 	IEnumerator LoadMap (string mapName,bool next =false)
 	{
+        currentMap = mapName;
+        Debug.Log("LOAD MAP" + currentMap);
 		//AsyncOperation async;
         progress.allLoader = 4;
         progress.finishedLoader = 1;
@@ -699,6 +786,7 @@ public class ServerHolder : MonoBehaviour
 			
 			mainMenu.FinishLvlLoad();
 		}
+        GameRule.instance.curStage = MUSIC_STAGE.BATLLE;
         Debug.Log("Compileted Load Map");
         
         if (next)

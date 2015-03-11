@@ -77,7 +77,7 @@ public class GlobalPlayer : MonoBehaviour {
 	
 	//this is for loading screen every long loading after loading increment  loadingStage when it's reached 
 	//MAXLOADSTAGE load finish;
-	private const int MAXLOADSTAGE =2;
+	private const int MAXLOADSTAGE =3;
 	
 	
 	

@@ -11,7 +11,7 @@ public class AskWindow  : MonoBehaviour{
 	
 	public UILabel text;
 	
-	public UIWidget panel;
+	public UIRect panel;
 	
 	public ConfirmAction action;
 	

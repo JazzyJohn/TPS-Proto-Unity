@@ -36,7 +36,7 @@ public class InventoryGUI : MonoBehaviour {
 
     public InventoryGroup group;
 
-    public UILabel setLabel;
+  //  public UILabel setLabel;
 
     public UIRect canBuy;
 
@@ -104,7 +104,7 @@ public class InventoryGUI : MonoBehaviour {
 		if( PremiumManager.instance. GetSetSize()<=i){
 			return;
 		}else{
-            setLabel.text = TextGenerator.instance.GetMoneyText("SetNumber", i + 1);
+            //setLabel.text = TextGenerator.instance.GetMoneyText("SetNumber", i + 1);
 			Choice.ChangeSet(i,0);
            
 			 ReloadSelectedItem();
@@ -118,6 +118,7 @@ public class InventoryGUI : MonoBehaviour {
 			int slotType = (int)weapon.gameSlot;
 			Choice.SetChoice(slotType, Choice._Player, new WeaponIndex(weapon.weaponId, ""));
 			slots[slotType].SetItem();
+            ItemManager.instance.SaveItemForSlot();
 		}
 	}
 
@@ -150,14 +151,22 @@ public class InventoryGUI : MonoBehaviour {
 		repairGui.Close();
 	}
 	public void ShowSet(int needSet){
+        
         switch (group)
         {
             case InventoryGroup.WEAPON:
+                if (weaponsPanels.Length <= needSet) {
+                    return;
+                }
                 weaponsPanels[curSet].alpha = 0.0f;
                 curSet = needSet;
                 weaponsPanels[curSet].alpha = 1.0f;
                 break;
             case InventoryGroup.STUFF:
+                if (itemPanels.Length <= curSet)
+                {
+                    return;
+                }
                 itemPanels[curSet].alpha = 0.0f;
                 curSet = needSet;
                 itemPanels[curSet].alpha = 1.0f;

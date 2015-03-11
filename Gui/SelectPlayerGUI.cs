@@ -570,6 +570,10 @@ public static class Choice
 			_SetChoice(i, _Player,ChoiceSet[curSet].slots[i] );
 		}
 	}
+    public static WeaponIndex ForSaveSLot(int slot, int set)
+    {
+        return ChoiceSet[set].slots[slot];
+    }
     public static WeaponIndex ForGuiSlot(int slot)
     {
 		switch(slot){

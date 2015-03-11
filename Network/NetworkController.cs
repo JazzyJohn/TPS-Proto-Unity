@@ -1921,7 +1921,7 @@ public class NetworkController : MonoBehaviour {
             return;
         }
         Pawn pawn = GetView(dt.GetInt("viewId")).pawn;
-        pawn.PawnKill();
+       
         int player = dt.GetInt("player");
         if (player == _smartFox.MySelf.Id)
         {
@@ -1932,19 +1932,21 @@ public class NetworkController : MonoBehaviour {
             }
             KillInfo info = new KillInfo(dt.GetInt("weaponId"), headShoot);
             GetPlayer(player).PawnKill(pawn, pawn.player, pawn.myTransform.position, info);
-
+            pawn.PawnKill(GetPlayer(player));
 
         }
         else
         {
             if (player > 0)
             {
-                GetPlayer(player).Score.Kill++;
+                pawn.PawnKill(GetPlayer(player));
             }
-            else
+            
+            if (pawn.player != null && !pawn.isAi)
             {
-                GetPlayer(player).Score.AIKill++;
+                pawn.player.Score.Death++;
             }
+           
         }
 
        

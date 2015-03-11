@@ -8,6 +8,8 @@ public class RepairGUI : MonoBehaviour {
     public InventoryGUI shop;	
 	
 	public UILabel repairLabel;
+
+    public UILabel unbreakPrice;
 	
 	public UIScrollBar repairScroll; 
 		
@@ -18,8 +20,11 @@ public class RepairGUI : MonoBehaviour {
 	public void ShowRepair(InventorySlot item){
         this.item = item;
 		repairWindow.alpha = 1.0f;
+        unbreakPrice.text = item.prices[1].parts[0].amount.ToString();
         repairScroll.value = (float)(item.maxcharge-item.charge) / (float)item.maxcharge;
-       
+
+        repairLabel.text = "0";
+        amount = 0;
 		
 	}
 	

@@ -50,6 +50,9 @@ public class MainMenuGUI : MonoBehaviour {
     public UIWidget allWWidget;
 
 	public bool inGame =false;
+
+    public AskWindow askWindow;
+
 	
     public void LoadingFinish()
     {
@@ -83,10 +86,7 @@ public class MainMenuGUI : MonoBehaviour {
 
 
 	void Awake(){
-		if(FindObjectsOfType<MainMenuGUI>().Length>1){
-			Destroy(gameObject);
-			return;
-		}
+	
 		HideAllPanel();
 		DontDestroyOnLoad(transform.gameObject);
 	}
@@ -105,18 +105,15 @@ public class MainMenuGUI : MonoBehaviour {
                 _PlayerComponent.premium.text = TextGenerator.instance.GetSimpleText("NoPremiumTitle");
             }
         }
-        _timer.timer += Time.deltaTime;
-        if (_timer.timer >= _timer.TimeRefresh)
+        
+        RefreshRoom();
+     
+        if (LevelingManager.instance.isLoaded)
         {
-            RefreshRoom();
-            _timer.timer = 0;
-            if (LevelingManager.instance.isLoaded)
-            {
-                LoadData();
+            LoadData();
 
-            }
         }
-
+        
 		
     }
 	public void ShowNews(){
@@ -351,10 +348,18 @@ public class MainMenuGUI : MonoBehaviour {
             _RoomsNgui.NameNewRoom.value = Server.newRoomName;
 		}
 	}
+    public void NextMap()
+    {
+        ServerHolder.Instance.NextMap();
+    }
+    public void PrevMap()
+    {
+        ServerHolder.Instance.PrevMap();
+    }
 
 	public void LoadingScreen() //Изменения процентов при загрузке(вызывает прогресс бар)
 	{
-		_PanelsNgui.SliderPanel.alpha= 1.0f;
+		//_PanelsNgui.SliderPanel.alpha= 1.0f;
 		_RoomsNgui.Loading.alpha = 1f;
 	}
 	
@@ -401,7 +406,7 @@ public class MainMenuGUI : MonoBehaviour {
 				NewRoom.transform.localPosition = new Vector3(0f, 0f, 0f);
 				
 				_RoomsNgui.Grid.Reposition();
-				_RoomsNgui.ScrollBar.barSize = 0;
+				//_RoomsNgui.ScrollBar.barSize = 0;
 			}
             Rooms[room.name].UpdateRoom(room, i);
 			
@@ -539,20 +544,11 @@ public class MainMenuGUI : MonoBehaviour {
 
     public void MoneyError()
     {
-        AskMoneyShow();
+        askWindow.action = MoneyBuyShow;
+     
+        askWindow.Show(TextGenerator.instance.GetSimpleText("NoMoney"));
     }
-    public void AskMoneyShow()
-    {
-        GA.API.Design.NewEvent("GUI:MainMenu:AskMoneyShow", 1); 
-        CamMove.RideTo(1);
-        _PanelsNgui.askAboutMoneyPanel.alpha = 1f;
-    }
-    public void AskMoneyHide()
-    {
-        CamMove.Reset();
-        
-        _PanelsNgui.askAboutMoneyPanel.alpha = 0.0f;
-    }
+  
     public void MoneyBuyShow()
     {
         GA.API.Design.NewEvent("GUI:MainMenu:MoneyBuyShow", 1); 
@@ -569,6 +565,7 @@ public class MainMenuGUI : MonoBehaviour {
     {
         GA.API.Design.NewEvent("GUI:MainMenu:AskExternalBuy:" + item, 1); 
         GlobalPlayer.instance.AskJsForMagazine(item);
+        MoneyBuyHide();
     }
 
     public void SetAvatar(Texture2D avatar)
@@ -610,7 +607,7 @@ public class MainMenuGUI : MonoBehaviour {
 	
 	public void FinishLvlLoad() //Изменения процентов при загрузке(вызывает прогресс бар)
 	{
-		_PanelsNgui.SliderPanel.alpha= 0.0f;
+		//_PanelsNgui.SliderPanel.alpha= 0.0f;
 		_RoomsNgui.Loading.alpha = 0.0f;
         gameObject.SetActive(false);
         allWWidget.alpha = 1.0f;
@@ -669,7 +666,7 @@ public class MainMenuGUI : MonoBehaviour {
             return;
         }
         GA.API.Design.NewEvent("GUI:Pause:MainMenu");
-		Pause = false;
+		Pause = true;
              
 		Screen.lockCursor = false;
         NetworkController.Instance.LeaveRoomReuqest();
@@ -683,8 +680,24 @@ public class MainMenuGUI : MonoBehaviour {
 		foreach(UIRect panel in ShowInGamePanels){
 			panel. gameObject.SetActive(false);
 		}
+       
 	}
-
+    void OnLevelWasLoaded(int level)
+    {
+        if(level==0){
+            FindObjectOfType<MusicHolder>().SetStage( MUSIC_STAGE.MAIN_MENU_LOOP);
+            gameObject.SetActive(true);
+            inGame = false;
+            foreach (UIRect panel in HideInGamePanels)
+            {
+                panel.gameObject.SetActive(true);
+            }
+            foreach (UIRect panel in ShowInGamePanels)
+            {
+                panel.gameObject.SetActive(false);
+            }
+        }
+    }
 }
 
 
@@ -778,7 +791,7 @@ public class RoomsNgui
 [System.Serializable]
 public class PanelsNgui
 {
-    public UIPanel SliderPanel;
+    public UIWidget SliderPanel;
 	public SlaiderPanel slaiderPanel;
     public UIPanel mainpanel;
     public UIPanel settings;

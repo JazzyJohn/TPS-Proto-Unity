@@ -8,6 +8,9 @@ public class SlaiderPanel : MonoBehaviour {
 
 	public GameObject onewNewButton;
 
+    public UIWidget newsMainWidget;
+
+
 	public UIPanel allNewsPanel;
 
 	public UIWidget newsContainer;
@@ -35,10 +38,10 @@ public class SlaiderPanel : MonoBehaviour {
 	private List<UIToggle> newsbtns = new List<UIToggle> ();
 
 	public void ShowNews(){
-		allNewsPanel.alpha = 1.0f;
+        newsMainWidget.alpha = 1.0f;
 	}
 	public void HideNews(){
-		allNewsPanel.alpha = 0.0f;
+        newsMainWidget.alpha = 0.0f;
 	}
 	
 	
@@ -55,7 +58,7 @@ public class SlaiderPanel : MonoBehaviour {
 			if(IsSliding){
 				Vector3 target = new Vector3(-curItem*offset, 0, 0);
 				allNewsPivot.localPosition = Vector3.Lerp(	allNewsPivot.localPosition, target,Time.deltaTime);
-				if((allNewsPivot.localPosition-target).sqrMagnitude<10f){
+				if((allNewsPivot.localPosition-target).sqrMagnitude<offset/10.0f){
 					allNewsPivot.localPosition=target;
 					IsSliding =false;
 				}

@@ -21,7 +21,8 @@ public class OperationGUI : MonoBehaviour {
     public void ShowOperation()
     {
         mainPanel.alpha = 1.0f;
-        DrawOperations();
+        //TODO: TURN ON WHEN READY
+        //DrawOperations();
         mission.Draw();
     }
     public void CloseOperation()

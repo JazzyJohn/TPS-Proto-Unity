@@ -28,6 +28,10 @@ public class InvItemGUI : MonoBehaviour {
 	void Start () {
         GetComponent<UIButton>().onClick.Add(new EventDelegate(OpenLot));
         box = GetComponent<UIWidget>();
+        if (Texture == null)
+        {
+            Texture = GetComponentInChildren<UITexture>();
+        }
 	}
 
 	// Update is called once per frame

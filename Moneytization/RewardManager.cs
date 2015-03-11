@@ -20,6 +20,7 @@ public class Reward{
 }
 public static class ParamLibrary{
 	public static string PARAM_KILL = "Kill";
+    public static string PARAM_DOUBLE_KILL = "DoubleKill";
 	public static string PARAM_TRIPLE_KILL = "TripleKill";
 	public static string PARAM_RAMPAGE_KILL = "Rampage";
 	public static string PARAM_RAMPAGE_GOING_KILL = "RampageGoing";

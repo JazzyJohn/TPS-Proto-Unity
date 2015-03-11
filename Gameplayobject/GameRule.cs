@@ -27,7 +27,7 @@ public class GameRule : MonoBehaviour {
     public bool CanUseRobot = true;
 
     [HideInInspector]
-    public MUSIC_STAGE curStage = MUSIC_STAGE.BATLLE;
+    public MUSIC_STAGE curStage = MUSIC_STAGE.MAIN_MENU_LOOP;
 
     public bool start = false;
 
