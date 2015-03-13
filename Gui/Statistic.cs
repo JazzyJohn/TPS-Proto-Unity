@@ -52,7 +52,7 @@ public class Statistic : MonoBehaviour {
 	void Start () 
 	{
 		timer=0;
-        Debug.Log("Read AND BLUE" + TeamRed.activeSelf + "  " + TeamBlue.activeSelf);
+//        Debug.Log("Read AND BLUE" + TeamRed.activeSelf + "  " + TeamBlue.activeSelf);
         if (TeamBlue.activeInHierarchy)
         {
 		    for (int i=0; i<TeamBlue.transform.childCount;i++)

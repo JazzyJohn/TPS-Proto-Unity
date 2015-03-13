@@ -79,7 +79,7 @@
 	</keys>
   <keys>
     <name>Pause</name>
-    <default>F1</default>
+    <default>Escape</default>
   </keys>
   <keys>
     <name>Skill1</name>

@@ -16,11 +16,11 @@ public class SocialButton : MonoBehaviour {
         switch (type)
         {
             case SocialBtn.ALBOM_SAVE:
-                GetComponent<UIButton>().onClick.Add(new EventDelegate( FindObjectOfType<MainMenuGUI>().TakeScreenShoot));
+                GetComponent<UIButton>().onClick.Add(new EventDelegate(MainMenuGUI.instance.TakeScreenShoot));
                 break;
 
             case SocialBtn.WALL_POST:
-                 GetComponent<UIButton>().onClick.Add(new EventDelegate( FindObjectOfType<MainMenuGUI>().TakeScreenShootWall));
+                GetComponent<UIButton>().onClick.Add(new EventDelegate(MainMenuGUI.instance.TakeScreenShootWall));
                 break;
         }
 	}

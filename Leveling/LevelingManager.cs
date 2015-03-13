@@ -162,6 +162,7 @@ public class LevelingManager : MonoBehaviour, LocalPlayerListener,GameListener{
             GlobalPlayer.instance.loadingStage++;
         }
 		isLoaded = true;
+        Debug.Log("Leveling Loaded");
         
 	}
 	//adding exp to current
@@ -190,6 +191,7 @@ public class LevelingManager : MonoBehaviour, LocalPlayerListener,GameListener{
 			if(playerExp>=playerNeededExp[playerLvl]){
 				sendByLvl= true;
 				playerLvl++;
+                GUIHelper.Notify(TextGenerator.instance.GetSimpleText("LevelUp"),TextGenerator.instance.GetExpText("LvlOpen",playerLvl));
 			}
 		}
 		if(selected!=-1&&classLvl[selected]<classNeededExp.Length){

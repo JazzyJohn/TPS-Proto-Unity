@@ -102,18 +102,13 @@ public class SlaiderPanel : MonoBehaviour {
         slideTimer = 0;
         SetButtons();
         Vector3 target = new Vector3(-curItem * offset, 0, 0);
-<<<<<<< HEAD
+
         allNewsPivot.localPosition = target;
         IsSliding = false;
 
     }
 
-=======
-        allNewsPivot.localPosition =target;
-        IsSliding = false;
-        
-    }
->>>>>>> newMonetizationLogic
+
 	public void SetButtons(){
 
 		newsbtns [curItem].value = true;

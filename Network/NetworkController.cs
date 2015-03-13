@@ -918,15 +918,13 @@ public class NetworkController : MonoBehaviour {
         pawnSpawnData.PutClass("pawn", pawn);
         pawnSpawnData.PutInt("group", swarm);
         pawnSpawnData.PutInt("home", home);
-        Debug.Log(serverHolder.gameRoom);
+//        Debug.Log(serverHolder.gameRoom);
       
         
 		if(bonusData!=null){
             go.GetComponent<Pawn>().AddExternalCharacteristic(bonusData);
 		}
         return go;
-
-
     }
 	/// <summary>
     /// weaponSpawn request to server
@@ -1550,7 +1548,7 @@ public class NetworkController : MonoBehaviour {
             Debug.Log("ALredy delete");
             return;
         }
-        Debug.Log("Pawn Spawn" + sirPawn.type + "ID:"+ sirPawn.id);
+//        Debug.Log("Pawn Spawn" + sirPawn.type + "ID:"+ sirPawn.id);
         GameObject go = RemoteInstantiateNetPrefab(sirPawn.type, sirPawn.position.GetVector(), sirPawn.rotation.GetQuat(), sirPawn.id);
         if (go == null)
         {
@@ -1616,7 +1614,7 @@ public class NetworkController : MonoBehaviour {
 
             BaseWeapon weapon = wepGo.GetComponent<BaseWeapon>();
             weapon.NetUpdate(weaponModel);
-			Debug.Log("PAwn" + pawn + " View" + GetView(dt.GetInt("pawnId")) + "ID" + dt.GetInt("pawnId"));
+//			Debug.Log("PAwn" + pawn + " View" + GetView(dt.GetInt("pawnId")) + "ID" + dt.GetInt("pawnId"));
             weapon.RemoteAttachWeapon(pawn, weaponModel.state);
 		}
 		
@@ -1771,7 +1769,7 @@ public class NetworkController : MonoBehaviour {
                 continue;
             }
 			BaseWeapon weapon = GetView(dt.GetInt("id")).weapon;
-		
+        
 			weapon.RemoteShot(((Vector3Model)dt.GetClass("position")).GetVector(),
 								((QuaternionModel)dt.GetClass("direction")).GetQuat(),
                                 dt.GetFloat("power"), dt.GetFloat("range"), dt.GetFloat("minRange"), dt.GetInt("viewId"), dt.GetInt("projId"), dt.GetLong("timeShoot"));
@@ -1931,7 +1929,7 @@ public class NetworkController : MonoBehaviour {
 
     public void HandlePawnDiedByKill(ISFSObject dt)
     {
-        Debug.Log("PAWN DIED");
+//        Debug.Log("PAWN DIED");
         if (GetView(dt.GetInt("viewId")) == null)
         {
             deleteIdLate.Add(dt.GetInt("viewId"));
@@ -1959,11 +1957,12 @@ public class NetworkController : MonoBehaviour {
             {
                 pawn.PawnKill(GetPlayer(player));
             }
-            
-            if (pawn.player != null && !pawn.isAi)
+            else
             {
-                pawn.player.Score.Death++;
+                pawn.PawnKill(null);
             }
+            
+           
            
         }
 
@@ -2173,7 +2172,7 @@ public class NetworkController : MonoBehaviour {
     public void HandleAISpawnBot(ISFSObject dt)
     {
             
-        Debug.Log("HandleAISpawnBot: " + string.Join("|", dt.GetKeys()));
+//        Debug.Log("HandleAISpawnBot: " + string.Join("|", dt.GetKeys()));
         if (dt.ContainsKey("team"))
         {
             AIDirector.instance.swarms[dt.GetInt("swarmId")].SpawnBot(dt.GetUtfString("prefabName"), dt.GetInt("id"), ((Vector3Model)dt.GetClass("position")).GetVector(),dt.GetInt("team"));
@@ -2203,6 +2202,10 @@ public class NetworkController : MonoBehaviour {
     /// </summary>	
     public void HandleChangeWeaponState(ISFSObject dt)
     {
+        FoxView view = GetView(dt.GetInt("id"));
+        if(view==null){
+            return;
+        }
         BaseWeapon weapon = GetView(dt.GetInt("id")).weapon;
         Debug.Log("HandleChangeWeaponState");
 		if(dt.GetBool("state")){

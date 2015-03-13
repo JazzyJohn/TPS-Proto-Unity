@@ -37,7 +37,11 @@ public class InventoryManager : MonoBehaviour {
 
     public void Awake()
     {
-       
+        if (owner == null)
+        {
+            owner = GetComponent<Pawn>();
+
+        }
     }
 	
 	
@@ -47,17 +51,18 @@ public class InventoryManager : MonoBehaviour {
 
     public virtual void Init()
     {
-        if (owner == null)
-        {
-            owner = GetComponent<Pawn>();
+        
            
 
             GenerateBag();
 
 
-        }
-        SpawnWeaponFromNameList();
+      
+     
+           SpawnWeaponFromNameList();
+        
     }
+ 
 	public virtual void PawnDeath(){
 		foreach(BaseWeapon weapon in myWeapons){
 			weapon.PawnDeath();
@@ -65,7 +70,8 @@ public class InventoryManager : MonoBehaviour {
 	}
 
     protected virtual void SpawnWeaponFromNameList(){
-        if (weaponNames.Length > 0)
+
+    if (weaponNames.Length > 0)
         {
             myWeapons = new BaseWeapon[weaponNames.Length];
         }

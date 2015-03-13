@@ -401,7 +401,7 @@ public class ItemManager : MonoBehaviour {
 
 	}
 	protected IEnumerator LoadItems(WWWForm form){
-		Debug.Log (form );
+//		Debug.Log (form );
 	
 		WWW w = StatisticHandler.GetMeRightWWW(form,StatisticHandler.LOAD_ITEMS);
 		

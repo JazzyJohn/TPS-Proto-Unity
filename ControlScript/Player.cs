@@ -3,6 +3,7 @@ using System;
 using System.Collections.Generic;
 using Sfs2X.Entities.Data;
 using Sfs2X.Entities;
+using System.Collections;
 
 public enum PawnType{PAWN,BOT};
 
@@ -117,7 +118,7 @@ public class Player : MonoBehaviour {
 	//param for delayed external call
 	public string delayedExternalCallData;
 	
-	public bool wasWallPost = false;
+	private bool wasWallPost = false;
 
     bool winnerWallPost = false;
 
@@ -669,22 +670,35 @@ public class Player : MonoBehaviour {
 	public void SendDelayedExternal(){
 		if(delayedExternalCallName!=""){
 			if(!wasWallPost){
-				Application.ExternalCall(delayedExternalCallName,delayedExternalCallData);
+                StartCoroutine(_SendDelayedExternal(delayedExternalCallName, delayedExternalCallData));
+				
 				delayedExternalCallName="";
 				wasWallPost =true;
 			}
 		}
 	}
-		
+
+    public IEnumerator _SendDelayedExternal(string name, string data)
+    {
+        yield return new WaitForSeconds(2.0f);
+        Application.ExternalCall(name, data);
+
+    
+    }
 	public void AchivmenUnlock(Achievement achv){
-		if(achv.isMultiplie){
-			PlayerMainGui.instance.AddMessage(achv.description,Vector3.zero,PlayerMainGui.MessageType.ACHIVEMENT);
-			delayedExternalCallName ="AchivmenUnlock";
-			delayedExternalCallData = TextGenerator.instance.GetSimpleText("AchivmenUnlock") +achv.description;
+		if(achv.type ==AchievementType.ACHIEVEMENT){
+            PlayerMainGui.instance.AddMessage(achv.name + "\n" + achv.description, Vector3.zero, PlayerMainGui.MessageType.ACHIVEMENT);
+            delayedExternalCallName = "AchivmenUnlock";
+            string text = TextGenerator.instance.GetSimpleText("AchivmenUnlock");
+            delayedExternalCallData = text + achv.name + ": " + achv.description;
+            GUIHelper.Notify(text,achv.description, achv.textureIcon);
 		}else{
-			PlayerMainGui.instance.AddMessage(achv.name+"\n"+achv.description,Vector3.zero,PlayerMainGui.MessageType.ACHIVEMENT);
-			delayedExternalCallName ="AchivmenUnlock";
-            delayedExternalCallData = TextGenerator.instance.GetSimpleText("AchivmenUnlock") + achv.name + ": " + achv.description;
+            PlayerMainGui.instance.AddMessage(achv.description, Vector3.zero, PlayerMainGui.MessageType.ACHIVEMENT);
+            delayedExternalCallName = "AchivmenUnlock";
+            string text =TextGenerator.instance.GetSimpleText("TaskUnlock");
+            delayedExternalCallData = text + achv.description;
+            GUIHelper.Notify(text, achv.description, achv.textureIcon);
+			
 		}
 		
 	}

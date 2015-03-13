@@ -13,6 +13,13 @@ public class MissionGUI : MonoBehaviour {
 
     public int cashId;
 
+    private string baseTime;
+    public void Awake()
+    {
+        baseTime = time.text;
+    }
+
+
     public void Draw()
     {
         Achievement[] list =  AchievementManager.instance.GetTask();

@@ -100,6 +100,7 @@ public class ServerHolder : MonoBehaviour
         NetworkController.smartFox.AddEventListener(SFSEvent.USER_ENTER_ROOM, OnUserEnterRoom);
         NetworkController.smartFox.AddEventListener(SFSEvent.USER_EXIT_ROOM, OnUserLeaveRoom);
         NetworkController.smartFox.AddEventListener(SFSEvent.ROOM_ADD, OnRoomAdded);
+        NetworkController.smartFox.AddEventListener(SFSEvent.ROOM_VARIABLES_UPDATE, OnRoomVarUpdate);
         NetworkController.smartFox.AddEventListener(SFSEvent.ROOM_CREATION_ERROR, OnRoomError);
         NetworkController.smartFox.AddEventListener(SFSEvent.ROOM_REMOVE, OnRoomDeleted);
        
@@ -176,12 +177,31 @@ public class ServerHolder : MonoBehaviour
 			SetupRoomList();
 		}
 	}
-
+    public void OnRoomVarUpdate(BaseEvent evt)
+    { //Room room) {
+//        Debug.Log(evt);
+    }
+    public List<RoomData>  GiveAlowedRooms(){
+        List<RoomData> answer = new List<RoomData>();
+        foreach (RoomData room in allRooms)
+        {
+            if (room.maxPlayers <= room.playerCount)
+            {
+                continue;
+            }
+            answer.Add(room);
+        }
+        return answer;
+    }
 
     private void SetupRoomList()
     {
-        List<Sfs2X.Entities.Room> roomList = NetworkController.smartFox.RoomManager.GetRoomListFromGroup("games");
+       
+        
+        List<Sfs2X.Entities.Room> roomList = NetworkController.smartFox.GetRoomListFromGroup("games");
+        List<RoomData> oldData = allRooms;
         allRooms = new List<RoomData>();
+
         foreach (Sfs2X.Entities.Room room in roomList)
         {
             // Show only game rooms
@@ -189,16 +209,28 @@ public class ServerHolder : MonoBehaviour
             {
                 continue;
             }
-            RoomData roomData = new RoomData();
-            roomData.id = room.Id;
-            roomData.name = room.Name;
-            roomData.playerCount = room.UserCount;
-            roomData.maxPlayers = room.MaxUsers;
+
+            RoomData roomData = oldData.Find(delegate(RoomData searchentry) { return searchentry.name == room.Name; });
+            if(roomData==null){
+                roomData   = new RoomData();
+
+                roomData.id = room.Id;
+                roomData.name = room.Name;
+               
+                roomData.maxPlayers = room.MaxUsers;
            
           
-            roomData.map = room.GetVariable("map").GetStringValue();
-               
-            roomData.mode = GetRuleClass(roomData.map);
+            }
+            
+            if (room.GetVariable("map") != null && roomData.map==null)
+            {
+                roomData.map = room.GetVariable("map").GetStringValue();
+
+                roomData.mode = GetRuleClass(roomData.map);
+            }
+            roomData.playerCount = room.UserCount;
+          
+           
             
             allRooms.Add(roomData);
             
@@ -263,7 +295,7 @@ public class ServerHolder : MonoBehaviour
 				nextUpdateTime += updateRate;
 			}
 		}*/
-        //SetupRoomList();
+        SetupRoomList();
 	}
 	
 	void OnReceivedRoomList()
@@ -532,7 +564,7 @@ public class ServerHolder : MonoBehaviour
                 gameRule = new SFSRoomVariable("ruleClass", "nstuff.juggerfall.extension.gamerule.PVPGameRule");
                 setting.teamCount = 2;
                 setting.maxTime =0;
-                setting.maxScore= 10;
+                setting.maxScore= 35;
                 break;
             case GAMEMODE.PVPJUGGERFIGHT:
                 gameRule = new SFSRoomVariable("ruleClass", "nstuff.juggerfall.extension.gamerule.PVPJuggerFightGameRule");
@@ -612,7 +644,7 @@ public class ServerHolder : MonoBehaviour
 		CreateNewRoom(map);
 		
 	}
-	
+    MainMenuGUI mainMenu;
 	
 	IEnumerator LoadMap (string mapName,bool next =false)
 	{
@@ -624,8 +656,10 @@ public class ServerHolder : MonoBehaviour
         progress.curLoader = 0;
 		connectingToRoom = true;
         AfterGameBonuses.Clear();
-		
-		MainMenuGUI mainMenu = FindObjectOfType<MainMenuGUI> ();
+        if (mainMenu == null)
+        {
+            mainMenu = MainMenuGUI.instance;
+        }
 	
 		if (mainMenu != null) {
 				
@@ -663,7 +697,7 @@ public class ServerHolder : MonoBehaviour
         }
        
             MapLoader loader = FindObjectOfType<MapLoader>();
-            Debug.Log(loader);
+//            Debug.Log(loader);
             if (loader != null)
             {
 
@@ -759,6 +793,13 @@ public class ServerHolder : MonoBehaviour
 		FinishLoad ();
 		
 		yield return new WaitForEndOfFrame();
+        if (next)
+        {
+
+            Destroy(FindObjectOfType<HUDHolder>().gameObject);
+            yield return new WaitForEndOfFrame();
+        }
+        
         GameObject menu;
         if (data != null)
         {
@@ -771,23 +812,26 @@ public class ServerHolder : MonoBehaviour
         }
 
         Camera.main.GetComponent<PlayerMainGui>().enabled = true;
-        HUDHolder holder =FindObjectOfType<HUDHolder>();
+        HUDHolder holder = FindObjectOfType<HUDHolder>();
         Camera.main.GetComponent<PlayerMainGui>().PlayGUI = holder.PlayPanel;
-//        holder.cameraForMark.transform.parent = Camera.main.transform;
-    //    holder.cameraForMark.transform.localPosition = Vector3.zero;
-  //      holder.cameraForMark.transform.localRotation = Quaternion.identity;
+        //        holder.cameraForMark.transform.parent = Camera.main.transform;
+        //    holder.cameraForMark.transform.localPosition = Vector3.zero;
+        //      holder.cameraForMark.transform.localRotation = Quaternion.identity;
         menu.transform.parent = FindObjectOfType<GUIRootHolder>().transform;
         menu.transform.localPosition = Vector3.zero;
         menu.transform.localRotation = Quaternion.identity;
         menu.transform.localScale = holder.scale;
-		if(mainMenu!=null){
-		
-		
-			mainMenu.PlayerGUI=Camera.main.GetComponent<PlayerMainGui>();
-			
-			mainMenu.FinishLvlLoad();
-		}
+        if (mainMenu != null)
+        {
+
+
+            mainMenu.PlayerGUI = Camera.main.GetComponent<PlayerMainGui>();
+
+            mainMenu.FinishLvlLoad();
+        }
+        
         GameRule.instance.curStage = MUSIC_STAGE.BATLLE;
+
         Debug.Log("Compileted Load Map");
         
         if (next)

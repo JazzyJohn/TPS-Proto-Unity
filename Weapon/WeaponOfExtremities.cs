@@ -21,11 +21,15 @@ public class WeaponOfExtremities : MonoBehaviour {
 
 
 		owner = GetComponent<Pawn>();
-
-		for (int i = 0; i < this.GetComponentsInChildren<HTHHitter>().Length; i++)
+        HTHHitter[] hitter =  GetComponentsInChildren<HTHHitter>();
+		for (int i = 0; i <hitter.Length; i++)
 		{
-			Weapon.Add(this.GetComponentsInChildren<HTHHitter>()[i]);
-			Weapon[i].SetOwner(this, owner);
+            if (hitter[i] != null)
+            {
+                Weapon.Add(hitter[i]);
+
+                Weapon[i].SetOwner(this, owner);
+            }
 		}
 	}
 
@@ -35,15 +39,18 @@ public class WeaponOfExtremities : MonoBehaviour {
 	{
 		foreach(HTHHitter Attack in Weapon)
 		{
-			if (Attack.isKick) 
-			{
-				//Attack.isKick=false;
-				if(!Attack.IsPlaying())
-				{
-					Kick(Attack);
-					
-				}
-			}
+            if (Attack != null)
+            {
+                if (Attack.isKick)
+                {
+                    //Attack.isKick=false;
+                    if (!Attack.IsPlaying())
+                    {
+                        Kick(Attack);
+
+                    }
+                }
+            }
 		}
 	}
 

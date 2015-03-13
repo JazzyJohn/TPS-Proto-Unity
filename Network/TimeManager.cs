@@ -45,7 +45,7 @@ public class TimeManager : MonoBehaviour {
 		pingValues = new long[averagePingCount];
 		pingCount = 0;
 		pingValueIndex = 0;
-        Debug.Log("timer");
+//        Debug.Log("timer");
 		running = true;
 	}
     /// <summary>

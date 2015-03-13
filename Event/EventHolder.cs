@@ -41,7 +41,7 @@ public class ListnerHolder<T>:HolderBase{
 		listenerList.Add(listener);
 	}
 	public void Bind(object listener){
-		Debug.Log (listener);
+	//	Debug.Log (listener);
 		listenerList.Add((T)listener);
 	}
 	public bool isValid(Type type){

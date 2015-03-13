@@ -99,7 +99,7 @@ public class SelectPlayerGUI : MonoBehaviour {
         ReDrawAll();
         SelectPlayer(1);
         SelectRobot();
-        Debug.Log(player.team);
+      //  Debug.Log(player.team);
 		if(player.team==0){
 			Choice._Team = -1;
 		}else{

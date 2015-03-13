@@ -120,8 +120,10 @@ class ProjectileManager: MonoBehaviour
             BaseProjectile proj = allProjectile[id];
             Type thisType = proj.GetType();
             MethodInfo theMethod = thisType.GetMethod(function);
-            
-            theMethod.Invoke(proj, addParams);
+            if (theMethod != null)
+            {
+                theMethod.Invoke(proj, addParams);
+            }
             
         }
     

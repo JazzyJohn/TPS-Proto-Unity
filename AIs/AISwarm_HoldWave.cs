@@ -91,10 +91,11 @@ public class AISwarm_HoldWave : AISwarm_QuantizeWave
 		
         Pawn pawn = obj.GetComponent<Pawn>();
         pawn.SetTeam(0);
-
+        pawn.AfterAwake();
         AIBase ai = obj.GetComponent<AIBase>();
         ai.Init(aiGroup, this, point);
         AfterSpawnAction(ai);
+
         NetworkController.Instance.EndPawnSpawnRequest();
     }
     

@@ -16,7 +16,11 @@ public enum AsyncNotify{
 public class GlobalPlayer : MonoBehaviour {
 
 	void Awake(){
-        
+        if (!isDebug)
+        {
+
+            UID = "";
+        }
 			if(FindObjectsOfType<GlobalPlayer>().Length>1){
 				Destroy(gameObject);
 			}else{
@@ -139,6 +143,7 @@ public class GlobalPlayer : MonoBehaviour {
             return s_Instance;
         }
     }
+  
     public void Start()
     {
 		switch(Application.platform){

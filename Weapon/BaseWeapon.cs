@@ -367,8 +367,10 @@ public class BaseWeapon : DestroyableNetworkObject {
 
         }
         initStats = true;
-
-        owner.ivnMan.RewrtieMaxAmmo(maxAmmoAmount,ammoType);
+        if (foxView.isMine)
+        {
+            owner.ivnMan.RewrtieMaxAmmo(maxAmmoAmount, ammoType);
+        }
 
         reloadTime = reloadTime * owner.GetPercentValue(CharacteristicList.RELOAD_SPEED);
         fireInterval = fireInterval * owner.GetPercentValue(CharacteristicList.FIRE_RATE);

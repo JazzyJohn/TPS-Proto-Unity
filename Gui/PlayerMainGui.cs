@@ -471,6 +471,10 @@ public class PlayerMainGui : MonoBehaviour {
            
 
         }
+        if (P1Hud == null)
+        {
+            return;
+        }
         P1Hud.ReDraw();
 		while (logMessages.Count>50) {
 				logMessages.Dequeue ();
@@ -888,6 +892,26 @@ public static class GUIHelper{
 			}
 		
 	}
+    public static void Notify(string title, string text)
+    {
+        Notify(title,text, (Texture2D)null);
+    }
+    public static void Notify(string title, string text, Texture2D icon)
+    {
+        Notifier notifier = UnityEngine.Object.FindObjectOfType<Notifier>();
+        if (notifier != null)
+        {
+            notifier.ShowIconMessage(title,text, icon);
+        }
+    }
+    public static void Notify(string title, string text, string icon)
+    {
+        Notifier notifier = UnityEngine.Object.FindObjectOfType<Notifier>();
+        if (notifier != null)
+        {
+            notifier.ShowIconMessage(title,text, icon);
+        }
+    }
     public static void SendMessage( string text,Texture2D icon)
     {
       

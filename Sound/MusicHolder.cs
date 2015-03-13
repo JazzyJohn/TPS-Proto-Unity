@@ -120,7 +120,7 @@ public class MusicHolder : MonoBehaviour {
 	}
 	
 	public void NextStage(){
-        Debug.Log("NEW STAGE " + MusicInStage.Length);
+//        Debug.Log("NEW STAGE " + MusicInStage.Length);
 		if (curStageInt <MusicInStage.Length ) {
             SetStage((MUSIC_STAGE)curStageInt);
             

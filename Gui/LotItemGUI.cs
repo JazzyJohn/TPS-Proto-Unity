@@ -158,9 +158,15 @@ public class LotItemGUI : MonoBehaviour
 			priceKey = key;
             Shop.askWindow.action = FinishBuy;
             string text;
-			if(item.prices[0].type==BuyPrice.KP_PRICE){
+            if (item.prices[key].type == BuyPrice.KP_PRICE)
+            {
                 text = TextGenerator.instance.GetMoneyText("buyKPprice", item.prices[key].parts[0].amount);
-			}else{
+            }
+            else if (item.prices[key].type == BuyPrice.GOLD_PRICE_UNBREAKE)
+            {
+                text = TextGenerator.instance.GetMoneyText("buyUnbreakeprice", item.prices[key].parts[0].amount);
+            }
+            else {
                 text = TextGenerator.instance.GetMoneyText("buyGoldPrice", item.prices[key].parts[0].amount);
 			}
 

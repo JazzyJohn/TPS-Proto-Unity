@@ -165,6 +165,8 @@ public class BaseProjectile : MonoBehaviour
 
     public Vector3 effectPosition;
 
+    public Vector3 velocity;
+
 	void Awake(){
 		aSource = GetComponent<AudioSource>();	
 		sControl = new soundControl(aSource);//создаем обьект контроллера звука и передаем указатель на источник
@@ -178,7 +180,7 @@ public class BaseProjectile : MonoBehaviour
       
         used = false;
         boomed = false;
-        mRigidBody.velocity = Vector3.zero;
+        velocity = Vector3.zero;
 		foreach(GameObject go in inactiveObjectInEffectStage){
             if (go!=null)
 			go.SetActive(true);
@@ -206,17 +208,17 @@ public class BaseProjectile : MonoBehaviour
 		
         startPosition = mTransform.position;
 
-        mRigidBody.velocity = mTransform.TransformDirection(Vector3.forward * startImpulse);
+        velocity = mTransform.TransformDirection(Vector3.forward * startImpulse);
         curSpeed = startImpulse;
 		
         RaycastHit hit;
-        float distance = mTransform.InverseTransformDirection(mRigidBody.velocity).z* 0.1f;
+        float distance = mTransform.InverseTransformDirection(velocity).z* 0.1f;
         if (replication)
         {
-            distance += (float)(TimeManager.Instance.NetworkTime  - lateTime) * mRigidBody.velocity.magnitude;
+            distance += (float)(TimeManager.Instance.NetworkTime  - lateTime) * velocity.magnitude;
         }
 
-        if (distance > 0 && Physics.Raycast(mTransform.position, mRigidBody.velocity.normalized, out hit, distance, dmgLayers))
+        if (distance > 0 && Physics.Raycast(mTransform.position, velocity.normalized, out hit, distance, dmgLayers))
         {
 
                 onBulletHit(hit);
@@ -274,7 +276,7 @@ public class BaseProjectile : MonoBehaviour
                 Vector3 preVel = ((target.position + targetOffset) - mTransform.position);
                 _attractionCoef += _attractionCoef * trajectoryCoef*Time.fixedDeltaTime;
                 preVel = Vector3.Cross(preVel, mTransform.up) + preVel.normalized * _attractionCoef;
-                result = Vector3.Lerp(mRigidBody.velocity, preVel.normalized * curSpeed, Time.deltaTime * trajectoryCoef) - mRigidBody.velocity;
+                result = Vector3.Lerp(velocity, preVel.normalized * curSpeed, Time.deltaTime * trajectoryCoef) - velocity;
                // Quaternion rotation = Quaternion.LookRotation(((target.position + targetOffset) - mTransform.position).normalized);
                // mRigidBody.velocity = rotation * mRigidBody.velocity;
                 break;
@@ -282,17 +284,17 @@ public class BaseProjectile : MonoBehaviour
             case ATTRACTION.LaserGuidance:
 
 
-                result = Vector3.Lerp(mRigidBody.velocity, ((target.position + targetOffset) - mTransform.position).normalized * curSpeed, Time.deltaTime * _attractionCoef) - mRigidBody.velocity;
+                result = Vector3.Lerp(velocity, ((target.position + targetOffset) - mTransform.position).normalized * curSpeed, Time.deltaTime * _attractionCoef) - velocity;
                 break;
             case ATTRACTION.NoAttraction:
               //  Debug.Log(curSpeed);
                 switch (speedChange)
                 {
                     case SPEEDCHANGE.Acceleration:
-                       result = mRigidBody.velocity.normalized * Time.deltaTime * speedChangeCoef;
+                       result = velocity.normalized * Time.deltaTime * speedChangeCoef;
                         break;
                     case SPEEDCHANGE.Deceleration:
-                        result =- mRigidBody.velocity.normalized * Time.deltaTime * speedChangeCoef;
+                        result =-velocity.normalized * Time.deltaTime * speedChangeCoef;
                         break;
                 }
              
@@ -302,11 +304,11 @@ public class BaseProjectile : MonoBehaviour
 
         }
      
-		if(mRigidBody.velocity.sqrMagnitude >0&&hitDelay<Time.time){
-			mTransform.rotation = Quaternion.LookRotation(mRigidBody.velocity);
+		if(velocity.sqrMagnitude >0&&hitDelay<Time.time){
+			mTransform.rotation = Quaternion.LookRotation(velocity);
             //
           //  Debug.Log(used);
-            if (!used&&Physics.Raycast(transform.position, mRigidBody.velocity.normalized, out hit, mRigidBody.velocity.magnitude * 0.1f, dmgLayers))
+            if (!used&&Physics.Raycast(transform.position, velocity.normalized, out hit, velocity.magnitude * 0.1f, dmgLayers))
 			{
               
                 //Debug.DrawRay(mTransform.position, mTransform.forward * mRigidBody.velocity.magnitude * 0.1f, Color.red, 10.0f);
@@ -354,8 +356,9 @@ public class BaseProjectile : MonoBehaviour
                     }
                     break;
             }
-            _detonateTimer += Time.deltaTime;
+            _detonateTimer += Time.fixedDeltaTime;
         }
+        mTransform.position += velocity * Time.fixedDeltaTime;
 
     }
     public void Detonate(Vector3 position)
@@ -367,15 +370,15 @@ public class BaseProjectile : MonoBehaviour
 
             Vector3 direction = position - mTransform.position;
             //Debug.DrawLine(mTransform.position, mTransform.position +  mRigidBody.velocity*(direction.magnitude+0.1f),Color.red,10.0f);
-            if (Physics.Raycast(mTransform.position, mRigidBody.velocity.normalized, out hit, direction.magnitude + mRigidBody.velocity.magnitude * 0.1f, dmgLayers))
+            if (Physics.Raycast(mTransform.position, velocity.normalized, out hit, direction.magnitude + velocity.magnitude * 0.1f, dmgLayers))
             {
 
                 onBulletHit(hit);
 
             }
-            mTransform.position = position - mRigidBody.velocity.normalized * 0.05f;
+            mTransform.position = position - velocity.normalized * 0.05f;
           //  Debug.DrawLine(mTransform.position, mTransform.position + mRigidBody.velocity * (direction.magnitude + mRigidBody.velocity.magnitude * 0.15f), Color.blue, 10.0f);
-            if (Physics.Raycast(mTransform.position, mRigidBody.velocity.normalized, out hit, direction.magnitude + mRigidBody.velocity.magnitude * 0.15f, dmgLayers))
+            if (Physics.Raycast(mTransform.position, velocity.normalized, out hit, direction.magnitude + velocity.magnitude * 0.15f, dmgLayers))
             {
 
                 onBulletHit(hit);
@@ -483,8 +486,8 @@ public class BaseProjectile : MonoBehaviour
                         }
                         if (nextTarget != null)
                         {
-                            mRigidBody.velocity = mRigidBody.velocity.magnitude * (nextTarget.myTransform.position - mTransform.position).normalized;
-                            ProjectileManager.instance.InvokeRPC("NewVelocity", projId, mRigidBody.velocity, proojHitCnt);
+                            velocity = velocity.magnitude * (nextTarget.myTransform.position - mTransform.position).normalized;
+                            ProjectileManager.instance.InvokeRPC("NewVelocity", projId, velocity, proojHitCnt);
                         }
                         else
                         {
@@ -555,9 +558,9 @@ public class BaseProjectile : MonoBehaviour
 						{
 							
 
-							mRigidBody.velocity = mRigidBody.velocity - 2 * Vector3.Project(mRigidBody.velocity, hit.normal);
+							velocity = velocity - 2 * Vector3.Project(velocity, hit.normal);
                             mTransform.position = hit.point;
-							ProjectileManager.instance.InvokeRPC("NewVelocity", projId, mRigidBody.velocity, proojHitCnt);
+							ProjectileManager.instance.InvokeRPC("NewVelocity", projId, velocity, proojHitCnt);
 						}
 					}
                     
@@ -610,7 +613,7 @@ public class BaseProjectile : MonoBehaviour
 
     void NewVelocity(Vector3 velocity, int cnt)
     {
-        mRigidBody.velocity = velocity;
+        this.velocity = velocity;
         proojHitCnt = cnt;
     }
     void NewHitCount(int cnt)
@@ -620,7 +623,7 @@ public class BaseProjectile : MonoBehaviour
     void StickPosition(Vector3 position)
     {
         mTransform.position = position;
-        mRigidBody.velocity = Vector3.zero;
+        velocity = Vector3.zero;
     }
 
    

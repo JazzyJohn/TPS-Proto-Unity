@@ -84,11 +84,15 @@ public class MainMenuGUI : MonoBehaviour {
        
     }
 
-
+    public static MainMenuGUI instance;
 	void Awake(){
 	
 		HideAllPanel();
 		DontDestroyOnLoad(transform.gameObject);
+        if (instance == null)
+        {
+            instance = this;
+        }
 	}
     void Update()
     {
@@ -227,8 +231,10 @@ public class MainMenuGUI : MonoBehaviour {
 			}*/
 			
 		} else {
-			if(Server.allRooms.Count>0){
-				Server.JoinRoom(Server.allRooms[UnityEngine.Random.Range(0,Server.allRooms.Count)]);
+            List<RoomData> allRooms = Server.GiveAlowedRooms();
+            if (allRooms.Count > 0)
+            {
+				Server.JoinRoom(allRooms[UnityEngine.Random.Range(0,allRooms.Count)]);
 				HideAllPanel();
 				_RoomsNgui.Loading.alpha = 1f;
 				//_PanelsNgui.SliderPanel.alpha = 1f;
@@ -621,6 +627,7 @@ public class MainMenuGUI : MonoBehaviour {
 		}
 		PlayGUI = PlayerGUI.PlayGUI;
         PlayerGUI.pausegui = this;
+        Pause = false;
 	}
 
 	 public void ActivateMenu(){

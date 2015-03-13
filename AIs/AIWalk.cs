@@ -252,7 +252,7 @@ public class AIWalk : AIMovementState
 	}
 	protected void FindCover(Vector3 position){
         	
-        Debug.Log("FindCover");
+//        Debug.Log("FindCover");
 		float weaponDistance =controlledPawn.OptimalDistance(false); 
 		Collider[] hitColliders = Physics.OverlapSphere(position, weaponDistance);
         List<CoverRating> allCovers =

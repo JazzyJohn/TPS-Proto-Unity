@@ -50,6 +50,17 @@ public class AnyRoom : MonoBehaviour {
 	{
 		MainScriptGUI.JoinRoom(room);
 	}
+    private static RoomData firstClickRoom;
+    public void Click()
+    {
+        if (firstClickRoom == room)
+        {
+            MainScriptGUI.JoinRoom(room);
+        }
+        else
+        {
+            firstClickRoom = room;
+        }
 
-
+    }
 }

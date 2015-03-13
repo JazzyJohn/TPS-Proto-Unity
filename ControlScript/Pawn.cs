@@ -439,6 +439,7 @@ public class Pawn : DamagebleObject
         {
             ivnMan.Init();
         }
+     
     }
 	public void SpawnImmortalityEnd(){
 		isSpawnImortality= false;
@@ -546,7 +547,7 @@ public class Pawn : DamagebleObject
     }
     public void SpeedInit()
     {
-        Debug.Log("speed mod" + GetPercentValue(CharacteristicList.SPEED));
+//        Debug.Log("speed mod" + GetPercentValue(CharacteristicList.SPEED));
         wallRunSpeed = wallRunSpeed * GetPercentValue(CharacteristicList.SPEED);
 
         groundSprintSpeed = groundSprintSpeed * GetPercentValue(CharacteristicList.SPEED);
@@ -1359,7 +1360,7 @@ public class Pawn : DamagebleObject
                         }
                         break;
                     case CharacterState.Dead:
-                       
+                       /*
                         if (characterState != CharacterState.Dead)
                         {
                            
@@ -1375,7 +1376,7 @@ public class Pawn : DamagebleObject
 								animator.StartDeath(AnimDirection.Back);
                             }
 
-                        }
+                        }*/
                         return;
                 }
                 characterState = nextState;
@@ -1429,7 +1430,10 @@ public class Pawn : DamagebleObject
     {
 
         //Debug.Log (photonView.isSceneView);
-
+        if (isDead)
+        {
+            return;
+        }
         ProgressEdit();
         if (!isActive && !foxView.isMine)
         {

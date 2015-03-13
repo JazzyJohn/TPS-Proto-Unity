@@ -41,6 +41,11 @@ public class SelectedItemGUI : MonoBehaviour {
 		if(_item==null)
 		{
 			_item =ItemManager.instance.GetFirstItemForSlot((GameClassEnum)Choice._Player, slot);
+            WeaponInventorySlot weapon = (WeaponInventorySlot)_item;
+            if (weapon != null)
+            {
+                Choice.SetChoice(slot, Choice._Player, new WeaponIndex(weapon.weaponId, ""));
+            }
 		}
 		if(_item==null){
             name.alpha = 1.0f;

@@ -253,8 +253,8 @@ public class PlayerHudNgui : MonoBehaviour {
         }
 	}
 	public void DeActivate(){
-    
-        if (hudpanel.enabled)
+
+        if (hudpanel!=null&&hudpanel.enabled)
         {
             hudpanel.enabled = false;
             if (mapCamera != null)
