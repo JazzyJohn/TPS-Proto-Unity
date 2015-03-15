@@ -32,9 +32,10 @@ public class MissionGUI : MonoBehaviour {
     {
         DateTime tomorrow = DateTime.Today.AddDays(1);
 
-
+     //   {0:D2} : {1:D2} : {2:D2} 
        TimeSpan span = new TimeSpan( tomorrow.Ticks-DateTime.UtcNow.Ticks);
-       time.text= string.Format("{0:D2} : {1:D2} : {2:D2} ", span.Hours, span.Minutes, span.Seconds);
+       time.text= string.Format(baseTime, span.Hours, span.Minutes, span.Seconds);
+
     }
     public void Skip(int id)
     {

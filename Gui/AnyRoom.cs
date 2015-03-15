@@ -1,66 +1,84 @@
 ﻿using UnityEngine;
 using System.Collections;
 
-public class AnyRoom : MonoBehaviour {
+public class AnyRoom : MonoBehaviour
+{
 
-	public  RoomData room ;
+    public RoomData room;
 
     public UILabel Number;
 
-	public UILabel Name;
+    public UILabel Name;
 
-    public UILabel  MapName;
+    public UILabel MapName;
 
-	public UILabel GameMode;
-	
-	public UILabel SizeRoom;
+    public UILabel GameMode;
 
-	public MainMenuGUI MainScriptGUI;
+    public UILabel SizeRoom;
 
-	public ServerHolder Server; 
-	bool have = false;
-	public bool shablon;
+    public MainMenuGUI MainScriptGUI;
 
-	// Use this for initialization
-	void Start () {
-		Server = FindObjectOfType<ServerHolder> ();
-	}
-   
-	// Update is called once per frame
-	
-	void Update(){
-		if(room!=null&&!Server.allRooms.Contains(room)){
-			MainScriptGUI.Rooms.Remove(room.name);
-			Destroy(this.gameObject);
-		}
-		
-	}
-	
-	public void UpdateRoom (RoomData room,int i ) 
-	{
-		this.room =room;	
-		Name.text = room.name;
-		SizeRoom.text = room.playerCount + " / " + room.maxPlayers;
-		GameMode.text =  TextGenerator.instance.GetSimpleText(room.mode);
+    public ServerHolder Server;
+    bool have = false;
+    public bool shablon;
+
+    // Use this for initialization
+    void Start()
+    {
+        Server = FindObjectOfType<ServerHolder>();
+    }
+
+    // Update is called once per frame
+
+    void Update()
+    {
+        if (room != null && !Server.allRooms.Contains(room))
+        {
+            MainScriptGUI.Rooms.Remove(room.name);
+            Destroy(this.gameObject);
+        }
+
+    }
+
+    public void UpdateRoom(RoomData room, int i)
+    {
+        this.room = room;
+        Name.text = room.name;
+        SizeRoom.text = room.playerCount + " / " + room.maxPlayers;
+        GameMode.text = TextGenerator.instance.GetSimpleText(room.mode);
         MapName.text = room.map;
         Number.text = i.ToString();
-	}
+    }
 
-	public void SelectBut()
-	{
-		MainScriptGUI.JoinRoom(room);
-	}
+    public void SelectBut()
+    {
+        MainScriptGUI.JoinRoom(room);
+    }
     private static RoomData firstClickRoom;
+
+    private static bool isBlock = false;
     public void Click()
     {
         if (firstClickRoom == room)
         {
+            if (isBlock)
+            {
+                return;
+            }
+            isBlock = true;
             MainScriptGUI.JoinRoom(room);
+            StartCoroutine(UnBlock());
         }
         else
         {
             firstClickRoom = room;
         }
+
+    }
+    public IEnumerator UnBlock()
+    {
+        yield return new WaitForSeconds(1.0f);
+        isBlock = false;
 
     }
 }

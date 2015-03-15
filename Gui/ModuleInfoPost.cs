@@ -24,6 +24,7 @@ public class ModuleInfoPost : MonoBehaviour {
 	{
 		if(isOver)
 		{
+           
 			if(!MainModule.Visable)
 			{
 				string[] info = new string[4];

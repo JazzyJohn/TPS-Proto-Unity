@@ -24,6 +24,10 @@ public class InvItemGUI : MonoBehaviour {
 	[HideInInspector]
 	public int numToItem;
 
+    public Color[] repairColors;
+
+    public UISprite repair;
+
 	// Use this for initialization
 	void Start () {
         GetComponent<UIButton>().onClick.Add(new EventDelegate(OpenLot));
@@ -57,12 +61,37 @@ public class InvItemGUI : MonoBehaviour {
         {
             name.text = _item.name;
         }
+        if (item.buyMode == BuyMode.FOR_KP)
+        {
+            int percent =  item.GetChargePercent();
+            if (percent > 70)
+            {
+                repair.alpha = 0.0f;
+            }
+            else if (percent > 50)
+            {
+                repair.color = repairColors[0];
+            }
+            else if (percent > 30)
+            {
+                repair.color = repairColors[1];
+            }
+            else 
+            {
+                repair.color = repairColors[2];
+            }
+
+        }else{
+            repair.alpha = 0.0f;
+
+        }
         if (item.isAvailable())
         {
             if (item.prices[0].type == BuyPrice.KP_PRICE)
             {
                 GetComponent<UIButton>().defaultColor = open;
                 box.color = open;
+           
             }
             else
             {

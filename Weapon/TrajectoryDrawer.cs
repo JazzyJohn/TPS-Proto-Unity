@@ -23,7 +23,7 @@ public class TrajectoryDrawer : MonoBehaviour {
 	
 	const float SIZE_COEF = 1.0f;
 	public void Init(BaseProjectile projectileClass){
-		gravity = projectileClass.rigidbody.useGravity;
+		gravity = projectileClass.useGravity;
 		startSpeed = projectileClass.startImpulse;
 		speedChange = projectileClass.GetSpeedChange();
 		rebound = projectileClass.projHtEffect == BaseProjectile.HITEFFECT.Rebound;
@@ -52,8 +52,10 @@ public class TrajectoryDrawer : MonoBehaviour {
             momentum += (G + momentum.normalized*speedChange)/amountOfSamples;
             pos += momentum / amountOfSamples;
 			RaycastHit hit;
-			if(Physics.Linecast(last,  pos, out hit)){
+			if(Physics.Linecast(last,  pos, out hit)&&hit.transform.root!=transform.root){
+
 				pos = hit.point;
+
                 if (rebound && _reboundCnt < reboundCnt)
                 {
 					_reboundCnt++;

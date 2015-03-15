@@ -34,7 +34,7 @@ public class ModuleInfo : MonoBehaviour {
 		float y = 0f;
 
 		Vector3 posNoEdit = Input.mousePosition;
-		
+      
 		switch(Type)
 		{
 		case TypeInfo.InfoNoIco: //Без иконок (заголовок и текст)
@@ -46,11 +46,14 @@ public class ModuleInfo : MonoBehaviour {
 			FixedPosition(posNoEdit, InfoNoIco.Obj);
 			break;
 		case TypeInfo.InfoDescription: //Только текст
-			InfoDescription.Obj.height = 60;
-			InfoDescription.Obj.height += 50*Mathf.FloorToInt(info[0].Length/20);
+            if (InfoDescription.resize)
+            {
+                InfoDescription.Obj.height = 60;
+                InfoDescription.Obj.height += 50 * Mathf.FloorToInt(info[0].Length / 20);
+            }
 
 			InfoDescription.Show(info[0]);
-
+            
 			FixedPosition(posNoEdit, InfoDescription.Obj);
 			break;
 		}
@@ -122,6 +125,9 @@ public class ModuleInfo : MonoBehaviour {
 		case TypeInfo.InfoNoIco:
 			InfoNoIco.PlayTween.Play(false);
 			break;
+        case TypeInfo.InfoDescription:
+            InfoDescription.PlayTween.Play(false);
+            break;
 		}
 	}
 }
@@ -235,22 +241,34 @@ public class infoDescription
 	public UIPlayTween PlayTween;
 	public UISprite Background;
 	public UILabel Text;
+    public bool resize = false;
 	
 	public void Show(string text)
 	{
-		Text.text = "";
-		int CharNum = 0;
-		for(int i = 0; i < text.Length; i++)
-		{
-			if(CharNum > 20)
-			{
-				Text.text += "\n";
-				CharNum = 0;
-				Text.overflowMethod = UILabel.Overflow.ResizeFreely;
-			}
-			Text.text += text[i];
-			CharNum++;
-		}
+		
+        if (resize)
+        {
+            Text.text = "";
+            int CharNum = 0;
+            for (int i = 0; i < text.Length; i++)
+            {
+                if (CharNum > 20)
+                {
+                    Text.text += "\n";
+                    CharNum = 0;
+                   
+                        Text.overflowMethod = UILabel.Overflow.ResizeFreely;
+                   
+                }
+                Text.text += text[i];
+                CharNum++;
+            }
+
+        }
+        else
+        {
+            Text.text = text;
+        }
 		PlayTween.Play(true);
 	}
 }

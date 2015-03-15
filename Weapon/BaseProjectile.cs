@@ -167,6 +167,8 @@ public class BaseProjectile : MonoBehaviour
 
     public Vector3 velocity;
 
+    public bool useGravity;
+
 	void Awake(){
 		aSource = GetComponent<AudioSource>();	
 		sControl = new soundControl(aSource);//создаем обьект контроллера звука и передаем указатель на источник
@@ -299,34 +301,44 @@ public class BaseProjectile : MonoBehaviour
                 }
              
                 break;
+
+         
            
 
 
+        }
+        if (useGravity)
+        {
+            result += Physics.gravity;
         }
      
 		if(velocity.sqrMagnitude >0&&hitDelay<Time.time){
 			mTransform.rotation = Quaternion.LookRotation(velocity);
             //
           //  Debug.Log(used);
+            Debug.DrawLine(mTransform.position, mTransform.position + velocity.normalized , Color.red, 10.0f);
             if (!used&&Physics.Raycast(transform.position, velocity.normalized, out hit, velocity.magnitude * 0.1f, dmgLayers))
 			{
-              
+                Debug.Log("Hit");
                 //Debug.DrawRay(mTransform.position, mTransform.forward * mRigidBody.velocity.magnitude * 0.1f, Color.red, 10.0f);
 					onBulletHit(hit);
 
             }
             else
             {
+                Debug.Log("NoHit");
                 if (result.sqrMagnitude != 0)
                 {
                    // Debug.Log(result);
-                    mRigidBody.AddForce(result, ForceMode.Acceleration);
+                    velocity+=result* Time.fixedDeltaTime;
+                    //mRigidBody.AddForce(result, ForceMode.Acceleration);
+
 
                 }
                 switch (trajectory)
                 {
                     case TRAJECTORY.Corkscrew:
-                        mRigidBody.AddForce(mTransform.right * Time.deltaTime * trajectoryCoef, ForceMode.Acceleration);
+                         velocity+=mTransform.right * Time.deltaTime * trajectoryCoef;
                         break;
 
                 }
@@ -369,7 +381,7 @@ public class BaseProjectile : MonoBehaviour
             RaycastHit hit;
 
             Vector3 direction = position - mTransform.position;
-            //Debug.DrawLine(mTransform.position, mTransform.position +  mRigidBody.velocity*(direction.magnitude+0.1f),Color.red,10.0f);
+          
             if (Physics.Raycast(mTransform.position, velocity.normalized, out hit, direction.magnitude + velocity.magnitude * 0.1f, dmgLayers))
             {
 

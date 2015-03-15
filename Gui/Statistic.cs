@@ -316,14 +316,14 @@ public class Statistic : MonoBehaviour {
 	}
     public void AquierAchievement()
     {
-        List<Achievement> list = AchievementManager.instance.GetDaylics();
+        Achievement[] list = AchievementManager.instance.GetTask();
         for (int i =0; i< achievements.Length;i++)
         {
             AchievementUI ui = achievements[i];
-            if (list.Count <= i)
+            if (list.Length <= i)
             {
                 ui.main.alpha = 0.0f;
-                break;
+                continue ;
             }
             else
             {

@@ -292,7 +292,7 @@ public class AchievementManager : MonoBehaviour, LocalPlayerListener, GameListen
 					}
 				}
 	}
-	protected void SyncAchievement(List<int> syncAchivment,List<Achievement> daylics){
+	protected void SyncAchievement(List<int> syncAchivment,Achievement[] tasks){
 		WWWForm form = new WWWForm ();
 			
 		form.AddField ("uid", UID);
@@ -300,9 +300,9 @@ public class AchievementManager : MonoBehaviour, LocalPlayerListener, GameListen
 			form.AddField ("ids[]", id);
 		}
 
-        foreach (Achievement daylic in daylics)
+        foreach (Achievement task in tasks)
         {
-            form.AddField("daylicProggress["+daylic.order+"]", daylic.GetFloatProgress().ToString("0.0"));
+            form.AddField("daylicProggress[" + task.order + "]", task.GetFloatProgress().ToString("0.0"));
 
         }
 		
@@ -326,6 +326,7 @@ public class AchievementManager : MonoBehaviour, LocalPlayerListener, GameListen
 	}
 	
 	public IEnumerator SkipAchive(int id){
+        GUIHelper.ShowConnectionStart();
 		WWWForm form = new WWWForm ();
 			
 		form.AddField ("uid", UID);
@@ -359,10 +360,12 @@ public class AchievementManager : MonoBehaviour, LocalPlayerListener, GameListen
 		}else{
 		
 		}
+        GUIHelper.ConnectionStop();
 	}
 
     public IEnumerator UpdateTask()
     {
+        GUIHelper.ShowConnectionStart();
 		WWWForm form = new WWWForm ();
 			
 		form.AddField ("uid", UID);
@@ -396,6 +399,7 @@ public class AchievementManager : MonoBehaviour, LocalPlayerListener, GameListen
 		}else{
 		
 		}
+        GUIHelper.ConnectionStop();
 	}
 	void OnDestroy(){
 		if (myThread != null) {
@@ -440,13 +444,13 @@ public class AchievementManager : MonoBehaviour, LocalPlayerListener, GameListen
         {
             time = Mathf.RoundToInt(Time.time);
             needupdate = false;
-            SyncAchievement(new List<int>(),GetDaylics());	
+            SyncAchievement(new List<int>(), GetTask());	
         }
         
 		if (syncAchivment.Count > 0) {
             time = Mathf.RoundToInt(Time.time);
             needupdate = false;
-			SyncAchievement (syncAchivment,GetDaylics());		
+			SyncAchievement (syncAchivment,GetTask());		
 		}
 		//Debug.Log (onFinishedAchivment.Count);
 	}

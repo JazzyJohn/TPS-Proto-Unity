@@ -48,7 +48,7 @@ public class BaseGrenade : BaseWeapon {
 		Vector3 normalDirection  = owner.getAimRotation(weaponRange)-muzzlePoint.position;
 		normalDirection =normalDirection + randVec.normalized * normalDirection.magnitude * aimRandCoef / 100;*/
 
-        Debug.Log(Quaternion.Euler(eluer));
+//        Debug.Log(Quaternion.Euler(eluer));
         if (projectileClass != null)
         {   
 

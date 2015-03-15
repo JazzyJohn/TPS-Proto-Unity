@@ -14,6 +14,8 @@ public class MusizStage{
 	public AudioClip[] clips;
 
     public bool withIntro=false;
+
+    public bool loop = false;
 	
 }
 public class MusicHolder : MonoBehaviour {
@@ -97,6 +99,7 @@ public class MusicHolder : MonoBehaviour {
 	public void StartSong(){
         curStageInt = (int)curStageEnum;
         curStage = MusicInStage[curStageInt  ];
+        
          int curMusicInt;
         if (curStage.withIntro)
         {
@@ -116,6 +119,7 @@ public class MusicHolder : MonoBehaviour {
 //        Debug.Log("NOW PLAY" + curMusic); 
         musicPlayer.clip = curMusic;
 		musicPlayer.PlayDelayed (musicTimeOut);
+        musicPlayer.loop = curStage.loop;
 
 	}
 	

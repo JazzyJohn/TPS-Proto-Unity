@@ -135,7 +135,10 @@ public class PassiveSkillManager : MonoBehaviour
 		}
 	}
 	public List<int>  GetSkills(int classID){
-		if(allSkill.Length>classID){
+
+        if (allSkill!=null&&allSkill.Length > classID&&allSkill[classID] != null)
+        {
+           
 			return allSkill[classID].GetSkills();
 		}else{
 			return new List<int>();

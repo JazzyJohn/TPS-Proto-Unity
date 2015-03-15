@@ -211,8 +211,13 @@ public class InventorySlot  : SimpleSlot{
 	public int group;
 
 	public WeaponChar chars;
-   
- }
+
+
+    public int GetChargePercent()
+    {
+        return Mathf.RoundToInt((((float)maxcharge - (float)charge) / (float)maxcharge) * 100.0f);
+    }
+}
 
 public class WeaponInventorySlot : InventorySlot
 {

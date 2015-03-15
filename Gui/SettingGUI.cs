@@ -64,6 +64,7 @@ public class SettingGUI : MonoBehaviour {
 		public UILabel Volume;
 		public UILabel SoundFx;
 		public UILabel Music;
+        public GameObject soundIcon;
 		public UIScrollBar VolumeScroll;
 		public UIScrollBar SoundFxScroll;
 		public UIScrollBar MusicScroll;
@@ -238,6 +239,7 @@ public class SettingGUI : MonoBehaviour {
         PlayerPrefs.SetFloat("OverallVolume", volumes.VolumeScroll.value);
         PlayerPrefs.SetFloat("SoundFX", volumes.SoundFxScroll.value);
         PlayerPrefs.SetFloat("Music", volumes.MusicScroll.value);
+        SetIcon();
     }
 	
 	public void SetValueVolume(UILabel IntArg, UIScrollBar ScrollArg) //Установка звука (Текст)
@@ -261,7 +263,20 @@ public class SettingGUI : MonoBehaviour {
                 MusicHolder.SetVolume(volumes.MusicScroll.value * volumes.VolumeScroll.value);
             }
         }
+        SetIcon();
 	}
+
+    private void SetIcon()
+    {
+        if (volumes.VolumeScroll.value > 0)
+        {
+            volumes.soundIcon.SetActive(true);
+        }
+        else
+        {
+            volumes.soundIcon.SetActive(false);
+        }
+    }
     
 
 	public void SetGraphic(UILabel ValueLabel, UIScrollBar ScrollValue, string Setting) //Настройки графики (текст)
@@ -449,6 +464,7 @@ public class SettingGUI : MonoBehaviour {
            // Debug.Log(volumes.MusicScroll.value + "  " + volumes.VolumeScroll.value);
             AudioListener.volume = volumes.SoundFxScroll.value * volumes.VolumeScroll.value;
             MusicHolder.SetVolume(volumes.MusicScroll.value * volumes.VolumeScroll.value);
+            SetIcon();
             StartCoroutine(SetDefoltGraphic(1));
         }
         else

@@ -410,13 +410,13 @@ public class MainMenuGUI : MonoBehaviour {
 				
 				NewRoom.transform.localScale = new Vector3(1f, 1f, 1f);
 				NewRoom.transform.localPosition = new Vector3(0f, 0f, 0f);
-				
-				_RoomsNgui.Grid.Reposition();
+
 				//_RoomsNgui.ScrollBar.barSize = 0;
 			}
             Rooms[room.name].UpdateRoom(room, i);
 			
 		}
+		_RoomsNgui.Grid.Reposition();
 	}
 
 	public void ShowGameList(){

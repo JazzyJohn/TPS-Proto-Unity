@@ -63,6 +63,10 @@ public class ServerHolder : MonoBehaviour
     public Sfs2X.Entities.Room gameRoom{
         get { 
             if(_gameRoom==null){
+                if (NetworkController.smartFox == null)
+                {
+                    return null;
+                }
                 _gameRoom = NetworkController.smartFox.LastJoinedRoom;
             }
             return _gameRoom;
@@ -196,8 +200,11 @@ public class ServerHolder : MonoBehaviour
 
     private void SetupRoomList()
     {
-       
-        
+
+        if (NetworkController.smartFox == null)
+        {
+            return;
+        }
         List<Sfs2X.Entities.Room> roomList = NetworkController.smartFox.GetRoomListFromGroup("games");
         List<RoomData> oldData = allRooms;
         allRooms = new List<RoomData>();
