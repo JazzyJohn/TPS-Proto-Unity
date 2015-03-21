@@ -52,9 +52,9 @@ public class dog_ThirdPersonController : ThirdPersonController {
 
 		// Are we moving backwards or looking backwards
 		if (v < -0.2f)
-			movingBack = true;
+			MovingBack = true;
 		else
-			movingBack = false;
+			MovingBack = false;
 		
 		bool wasMoving= isMoving;
 		isMoving = Mathf.Abs (h) > 0.1f || Mathf.Abs (v) > 0.1f;
@@ -66,9 +66,9 @@ public class dog_ThirdPersonController : ThirdPersonController {
 		
 		
 		// Lock camera for short period when transitioning moving & standing still
-		lockCameraTimer += Time.deltaTime;
+		LockCameraTimer += Time.deltaTime;
 		if (isMoving != wasMoving)
-			lockCameraTimer = 0.0f;
+			LockCameraTimer = 0.0f;
 		
 		// We store speed and direction seperately,
 		// so that when the character stands still we still have a valid forward direction
@@ -76,16 +76,16 @@ public class dog_ThirdPersonController : ThirdPersonController {
 		if (targetDirection != Vector3.zero)
 		{
 			// If we are really slow, just snap to the target direction
-			if (moveSpeed < pawn.groundWalkSpeed * 0.9f )
+			if (MoveSpeed < pawn.groundWalkSpeed * 0.9f )
 			{
-				moveDirection = targetDirection.normalized;
+				MoveDirection = targetDirection.normalized;
 			}
 			// Otherwise smoothly turn towards it
 			else
 			{
-				moveDirection = Vector3.RotateTowards(moveDirection, targetDirection, rotateSpeed * Mathf.Deg2Rad * Time.deltaTime, 1000);
+				MoveDirection = Vector3.RotateTowards(MoveDirection, targetDirection, rotateSpeed * Mathf.Deg2Rad * Time.deltaTime, 1000);
 				
-				moveDirection = moveDirection.normalized;
+				MoveDirection = MoveDirection.normalized;
 			}
 		}
 		
@@ -129,12 +129,12 @@ public class dog_ThirdPersonController : ThirdPersonController {
 			}
 		}
 		
-		moveSpeed = Mathf.Lerp(moveSpeed, targetSpeed, curSmooth);
+		MoveSpeed = Mathf.Lerp(MoveSpeed, targetSpeed, curSmooth);
 		
 		
 		
 		// Reset walk time start when we slow down
-		if (moveSpeed < pawn.groundWalkSpeed * 0.3f)
+		if (MoveSpeed < pawn.groundWalkSpeed * 0.3f)
 			walkTimeStart = Time.time;
 
 		//Debug.Log (moveSpeed);

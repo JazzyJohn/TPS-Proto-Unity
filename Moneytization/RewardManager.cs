@@ -73,7 +73,7 @@ public class  RewardManager : MonoBehaviour, LocalPlayerListener,GameListener{
         int multiplier = 1;
         if (AfterGameBonuses.wasStamined)
         {
-            multiplier = Mathf.RoundToInt(PremiumManager.STAMINA_MULTIPLIER);
+          //  multiplier = Mathf.RoundToInt(PremiumManager.STAMINA_MULTIPLIER);
         }
         List<RewardGUI> answer = new List<RewardGUI>();
         foreach (KeyValuePair<string, MoneyReward> entry in rewardMoneyDictionary)
@@ -149,9 +149,9 @@ public class  RewardManager : MonoBehaviour, LocalPlayerListener,GameListener{
 	
         if(rewardMoneyDictionary.ContainsKey(reason)){
 			MoneyReward reward = rewardMoneyDictionary[reason];
-			
-	    	upCash+=Mathf.RoundToInt( reward.cash *PremiumManager. GetMultiplier());
-			upGold+=Mathf.RoundToInt( reward.gold *PremiumManager. GetMultiplier());
+
+            upCash += Mathf.RoundToInt(reward.cash * PremiumManager.GetMultiplierMoney(reason, myPlayer.team));
+            upGold += Mathf.RoundToInt(reward.gold * PremiumManager.GetMultiplierMoney(reason, myPlayer.team));
             if (reward.cash != 0 || reward.gold != 0)
             {
                reward.Increment();
@@ -160,12 +160,12 @@ public class  RewardManager : MonoBehaviour, LocalPlayerListener,GameListener{
             {
                 if (reward.cash > 0)
                 {
-                    String rewardStr = TextGenerator.instance.GetMoneyText(reason, Mathf.RoundToInt(reward.cash * PremiumManager.GetMultiplier()));
+                    String rewardStr = TextGenerator.instance.GetMoneyText(reason, Mathf.RoundToInt(reward.cash * PremiumManager.GetMultiplierMoney(reason, myPlayer.team)));
                     PlayerMainGui.instance.AddMessage(rewardStr, PlayerMainGui.MessageType.MONEY_REWARD);
                 }
                 if (reward.gold > 0)
                 {
-                    String rewardStr = TextGenerator.instance.GetMoneyText(reason,Mathf.RoundToInt( reward.gold * PremiumManager.GetMultiplier()));
+                    String rewardStr = TextGenerator.instance.GetMoneyText(reason, Mathf.RoundToInt(reward.gold * PremiumManager.GetMultiplierMoney(reason, myPlayer.team)));
                     PlayerMainGui.instance.AddMessage(rewardStr, PlayerMainGui.MessageType.GOLD_REWARD);
                 }
             }

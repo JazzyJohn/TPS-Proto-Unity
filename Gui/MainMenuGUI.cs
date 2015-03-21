@@ -101,7 +101,7 @@ public class MainMenuGUI : MonoBehaviour {
             if (PremiumManager.instance.IsPremium())
             {
 
-                _PlayerComponent.premium.text = TextGenerator.instance.GetSimpleText("PremiumLeft", PremiumManager.instance.TimeLeft());
+                //_PlayerComponent.premium.text = TextGenerator.instance.GetSimpleText("PremiumLeft", PremiumManager.instance.TimeLeft());
 
             }
             else

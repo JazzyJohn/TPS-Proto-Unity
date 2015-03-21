@@ -30,9 +30,13 @@ public class InventoryGUI : MonoBehaviour {
 
 	public AskWindow askWindow;
 
-    public UIWidget[] weaponsPanels;
+    public int maxWeaponSet;
 
-    public UIWidget[] itemPanels;
+    public UIWidget weaponPanel;
+
+    public int maxItemSet;
+
+    public UIWidget itemPanel;
 
     public InventoryGroup group;
 
@@ -75,7 +79,20 @@ public class InventoryGUI : MonoBehaviour {
 		InvItemGUI[] items = GetComponentsInChildren<InvItemGUI>();
 		foreach(InvItemGUI itemInfo  in items){
 			itemInfo.Shop = this;
-			itemInfo.SetItem(ItemManager.instance.GetItem(itemInfo.id));
+            for(int i=0; i<itemInfo.ids.Length;i++){
+                string id = itemInfo.ids[i];
+                if (id == "-1")
+                {
+                    itemInfo.SetItem(null,i);
+                }
+                else
+                {
+                    itemInfo.SetItem(ItemManager.instance.GetItem(id), i);
+
+                }
+                itemInfo.SetSet(0);
+            }
+			
 			AllItems[itemInfo.id] =itemInfo;
 		}
 		selected = GetComponentsInChildren<SelectedItemGUI>();
@@ -113,39 +130,24 @@ public class InventoryGUI : MonoBehaviour {
     public void SetItemForChoiseSet(InventorySlot slot)
     {
 		
-		WeaponInventorySlot weapon = (WeaponInventorySlot) slot;
+		WeaponInventorySlot weapon = slot as WeaponInventorySlot;
 		if(weapon!=null){
 			int slotType = (int)weapon.gameSlot;
 			Choice.SetChoice(slotType, Choice._Player, new WeaponIndex(weapon.weaponId, ""));
 			slots[slotType].SetItem();
             ItemManager.instance.SaveItemForSlot();
 		}
+        ArmorInventorySlot armor = slot as ArmorInventorySlot;
+        if (armor != null)
+        {
+            int slotType = (int)armor.gameSlot;
+            Choice.SetChoice(slotType, Choice._Player, new WeaponIndex(armor.armorId, ""));
+            slots[slotType].SetItem();
+            ItemManager.instance.SaveItemForSlot();
+        }
 	}
 
-    public void HideAllPanel()
-    {
-        switch (group)
-        {
-            case InventoryGroup.WEAPON:
-                foreach (UIWidget panel in weaponsPanels)
-                {
-                    panel.alpha = 0f;
-                }
-                weaponsPanels[curSet].alpha = 1.0f;
-             
-
-                break;
-            case InventoryGroup.STUFF:
-                foreach (UIWidget panel in itemPanels)
-                {
-                    panel.alpha = 0f;
-                }
-                itemPanels[curSet].alpha = 1.0f;
-              
-
-                break;
-        }
-    }
+   
 		
 	public void CloseRepair(){
 		repairGui.Close();
@@ -155,21 +157,21 @@ public class InventoryGUI : MonoBehaviour {
         switch (group)
         {
             case InventoryGroup.WEAPON:
-                if (weaponsPanels.Length <= needSet) {
+                if (maxWeaponSet <= needSet) {
                     return;
                 }
-                weaponsPanels[curSet].alpha = 0.0f;
+               
                 curSet = needSet;
-                weaponsPanels[curSet].alpha = 1.0f;
+
+             
                 break;
             case InventoryGroup.STUFF:
-                if (itemPanels.Length <= curSet)
+                if (maxItemSet <= needSet)
                 {
                     return;
                 }
-                itemPanels[curSet].alpha = 0.0f;
                 curSet = needSet;
-                itemPanels[curSet].alpha = 1.0f;
+                
                 break;
         }
         mustOpen.alpha = 0.0f;
@@ -188,6 +190,10 @@ public class InventoryGUI : MonoBehaviour {
             }
 
         }
+        foreach (InvItemGUI gui in AllItems.Values)
+        {
+            gui.SetSet(curSet);
+        }
 	}
     public void ResetSet()
     {
@@ -199,14 +205,14 @@ public class InventoryGUI : MonoBehaviour {
         switch (group)
         {
             case InventoryGroup.WEAPON:
-                itemPanels[curSet].alpha = 0.0f;
+                itemPanel.alpha = 0.0f;
                 
-                weaponsPanels[curSet].alpha = 1.0f;
+                weaponPanel.alpha = 1.0f;
                 break;
             case InventoryGroup.STUFF:
-                weaponsPanels[curSet].alpha = 0.0f;
+                weaponPanel.alpha = 0.0f;
                 
-                itemPanels[curSet].alpha = 1.0f;
+                itemPanel.alpha = 1.0f;
                 break;
         }
 
@@ -326,7 +332,7 @@ public class InventoryGUI : MonoBehaviour {
     {
         if (AllItems.ContainsKey(slot.id))
         {
-            AllItems[slot.id].SetItem(slot);
+            AllItems[slot.id].UpdateItem(slot);
         }
     }
 }

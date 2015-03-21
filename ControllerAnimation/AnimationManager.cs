@@ -148,7 +148,6 @@ public class AnimationManager : MonoBehaviour
 	/// </summary>
 	public virtual void WallAnimation(bool leftW,bool rightW,bool frontW)
 	{
-
 		if (leftW || rightW || frontW) {
 			animator.SetBool ("Jump", false);
 			animator.SetBool ("Grounded", false);

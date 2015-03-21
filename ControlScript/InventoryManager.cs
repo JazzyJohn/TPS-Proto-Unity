@@ -7,7 +7,11 @@ public enum AMMOTYPE{PISTOL,RIFLE,ROCKETS,MACHINEGUN,SHOOTGUNSHEELL,FUEL,GRENADE
 public class InventoryManager : MonoBehaviour {
 
 	private BaseWeapon[] myWeapons = new BaseWeapon[0] ;
+
+    private BaseArmor[] myArmor = new BaseArmor[2];
     public string[] weaponNames;
+
+    public string[] armorNames;
 
 	private BaseWeapon currentWeapon;
 	
@@ -67,11 +71,18 @@ public class InventoryManager : MonoBehaviour {
 		foreach(BaseWeapon weapon in myWeapons){
 			weapon.PawnDeath();
 		}
+        foreach (BaseArmor armor in myArmor)
+        {
+            if (armor != null)
+            {
+                armor.PawnDeath();
+            }
+        }
 	}
 
     protected virtual void SpawnWeaponFromNameList(){
 
-    if (weaponNames.Length > 0)
+         if (weaponNames.Length > 0)
         {
             myWeapons = new BaseWeapon[weaponNames.Length];
         }
@@ -81,16 +92,23 @@ public class InventoryManager : MonoBehaviour {
             myWeapons[i] = NetworkController.Instance.WeaponSpawn(weaponNames[i], transform.position, Quaternion.identity, owner.foxView.isChildScene(), owner.foxView.viewID).GetComponent<BaseWeapon>();
             myWeapons[i].AttachWeaponToChar(owner);
             
-            if (myWeapons[i].slotType == BaseWeapon.SLOTTYPE.GRENADE)
+            if (myWeapons[i].slotType == SLOTTYPE.GRENADE)
             {
                 grenadeSlot = i;
             }
 			 
 			
         }
+        for (int i = 0; i < armorNames.Length; i++)
+        {
+
+            myArmor[i] = NetworkController.Instance.ArmorSpawn(armorNames[i], transform.position, Quaternion.identity, owner.foxView.isChildScene(), owner.foxView.viewID).GetComponent<BaseArmor>();
+            myArmor[i].AttachArmorToChar(owner);
+
+        }
         for (int i = 0; i < myWeapons.Length; i++)
         {
-            if (myWeapons[i].slotType == BaseWeapon.SLOTTYPE.MAIN)
+            if (myWeapons[i].slotType == SLOTTYPE.MAIN)
             {
                 NetworkController.Instance.ThisSpawnWeaponMakeInHand(i);
                 return;
@@ -98,7 +116,7 @@ public class InventoryManager : MonoBehaviour {
         }
         for (int i = 0; i < myWeapons.Length; i++)
         {
-            if (myWeapons[i].slotType == BaseWeapon.SLOTTYPE.PERSONAL)
+            if (myWeapons[i].slotType == SLOTTYPE.PERSONAL)
             {
                 NetworkController.Instance.ThisSpawnWeaponMakeInHand(i);
                 return;
@@ -111,14 +129,14 @@ public class InventoryManager : MonoBehaviour {
 	public void GenerateWeaponStart(){
 		if (owner.foxView.isMine) {
 			for(int i=0;i<myWeapons.Length;i++){
-				if(myWeapons[i].slotType==BaseWeapon.SLOTTYPE.MAIN){
+				if(myWeapons[i].slotType==SLOTTYPE.MAIN){
 						_ChangeWeapon (i);
                         return;
 				}
 			}
             for (int i = 0; i < myWeapons.Length; i++)
             {
-                if (myWeapons[i].slotType == BaseWeapon.SLOTTYPE.PERSONAL)
+                if (myWeapons[i].slotType == SLOTTYPE.PERSONAL)
                 {
                     _ChangeWeapon(i);
                     return;
@@ -281,13 +299,28 @@ public class InventoryManager : MonoBehaviour {
     {
         for (int i = 0; i < myWeapons.Length; i++)
         {
-            if (myWeapons[i].slotType == BaseWeapon.SLOTTYPE.MAIN)
+            if (myWeapons[i].slotType == SLOTTYPE.MAIN)
             {
 
                 return true;
             }
         }
         return false;
+    }
+    public void SetArmorSlot(BaseArmor prefab)
+    {
+        int i = 0;
+        switch (prefab.slotType)
+        {
+            case SLOTTYPE.HEAD:
+                i = 1;
+                break;
+            default:
+                i = 0;
+                break;
+        }
+        myArmor[i] = NetworkController.Instance.ArmorSpawn(prefab.name, transform.position, Quaternion.identity, owner.foxView.isChildScene(), owner.foxView.viewID).GetComponent<BaseArmor>();
+        myArmor[i].AttachArmorToChar(owner);	
     }
 	
 	public void SetSlot( BaseWeapon prefab){
@@ -298,14 +331,14 @@ public class InventoryManager : MonoBehaviour {
 		for(int i=0;i<myWeapons.Length;i++){
 			if(myWeapons[i].slotType==prefab.slotType){
 				myWeapons[i]=NetworkController.Instance.WeaponSpawn(prefab.name,transform.position, Quaternion.identity,owner.foxView.isChildScene(),owner.foxView.viewID).GetComponent<BaseWeapon>();
-				if(prefab.slotType==BaseWeapon.SLOTTYPE.GRENADE){
+				if(prefab.slotType==SLOTTYPE.GRENADE){
                     grenadeSlot = i;
 				}
-				 if (prefab.slotType == BaseWeapon.SLOTTYPE.MAIN)
+				 if (prefab.slotType == SLOTTYPE.MAIN)
 				{
 					NetworkController.Instance.LastSpawnWeaponMakeInHand();
 				}
-                 if (!isThereMain() && prefab.slotType == BaseWeapon.SLOTTYPE.PERSONAL)
+                 if (!isThereMain() && prefab.slotType == SLOTTYPE.PERSONAL)
                  {
                      NetworkController.Instance.LastSpawnWeaponMakeInHand();
                  }
@@ -320,14 +353,14 @@ public class InventoryManager : MonoBehaviour {
 			myWeapons[i]= oldprefabWeapon[i];
 		}
 		myWeapons[myWeapons.Length-1] = NetworkController.Instance.WeaponSpawn(prefab.name,transform.position, Quaternion.identity,owner.foxView.isChildScene(),owner.foxView.viewID).GetComponent<BaseWeapon>();
-		if(prefab.slotType==BaseWeapon.SLOTTYPE.GRENADE){
+		if(prefab.slotType==SLOTTYPE.GRENADE){
 					grenadeSlot=myWeapons.Length-1;
 		}
-		 if (prefab.slotType == BaseWeapon.SLOTTYPE.MAIN)
+		 if (prefab.slotType == SLOTTYPE.MAIN)
 				{
 					NetworkController.Instance.LastSpawnWeaponMakeInHand();
 				}
-         if (!isThereMain() && prefab.slotType == BaseWeapon.SLOTTYPE.PERSONAL)
+         if (!isThereMain() && prefab.slotType == SLOTTYPE.PERSONAL)
          {
              NetworkController.Instance.LastSpawnWeaponMakeInHand();
          }

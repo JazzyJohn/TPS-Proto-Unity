@@ -87,7 +87,7 @@ public class GameRule : MonoBehaviour {
         EventHolder.instance.FireEvent(typeof(GameListener), "EventTeamWin", Winner());
         GlobalPlayer.instance.MathcEnd();
         Player.localPlayer.GameEnd();
-        ItemManager.instance.SendChargeData();
+        ItemManager.instance.MatchEnd();
         List<Pawn> pawns = PlayerManager.instance.FindAllPawn();
         foreach (Pawn pawn in pawns)
         {

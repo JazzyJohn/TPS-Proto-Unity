@@ -74,7 +74,7 @@ public class LevelingManager : MonoBehaviour, LocalPlayerListener,GameListener{
         int multiplier = 1;
         if (AfterGameBonuses.wasStamined)
         {
-            multiplier = Mathf.RoundToInt(PremiumManager.STAMINA_MULTIPLIER);
+          //  multiplier = Mathf.RoundToInt(PremiumManager.STAMINA_MULTIPLIER);
         }
          List<RewardGUI> answer = new List<RewardGUI>();
          foreach (KeyValuePair<string, ExpReward> entry in expDictionary)
@@ -176,7 +176,7 @@ public class LevelingManager : MonoBehaviour, LocalPlayerListener,GameListener{
         }
 		
 		int exp = expDictionary[cause].amount;
-		exp = Mathf.RoundToInt( exp *PremiumManager. GetMultiplier());
+        exp = Mathf.RoundToInt(exp * PremiumManager.GetMultiplierExp(cause, myPlayer.team));
         if (exp == 0)
         {
             return false;
@@ -194,7 +194,8 @@ public class LevelingManager : MonoBehaviour, LocalPlayerListener,GameListener{
                 GUIHelper.Notify(TextGenerator.instance.GetSimpleText("LevelUp"),TextGenerator.instance.GetExpText("LvlOpen",playerLvl));
 			}
 		}
-		if(selected!=-1&&classLvl[selected]<classNeededExp.Length){
+        if (selected != -1 && classLvl.Length>selected&&classLvl[selected] < classNeededExp.Length)
+        {
 			classExp[selected]+=exp;
 			if(classExp[selected]>=classNeededExp[classLvl[selected]]){
 				sendByLvl= true;

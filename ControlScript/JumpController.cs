@@ -12,14 +12,14 @@ using System.Collections;
             if (InputManager.instance.GetButton("Fire1"))
             {
                 characterState = CharacterState.Running;
-                moveDirection = Vector3.forward;
-                moveSpeed = 1;
+                MoveDirection = Vector3.forward;
+                MoveSpeed = 1;
             }
             else
             {
                 characterState = CharacterState.Idle;
-                moveDirection = Vector3.zero;
-                moveSpeed = 0;
+                MoveDirection = Vector3.zero;
+                MoveSpeed = 0;
             }
         }
         void Update()

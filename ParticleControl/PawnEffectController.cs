@@ -32,7 +32,8 @@ public class PawnEffectController : MonoBehaviour
 	
 	
 	public EffectEntity[] allEffect;
-	
+
+    private Renderer mRenderer;
 	
 	void Start(){
 		myTransform= transform;
@@ -47,12 +48,24 @@ public class PawnEffectController : MonoBehaviour
 			        effectObject.Stop();
 		        }
             }
+            else
+            {
+                foreach (GameObject effectObject in entity.effectObject)
+                {
+                    if (effectObject.CountPooled() == 0 && effectObject.CountSpawned() == 0)
+                    {
+                        effectObject.CreatePool(50);
+                    }
+                }
+            }
 			
-		}		
+		}
+        mRenderer = GetComponentInChildren<SkinnedMeshRenderer>();
 		
 	}
 	
 	void Update(){
+        
 		foreach(EffectEntity entity in allEffect){
 			if(entity._timer>0){
 				entity._timer-=Time.deltaTime;
@@ -76,7 +89,11 @@ public class PawnEffectController : MonoBehaviour
 	}
 	
 	public void DamageEffect(DamageType type,Vector3 position,Vector3 direction){
-		
+        if (mRenderer == null || !mRenderer.isVisible)
+        {
+           // Debug.Log(mRenderer + " " + mRenderer.isVisible);
+            return;
+        }
 		Quaternion rot;
 		if(direction.sqrMagnitude==0){
 			rot = myTransform.rotation;
@@ -93,7 +110,12 @@ public class PawnEffectController : MonoBehaviour
 					if (entity._timer <= 0)
 					{
                         entity._timer = entity.timer;
-                        Instantiate(entity.effectObject[UnityEngine.Random.Range(0,entity.effectObject.Length)], position, rot);
+                        GameObject pref = entity.effectObject[UnityEngine.Random.Range(0, entity.effectObject.Length)];
+                        if (pref.CountPooled() != 0)
+                        {
+                            pref.Spawn(position, rot);
+                        }
+                        
 					}
 				}else{
                    

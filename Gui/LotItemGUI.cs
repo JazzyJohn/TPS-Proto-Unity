@@ -92,7 +92,7 @@ public class LotItemGUI : MonoBehaviour
             repairKP.alpha = 0.0f;
         }
 
-        if (item.buyMode != BuyMode.NONE)
+        if (item.isAvailable())
         {
             useItem.alpha = 1.0f;
 

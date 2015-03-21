@@ -36,15 +36,34 @@ public class SelectedItemGUI : MonoBehaviour {
 		WeaponIndex choice = Choice.ForGuiSlot(slot);
 		if (!choice.IsSameIndex( WeaponIndex.Zero))
 		{
-            _item = ItemManager.instance.GetWeaponSlotbByID(choice);
+            switch (slot)
+            {
+                case 0:
+                case 1:
+                case 2:
+                case 3:
+                    _item = ItemManager.instance.GetWeaponSlotbByID(choice);
+                    break;
+                case 4:
+                case 5:
+                    _item = ItemManager.instance.GetArmorSlotbByID(choice);
+                    break;
+            }
+            
 		}
 		if(_item==null)
 		{
 			_item =ItemManager.instance.GetFirstItemForSlot((GameClassEnum)Choice._Player, slot);
-            WeaponInventorySlot weapon = (WeaponInventorySlot)_item;
+           
+            WeaponInventorySlot weapon = _item as WeaponInventorySlot;
             if (weapon != null)
             {
                 Choice.SetChoice(slot, Choice._Player, new WeaponIndex(weapon.weaponId, ""));
+            }
+            ArmorInventorySlot armor = _item as ArmorInventorySlot;
+            if (armor != null)
+            {
+                Choice.SetChoice(slot, Choice._Player, new WeaponIndex(armor.armorId, ""));
             }
 		}
 		if(_item==null){

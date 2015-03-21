@@ -1,38 +1,26 @@
 using UnityEngine;
-using System;
-using System.Collections;
-using System.Collections.Generic;
 
-
-public class SimplePawn : Pawn {
-
-
+public class SimplePawn : Pawn
+{
     protected bool stopSprint;
 
     public override void FixedUpdate()
     {
+        if (!isActive || !foxView.isMine)
+        {
+            return;
+        }
 
-        if (!isActive)
-        {
-            return;
-        }
-        if (!foxView.isMine)
-        {
-            return;
-        }
         if (!_rb.isKinematic)
         {
-
             _rb.AddForce(new Vector3(0, -gravity * rigidbody.mass, 0) + pushingForce);
         }
-        if (!canMove)
+
+        if (!canMove || isDead)
         {
             return;
         }
-        if (isDead)
-        {
-            return;
-        }
+
         if (myTransform.position.y < GameRule.instance.DeathY)
         {
             KillIt(null);
@@ -64,7 +52,7 @@ public class SimplePawn : Pawn {
             case CharacterState.Idle:
             case CharacterState.Running:
             case CharacterState.Walking:
-			case CharacterState.Crouching:
+            case CharacterState.Crouching:
                 if (isGrounded)
                 {
                     jetPackEnable = false;
@@ -79,7 +67,6 @@ public class SimplePawn : Pawn {
                         StopFire();
                         StopReload();
                         StartSprint();
-
                     }
                     else
                     {
@@ -89,7 +76,6 @@ public class SimplePawn : Pawn {
                     {
                         rigidbody.AddForce(velocityChange, ForceMode.VelocityChange);
                         Jump();
-
                     }
                 }
                 else
@@ -129,22 +115,13 @@ public class SimplePawn : Pawn {
                     if (isGrounded)
                     {
                         //rigidbody.AddForce(velocityChange, ForceMode.VelocityChange)
-
                     }
                     else
                     {
                         characterState = CharacterState.Jumping;
                     }
-                    
                 }
-
-
-
-              
                 ToggleAim(false);
-
-
-
                 break;
             case CharacterState.Jumping:
                 if (characterState != CharacterState.DoubleJump)
@@ -152,34 +129,28 @@ public class SimplePawn : Pawn {
                     animator.FreeFall();
                 }
                 animator.ApllyJump(true);
-                            
-               
+
                 if (isGrounded)
                 {
                     JumpEnd(nextState);
                 }
                 break;
-           
-            
             default:
                 characterState = nextState;
                 break;
-
         }
-       
-        isGrounded = false;
 
+        isGrounded = false;
     }
+
     public override void StartFire()
     {
-        base. StartFire();
+        base.StartFire();
         stopSprint = true;
     }
+
     public override bool CanSprint()
     {
         return base.CanSprint() && !CurWeapon.IsShooting();
     }
-
-   
-	
 }

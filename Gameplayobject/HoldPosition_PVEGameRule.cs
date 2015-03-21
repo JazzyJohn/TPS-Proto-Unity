@@ -31,10 +31,10 @@ public class HoldPosition_PVEGameRule : GameRule {
         isGameEnded = true;
         //Player player = GameObject.Find ("Player").GetComponent<Player> ();
         //player.GameEnd ();
-
+        Player.localPlayer.GameEnd();
         GlobalPlayer.instance.MathcEnd();
         Player.localPlayer.GameEnd();
-        ItemManager.instance.SendChargeData();
+        ItemManager.instance.MatchEnd();
         List<Pawn> pawns = PlayerManager.instance.FindAllPawn();
         foreach (Pawn pawn in pawns)
         {

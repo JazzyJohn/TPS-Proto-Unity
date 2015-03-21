@@ -5,6 +5,7 @@ using System.Collections.Generic;
 using nstuff.juggerfall.extension.models;
 using Random = UnityEngine.Random;
 
+public enum SLOTTYPE { PERSONAL, MAIN, ANTITANK, GRENADE, HEAD, CHEST };
 
 public class BaseWeapon : DestroyableNetworkObject {
 
@@ -18,8 +19,6 @@ public class BaseWeapon : DestroyableNetworkObject {
 	public enum AMUNITONTYPE{SIMPLEHIT, PROJECTILE, RAY, HTHWEAPON, AOE};
 
 	public AMUNITONTYPE amunitionType;
-	
-	public enum SLOTTYPE{PERSONAL, MAIN, ANTITANK,GRENADE};
 
 	public SLOTTYPE slotType;
 	
@@ -271,9 +270,9 @@ public class BaseWeapon : DestroyableNetworkObject {
         if (projectilePrefab != null)
         {
             projectileClass = projectilePrefab.GetComponent<BaseProjectile>();
-            if (projectileClass.CountPooled() == 0)
+            if (projectileClass.CountPooled() == 0&&projectileClass.CountSpawned() == 0)
             {
-                projectileClass.CreatePool(50);
+                projectileClass.CreatePool(300);
             }
         }
 		if(shouldDrawTrajectory){
@@ -325,7 +324,7 @@ public class BaseWeapon : DestroyableNetworkObject {
             Destroy(gameObject);
             return;
         }
-        curTransform.parent = owner.GetSlotForWeapon(slotType);
+        curTransform.parent = owner.GetSlotForItem(slotType);
         curTransform.localPosition = Vector3.zero;
         curTransform.localRotation = Quaternion.identity;
         curTransform.localScale = Vector3.one;
@@ -377,8 +376,8 @@ public class BaseWeapon : DestroyableNetworkObject {
 
         clipSize = Mathf.RoundToInt(clipSize * owner.GetPercentValue(CharacteristicList.AMMO_AMOUNT));
 
-        float recoilmod = owner.GetValue(CharacteristicList.RECOIL_ALL);
-        switch (descriptionType)
+        float recoilmod = owner.GetValue(CharacteristicList.AIM_ALL);
+       /* switch (descriptionType)
         {
 
 
@@ -389,20 +388,63 @@ public class BaseWeapon : DestroyableNetworkObject {
             case DESCRIPTIONTYPE.ROCKET_LAUNCHER:
                 recoilmod += owner.GetValue(CharacteristicList.RECOIL_ROCKET);
                 break;
+        }*/
+        if (slotType == SLOTTYPE.PERSONAL)
+        {
+            recoilmod += damageAmount.Damage * owner.GetValue(CharacteristicList.AIM_DOP);
+        }
+        if (slotType == SLOTTYPE.MAIN)
+        {
+            recoilmod += damageAmount.Damage * owner.GetValue(CharacteristicList.AIM_MAIN);
         }
         recoilmod = ((float)recoilmod) / 100f + 1f;
-        normalRandCoef = normalRandCoef * recoilmod;
-        aimRandCoef = aimRandCoef * recoilmod;
-        damageAmount.Damage = damageAmount.Damage * owner.GetPercentValue(CharacteristicList.DAMAGE_ALL);
-        damageAmount.weapon = true;
-        float damageMode = ((float)charge) / DAMAGE_BROKE_PERCEN * DAMAGE_BROKE_COEF / 100;
-        if (damageMode > DAMAGE_BROKE_MAX)
+     
+      
+        float damageAdd = owner.GetValue(CharacteristicList.DAMAGE_ALL);
+        if (slotType == SLOTTYPE.PERSONAL)
         {
-            damageMode = DAMAGE_BROKE_MAX;
+            damageAdd += owner.GetValue(CharacteristicList.DAMAGE_ADD_DOP);
         }
-        damageAmount.Damage -= damageAmount.Damage * damageMode;
-        float aimMode = ((float)charge) / AIM_BROKE_PERCEN * AIM_BROKE_COEF / 100;
-        recoilmod += aimMode * recoilmod;
+        if (slotType == SLOTTYPE.MAIN)
+        {
+            damageAdd += owner.GetValue(CharacteristicList.DAMAGE_ADD_MAIN);
+        }
+        damageAmount.Damage = damageAmount.Damage * ((float)damageAdd/100f+1);
+
+        if (SQLId > 0)
+        {
+            int minWear = Mathf.RoundToInt(ItemManager.instance.GetWeaponSlotbByID(SQLId).maxcharge * owner.GetPercentValue(CharacteristicList.DAMAGE_ADD_MAIN));
+            damageAmount.weapon = true;
+            float damageMode = ((float)charge - minWear) / DAMAGE_BROKE_PERCEN * DAMAGE_BROKE_COEF / 100;
+            if (damageMode > DAMAGE_BROKE_MAX)
+            {
+                damageMode = DAMAGE_BROKE_MAX;
+            }
+            damageAmount.Damage -= damageAmount.Damage * damageMode;
+            float aimMode = ((float)charge - minWear) / AIM_BROKE_PERCEN * AIM_BROKE_COEF / 100;
+            recoilmod += aimMode * recoilmod;
+           
+        }
+        aimRandCoef = aimRandCoef * recoilmod;
+        normalRandCoef = normalRandCoef * recoilmod;
+        float randPerShootMod = owner.GetValue(CharacteristicList.RECOIL_ALL);
+        if (slotType == SLOTTYPE.PERSONAL)
+        {
+            randPerShootMod += owner.GetValue(CharacteristicList.RECOIL_DOP);
+        }
+        if (slotType == SLOTTYPE.MAIN)
+        {
+            randPerShootMod += damageAmount.Damage * owner.GetValue(CharacteristicList.RECOIL_MAIN);
+        }
+        randPerShoot = randPerShoot *  ((float)randPerShootMod/100f+1);
+
+        if (slotType == SLOTTYPE.MAIN)
+        {
+            weaponRange = weaponRange * owner.GetPercentValue(CharacteristicList.DAMAGE_ADD_MAIN);
+            weaponMinRange = weaponMinRange * owner.GetPercentValue(CharacteristicList.DAMAGE_ADD_MAIN);
+        }
+
+        shootPerCharge = Mathf.RoundToInt((float)shootPerCharge * owner.GetPercentValue(CharacteristicList.WEAR));
     }
 	
 	public void PawnDeath(){
@@ -1348,7 +1390,7 @@ public class BaseWeapon : DestroyableNetworkObject {
     public virtual void PutAway()
     {
 		enabled = false;
-		curTransform.parent = owner.GetSlotForWeapon(slotType);
+		curTransform.parent = owner.GetSlotForItem(slotType);
         curTransform.localPosition = Vector3.zero;
         curTransform.localRotation = Quaternion.identity;
 		curTransform.localScale=  Vector3.one;

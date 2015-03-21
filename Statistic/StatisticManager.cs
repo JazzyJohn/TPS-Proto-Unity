@@ -89,7 +89,7 @@ public class StatisticManager : MonoBehaviour, LocalPlayerListener,GameListener{
             {
                 UpData(ParamLibrary.PARAM_HEAD_SHOOT);
             }
-			if(ItemManager.instance.GetWeaponprefabByID(killinfo.weaponId).slotType==BaseWeapon.SLOTTYPE.GRENADE){
+			if(ItemManager.instance.GetWeaponprefabByID(killinfo.weaponId).slotType==SLOTTYPE.GRENADE){
                 UpData(ParamLibrary.PARAM_GRENADE_KILL);
 			}
 		}

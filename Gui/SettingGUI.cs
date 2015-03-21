@@ -7,6 +7,8 @@ public class SettingGUI : MonoBehaviour {
 
 	public bool FullScreen_Z;
 
+
+
 	public enum _TypeSettingPanel{MainMenu, GameMode};
 
 	public _TypeSettingPanel TypeSettingPanel;
@@ -279,6 +281,7 @@ public class SettingGUI : MonoBehaviour {
     }
     
 
+
 	public void SetGraphic(UILabel ValueLabel, UIScrollBar ScrollValue, string Setting) //Настройки графики (текст)
 	{
 
@@ -375,10 +378,12 @@ public class SettingGUI : MonoBehaviour {
 
 	public void DefaultGraphic()
 	{
-		graphicSetting.ResolutionScroll.value = 1f;
-		graphicSetting.TextureScroll.value = 1f;
-		graphicSetting.ShadowScroll.value = 1f;
-		graphicSetting.LighningScroll.value = 1f;
+        Debug.Log(QualitySettings.GetQualityLevel());
+        graphicSetting.GraphicScroll.value = ((float)QualitySettings.GetQualityLevel()) / (graphicSetting.ResolutionScroll.numberOfSteps );
+        graphicSetting.ResolutionScroll.value = ((float)QualitySettings.GetQualityLevel()) / (graphicSetting.ResolutionScroll.numberOfSteps - 1);
+        graphicSetting.TextureScroll.value = ((float)QualitySettings.GetQualityLevel()) / (graphicSetting.TextureScroll.numberOfSteps - 1);
+        graphicSetting.ShadowScroll.value = ((float)QualitySettings.GetQualityLevel()) / (graphicSetting.ShadowScroll.numberOfSteps - 1);
+        graphicSetting.LighningScroll.value = ((float)QualitySettings.GetQualityLevel()) / (graphicSetting.LighningScroll.numberOfSteps - 1);
 		
 	}
 
@@ -430,6 +435,9 @@ public class SettingGUI : MonoBehaviour {
 	// Use this for initialization
 	void Start () 
 	{
+		NGUI_setting.setting = this;
+
+        PlayerPrefs.DeleteAll();
 
 		FullScreen_Z = Screen.fullScreen;
 		
@@ -496,5 +504,25 @@ public class SettingGUI : MonoBehaviour {
 	// Update is called once per frame
 	void Update () {
 	
+	}
+}
+
+public static class NGUI_setting
+{
+	public static SettingGUI setting;
+
+	public static void setQuality(int arg1)
+	{
+		
+		setting.graphicSetting.Texture.text = QualitySettings.names[arg1];
+		setting.graphicSetting.Shadow.text = QualitySettings.names[arg1];
+		setting.graphicSetting.Lighning.text = QualitySettings.names[arg1];
+		setting.graphicSetting.TextureScroll.value = ((float)arg1) / (setting.graphicSetting.TextureScroll.numberOfSteps-1);
+		setting.graphicSetting.ShadowScroll.value = ((float)arg1) / (setting.graphicSetting.ShadowScroll.numberOfSteps-1);
+		setting.graphicSetting.LighningScroll.value = ((float)arg1) / (setting.graphicSetting.LighningScroll.numberOfSteps-1);
+		setting.graphicSetting.Graphic.text = QualitySettings.names[arg1];
+		setting.graphicSetting.GraphicScroll.value =( (float)arg1) / (setting.graphicSetting.GraphicScroll.numberOfSteps-1);
+
+		setting.SaveGraphicSetting();
 	}
 }

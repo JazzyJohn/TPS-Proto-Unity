@@ -2,31 +2,122 @@
 using System.Collections;
 using System.Xml;
 using System;
+using System.Collections.Generic;
+
+public enum PremiumSkillType
+{
+    EXP,
+    MONEY,
+    SKILL,
+    HP_BOOST,
+
+}
+
+public class PremiumSkill
+{
+   
+    
+    public PremiumSkillType type;
+
+    public int amount;
+
+    public bool maxAmount;
+
+    public List<string> eventTriggers = new List<string>();
+
+    public int[] price = new int[PremiumManager.PRICE_COUNT];
+
+    public int id;
+
+    public DateTime timeEnd;
+    public bool Open()
+    {
+        return timeEnd > DateTime.Now;
+    }
+
+    public int team;
+}
 
 public class PremiumManager : MonoBehaviour {
 
-    public static int DOUBLECOST = 1;
-	
-	public static int STAMINA_MULTIPLIER=2;
-	
-	public static int PREMIUM_MULTIPLIER= 2;
+    public const int PRICE_COUNT = 3;
+
+    public static float REGEN_TIME = 10.0f;
+
+    public static float REGEN_MIN = 20.0f;
+
+    public PremiumSkill regen;
+
+
+    Dictionary<int, PremiumSkill> skills = new Dictionary<int, PremiumSkill>();
+
+    List<PremiumSkill> open = new List<PremiumSkill>();
 	
 	int setSize =   2;
 	
 	bool isPremium = false;
-	
-	bool buyBlock = false;
-	
-	DateTime timeEnd;
-	
-	
-	
-	public void Start(){
-		timeEnd = DateTime.Now;
+
+    bool buyBlock = false;
+
+
+
+    public void ParseData(XmlDocument xmlDoc,string root)
+    {
+		
+		
+		XmlNodeList list = xmlDoc.SelectNodes(root +"/premiumskill");
+
+
+        foreach (XmlNode node in list)
+        {
+            int id = int.Parse(node.SelectSingleNode("id").InnerText);
+            PremiumSkill skill;
+            if (skills.ContainsKey(id))
+            {
+                skill = skills[id];
+            }else{
+                skill = new PremiumSkill();
+                skills[id] = skill;
+                skill.id = id;
+                skill.type = (PremiumSkillType)System.Enum.Parse(typeof(PremiumSkillType), node.SelectSingleNode("type").InnerText);
+                skill.amount = int.Parse(node.SelectSingleNode("gameData").InnerText);
+                skill.maxAmount = bool.Parse(node.SelectSingleNode("maxAmount").InnerText);
+                foreach (XmlNode trigger in node.SelectNodes("eventTriggers"))
+                {
+                    skill.eventTriggers.Add(trigger.InnerText);  
+                }
+                XmlNodeList  prices = node.SelectNodes("price");
+                for (int i = 0; i < PRICE_COUNT;i++ )
+                {
+                    XmlNode price = prices[i];
+                    skill.price[i] = int.Parse(price.InnerText);
+                }
+                skill.team = int.Parse(node.SelectSingleNode("team").InnerText);
+            }
+
+            if (node.SelectSingleNode("timeEnd").InnerText != "")
+            {
+                try
+                {
+                    skill.timeEnd = DateTime.Parse(node.SelectSingleNode("timeEnd").InnerText);
+
+                }
+                catch (Exception)
+                {
+
+                    Debug.LogError("date format  exeption");
+                }
+
+            }
+            if (skill.Open() && !open.Contains(skill))
+            {
+                open.Add(skill);
+            }
+
+        }
 	}
-	
-	
-    public IEnumerator PayForDouble(AddShops shop)
+
+    public IEnumerator BuyItem(int itemId,int price)
     {
         if (buyBlock)
         {
@@ -36,77 +127,47 @@ public class PremiumManager : MonoBehaviour {
         WWWForm form = new WWWForm();
 
         form.AddField("uid", GlobalPlayer.instance.UID);
-       
+        form.AddField("itemid", itemId);
+        form.AddField("price", price);
+        GUIHelper.ShowConnectionStart();
 
-        WWW w = StatisticHandler.GetMeRightWWW(form, StatisticHandler.DOUBLE_REWARD);
+        WWW w = StatisticHandler.GetMeRightWWW(form, StatisticHandler.BUY_SKILL_ITEM);
 
         yield return w;
+
         Debug.Log(w.text);
         XmlDocument xmlDoc = new XmlDocument();
         xmlDoc.LoadXml(w.text);
 
         if (xmlDoc.SelectSingleNode("result/error").InnerText == "0")
         {
-
-            GlobalPlayer.instance.gold -= DOUBLECOST;
-            shop.ShowDoubleReward();
-            DoubleReward();
+            GlobalPlayer.instance.gold -= int.Parse(xmlDoc.SelectSingleNode("result/price").InnerText);
+            ParseData(xmlDoc, "result");
         }
         else
         {
-            if (shop != null)
+         /*   if (gui != null)
             {
                 if (xmlDoc.SelectSingleNode("result/error").InnerText == "2")
                 {
-                    shop.AskMoneyShow(shop.BuyDouble);
+                    gui.Shop.MainMenu.MoneyError();
                 }
-                shop.SetMessage(xmlDoc.SelectSingleNode("result/errortext").InnerText);
-            }
+                gui.SetError(xmlDoc.SelectSingleNode("result/errortext").InnerText);
+            }*/
         }
+        GUIHelper.ConnectionStop();
         buyBlock = false;
     }
-
-	public string TimeLeft(){
-        if (isPremium)
-        {
-            TimeSpan timeSpan = timeEnd.Subtract(DateTime.Now);
-            return string.Format("{0:D2}:{1:D2}:{2:D2}:{3:D2}",timeSpan.Days, timeSpan.Hours, timeSpan.Minutes, timeSpan.Seconds); 
-		}
-		return "";
-	}
-	
+				
 	public bool IsPremium(){
         return isPremium;
 	}
 	public void Update(){
-		DateTime saveNow = DateTime.Now;
-        if (saveNow > timeEnd && isPremium)
-        {
-			
-			GUIHelper.SendMessage(TextGenerator.instance.GetSimpleText("PremiumEnd"));
-
-            isPremium = false; 
-		}	
 		
 	
 	}
 	
-	public void SetPremium(bool isPremium,DateTime timeEnd){
-        	DateTime saveNow = DateTime.Now;
-            if (saveNow < timeEnd)
-            {
-                
-                this.isPremium = isPremium;
-                this.timeEnd = timeEnd;
-            }
-            else
-            {
-                this.isPremium = false;
-            }
 
-       
-		
-	}
 	public void SetSetSize(int setSize){
 		this.setSize =setSize;
 	}
@@ -142,24 +203,62 @@ public class PremiumManager : MonoBehaviour {
         }
     }
 
-    void DoubleReward()
+    public static float GetMultiplierExp(string cause, int team)
     {
-        RewardManager.instance.AddPremiumBoost(AfterGameBonuses.cashBoost);
-        LevelingManager.instance.AddPremiumBoost(AfterGameBonuses.expBoost);
-        AfterGameBonuses.done = true;
-    }
-	public static float GetMultiplier(){
-		float multiplier = 1.0f;
-		if(GlobalPlayer.instance.stamina>0){
-			multiplier*= STAMINA_MULTIPLIER;
-		}
-        if (instance.isPremium)
-        {
-			multiplier*= PREMIUM_MULTIPLIER;
-		}
-//        Debug.Log(multiplier);
-		return multiplier;
+        return 1 + (instance.GetMod(PremiumSkillType.EXP, cause, team) / 100.0f);
 	}
+    public static float GetMultiplierMoney(string cause, int team)
+    {
+
+        return 1 + (instance.GetMod(PremiumSkillType.MONEY, cause, team) / 100.0f); 
+    }
+
+    public float GetMod(PremiumSkillType type,string cause, int team)
+    {
+        int maxAmount=0;
+        int totalSum=0;
+        foreach (PremiumSkill skill in open)
+        {
+            if (skill.Open()&&skill.type == type 
+                && (skill.eventTriggers.Count == 0 || skill.eventTriggers.Contains(cause))
+                && (skill.team==0||skill.team==team))
+            {
+                if (skill.maxAmount && maxAmount<skill.amount)
+                {
+                    maxAmount = skill.amount;
+                }
+                else
+                {
+                    totalSum += skill.amount;
+                }
+            }
+        }
+        totalSum += maxAmount;
+        return totalSum;
+    }
+    public List<int> GetSkills()
+    {
+        List<int> lists = new List<int>();
+        foreach (PremiumSkill skill in open)
+        {
+            if (skill.Open()&&skill.type == PremiumSkillType.SKILL)
+            {
+                lists.Add(skill.amount);
+            }
+        }
+        return lists;
+    }
+
+    public void Regen(Pawn target, float time, float max)
+    {
+        if (target.health < max * REGEN_MIN / 100.0f && time + REGEN_TIME < Time.time)
+        {
+            if (regen.Open())
+            {
+                target.health = max;
+            }
+        }
+    }
 }
 
 public static class AfterGameBonuses

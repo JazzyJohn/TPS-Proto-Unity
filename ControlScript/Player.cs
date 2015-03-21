@@ -271,7 +271,7 @@ public class Player : MonoBehaviour {
 	public int[] GetBuffs(){
 		List <int> allbuff = new List<int>();
         allbuff.AddRange(PassiveSkillManager.instance.GetSkills(selected));
-		allbuff.AddRange(ItemManager.instance.GetImplants());
+		allbuff.AddRange(PremiumManager.instance.GetSkills());
         foreach (int stimId in activeSteampacks)
         {
             allbuff.Add(ItemManager.instance.GetBuffFromStim(stimId));
@@ -592,6 +592,10 @@ public class Player : MonoBehaviour {
 			return;
 		
 		}
+        if (GetCurrentPawn() != null)
+        {
+            GetCurrentPawn().KillEnemy();
+        }
         AnnonceAddType addtype = AnnonceAddType.NONE;
         if (killinfo.isHeadShoot)
         {

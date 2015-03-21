@@ -160,7 +160,7 @@ public class SelectPlayerGUI : MonoBehaviour {
 			Choice._Player = (int)GameClassEnum.ASSAULT;
 			break;
 		}
-        for (int j = 0; j < slotAmount; j++)
+        /*for (int j = 0; j < slotAmount; j++)
         {
             listOfItems [j] =ItemManager.instance.GetItemForSlot((GameClassEnum)Choice._Player, j);
             WeaponIndex choice = Choice.ForGuiSlot(j);
@@ -177,7 +177,7 @@ public class SelectPlayerGUI : MonoBehaviour {
         HideModel();
         if (MenuElements.ClassModels.Count<Choice._Player&& MenuElements.ClassModels[Choice._Player] != null) {
             MenuElements.ClassModels[Choice._Player].SetActive(true);
-        };
+        };*/
 	}
 
     public void HideModel() {
@@ -420,11 +420,11 @@ public class SelectPlayerGUI : MonoBehaviour {
 			 int timer = (int)LocalPlayer.GetRespawnTimer();
              if (timer <= 0)
              {
-                 for (int j = 0; j < slotAmount; j++)
+                /* for (int j = 0; j < slotAmount; j++)
                  {
                      listOfItems[j] = ItemManager.instance.GetItemForSlot((GameClassEnum)Choice._Player, j);
                      ChangeWeapon(j, 0);
-                 }
+                 }*/
                  LocalPlayer.selectedBot = 1;
                  LocalPlayer.selected = Choice._Player;
                  LocalPlayer.isStarted = true;
@@ -543,6 +543,10 @@ public static class Choice
     public static WeaponIndex[] _Main = new WeaponIndex[4] { WeaponIndex.Zero, WeaponIndex.Zero, WeaponIndex.Zero, WeaponIndex.Zero };
     public static WeaponIndex[] _Extra = new WeaponIndex[4] { WeaponIndex.Zero, WeaponIndex.Zero, WeaponIndex.Zero, WeaponIndex.Zero };
     public static WeaponIndex[] _Grenad = new WeaponIndex[4] { WeaponIndex.Zero, WeaponIndex.Zero, WeaponIndex.Zero, WeaponIndex.Zero };
+    public static WeaponIndex[] _BodyArmor = new WeaponIndex[4] { WeaponIndex.Zero, WeaponIndex.Zero, WeaponIndex.Zero, WeaponIndex.Zero };
+    public static WeaponIndex[] _HeadArmor = new WeaponIndex[4] { WeaponIndex.Zero, WeaponIndex.Zero, WeaponIndex.Zero, WeaponIndex.Zero };
+  
+
     public static WeaponIndex[] _Taunt = new WeaponIndex[4] { WeaponIndex.Zero, WeaponIndex.Zero, WeaponIndex.Zero, WeaponIndex.Zero };
 	public static WeaponIndex[] _HeadImplant = new WeaponIndex[4] { WeaponIndex.Zero, WeaponIndex.Zero, WeaponIndex.Zero, WeaponIndex.Zero };
 	public static WeaponIndex[] _BodyImplant= new WeaponIndex[4] { WeaponIndex.Zero, WeaponIndex.Zero, WeaponIndex.Zero, WeaponIndex.Zero };
@@ -590,10 +594,10 @@ public static class Choice
 			return _Grenad[_Player];
 			break;
 		case 4:
-			return _Taunt[_Player];
+			return _BodyArmor[_Player];
 			break;	
 		case 5:
-			return _HeadImplant[_Player];
+			return _HeadArmor[_Player];
 			break;	
 		case 6:
 				return _BodyImplant[_Player];
@@ -637,10 +641,10 @@ public static class Choice
 			_Grenad[gameClass]=index;
 			break;
 		case 4:
-			_Taunt[gameClass]=index;
+            _BodyArmor[gameClass] = index;
 			break;
 		case 5:
-			_HeadImplant[gameClass]=index;
+			_HeadArmor[gameClass]=index;
 			break;
 		case 6:
 			_BodyImplant[gameClass]=index;

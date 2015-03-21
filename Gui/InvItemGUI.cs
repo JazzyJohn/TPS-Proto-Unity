@@ -1,5 +1,6 @@
 using UnityEngine;
 using System.Collections;
+using System;
 
 public class InvItemGUI : MonoBehaviour {
 
@@ -19,6 +20,10 @@ public class InvItemGUI : MonoBehaviour {
 
     public string id;
 
+    public string[] ids;
+
+    public InventorySlot[] items;
+
     public UIWidget box;
 
 	[HideInInspector]
@@ -26,7 +31,13 @@ public class InvItemGUI : MonoBehaviour {
 
     public Color[] repairColors;
 
+    public UIWidget repairFon;
+
     public UISprite repair;
+
+    public UIWidget timerFon;
+
+    public UILabel timerLabel;
 
 	// Use this for initialization
 	void Start () {
@@ -36,6 +47,7 @@ public class InvItemGUI : MonoBehaviour {
         {
             Texture = GetComponentInChildren<UITexture>();
         }
+        items = new InventorySlot[ids.Length];
 	}
 
 	// Update is called once per frame
@@ -45,17 +57,44 @@ public class InvItemGUI : MonoBehaviour {
             Texture.mainTexture= item.texture;
            
         }
+        if (item != null && item.buyMode == BuyMode.FOR_GOLD_TIME && item.isAvailable())
+        {
+            TimeSpan span = new TimeSpan(item.timeEnd.Ticks - DateTime.UtcNow.Ticks);
+            timerLabel.text = string.Format("{0:D3} : {1:D2} : {2:D2}", span.Hours + span.Days * 24, span.Minutes, span.Seconds);
+        }
 	}
+    public void SetItem(InventorySlot _item, int set)
+    {
+        items[set] = _item;
+    }
 
-    public void SetItem(InventorySlot _item)
+    public void UpdateItem(InventorySlot _item)
+    {
+        if (_item == item)
+        {
+            SetItem(_item);
+
+        }
+    }
+
+    public void SetSet(int set){
+        if(set<items.Length){
+            SetItem(items[set]);
+        }else{
+            box.alpha = 0.0f;
+        }
+       
+    }
+    private void SetItem(InventorySlot _item)
     {
         if (_item == null)
         {
+            box.alpha = 0.0f;
             return;
         }
         
         item = _item;
-        GA.API.Design.NewEvent("GUI:MainMenu:Inventory:SelectItem:" + _item.engName);
+    
         Texture.mainTexture = null;
         if (name != null)
         {
@@ -66,24 +105,36 @@ public class InvItemGUI : MonoBehaviour {
             int percent =  item.GetChargePercent();
             if (percent > 70)
             {
-                repair.alpha = 0.0f;
+                repairFon.alpha = 0.0f;
             }
             else if (percent > 50)
             {
+                repairFon.alpha = 1.0f;
                 repair.color = repairColors[0];
             }
             else if (percent > 30)
             {
+                repairFon.alpha = 1.0f;
                 repair.color = repairColors[1];
             }
             else 
             {
+                repairFon.alpha = 1.0f;
                 repair.color = repairColors[2];
             }
 
         }else{
-            repair.alpha = 0.0f;
+            repairFon.alpha = 0.0f;
 
+        }
+        if (item.buyMode == BuyMode.FOR_GOLD_TIME && item.isAvailable())
+        {
+            timerFon.alpha = 1.0f;
+           
+        }
+        else
+        {
+            timerFon.alpha = 0.0f;
         }
         if (item.isAvailable())
         {

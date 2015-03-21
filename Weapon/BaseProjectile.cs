@@ -16,8 +16,9 @@ public enum DamageType{
 public class BaseDamage{
 	public float Damage;
     public float minDamage;
-	public bool isVsArmor;
+	public float vsArmor;
 	public float pushForce;
+  
 	public bool knockOut= false;
 	public DamageType type;
 	
@@ -25,7 +26,7 @@ public class BaseDamage{
 	public bool splash=false;
 	[HideInInspector] 
 	public bool weapon= false;
-	[HideInInspector] 
+  	[HideInInspector] 
 	public Vector3 pushDirection;
 	[HideInInspector] 
 	public Vector3 hitPosition;
@@ -44,7 +45,7 @@ public class BaseDamage{
 	public BaseDamage(BaseDamage old){
 		Damage = old.Damage;
         minDamage = old.minDamage;
-		isVsArmor = old.isVsArmor;
+		vsArmor = old.vsArmor;
 		pushForce = old.pushForce;
         knockOut = old.knockOut;
 		splash = old.splash;
@@ -169,12 +170,19 @@ public class BaseProjectile : MonoBehaviour
 
     public bool useGravity;
 
+    private Renderer mRenderer;
+
 	void Awake(){
 		aSource = GetComponent<AudioSource>();	
 		sControl = new soundControl(aSource);//создаем обьект контроллера звука и передаем указатель на источник
         sControl.playClip(reactiveEngineSound);
 		mTransform = transform;
 		mRigidBody = rigidbody;
+        if (hitParticle.CountPooled() == 0 && hitParticle.CountSpawned() == 0)
+        {
+            hitParticle.CreatePool(50);
+        }
+        mRenderer = GetComponentInChildren<Renderer>();
 	}
 	
     void OnEnable()
@@ -187,6 +195,7 @@ public class BaseProjectile : MonoBehaviour
             if (go!=null)
 			go.SetActive(true);
 		}
+        active = true;
     }
    public void Init(){
         shouldInit = false;
@@ -256,9 +265,10 @@ public class BaseProjectile : MonoBehaviour
 
     protected void FixedUpdate()
     {
-        if(active){
+        if(!active){
 			return;
 		}
+       // Debug.Log("Move");
         RaycastHit hit;
     
         switch (speedChange)
@@ -316,17 +326,17 @@ public class BaseProjectile : MonoBehaviour
 			mTransform.rotation = Quaternion.LookRotation(velocity);
             //
           //  Debug.Log(used);
-            Debug.DrawLine(mTransform.position, mTransform.position + velocity.normalized , Color.red, 10.0f);
+            //Debug.DrawLine(mTransform.position, mTransform.position + velocity.normalized , Color.red, 10.0f);
             if (!used&&Physics.Raycast(transform.position, velocity.normalized, out hit, velocity.magnitude * 0.1f, dmgLayers))
 			{
-                Debug.Log("Hit");
+              //  Debug.Log("Hit");
                 //Debug.DrawRay(mTransform.position, mTransform.forward * mRigidBody.velocity.magnitude * 0.1f, Color.red, 10.0f);
 					onBulletHit(hit);
 
             }
             else
             {
-                Debug.Log("NoHit");
+               // Debug.Log("NoHit");
                 if (result.sqrMagnitude != 0)
                 {
                    // Debug.Log(result);
@@ -647,7 +657,7 @@ public class BaseProjectile : MonoBehaviour
             {
                 ProjectileManager.instance.InvokeRPC("Detonate", projId, Position);
             }
-            Invoke("DeActivate", 0.1f);
+            DeActivate();
                 return;
         }
         if (boomed)
@@ -703,24 +713,43 @@ public class BaseProjectile : MonoBehaviour
         {
             ProjectileManager.instance.InvokeRPC("Detonate", projId, Position);
         }
-        Invoke("DeActivate", 0.1f);
+        DeActivate();
     }
 	public virtual void SpawnAfterEffect(Vector3 forward){
-	
-			if (hitParticle != null)
+      //  Debug.Log(Camera.main.WorldToViewportPoint(effectPosition));
+
+       // Debug.DrawLine(effectPosition, effectPosition + Vector3.up * 2, Color.red, 10.0f);
+        if (!this.IsOnScreen(effectPosition))
+        {
+            return;
+        }
+        if ( hitParticle != null && hitParticle.CountPooled() != 0)
             {
+            
                 hitParticle.Spawn(effectPosition,Quaternion.LookRotation(forward));
             }
 	}
 	public void DeActivate(){
-		active= false;
-		foreach(GameObject go in inactiveObjectInEffectStage){
-            if (go!=null)
-			go.SetActive(false);
-		}
-		 Invoke("_DeActivate", disableEffectDelay);
+        active = false;
+        
+        //Debug.Log("hit");
+        StartCoroutine(_DeActivate());
+		 
 	}
-	void _DeActivate(){
+    IEnumerator _DeActivate(){
+        yield return new WaitForEndOfFrame();
+        mTransform.position = effectPosition;
+        yield return new WaitForSeconds(0.1f);
+      
+        foreach (GameObject go in inactiveObjectInEffectStage)
+        {
+            if (go != null)
+                go.SetActive(false);
+        }
+        Invoke("_DeActivateEffect", disableEffectDelay);
+    }
+    void _DeActivateEffect()
+    {
         ProjectileManager.instance.RemoveProjectile(projId);
 		gameObject.Recycle();
        

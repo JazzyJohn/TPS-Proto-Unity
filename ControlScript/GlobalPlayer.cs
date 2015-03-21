@@ -260,9 +260,7 @@ public class GlobalPlayer : MonoBehaviour {
 		gold = int.Parse (xmlDoc.SelectSingleNode ("player/gold").InnerText);
 		cash = int.Parse (xmlDoc.SelectSingleNode ("player/cash").InnerText);
 		stamina = int.Parse (xmlDoc.SelectSingleNode ("player/stamina").InnerText);
-		bool isPremium = bool.Parse (xmlDoc.SelectSingleNode ("player/premium").InnerText);
-		DateTime timeEnd= DateTime.Parse((xmlDoc.SelectSingleNode ("player/premiumEnd").InnerText));
-		PremiumManager.instance.SetPremium(isPremium,timeEnd);
+		
 		XmlNodeList list = xmlDoc.SelectNodes("player/notify");
 
         open_set = int.Parse(xmlDoc.SelectSingleNode("player/open_set").InnerText);
@@ -284,6 +282,7 @@ public class GlobalPlayer : MonoBehaviour {
 
         }
 		TournamentManager.instance.ParseData(xmlDoc);
+        PremiumManager.instance.ParseData(xmlDoc, "player");
 	}
 
 
@@ -323,6 +322,7 @@ public class GlobalPlayer : MonoBehaviour {
 		form.AddField ("uid", Uid);
 		form.AddField ("name", Name);
 		form.AddField ("tournament", 1);
+        form.AddField("premium", 1);
 		WWW w = null;
 		if (String.Compare(Application.absoluteURL, 0, "https", 0,5) != 0) {
 			

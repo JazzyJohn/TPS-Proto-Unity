@@ -727,16 +727,29 @@ public class NetworkController : MonoBehaviour
         }
 
         FoxView view = newObject.GetComponent<FoxView>();
-        if (!Scene)
+        if (view != null)
         {
-            view.viewID = AllocateViewID(_smartFox.MySelf.Id);
-        }
-        else
-        {
-            view.viewID = AllocateViewID(FoxView.SCENE_OWNER_ID);
-        }
-        foxViewList.Add(view.viewID, view);
+            if (!Scene)
+            {
+                view.viewID = AllocateViewID(_smartFox.MySelf.Id);
+            }
+            else
+            {
+                view.viewID = AllocateViewID(FoxView.SCENE_OWNER_ID);
+            }
+            foxViewList.Add(view.viewID, view);
 
+        }
+        return newObject;
+    }
+    private GameObject RemoteInstantiateNetPrefab(string prefab, Vector3 vector3, Quaternion quaternion)
+    {
+        GameObject newObject = _SpawnPrefab(prefab, vector3, quaternion);
+        if (newObject == null)
+        {
+            return null;
+        }
+       
         return newObject;
     }
     private GameObject RemoteInstantiateNetPrefab(string prefab, Vector3 vector3, Quaternion quaternion, int viewId)
@@ -948,6 +961,8 @@ public class NetworkController : MonoBehaviour
     public ISFSObject pawnSpawnData;
 
     public List<WeaponModel> pawnWeapons = new List<WeaponModel>();
+
+    public ISFSArray pawnArmor;
     /// <summary>
     /// pawnSpawn request to server
     /// 
@@ -955,6 +970,7 @@ public class NetworkController : MonoBehaviour
     public GameObject BeginPawnSpawnRequest(string prefab, Vector3 vector3, Quaternion quaternion, bool isAI, int[] stims, bool scene)
     {
         pawnSpawnData = new SFSObject();
+        pawnArmor = new SFSArray();
         pawnWeapons.Clear();
         pawnSpawnData.PutBool("Scene", scene);
         pawnSpawnData.PutBool("isAI", isAI);
@@ -974,6 +990,7 @@ public class NetworkController : MonoBehaviour
     public GameObject BeginPawnForSwarmSpawnRequest(string prefab, Vector3 vector3, Quaternion quaternion, int[] stims, int swarm, int home, int team = 0, List<CharacteristicToAdd> bonusData = null)
     {
         pawnSpawnData = new SFSObject();
+        pawnArmor = new SFSArray();
         pawnWeapons.Clear();
         if (bonusData != null)
         {
@@ -1085,7 +1102,23 @@ public class NetworkController : MonoBehaviour
         }
         pawnWeapons[pawnWeapons.Count - 1].state = true;
     }
+    /// <summary>
+    /// armorSpawn request to server
+    /// </summary>	
 
+    public GameObject ArmorSpawn(string prefab, Vector3 vector3, Quaternion quaternion, bool isAI, int pawnId)
+    {
+        ISFSObject data = new SFSObject();
+
+
+        GameObject go = InstantiateNetPrefab(prefab, vector3, quaternion, data, isAI);
+
+        pawnArmor.AddUtfString(prefab);
+
+        return go;
+
+
+    }
     public void EndPawnSpawnRequest()
     {
         if (pawnSpawnData != null)
@@ -1098,6 +1131,7 @@ public class NetworkController : MonoBehaviour
                 sendWeapon.AddClass(model);
             }
             pawnSpawnData.PutSFSArray("weapons", sendWeapon);
+            pawnSpawnData.PutSFSArray("armors", pawnArmor);
             ExtensionRequest request = new ExtensionRequest("pawnSpawn", pawnSpawnData, serverHolder.gameRoom);
             smartFox.Send(request);
         }
@@ -1731,6 +1765,20 @@ public class NetworkController : MonoBehaviour
             weapon.NetUpdate(weaponModel);
             //			Debug.Log("PAwn" + pawn + " View" + GetView(dt.GetInt("pawnId")) + "ID" + dt.GetInt("pawnId"));
             weapon.RemoteAttachWeapon(pawn, weaponModel.state);
+        }
+
+
+        ISFSArray armors = dt.GetSFSArray("armors");
+        foreach (string armorName in armors)
+        {
+            GameObject armorGo = RemoteInstantiateNetPrefab(armorName, Vector3.zero, Quaternion.identity);
+            if (armorGo == null)
+            {
+                continue;
+            }
+
+            BaseArmor armor = armorGo.GetComponent<BaseArmor>();
+            armor.AttachArmorToChar(pawn);
         }
 
     }

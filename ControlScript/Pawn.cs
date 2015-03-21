@@ -60,7 +60,7 @@ public class DamagerEntry
 public class Pawn : DamagebleObject
 {
 
-
+    public static float HEAD_SHOOT_MULTIPLIER = 2.5f;
 
     public List<singleDPS> activeDPS = new List<singleDPS>();
 
@@ -83,6 +83,8 @@ public class Pawn : DamagebleObject
 	public float spawnImortalityDuration= 3.0f;
     //Weapon that in hand
     public BaseWeapon CurWeapon;
+
+    public List<BaseArmor> armors = new List<BaseArmor>();
 
     public Transform weaponSlot;
 	
@@ -333,6 +335,12 @@ public class Pawn : DamagebleObject
     protected CharacteristicManager charMan;
     public SkillManager skillManager;
     public BasePawnStatistic statistic = new BasePawnStatistic();
+    private float headBlockTime = -10.0f;
+    public float headBlockCoolDown  = 10.0f;
+    private float regenTime = -10.0f;
+    private float regenCoolDown = 10.0f;
+
+
     //effects
 
 	public PawnEffectController effectController;
@@ -548,21 +556,22 @@ public class Pawn : DamagebleObject
     public void SpeedInit()
     {
 //        Debug.Log("speed mod" + GetPercentValue(CharacteristicList.SPEED));
-        wallRunSpeed = wallRunSpeed * GetPercentValue(CharacteristicList.SPEED);
+        float speedMod = GetPercentValue(CharacteristicList.SPEED);
+        wallRunSpeed = wallRunSpeed * speedMod;
 
-        groundSprintSpeed = groundSprintSpeed * GetPercentValue(CharacteristicList.SPEED);
+        groundSprintSpeed = groundSprintSpeed * (speedMod+((float)GetValue(CharacteristicList.SPRINT_SPEED))/100f);
 
-        flyForwardSpeed = flyForwardSpeed * GetPercentValue(CharacteristicList.SPEED);
+        flyForwardSpeed = flyForwardSpeed * speedMod;
 
-        groundRunSpeed = groundRunSpeed * GetPercentValue(CharacteristicList.SPEED);
+        groundRunSpeed = groundRunSpeed * speedMod;
 
-        flySpeed = flySpeed * GetPercentValue(CharacteristicList.SPEED);
+        flySpeed = flySpeed *speedMod;
 
-        groundWalkSpeed = groundWalkSpeed * GetPercentValue(CharacteristicList.SPEED);
+        groundWalkSpeed = groundWalkSpeed * speedMod;
 
-		groundCrouchSpeed = groundCrouchSpeed  * GetPercentValue(CharacteristicList.SPEED);
+		groundCrouchSpeed = groundCrouchSpeed  * speedMod;
 		
-        jumpHeight = jumpHeight * GetPercentValue(CharacteristicList.JUMPHEIGHT);
+        jumpHeight = jumpHeight * speedMod;
     }
     public float GetSize()
     {
@@ -597,6 +606,9 @@ public class Pawn : DamagebleObject
         WeaponIndex idPersonal = Choice._Personal[myId],
         idMain = Choice._Main[myId],
         idExtra = Choice._Extra[myId],
+        idGrenade = Choice._Grenad[myId],
+        idArmor = Choice._BodyArmor[myId],
+        idHead = Choice._HeadArmor[myId],
         idTaunt = Choice._Taunt[myId];
       
         if (!idPersonal.IsSameIndex(WeaponIndex.Zero))
@@ -612,21 +624,44 @@ public class Pawn : DamagebleObject
         {
             ivnMan.SetSlot(ItemManager.instance.GetWeaponprefabByID(idExtra));
         }
+        if (!idArmor.IsSameIndex(WeaponIndex.Zero))
+        {
+            ivnMan.SetArmorSlot(ItemManager.instance.GetArmorprefabByID(idExtra));
+        }
+        if (!idHead.IsSameIndex(WeaponIndex.Zero))
+        {
+            ivnMan.SetArmorSlot(ItemManager.instance.GetArmorprefabByID(idHead));
+        }
         ivnMan.GenerateWeaponStart();
         if (!idTaunt.IsSameIndex(WeaponIndex.Zero))
         {
             tauntAnimation = ItemManager.instance.animsIndexTable[idTaunt.prefabId].animationId;
         }
     }
-    public override void Damage(BaseDamage damage, GameObject killer)
+    public void ResolvedDamage(BaseDamage damage)
     {
-        if (isSpawn || killer == null || !isActive)
-        {//если только респавнились, то повреждений не получаем
-            return;
+        float allPrecent = GetValue(CharacteristicList.DAMAGE_REDUCE_ALL);
+        if (damage.isHeadshoot)
+        {
+            damage.Damage = damage.Damage * HEAD_SHOOT_MULTIPLIER;
+            allPrecent += GetValue(CharacteristicList.DAMAGE_REDUCE_HEAD);
+            
+        }
+        foreach (BaseArmor armor in armors)
+        {
+            armor.AffectDamage(damage);
         }
 
+        if (damage.isHeadshoot)
+        {
+            if (GetValue(CharacteristicList.HEAD_BLOCK) == 0&&headBlockTime+headBlockCoolDown<Time.time)
+            {
+                float headDamage = damage.Damage - damage.Damage / HEAD_SHOOT_MULTIPLIER;
+                damage.Damage -= headDamage;
+                headBlockTime = Time.time;
+            }
 
-        float allPrecent = GetValue(CharacteristicList.DAMAGE_REDUCE_ALL);
+        }
         if (damage.weapon)
         {
             allPrecent += GetValue(CharacteristicList.DAMAGE_REDUCE_GUN);
@@ -636,12 +671,19 @@ public class Pawn : DamagebleObject
             allPrecent += GetValue(CharacteristicList.DAMAGE_REDUCE_SPLASH);
         }
         damage.Damage = damage.Damage * (((float)allPrecent) / 100f + 1f);
-        bool isVs = (damage.isVsArmor && charMan.GetBoolChar(CharacteristicList.ARMOR)) || (!damage.isVsArmor && !charMan.GetBoolChar(CharacteristicList.ARMOR));
-        if (!isVs)
-        {
-            damage.Damage *= 0.5f;
+        regenTime = Time.time;
+
+    }
+
+    public override void Damage(BaseDamage damage, GameObject killer)
+    {
+        if (isSpawn || killer == null || !isActive)
+        {//если только респавнились, то повреждений не получаем
+            return;
         }
 
+      
+        
         //вопли при попадании
         //выбираются случайно из массива. Звучат не прерываясь при следующем вызове
         if (lastPainSound + 1.0f < Time.time && painSoundsArray.Length > 0)
@@ -658,15 +700,7 @@ public class Pawn : DamagebleObject
 
             return;
         }
-        if (killerPawn != null)
-        {
-            Player killerPlayer = killerPawn.player;
-            if (killerPlayer != null && killerPawn != this)
-            {
-                //Debug.Log ("DAMAGE" +damage.sendMessage);
-                killerPlayer.DamagePawn(damage);
-            }
-        }
+       
        
         if (foxView.isMine)
         {
@@ -723,6 +757,7 @@ public class Pawn : DamagebleObject
         }
         if (killerPawn == null && foxView.isMine)
         {
+            ResolvedDamage(damage);
 			if (damage.sendMessage)
 			{
 				AddEffect(damage.hitPosition,damage.pushDirection ,damage.type);
@@ -737,6 +772,7 @@ public class Pawn : DamagebleObject
 			StatisticManager.instance.AddDamageDeliver(Mathf.RoundToInt(damage.Damage));
             if (foxView.isMine)
             {
+                ResolvedDamage(damage);
    			    if (damage.sendMessage)
 				{
 					AddEffect(damage.hitPosition,damage.pushDirection ,damage.type);
@@ -747,11 +783,24 @@ public class Pawn : DamagebleObject
             }
             else
             {
+                if (damage.sendMessage)
+                {
+                    AddEffect(damage.hitPosition, damage.pushDirection, damage.type);
+                }
                 foxView.LowerHPRequest(damage, killerPawn.foxView.viewID);
+                ResolvedDamage(damage);
             }
           
         }
-       
+        if (killerPawn != null)
+        {
+            Player killerPlayer = killerPawn.player;
+            if (killerPlayer != null && killerPawn != this)
+            {
+                //Debug.Log ("DAMAGE" +damage.sendMessage);
+                killerPlayer.DamagePawn(damage);
+            }
+        }
         //Debug.Log ("DAMAGE");
        
     }
@@ -759,6 +808,7 @@ public class Pawn : DamagebleObject
     public void LowerHealth(BaseDamageModel damageModel, GameObject killer)
     {
         BaseDamage damage = damageModel.GetDamage();
+        ResolvedDamage(damage);
         Pawn killerPawn = killer.GetComponent<Pawn>();
         if (killerPawn != null)
         {
@@ -1454,7 +1504,26 @@ public class Pawn : DamagebleObject
 
         if (foxView.isMine)
         {
+            int maxHealth = GetMaxHealth();
+            if (health < maxHealth)
+            {
+                if (regenTime + regenCoolDown < Time.time)
+                {
+                    int regen = GetValue(CharacteristicList.REGEN);
+                    if (regen != 0)
+                    {
+                       
+                        
+                            health += (float)(regen * maxHealth) * Time.deltaTime;
+                       
+                    }
+                }
+                if (player == Player.localPlayer)
+                {
+                    PremiumManager.instance.Regen(this,regenTime, maxHealth);
+                }
 
+            }
             UpdateSeenList();
             if (jetPackEnable == false)
             {
@@ -1748,7 +1817,7 @@ public class Pawn : DamagebleObject
     }
 	
 	public virtual void StopGrenadeThrow(){
-		if(CurWeapon.slotType==BaseWeapon.SLOTTYPE.GRENADE){
+		if(CurWeapon.slotType==SLOTTYPE.GRENADE){
 
             ivnMan.PutGrenadeAway();
 		}
@@ -1765,7 +1834,7 @@ public class Pawn : DamagebleObject
         return characterState != CharacterState.Sprinting && characterState != CharacterState.Jumping && ivnMan.HasGrenade();
 	}
 	public virtual void ThrowGrenade(){
-		if(CurWeapon.slotType==BaseWeapon.SLOTTYPE.GRENADE){
+		if(CurWeapon.slotType==SLOTTYPE.GRENADE){
             CurWeapon.StartFire();
            
 		}
@@ -1812,7 +1881,10 @@ public class Pawn : DamagebleObject
             if (invisible) MakeWeaponInvisible();
         }
     }
-	
+    public void AddArmor(BaseArmor armor)
+    {
+        armors.Add(armor);
+    }
 	public void ForcedWeaponAttach(BaseWeapon newWeapon){
 	
 	     newWeapon.AttachWeapon(weaponSlot, Vector3.zero, Quaternion.Euler(weaponRotatorOffset), this);
@@ -1826,7 +1898,7 @@ public class Pawn : DamagebleObject
         }
     }
 
-	public Transform GetSlotForWeapon(BaseWeapon.SLOTTYPE type){
+	public Transform GetSlotForItem(SLOTTYPE type){
 		if(putAwaySlots.Length<=(int)type){
 			return myTransform;
 		}
@@ -3548,6 +3620,16 @@ public class Pawn : DamagebleObject
     public float GetPercentValue(CharacteristicList characteristic)
     {
         return 1f + ((float)charMan.GetIntChar(characteristic)) / 100f;
+    }
+
+    public void KillEnemy()
+    {
+        int amount = GetValue(CharacteristicList.KILL_REFILE);
+        if (amount > 0)
+        {
+            ivnMan.AddAmmoAll(amount);
+        }
+
     }
     //END OF BUFF SECTION
 

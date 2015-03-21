@@ -1,404 +1,339 @@
 using UnityEngine;
-using System.Collections;
 
-
-public class ThirdPersonController : MonoBehaviour 
+public class ThirdPersonController : MonoBehaviour
 {
+    // Require a character controller to be attached to the same game object
+    //@script RequireComponent(CharacterController)
+    protected Pawn pawn;
 
-// Require a character controller to be attached to the same game object
-//@script RequireComponent(CharacterController)
+    protected CharacterState characterState;
 
+    // when pressing "Fire3" button (cmd) we start running
 
+    // The gravity for the character
+    public float gravity = 20.0f;
+    // The gravity in controlled descent mode
+    public float speedSmoothing = 10.0f;
+    public float rotateSpeed = 500.0f;
+    public float trotAfterSeconds = 3.0f;
 
+    public bool canJump = true;
 
-protected Pawn pawn;
+    private const float jumpRepeatTime = 0.05f;
+    private const float jumpTimeout = 0.05f;
+    private const float groundedTimeout = 0.25f;
 
-private Transform myTransform;
+    // The camera doesnt start following the target immediately but waits for a split second to avoid too much waving around.
+    public float LockCameraTimer { get; protected set; }
 
-protected CharacterState characterState;
+    // The current move direction in x-z
+    public Vector3 MoveDirection { get; protected set; }
+    // The current vertical speed
+    private float verticalSpeed;
+    // The current x-z move speed
+    public float MoveSpeed { get; protected set; }
 
+    // Are we jumping? (Initiated with jump button and not grounded yet)
+    public bool Jumping { get; private set; }
+    private bool doubleJump;
+    public bool JumpingReachedApex { get; private set; }
 
-// when pressing "Fire3" button (cmd) we start running
+    // Are we moving backwards (This locks the camera to not do a 180 degree spin)
+    public bool MovingBack { get; protected set; }
+    // Is the user pressing any keys?
+    protected bool isMoving;
+    // When did the user start walking (Used for going into trot after a while)
+    protected float walkTimeStart;
+    // Last time the jump button was clicked down
+    protected float lastJumpButtonTime = -10.0f;
+    // Last time we performed a jump
+    private float lastJumpTime = -1.0f;
+    //Last time DoubleJumping
+    protected float lastDoubleTime = -1.0f;
 
+    private Vector3 inAirVelocity = Vector3.zero;
 
-
-
-// The gravity for the character
-public float gravity= 20.0f;
-// The gravity in controlled descent mode
-public float speedSmoothing= 10.0f;
-public float rotateSpeed= 500.0f;
-public float trotAfterSeconds= 3.0f;
-
-public bool canJump= true;
-
-private float jumpRepeatTime= 0.05f;
-private float jumpTimeout= 0.05f;
-private float groundedTimeout= 0.25f;
-
-// The camera doesnt start following the target immediately but waits for a split second to avoid too much waving around.
-protected float lockCameraTimer= 0.0f;
-
-// The current move direction in x-z
-protected Vector3 moveDirection= Vector3.zero;
-// The current vertical speed
-private float verticalSpeed= 0.0f;
-// The current x-z move speed
-protected float moveSpeed= 0.0f;
-	
-// Are we jumping? (Initiated with jump button and not grounded yet)
-private bool jumping= false;
-private bool doubleJump= false;
-private bool jumpingReachedApex= false;
-
-// Are we moving backwards (This locks the camera to not do a 180 degree spin)
-protected bool movingBack= false;
-// Is the user pressing any keys?
-protected bool isMoving= false;
-// When did the user start walking (Used for going into trot after a while)
-protected float walkTimeStart= 0.0f;
-// Last time the jump button was clicked down
-protected float lastJumpButtonTime = -10.0f;
-// Last time we performed a jump
-private float lastJumpTime= -1.0f;
-//Last time DoubleJumping
-protected float lastDoubleTime = -1.0f;
-
-// the height we jumped from (Used to determine for how long to apply extra jump power after jumping.)
-private float lastJumpStartHeight= 0.0f;
+    private float lastGroundedTime;
 
 
-private Vector3 inAirVelocity= Vector3.zero;
+    protected bool isControllable = true;
 
-private float lastGroundedTime= 0.0f;
+    private void Awake()
+    {
+        MoveDirection = transform.TransformDirection(Vector3.forward);
 
+        pawn = GetComponent<Pawn>();
+        canJump = pawn.canJump;
+    }
 
-protected bool isControllable= true;
+    public virtual void UpdateSmoothedMovementDirection()
+    {
+        Transform cameraTransform = Camera.main.transform;
 
-void  Awake ()
-{
-	moveDirection = transform.TransformDirection(Vector3.forward);
-    
-	
+        // Forward vector relative to the camera along the x-z plane	
+        Vector3 forward = cameraTransform.TransformDirection(Vector3.forward);
+        forward.y = 0;
+        forward = forward.normalized;
 
-	pawn= GetComponent<Pawn>();
-	myTransform = transform;
-		canJump = pawn.canJump;
-	/*if(!_animation)
-		//Debug.Log("The character you would like to control doesn't have animations. Moving her might look weird.");
-	
-	/*
-public AnimationClip idleAnimation;
-public AnimationClip walkAnimation;
-public AnimationClip runAnimation;
-public AnimationClip jumpPoseAnimation;	
-	*/
-	/*
-	if(!idleAnimation) {
-		_animation = null;
-		Debug.Log("No idle animation found. Turning off animations.");
-	}
-	if(!walkAnimation) {
-		_animation = null;
-		Debug.Log("No walk animation found. Turning off animations.");
-	}
-	if(!runAnimation) {
-		_animation = null;
-		Debug.Log("No run animation found. Turning off animations.");
-	}
-	if(!jumpPoseAnimation && canJump) {
-		_animation = null;
-		Debug.Log("No jump animation found and the character has canJump enabled. Turning off animations.");
-	}
-	*/		
-}
+        // Right vector relative to the camera
+        // Always orthogonal to the forward vector
+        Vector3 right = new Vector3(forward.z, 0, -forward.x);
 
+        float v = InputManager.instance.GetAxisRaw("Vertical");
+        float h = InputManager.instance.GetAxisRaw("Horizontal");
 
-public virtual void UpdateSmoothedMovementDirection ()
-{
-	Transform cameraTransform= Camera.main.transform;
-	
-	
-	// Forward vector relative to the camera along the x-z plane	
-	Vector3 forward= cameraTransform.TransformDirection(Vector3.forward);
-	forward.y = 0;
-	forward = forward.normalized;
+        // Are we moving backwards or looking backwards
+        if (v < -0.2f)
+            MovingBack = true;
+        else
+            MovingBack = false;
 
-	// Right vector relative to the camera
-	// Always orthogonal to the forward vector
-	Vector3 right= new Vector3(forward.z, 0, -forward.x);
+        bool wasMoving = isMoving;
+        isMoving = Mathf.Abs(h) > 0.1f || Mathf.Abs(v) > 0.1f;
 
-    float v = InputManager.instance.GetAxisRaw("Vertical");
-    float h = InputManager.instance.GetAxisRaw("Horizontal");
+        // Target direction relative to the camera
+        Vector3 targetDirection = h * right + v * forward;
 
+        // Lock camera for short period when transitioning moving & standing still
+        LockCameraTimer += Time.deltaTime;
+        if (isMoving != wasMoving)
+            LockCameraTimer = 0.0f;
 
+        // We store speed and direction seperately,
+        // so that when the character stands still we still have a valid forward direction
+        // moveDirection is always normalized, and we only update it if there is user input.
+        if (targetDirection != Vector3.zero)
+        {
+            // If we are really slow, just snap to the target direction
+            if (MoveSpeed < pawn.groundWalkSpeed * 0.9f)
+            {
+                MoveDirection = targetDirection.normalized;
+            }
+            // Otherwise smoothly turn towards it
+            else
+            {
+                MoveDirection = targetDirection.normalized;
+            }
+        }
 
-	// Are we moving backwards or looking backwards
-	if (v < -0.2f)
-		movingBack = true;
-	else
-		movingBack = false;
-	
-	bool wasMoving= isMoving;
-	isMoving = Mathf.Abs (h) > 0.1f || Mathf.Abs (v) > 0.1f;
+        // Smooth the speed based on the current target direction
+        //float curSmooth = speedSmoothing * Time.deltaTime;
 
-			
-	// Target direction relative to the camera
-		Vector3 targetDirection=h*right + v * forward;
+        // Choose target speed
+        //* We want to support analog input but make sure you cant walk faster diagonally than just forward or sideways
+        float targetSpeed = Mathf.Min(targetDirection.magnitude, 1.0f);
 
-	
-	
-		// Lock camera for short period when transitioning moving & standing still
-		lockCameraTimer += Time.deltaTime;
-		if (isMoving != wasMoving)
-			lockCameraTimer = 0.0f;
-
-		// We store speed and direction seperately,
-		// so that when the character stands still we still have a valid forward direction
-		// moveDirection is always normalized, and we only update it if there is user input.
-		if (targetDirection != Vector3.zero)
-		{
-			// If we are really slow, just snap to the target direction
-			if (moveSpeed < pawn.groundWalkSpeed * 0.9f )
-			{
-				moveDirection = targetDirection.normalized;
-			}
-			// Otherwise smoothly turn towards it
-			else
-			{
-				
-                moveDirection = targetDirection.normalized;
-			}
-		}
-		
-		// Smooth the speed based on the current target direction
-		float curSmooth= speedSmoothing * Time.deltaTime;
-		
-		// Choose target speed
-		//* We want to support analog input but make sure you cant walk faster diagonally than just forward or sideways
-		float targetSpeed= Mathf.Min(targetDirection.magnitude, 1.0f);
-	
-		
-		
-		// Pick speed modifier
-		//Debug.Log (!Input.GetKey (KeyCode.LeftShift) &&! Input.GetKey (KeyCode.RightShift));
+        // Pick speed modifier
+        //Debug.Log (!Input.GetKey (KeyCode.LeftShift) &&! Input.GetKey (KeyCode.RightShift));
 
         bool crouch = InputManager.instance.GetButton("Crouch");
-		
-		if (pawn.isAiming ) {
-			
-			
-				if(crouch){
-					targetSpeed *= pawn.groundCrouchSpeed;
-                    characterState = CharacterState.Crouching;
-				}else{
-                    if(isMoving){
-					    targetSpeed *= pawn.groundWalkSpeed;
-					    characterState = CharacterState.Walking;
-                    }
-                    else
-                    {
-                        targetSpeed *= 0;
-                        characterState = CharacterState.Idle;
-                    }
-				}
-			
 
+        if (pawn.isAiming)
+        {
+            if (crouch)
+            {
+                targetSpeed *= pawn.groundCrouchSpeed;
+                characterState = CharacterState.Crouching;
+            }
+            else
+            {
+                if (isMoving)
+                {
+                    targetSpeed *= pawn.groundWalkSpeed;
+                    characterState = CharacterState.Walking;
+                }
+                else
+                {
+                    targetSpeed *= 0;
+                    characterState = CharacterState.Idle;
+                }
+            }
         }
         else if (InputManager.instance.GetButton("Sprint") && pawn.CanSprint())
-		{
+        {
             targetSpeed *= pawn.groundRunSpeed;
-			if(isMoving){
-				characterState = CharacterState.Sprinting;
-			}else{
-				characterState = CharacterState.Idle;
-			}
-		
+            if (isMoving)
+            {
+                characterState = CharacterState.Sprinting;
+            }
+            else
+            {
+                characterState = CharacterState.Idle;
+            }
+        }
+        else
+        {
+            if (crouch)
+            {
+                targetSpeed *= pawn.groundCrouchSpeed;
+                characterState = CharacterState.Crouching;
+            }
+            else
+            {
+                if (isMoving)
+                {
+                    targetSpeed *= pawn.groundRunSpeed;
+                    characterState = CharacterState.Running;
+                }
+                else
+                {
+                    targetSpeed *= 0;
+                    characterState = CharacterState.Idle;
+                }
+            }
+        }
 
-		}
-		else
-		{
+        MoveSpeed = targetSpeed;
 
-			
-	
-				if(crouch){
-					targetSpeed *= pawn.groundCrouchSpeed;
-					characterState = CharacterState.Crouching;
-				}else{
-                    if (isMoving)
-                    {
-					    targetSpeed *= pawn.groundRunSpeed;
-					    characterState = CharacterState.Running;
-                    }else{
-				        targetSpeed *= 0;
-				        characterState = CharacterState.Idle;
-			        }
-				}
-			
-		}
+        // Reset walk time start when we slow down
+        if (MoveSpeed < pawn.groundWalkSpeed * 0.3f)
+            walkTimeStart = Time.time;
+    }
 
-        moveSpeed = targetSpeed;
-	
-		// Reset walk time start when we slow down
-		if (moveSpeed < pawn.groundWalkSpeed * 0.3f)
-			walkTimeStart = Time.time;
-	
-	
+    private void ApplyJumping()
+    {
+        // Prevent jumping too fast after each other
+        if (lastJumpTime + jumpRepeatTime > Time.time)
+        {
+            //Debug.Log("timeOutReturn"+lastJumpTime+jumpRepeatTime +Time.time);
+            return;
+        }
 
-		
-}
+        // Jump
+        // - Only when pressing the button down
+        // - With a timeout so you can press the button slightly before landing		
 
+        if (canJump && !doubleJump && Time.time <= lastJumpButtonTime + jumpTimeout)
+        {
+            //Debug.Log(lastJumpButtonTime+jumpTimeout);
+            verticalSpeed = CalculateJumpVerticalSpeed(pawn.jumpHeight);
+            SendMessage("DidJump", SendMessageOptions.DontRequireReceiver);
+        }
+        else
+        {
+            verticalSpeed = 0;
+        }
 
-void  ApplyJumping (){
-	// Prevent jumping too fast after each other
-		if (lastJumpTime + jumpRepeatTime > Time.time) {
-			//Debug.Log("timeOutReturn"+lastJumpTime+jumpRepeatTime +Time.time);
-			return;
-		}
+    }
 
-		// Jump
-		// - Only when pressing the button down
-		// - With a timeout so you can press the button slightly before landing		
+    public float CalculateJumpVerticalSpeed(float targetJumpHeight)
+    {
+        // From the jump height and gravity we deduce the upwards speed 
+        // for the character to reach at the apex.
+        return Mathf.Sqrt(2 * targetJumpHeight * Pawn.gravity);
+    }
 
-		if (canJump&&!doubleJump && Time.time <= lastJumpButtonTime + jumpTimeout) {
-			//Debug.Log(lastJumpButtonTime+jumpTimeout);
-			verticalSpeed = CalculateJumpVerticalSpeed (pawn.jumpHeight);
-			SendMessage("DidJump", SendMessageOptions.DontRequireReceiver);
-		}else{
-			verticalSpeed=0;
-		}
-	
-}
+    public void DidJump()
+    {
+        ///Debug.Log ("DidJump");
+        JumpingReachedApex = false;
+        lastJumpTime = Time.time;
 
-
-public float CalculateJumpVerticalSpeed ( float targetJumpHeight  )
-{
-	// From the jump height and gravity we deduce the upwards speed 
-	// for the character to reach at the apex.
-	return Mathf.Sqrt(2 * targetJumpHeight * Pawn.gravity);
-}
-
-	public void DidJump ()
-	{
-		///Debug.Log ("DidJump");
-		jumpingReachedApex = false;
-		lastJumpTime = Time.time;
-
-		lastJumpStartHeight = transform.position.y;
-		lastJumpButtonTime = -10;
-		if (jumping == true ) {
+        lastJumpButtonTime = -10;
+        if (Jumping)
+        {
             doubleJump = true;
             characterState = CharacterState.DoubleJump;
-		} else{
+        }
+        else
+        {
             lastDoubleTime = Time.time;
-				characterState = CharacterState.Jumping;	
-		}
-		jumping = true;
-	}
-	void Update ()
-	{
-		if (!isControllable)
-		{
-			// kill all inputs if not controllable.
-			Input.ResetInputAxes();
-		}
-		
-		if (InputManager.instance.GetButtonDown ("Jump"))
-		{
-			lastJumpButtonTime = Time.time;
-			
-			
-		}
-		if (PlayerMainGui.IsMouseAV) {
+            characterState = CharacterState.Jumping;
+        }
+        Jumping = true;
+    }
+
+    private void Update()
+    {
+        if (!isControllable)
+        {
+            // kill all inputs if not controllable.
+            Input.ResetInputAxes();
+        }
+
+        if (InputManager.instance.GetButtonDown("Jump"))
+        {
+            lastJumpButtonTime = Time.time;
+        }
+
+        if (PlayerMainGui.IsMouseAV)
+        {
             if (InputManager.instance.GetButtonDown("Fire1"))
             {
-				
-								pawn.StartFire ();
-			}
-			
+                pawn.StartFire();
+            }
             if (InputManager.instance.GetButtonUp("Fire1"))
             {
-				
-								pawn.StopFire ();
-			}
-			 if (InputManager.instance.GetButtonDown("Grenade"))
+                pawn.StopFire();
+            }
+            if (InputManager.instance.GetButtonDown("Grenade"))
             {
-				
-								pawn.StartGrenadeThrow ();
-			}
-		/*	 if (InputManager.instance.GetButtonUp("Grenade"))
+                pawn.StartGrenadeThrow();
+            }
+            /*	 if (InputManager.instance.GetButtonUp("Grenade"))
             {
-				
-								pawn.ThrowGrenade ();
+			    pawn.ThrowGrenade ();
 			}*/
             if (InputManager.instance.GetButtonDown("PreFire"))
             {
-
-                            pawn.StartPumping();
+                pawn.StartPumping();
             }
             if (InputManager.instance.GetButtonUp("PreFire"))
             {
-
-                            pawn.StopPumping();
+                pawn.StopPumping();
             }
             if (InputManager.instance.GetButtonUp("Reload"))
             {
-							
-				pawn.Reload ();
-			}
+                pawn.Reload();
+            }
             if (InputManager.instance.GetButtonUp("KnockOut"))
             {
-
                 pawn.StartKnockOut();
-			}
+            }
             if (InputManager.instance.GetButtonDown("LegKick"))
             {
-
                 pawn.Kick(0);
             }
 
             if (InputManager.instance.GetButtonUp("LegKick"))
             {
-
                 pawn.StopKick();
             }
-		
-			float wheel = Input.GetAxis ("Mouse ScrollWheel");
-		
-			if (wheel < 0) {
-					pawn.PrevWeapon ();
-			}
-			if (wheel > 0) {
-					pawn.NextWeapon ();
-			}
+
+            float wheel = Input.GetAxis("Mouse ScrollWheel");
+            if (wheel < 0)
+            {
+                pawn.PrevWeapon();
+            }
+            if (wheel > 0)
+            {
+                pawn.NextWeapon();
+            }
+
             if (InputManager.instance.GetButtonUp("Taunt"))
             {
-								
-				pawn.PlayTaunt();
-			}
+                pawn.PlayTaunt();
+            }
             if (InputManager.instance.GetButtonDown("Skill1"))
             {
-
                 pawn.UseSkill(0);
             }
             if (InputManager.instance.GetButtonUp("Skill1"))
             {
-
                 pawn.UnUseSkill(0);
             }
 
-            pawn.UpdateRotation(-InputManager.instance.GetMouseAxis("Mouse Y"),InputManager.instance.GetMouseAxis("Mouse X"));
-                 
-                       
-		}
+            pawn.UpdateRotation(-InputManager.instance.GetMouseAxis("Mouse Y"),
+                InputManager.instance.GetMouseAxis("Mouse X"));
+        }
+    }
 
-}
     /// <summary>
     /// IS palyer Want DoubleJump
     /// </summary>
-protected virtual void ApplyDoubleJumping() {
-   
-        if(!pawn.isGrounded)
+    protected virtual void ApplyDoubleJumping()
+    {
+        if (!pawn.isGrounded)
         {
             switch (pawn.GetState())
             {
@@ -406,14 +341,12 @@ protected virtual void ApplyDoubleJumping() {
                     if ((InputManager.instance.GetButton("Jump")) || InputManager.instance.GetButton("Sprint"))
                     {
                         characterState = CharacterState.DoubleJump;
-
                     }
                     else
                     {
                         characterState = CharacterState.Jumping;
                     }
                     break;
-
                 case CharacterState.Jumping:
                 case CharacterState.Sprinting:
                     if (lastDoubleTime < Time.time - 1.0f)
@@ -429,120 +362,73 @@ protected virtual void ApplyDoubleJumping() {
                         }
                     }
                     break;
-               default:
-                    break;
-
-
             }
-            
-        }  
-}
-void FixedUpdate ()
-{
-	moveDirection = Vector3.zero;
+        }
+    }
 
-   
-	UpdateSmoothedMovementDirection();
-	
-	
-	// Apply jumping logic
-	ApplyJumping ();
-		//Debug.Log (jumping.ToString()+doubleJump);
-	// Calculate actual motion
-    ApplyDoubleJumping();
-   
-	Vector3 movement= moveDirection * moveSpeed + new Vector3 (0, verticalSpeed, 0) + inAirVelocity;
+    private void FixedUpdate()
+    {
+        MoveDirection = Vector3.zero;
 
-//    Debug.Log("inController" + movement);
-		//Debug.Log (movement.magnitude);
-		pawn.Movement (movement, characterState);
+        UpdateSmoothedMovementDirection();
 
+        ApplyJumping();
+        ApplyDoubleJumping();
 
-		
-	
+        Vector3 movement = MoveDirection * MoveSpeed + new Vector3(0, verticalSpeed, 0) + inAirVelocity;
 
-	// ANIMATION sector
-	
-	
+        pawn.Movement(movement, characterState);
+    }
 
+    public void DidLand()
+    {
+        //if(lastGroundedTime
+        if (lastJumpTime + jumpRepeatTime >= Time.time)
+        {
+            return;
+        }
+        lastGroundedTime = 0;
+        inAirVelocity = Vector3.zero;
+        if (Jumping)
+        {
+            doubleJump = false;
+            Jumping = false;
+        }
+    }
 
-	
-}
-public void DidLand(){
-	//if(lastGroundedTime
-	if(	lastJumpTime +jumpRepeatTime>=	 Time.time){
-			return;
-	}
-	lastGroundedTime = 0;
-	inAirVelocity = Vector3.zero;
-	if (jumping) {
-			doubleJump = false;
-			jumping = false;
-			//
-	}
-}
+    public void WallLand()
+    {
+        //if(lastGroundedTime
+        if (lastJumpTime + jumpRepeatTime >= Time.time)
+        {
+            return;
+        }
+        lastGroundedTime = 0;
+        inAirVelocity = Vector3.zero;
+        if (Jumping)
+        {
+            doubleJump = false;
+            Jumping = false;
+        }
+    }
 
-public void WallLand(){
-		//if(lastGroundedTime
-		if(	lastJumpTime +jumpRepeatTime>=	 Time.time){
-			return;
-		}
-		lastGroundedTime = 0;
-		inAirVelocity = Vector3.zero;
-		if (jumping) {
-			doubleJump = false;
-			jumping = false;
-			//
-		}
-	}
-public void WallJumpMessage()
-{
-    lastDoubleTime = Time.time;
-}
-public float GetSpeed ()
-{
-	return moveSpeed;
-}
+    public void WallJumpMessage()
+    {
+        lastDoubleTime = Time.time;
+    }
 
-public bool IsJumping ()
-{
-	return jumping;
-}
+    public bool IsMoving()
+    {
+        return Mathf.Abs(Input.GetAxisRaw("Vertical")) + Mathf.Abs(Input.GetAxisRaw("Horizontal")) > 0.5f;
+    }
 
+    public bool IsGroundedWithTimeout()
+    {
+        return lastGroundedTime + groundedTimeout > Time.time;
+    }
 
-public Vector3 GetDirection ()
-{
-	return moveDirection;
-}
-
-public bool IsMovingBackwards ()
-{
-	return movingBack;
-}
-
-public float GetLockCameraTimer ()
-{
-	return lockCameraTimer;
-}
-
-public bool IsMoving ()
-{
-	 return Mathf.Abs(Input.GetAxisRaw("Vertical")) + Mathf.Abs(Input.GetAxisRaw("Horizontal")) > 0.5f;
-}
-
-public bool HasJumpReachedApex ()
-{
-	return jumpingReachedApex;
-}
-
-public bool IsGroundedWithTimeout ()
-{
-	return lastGroundedTime + groundedTimeout > Time.time;
-}
-
-public void Reset ()
-{
-	gameObject.tag = "Player";
-}
-
+    public void Reset()
+    {
+        gameObject.tag = "Player";
+    }
 }

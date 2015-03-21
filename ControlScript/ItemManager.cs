@@ -164,6 +164,8 @@ public class SmallShopData{
 public class InventorySlot  : SimpleSlot{
 
 	public int charge;
+
+    private int chacheCharge;
 	
 	public int repairCost;
 
@@ -196,16 +198,32 @@ public class InventorySlot  : SimpleSlot{
 			return true;
 		}
       
-		return timeEnd> DateTime.Now;
+		return timeEnd> DateTime.Now.ToUniversalTime();
 	}
 	public virtual int UpCharge(){
-		if(BuyMode.FOR_KP!=buyMode){
-			if(charge<maxcharge){
-				charge++;
+		if(BuyMode.FOR_KP==buyMode){
+            if (charge + chacheCharge < maxcharge)
+            {
+                chacheCharge++;
 			}
 		}
 		return charge;
 	}
+    public void ApplyCharge()
+    {
+        charge += chacheCharge;
+    }
+    public virtual int GetCharge()
+    {
+        if (BuyMode.FOR_KP == buyMode)
+        {
+            return charge;
+        }
+        else
+        {
+            return 0;
+        }
+    }
 	private int _gameId;
 
 	public int group;
@@ -224,7 +242,7 @@ public class WeaponInventorySlot : InventorySlot
  	public int weaponId;
 	
 	
-	public BaseWeapon.SLOTTYPE gameSlot;
+	public SLOTTYPE gameSlot;
 
 	public int group;
 	
@@ -240,6 +258,31 @@ public class WeaponInventorySlot : InventorySlot
 	}
 
  }
+
+public class ArmorInventorySlot : InventorySlot
+{
+    public int armorId;
+
+
+    public SLOTTYPE gameSlot;
+
+    public int group;
+
+    protected override int getGameType()
+    {
+        return (int)gameSlot;
+    }
+    public int GetMissingCharge()
+    {
+        if (BuyMode.FOR_KP != buyMode)
+        {
+
+            return charge;
+        }
+        return 0;
+    }
+
+}
 public class StimPack{
 	public int amount;
 
@@ -276,11 +319,12 @@ public class ItemManager : MonoBehaviour {
 
 	//PLAYER ITEM SECTION
 	public BaseWeapon[] weaponPrefabsListbyId;
+    public BaseArmor[] armorPrefabsListbyId;
 
 	public List<string> markedItems = new List<string>();
 
     public Dictionary<int, WeaponInventorySlot> weaponIndexTable = new Dictionary<int, WeaponInventorySlot>();
-
+    public Dictionary<int, ArmorInventorySlot> armorIndexTable = new Dictionary<int, ArmorInventorySlot>();
 
 	
 	public  Dictionary<int,FromDBAnims> animsIndexTable= new Dictionary<int,FromDBAnims>();
@@ -353,8 +397,33 @@ public class ItemManager : MonoBehaviour {
         {
             return 0;
         }
-		return weaponIndexTable[id].charge;
+        return weaponIndexTable[id].GetCharge();
 	}
+    public float LowerArmorCharge(int id)
+    {
+        //        Debug.Log("lowercharge");
+        if (!armorIndexTable.ContainsKey(id))
+        {
+            return 0;
+        }
+
+        string acttualID = armorIndexTable[id].id;
+        if (!toSendLower.ContainsKey(acttualID))
+        {
+            toSendLower[acttualID] = new ShootData();
+        }
+        toSendLower[acttualID].chargeSpend = toSendLower[acttualID].chargeSpend + 1;
+        toSendLower[acttualID].shootCounter = 0;
+        return (armorIndexTable[id].maxcharge -armorIndexTable[id].UpCharge() )/ 100.0f;
+    }
+    public float GetArmorCharge(int id)
+    {
+        if (!armorIndexTable.ContainsKey(id))
+        {
+            return 1f;
+        }
+        return (armorIndexTable[id].maxcharge -armorIndexTable[id].GetCharge())/100.0f;
+    }
 	public void SetShootCount(int id, int shootCounter){
 		if (!weaponIndexTable.ContainsKey(id))
         {
@@ -379,6 +448,34 @@ public class ItemManager : MonoBehaviour {
 		}
 		return 	toSendLower[acttualID].shootCounter;
 	}
+    public void SetUseCount(int id, int shootCounter)
+    {
+        if (!weaponIndexTable.ContainsKey(id))
+        {
+            return;
+        }
+
+        string acttualID = weaponIndexTable[id].id;
+        if (!toSendLower.ContainsKey(acttualID))
+        {
+            toSendLower[acttualID] = new ShootData();
+        }
+
+        toSendLower[acttualID].shootCounter = shootCounter;
+    }
+    public int GetUseCounter(int id)
+    {
+        if (!armorIndexTable.ContainsKey(id))
+        {
+            return 0;
+        }
+        string acttualID = armorIndexTable[id].id;
+        if (!toSendLower.ContainsKey(acttualID))
+        {
+            return 0;
+        }
+        return toSendLower[acttualID].shootCounter;
+    }
 	public WeaponInventorySlot GetSlot(int id){
 		return weaponIndexTable[id];
 	}
@@ -443,7 +540,10 @@ public class ItemManager : MonoBehaviour {
                 {
                     try
                     {
-                        slot.timeEnd = DateTime.Parse(node.SelectSingleNode("time_end").InnerText);
+                        DateTime date = DateTime.Parse(node.SelectSingleNode("time_end").InnerText);
+
+                        slot.timeEnd = date.ToUniversalTime();
+
 
                     }
                     catch (Exception)
@@ -464,25 +564,37 @@ public class ItemManager : MonoBehaviour {
                 switch (type)
                 {
                     case ShopSlotType.WEAPON:
-                        WeaponInventorySlot weaponslot = new WeaponInventorySlot();
-                        slot = weaponslot;
-
-                        weaponslot.weaponId = int.Parse(node.SelectSingleNode("ingame_mysqlid").InnerText);
-                        weaponIndexTable[weaponslot.weaponId] = weaponslot;
-
-
-
-                        weaponslot.gameSlot = (BaseWeapon.SLOTTYPE)int.Parse(node.SelectSingleNode("ingame_type").InnerText);
-                        if (node.SelectSingleNode("aim") != null)
                         {
-                            slot.chars = new WeaponChar();
-                            slot.chars.aim = float.Parse(node.SelectSingleNode("aim").InnerText);
-                            slot.chars.dmg = float.Parse(node.SelectSingleNode("damage").InnerText);
-                            slot.chars.speed = float.Parse(node.SelectSingleNode("speed").InnerText);
-                            slot.chars.reload = float.Parse(node.SelectSingleNode("reload").InnerText);
-                            slot.chars.magazine = int.Parse(node.SelectSingleNode("magazine").InnerText);
-                            slot.chars.gunMode = node.SelectSingleNode("mode").InnerText;
+                            WeaponInventorySlot weaponslot = new WeaponInventorySlot();
+                            slot = weaponslot;
+
+                            weaponslot.weaponId = int.Parse(node.SelectSingleNode("ingame_mysqlid").InnerText);
+                            weaponIndexTable[weaponslot.weaponId] = weaponslot;
+
+
+
+                            weaponslot.gameSlot = (SLOTTYPE)int.Parse(node.SelectSingleNode("ingame_type").InnerText);
+                            if (node.SelectSingleNode("aim") != null)
+                            {
+                                slot.chars = new WeaponChar();
+                                slot.chars.aim = float.Parse(node.SelectSingleNode("aim").InnerText);
+                                slot.chars.dmg = float.Parse(node.SelectSingleNode("damage").InnerText);
+                                slot.chars.speed = float.Parse(node.SelectSingleNode("speed").InnerText);
+                                slot.chars.reload = float.Parse(node.SelectSingleNode("reload").InnerText);
+                                slot.chars.magazine = int.Parse(node.SelectSingleNode("magazine").InnerText);
+                                slot.chars.gunMode = node.SelectSingleNode("mode").InnerText;
+                            }
                         }
+                        break;
+                    case ShopSlotType.ARMOR:
+                        ArmorInventorySlot armorSlot = new ArmorInventorySlot();
+                        slot = armorSlot;
+                        armorSlot.armorId = int.Parse(node.SelectSingleNode("ingame_mysqlid").InnerText);
+
+
+                        armorSlot.gameSlot = (SLOTTYPE)int.Parse(node.SelectSingleNode("ingame_type").InnerText);
+
+                        armorIndexTable[armorSlot.armorId] = armorSlot;
                         break;
                     default:
                         slot = new InventorySlot();
@@ -504,7 +616,9 @@ public class ItemManager : MonoBehaviour {
                 {
                     try
                     {
-                        slot.timeEnd = DateTime.Parse(node.SelectSingleNode("time_end").InnerText);
+                        DateTime date = DateTime.Parse(node.SelectSingleNode("time_end").InnerText);
+
+                        slot.timeEnd = date.ToUniversalTime();
 
                     }
                     catch (Exception)
@@ -694,7 +808,7 @@ public class ItemManager : MonoBehaviour {
             {
                 WeaponIndex index = new WeaponIndex(node.SelectSingleNode("weaponId").InnerText);
                 index.gameClass = int.Parse(node.SelectSingleNode("gameClass").InnerText);
-                if (weaponIndexTable.ContainsKey(index.prefabId))
+                if (weaponIndexTable.ContainsKey(index.prefabId) && weaponIndexTable[index.prefabId].isAvailable())
                 {
                     int gameSlot = (int)weaponIndexTable[index.prefabId].gameSlot;
                     int set = int.Parse(node.SelectSingleNode("set").InnerText);
@@ -727,6 +841,15 @@ public class ItemManager : MonoBehaviour {
         }
 		//weaponPrefabsListbyId[prefab.SQLId].HUDIcon = weaponIndexTable[prefab.SQLId].textureGUI;
 	}
+    public void SetNewArmor(BaseArmor prefab)
+    {
+        //Debug.Log (prefab);
+        if (prefab.SQLId >= 0)
+        {
+            armorPrefabsListbyId[prefab.SQLId] = prefab;
+        }
+        //weaponPrefabsListbyId[prefab.SQLId].HUDIcon = weaponIndexTable[prefab.SQLId].textureGUI;
+    }
 	public BaseWeapon GetWeaponprefabByID(WeaponIndex index){
         if (weaponPrefabsListbyId[index.prefabId]!=null)
         {
@@ -739,6 +862,24 @@ public class ItemManager : MonoBehaviour {
 			return weaponPrefabsListbyId[0];
 		}
 	}
+    public BaseArmor GetArmorprefabByID(WeaponIndex index)
+    {
+        if (armorPrefabsListbyId[index.prefabId] != null)
+        {
+            if (armorIndexTable[index.prefabId].isAvailable())
+            {
+                return armorPrefabsListbyId[index.prefabId];
+            }
+            else
+            {
+                return null;
+            }
+        }
+        else
+        {
+            return armorPrefabsListbyId[0];
+        }
+    }
 
     public BaseWeapon GetWeaponprefabByID(int index)
     {
@@ -749,6 +890,17 @@ public class ItemManager : MonoBehaviour {
     public WeaponInventorySlot GetWeaponSlotbByID(WeaponIndex index)
     {
         return weaponIndexTable[index.prefabId];
+
+    }
+    public WeaponInventorySlot GetWeaponSlotbByID(int SQLID)
+    {
+
+        return weaponIndexTable[SQLID];
+
+    }
+    public ArmorInventorySlot GetArmorSlotbByID(WeaponIndex index)
+    {
+        return armorIndexTable[index.prefabId];
 
     }
 	public static GameClassEnum gameClassPase(string text){
@@ -815,6 +967,14 @@ public class ItemManager : MonoBehaviour {
 		StatisticHandler.instance.StartCoroutine(StatisticHandler.SendForm (form,StatisticHandler.SAVE_ITEM));
 	
 	}
+    public void MatchEnd()
+    {
+        SendChargeData();
+        foreach (KeyValuePair<string, ShootData> pair in toSendLower)
+        {
+            allShopSlot[pair.Key].ApplyCharge();
+        }
+    }
 	public void SendChargeData(){
 		WWWForm form = new WWWForm ();
 			
@@ -867,23 +1027,53 @@ public class ItemManager : MonoBehaviour {
 							}
 						}
                     break;
-				default:
+                case 0:
+                case 1:
+                case 2:
+                case 3:
+                    {
 
-                    BaseWeapon.SLOTTYPE slotType = (BaseWeapon.SLOTTYPE)gameSlot;
-						GameClassEnum MyANY = GameClassEnum.ANY;
-						if((int)gameClass>(int) GameClassEnum.ANY){
-							MyANY = GameClassEnum.ANYROBOT;
-						}
-						foreach(WeaponInventorySlot slot  in weaponIndexTable.Values){
-							if(slot.isAvailable()){
-								if (slot.gameSlot ==slotType && (slot.gameClass == MyANY || slot.gameClass == gameClass))
-								{
-									return slot;
-								
-								}
-							}
-						}
-                    break;
+                        SLOTTYPE slotType = (SLOTTYPE)gameSlot;
+                        GameClassEnum MyANY = GameClassEnum.ANY;
+                        if ((int)gameClass > (int)GameClassEnum.ANY)
+                        {
+                            MyANY = GameClassEnum.ANYROBOT;
+                        }
+                        foreach (WeaponInventorySlot slot in weaponIndexTable.Values)
+                        {
+                            if (slot.isAvailable())
+                            {
+                                if (slot.gameSlot == slotType && (slot.gameClass == MyANY || slot.gameClass == gameClass))
+                                {
+                                    return slot;
+
+                                }
+                            }
+                        }
+                        break;
+                    }
+                case 4:
+                case 5:
+                    {
+                        SLOTTYPE slotType = (SLOTTYPE)gameSlot;
+                        GameClassEnum MyANY = GameClassEnum.ANY;
+                        if ((int)gameClass > (int)GameClassEnum.ANY)
+                        {
+                            MyANY = GameClassEnum.ANYROBOT;
+                        }
+                        foreach (ArmorInventorySlot slot in armorIndexTable.Values)
+                        {
+                            if (slot.isAvailable())
+                            {
+                                if (slot.gameSlot == slotType && (slot.gameClass == MyANY || slot.gameClass == gameClass))
+                                {
+                                    return slot;
+
+                                }
+                            }
+                        }
+                        break;
+                    }
 						
 			}
 			
@@ -892,7 +1082,7 @@ public class ItemManager : MonoBehaviour {
 			
 		return null;
 	}
-	
+	/*
 	public List<GUIItem> GetItemForSlot(GameClassEnum gameClass, int gameSlot){
 		
 		//Debug.Log (gameClass +"  "+ gameSlot);
@@ -907,7 +1097,7 @@ public class ItemManager : MonoBehaviour {
 						return  GetArmorForSlot( gameClass,  gameSlot);
 				default:
 				
-					return  GetWeaponForSlot( gameClass, (BaseWeapon.SLOTTYPE) gameSlot);
+					return  GetWeaponForSlot( gameClass, (SLOTTYPE) gameSlot);
 			
 					
 			
@@ -973,7 +1163,7 @@ public class ItemManager : MonoBehaviour {
 		return weaponList;
 	}
   
-	public List<GUIItem> GetWeaponForSlot(GameClassEnum gameClass, BaseWeapon.SLOTTYPE gameSlot){
+	public List<GUIItem> GetWeaponForSlot(GameClassEnum gameClass, SLOTTYPE gameSlot){
 
         List<GUIItem> weaponList = new List<GUIItem>();
 		GameClassEnum MyANY = GameClassEnum.ANY;
@@ -1010,7 +1200,7 @@ public class ItemManager : MonoBehaviour {
 		}
 		return answer;
 		
-	}
+	}*/
 	//ENDPLAYER ITEM SECTION
 	
 	
@@ -1268,7 +1458,7 @@ public class ItemManager : MonoBehaviour {
                 {
                     gui.Shop.MainMenu.MoneyError();
                 }
-                gui.SetError(xmlDoc.SelectSingleNode("result/errortext").InnerText);
+                //gui.SetError(xmlDoc.SelectSingleNode("result/errortext").InnerText);
             }
         }
         

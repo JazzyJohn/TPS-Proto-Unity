@@ -13,7 +13,7 @@ public class BodyHurt : DamagebleObject {
 	public enum BodySegment {Chest=0, Head, None};
 	public BodySegment Organ;
 
-    public static float HEAD_SHOOT_MULTIPLIER = 2.5f;
+  
 	// Use this for initialization
 	void Start () {
 	
@@ -31,7 +31,6 @@ public class BodyHurt : DamagebleObject {
             switch (Organ)
             {
                 case BodySegment.Head:
-                    damage.Damage *= HEAD_SHOOT_MULTIPLIER;
                     damage.isHeadshoot = true;
                     break;
                 

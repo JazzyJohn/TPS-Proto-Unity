@@ -40,35 +40,7 @@ public class AddShops : MonoBehaviour
     }
 
 
-    public void Double()
-    {
-        ask.panel.alpha = 1.0f;
-        ask.text.text = TextGenerator.instance.GetSimpleText("DoubleExp");
-        ask.action = BuyDouble;
-        GA.API.Design.NewEvent("GUI:SmallShop:Double", 1);
-    }
-
-
-    public void BuyDouble()
-    {
-        if (AfterGameBonuses.done)
-        {
-            return;
-
-        }
-        if (GlobalPlayer.instance.gold >= PremiumManager.DOUBLECOST)
-        {
-            GA.API.Business.NewEvent("SmallShop:DoubleReward", "GOLD", PremiumManager.DOUBLECOST);
-            StartCoroutine(PremiumManager.instance.PayForDouble(this));
-        }
-        else
-        {
-
-            AskMoneyShow(BuyDouble);
-
-        }
-
-    }
+   
 
     public void AskMoneyShow(ConfirmAction action)
     {

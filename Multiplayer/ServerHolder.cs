@@ -655,6 +655,7 @@ public class ServerHolder : MonoBehaviour
 	
 	IEnumerator LoadMap (string mapName,bool next =false)
 	{
+        FPSControll.instance.dontCount = true;
         currentMap = mapName;
         Debug.Log("LOAD MAP" + currentMap);
 		//AsyncOperation async;
@@ -863,7 +864,8 @@ public class ServerHolder : MonoBehaviour
 		}
         NetworkController.Instance.pause = false;
       //  NetworkController.Instance.SpawnPlayer( Vector3.zero, Quaternion.identity);
-	
+        FPSControll.instance.dontCount = false;
+        FPSControll.instance.SetDelay(10.0f);
 	}
 	public void FinishLoad(){
 		if(!shouldLoad){

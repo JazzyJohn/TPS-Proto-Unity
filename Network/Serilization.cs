@@ -175,18 +175,51 @@ namespace nstuff.juggerfall.extension.models
 			return MakeQuaternion(quat);
 		}
 	}
+    public static class FlagsHelper
+    {
+        public static bool IsSet<T>(T flags, T flag) where T : struct
+        {
+            int flagsValue = (int)(object)flags;
+            int flagValue = (int)(object)flag;
+
+            return (flagsValue & flagValue) != 0;
+        }
+
+        public static void Set<T>(ref T flags, T flag) where T : struct
+        {
+            int flagsValue = (int)(object)flags;
+            int flagValue = (int)(object)flag;
+
+            flags = (T)(object)(flagsValue | flagValue);
+        }
+
+        public static void Unset<T>(ref T flags, T flag) where T : struct
+        {
+            int flagsValue = (int)(object)flags;
+            int flagValue = (int)(object)flag;
+
+            flags = (T)(object)(flagsValue & (~flagValue));
+        }
+    }
+    public enum DamageModifiers
+    {
+        NONE=0,
+        HEADSHOT= 1,
+        SPLASH = 2,
+        GUN = 3,
+        KNOCKOUT  =4,
+        CONTINIUS = 5
+    }
 	[Serializable]
     public class BaseDamageModel : SerializableSFSType
     {
         public float damage;
-		public float pushForce;
-		public bool knockOut;
-		public Vector3Model pushDirection;
-		public Vector3Model hitPosition;
-		public bool isContinius;
+	    public Vector3Model hitPosition;
+		
 		public int weaponId;
 		public int damageType;
-        public bool isHeadShot;
+        public float vsArmor;
+        public int modifiers=0;
 		 
         public BaseDamageModel()
         {
@@ -194,26 +227,50 @@ namespace nstuff.juggerfall.extension.models
         }
 		public BaseDamageModel(BaseDamage damage){
 			this.damage =damage.Damage;
-			this.pushForce= damage.pushForce;
-			this.knockOut= damage.knockOut;
-			this.isContinius= damage.isContinius;
-			this.pushDirection= new Vector3Model(damage.pushDirection);
+            if (damage.knockOut)
+            {
+                FlagsHelper.Set(ref modifiers, (int)DamageModifiers.KNOCKOUT);
+            }
+            if (damage.splash)
+            {
+                FlagsHelper.Set(ref modifiers, (int)DamageModifiers.SPLASH);
+            }
+            if (damage.isHeadshoot)
+            {
+                FlagsHelper.Set(ref modifiers, (int)DamageModifiers.HEADSHOT);
+            }
+            if (damage.weapon)
+            {
+                FlagsHelper.Set(ref modifiers, (int)DamageModifiers.GUN);
+            }
+			 if (damage.isContinius)
+            {
+                FlagsHelper.Set(ref modifiers, (int)DamageModifiers.CONTINIUS);
+            }
+			
+		
 			this.hitPosition= new Vector3Model(damage.hitPosition);
             this.weaponId = damage.shootWeapon;
 			this.damageType = (int)damage.type;
-            this.isHeadShot = damage.isHeadshoot;
+        
+            this.vsArmor = damage.vsArmor;
 		}	
 		public BaseDamage GetDamage(){
             BaseDamage damageClass = new BaseDamage();
             damageClass.Damage = damage;
-            damageClass.pushForce = pushForce;
-            damageClass.knockOut = knockOut;
-            damageClass.isContinius = isContinius;
-            damageClass.pushDirection = pushDirection.GetVector();
+            damageClass.pushForce = 0;
+            damageClass.knockOut = FlagsHelper.IsSet(modifiers, (int)DamageModifiers.KNOCKOUT);
+            damageClass.isHeadshoot = FlagsHelper.IsSet(modifiers, (int)DamageModifiers.HEADSHOT);
+            damageClass.splash = FlagsHelper.IsSet(modifiers, (int)DamageModifiers.SPLASH);
+            damageClass.weapon = FlagsHelper.IsSet(modifiers, (int)DamageModifiers.GUN);
+            damageClass.isContinius = FlagsHelper.IsSet(modifiers, (int)DamageModifiers.CONTINIUS);
+            
+            damageClass.pushDirection = Vector3.zero;
             damageClass.hitPosition = hitPosition.GetVector();
 			damageClass.shootWeapon =weaponId;
             damageClass.type = (DamageType)damageType;
-            damageClass.isHeadshoot = isHeadShot;
+           
+            damageClass.vsArmor = vsArmor;
             return damageClass;
 		}	
     }

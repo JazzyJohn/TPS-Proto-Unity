@@ -1,69 +1,65 @@
 ﻿using UnityEngine;
-using System.Collections;
-using RootMotion.FinalIK;
 
-public class CharacterControllerM1A1 : MonoBehaviour {
-	private float inputMagnitude;
-	public float inputMagnitudeDampTime;
-	
-	private float walkStartAngle;
-	public float walkStartAngleDampTime;
-	
-	private float walkStopAngle;
-	public float walkStopAngleDampTime;
-	
-	private float horAimAngle;
-	public float horAimAngleDampTime;
-	
-	private float inputAngle;
-	public float inputAngleDampTime;
-	private float inputAngleOld;
-	private float inputAngularSpeed;
+// Закомментированные строчки кода отключены по подозрению в бесполезности
+public class CharacterControllerM1A1 : MonoBehaviour
+{
+    //private float inputMagnitude;
+    //public float inputMagnitudeDampTime;
 
-	private Animator animator;
-	
-	public Pawn character;
-	private Rigidbody characterRigidbody;
+    //private float walkStartAngle;
+    //public float walkStartAngleDampTime;
 
-	private float IsRU;
-	private bool IsStopLU;
-	private bool IsStopRU;
+    //private float walkStopAngle;
+    //public float walkStopAngleDampTime;
 
-	private float Horizontal;
-	private float Vertical;
-	public float HorizontalDampTime;
-	public float VerticalDampTime;
+    //private float horAimAngle;
+    //public float horAimAngleDampTime;
 
-    private bool isStart=false;
+    //private float inputAngle;
+    //public float inputAngleDampTime;
+    //private float inputAngleOld;
+    //private float inputAngularSpeed;
 
-	private float speedAimFactor = 1f;
-	private float speedSprintFactor = 1f;
+    public float IKSetSpeed = 8f;
+    public float DelayAfterJump = 0.5f;
 
-	private float IKWeight = 1f;
+    private Animator animator;
 
-	private Transform camTransform;
+    [HideInInspector] public Pawn character;
+    private Rigidbody characterRigidbody;
 
-	public IKcontroller ik;
+    private float IsRU;
+    private bool IsStopLU;
+    private bool IsStopRU;
 
-	private Quaternion lookRotation;
+    private float horizontal;
+    private float vertical;
+    public float HorizontalDampTime;
+    public float VerticalDampTime;
 
-	private bool isCrouch;
+    private float IKWeight = 1f;
 
-	private float IsNotAim;
-	private float upperWeight;
+    private Transform camTransform;
 
-	// Use this for initialization
-	void Awake () {
-		animator = GetComponent<Animator> ();
-		camTransform = Camera.main.transform;
-		characterRigidbody = character.rigidbody;
-		isCrouch = false;
-	}
-	
-	void OnAnimatorMove () {
-		//Position
-       
-      
+    [HideInInspector] public IKcontroller ik;
+
+    //private Quaternion lookRotation;
+
+
+    //private float IsNotAim;
+    private float upperWeight;
+    private float inputValue;
+    private float lastTimeInAir;
+
+    private void Awake()
+    {
+        animator = GetComponent<Animator>();
+        camTransform = Camera.main.transform;
+        characterRigidbody = character.rigidbody;
+    }
+
+    private void OnAnimatorMove()
+    {
         if (!character.foxView.isMine)
         {
             return;
@@ -76,222 +72,173 @@ public class CharacterControllerM1A1 : MonoBehaviour {
             case CharacterState.Idle:
             case CharacterState.Crouching:
                 Vector3 velocity = animator.deltaPosition / Time.deltaTime;
-		        velocity.y = characterRigidbody.velocity.y;
-		        characterRigidbody.velocity = velocity;
+                velocity.y = characterRigidbody.velocity.y;
+                characterRigidbody.velocity = velocity;
                 break;
         }
-		
-	}
-	
-	// Update is called once per frame
-	void Update () {
-       
-		GetAnimatorVariables ();
-		GetInput ();
-        if (isStart)
+    }
+
+    private void Update()
+    {
+        GetAnimatorVariables();
+        GetInput();
+        //if (isStart)
+        //{
+        //    walkStartAngle = inputAngle;
+        //}
+        //if (inputMagnitude > 0.7f) 
+        //    walkStopAngle = inputAngle;
+
+        if (!character.IsGrounded())
         {
-			walkStartAngle = inputAngle;
-			//horAimAngle = inputAngle;
-		}
-		if (inputMagnitude > 0.7f) walkStopAngle = inputAngle;
-		
-		ChooseStopAnimation ();
-		
-		SetCharacterPositionAndRotation ();
-		
-		SetAnimatorVariables ();
+            lastTimeInAir = Time.time;
+        }
 
-		SetAimWeight ();
-	}
+        ChooseStopAnimation();
 
-	void GetInput () {
+        //SetCharacterPositionAndRotation();
+
+        SetAnimatorVariables();
+
+        SetAimWeight();
+    }
+
+    private void GetInput()
+    {
         Vector3 nextMovement;
-            if (character.foxView.isMine)
+        if (character.foxView.isMine)
+        {
+            nextMovement = character.GetNextMovement();
+        }
+        else
+        {
+            nextMovement = character.GetVelocity();
+            if (nextMovement.sqrMagnitude < 0.1f)
             {
-         
-                nextMovement = character.GetNextMovement();
-              
+                nextMovement = Vector3.zero;
             }
-            else
+        }
+
+        horizontal = Vector3.Dot(nextMovement.normalized, character.myTransform.right);
+        vertical = Vector3.Dot(nextMovement.normalized, character.myTransform.forward);
+
+        if (Mathf.Abs(horizontal) < 0.1f)
+        {
+            horizontal = 0.0f;
+        }
+        if (Mathf.Abs(vertical) < 0.1f)
+        {
+            vertical = 0.0f;
+        }
+        
+        //set inputMagnitude
+        //Vector2 speedVec = new Vector2(Horizontal, Vertical);
+        //inputMagnitude = Mathf.Clamp(speedVec.magnitude, 0, 1);
+        inputValue = Mathf.Abs(horizontal) + Mathf.Abs(vertical);
+
+        Vector3 CameraDirection = camTransform.forward;
+        CameraDirection.y = 0.0f; // kill Y
+        
+        //Vector3 moveDirection;
+
+        //moveDirection = nextMovement.normalized;
+        //isStart = false;
+        //if (moveDirection.sqrMagnitude == 0)
+        //{
+        //    inputAngle = 0;
+        //}
+        //else
+        //{
+        //    Vector3 axis = Vector3.Cross(transform.forward, moveDirection);
+        //    if (inputAngle == 0)
+        //    {
+        //        isStart = true;
+        //    }
+        //    inputAngle = Vector3.Angle(transform.forward, moveDirection) * Mathf.Sign(axis.y);
+        //}
+
+        //float deltaInputAngle = inputAngleOld - inputAngle;
+        //inputAngularSpeed = deltaInputAngle / Time.deltaTime;
+        //inputAngleOld = inputAngle;
+
+        float speedFactor;
+
+        //Aim
+        if (character.isAiming)
+        {
+            speedFactor = 0.5f;
+        }
+        else
+        {
+            speedFactor = 1f;
+            animator.SetBool("Sprint", character.IsSprinting());
+        }
+
+        horizontal *= speedFactor;
+        vertical *= speedFactor;
+
+        animator.SetBool("Crouch", character.IsCrouch());
+    }
+
+    private void GetAnimatorVariables()
+    {
+        IsRU = animator.GetFloat(Animator.StringToHash("IsRU"));
+        //IsNotAim = animator.GetFloat(Animator.StringToHash("IsNotAim"));
+    }
+
+    private void SetAnimatorVariables()
+    {
+        //animator.SetFloat(Animator.StringToHash("InputMagnitude"), inputMagnitude, inputMagnitudeDampTime,
+            //Time.deltaTime);
+        animator.SetFloat(Animator.StringToHash("InputValue"), inputValue);
+        //animator.SetFloat(Animator.StringToHash("WalkStartAngle"), walkStartAngle, walkStartAngleDampTime,
+        //    Time.deltaTime);
+        //animator.SetFloat(Animator.StringToHash("WalkStopAngle"), walkStopAngle, walkStopAngleDampTime, Time.deltaTime);
+        //animator.SetFloat(Animator.StringToHash("HorAimAngle"), horAimAngle, horAimAngleDampTime, Time.deltaTime);
+        //animator.SetFloat(Animator.StringToHash("InputAngle"), inputAngle, inputAngleDampTime, Time.deltaTime);
+        animator.SetBool(Animator.StringToHash("IsStopRU"), IsStopRU);
+        animator.SetBool(Animator.StringToHash("IsStopLU"), IsStopLU);
+        animator.SetFloat(Animator.StringToHash("Horizontal"), horizontal, HorizontalDampTime, Time.deltaTime);
+        animator.SetFloat(Animator.StringToHash("Vertical"), vertical, VerticalDampTime, Time.deltaTime);
+        //animator.SetFloat(Animator.StringToHash("InputAngularSpeed"), inputAngularSpeed, inputAngleDampTime,
+            //Time.deltaTime);
+    }
+
+    //private void SetCharacterPositionAndRotation()
+    //{
+    //    if (!(character.GetComponent<AIAgentComponent>()))
+    //    {
+    //        transform.rotation = lookRotation;
+    //    }
+    //}
+
+    private void ChooseStopAnimation()
+    {
+        if (inputValue > 0.95)
+        {
+            IsStopLU = IsRU <= 0.95;
+            IsStopRU = IsRU > 0.95;
+        }
+    }
+
+    private void SetAimWeight()
+    {
+        if (character.IsSprinting())
+        {
+            if (lastTimeInAir + DelayAfterJump > Time.time)
             {
-                nextMovement = character.GetVelocity();
-                if (nextMovement.sqrMagnitude < 0.1f)
-                {
-                    nextMovement = Vector3.zero;
-                }
-             
+                return;
             }
 
-            Horizontal = Vector3.Dot(nextMovement.normalized, character.myTransform.right);
-            Vertical = Vector3.Dot(nextMovement.normalized, character.myTransform.forward);
-            if (Mathf.Abs(Horizontal) < 0.1f)
-            {
-                Horizontal = 0.0f;
-            }
-            if (Mathf.Abs(Vertical)< 0.1f)
-            {
-                Vertical = 0.0f;
-            }
-            if (!character.isAi)
-            {
-                
-
-               // Debug.Log("Horizontal " + Horizontal + " Vertical " + Vertical);
-            }
-			//set inputMagnitude
-			Vector2 speedVec =  new Vector2 (Horizontal, Vertical);
-			inputMagnitude = Mathf.Clamp (speedVec.magnitude, 0, 1);
-			
-			//set inputAngle
-			Vector3 stickDirection = new Vector3 (Horizontal, 0, Vertical);
-			
-			Vector3 CameraDirection = camTransform.forward;
-			CameraDirection.y = 0.0f; // kill Y
-			Quaternion referentialShift = Quaternion.FromToRotation (Vector3.forward, CameraDirection);
-			
-
-
-			Vector3 moveDirection;
-
-			moveDirection = nextMovement.normalized;
-            isStart = false;
-            if (moveDirection.sqrMagnitude == 0)
-            {
-                inputAngle=0;
-            }
-             else
-            {
-                Vector3 axis = Vector3.Cross(transform.forward, moveDirection);
-                if (inputAngle == 0)
-                {
-                    isStart = true;
-                }
-                inputAngle = Vector3.Angle(transform.forward, moveDirection) * (axis.y < 0 ? -1 : 1);
-            }
-			
-			float deltaInputAngle = inputAngleOld - inputAngle;
-			inputAngularSpeed = deltaInputAngle/Time.deltaTime;
-			inputAngleOld = inputAngle;
-			
-			//Aim
-			if (character.isAiming) {
-				speedAimFactor = 0.5f;
-				speedSprintFactor = 1f;
-			}
-			else {
-				speedAimFactor = 1f;
-				if (character.IsSprinting ()) speedSprintFactor = 2f;
-				else speedSprintFactor = 1f;
-			}
-			
-			Horizontal *= speedAimFactor * speedSprintFactor;
-			Vertical *= speedAimFactor * speedSprintFactor;
-
-
-          //  Debug.Log(character.IsCrouch());
-			if (character.IsCrouch()&&!isCrouch) {
-				isCrouch = true;
-				animator.SetTrigger (Animator.StringToHash ("CrouchTrigger"));
-			}
-			if(!character.IsCrouch()&&isCrouch){
-				isCrouch = false;
-				animator.SetTrigger (Animator.StringToHash ("UpTrigger"));
-			}
-		/*}
-		else {
-			Horizontal = Input.GetAxis ("Horizontal");
-			Vertical = Input.GetAxis ("Vertical");
-			
-			//set inputMagnitude
-			Vector2 speedVec =  new Vector2 (Horizontal, Vertical);
-			inputMagnitude = Mathf.Clamp (speedVec.magnitude, 0, 1);
-			
-			//set inputAngle
-			Vector3 stickDirection = new Vector3 (Horizontal, 0, Vertical);
-			
-			Vector3 CameraDirection = camTransform.forward;
-			CameraDirection.y = 0.0f; // kill Y
-			Quaternion referentialShift = Quaternion.FromToRotation (Vector3.forward, CameraDirection);
-			
-			Vector3 moveCompassVector3 = new Vector3 (0f, camTransform.rotation.eulerAngles.y, 0f);
-			lookRotation = Quaternion.Euler (moveCompassVector3);
-			
-			Vector3 moveDirection;
-			if (inputMagnitude > 0.2f) moveDirection = referentialShift * stickDirection;
-			else moveDirection = referentialShift * Vector3.forward;
-			
-			Vector3 axis = Vector3.Cross (transform.forward, moveDirection);
-			
-			inputAngle = Vector3.Angle (transform.forward, moveDirection) * (axis.y < 0 ? -1 : 1);
-			float deltaInputAngle = inputAngleOld - inputAngle;
-			inputAngularSpeed = deltaInputAngle/Time.deltaTime;
-			inputAngleOld = inputAngle;
-			
-			//Aim
-			if (character.isAiming) {
-				speedAimFactor = 0.5f;
-				speedSprintFactor = 1f;
-			}
-			else {
-				speedAimFactor = 1f;
-				if (character.IsSprinting ()) speedSprintFactor = 2f;
-				else speedSprintFactor = 1f;
-			}
-			
-			Horizontal *= speedAimFactor * speedSprintFactor;
-			Vertical *= speedAimFactor * speedSprintFactor;
-			*/
-			
-		
-	}
-	
-	void GetAnimatorVariables () {
-		IsRU = animator.GetFloat (Animator.StringToHash ("IsRU"));
-		IsNotAim = animator.GetFloat (Animator.StringToHash ("IsNotAim"));
-	}
-	
-	void SetAnimatorVariables () {
-		animator.SetFloat (Animator.StringToHash ("InputMagnitude"), inputMagnitude, inputMagnitudeDampTime, Time.deltaTime);
-		animator.SetFloat (Animator.StringToHash ("WalkStartAngle"), walkStartAngle, walkStartAngleDampTime, Time.deltaTime);
-		animator.SetFloat (Animator.StringToHash ("WalkStopAngle"), walkStopAngle, walkStopAngleDampTime, Time.deltaTime);
-		animator.SetFloat (Animator.StringToHash ("HorAimAngle"), horAimAngle, horAimAngleDampTime, Time.deltaTime);
-		animator.SetFloat (Animator.StringToHash ("InputAngle"), inputAngle, inputAngleDampTime, Time.deltaTime);
-		animator.SetBool (Animator.StringToHash ("IsStopRU"), IsStopRU);
-		animator.SetBool (Animator.StringToHash ("IsStopLU"), IsStopLU);
-		animator.SetFloat (Animator.StringToHash ("Horizontal"), Horizontal, HorizontalDampTime, Time.deltaTime);
-		animator.SetFloat (Animator.StringToHash ("Vertical"), Vertical, VerticalDampTime, Time.deltaTime);
-		animator.SetFloat (Animator.StringToHash ("InputAngularSpeed"), inputAngularSpeed, inputAngleDampTime, Time.deltaTime);
-	}
-
-	void SetCharacterPositionAndRotation () {
-		if (!(character.GetComponent<AIAgentComponent>())) {
-			transform.rotation = lookRotation;
-		}
-	}
-
-	void ChooseStopAnimation() {
-		if (inputMagnitude > 0.95) {
-			if (IsRU > 0.95) {
-				IsStopLU = false;
-				IsStopRU = true;
-			}
-			else {
-				IsStopLU = true;
-				IsStopRU = false;
-			}
-		}
-	}
-
-	void SetAimWeight () {
-		if (Vertical > 1.1f) {
-			IKWeight = Mathf.Lerp (IKWeight, 0f, Time.deltaTime * 8f);
-			upperWeight = IKWeight;
-		}
-		else {
-			IKWeight = 1f - IsNotAim;
-			upperWeight = Mathf.Lerp (upperWeight, 1f, Time.deltaTime * 8f);
-		}
-		ik.SetWeight (IKWeight);
-		animator.SetLayerWeight (1, upperWeight);
-	}
+            IKWeight = Mathf.Lerp(IKWeight, 0f, Time.deltaTime * IKSetSpeed);
+            upperWeight = IKWeight;
+        }
+        else
+        {
+            upperWeight = Mathf.Lerp(upperWeight, 1f, Time.deltaTime * IKSetSpeed);
+            IKWeight = upperWeight;
+        }
+        ik.SetWeight(IKWeight);
+        animator.SetLayerWeight(1, upperWeight);
+    }
 }

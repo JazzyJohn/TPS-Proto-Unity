@@ -6,7 +6,7 @@ using System.Collections.Generic;
 using System.Xml;
 
 
-public enum PASSIVESKILLCONDITION{NeedOpen,NeedSkillPoint};
+public enum PASSIVESKILLCONDITION{None,NeedOpen,NeedSkillPoint};
 
 public class  PassiveSkill{
 	public PassiveSkill(){
@@ -73,7 +73,7 @@ public class PassiveSkillClass {
 				return totalPoint>=skill.openKey;
 			break;
 		}
-		return false;
+		return true;
 	}
 
 }
@@ -109,7 +109,7 @@ public class PassiveSkillManager : MonoBehaviour
 					totalSkill+=	skill.lvl;
 					skillClass.openSkills.Add(skill.id);
 				}else{
-                    skill.condition = (PASSIVESKILLCONDITION)int.Parse(skillNode.SelectSingleNode("condition").InnerText);
+                    skill.condition = (PASSIVESKILLCONDITION)Enum.Parse(typeof(PASSIVESKILLCONDITION), skillNode.SelectSingleNode("condition").InnerText);
                     skill.openKey = int.Parse(skillNode.SelectSingleNode("openKey").InnerText);
 				}
 					

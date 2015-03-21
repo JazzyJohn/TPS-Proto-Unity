@@ -11,6 +11,7 @@ public enum EffectType{
 }
 public enum CharacteristicList{
 		SPEED,
+        SPRINT_SPEED,
 		MAXHEALTH,
 		WALLSPEED,
 		JUMPHEIGHT,
@@ -28,17 +29,37 @@ public enum CharacteristicList{
 
 		RELOAD_SPEED,
 		RECOIL_ALL,
+        RECOIL_DOP,
+        RECOIL_MAIN,
 		RECOIL_MACHINEGUN,
 		RECOIL_ROCKET,
+
+        AIM_ALL,
+        AIM_DOP,
+        AIM_MAIN,
+
 		FIRE_RATE,
 		
 		DAMAGE_ALL,
 		DAMAGE_REDUCE_SPLASH,
 		DAMAGE_REDUCE_GUN,
 		DAMAGE_REDUCE_ALL,
+        DAMAGE_REDUCE_HEAD,
+
+        DAMAGE_ADD_DOP,
+        DAMAGE_ADD_MAIN,
+
+        DISTANCE_MAIN,
+
+        WEAR,
 		
 		AMMO_AMOUNT,
-		
+
+        KILL_REFILE,
+
+        HEAD_BLOCK,
+
+        REGEN
 		
 		
 }

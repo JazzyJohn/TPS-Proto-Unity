@@ -12,12 +12,18 @@ public class ShellparticleSystem : MonoBehaviour
 	//Функция создания гильзы
 	public void Play(Collider owner)
 	{
-        if (ShellControl.shellCount >= ShellControl.MAX_SHELL_COUNT)
-        {
-            return;
-        }
-        ShellControl.shellCount++;
+        
 		//Создаем гильзу
+        if (shellPrefab.CountPooled() == 0) {
+            if (shellPrefab.CountSpawned() == 0)
+            {
+                shellPrefab.CreatePool(30);
+            }
+            else
+            {
+                return;
+            }
+        }
 		GameObject shellObject =shellPrefab.Spawn(transform.position, Quaternion.Euler(new Vector3(0, 0, 90)));
 
 		//Устанавливаем текущую угловую скорость, скорость движения

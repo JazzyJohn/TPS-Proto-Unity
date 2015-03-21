@@ -10,6 +10,9 @@ public class RifleParticleController : MonoBehaviour
 	public GameObject simpleRay;
 	
 	protected Collider owner;
+     private Renderer renderer;
+
+  
 	//Инициализация, получаем ссылки на необходимые нам компоненты
 	protected void Start()
 	{
@@ -20,12 +23,13 @@ public class RifleParticleController : MonoBehaviour
 
 	public void SetOwner(Collider newOwner){
 		owner = newOwner;
+        this.renderer = newOwner.GetComponentInChildren<Renderer>();
 	}
 	//Функция создания самого выстрела
     public void CreateShootFlame()
     {
 
-        if (shellParticles != null)
+        if (renderer != null && renderer.isVisible && shellParticles != null)
         {
             shellParticles.Play(owner);
         }
