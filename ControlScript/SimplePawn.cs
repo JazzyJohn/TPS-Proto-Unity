@@ -92,6 +92,11 @@ public class SimplePawn : Pawn
                 {
                     velocityChange = nextMovement.normalized * groundSprintSpeed - velocity;
                 }
+                else
+                {
+                    rigidbody.AddForce(velocityChange.normalized * groundSprintSpeed, ForceMode.VelocityChange);
+                    Jump();
+                }
                 //Debug.Log (velocityChange);
                 if (!jetPackEnable || stopSprint)
                 {

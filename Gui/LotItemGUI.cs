@@ -6,6 +6,7 @@ public class LotItemGUI : MonoBehaviour
 
 
     public CharSection weaponSection;
+    public ArmorSection armSection;
 
     public InventoryGUI Shop;
     public InventorySlot item;
@@ -16,14 +17,19 @@ public class LotItemGUI : MonoBehaviour
     public UIWidget Box;
     public UILabel loading;
     public UILabel buyLabel;
-	
-   
+
+    
+
 
 	public UIWidget forGold;
 	
 	public UILabel[] goldPrices;
 	
 	public UIWidget forKP;
+
+    public UIWidget forSpecial;
+
+    public UILabel forSpecialLabel;
 
     public UIWidget buyKP;
 
@@ -72,9 +78,13 @@ public class LotItemGUI : MonoBehaviour
     {
         item = _item;
         Debug.Log(item.buyMode);
+
+      
+
         if (item.buyMode == BuyMode.FOR_KP)
         {
             buyKP.alpha = 0.0f;
+            forSpecial.alpha = 0.0f;
             buyUnbreake.alpha = 1.0f;
             repairKP.alpha = 1.0f;
 
@@ -82,16 +92,65 @@ public class LotItemGUI : MonoBehaviour
         else if(item.buyMode ==BuyMode.FOR_KP_UNBREAK)
         {
             buyKP.alpha = 0.0f;
+            forSpecial.alpha = 0.0f;
             buyUnbreake.alpha = 0.0f;
             repairKP.alpha = 0.0f;
         }             
         else
         {
             buyUnbreake.alpha = 0.0f;
-            buyKP.alpha = 1.0f;
+          
+            if (item.prices[0].parts[0].amount < 0)
+            {
+
+                forSpecial.alpha = 1.0f;
+                buyKP.alpha =0.0f;
+                if (item.prices[0].parts[0].amount < 0)
+                {
+
+                    forSpecialLabel.text = TextGenerator.instance.GetSimpleText("itemForRewardID" + item.prices[0].parts[0].amount);
+                }
+            }
+            else
+            {
+                buyKP.alpha = 1.0f;
+                forSpecial.alpha = 0.0f;
+            }
             repairKP.alpha = 0.0f;
         }
+        if (item.prices[0].type == BuyPrice.KP_PRICE)
+        {
+            forGold.alpha = 0.0f;
+            forKP.alpha = 1.0f;
+           
+           
+                
+                for (int i = 0; i < item.prices.Length; i++)
+                {
+                    kpPrices[i].text = item.prices[i].parts[0].amount.ToString();
+                }
+           
 
+        }
+        else
+        {
+            if (item.buyMode == BuyMode.FOR_GOLD_FOREVER)
+            {
+
+                forGold.alpha = 0.0f;
+                forKP.alpha = 0.0f;
+            }
+            else
+            {
+
+                forGold.alpha = 1.0f;
+                forKP.alpha = 0.0f;
+                for (int i = 0; i < item.prices.Length; i++)
+                {
+                    goldPrices[i].text = item.prices[i].parts[0].amount.ToString();
+                }
+            }
+        }
         if (item.isAvailable())
         {
             useItem.alpha = 1.0f;
@@ -103,33 +162,13 @@ public class LotItemGUI : MonoBehaviour
         }
 
 
-		if(item.prices[0].type==BuyPrice.KP_PRICE){
-			forGold.alpha = 0.0f;
-			forKP.alpha = 1.0f;
-            for (int i = 0; i < item.prices.Length; i++)
-            {
-				kpPrices[i].text =item.prices[i].parts[0].amount.ToString();
-			}
-		}else{
-            if (item.buyMode == BuyMode.FOR_GOLD_FOREVER)
-            {
-                forGold.alpha = 0.0f;
-                forKP.alpha = 0.0f;
-            }
-            else{
-			    forGold.alpha = 1.0f;
-			    forKP.alpha = 0.0f;
-			    for(int i =0;i< item.prices.Length;i++){
-                    goldPrices[i].text = item.prices[i].parts[0].amount.ToString();
-			    }
-            }
-		}
+		
 
         
         GA.API.Design.NewEvent("GUI:MainMenu:Shop:SelectItem:" + _item.engName);
         Name.text = item.name;
 		
-        Description.text = item.description;
+       
 
         if (gunModel != null)
         {
@@ -137,19 +176,29 @@ public class LotItemGUI : MonoBehaviour
         }
         gunModel = null;
         ItemManager.instance.LoadModel(item);
+        Description.text = item.description;
         if (item.type == ShopSlotType.WEAPON)
         {
+            
+            WeaponInventorySlot weapon = (WeaponInventorySlot)item;
             weaponSection.widget.alpha = 1.0f;
-            weaponSection.magazine.text = item.chars.magazine.ToString();
-            weaponSection.dmg.value = item.chars.dmg;
-            weaponSection.aim.value = item.chars.aim;
-            weaponSection.reload.value = item.chars.reload;
-            weaponSection.speed.value = item.chars.speed;
-            weaponSection.mode.text = TextGenerator.instance.GetSimpleText(item.chars.gunMode);
+            weaponSection.magazine.text = weapon.chars.magazine.ToString();
+            weaponSection.dmg.value = weapon.chars.dmg;
+            weaponSection.aim.value = weapon.chars.aim;
+            weaponSection.reload.value = weapon.chars.reload;
+            weaponSection.speed.value = weapon.chars.speed;
+            weaponSection.mode.text = TextGenerator.instance.GetSimpleText(weapon.chars.gunMode);
+            armSection.widget.alpha =0.0f;
+          
+        } else if(item.type == ShopSlotType.ARMOR) {
+            ArmorInventorySlot armor = (ArmorInventorySlot)item;
+            armSection.def.value = armor.chars.def/100;
+            weaponSection.widget.alpha = 0.0f;
         }
         else
         {
-            weaponSection.widget.alpha = 0.0f;
+              weaponSection.widget.alpha = 0.0f;
+              armSection.widget.alpha =0.0f;
         }
         loading.alpha = 1.0f;
     }
@@ -209,4 +258,12 @@ public class CharSection
     public UIProgressBar aim;
     public UIProgressBar speed;
     public UIProgressBar reload;
+}
+[System.Serializable]
+public class ArmorSection
+{
+    public UIWidget widget;
+ 
+    public UIProgressBar def;
+
 }

@@ -40,7 +40,7 @@ public class MusicHolder : MonoBehaviour {
     public bool wasIntro;
 	
 	public static void  SetVolume(float newVolume){
-	
+      //  Debug.Log(newVolume);
 		
 		MusicHolder holder = FindObjectOfType(typeof (MusicHolder)) as MusicHolder;
 		if(holder!=null){

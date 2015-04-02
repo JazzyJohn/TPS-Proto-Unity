@@ -215,7 +215,7 @@ namespace nstuff.juggerfall.extension.models
     {
         public float damage;
 	    public Vector3Model hitPosition;
-		
+        public Vector3Model pushDirection;
 		public int weaponId;
 		public int damageType;
         public float vsArmor;
@@ -252,7 +252,7 @@ namespace nstuff.juggerfall.extension.models
 			this.hitPosition= new Vector3Model(damage.hitPosition);
             this.weaponId = damage.shootWeapon;
 			this.damageType = (int)damage.type;
-        
+            this.pushDirection = new Vector3Model(damage.pushDirection);
             this.vsArmor = damage.vsArmor;
 		}	
 		public BaseDamage GetDamage(){
@@ -265,7 +265,7 @@ namespace nstuff.juggerfall.extension.models
             damageClass.weapon = FlagsHelper.IsSet(modifiers, (int)DamageModifiers.GUN);
             damageClass.isContinius = FlagsHelper.IsSet(modifiers, (int)DamageModifiers.CONTINIUS);
             
-            damageClass.pushDirection = Vector3.zero;
+            damageClass.pushDirection = pushDirection.GetVector();
             damageClass.hitPosition = hitPosition.GetVector();
 			damageClass.shootWeapon =weaponId;
             damageClass.type = (DamageType)damageType;

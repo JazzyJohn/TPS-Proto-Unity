@@ -58,7 +58,7 @@ public class TopGUI : MonoBehaviour {
     public void Populate()
     {
         isPopulate = true;
-        List<Winner[]> tops  =  TournamentManager.instance.GetAllTops();
+        List<Top> tops  =  TournamentManager.instance.GetAllTops();
       
         for (int i = 0; i < tops.Count;i++ )
         {
@@ -69,7 +69,7 @@ public class TopGUI : MonoBehaviour {
             newTrans.localPosition = new Vector3(0f, 0f, 0f);
 
             OneTopGUI gui = newTrans.GetComponent<OneTopGUI>();
-            gui.Populate(tops[i], TextGenerator.instance.GetSimpleText("topName"+i));
+            gui.Populate(tops[i].winners, tops[i].name);
         }
         table.Reposition();
         scrollview.ResetPosition();

@@ -178,7 +178,7 @@ public class BaseProjectile : MonoBehaviour
         sControl.playClip(reactiveEngineSound);
 		mTransform = transform;
 		mRigidBody = rigidbody;
-        if (hitParticle.CountPooled() == 0 && hitParticle.CountSpawned() == 0)
+        if (hitParticle!=null&&hitParticle.CountPooled() == 0 && hitParticle.CountSpawned() == 0)
         {
             hitParticle.CreatePool(50);
         }
@@ -721,6 +721,7 @@ public class BaseProjectile : MonoBehaviour
        // Debug.DrawLine(effectPosition, effectPosition + Vector3.up * 2, Color.red, 10.0f);
         if (!this.IsOnScreen(effectPosition))
         {
+           
             return;
         }
         if ( hitParticle != null && hitParticle.CountPooled() != 0)

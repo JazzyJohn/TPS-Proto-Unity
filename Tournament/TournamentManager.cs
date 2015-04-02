@@ -27,6 +27,12 @@ public class Winner{
 	}
 }
 
+public class Top
+{
+    public string name;
+
+    public Winner[] winners;
+}
 public class BaseSocEvent{
 	public bool isFinished;
 
@@ -96,7 +102,7 @@ public class TournamentManager : MonoBehaviour, LocalPlayerListener, GameListene
 
 	List<string> uids =  new List<string>();
 
-    List<Winner[]> tops = new List<Winner[]>();
+    List<Top> tops = new List<Top>();
 
 
 	
@@ -111,19 +117,19 @@ public class TournamentManager : MonoBehaviour, LocalPlayerListener, GameListene
 
 
 
-    public Winner[] GetTop(TOPS top)
+    public Top GetTop(TOPS top)
     {
         return tops[(int)top];
     }
-    public List<Winner[]>  GetAllTops()
+    public List<Top> GetAllTops()
     {
         return tops;
     }
 
-    public List<Winner[]> GetRandomTops(int amount, out List<int> indexs)
+    public List<Top> GetRandomTops(int amount, out List<int> indexs)
     {
         indexs = new List<int>();
-        List<Winner[]> answer = new List<Winner[]>();
+        List<Top> answer = new List<Top>();
         if (amount >= tops.Count)
         {
             return tops;
@@ -152,6 +158,7 @@ public class TournamentManager : MonoBehaviour, LocalPlayerListener, GameListene
 		}
         XmlNodeList killersXml = xmlDoc.SelectNodes("player/globalkillers");
 
+        Top top = new Top();
         Winner[] killers = new Winner[killersXml.Count];
 		
 		for(int j=0;j<killersXml.Count;j++){
@@ -159,9 +166,11 @@ public class TournamentManager : MonoBehaviour, LocalPlayerListener, GameListene
 			killers[j] = new Winner(GetUser(node.SelectSingleNode("uid").InnerText),int.Parse(node.SelectSingleNode("score").InnerText));
 			
 		}
-        tops.Add(killers);
+        top.winners = killers;
+        top.name = TextGenerator.instance.GetSimpleText("topNameglobalkillers");
+        tops.Add(top);
         killersXml = xmlDoc.SelectNodes("player/globalaikillers");
-
+        top = new Top();
         killers = new Winner[killersXml.Count];
 		
 		for(int j=0;j<killersXml.Count;j++){
@@ -169,10 +178,12 @@ public class TournamentManager : MonoBehaviour, LocalPlayerListener, GameListene
             killers[j] = new Winner(GetUser(node.SelectSingleNode("uid").InnerText), int.Parse(node.SelectSingleNode("score").InnerText));
 			
 		}
-        tops.Add(killers);
+        top.winners = killers;
+        top.name = TextGenerator.instance.GetSimpleText("topNameglobalaikillers");
+        tops.Add(top);
 
         killersXml = xmlDoc.SelectNodes("player/toplvls");
-
+        top = new Top();
         killers = new Winner[killersXml.Count];
 
         for (int j = 0; j < killersXml.Count; j++)
@@ -181,9 +192,25 @@ public class TournamentManager : MonoBehaviour, LocalPlayerListener, GameListene
             killers[j] = new Winner(GetUser(node.SelectSingleNode("uid").InnerText), int.Parse(node.SelectSingleNode("score").InnerText));
 
         }
-        tops.Add(killers);
+        top.winners = killers;
+        top.name = TextGenerator.instance.GetSimpleText("topNametoplvls");
+        tops.Add(top);
 
         killersXml = xmlDoc.SelectNodes("player/topcash");
+        top = new Top();
+        killers = new Winner[killersXml.Count];
+
+        for (int j = 0; j < killersXml.Count; j++)
+        {
+            XmlNode node = killersXml[j];
+            killers[j] = new Winner(GetUser(node.SelectSingleNode("uid").InnerText), int.Parse(node.SelectSingleNode("score").InnerText));
+
+        }
+        top.winners = killers;
+        top.name = TextGenerator.instance.GetSimpleText("topNametopcash");
+        tops.Add(top);
+
+       /* killersXml = xmlDoc.SelectNodes("player/daylic");
 
         killers = new Winner[killersXml.Count];
 
@@ -193,19 +220,7 @@ public class TournamentManager : MonoBehaviour, LocalPlayerListener, GameListene
             killers[j] = new Winner(GetUser(node.SelectSingleNode("uid").InnerText), int.Parse(node.SelectSingleNode("score").InnerText));
 
         }
-        tops.Add(killers);
-
-        killersXml = xmlDoc.SelectNodes("player/daylic");
-
-        killers = new Winner[killersXml.Count];
-
-        for (int j = 0; j < killersXml.Count; j++)
-        {
-            XmlNode node = killersXml[j];
-            killers[j] = new Winner(GetUser(node.SelectSingleNode("uid").InnerText), int.Parse(node.SelectSingleNode("score").InnerText));
-
-        }
-        tops.Add(killers);
+        tops.Add(killers);*/
         XmlNode lastOperationNode  = xmlDoc.SelectSingleNode("player/lastoperation");
         if (lastOperationNode!=null)
         {

@@ -35,9 +35,15 @@ public class InvItemGUI : MonoBehaviour {
 
     public UISprite repair;
 
+    public UIWidget repairBarFon;
+
+    public UISprite repairBar;
+
     public UIWidget timerFon;
 
     public UILabel timerLabel;
+
+    
 
 	// Use this for initialization
 	void Start () {
@@ -102,30 +108,36 @@ public class InvItemGUI : MonoBehaviour {
         }
         if (item.buyMode == BuyMode.FOR_KP)
         {
+            repairBarFon.alpha = 1.0f;
             int percent =  item.GetChargePercent();
+            repairBar.fillAmount = (float)Mathf.Max(percent,10) / 100.0f;
             if (percent > 70)
             {
                 repairFon.alpha = 0.0f;
+                repairBar.color = repairColors[0];
             }
             else if (percent > 50)
             {
                 repairFon.alpha = 1.0f;
                 repair.color = repairColors[0];
+                repairBar.color = repairColors[0];
             }
             else if (percent > 30)
             {
                 repairFon.alpha = 1.0f;
                 repair.color = repairColors[1];
+                repairBar.color = repairColors[1];
             }
             else 
             {
                 repairFon.alpha = 1.0f;
                 repair.color = repairColors[2];
+                repairBar.color = repairColors[2];
             }
 
         }else{
             repairFon.alpha = 0.0f;
-
+            repairBarFon.alpha = 0.0f;
         }
         if (item.buyMode == BuyMode.FOR_GOLD_TIME && item.isAvailable())
         {

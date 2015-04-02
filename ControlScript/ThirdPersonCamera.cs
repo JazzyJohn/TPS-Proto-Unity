@@ -30,6 +30,20 @@ public class ThirdPersonCamera : PlayerCamera
 
 
     protected Vector3 targetOffset = Vector3.zero;
+    protected Vector3 neededOffset = Vector3.zero;
+    protected Vector3 startedOffset = Vector3.zero;
+
+    protected float timeLerp;
+
+    
+    protected Vector3 neededPos = Vector3.zero;
+    protected Vector3 startedPos= Vector3.zero;
+
+    protected float timeLerpPos;
+
+    protected bool lastFrameHit;
+
+    public float lerpSpeed = 1.5f;
 	//public Vector3 normalOffset  = Vector3.zero;
     public Vector3 aimingOffset = Vector3.zero;
 
@@ -84,15 +98,31 @@ public class ThirdPersonCamera : PlayerCamera
 		
 		//TODO: Learn about wtf this do here
 		//EventHolder.instance.Bind (this);
+        neededOffset = normalOffset;
+        startedOffset = neededOffset;
 
 	}
 
 	
 
 	public override void ToggleAim(bool value,bool isFps){
+        if (aiming != value)
+        {
+            timeLerp = 0.0f;
+            if (value)
+            {
+                neededOffset = aimingOffset;
+                startedOffset = targetOffset;
+            }
+            else
+            {
+                neededOffset = normalOffset;
+                startedOffset = targetOffset;
+            }
+        }
 		aiming = value;
 		this.isFps = isFps;
-		
+      
 	}
 	void  DebugDrawStuff (){
 		//Debug.DrawLine(_target.position, _target.position + headOffset);
@@ -111,33 +141,44 @@ public class ThirdPersonCamera : PlayerCamera
 		/*if (!controller)
 			return;
 		*/
+        if (timeLerp * lerpSpeed < 1.0f)
+        {
+            timeLerp += Time.deltaTime * lerpSpeed;
+            targetOffset = Vector3.Lerp(startedOffset, neededOffset, timeLerp);
+        }
+        
+        Vector3 lTargetOffset = targetOffset;
 		float lXOffset;
         if (aiming)
         {
 			if(isFps){
-				targetOffset= Vector3.zero;
+                lTargetOffset = Vector3.zero;
 				lXOffset =0;
 			}else{
                 lXOffset = xOffset;
-				targetOffset = aimingOffset;
+				//targetOffset = aimingOffset;
 			}
             Camera.main.fieldOfView = aimFov;
         }
         else
         {
             lXOffset = xOffset;
-            targetOffset = normalOffset;
+          //  targetOffset = normalOffset;
             Camera.main.fieldOfView = startFov;
         }
 
-        Vector3 targetHead = _target.position + _pawn.headOffset + _pawn.GetDesireRotation() * Vector3.right * lXOffset;
-        Vector3 lOffset = _pawn.GetDesireRotation()* targetOffset;
-
-        Debug.DrawLine(targetHead, targetHead + lOffset, Color.red);
-
+        Vector3 targetHead = _pawn.GetHead().position;
+        targetHead.x =_pawn.myTransform.position.x;
+        targetHead += _pawn.GetDesireRotation() * Vector3.right * lXOffset;
+        Vector3 lOffset = _pawn.GetDesireRotation() * lTargetOffset;
+        Vector3 headAxis = (targetHead + lOffset.y * Vector3.up);
+       // Debug.DrawLine(targetHead, targetHead + lOffset, Color.red);
+        Vector3 flattDirection = lOffset;
+        flattDirection.y = 0;
+        flattDirection.Normalize();
         Vector3 resultcameraPos = targetHead + lOffset;
 
-        Ray wallRay = new Ray(targetHead, lOffset.normalized);
+        Ray wallRay = new Ray(headAxis, flattDirection);
         float distance = lOffset.magnitude;
         //	Debug.DrawRay (wallRay.origin, wallRay.direction);
         float magnitude = distance * distance + 10.0f;
@@ -192,21 +233,21 @@ public class ThirdPersonCamera : PlayerCamera
             }
 
         }
-       
 
 
-        Vector3 fromHeadDirection = targetHead - (resultcameraPos + GetShaker());
-        Vector3 direction = _pawn.getAimpointForCamera() - (resultcameraPos + GetShaker());
-       
-        if (fromHeadDirection.sqrMagnitude < maxDistance|| Vector3.Dot(direction,fromHeadDirection)<0)
+     
+        Vector3 fromHeadDirection = headAxis - (resultcameraPos + GetShaker());
+        Quaternion direction =_pawn.getQuternionForCamera();
+
+        if (fromHeadDirection.sqrMagnitude < maxDistance || Vector3.Dot(direction*Vector3.forward , fromHeadDirection) < 0)
         {
-            resultcameraPos = targetHead + lOffset.normalized * inWallDrop;
-            direction = _pawn.getAimpointForCamera() - (resultcameraPos + GetShaker());
-            
+            resultcameraPos = headAxis + lOffset.normalized * inWallDrop;
+        
         }
        
         if (needOclusion)
         {
+            timeLerpPos = 1.0f;
             if (mainCamera.useOcclusionCulling)
             {
                 mainCamera.useOcclusionCulling = false;
@@ -214,17 +255,40 @@ public class ThirdPersonCamera : PlayerCamera
         }
         else
         {
+            if (lastFrameHit)
+            {
+                timeLerpPos = 0.0f;
+                startedPos = cameraTransform.position;
+            }
             if (!mainCamera.useOcclusionCulling)
             {
                 mainCamera.useOcclusionCulling = true;
             }
         }
 
-
-        cameraTransform.position = resultcameraPos + GetShaker();
-        // Always look at the target	
+        Vector3 velocity = Vector3.zero;
+        if (timeLerpPos < 1.0f)
+        {
+            timeLerpPos += Time.deltaTime * lerpSpeed;
+            neededPos = resultcameraPos + GetShaker();
+            cameraTransform.position = Vector3.Lerp(startedPos, neededPos, timeLerpPos);
+        }
+        else
+        {
+            cameraTransform.position = resultcameraPos + GetShaker();
+        }
      
-        cameraTransform.rotation = Quaternion.LookRotation(direction);
+        // Always look at the target	
+      
+       /* if (Quaternion.Angle(newRotation, cameraTransform.rotation) > 0.2f) {
+            cameraTransform.rotation = Quaternion.Slerp(cameraTransform.rotation, newRotation, 0.1f);
+        }
+        else
+        {*/
+        cameraTransform.rotation = direction;
+      /*  }*/
+        lastFrameHit = needOclusion;
+       
 	}
 
     protected Vector3 GetShaker()

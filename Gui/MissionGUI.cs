@@ -30,7 +30,7 @@ public class MissionGUI : MonoBehaviour {
     }
     public void Update()
     {
-        DateTime tomorrow = DateTime.Today.AddDays(1);
+        DateTime tomorrow = DateTime.Today.AddHours(20);
 
      //   {0:D2} : {1:D2} : {2:D2} 
        TimeSpan span = new TimeSpan( tomorrow.Ticks-DateTime.UtcNow.Ticks);

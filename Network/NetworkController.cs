@@ -90,7 +90,7 @@ public class NetworkController : MonoBehaviour
     {
         foxViewList.Remove(id);
     }
-    public void MasterViewUpdate()
+    public void MasterViewUpdate(bool isMaster)
     {
         foreach (FoxView view in foxViewList.Values)
         {
@@ -98,11 +98,14 @@ public class NetworkController : MonoBehaviour
             if (view.IsOnMasterControll())
             {
                 Debug.Log("MasterViewUpdate" + view);
-                if (view.viewID == 0)
+                if (isMaster)
                 {
-                    NetworkController.RegisterSceneView(view);
+                    if (view.viewID == 0)
+                    {
+                        NetworkController.RegisterSceneView(view);
+                    }
                 }
-                view.SetMine(true);
+                view.SetMine(isMaster);
                 view.SendMessage("OnMasterClientSwitched", SendMessageOptions.DontRequireReceiver);
             }
 
@@ -160,14 +163,12 @@ public class NetworkController : MonoBehaviour
             if (changedVars.Contains("Master"))
             {
                 Debug.Log(smartFox.MySelf.GetVariable("Master").GetBoolValue());
-                if (smartFox.MySelf.GetVariable("Master").GetBoolValue())
-                {
-                    if (GameRule.instance != null)
+                 if (GameRule.instance != null)
                     {
                         GameRule.instance.StartGame();
-                        MasterViewUpdate();
+                        MasterViewUpdate(smartFox.MySelf.GetVariable("Master").GetBoolValue());
                     }
-                }
+               
             }
 
         }

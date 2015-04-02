@@ -10,8 +10,11 @@ public enum PLATFORMTYPE{
 	VK,
 	FACEBOOK
 }
-public enum AsyncNotify{
-	PREMIUM
+public enum AsyncNotify
+{
+    PREMIUM,
+    RELOAD_ITEMS,
+    HOLIDAY
 }
 public class GlobalPlayer : MonoBehaviour {
 
@@ -269,9 +272,16 @@ public class GlobalPlayer : MonoBehaviour {
 			AsyncNotify type = (AsyncNotify)Enum.Parse(typeof(AsyncNotify), node.SelectSingleNode("type").InnerText);
 			switch(type){
 				case AsyncNotify.PREMIUM:
-				GUIHelper.SendMessage(TextGenerator.instance.GetSimpleText("PremiumStart"));
-				ItemManager.instance.ReloadItem();			
+				    GUIHelper.SendMessage(TextGenerator.instance.GetSimpleText("PremiumStart"));
+				    ItemManager.instance.ReloadItem();			
 				break;
+                case AsyncNotify.RELOAD_ITEMS:
+                    ItemManager.instance.ReloadItem();	
+                break;
+                case AsyncNotify.HOLIDAY:
+              
+                      GUIHelper.PushMessage(TextGenerator.instance.GetSimpleText("RewardHOLIDAY"));
+                break;
 			}
 		}
         list = xmlDoc.SelectNodes("player/statistic/entry");
@@ -283,6 +293,8 @@ public class GlobalPlayer : MonoBehaviour {
         }
 		TournamentManager.instance.ParseData(xmlDoc);
         PremiumManager.instance.ParseData(xmlDoc, "player");
+
+        ItemManager.instance.Init(UID);
 	}
 
 
@@ -405,7 +417,7 @@ public class GlobalPlayer : MonoBehaviour {
 		StartCoroutine(StartStats(UID,PlayerName));
 		LevelingManager.instance.Init(UID);
 		AchievementManager.instance.Init(UID);
-		ItemManager.instance.Init(UID);
+		
         FindObjectOfType<RewardManager>().Init(UID);
         NetworkController.Instance.SetLogin(UID);
         StatisticManager.instance.Init(UID);

@@ -798,6 +798,7 @@ public class Player : MonoBehaviour {
 			if(curPawn.CurWeapon!=null){
 			
 				stats.gun  = curPawn.CurWeapon;
+                stats.armor = curPawn.GetArmor();
 				stats.ammoInBag = curPawn.GetAmmoInBag ();
 				stats.reloadTime = curPawn.CurWeapon.ReloadTimer();
                 stats.pumpCoef = curPawn.CurWeapon.PumpCoef();

@@ -81,9 +81,10 @@ public class DetailItemGUI : MonoBehaviour
         {
             raspil.alpha = 1.0f;
         }
-       
+       /*
         if (item.type == ShopSlotType.WEAPON)
         {
+            WeaponInventorySlot weapon = (WeaponInventorySlot)item;
             weaponSection.widget.alpha = 1.0f;
             weaponSection.magazine.text = item.chars.magazine.ToString();
             weaponSection.dmg.value = item.chars.dmg;
@@ -92,10 +93,12 @@ public class DetailItemGUI : MonoBehaviour
             weaponSection.speed.value = item.chars.speed;
             weaponSection.mode.text = TextGenerator.instance.GetSimpleText(item.chars.gunMode);
         }
+      
         else
         {
+            
             weaponSection.widget.alpha = 0.0f;
-        }
+        }*/
     }
   
 }

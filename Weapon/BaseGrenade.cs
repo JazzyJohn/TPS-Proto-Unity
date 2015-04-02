@@ -71,7 +71,7 @@ public class BaseGrenade : BaseWeapon {
     public override void PutAway()
     {
         base.PutAway();
-        owner.animator.aimPos.AimOn();
+        //owner.animator.aimPos.AimOn();
     }
 
     void Update()

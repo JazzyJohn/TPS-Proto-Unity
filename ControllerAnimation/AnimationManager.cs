@@ -20,6 +20,7 @@ public class AnimationManager : MonoBehaviour
     protected RaggdollRoot raggdollRoot;
     public bool isDead = false;
     public Pawn pawn;
+    public bool inWeaponChange = false;
 	protected void Awake()
     {
         animator = GetComponent<Animator>();
@@ -205,8 +206,8 @@ public class AnimationManager : MonoBehaviour
     /// </summary>
     public void ToggleAimPos(bool state){
        // Debug.Log(state);
-		return;
-       /* if (aimPos != null) {
+		
+       if (aimPos != null) {
 
             if (state)
             {
@@ -214,7 +215,7 @@ public class AnimationManager : MonoBehaviour
             }else{
                 aimPos.SetWeight(0.0f);
             }
-        }*/
+        }
     }
 	/// <summary>
     /// Short cut to turn off IK
@@ -282,11 +283,23 @@ public class AnimationManager : MonoBehaviour
 		animator.SetBool ("Reload",true);
 		IKOff ();
 	}
-    public void ReloadStop()
+    public bool CanWeaponChange()
+    {
+        if (inWeaponChange)
+        {
+            return false;
+        }
+        inWeaponChange = true;
+        return true;
+    }
+    public void ReloadStop(bool needIk )
     {
 
         animator.SetBool("Reload",false);
-        IKOn();
+        if (needIk)
+        {
+            IKOn();
+        }
     }
 
 	public void StartDeath(AnimDirection direction){
@@ -311,12 +324,12 @@ public class AnimationManager : MonoBehaviour
 	}
 	public void EquipWeaponNow()
 	{
-		
-		//pawn.ChangeWeapon();
+        inWeaponChange = false;
+	    pawn.ChangeWeapon();
 	}
 	public void UnEquipWeaponNow()
 	{
-		
+        pawn.UnEquipWeapon();
 		//pawn.ChangeWeapon();
 	}
 	public void ShootAnim(){

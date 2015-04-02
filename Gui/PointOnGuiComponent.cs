@@ -10,6 +10,12 @@ public class PointOnGuiComponent : ShowOnGuiComponent
     public void SetTitle(string text, int team,int conquerTeam)
     {
         base.SetTitle(text, team);
+
+        if (hudentry == null)
+        {
+            return;
+        }
+
         if (hudentry.Sprite != null)
         {
             if (teamSprites.Length > team)

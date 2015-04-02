@@ -253,7 +253,7 @@ public class PremiumManager : MonoBehaviour {
     {
         if (target.health < max * REGEN_MIN / 100.0f && time + REGEN_TIME < Time.time)
         {
-            if (regen.Open())
+            if (regen!=null&&regen.Open())
             {
                 target.health = max;
             }

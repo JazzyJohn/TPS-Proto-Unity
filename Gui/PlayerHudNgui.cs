@@ -37,6 +37,9 @@ public class PlayerHudNgui : MonoBehaviour {
     public DeadGUI _DeadGUI;
 
     public UILabel healthLabel;
+
+    public UISprite armor;
+    public UILabel armorLabel;
     //public UILabel juggernautDropTime;
     public UILabel ammoInGun;
     public UILabel maxAmmoInGun;
@@ -204,6 +207,22 @@ public class PlayerHudNgui : MonoBehaviour {
 				weaponTexture.mainTexture = Stats.gun.HUDIcon;
 	            if (gunName) gunName.text = "Cant show rus";//Stats.gunName;
 			}
+            if (Stats.armor)
+            {
+                if (Stats.armor.GetHP() > 0)
+                {
+                    armor.alpha = 1.0f;
+                    armorLabel.text = Stats.armor.GetHP().ToString("0"); 
+                }
+                else
+                {
+                    armor.alpha = 0.0f;
+                }
+            }
+            else
+            {
+                armor.alpha = 0.0f;
+            }
             if (reloadingSprite) reloadingSprite.fillAmount = 1 - Stats.reloadTime;
 
             if (jetPackCharge) jetPackCharge.text = Stats.jetPackCharge.ToString("0.0");

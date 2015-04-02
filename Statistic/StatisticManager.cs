@@ -89,14 +89,16 @@ public class StatisticManager : MonoBehaviour, LocalPlayerListener,GameListener{
             {
                 UpData(ParamLibrary.PARAM_HEAD_SHOOT);
             }
-			if(ItemManager.instance.GetWeaponprefabByID(killinfo.weaponId).slotType==SLOTTYPE.GRENADE){
+            BaseWeapon weapon = ItemManager.instance.GetWeaponprefabByID(killinfo.weaponId);
+            if (weapon!=null&&weapon.slotType == SLOTTYPE.GRENADE)
+            {
                 UpData(ParamLibrary.PARAM_GRENADE_KILL);
 			}
 		}
 	}
     public void EventPawnKillAI(Player target, KillInfo killinfo)
     {
-	
+        UpData(ParamLibrary.PARAM_KILL_AI);
 
 		
 	

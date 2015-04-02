@@ -72,6 +72,8 @@ public class Pawn : DamagebleObject
     protected LayerMask wallRunLayers = 1;
     private LayerMask climbLayers = 1 << 9; // Layer 9
     public LayerMask seenlist = 1;
+
+    public static LayerMask AIM_MASK = 1;
     public bool isActive = false;
 
     //If this spawn pre defained by game designer we don't want to start in on start but on AIDirector start so set this to false;
@@ -90,6 +92,8 @@ public class Pawn : DamagebleObject
 	
 	public Transform[] putAwaySlots;
 
+    public Transform head;
+    
     //Nautaral weapons like hand or claws
 
     public WeaponOfExtremities naturalWeapon;
@@ -316,6 +320,8 @@ public class Pawn : DamagebleObject
 	public bool isFps= false;
 
     public float aimModCoef = -10.0f;
+
+    public float aimDisplacment = 0.0f;
 	
 	public float aimCrouchPercentMultiplier =0.1f;
 	
@@ -410,6 +416,10 @@ public class Pawn : DamagebleObject
 	
     protected void Awake()
     {
+        if (AIM_MASK == 1)
+        {
+            AIM_MASK =1 | LayerMask.GetMask("Damagable", "PlayerDamage", "Default");
+        }
         myTransform = transform;
         ivnMan = GetComponent<InventoryManager>();
         _rb = GetComponent<Rigidbody>();
@@ -624,6 +634,10 @@ public class Pawn : DamagebleObject
         {
             ivnMan.SetSlot(ItemManager.instance.GetWeaponprefabByID(idExtra));
         }
+        if (!idGrenade.IsSameIndex(WeaponIndex.Zero))
+        {
+            ivnMan.SetSlot(ItemManager.instance.GetWeaponprefabByID(idGrenade));
+        }
         if (!idArmor.IsSameIndex(WeaponIndex.Zero))
         {
             ivnMan.SetArmorSlot(ItemManager.instance.GetArmorprefabByID(idExtra));
@@ -755,13 +769,14 @@ public class Pawn : DamagebleObject
             lastHitDirection = damage.pushDirection;
            
         }
-        if (killerPawn == null && foxView.isMine)
-        {
-            ResolvedDamage(damage);
-			if (damage.sendMessage)
+        	if (damage.sendMessage)
 			{
 				AddEffect(damage.hitPosition,damage.pushDirection ,damage.type);
 			}
+        if (killerPawn == null && foxView.isMine)
+        {
+            ResolvedDamage(damage);
+		
 			if(CanBeDamaged()){
 				StatisticManager.instance.AddDamage(Mathf.RoundToInt(damage.Damage));
 				base.Damage(damage, killer);
@@ -773,20 +788,14 @@ public class Pawn : DamagebleObject
             if (foxView.isMine)
             {
                 ResolvedDamage(damage);
-   			    if (damage.sendMessage)
-				{
-					AddEffect(damage.hitPosition,damage.pushDirection ,damage.type);
-				}
+   			   
 				if(CanBeDamaged()){
 					base.Damage(damage, killer);
 				}
             }
             else
             {
-                if (damage.sendMessage)
-                {
-                    AddEffect(damage.hitPosition, damage.pushDirection, damage.type);
-                }
+               
                 foxView.LowerHPRequest(damage, killerPawn.foxView.viewID);
                 ResolvedDamage(damage);
             }
@@ -800,6 +809,10 @@ public class Pawn : DamagebleObject
                 //Debug.Log ("DAMAGE" +damage.sendMessage);
                 killerPlayer.DamagePawn(damage);
             }
+        }
+        if (damage.sendMessage)
+        {
+            AddEffect(damage.hitPosition, damage.pushDirection, damage.type);
         }
         //Debug.Log ("DAMAGE");
        
@@ -1082,7 +1095,7 @@ public class Pawn : DamagebleObject
     //EFFECCT SECTION
     void AddEffect(Vector3 position,Vector3 direction,DamageType type)
     {
-        if (player != null)
+        if (player != null && player.isMine)
         {
 
             player.ShowDamageIndicator(-direction);
@@ -1504,6 +1517,7 @@ public class Pawn : DamagebleObject
 
         if (foxView.isMine)
         {
+            DisplacmentCoolDown();
             int maxHealth = GetMaxHealth();
             if (health < maxHealth)
             {
@@ -1778,6 +1792,10 @@ public class Pawn : DamagebleObject
 			ivnMan.ChangeWeapon();
 		
     }
+    public void UnEquipWeapon()
+    {
+        CurWeapon.PutAway();
+    }
 
     public virtual void StartFire()
     {
@@ -1825,6 +1843,7 @@ public class Pawn : DamagebleObject
 	
 	public virtual void StartGrenadeThrow(){
 		if(CanUseGrenade()){
+            UnEquipWeapon();
             ivnMan.TakeGrenade();
         } 
    
@@ -1856,6 +1875,27 @@ public class Pawn : DamagebleObject
         {
             ivnMan.NextWeapon();
         }
+    }
+    public void AfterShoot()
+    {
+
+        xAngle -= (CurWeapon.aimDisplacment-aimDisplacment);
+        xAngle = Mathf.Clamp(xAngle, cameraController.MinYAngle, cameraController.MaxYAngle);
+        
+        aimDisplacment = CurWeapon.aimDisplacment;
+    }
+    public void DisplacmentCoolDown()
+    {
+        if (aimDisplacment > 0)
+        {
+            xAngle += CurWeapon.aimDisplacmentCooling * Time.deltaTime;
+            aimDisplacment -= CurWeapon.aimDisplacmentCooling * Time.deltaTime;
+            if (aimDisplacment < 0)
+            {
+                aimDisplacment = 0.0f;  
+            }
+        }
+        
     }
     //Setting new weapon if not null try to attach it
     public void setWeapon(BaseWeapon newWeapon)
@@ -1960,7 +2000,12 @@ public class Pawn : DamagebleObject
     public virtual Vector3 getAimpointForCamera()
     {
 
-        return myTransform.position + headOffset + desiredRotation * Vector3.forward * aimRange;
+        float aimDistance = (myTransform.position - aimRotation).magnitude;
+        return myTransform.position + headOffset + desiredRotation * Vector3.forward * aimDistance;//+ aimRange * aimDisplacment * Vector3.up;
+    }
+    public Quaternion getQuternionForCamera()
+    {
+        return desiredRotation;
     }
     protected Quaternion desiredRotation;
     float xAngle = 0;
@@ -1968,10 +2013,15 @@ public class Pawn : DamagebleObject
     public static float fromOldRotationMod =5.0f;
     public virtual void UpdateRotation(float xDeltaAngle,float yDeltaAngle)
     {
-
-        xAngle += xDeltaAngle * fromOldRotationMod;
-        xAngle = Mathf.Clamp(xAngle, cameraController.MinYAngle, cameraController.MaxYAngle);
-        yAngle += yDeltaAngle * fromOldRotationMod;
+        if (xDeltaAngle > 0)
+        {
+            aimDisplacment = 0;
+        }
+          xAngle += xDeltaAngle * fromOldRotationMod;
+          xAngle = Mathf.Clamp(xAngle, cameraController.MinYAngle, cameraController.MaxYAngle);
+        
+       
+            yAngle += yDeltaAngle * fromOldRotationMod;
         if (yAngle > 360)
         {
             yAngle -= 360;
@@ -1981,6 +2031,9 @@ public class Pawn : DamagebleObject
             yAngle+=360;
         }
 
+
+        
+      
         desiredRotation = Quaternion.Euler(xAngle, yAngle,0.0f);
 
     }
@@ -1988,6 +2041,10 @@ public class Pawn : DamagebleObject
     public virtual Quaternion GetDesireRotation()
     {
         return desiredRotation;
+    }
+    public virtual Transform GetHead()
+    {
+        return head;
     }
     public virtual void getAimRotation()
     {
@@ -2033,7 +2090,7 @@ public class Pawn : DamagebleObject
                 float magnitude = aimRange;
                 float range = aimRange;
 				Transform localTarget=null;
-                foreach (RaycastHit hitInfo in Physics.RaycastAll(centerRay, aimRange, ThirdPersonCamera.cameraLayer))
+                foreach (RaycastHit hitInfo in Physics.RaycastAll(centerRay, aimRange,AIM_MASK))
                 {
                     if (hitInfo.collider == myCollider || hitInfo.transform.IsChildOf(myTransform) || hitInfo.collider.isTrigger)
                     {
@@ -2086,7 +2143,7 @@ public class Pawn : DamagebleObject
                         animator.WeaponDown(false);
                     }
                 }
-                aimRotation = targetpoint;
+                aimRotation = targetpoint ;
 
             }
 
@@ -2229,6 +2286,10 @@ public class Pawn : DamagebleObject
     {
         return ivnMan.GetAmmo(CurWeapon.ammoType);
 
+    }
+    public BaseArmor GetArmor()
+    {
+        return ivnMan.GetArmor();
     }
 
     public void AddAmmo(float p)

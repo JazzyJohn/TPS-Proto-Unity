@@ -149,6 +149,10 @@ public class BaseWeapon : DestroyableNetworkObject {
     ///  Rand to Shoot direction add after one shoot;
     /// </summary>
 	public float randPerShoot;
+    /// <summary>
+    ///  How Much Crosshair goes up after shoot;
+    /// </summary>
+    public float aimDisplacment;
 	/// <summary>
     ///  Rand to Shoot direction summary from some effects;
     /// </summary>
@@ -157,6 +161,10 @@ public class BaseWeapon : DestroyableNetworkObject {
     /// How cooling move to zero;
     /// </summary>
 	public float randCoolingEffect;
+    /// <summary>
+    ///  How fast aim go to normal
+    /// </summary>
+    public float aimDisplacmentCooling;
     /// <summary>
     /// How cooling move to zero when not firing
     /// </summary>
@@ -413,16 +421,25 @@ public class BaseWeapon : DestroyableNetworkObject {
 
         if (SQLId > 0)
         {
-            int minWear = Mathf.RoundToInt(ItemManager.instance.GetWeaponSlotbByID(SQLId).maxcharge * owner.GetPercentValue(CharacteristicList.DAMAGE_ADD_MAIN));
+            int minWear = Mathf.RoundToInt(ItemManager.instance.GetWeaponSlotbByID(SQLId).maxcharge * owner.GetValue(CharacteristicList.DAMAGE_ADD_MAIN));
             damageAmount.weapon = true;
-            float damageMode = ((float)charge - minWear) / DAMAGE_BROKE_PERCEN * DAMAGE_BROKE_COEF / 100;
-            if (damageMode > DAMAGE_BROKE_MAX)
+          
+             float damageMode = ((float)charge - minWear) / DAMAGE_BROKE_PERCEN * DAMAGE_BROKE_COEF / 100;
+            if (damageMode > 0)
             {
-                damageMode = DAMAGE_BROKE_MAX;
+                if (damageMode > DAMAGE_BROKE_MAX)
+                {
+                    damageMode = DAMAGE_BROKE_MAX;
+                }
+
+                damageAmount.Damage -= damageAmount.Damage * damageMode;
             }
-            damageAmount.Damage -= damageAmount.Damage * damageMode;
-            float aimMode = ((float)charge - minWear) / AIM_BROKE_PERCEN * AIM_BROKE_COEF / 100;
-            recoilmod += aimMode * recoilmod;
+          
+                float aimMode = ((float)charge - minWear) / AIM_BROKE_PERCEN * AIM_BROKE_COEF / 100;
+            if (damageMode > 0)
+            {
+                recoilmod += aimMode * recoilmod;
+            }
            
         }
         aimRandCoef = aimRandCoef * recoilmod;
@@ -789,19 +806,19 @@ public class BaseWeapon : DestroyableNetworkObject {
 	}
     public void OnDestroy()
     {
-        owner.animator.ReloadStop();
+        owner.animator.ReloadStop(true);
     }
 
-    public void StopReload()
+    public void StopReload(bool needIk=true)
     {
         isReload = false;
         shootAfterReload = false;
-        owner.animator.ReloadStop();
+        owner.animator.ReloadStop(needIk);
     }
     public void ReloadFinish()
     {
         isReload = false;
-        owner.animator.ReloadStop();
+        owner.animator.ReloadStop(true);
         if (shootAfterReload)
         {
             shootAfterReload = false;
@@ -1059,6 +1076,7 @@ public class BaseWeapon : DestroyableNetworkObject {
 				shootCounter= 0;
 				charge = ItemManager.instance.LowerCharge(SQLId);
 			}
+            owner.AfterShoot();
 		}
 		
     }
@@ -1395,7 +1413,7 @@ public class BaseWeapon : DestroyableNetworkObject {
         curTransform.localRotation = Quaternion.identity;
 		curTransform.localScale=  Vector3.one;
 		StopFire();
-        StopReload();
+        StopReload(false);
 		if(foxView.isMine){
 			foxView.PutAway();
 		}

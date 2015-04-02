@@ -8,6 +8,8 @@ public class IKcontroller : MonoBehaviour {
     public FullBodyBipedIK fullBody;
     public GrounderFBBIK grounder;
 	protected float targetWeight=1.0f;
+    private float motionWeight = 1.0f;
+    private float actionWeight = 1.0f;
 	private float vel = 0.0f;
 	/// <summary>
     /// IS we under IK controll
@@ -27,25 +29,38 @@ public class IKcontroller : MonoBehaviour {
 	}
 	public void SetWeight(float weight){
        
-			aim.solver.IKPositionWeight = weight;
+			
           // Debug.Log("WEIGHT" + weight);
-			targetWeight = weight;
+            actionWeight = weight;
+           
 	}
+
+    public void SetMotionWeight(float weight)
+    {
+        motionWeight = weight;
+  
+    }
 	public void EvalToWeight(float weight){
 		//aim.solver.IKPositionWeight = weight;
          //Debug.Log("WEIGHT" + weight);
-		targetWeight = weight;
+        actionWeight = weight;
 	}
 	void Update(){
-		if (Mathf.Abs (targetWeight - aim.solver.IKPositionWeight) > 0.01f) {
-			
-			aim.solver.IKPositionWeight= Mathf.SmoothDamp(aim.solver.IKPositionWeight,targetWeight,ref vel,0.5f); 
-		}
+        if (actionWeight == 1.0f)
+        {
+            targetWeight = motionWeight;
+        }
+        else
+        {
+            targetWeight =actionWeight;
+        }
+		
+        aim.solver.IKPositionWeight = targetWeight; 
 		
 	}
     public void AddAction(UpdateFinished finished)
     {
-        GetComponentInChildren<AimIK>().solver.action = finished;
+        //GetComponentInChildren<AimIK>().solver.action = finished;
     }
     public bool  ActiveAim()
     {

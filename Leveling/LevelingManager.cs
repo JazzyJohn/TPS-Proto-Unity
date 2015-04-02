@@ -247,6 +247,11 @@ public class LevelingManager : MonoBehaviour, LocalPlayerListener,GameListener{
         {
 
             GlobalPlayer.instance.open_set = int.Parse(node.InnerText);
+            InventoryGUI shop = FindObjectOfType<InventoryGUI>();
+            if (shop != null)
+            {
+                shop.ResetSet();
+            }
 
         }
 

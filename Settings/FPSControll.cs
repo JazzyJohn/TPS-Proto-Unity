@@ -34,6 +34,7 @@ public class FPSControll : MonoBehaviour{
 
 	public void afterQualityChange(){
         NGUI_setting.setQuality(QualitySettings.GetQualityLevel());
+      
 		//Does nothing by default. 
 		//If you have menu allowing user to choose quality, you can set it's active value value here.
 	}
@@ -106,6 +107,8 @@ public class FPSControll : MonoBehaviour{
 	    	nextUpdate = Time.realtimeSinceStartup + 1.0f/updateRate;
 	        currentFramerate = frameCount * updateRate;
 	        frameCount = 0;
+          
+
 	    	if(threshold>minThreshold)threshold--;
 	    	if(currQuality != QualitySettings.GetQualityLevel()){
 	    		currQuality = QualitySettings.GetQualityLevel();
@@ -190,11 +193,14 @@ public static class DisplayDetector
            camTransform = main.transform;
         }
         Vector3 result = Camera.main.WorldToViewportPoint(vect);
-        if (Physics.Linecast(result, main.transform.position,LayerMask.GetMask("Default")))
+
+        if (Physics.Linecast(vect, main.transform.position, LayerMask.GetMask("Default")))
         {
+            //Debug.Log("offScreen");
             return false;
         }
-        return vect.z > 0 && vect.x > 0f && vect.x < 1.0f && vect.y > 0 && vect.y < 1.0f;
+//        Debug.Log("offScreen");
+        return result.z > 0 && result.x > 0f && result.x < 1.0f && result.y > 0 && result.y < 1.0f;
     }
 
 }

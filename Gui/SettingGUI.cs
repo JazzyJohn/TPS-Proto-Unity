@@ -241,6 +241,7 @@ public class SettingGUI : MonoBehaviour {
         PlayerPrefs.SetFloat("OverallVolume", volumes.VolumeScroll.value);
         PlayerPrefs.SetFloat("SoundFX", volumes.SoundFxScroll.value);
         PlayerPrefs.SetFloat("Music", volumes.MusicScroll.value);
+        SaveGraphicSetting();
         SetIcon();
     }
 	
@@ -384,7 +385,9 @@ public class SettingGUI : MonoBehaviour {
         graphicSetting.TextureScroll.value = ((float)QualitySettings.GetQualityLevel()) / (graphicSetting.TextureScroll.numberOfSteps - 1);
         graphicSetting.ShadowScroll.value = ((float)QualitySettings.GetQualityLevel()) / (graphicSetting.ShadowScroll.numberOfSteps - 1);
         graphicSetting.LighningScroll.value = ((float)QualitySettings.GetQualityLevel()) / (graphicSetting.LighningScroll.numberOfSteps - 1);
-		
+        volumes.SoundFxScroll.value = 0.5f;
+        volumes.VolumeScroll.value = 0.5f;
+        volumes.MusicScroll.value = 0.5f;
 	}
 
 	IEnumerator SetDefoltGraphic(int i)
@@ -437,7 +440,7 @@ public class SettingGUI : MonoBehaviour {
 	{
 		NGUI_setting.setting = this;
 
-        PlayerPrefs.DeleteAll();
+    ///    PlayerPrefs.DeleteAll();
 
 		FullScreen_Z = Screen.fullScreen;
 		
@@ -492,6 +495,9 @@ public class SettingGUI : MonoBehaviour {
 			graphicSetting.ShadowScroll.value = PlayerPrefs.GetFloat("ShadowQuality");
 			graphicSetting.LighningScroll.value = PlayerPrefs.GetFloat("LighningQuality");
 
+            volumes.VolumeScroll.value = PlayerPrefs.GetFloat("OverallVolume");
+            volumes.SoundFxScroll.value = PlayerPrefs.GetFloat("SoundFX");
+            volumes.MusicScroll.value = PlayerPrefs.GetFloat("Music");
         }
 		else
 		{

@@ -213,6 +213,14 @@ public class InventoryManager : MonoBehaviour {
 		}
 		return 0;
 	}
+    public BaseArmor GetArmor()
+    {
+        if (myArmor.Length > 0)
+        {
+            return myArmor[0];
+        }
+        return null;
+    }
 	//Return ammo from bag
 	public virtual int GiveAmmo(AMMOTYPE ammo,int amount){
 		for(int i=0;i<allAmmo.Length;i++){
@@ -277,6 +285,10 @@ public class InventoryManager : MonoBehaviour {
 
     }
 	public virtual bool HasGrenade(){
+        if (grenadeSlot < 0)
+        {
+            return false;
+        }
 		if(myWeapons[grenadeSlot].curAmmo>0){
 			return true;
 		}
@@ -385,6 +397,9 @@ public class InventoryManager : MonoBehaviour {
 	}
 	
 	public void NextWeapon(){
+        if(!owner.animator.CanWeaponChange()){
+            return;
+        }
 		int newIndex = indexWeapon+1;
 		if(newIndex==grenadeSlot){
 			newIndex++;
@@ -396,11 +411,15 @@ public class InventoryManager : MonoBehaviour {
 			newIndex++;
 		}
 		//Debug.Log ("NextWeapon"+newIndex);
-        //cahcedIndex = newIndex;
-       // owner.animator.SetWeaponType(prefabWeapon[cahcedIndex].animType);
-		_ChangeWeapon(newIndex);
+        cahcedIndex = newIndex;
+        owner.animator.SetWeaponType(myWeapons[cahcedIndex].animType);
+		//_ChangeWeapon(newIndex);
 	}
 	public void PrevWeapon(){
+        if (!owner.animator.CanWeaponChange())
+        {
+            return;
+        }
 		int newIndex = indexWeapon-1;
 		if(newIndex==grenadeSlot){
 			newIndex--;
@@ -412,9 +431,9 @@ public class InventoryManager : MonoBehaviour {
 			newIndex--;
 		}
 		//Debug.Log ("PrevWeapon"+newIndex);
-        //cahcedIndex = newIndex;
-        //owner.animator.SetWeaponType(prefabWeapon[cahcedIndex].animType);
-		_ChangeWeapon(newIndex);
+       cahcedIndex = newIndex;
+       owner.animator.SetWeaponType(myWeapons[cahcedIndex].animType);
+		//_ChangeWeapon(newIndex);
 	}
 
     public void ChangeWeapon()
@@ -440,7 +459,7 @@ public class InventoryManager : MonoBehaviour {
 	
 		if(currentWeapon!=null){
 			
-			currentWeapon.PutAway();
+		//	currentWeapon.PutAway();
 		}
 
 		//TakeWeaponAway ();

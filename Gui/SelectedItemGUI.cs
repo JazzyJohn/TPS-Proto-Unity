@@ -11,11 +11,21 @@ public class SelectedItemGUI : MonoBehaviour {
     public UILabel name;
 
     public int slot;
-    
+
+    public int close = 2;
+
+    public UIWidget closeBox;
+    public UIWidget openBox;
+
+    public UIWidget box;
+
+    public Color open;
 
 	[HideInInspector]
 	public int numToItem;
-
+    public void Awake(){
+        box = GetComponent<UIWidget>();
+    }
 	// Use this for initialization
 	void Start () {
 	
@@ -29,6 +39,19 @@ public class SelectedItemGUI : MonoBehaviour {
            
         }
 	}
+    public void TryOpen()
+    {
+        if (close != 1)
+        {
+            if (close <= GlobalPlayer.instance.open_set)
+            {
+                closeBox.alpha = 0.0f;
+                openBox.alpha = 1.0f;
+                box.color = open;
+
+            }
+        }
+    }
 
     public void SetItem()
     {

@@ -11,6 +11,8 @@ public class BaseArmor : MonoBehaviour {
 
     public float armorHp;
 
+    public GameObject effect;
+
     protected Transform curTransform;
 
     protected Pawn owner;
@@ -84,8 +86,14 @@ public class BaseArmor : MonoBehaviour {
             return;
         }
         Used();
+        Effect(damage);
         ActualUse(damage);
        
+    }
+    protected virtual void Effect(BaseDamage damage)
+    {
+        effect.transform.rotation.SetLookRotation(damage.pushDirection);
+        effect.SetActive(true);
     }
     protected virtual void ActualUse(BaseDamage damage)
     {
@@ -105,8 +113,12 @@ public class BaseArmor : MonoBehaviour {
     {
         if (owner.foxView.isMine && !owner.isAi)
         {
-            ItemManager.instance.SetShootCount(SQLId, useCounter);
+            ItemManager.instance.SetUseCount(SQLId, useCounter);
 
         }
+    }
+    public float GetHP()
+    {
+        return armorHp;
     }
 }

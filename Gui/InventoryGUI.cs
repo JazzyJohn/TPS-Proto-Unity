@@ -46,17 +46,21 @@ public class InventoryGUI : MonoBehaviour {
 
     public UILabel canBuyText;
 
+    public UILabel canBuyPrice;
+
     public UIRect mustOpen;
 	
     public UILabel  mustOpenText;
 	
     Dictionary<string,InvItemGUI> AllItems= new Dictionary<string,InvItemGUI>();
 
+    InvItemGUI[] items; 
+
     Dictionary<int, SelectedItemGUI> slots = new Dictionary<int, SelectedItemGUI>();
 
     SelectedItemGUI[] selected;
 	
-    public int curSet = 0;
+    int curSet = 1;
 
     bool[] allowedReapair = new bool[3];
 
@@ -76,7 +80,7 @@ public class InventoryGUI : MonoBehaviour {
 	}
 	
 	public void Init(){
-		InvItemGUI[] items = GetComponentsInChildren<InvItemGUI>();
+	     items = GetComponentsInChildren<InvItemGUI>();
 		foreach(InvItemGUI itemInfo  in items){
 			itemInfo.Shop = this;
             for(int i=0; i<itemInfo.ids.Length;i++){
@@ -90,10 +94,11 @@ public class InventoryGUI : MonoBehaviour {
                     itemInfo.SetItem(ItemManager.instance.GetItem(id), i);
 
                 }
-                itemInfo.SetSet(0);
+                itemInfo.SetSet(1);
+                AllItems[itemInfo.id] = itemInfo;
             }
 			
-			AllItems[itemInfo.id] =itemInfo;
+		
 		}
 		selected = GetComponentsInChildren<SelectedItemGUI>();
 		ReloadSelectedItem();
@@ -107,6 +112,7 @@ public class InventoryGUI : MonoBehaviour {
 			itemInfo.Shop = this;
 			itemInfo.SetItem();
 			slots[itemInfo.slot]= itemInfo;
+            itemInfo.TryOpen();
 		}
 	}
     public void ChangeSetGUI(UIPopupList list)
@@ -176,27 +182,32 @@ public class InventoryGUI : MonoBehaviour {
         }
         mustOpen.alpha = 0.0f;
         canBuy.alpha = 0.0f;
-        if (curSet+1 > GlobalPlayer.instance.open_set)
+        if (curSet > GlobalPlayer.instance.open_set)
         {
-            if (curSet+1  > GlobalPlayer.instance.open_set+1)
+            if (curSet  > GlobalPlayer.instance.open_set+1)
             {
-                mustOpenText.text = TextGenerator.instance.GetMoneyText("openSet", curSet * 10);
+                mustOpenText.text = TextGenerator.instance.GetMoneyText("openSet", (curSet-1) * 10);
                 mustOpen.alpha = 1.0f;
             }
             else
             {
-                canBuyText.text = TextGenerator.instance.GetMoneyText("openSet", curSet * 10);
+                canBuyText.text = TextGenerator.instance.GetMoneyText("openSet", (curSet-1) * 10);
+                canBuyPrice.text = TextGenerator.instance.GetSimpleText("openSet" + (needSet-1));
                 canBuy.alpha = 1.0f;
             }
 
         }
-        foreach (InvItemGUI gui in AllItems.Values)
+        foreach (InvItemGUI gui in items)
         {
             gui.SetSet(curSet);
         }
 	}
     public void ResetSet()
     {
+        foreach (SelectedItemGUI slot in slots.Values)
+        {
+            slot.TryOpen(); 
+        }
         ShowSet(curSet);
     }
     public void ShowGroup(int newGroup)
@@ -208,11 +219,17 @@ public class InventoryGUI : MonoBehaviour {
                 itemPanel.alpha = 0.0f;
                 
                 weaponPanel.alpha = 1.0f;
+                ShowSet(curSet);
                 break;
             case InventoryGroup.STUFF:
+                if (maxItemSet <= curSet)
+                {
+                    curSet = maxItemSet-1;
+                }
                 weaponPanel.alpha = 0.0f;
                 
                 itemPanel.alpha = 1.0f;
+                ShowSet(curSet);
                 break;
         }
 

@@ -136,6 +136,15 @@ public class CharacterControllerM1A1 : MonoBehaviour
         //inputMagnitude = Mathf.Clamp(speedVec.magnitude, 0, 1);
         inputValue = Mathf.Abs(horizontal) + Mathf.Abs(vertical);
 
+        // Чтобы не пытался бежать в воздухе. Проверка на crouch нужна, так как на момент написания кода
+        // все еще был баг, что при приседе сразу после прыжка персонаж не был grounded
+        if (!character.IsCrouch() && !character.IsGrounded())
+        {
+            inputValue = 0f;
+            vertical = 0f;
+            horizontal = 0f;
+        }
+
         Vector3 CameraDirection = camTransform.forward;
         CameraDirection.y = 0.0f; // kill Y
         
@@ -161,21 +170,13 @@ public class CharacterControllerM1A1 : MonoBehaviour
         //inputAngularSpeed = deltaInputAngle / Time.deltaTime;
         //inputAngleOld = inputAngle;
 
-        float speedFactor;
+      
 
         //Aim
-        if (character.isAiming)
-        {
-            speedFactor = 0.5f;
-        }
-        else
-        {
-            speedFactor = 1f;
-            animator.SetBool("Sprint", character.IsSprinting());
-        }
+        
+        animator.SetBool("Sprint", character.IsSprinting());
+       
 
-        horizontal *= speedFactor;
-        vertical *= speedFactor;
 
         animator.SetBool("Crouch", character.IsCrouch());
     }
@@ -232,13 +233,14 @@ public class CharacterControllerM1A1 : MonoBehaviour
 
             IKWeight = Mathf.Lerp(IKWeight, 0f, Time.deltaTime * IKSetSpeed);
             upperWeight = IKWeight;
+            
         }
         else
         {
             upperWeight = Mathf.Lerp(upperWeight, 1f, Time.deltaTime * IKSetSpeed);
             IKWeight = upperWeight;
         }
-        ik.SetWeight(IKWeight);
+        ik.SetMotionWeight(IKWeight);
         animator.SetLayerWeight(1, upperWeight);
     }
 }

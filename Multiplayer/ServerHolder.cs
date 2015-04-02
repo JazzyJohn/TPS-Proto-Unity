@@ -851,7 +851,7 @@ public class ServerHolder : MonoBehaviour
             }
             if (NetworkController.IsMaster())
             {
-                NetworkController.Instance.MasterViewUpdate();
+                NetworkController.Instance.MasterViewUpdate(true);
                 NetworkController.Instance.SendMapData();
             }
         }

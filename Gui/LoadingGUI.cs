@@ -38,13 +38,13 @@ public class LoadingGUI : MonoBehaviour {
         }
         top.alpha = 1.0f;
         List<int> indexs = new List<int>();
-        List<Winner[]> killers = TournamentManager.instance.GetRandomTops(2,out indexs);
+        List<Top> killers = TournamentManager.instance.GetRandomTops(2,out indexs);
          int i = 0;
         int count = 0;
-        while (count < killers[0].Length / 2 && i < killers[0].Length)
+        while (count < killers[0].winners.Length / 2 && i < killers[0].winners.Length)
         {
 
-            Winner winner = killers[0][i];
+            Winner winner = killers[0].winners[i];
             if (winner.user.avatar == null)
             {
                  #if !UNITY_EDITOR
@@ -70,10 +70,10 @@ public class LoadingGUI : MonoBehaviour {
 
          i = 0;
          count = 0;
-        while (count < killers[1].Length / 2 && i < killers[1].Length)
+         while (count < killers[1].winners.Length / 2 && i < killers[1].winners.Length)
         {
 
-            Winner winner = killers[1][i];
+            Winner winner = killers[1].winners[i];
             if (winner.user.avatar == null)
             {
                 #if !UNITY_EDITOR
@@ -97,8 +97,8 @@ public class LoadingGUI : MonoBehaviour {
 
         }
 
-        firstLabel.text = TextGenerator.instance.GetSimpleText("topName" + indexs[0]);
-        secondLablel.text = TextGenerator.instance.GetSimpleText("topName" + indexs[1]);
+        firstLabel.text = killers[0].name;
+        secondLablel.text = killers[1].name;
         aiKillerTable.Reposition();
         killerTable.Reposition();
     }
@@ -109,10 +109,10 @@ public class LoadingGUI : MonoBehaviour {
         {
             return;
         }
-        /*if (TournamentManager.instance.isLoaded)
+        if (TournamentManager.instance.isLoaded)
         {
             LoadTop();
-        }*/
+        }
         if (Server.connectingToRoom)
         {
 				float percent =Server.LoadProcent();

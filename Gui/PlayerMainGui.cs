@@ -90,6 +90,7 @@ public class PlayerMainGui : MonoBehaviour {
 		public float health=0;
         public float maxHealth = 200;
 		public BaseWeapon gun;
+        public BaseArmor armor;
 		public float ammoInBag=0;
 		public float reloadTime=0;
 		public float jetPackCharge= 0;
@@ -878,7 +879,7 @@ public class PlayerMainGui : MonoBehaviour {
 }
 
 public static class GUIHelper{
-	
+    public static Queue<string> messages = new Queue<string>();
 	public static void SendMessage(string text){
 			MainMenuGUI menu =UnityEngine.Object.FindObjectOfType<MainMenuGUI>();
 			if (menu != null)
@@ -892,6 +893,10 @@ public static class GUIHelper{
 			}
 		
 	}
+    public static void PushMessage(string text)
+    {
+        messages.Enqueue(text);
+    }
     public static void Notify(string title, string text)
     {
         Notify(title,text, (Texture2D)null);

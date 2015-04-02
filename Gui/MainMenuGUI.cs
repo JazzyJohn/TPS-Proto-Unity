@@ -80,8 +80,13 @@ public class MainMenuGUI : MonoBehaviour {
         {
             panel.gameObject.SetActive(false);
         }
-        
-       
+
+    
+        if (GUIHelper.messages.Count > 0)
+        {
+            //Debug.Log("PULLSIZE" + GUIHelper.messages.Dequeue());
+            SimpleMessage(GUIHelper.messages.Dequeue());
+        }
     }
 
     public static MainMenuGUI instance;
@@ -532,10 +537,25 @@ public class MainMenuGUI : MonoBehaviour {
 	public void AddCoins(){
 		 _playerInfo.Player.AskJsForMagazine("gitp_5");
 	}
-    
-
+    public void SimpleMessage(string text)
+    {
+        _PanelsNgui.simpleMessagePanel.alpha =1.0f;
+        _PanelsNgui.simpleMessage.text = text;
+    }
+    public void CloseMessage()
+    {
+        _PanelsNgui.simpleMessagePanel.alpha = 0.0f;
+        if (GUIHelper.messages.Count > 0)
+        {
+            SetMessage(GUIHelper.messages.Dequeue());
+        }
+    }
     public void SetMessage(string text)
     {
+        if (_PanelsNgui.annonce == null)
+        {
+            return;
+        }
         _PanelsNgui.annonce.text = text;
         _PanelsNgui.annonceTweener.tweenFactor = 0.0f;
         _PanelsNgui.annonceTweener.PlayForward();
@@ -808,6 +828,8 @@ public class PanelsNgui
     public UIPanel askAboutMoneyPanel;
     public UIRect moneyBuyPanel;
     public UIRect serverResponse;
+    public UIRect simpleMessagePanel;
+    public UILabel simpleMessage;
 }
 [System.Serializable]
 public class LoginPanel

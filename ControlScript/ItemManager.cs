@@ -138,6 +138,14 @@ public class WeaponChar {
     public float reload;
 
 }
+public class ArmorChar
+{
+   
+
+    public float def;
+
+
+}
 public class SmallShopData{
 
 	public string cashSlot;
@@ -228,7 +236,7 @@ public class InventorySlot  : SimpleSlot{
 
 	public int group;
 
-	public WeaponChar chars;
+	
 
 
     public int GetChargePercent()
@@ -256,6 +264,7 @@ public class WeaponInventorySlot : InventorySlot
 		}
 		return 0;
 	}
+    public WeaponChar chars;
 
  }
 
@@ -263,6 +272,7 @@ public class ArmorInventorySlot : InventorySlot
 {
     public int armorId;
 
+    public ArmorChar chars;
 
     public SLOTTYPE gameSlot;
 
@@ -450,12 +460,12 @@ public class ItemManager : MonoBehaviour {
 	}
     public void SetUseCount(int id, int shootCounter)
     {
-        if (!weaponIndexTable.ContainsKey(id))
+        if (!armorIndexTable.ContainsKey(id))
         {
             return;
         }
 
-        string acttualID = weaponIndexTable[id].id;
+        string acttualID = armorIndexTable[id].id;
         if (!toSendLower.ContainsKey(acttualID))
         {
             toSendLower[acttualID] = new ShootData();
@@ -519,7 +529,7 @@ public class ItemManager : MonoBehaviour {
 	}
 	//parse XML string to normal Achivment Pattern
 	protected IEnumerator ParseList(string XML,string startTag = "items"){
-		//Debug.Log (XML);
+	Debug.Log (XML);
 	  	XmlDocument xmlDoc = new XmlDocument();
 		xmlDoc.LoadXml(XML);
 
@@ -576,13 +586,13 @@ public class ItemManager : MonoBehaviour {
                             weaponslot.gameSlot = (SLOTTYPE)int.Parse(node.SelectSingleNode("ingame_type").InnerText);
                             if (node.SelectSingleNode("aim") != null)
                             {
-                                slot.chars = new WeaponChar();
-                                slot.chars.aim = float.Parse(node.SelectSingleNode("aim").InnerText);
-                                slot.chars.dmg = float.Parse(node.SelectSingleNode("damage").InnerText);
-                                slot.chars.speed = float.Parse(node.SelectSingleNode("speed").InnerText);
-                                slot.chars.reload = float.Parse(node.SelectSingleNode("reload").InnerText);
-                                slot.chars.magazine = int.Parse(node.SelectSingleNode("magazine").InnerText);
-                                slot.chars.gunMode = node.SelectSingleNode("mode").InnerText;
+                                weaponslot.chars = new WeaponChar();
+                                weaponslot.chars.aim = float.Parse(node.SelectSingleNode("aim").InnerText);
+                                weaponslot.chars.dmg = float.Parse(node.SelectSingleNode("damage").InnerText);
+                                weaponslot.chars.speed = float.Parse(node.SelectSingleNode("speed").InnerText);
+                                weaponslot.chars.reload = float.Parse(node.SelectSingleNode("reload").InnerText);
+                                weaponslot.chars.magazine = int.Parse(node.SelectSingleNode("magazine").InnerText);
+                                weaponslot.chars.gunMode = node.SelectSingleNode("mode").InnerText;
                             }
                         }
                         break;
@@ -593,7 +603,12 @@ public class ItemManager : MonoBehaviour {
 
 
                         armorSlot.gameSlot = (SLOTTYPE)int.Parse(node.SelectSingleNode("ingame_type").InnerText);
+                        if (node.SelectSingleNode("block") != null)
+                        {
+                            armorSlot.chars = new ArmorChar();
+                            armorSlot.chars.def = float.Parse(node.SelectSingleNode("block").InnerText);
 
+                        }
                         armorIndexTable[armorSlot.armorId] = armorSlot;
                         break;
                     default:
@@ -883,7 +898,10 @@ public class ItemManager : MonoBehaviour {
 
     public BaseWeapon GetWeaponprefabByID(int index)
     {
-   
+        if (weaponPrefabsListbyId.Length <= index || index < 0)
+        {
+            return null;
+        }
             return weaponPrefabsListbyId[index];
        
     }
@@ -1621,7 +1639,11 @@ public class ItemManager : MonoBehaviour {
         else
         {
 
-            GUIHelper.SendMessage(xmlDoc.SelectSingleNode("result/errortext").InnerText);
+            if (xmlDoc.SelectSingleNode("result/error").InnerText == "2")
+            {
+                shop.MainMenu.MoneyError();
+            }
+
         }
         GUIHelper.ConnectionStop();
     }
