@@ -246,7 +246,7 @@ public class AchievementManager : MonoBehaviour, LocalPlayerListener, GameListen
                                     foreach (string eventStr in events)
                                     {
 
-                                       // Debug.Log(eventStr);
+                                     //   Debug.Log(eventStr);
                                         foreach (Achievement achiv in ongoingAchivment)
                                         {
                                             if (achiv.isDone)

@@ -28,6 +28,7 @@ public class MapData
 {
     public string name;
     public string version;
+    public string lightmapversion;
 	public string weaponAsset;
 	public string characterAsset;
     public GameObject playerHud;
@@ -319,9 +320,17 @@ public class ServerHolder : MonoBehaviour
 	
 	void OnGUI()
 	{
-        if (!shouldLoad && gameRoom == null)
-        {
-            ShowConnectMenu();
+
+    
+
+            if (!shouldLoad )
+            {    if (!NetworkController.Instance.isSingle)
+                {
+                    
+               
+                    if( gameRoom == null)
+                        ShowConnectMenu();
+                }
         }
         /*if(!shouldLoad){
             if (!PhotonNetwork.inRoom && PhotonNetwork.connected)
@@ -686,7 +695,7 @@ public class ServerHolder : MonoBehaviour
         }
 		yield return new WaitForSeconds(1);
 
-
+       
 
 
 
@@ -706,6 +715,7 @@ public class ServerHolder : MonoBehaviour
        
             MapLoader loader = FindObjectOfType<MapLoader>();
 //            Debug.Log(loader);
+         string fullMapName=mapName;
             if (loader != null)
             {
 
@@ -716,6 +726,7 @@ public class ServerHolder : MonoBehaviour
                 IEnumerator innerCoroutineEnumerator;
                 if (data != null)
                 {
+                    fullMapName = mapName + data.lightmapversion;
                     bool skipWeapon = false, skipPawn = false;
                     IEnumerator tempEnumerator;
                     if (loader.IsInCache(data.weaponAsset))
@@ -738,8 +749,8 @@ public class ServerHolder : MonoBehaviour
                         progress.finishedLoader++;
                         skipPawn = true;
                     }
-                    
-                    tempEnumerator = loader.Load(mapName, data.version);
+
+                    tempEnumerator = loader.Load(fullMapName, data.version);
                     while (tempEnumerator.MoveNext())
                     {
                         yield return tempEnumerator.Current;
@@ -768,7 +779,7 @@ public class ServerHolder : MonoBehaviour
                 }
                 else
                 {
-                    innerCoroutineEnumerator = loader.Load(mapName);
+                    innerCoroutineEnumerator = loader.Load(fullMapName);
 
                     while (innerCoroutineEnumerator.MoveNext())
                     {
@@ -862,7 +873,8 @@ public class ServerHolder : MonoBehaviour
 				break;
 			}
 		}
-        NetworkController.Instance.pause = false;
+        NetworkController.Instance.LoadFinish();
+     
       //  NetworkController.Instance.SpawnPlayer( Vector3.zero, Quaternion.identity);
         FPSControll.instance.dontCount = false;
         FPSControll.instance.SetDelay(10.0f);
@@ -877,8 +889,8 @@ public class ServerHolder : MonoBehaviour
             menu.transform.localRotation = Quaternion.identity;
             menu.transform.localScale = holder.scale;
             Camera.main.GetComponent<PlayerMainGui>().enabled = true;
-        
-            NetworkController.Instance.pause = false;
+
+            NetworkController.Instance.LoadFinish();
 		}
 		connectingToRoom = false;
 		
@@ -899,6 +911,10 @@ public class ServerHolder : MonoBehaviour
     void Awake()
     {
         instance = this;
+        if (!shouldLoad && NetworkController.Instance.isSingle)
+        {
+            FinishLoad();
+        }
     }
 
     private static ServerHolder instance;

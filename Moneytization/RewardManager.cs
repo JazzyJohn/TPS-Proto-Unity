@@ -3,6 +3,7 @@ using System;
 using System.Xml;
 using System.Collections;
 using System.Collections.Generic;
+using CodeStage.AntiCheat.ObscuredTypes;
 //using System.Threading;
 public class Reward{
 	int count = 0;
@@ -140,8 +141,8 @@ public class  RewardManager : MonoBehaviour, LocalPlayerListener,GameListener{
 		}
 	
 	}
-	private int upCash = 0;
-    private int upGold = 0;
+    private ObscuredInt upCash = 0;
+    private ObscuredInt upGold = 0;
 	public void UpMoney(string reason){
 		if(GameRule.instance.IsPractice()){
 			return;

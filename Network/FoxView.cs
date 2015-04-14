@@ -42,30 +42,41 @@ public class FoxView : MonoBehaviour {
         }
         set
         {
-            // if ID was 0 for an awakened PhotonView, the view should add itself into the networkingPeer.photonViewList after setup
-            realId = value;
-
-            this.ownerId = value / NetworkController.MAX_VIEW_IDS;
-
-            this.subId = value % NetworkController.MAX_VIEW_IDS;
-
-            if (this.ownerId<0)
+            if (NetworkController.Instance.isSingle)
             {
-                this.ownerId--;
+                isMine = true;
             }
-            isSceneView = ownerId == SCENE_OWNER_ID;
-            if (NetworkController.smartFox != null && NetworkController.smartFox.MySelf!=null)
+            else
             {
-                if (isSceneView)
+
+                // if ID was 0 for an awakened PhotonView, the view should add itself into the networkingPeer.photonViewList after setup
+                realId = value;
+
+                this.ownerId = value / NetworkController.MAX_VIEW_IDS;
+
+                this.subId = value % NetworkController.MAX_VIEW_IDS;
+
+                if (this.ownerId < 0)
                 {
-                    isMine = NetworkController.smartFox.MySelf.ContainsVariable("Master") && NetworkController.smartFox.MySelf.GetVariable("Master").GetBoolValue();
+                    this.ownerId--;
                 }
-                else
+                isSceneView = ownerId == SCENE_OWNER_ID;
+                if (NetworkController.smartFox != null && NetworkController.smartFox.MySelf != null)
                 {
-                    isMine = NetworkController.smartFox.MySelf.Id == ownerId;
+                    if (isSceneView)
+                    {
+                        isMine = NetworkController.smartFox.MySelf.ContainsVariable("Master") && NetworkController.smartFox.MySelf.GetVariable("Master").GetBoolValue();
+                    }
+                    else
+                    {
+                        isMine = NetworkController.smartFox.MySelf.Id == ownerId;
+                    }
                 }
+                DebufViewID = value;
+
+
             }
-            DebufViewID = value;
+        
           
         }
     }
@@ -140,24 +151,49 @@ public class FoxView : MonoBehaviour {
 
     */
 	void OnDestroy(){
+
 		NetworkController.ClearView(viewID);
 	}
 	public void StartShoot(string animName){
+        if (NetworkController.Instance.isSingle)
+        {
+            return;
+        }
 		NetworkController.Instance.PawnChangeShootAnimStateRequest( viewID,  animName,true);
 	}
 	public void StopShoot(string animName){
+        if (NetworkController.Instance.isSingle)
+        {
+            return;
+        }
 		NetworkController.Instance.PawnChangeShootAnimStateRequest( viewID,  animName,false);
 	}
 	public void StartKick(int i){
+        if (NetworkController.Instance.isSingle)
+        {
+            return;
+        }
 		NetworkController.Instance.PawnKickRequest( viewID,i,true);
 	}
 	public void StopKick(){
+        if (NetworkController.Instance.isSingle)
+        {
+            return;
+        }
 		NetworkController.Instance.PawnKickRequest(viewID,0,false);
 	}
 	public void Activate(){
+        if (NetworkController.Instance.isSingle)
+        {
+            return;
+        }
 		NetworkController.Instance.PawnActiveStateRequest(viewID,true);
 	}
 	public void DeActivate(){
+        if (NetworkController.Instance.isSingle)
+        {
+            return;
+        }
 		NetworkController.Instance.PawnActiveStateRequest(viewID,false);
 	}
 
@@ -166,9 +202,17 @@ public class FoxView : MonoBehaviour {
 	//	NetworkController.Instance.PawnUpdateRequest(pawn);
 	}
 	public void Taunt(string name){
+        if (NetworkController.Instance.isSingle)
+        {
+            return;
+        }
 		NetworkController.Instance.PawnTauntRequest(viewID, name);
 	}
 	public void KnockOut(){
+        if (NetworkController.Instance.isSingle)
+        {
+            return;
+        }
 		NetworkController.Instance.PawnKnockOutRequest(viewID);
 	}
 	public void Destroy(){
@@ -181,11 +225,18 @@ public class FoxView : MonoBehaviour {
 	}
     public void Detonate()
     {
+        if (NetworkController.Instance.isSingle)
+        {
+            return;
+        }
         NetworkController.Instance.DetonateRequest(viewID);
     }
     public void PrepareShoot(Vector3 position, Quaternion rotation, float power, float range, float minRange, int viewId, int projId)
     {
-		
+        if (NetworkController.Instance.isSingle)
+        {
+            return;
+        }
 		ISFSObject data = new SFSObject();
 		
      	data.PutClass("position",new Vector3Model(position));
@@ -205,23 +256,43 @@ public class FoxView : MonoBehaviour {
 		//NetworkController.Instance.WeaponShootRequest(data);
 	}
 	public void TakeInHand(){
+        if (NetworkController.Instance.isSingle)
+        {
+            return;
+        }
 		NetworkController.Instance.ChangeWeaponStateRequest(viewID,true);
 	}
 	
 	public void PutAway(){
+        if (NetworkController.Instance.isSingle)
+        {
+            return;
+        }
 		NetworkController.Instance.ChangeWeaponStateRequest(viewID,false);
 	}
 	
 	public void SkillCastEffect(string name){
+        if (NetworkController.Instance.isSingle)
+        {
+            return;
+        }
         NetworkController.Instance.SkillCastEffectRequest(viewID, name);
 	}
 	public void SkillActivate(string name){
+        if (NetworkController.Instance.isSingle)
+        {
+            return;
+        }
 		ISFSObject data = new SFSObject();
 		data.PutInt("id", viewID);	
 		data.PutUtfString("name", name);			
 		NetworkController.Instance.SkillActivateRequest(data);
 	}
 	public void SkillActivate(string name,Vector3 position){
+        if (NetworkController.Instance.isSingle)
+        {
+            return;
+        }
 		ISFSObject data = new SFSObject();
 		data.PutInt("id", viewID);	
 		data.PutUtfString("name", name);			
@@ -229,6 +300,10 @@ public class FoxView : MonoBehaviour {
 		NetworkController.Instance.SkillActivateRequest(data);
 	}
 	public void SkillActivate(string name,int viewId){
+        if (NetworkController.Instance.isSingle)
+        {
+            return;
+        }
 		ISFSObject data = new SFSObject();
 		data.PutInt("id", viewID);	
 		data.PutUtfString("name", name);			
@@ -238,11 +313,19 @@ public class FoxView : MonoBehaviour {
 
     public void InvokeProjectileCall(ISFSObject data)
     {
+        if (NetworkController.Instance.isSingle)
+        {
+            return;
+        }
         NetworkController.Instance.InvokeProjectileCallRequest(data);
     }
 
     public void PawnDiedByKill(int userId)
     {
+        if (NetworkController.Instance.isSingle)
+        {
+            return;
+        }
 		ISFSObject data = new SFSObject();
         data.PutInt("viewId", viewID);
         data.PutInt("player", userId);
@@ -252,36 +335,64 @@ public class FoxView : MonoBehaviour {
 	
 	public void VipSpawnedRequest(PawnModel pawn)
     {
+        if (NetworkController.Instance.isSingle)
+        {
+            return;
+        }
 		NetworkController.Instance.VipSpawnedRequest(pawn);
 	}
 
 
     public void InPilotChange(bool isPilotIn)
     {
+        if (NetworkController.Instance.isSingle)
+        {
+            return;
+        }
         NetworkController.Instance.InPilotChangeRequest(viewID,isPilotIn);
     }
 
 
     public void UpdateSimpleDestroyableObject(SimpleDestroyableModel model)
     {
+        if (NetworkController.Instance.isSingle)
+        {
+            return;
+        }
         NetworkController.Instance.UpdateSimpleDestroyableObjectRequest(model);
     }
 	public void UpdateConquestPoint(ConquestPointModel model)
     {
+        if (NetworkController.Instance.isSingle)
+        {
+            return;
+        }
 		NetworkController.Instance.UpdateConquestPointRequest(model);
 	}
 
     public void CustomAnimStart(string animName)
     {
+        if (NetworkController.Instance.isSingle)
+        {
+            return;
+        }
         NetworkController.Instance.CustomAnimStartRequest(viewID, animName);
 
     }
 	
 	public void ChangeWeaponShootState(bool state){
+        if (NetworkController.Instance.isSingle)
+        {
+            return;
+        }
 		  NetworkController.Instance.ChangeWeaponShootStateRequest(viewID, state);
 	}
 	
 	public static void  SendShoot(){
+        if (NetworkController.Instance.isSingle)
+        {
+            return;
+        }
 		if(sendProj==null){
 			return;
 		}
@@ -293,10 +404,17 @@ public class FoxView : MonoBehaviour {
 
     public void LowerHPRequest(BaseDamage damage,int killerId)
     {
+        if (NetworkController.Instance.isSingle)
+        {
+            return;
+        }
         NetworkController.Instance.RemoteDamageOnPawnRequest(new BaseDamageModel(damage), viewID,killerId);
     }
 	public void SendMark(){
-		
+        if (NetworkController.Instance.isSingle)
+        {
+            return;
+        }
 	   NetworkController.Instance.SendMarkRequest(viewID);
 	}
 }

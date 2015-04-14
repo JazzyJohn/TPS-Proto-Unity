@@ -228,6 +228,7 @@ public class AnimationManager : MonoBehaviour
     /// </summary>
     public virtual void IKOn()
     {
+//        Debug.Log("ikON");
 		ToggleAimPos(true);
 	}
 	
@@ -425,6 +426,7 @@ public class AnimationManager : MonoBehaviour
     {
         Debug.Log("PutGrenadeAway");
         pawn.StopGrenadeThrow();
+        aimPos.AimOn();
     }
 	/*[Serializable]
 	public class Leg

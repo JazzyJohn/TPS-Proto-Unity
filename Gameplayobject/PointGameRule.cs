@@ -98,7 +98,7 @@ public class PointGameRule : GameRule {
 			isGameEnded = true;
 		}
 		
-        }
+    }
 
 
     public override PlayerMainGui.GameStats GetStats()

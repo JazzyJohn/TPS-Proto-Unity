@@ -4,14 +4,15 @@ using System.Xml;
 using System.Collections;
 using System.Collections.Generic;
 using System.Threading;
+using CodeStage.AntiCheat.ObscuredTypes;
 
-public class LevelingManager : MonoBehaviour, LocalPlayerListener,GameListener{ 
-	
+public class LevelingManager : MonoBehaviour, LocalPlayerListener,GameListener{
 
-		
-	public int playerLvl = 0;
-	
-	public int playerExp = 0;
+
+
+    public ObscuredInt playerLvl = 0;
+
+    public ObscuredInt playerExp = 0;
 	
 	public int[] playerNeededExp;
 

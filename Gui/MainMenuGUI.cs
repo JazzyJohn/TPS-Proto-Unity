@@ -53,7 +53,7 @@ public class MainMenuGUI : MonoBehaviour {
 
     public AskWindow askWindow;
 
-	
+    public InventoryGUI shop;
     public void LoadingFinish()
     {
 		
@@ -162,9 +162,9 @@ public class MainMenuGUI : MonoBehaviour {
 				NewRoom.transform.localScale = new Vector3 (1f, 1f, 1f);
 				NewRoom.transform.localPosition = new Vector3(0f, 0f, 0f);
 
-				_RoomsNgui.Grid.Reposition ();
 				_RoomsNgui.ScrollBar.barSize = 0;
 			}
+			_RoomsNgui.Grid.Reposition ();
 		}
         //_PanelsNgui.SliderPanel.alpha = 1f;
 	}
@@ -372,6 +372,7 @@ public class MainMenuGUI : MonoBehaviour {
 	{
 		//_PanelsNgui.SliderPanel.alpha= 1.0f;
 		_RoomsNgui.Loading.alpha = 1f;
+        shop.CloseLot();
 	}
 	
 	public void StartBut() //Создать комнату
@@ -399,9 +400,15 @@ public class MainMenuGUI : MonoBehaviour {
 
 	}
 
+	UIScrollView gamesRoom;
+
 	public void RefreshRoom() // Обновления списка комнат
 	{
         int i = 0;
+
+		if(!gamesRoom)
+			gamesRoom = _RoomsNgui.Grid.GetComponentInParent<UIScrollView>();
+
         foreach (RoomData room in Server.allRooms)
 		{
             i++;
@@ -419,10 +426,14 @@ public class MainMenuGUI : MonoBehaviour {
 				//_RoomsNgui.ScrollBar.barSize = 0;
 			}
             Rooms[room.name].UpdateRoom(room, i);
-			
 		}
 		_RoomsNgui.Grid.Reposition();
+		gamesRoom.UpdatePosition();
+		gamesRoom.UpdateScrollbars(true);
+
 	}
+
+
 
 	public void ShowGameList(){
         HideAllPanel();
@@ -697,6 +708,7 @@ public class MainMenuGUI : MonoBehaviour {
              
 		Screen.lockCursor = false;
         NetworkController.Instance.LeaveRoomReuqest();
+        ItemManager.instance.LeaveRoom();
         Destroy(FindObjectOfType<HUDHolder>().gameObject);
         Application.LoadLevel(0);
         gameObject.SetActive(true);

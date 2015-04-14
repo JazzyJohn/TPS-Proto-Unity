@@ -473,6 +473,7 @@ public class BaseWeapon : DestroyableNetworkObject {
 	}
 	public void RemoteAttachWeapon(Pawn newowner,bool state){
 		if(state){
+            Debug.Log(name + " EQUIP");
             newowner.setWeapon(this); 
 		}else{
             AttachWeaponToChar(newowner);

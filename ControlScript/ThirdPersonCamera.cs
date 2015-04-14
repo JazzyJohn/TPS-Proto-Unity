@@ -141,11 +141,10 @@ public class ThirdPersonCamera : PlayerCamera
 		/*if (!controller)
 			return;
 		*/
-        if (timeLerp * lerpSpeed < 1.0f)
-        {
+       
             timeLerp += Time.deltaTime * lerpSpeed;
             targetOffset = Vector3.Lerp(startedOffset, neededOffset, timeLerp);
-        }
+       
         
         Vector3 lTargetOffset = targetOffset;
 		float lXOffset;
@@ -250,7 +249,7 @@ public class ThirdPersonCamera : PlayerCamera
             timeLerpPos = 1.0f;
             if (mainCamera.useOcclusionCulling)
             {
-                mainCamera.useOcclusionCulling = false;
+                //mainCamera.useOcclusionCulling = false;
             }
         }
         else
@@ -262,12 +261,12 @@ public class ThirdPersonCamera : PlayerCamera
             }
             if (!mainCamera.useOcclusionCulling)
             {
-                mainCamera.useOcclusionCulling = true;
+                //mainCamera.useOcclusionCulling = true;
             }
         }
 
         Vector3 velocity = Vector3.zero;
-        if (timeLerpPos < 1.0f)
+        if (timeLerpPos <= 1.0f)
         {
             timeLerpPos += Time.deltaTime * lerpSpeed;
             neededPos = resultcameraPos + GetShaker();

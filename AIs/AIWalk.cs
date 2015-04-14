@@ -166,6 +166,10 @@ public class AIWalk : AIMovementState
 
         controlledPawn.ToggleAim(!isMelee);
         state = nextstate;
+        if (_enemy != null)
+        {
+            aibase.EnemyUpdate(_enemy);
+        }
 	
 	}   
 	protected void DecideTacktick(float addToMelee=0.0f){

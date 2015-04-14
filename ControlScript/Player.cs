@@ -160,7 +160,7 @@ public class Player : MonoBehaviour {
     {
 		DontDestroyOnLoad(gameObject);
         playerView = GetComponent<PlayerView>();
-		
+       
     }
     void Start()
     {

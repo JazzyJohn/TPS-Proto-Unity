@@ -19,12 +19,22 @@ public class PlayerView : MonoBehaviour {
 
     public void SetId(int userId)
     {
+     
         ownerId = userId;
-		if( NetworkController.smartFox.MySelf==null){
-			NetworkController.Instance.BackToMenu();
-		}
-        isMine = NetworkController.smartFox.MySelf.Id == ownerId;
-        
+        if (NetworkController.Instance.isSingle )
+        {
+            isMine = true;
+        }
+        else
+        {
+            if (NetworkController.smartFox == null||NetworkController.smartFox.MySelf == null)
+            {
+                NetworkController.Instance.BackToMenu();
+            }
+            isMine = NetworkController.smartFox.MySelf.Id == ownerId;
+
+          
+        }
         observed = GetComponent<Player>();
         allPlayer.Add(ownerId, this);
     }
@@ -35,10 +45,18 @@ public class PlayerView : MonoBehaviour {
     }
     public void SetNameUID(string UID, string PlayerName)
     {
+        if (NetworkController.Instance.isSingle)
+        {
+            return;
+        }
         NetworkController.Instance.SetNameUIDRequest( UID,  PlayerName);
     }
     public void SetTeam(int team)
     {
+        if (NetworkController.Instance.isSingle)
+        {
+            return;
+        }
         NetworkController.Instance.SetTeamRequest(team);
     }
 
@@ -51,7 +69,7 @@ public class PlayerView : MonoBehaviour {
 
     public void NetUpdate(PlayerModel player)
     {
-        Debug.Log("NET UPDATE " + player.uid + " name " + player.name + "team" + player.team);
+        Debug.Log("NET UPDATE " + player.uid + " name " + player.name + "team" + player.team + " player.kill" + player.kill);
         observed.UID = player.uid;
         observed.team =  player.team;
         observed.PlayerName = player.name;

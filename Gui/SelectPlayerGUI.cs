@@ -619,7 +619,7 @@ public static class Choice
 	public static void SetChoice(int slot, int gameClass, WeaponIndex index,int set)
     {
 		ChoiceSet[set].slots[slot] =index;
-		if(set==0){
+		if(set==curSet){
 			_SetChoice(slot, gameClass, index);
 		}
 	}

@@ -22,7 +22,7 @@ public class OperationGUI : MonoBehaviour {
     {
         mainPanel.alpha = 1.0f;
         //TODO: TURN ON WHEN READY
-        //DrawOperations();
+        DrawOperations();
         mission.Draw();
     }
     public void CloseOperation()
@@ -109,6 +109,8 @@ public class OneOperationGUI{
 
     public UILabel goal;
 
+    public UILabel goalBig;
+
     public UILabel myScore;
 
     public UILabel myPlace;
@@ -123,7 +125,13 @@ public class OneOperationGUI{
 
     public UIGrid table;
 
+    public UIScrollView view;
+
     public WinnerGUI[] spawnedWinners;
+
+    public UIWidget yourPlace;
+
+    public UIWidget startPlace;
 
     public void Fill(Operation oper)
     {
@@ -136,38 +144,50 @@ public class OneOperationGUI{
       
         text.text = oper.desctiption;
         goal.text = TextGenerator.instance.GetSimpleText("Operation_" + oper.counterEvent);
+        goalBig.text = TextGenerator.instance.GetSimpleText("Operation_" + oper.counterEvent);
         myScore.text = oper.myCounter.ToString();
         myPlace.text = oper.myPlace.ToString();
+        if (oper.myCounter == 0)
+        {
+            yourPlace.alpha =0.0f;
+            startPlace.alpha = 1.0f;
+        }
+        else
+        {
+            yourPlace.alpha = 1.0f;
+            startPlace.alpha = 0.0f;
+        }
         for(int i=0; i<cashPrizes.Length;i++)
         {
-            if(i>=oper.cashReward.Length){
+            if (i >= oper.cashReward.Length || oper.cashReward[i]== 0)
+            {
                 cashPrizes[i].box.alpha = 0.0f;
             }else{
-                cashPrizes[i].label.text = TextGenerator.instance.GetMoneyText("oper_cash", oper.cashReward[i]);
+                cashPrizes[i].label.text = TextGenerator.instance.GetMoneyText("oper_cash", oper.cashReward[i],i+1);
             }
 
         }
         for (int i = 0; i < goldPrizes.Length; i++)
         {
-            if (i >= oper.goldReward.Length)
+            if (i >= oper.goldReward.Length || oper.goldReward[i]== 0)
             {
                 goldPrizes[i].box.alpha = 0.0f;
             }
             else
             {
-                goldPrizes[i].label.text = TextGenerator.instance.GetMoneyText("oper_gold", oper.goldReward[i]);
+                goldPrizes[i].label.text = TextGenerator.instance.GetMoneyText("oper_gold", oper.goldReward[i], i+1);
             }
 
         }
         for (int i = 0; i < expPrizes.Length; i++)
         {
-            if (i >= oper.expReward.Length)
+            if (i >= oper.expReward.Length || oper.expReward[i]==0)
             {
                 expPrizes[i].box.alpha = 0.0f;
             }
             else
             {
-                expPrizes[i].label.text =  TextGenerator.instance.GetMoneyText("oper_exp",oper.expReward[i]);
+                expPrizes[i].label.text = TextGenerator.instance.GetMoneyText("oper_exp", oper.expReward[i], i+1);
             }
 
         }
@@ -177,6 +197,11 @@ public class OneOperationGUI{
     {
         int count = Mathf.Min(3, oper.winners.Length);
         int i = 0;
+        for (i = 0; i < 3; i++)
+        {
+            WinnerGUI gui = spawnedWinners[i];
+            gui.box.alpha = 0.0f;
+        }
         for (i = 0; i < count; i++)
         {
             Winner winner = oper.winners[i];
@@ -193,9 +218,10 @@ public class OneOperationGUI{
             }
             gui.score.text = winner.score.ToString();
             gui.publicName.text = winner.user.name;
+            gui.box.alpha = 1.0f;
 
         }
-        for(;i<oper.winners.Length;i++){
+        for(i=0;i<oper.winners.Length;i++){
 
              Winner winner = oper.winners[i];
             if (winner.user.avatar == null)
@@ -219,11 +245,13 @@ public class OneOperationGUI{
             gui.publicName.text = winner.user.name;
             if (gui.num!=null)
             {
-                gui.num.text =i.ToString();
+                gui.num.text =(i+1).ToString();
             }
 
         }
         table.Reposition();
+        view.UpdatePosition();
+        view.UpdateScrollbars(true);
     }
 
 }

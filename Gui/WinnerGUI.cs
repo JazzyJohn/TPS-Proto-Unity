@@ -8,4 +8,5 @@ public class WinnerGUI : MonoBehaviour
     public UILabel publicName;
     public UITexture avatar;
     public UILabel num;
+    public UIWidget box;
 }

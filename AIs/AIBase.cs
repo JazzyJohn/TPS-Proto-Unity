@@ -196,6 +196,7 @@ public class AIBase : MonoBehaviour
         {
             controlledPawn.RequestKillMe();
         }
+       
     }
 
 
@@ -221,6 +222,13 @@ public class AIBase : MonoBehaviour
 		if(aiSwarm!=null){
             aiSwarm.NewEnemy(enemy);
 		}
+   }
+   public void EnemyUpdate(Pawn enemy)
+   {
+       if (aiSwarm != null)
+       {
+           aiSwarm.EnemyUpdate(enemy);
+       }
    }
    public virtual void EnemyFromSwarm(Pawn enemy){
 		_currentState.EnemyFromSwarm(enemy);

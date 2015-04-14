@@ -327,6 +327,8 @@ public class Pawn : DamagebleObject
 	
 	public float aimJumpPercentMultiplier=0.1f;
 
+    public float aimIdlePercentMultiplier = 0.25f;
+
     public bool isLookingAt = true;
 
     public bool initialReplication = true;
@@ -1787,14 +1789,22 @@ public class Pawn : DamagebleObject
     //Weapon Section
     public void ChangeWeapon()
     {
-	
-		
-			ivnMan.ChangeWeapon();
+
+        if (foxView.isMine)
+        {
+
+
+            ivnMan.ChangeWeapon();
+        }
 		
     }
     public void UnEquipWeapon()
     {
-        CurWeapon.PutAway();
+        if (foxView.isMine)
+        {
+
+            CurWeapon.PutAway();
+        }
     }
 
     public virtual void StartFire()
@@ -2234,6 +2244,9 @@ public class Pawn : DamagebleObject
             case CharacterState.Jumping:
 				mult+=aimJumpPercentMultiplier;
 			break;
+            /*   case CharacterState.Idle:
+                mult -= aimIdlePercentMultiplier;
+                break;*/
 		}
 		return mult;
 		
@@ -2898,7 +2911,10 @@ public class Pawn : DamagebleObject
                 CapsuleCollider capsule = ((CapsuleCollider)myCollider);
                 minAngle = Mathf.Atan(capsule.radius / capsule.height * 2)  ;
             }
-           // Debug.Log(Mathf.Cos(minAngle));
+            if (!isAi)
+            {
+                Debug.Log(Mathf.Cos(minAngle));
+            }
           
             /*
              *   float normalRadius;
@@ -3275,8 +3291,15 @@ public class Pawn : DamagebleObject
 
     public bool IsGrounded()
     {
-
-        return isGrounded;
+        if (foxView.isMine)
+        {
+            return isGrounded;
+        }
+        else
+        {
+            return!(nextState==CharacterState.Jumping||nextState==CharacterState.DoubleJump);
+        }
+     
     }
     protected virtual void Jump()
     {
@@ -3499,7 +3522,11 @@ public class Pawn : DamagebleObject
         {
             myTransform.GetChild(i).gameObject.SetActive(true);
         }
-        foxView.Activate();
+        if (foxView.isMine)
+        {
+            foxView.Activate();
+        }
+      
     }
 
     public void RemoteActivate()
@@ -3534,7 +3561,10 @@ public class Pawn : DamagebleObject
         {
             myTransform.GetChild(i).gameObject.SetActive(false);
         }
-        foxView.DeActivate();
+        if (foxView.isMine)
+        {
+            foxView.DeActivate();
+        }
 
     }
 

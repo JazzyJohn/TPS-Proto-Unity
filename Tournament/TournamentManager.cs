@@ -252,18 +252,24 @@ public class TournamentManager : MonoBehaviour, LocalPlayerListener, GameListene
         oper.prizePlaces = int.Parse(node.SelectSingleNode("prizeplaces").InnerText);
         oper.cashReward = new int[oper.prizePlaces+1];
         XmlNodeList rewards = node.SelectNodes("cashReward");
-        for (int i = 0; i <= oper.prizePlaces; i++)
+        for (int i = 0; i < rewards.Count; i++)
         {
             oper.cashReward[i] = int.Parse(rewards[i].InnerText);
         }
         oper.goldReward = new int[oper.prizePlaces+1];
         rewards = node.SelectNodes("goldReward");
-        for (int i = 0; i <= oper.prizePlaces; i++)
+        for (int i = 0; i < rewards.Count; i++)
         {
             oper.goldReward[i] = int.Parse(rewards[i].InnerText);
         }
 
         oper.expReward = new int[oper.prizePlaces+1];
+        rewards = node.SelectNodes("expReward");
+        for (int i = 0; i < rewards.Count; i++)
+        {
+            oper.expReward[i] = int.Parse(rewards[i].InnerText);
+        }
+
         XmlNodeList winners = node.SelectNodes("winners");
         oper.winners = new Winner[winners.Count];
         for (int j = 0; j < winners.Count; j++)

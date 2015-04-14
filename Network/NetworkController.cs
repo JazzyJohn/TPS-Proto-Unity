@@ -41,9 +41,15 @@ public class NetworkController : MonoBehaviour
     public string serverResolverName = "127.0.0.1";
     public int serverPort = 9933;
     public int udpPort = 9934;
+    public int[] backUppPorts;
+    public int curPort = 0;
     public string zone = "BasicJugger";
     public bool debug = true;
     public bool pause = false;
+    public bool isSingle=false;
+    public bool isAutoConnect=true;
+
+    public bool allConnectionDone = false;
     public string PlayerPrefab = "Player";
     ConterIdleRequest conterIdleRequest;
     private static NetworkController instance;
@@ -132,6 +138,10 @@ public class NetworkController : MonoBehaviour
 
     public void SetNetworkLvl(int lvl)
     {
+        if (isSingle)
+        {
+            return;
+        }
         List<UserVariable> userVars = new List<UserVariable>();
         userVars.Add(new SFSUserVariable("lvl", lvl));
         smartFox.Send(new SetUserVariablesRequest(userVars));
@@ -184,6 +194,7 @@ public class NetworkController : MonoBehaviour
             return;
 
         }
+      
         instance = this;
         Application.runInBackground = true; // Let the application be running whyle the window is not active.
         // In a webplayer (or editor in webplayer mode) we need to setup security policy negotiation with the server first
@@ -195,7 +206,11 @@ public class NetworkController : MonoBehaviour
             }
         }
         DefaultSFSDataSerializer.RunningAssembly = Assembly.GetExecutingAssembly();
-        Connect();
+        if (isAutoConnect)
+        {
+            Connect();
+
+        }
     }
     public void Connect()
     {
@@ -276,7 +291,7 @@ public class NetworkController : MonoBehaviour
         /* Thread  pyThread = new Thread(new ThreadStart(this.ServerResolvedLoop));
       
          pyThread.Start();		*/
-        if (_smartFox.IsConnected)
+        if (_smartFox!=null&&_smartFox.IsConnected)
         {
             Login(username);
         }
@@ -360,8 +375,11 @@ public class NetworkController : MonoBehaviour
         {
             pyThread.Abort();
         }
-        _smartFox.Disconnect();
-        UnsubscribeDelegates();
+        if (_smartFox != null)
+        {
+            _smartFox.Disconnect();
+            UnsubscribeDelegates();
+        }
         /*if (myThread != null)
         {
             myThread.Abort();
@@ -376,15 +394,19 @@ public class NetworkController : MonoBehaviour
     public void OnConnection(BaseEvent evt)
     {
         bool success = (bool)evt.Params["success"];
-        string error = (string)evt.Params["error"];
-
+        string error = (string)evt.Params["errorMessage"];
+      /*  IEnumerator enume  =evt.Params.Keys.GetEnumerator();
+         while(enume.MoveNext()){
+            Debug.Log(enume.Current.ToString());
+        }*/
+      
         Debug.Log("On Connection callback got: " + success + " (error : <" + error + ">)");
 
 
         if (success)
         {
             SmartFoxConnection.Connection = _smartFox;
-            Debug.Log(UID);
+            //Debug.Log(UID);
             if (UID != "")
             {
                 Login(UID);
@@ -394,7 +416,19 @@ public class NetworkController : MonoBehaviour
         else
         {
             UnsubscribeDelegates();
+            try
+            {
+                _smartFox.Disconnect();
+                _smartFox.KillConnection();
+            }
+            catch (Exception e)
+            {
+                Debug.Log(e);
+            }
+            _smartFox = null;
+
             this.Connect();
+
         }
 
     }
@@ -405,8 +439,25 @@ public class NetworkController : MonoBehaviour
         Debug.Log("On Connection lost");
 
         UnsubscribeDelegates();
+        if (serverHolder.gameRoom != null)
+        {
+           FindObjectOfType<MainMenuGUI>().GoToMainMenu();
+           serverHolder.gameRoom = null;
+        }
+    
+        try
+        {
+            _smartFox.Disconnect();
+            _smartFox.KillConnection();
+        }
+        catch (Exception e)
+        {
+            Debug.Log(e);
+        }
+        _smartFox = null;
         this.Connect();
     }
+
 
     public void OnDebugMessage(BaseEvent evt)
     {
@@ -442,11 +493,22 @@ public class NetworkController : MonoBehaviour
     {
         if (evt.Params.Contains("success") && !(bool)evt.Params["success"])
         {
-            smartFox.InitUDP(serverName, serverPort);
+             IEnumerator enume  =evt.Params.Keys.GetEnumerator();
+            while(enume.MoveNext()){
+                Debug.Log(evt.Params[enume.Current]);
+
+            }
+            smartFox.InitUDP(serverName, backUppPorts[curPort]);
+            curPort++;
+            if (curPort >= backUppPorts.Length)
+            {
+                curPort = 0;
+            }
             Debug.Log("UDP error: " + (string)evt.Params["errorMessage"]);
         }
         else
         {
+            allConnectionDone = true;
             Debug.Log("UDP ok");
             GlobalPlayer.instance.loadingStage++;
             // On to the lobby
@@ -454,6 +516,14 @@ public class NetworkController : MonoBehaviour
             serverHolder.Connect();
 
         }
+    }
+    public void LoadFinish()
+    {
+       pause = false;
+       if (isSingle)
+       {
+           SpawnPlayer(0);
+       }
     }
 
     private Queue<BaseEvent> lateEvents = new Queue<BaseEvent>();
@@ -486,6 +556,7 @@ public class NetworkController : MonoBehaviour
                     {
                         if (player.userId != _smartFox.MySelf.Id)
                         {
+                            Debug.Log("init player" + player.userId);
                             if (PlayerView.allPlayer.ContainsKey(player.userId))
                             {
                                 PlayerView.allPlayer[player.userId].NetUpdate(player);
@@ -515,6 +586,7 @@ public class NetworkController : MonoBehaviour
                         }
                         catch (Exception e)
                         {
+
                             Debug.LogError("Exception handling playersSpawm in views section: " + e.Message + " >>> " + e.StackTrace);
 
                         }
@@ -570,6 +642,10 @@ public class NetworkController : MonoBehaviour
                     if (dt.ContainsKey("swarms"))
                     {
                         ReadMapData(dt);
+                    }
+                    if (dt.ContainsKey("gameRule"))
+                    {
+                        GameRule.instance.SetFromModel((GameRuleModel)dt.GetClass("gameRule"));
                     }
                     GameRule.instance.ReadData(dt);
 
@@ -721,27 +797,41 @@ public class NetworkController : MonoBehaviour
 
     private GameObject InstantiateNetPrefab(string prefab, Vector3 vector3, Quaternion quaternion, ISFSObject data, bool Scene)
     {
-        GameObject newObject = _SpawnPrefab(prefab, vector3, quaternion);
-        if (newObject == null)
+        if (isSingle)
         {
-            return null;
-        }
+            GameObject newObject = _SpawnPrefab(prefab, vector3, quaternion);
 
-        FoxView view = newObject.GetComponent<FoxView>();
-        if (view != null)
+            FoxView view = newObject.GetComponent<FoxView>();
+
+            view.viewID = 0;
+            return newObject;
+        }
+        else
         {
-            if (!Scene)
+            GameObject newObject = _SpawnPrefab(prefab, vector3, quaternion);
+            if (newObject == null)
             {
-                view.viewID = AllocateViewID(_smartFox.MySelf.Id);
+                return null;
             }
-            else
+
+            FoxView view = newObject.GetComponent<FoxView>();
+            if (view != null)
             {
-                view.viewID = AllocateViewID(FoxView.SCENE_OWNER_ID);
+                if (!Scene)
+                {
+                    view.viewID = AllocateViewID(_smartFox.MySelf.Id);
+                }
+                else
+                {
+                    view.viewID = AllocateViewID(FoxView.SCENE_OWNER_ID);
+                }
+                foxViewList.Add(view.viewID, view);
+
             }
-            foxViewList.Add(view.viewID, view);
+            return newObject;
 
         }
-        return newObject;
+      
     }
     private GameObject RemoteInstantiateNetPrefab(string prefab, Vector3 vector3, Quaternion quaternion)
     {
@@ -772,7 +862,10 @@ public class NetworkController : MonoBehaviour
         foxViewList.Add(view.viewID, view);
         return newObject;
     }
-
+    public GameObject SpawnSinglePlayerPrefab(string prefabName, Vector3 vector3, Quaternion quaternion)
+    {
+        return _SpawnPrefab(prefabName, vector3, quaternion);
+    }
     private GameObject _SpawnPrefab(string prefabName, Vector3 vector3, Quaternion quaternion)
     {
         if (prefabName == null || prefabName == "")
@@ -877,10 +970,13 @@ public class NetworkController : MonoBehaviour
 
     public void ConterIdleRequestSend()
     {
-        ISFSObject data = new SFSObject();
+        if (allConnectionDone) {
+            ISFSObject data = new SFSObject();
 
-        ExtensionRequest request = new ExtensionRequest("conterIdle", data);
-        smartFox.Send(request);
+            ExtensionRequest request = new ExtensionRequest("conterIdle", data);
+            smartFox.Send(request);
+        }
+        
     }
     /// <summary>
     /// Spawn current player object
@@ -1240,6 +1336,10 @@ public class NetworkController : MonoBehaviour
     /// </summary>	
     public void DeleteViewRequest(int id)
     {
+        if (isSingle)
+        {
+            return;
+        }
         ISFSObject data = new SFSObject();
         //Debug.Log("DeleteView Request");
         data.PutInt("id", id);
@@ -1438,12 +1538,19 @@ public class NetworkController : MonoBehaviour
 
     public void LeaveRoomReuqest()
     {
+        try
+        {
 
+            LeaveRoomRequest request = new LeaveRoomRequest(serverHolder.gameRoom);
+            PlayerManager.instance.ClearAll();
+            PlayerView.allPlayer.Clear();
+            smartFox.Send(request);
+        }
+        catch (Exception e)
+        {
+            Debug.Log(e);
+        }
 
-        LeaveRoomRequest request = new LeaveRoomRequest(serverHolder.gameRoom);
-        PlayerManager.instance.ClearAll();
-        PlayerView.allPlayer.Clear();
-        smartFox.Send(request);
     }
     /// <summary>
     /// pawnInPilotChange request to server

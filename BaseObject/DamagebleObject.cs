@@ -1,5 +1,6 @@
 ﻿using UnityEngine;
 using System.Collections;
+using CodeStage.AntiCheat.ObscuredTypes;
 public struct KillInfo{
 	public int weaponId;
     public bool isHeadShoot;
@@ -14,7 +15,7 @@ public struct KillInfo{
 }
 public class DamagebleObject : DestroyableNetworkObject {
 
-	private float _health;
+    private ObscuredFloat _health;
 	
 	protected KillInfo killInfo;
 	public float health{

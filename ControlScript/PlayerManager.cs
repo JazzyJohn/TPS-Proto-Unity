@@ -62,7 +62,7 @@ public class PlayerManager : MonoBehaviour {
     }
  
     // Add the rest of the code here...
-    public Pawn SpawmPlayer(String newPalyerClass,int team,int[] stims) {
+    public virtual  Pawn SpawmPlayer(String newPalyerClass,int team,int[] stims) {
 		Pawn localPlayer;
 		Transform targetPos = GetSpamPosition (team);
 
@@ -83,7 +83,7 @@ public class PlayerManager : MonoBehaviour {
 		return localPlayer;
     }
 
-	public Transform GetSpamPosition(int team){
+	public virtual Transform GetSpamPosition(int team){
 
         List<DispenserSpawn> listDist = new List<DispenserSpawn>();
         DispenserSpawn[] disspamPoints = FindObjectsOfType<DispenserSpawn>();
@@ -164,7 +164,7 @@ public class PlayerManager : MonoBehaviour {
         }
       
     }
-	public void Update(){
+	public  void Update(){
 		updateTimer += Time.deltaTime;
         if (updateTimer > updateDelay)
         {

@@ -194,6 +194,7 @@ public class LotItemGUI : MonoBehaviour
             ArmorInventorySlot armor = (ArmorInventorySlot)item;
             armSection.def.value = armor.chars.def/100;
             weaponSection.widget.alpha = 0.0f;
+            armSection.widget.alpha = 1.0f;
         }
         else
         {

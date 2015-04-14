@@ -206,9 +206,9 @@ namespace nstuff.juggerfall.extension.models
         NONE=0,
         HEADSHOT= 1,
         SPLASH = 2,
-        GUN = 3,
-        KNOCKOUT  =4,
-        CONTINIUS = 5
+        GUN = 4,
+        KNOCKOUT  =8,
+        CONTINIUS = 16
     }
 	[Serializable]
     public class BaseDamageModel : SerializableSFSType

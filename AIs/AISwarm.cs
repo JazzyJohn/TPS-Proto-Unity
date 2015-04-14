@@ -15,6 +15,13 @@ public class AISwarmBuff{
         this.value = value;
     }
 }
+public enum AWERNESS_LEVEL
+{
+    NO,
+    SEND_ON_SEE,
+    SEND_ON_DAMAGE,
+    SEND_ALWAYS
+}
 
 public class AISwarm:MonoBehaviour
 {
@@ -41,6 +48,7 @@ public class AISwarm:MonoBehaviour
 
     protected List<Transform> avaiblePoints = new List<Transform>();
 
+    public AWERNESS_LEVEL awernessLvl=AWERNESS_LEVEL.SEND_ON_SEE;
     void ReloadList()
     {
         if (avaiblePoints.Count == 0)
@@ -178,11 +186,26 @@ public class AISwarm:MonoBehaviour
 		}
 	}
 	public void NewEnemy(Pawn enemy){
+        if (awernessLvl == AWERNESS_LEVEL.NO)
+        {
+            return;
+        }
 		foreach (AIBase aiBase in allPawn)
         {
 			aiBase.EnemyFromSwarm(enemy);
 		}
 	}
+    public void EnemyUpdate(Pawn enemy)
+    {
+        if (awernessLvl != AWERNESS_LEVEL.SEND_ALWAYS)
+        {
+            return;
+        }
+        foreach (AIBase aiBase in allPawn)
+        {
+            aiBase.EnemyFromSwarm(enemy);
+        }
+    }
 
     public void ChangeState(bool state)
     {
@@ -250,5 +273,10 @@ public class AISwarm:MonoBehaviour
     public virtual void ReadData(ISFSObject iSFSObject)
     {
         isActive = iSFSObject.GetBool("active");
+    }
+
+    public virtual AWERNESS_LEVEL GetAwernessLvl()
+    {
+        return awernessLvl;
     }
 }

@@ -345,7 +345,7 @@ public class SettingGUI : MonoBehaviour {
         
 	}
 
-	public void SaveGraphicSetting()
+    public void SaveGraphicSetting(bool save = true)
 	{
 		PlayerPrefs.SetFloat("Resolution", graphicSetting.ResolutionScroll.value);
 		PlayerPrefs.SetString("ResolutionValue", graphicSetting.Resolution.text);
@@ -358,20 +358,24 @@ public class SettingGUI : MonoBehaviour {
 		PlayerPrefs.SetFloat("SoundFX", volumes.SoundFxScroll.value);
 		PlayerPrefs.SetFloat("Music", volumes.MusicScroll.value);
 		PlayerPrefs.SetString("SaveSetting", "yes");
-		ApplyGraphicSetting();
+        ApplyGraphicSetting(save);
 	}
 
-	public void ApplyGraphicSetting()
+	public void ApplyGraphicSetting(bool save=true)
 	{
 		string[] x_y;
 		if (PlayerPrefs.GetString("ResolutionValue", "not") != "not")
 			x_y = PlayerPrefs.GetString("ResolutionValue").Split('x');
 		else
 			x_y = graphicSetting.Resolution.text.Split('x');
-		Screen.SetResolution(int.Parse(x_y[0]), int.Parse(x_y[1]), Screen.fullScreen);
+	
 
         int arg1 = Mathf.RoundToInt(graphicSetting.GraphicScroll.value * (graphicSetting.GraphicScroll.numberOfSteps - 1));
-        QualitySettings.SetQualityLevel(arg1);
+        if (save)
+        {
+            Screen.SetResolution(int.Parse(x_y[0]), int.Parse(x_y[1]), Screen.fullScreen);
+            QualitySettings.SetQualityLevel(arg1);
+        }
 	
         AudioListener.volume = volumes.SoundFxScroll.value * volumes.VolumeScroll.value;
         MusicHolder.SetVolume(volumes.MusicScroll.value * volumes.VolumeScroll.value);
@@ -381,7 +385,7 @@ public class SettingGUI : MonoBehaviour {
 	{
         Debug.Log(QualitySettings.GetQualityLevel());
         graphicSetting.GraphicScroll.value = ((float)QualitySettings.GetQualityLevel()) / (graphicSetting.ResolutionScroll.numberOfSteps );
-        graphicSetting.ResolutionScroll.value = ((float)QualitySettings.GetQualityLevel()) / (graphicSetting.ResolutionScroll.numberOfSteps - 1);
+        graphicSetting.ResolutionScroll.value = 1.0f ;
         graphicSetting.TextureScroll.value = ((float)QualitySettings.GetQualityLevel()) / (graphicSetting.TextureScroll.numberOfSteps - 1);
         graphicSetting.ShadowScroll.value = ((float)QualitySettings.GetQualityLevel()) / (graphicSetting.ShadowScroll.numberOfSteps - 1);
         graphicSetting.LighningScroll.value = ((float)QualitySettings.GetQualityLevel()) / (graphicSetting.LighningScroll.numberOfSteps - 1);
@@ -529,6 +533,6 @@ public static class NGUI_setting
 		setting.graphicSetting.Graphic.text = QualitySettings.names[arg1];
 		setting.graphicSetting.GraphicScroll.value =( (float)arg1) / (setting.graphicSetting.GraphicScroll.numberOfSteps-1);
 
-		setting.SaveGraphicSetting();
+		setting.SaveGraphicSetting(false);
 	}
 }

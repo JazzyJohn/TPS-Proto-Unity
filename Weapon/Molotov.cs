@@ -17,7 +17,7 @@ public class Molotov : BaseProjectile
 	
 			if (hitParticle != null)
             {
-                GameObject flame = hitParticle.Spawn(effectPosition,Quaternion.LookRotation(forward));
+                GameObject flame = hitParticle[0].Spawn(effectPosition,Quaternion.LookRotation(forward));
 			   
 			   StationaryDamager damager = flame.GetComponent<StationaryDamager>(); 
 			   if(damager!=null){

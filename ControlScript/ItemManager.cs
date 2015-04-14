@@ -821,15 +821,42 @@ public class ItemManager : MonoBehaviour {
            
             foreach (XmlNode node in xmlDoc.SelectNodes(startTag+"/default"))
             {
-                WeaponIndex index = new WeaponIndex(node.SelectSingleNode("weaponId").InnerText);
-                index.gameClass = int.Parse(node.SelectSingleNode("gameClass").InnerText);
-                if (weaponIndexTable.ContainsKey(index.prefabId) && weaponIndexTable[index.prefabId].isAvailable())
+
+                int slotInt= int.Parse(node.SelectSingleNode("slot").InnerText);;
+                SLOTTYPE slot = (SLOTTYPE)slotInt;
+
+                switch (slot)
                 {
-                    int gameSlot = (int)weaponIndexTable[index.prefabId].gameSlot;
-                    int set = int.Parse(node.SelectSingleNode("set").InnerText);
-                    Choice.SetChoice(gameSlot, index.gameClass, index, set);
+                    case SLOTTYPE.MAIN:
+                    case SLOTTYPE.PERSONAL:
+                    case SLOTTYPE.GRENADE:
+                    case SLOTTYPE.ANTITANK:
+                        {
+                            WeaponIndex index = new WeaponIndex(node.SelectSingleNode("weaponId").InnerText);
+                            index.gameClass = int.Parse(node.SelectSingleNode("gameClass").InnerText);
+                            if (weaponIndexTable.ContainsKey(index.prefabId) && weaponIndexTable[index.prefabId].isAvailable())
+                            {
+
+                                int set = int.Parse(node.SelectSingleNode("set").InnerText);
+                                Choice.SetChoice(slotInt, index.gameClass, index, set);
+                            }
+                        }
+                        break;
+                    case SLOTTYPE.CHEST:
+                    case SLOTTYPE.HEAD:
+                        {
+                            WeaponIndex index = new WeaponIndex(node.SelectSingleNode("weaponId").InnerText);
+                            index.gameClass = int.Parse(node.SelectSingleNode("gameClass").InnerText);
+                            if (armorIndexTable.ContainsKey(index.prefabId) && armorIndexTable[index.prefabId].isAvailable())
+                            {
+
+                                int set = int.Parse(node.SelectSingleNode("set").InnerText);
+                                Choice.SetChoice(slotInt, index.gameClass, index, set);
+                            }
+                        }
+                        break;
                 }
-				
+              
                
 
             }
@@ -968,7 +995,7 @@ public class ItemManager : MonoBehaviour {
 			  //  Debug.Log(Choice.ForGuiSlot(i).ToString());
                 WeaponIndex index = Choice.ForSaveSLot(i,j);
 				if(!index.IsSameIndex( WeaponIndex.Zero)){
-					form.AddField ("default[]", index.ToString() + "@set"+j);
+					form.AddField ("default[]", index.ToString() + "@"+j+"@"+i);
 				
 				}
 			
@@ -985,6 +1012,14 @@ public class ItemManager : MonoBehaviour {
 		StatisticHandler.instance.StartCoroutine(StatisticHandler.SendForm (form,StatisticHandler.SAVE_ITEM));
 	
 	}
+    public void LeaveRoom()
+    {
+        SendChargeData();
+        foreach (KeyValuePair<string, ShootData> pair in toSendLower)
+        {
+            allShopSlot[pair.Key].ApplyCharge();
+        }
+    }
     public void MatchEnd()
     {
         SendChargeData();

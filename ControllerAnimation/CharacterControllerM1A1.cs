@@ -92,6 +92,7 @@ public class CharacterControllerM1A1 : MonoBehaviour
         if (!character.IsGrounded())
         {
             lastTimeInAir = Time.time;
+          
         }
 
         ChooseStopAnimation();
@@ -113,6 +114,7 @@ public class CharacterControllerM1A1 : MonoBehaviour
         else
         {
             nextMovement = character.GetVelocity();
+            
             if (nextMovement.sqrMagnitude < 0.1f)
             {
                 nextMovement = Vector3.zero;
@@ -143,11 +145,18 @@ public class CharacterControllerM1A1 : MonoBehaviour
             inputValue = 0f;
             vertical = 0f;
             horizontal = 0f;
+          //  Debug.Log("RESET GROUNDED");
         }
 
         Vector3 CameraDirection = camTransform.forward;
         CameraDirection.y = 0.0f; // kill Y
-        
+
+        if (character.isAiming)
+        {
+            vertical /= 2f;
+            horizontal /= 2f;
+        }
+
         //Vector3 moveDirection;
 
         //moveDirection = nextMovement.normalized;
@@ -175,9 +184,6 @@ public class CharacterControllerM1A1 : MonoBehaviour
         //Aim
         
         animator.SetBool("Sprint", character.IsSprinting());
-       
-
-
         animator.SetBool("Crouch", character.IsCrouch());
     }
 

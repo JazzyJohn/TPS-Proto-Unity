@@ -53,9 +53,10 @@ public class SelectedItemGUI : MonoBehaviour {
         }
     }
 
-    public void SetItem()
+    public bool SetItem()
     {
 		InventorySlot _item=null;
+        bool needSave = false;
 		WeaponIndex choice = Choice.ForGuiSlot(slot);
 		if (!choice.IsSameIndex( WeaponIndex.Zero))
 		{
@@ -77,7 +78,7 @@ public class SelectedItemGUI : MonoBehaviour {
 		if(_item==null)
 		{
 			_item =ItemManager.instance.GetFirstItemForSlot((GameClassEnum)Choice._Player, slot);
-           
+            needSave = true;
             WeaponInventorySlot weapon = _item as WeaponInventorySlot;
             if (weapon != null)
             {
@@ -91,13 +92,13 @@ public class SelectedItemGUI : MonoBehaviour {
 		}
 		if(_item==null){
             name.alpha = 1.0f;
-			return;
+            return  false;
 		}
         item = _item;
         GA.API.Design.NewEvent("GUI:MainMenu:Inventory:SelectItem:" + _item.engName);
         Texture.mainTexture = null;
         name.alpha = 0.0f;
-        
+        return needSave;
     }
         
 }

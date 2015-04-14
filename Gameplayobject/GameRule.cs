@@ -38,15 +38,22 @@ public class GameRule : MonoBehaviour {
 
     protected void Awake()
     {
+       
         curStage = MUSIC_STAGE.BATLLE;
         isGameEnded = false;
         lvlChanging = false;
+       
+        
        // PhotonNetwork.isMessageQueueRunning = true;
        
     }
 	// Use this for initialization
 	void Start () {
-	
+        if (NetworkController.Instance.isSingle)
+        {
+            s_Instance = this;
+        }
+       
 	}
 	
         public void Annonce() {

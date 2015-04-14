@@ -12,6 +12,8 @@ public class ModuleInfoPost : MonoBehaviour {
 	public string IcoLeftValue;
 	public Texture IcoRight;
 	public string IcoRightValue;
+	public bool useColor = false;
+	public Color32 color;
 
 	// Use this for initialization
 	void Start () 
@@ -24,9 +26,14 @@ public class ModuleInfoPost : MonoBehaviour {
 	{
 		if(isOver)
 		{
-           
+
 			if(!MainModule.Visable)
 			{
+				if(useColor)
+				{
+					ModuleInfo.colorNoDef = useColor;
+					ModuleInfo.color = color;
+				}
 				string[] info = new string[4];
 				Texture[] texture = new Texture[2];
 				switch(Type)
@@ -64,6 +71,7 @@ public class ModuleInfoPost : MonoBehaviour {
 			if(MainModule.Visable)
 			{
 				MainModule.DisableInfo(Type);
+				ModuleInfo.colorNoDef = false;
 			}
 		}
 	}

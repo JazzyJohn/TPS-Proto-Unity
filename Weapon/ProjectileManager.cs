@@ -38,17 +38,26 @@ class ProjectileManager: MonoBehaviour
 
     private Dictionary<int, BaseProjectile> allProjectile =new Dictionary<int, BaseProjectile>();
 
-
+    
 
     void Awake() {
-
-        nextId =MAXPERPLAYER * (NetworkController.smartFox.MySelf.Id+1);
+        int myId = 0;
+        if (NetworkController.smartFox != null)
+        {
+            myId = NetworkController.smartFox.MySelf.Id;
+        }
+        nextId = MAXPERPLAYER * (myId + 1);
         maxId = nextId + MAXPERPLAYER;
         minId = nextId;
     }
     public int GetNextId() {
+        int myId = 0;
+        if (NetworkController.smartFox != null)
+        {
+            myId = NetworkController.smartFox.MySelf.Id;
+        }
         if(nextId>=maxId){
-            nextId = MAXPERPLAYER * (NetworkController.smartFox.MySelf.Id + 1);
+            nextId = MAXPERPLAYER * (myId + 1);
         }
         for (int i = nextId+1; i < maxId; i++) {
             if (!allProjectile.ContainsKey(i)) {
@@ -76,6 +85,10 @@ class ProjectileManager: MonoBehaviour
     
     public void InvokeRPC(string name, int projid,Vector3 position)
     {
+        if (NetworkController.Instance.isSingle)
+        {
+            return;
+        }
         ISFSObject data = new SFSObject();
         data.PutUtfString("name", name);
         data.PutInt("projid", projid);
@@ -84,6 +97,10 @@ class ProjectileManager: MonoBehaviour
     }
     public void InvokeRPC(string name, int projid, Vector3 position, int count)
     {
+        if (NetworkController.Instance.isSingle)
+        {
+            return;
+        }
         ISFSObject data = new SFSObject();
         data.PutUtfString("name", name);
         data.PutInt("projid", projid);
@@ -94,6 +111,10 @@ class ProjectileManager: MonoBehaviour
     }
     public void InvokeRPC(string name, int projid, int count)
     {
+        if (NetworkController.Instance.isSingle)
+        {
+            return;
+        }
         ISFSObject data = new SFSObject();
         data.PutUtfString("name", name);
         data.PutInt("projid", projid);

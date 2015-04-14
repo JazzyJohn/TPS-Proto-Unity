@@ -6,6 +6,8 @@ using System.Collections.Generic;
 
 using Facebook.MiniJSON;
 using Facebook;
+using CodeStage.AntiCheat.Detectors;
+using CodeStage.AntiCheat.ObscuredTypes;
 public enum PLATFORMTYPE{
 	VK,
 	FACEBOOK
@@ -14,9 +16,13 @@ public enum AsyncNotify
 {
     PREMIUM,
     RELOAD_ITEMS,
-    HOLIDAY
+    HOLIDAY,
+    DAYREWARD
 }
 public class GlobalPlayer : MonoBehaviour {
+
+   
+
 
 	void Awake(){
         if (!isDebug)
@@ -46,6 +52,7 @@ public class GlobalPlayer : MonoBehaviour {
 		
 	}
 	void OnLevelWasLoaded(int level) {
+        cheatCheck = false;
 		if(UID!=""&&level==0){
 			MainMenuGUI menu = FindObjectOfType<MainMenuGUI>();
             if (menu != null)
@@ -64,7 +71,9 @@ public class GlobalPlayer : MonoBehaviour {
 	public PLATFORMTYPE platformType;
 
 	public string UID;
-	
+
+    public bool cheatCheck = false;
+
 	public int gold;
 	
 	public int cash;
@@ -72,6 +81,8 @@ public class GlobalPlayer : MonoBehaviour {
     public int open_set;
 
 	public int stamina;
+
+    public bool isSingleAv;
 	
     public Texture2D avatar;
     public bool isDebug=false;
@@ -167,7 +178,14 @@ public class GlobalPlayer : MonoBehaviour {
               }
 			break;
 		}
+        if (isSingleAv)
+        {
+            loadingStage++;
+        }
+        SpeedHackDetector.StartDetection(OnSpeedHackDetected, 1f, 5);
+        ObscuredInt.onCheatingDetected = OnSpeedHackDetected;
     }
+
 
 	void Update(){
 		if(UID!=""&&!loaded&&(NewsManager.instance==null||(NewsManager.instance!=null&&NewsManager.instance.finished))){
@@ -255,7 +273,7 @@ public class GlobalPlayer : MonoBehaviour {
 	}
 	
 	
-	public void parseProfile(string XML){
+	public void parseProfile(string XML,bool parseFirsttTime = false){
 
         Debug.Log(XML);
 		XmlDocument xmlDoc = new XmlDocument();
@@ -282,6 +300,8 @@ public class GlobalPlayer : MonoBehaviour {
               
                       GUIHelper.PushMessage(TextGenerator.instance.GetSimpleText("RewardHOLIDAY"));
                 break;
+                case AsyncNotify.DAYREWARD:
+                break;
 			}
 		}
         list = xmlDoc.SelectNodes("player/statistic/entry");
@@ -293,8 +313,11 @@ public class GlobalPlayer : MonoBehaviour {
         }
 		TournamentManager.instance.ParseData(xmlDoc);
         PremiumManager.instance.ParseData(xmlDoc, "player");
-
-        ItemManager.instance.Init(UID);
+        if (parseFirsttTime)
+        {
+            ItemManager.instance.Init(UID);
+        }
+       
 	}
 
 
@@ -328,7 +351,7 @@ public class GlobalPlayer : MonoBehaviour {
 		yield return w;
 	}
 	
-	protected IEnumerator  StartStats(string Uid,string Name){
+	protected IEnumerator  StartStats(string Uid,string Name,bool ParseFirstTime= false){
 		WWWForm form = new WWWForm ();
 		
 		form.AddField ("uid", Uid);
@@ -348,7 +371,7 @@ public class GlobalPlayer : MonoBehaviour {
 
 		yield return w;
 		//Debug.Log (w.text);
-		parseProfile(w.text);
+        parseProfile(w.text, ParseFirstTime);
 	}	
 	public IEnumerator  ReloadStats(){
 		WWWForm form = new WWWForm ();
@@ -414,7 +437,7 @@ public class GlobalPlayer : MonoBehaviour {
 	
 	public void LoadAll(){
 		loaded= true;
-		StartCoroutine(StartStats(UID,PlayerName));
+		StartCoroutine(StartStats(UID,PlayerName,true));
 		LevelingManager.instance.Init(UID);
 		AchievementManager.instance.Init(UID);
 		
@@ -454,6 +477,18 @@ public class GlobalPlayer : MonoBehaviour {
         {
             gui.SetAvatar(avatar);
         }
+    }
+
+    private  void OnSpeedHackDetected(){
+        if (cheatCheck)
+        {
+            return;
+        }
+        cheatCheck = true;
+        FindObjectOfType<MainMenuGUI>().GoToMainMenu();
+
+        GUIHelper.PushMessage(TextGenerator.instance.GetSimpleText("CHEATER"));
+        GUIHelper.ShowAllMessage();
     }
 	
 }

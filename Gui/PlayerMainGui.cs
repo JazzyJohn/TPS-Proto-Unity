@@ -897,6 +897,18 @@ public static class GUIHelper{
     {
         messages.Enqueue(text);
     }
+    public static void ShowAllMessage()
+    {
+        MainMenuGUI menu = UnityEngine.Object.FindObjectOfType<MainMenuGUI>();
+        if (menu != null)
+        {
+            if (GUIHelper.messages.Count > 0)
+            {
+                //Debug.Log("PULLSIZE" + GUIHelper.messages.Dequeue());
+                menu.SimpleMessage(GUIHelper.messages.Dequeue());
+            }
+        }
+    }
     public static void Notify(string title, string text)
     {
         Notify(title,text, (Texture2D)null);

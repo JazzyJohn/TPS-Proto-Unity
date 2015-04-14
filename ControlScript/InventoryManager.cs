@@ -149,6 +149,7 @@ public class InventoryManager : MonoBehaviour {
 	public void TakeGrenade(){
 		if (owner.foxView.isMine) {
 			beforeGrenade =indexWeapon;
+          
 			_ChangeWeapon(grenadeSlot);
 		}
 	}
@@ -453,13 +454,18 @@ public class InventoryManager : MonoBehaviour {
 			Debug.Log("Selected weapon doesn't exist in current inventory manager");
 			return;
 		}
+        if (newWeapon == grenadeSlot)
+        {
+            owner.animator.SetWeaponType(myWeapons[grenadeSlot].animType);
+
+        }
 		BaseWeapon firstWeapon = myWeapons[newWeapon];
      
 	
 	
-		if(currentWeapon!=null){
+		if(currentWeapon!=null&&currentWeapon.slotType==SLOTTYPE.GRENADE){
 			
-		//	currentWeapon.PutAway();
+			currentWeapon.PutAway();
 		}
 
 		//TakeWeaponAway ();

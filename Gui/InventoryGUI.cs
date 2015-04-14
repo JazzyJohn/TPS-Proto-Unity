@@ -60,7 +60,7 @@ public class InventoryGUI : MonoBehaviour {
 
     SelectedItemGUI[] selected;
 	
-    int curSet = 1;
+    public int curSet = 1;
 
     bool[] allowedReapair = new bool[3];
 
@@ -94,7 +94,7 @@ public class InventoryGUI : MonoBehaviour {
                     itemInfo.SetItem(ItemManager.instance.GetItem(id), i);
 
                 }
-                itemInfo.SetSet(1);
+                itemInfo.SetSet(curSet);
                 AllItems[itemInfo.id] = itemInfo;
             }
 			
@@ -106,14 +106,18 @@ public class InventoryGUI : MonoBehaviour {
 	}
 	
 	void ReloadSelectedItem(){
-		
+        bool shouldSave = false;
         foreach (SelectedItemGUI itemInfo in selected)
         {
 			itemInfo.Shop = this;
-			itemInfo.SetItem();
+            shouldSave = shouldSave||itemInfo.SetItem();
 			slots[itemInfo.slot]= itemInfo;
             itemInfo.TryOpen();
 		}
+        if (shouldSave)
+        {
+            ItemManager.instance.SaveItemForSlot();
+        }
 	}
     public void ChangeSetGUI(UIPopupList list)
     {

@@ -84,8 +84,8 @@ public class BaseProjectile : MonoBehaviour
     public Vector3 startPosition;
 	
 	//EFFECTS
-    public GameObject hitParticle;
-	
+    public GameObject[] hitParticle; //Roman
+	int hitCount=0;
 	public float disableEffectDelay;
 	
 	public GameObject[] inactiveObjectInEffectStage;
@@ -178,10 +178,13 @@ public class BaseProjectile : MonoBehaviour
         sControl.playClip(reactiveEngineSound);
 		mTransform = transform;
 		mRigidBody = rigidbody;
-        if (hitParticle!=null&&hitParticle.CountPooled() == 0 && hitParticle.CountSpawned() == 0)
-        {
-            hitParticle.CreatePool(50);
-        }
+		if (hitParticle.Length != 0) {
+			for(int i=0;i<hitParticle.Length;i++){
+				if (hitParticle[i] != null && hitParticle[i].CountPooled () == 0 && hitParticle[i].CountSpawned () == 0) {
+					hitParticle[i].CreatePool (50);
+			}
+			}
+		}
         mRenderer = GetComponentInChildren<Renderer>();
 	}
 	
@@ -429,11 +432,27 @@ public class BaseProjectile : MonoBehaviour
         {
             return;
         }
-     
+     	switch (hit.transform.tag) {
+		case "metal":
+				hitCount=1;
+				break;
+		case "wood":
+				hitCount=2;
+			break;
+		case "ground":
+				hitCount=3;
+			break;
+		case "concrete":
+				hitCount=4;
+			break;
+		default:
+			hitCount=0;
+			break;
+		}
         DamagebleObject obj = hit.transform.gameObject.GetComponent<DamagebleObject>();
         //move explosion center from surface so raycast dont hit it
         Vector3 exploPosition = hit.point + hit.normal;
-        effectPosition = hit.point + hit.normal*0.1f;
+        effectPosition = hit.point + hit.normal*0.01f;
         if (obj != null)
         {
 
@@ -724,11 +743,19 @@ public class BaseProjectile : MonoBehaviour
            
             return;
         }
-        if ( hitParticle != null && hitParticle.CountPooled() != 0)
+        if (hitParticle.Length > 0)
+        {
+            if (hitParticle.Length <=hitCount)
             {
-            
-                hitParticle.Spawn(effectPosition,Quaternion.LookRotation(forward));
+                hitCount=0;
             }
+            if (hitParticle[hitCount] != null && hitParticle[hitCount].CountPooled() != 0)
+            {
+
+                hitParticle[hitCount].Spawn(effectPosition, Quaternion.LookRotation(forward));
+            }
+        }
+		
 	}
 	public void DeActivate(){
         active = false;

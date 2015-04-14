@@ -12,10 +12,9 @@ public class ConterIdleRequest : MonoBehaviour {
         if (_timer > time)
         {
             _timer = 0.0f;
-            if (NetworkController.smartFox != null)
-            {
+           
                 NetworkController.Instance.ConterIdleRequestSend();
-            }
+           
         }
 
 	}
