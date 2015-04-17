@@ -114,7 +114,7 @@ public class StatisticManager : MonoBehaviour, LocalPlayerListener,GameListener{
 	public void EventTeamWin(int teamNumber){
 		//if we not winner so no change in exp, or we a winner but no send were initiate we sync data 
         
-		if (myPlayer.team	!= teamNumber) {
+		if (myPlayer.team	== teamNumber) {
 			UpData(ParamLibrary.PARAM_WIN);
 		}else{
 			UpData(ParamLibrary.PARAM_LOSE);

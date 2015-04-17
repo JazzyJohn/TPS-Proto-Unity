@@ -6,20 +6,26 @@ public enum AMMOTYPE{PISTOL,RIFLE,ROCKETS,MACHINEGUN,SHOOTGUNSHEELL,FUEL,GRENADE
 [RequireComponent (typeof (Pawn))]
 public class InventoryManager : MonoBehaviour {
 
-	private BaseWeapon[] myWeapons = new BaseWeapon[0] ;
+    private int specialSize = 1;
+
+	private BaseWeapon[] myWeapons = new BaseWeapon[0];
+
+    private int[] indexOfSlot = new int[]{-1,-1,-1,-1};
 
     private BaseArmor[] myArmor = new BaseArmor[2];
     public string[] weaponNames;
 
     public string[] armorNames;
 
+    public string stdMelee;
+
 	private BaseWeapon currentWeapon;
 	
 	private int indexWeapon;
 	
-	private int grenadeSlot=-1;
-	
-	private int beforeGrenade;
+    private int beforeGrenade;
+
+    private int beforeMelee;
 	
 	protected Pawn owner;
 
@@ -91,13 +97,8 @@ public class InventoryManager : MonoBehaviour {
 
             myWeapons[i] = NetworkController.Instance.WeaponSpawn(weaponNames[i], transform.position, Quaternion.identity, owner.foxView.isChildScene(), owner.foxView.viewID).GetComponent<BaseWeapon>();
             myWeapons[i].AttachWeaponToChar(owner);
+            indexOfSlot[(int)myWeapons[i].slotType] = i;
             
-            if (myWeapons[i].slotType == SLOTTYPE.GRENADE)
-            {
-                grenadeSlot = i;
-            }
-			 
-			
         }
         for (int i = 0; i < armorNames.Length; i++)
         {
@@ -106,59 +107,74 @@ public class InventoryManager : MonoBehaviour {
             myArmor[i].AttachArmorToChar(owner);
 
         }
-        for (int i = 0; i < myWeapons.Length; i++)
+        if (indexOfSlot[(int)SLOTTYPE.MAIN] != -1)
         {
-            if (myWeapons[i].slotType == SLOTTYPE.MAIN)
-            {
-                NetworkController.Instance.ThisSpawnWeaponMakeInHand(i);
-                return;
-            }
+            NetworkController.Instance.ThisSpawnWeaponMakeInHand(indexOfSlot[(int)SLOTTYPE.MAIN]);
+            return;
         }
-        for (int i = 0; i < myWeapons.Length; i++)
+        if (indexOfSlot[(int)SLOTTYPE.PERSONAL] != -1)
         {
-            if (myWeapons[i].slotType == SLOTTYPE.PERSONAL)
-            {
-                NetworkController.Instance.ThisSpawnWeaponMakeInHand(i);
-                return;
-            }
+            NetworkController.Instance.ThisSpawnWeaponMakeInHand(indexOfSlot[(int)SLOTTYPE.PERSONAL]);
+            return;
         }
+  
+        
 	}
 
 
 	//Start Weapon generation
 	public void GenerateWeaponStart(){
 		if (owner.foxView.isMine) {
-			for(int i=0;i<myWeapons.Length;i++){
-				if(myWeapons[i].slotType==SLOTTYPE.MAIN){
-						_ChangeWeapon (i);
-                        return;
-				}
-			}
-            for (int i = 0; i < myWeapons.Length; i++)
+            if (indexOfSlot[(int)SLOTTYPE.MAIN] != -1)
             {
-                if (myWeapons[i].slotType == SLOTTYPE.PERSONAL)
-                {
-                    _ChangeWeapon(i);
-                    return;
-                }
+                _ChangeWeapon(indexOfSlot[(int)SLOTTYPE.MAIN]);
+                return;
+            }
+            if (indexOfSlot[(int)SLOTTYPE.PERSONAL] != -1)
+            {
+                _ChangeWeapon(indexOfSlot[(int)SLOTTYPE.PERSONAL]);
+                return;
             }
             _ChangeWeapon(0);
 		}
+        if (indexOfSlot[(int)SLOTTYPE.GRENADE] != -1)
+        {
+            specialSize++;
+        }
 	}
 	
 	public void TakeGrenade(){
 		if (owner.foxView.isMine) {
 			beforeGrenade =indexWeapon;
-          
-			_ChangeWeapon(grenadeSlot);
+
+            _ChangeWeapon(indexOfSlot[(int)SLOTTYPE.GRENADE]);
 		}
 	}
+  
 	public void PutGrenadeAway(){
 		if (owner.foxView.isMine) {
 	
 			_ChangeWeapon(beforeGrenade);
 		}
 	}
+    public void TakeMelee()
+    {
+        if (owner.foxView.isMine)
+        {
+            if (indexOfSlot[(int)SLOTTYPE.MELEE]!=indexWeapon)
+             beforeMelee = indexWeapon;
+
+            _ChangeWeapon(indexOfSlot[(int)SLOTTYPE.MELEE]);
+        }
+    }
+    public void PutMeleeAway()
+    {
+        if (owner.foxView.isMine)
+        {
+           // Debug.Log("beforeMelee"+beforeMelee);
+            _ChangeWeapon(beforeMelee);
+        }
+    }
 	//Destroy weapon and make pawn empty handed
 	public void TakeWeaponAway(){
 		if(currentWeapon!=null){
@@ -258,9 +274,10 @@ public class InventoryManager : MonoBehaviour {
         for (int i = 0; i < allAmmo.Length; i++)
         {
 
-                if (allAmmo[i].type == AMMOTYPE.GRENADE && grenadeSlot != -1 )
+            if (allAmmo[i].type == AMMOTYPE.GRENADE && indexOfSlot[(int)SLOTTYPE.GRENADE] != -1)
                 {
-                    if( myWeapons[grenadeSlot].curAmmo >= 1){
+                    if (myWeapons[indexOfSlot[(int)SLOTTYPE.GRENADE]].curAmmo >= 1)
+                    {
                         continue;
                     }else{
                         allAmmo[i].amount += ((float)allAmmo[i].maxSize) * percent * GRENADE_ADD_COEF / 100;
@@ -275,9 +292,9 @@ public class InventoryManager : MonoBehaviour {
                 {
                     
                     allAmmo[i].amount = allAmmo[i].maxSize;
-                    if (allAmmo[i].type == AMMOTYPE.GRENADE&&grenadeSlot!=-1)
+                    if (allAmmo[i].type == AMMOTYPE.GRENADE && indexOfSlot[(int)SLOTTYPE.GRENADE] != -1)
                     {
-                        myWeapons[grenadeSlot].Reload();
+                        myWeapons[indexOfSlot[(int)SLOTTYPE.GRENADE]].Reload();
                     }
                   
                 }
@@ -286,6 +303,7 @@ public class InventoryManager : MonoBehaviour {
 
     }
 	public virtual bool HasGrenade(){
+        int grenadeSlot = indexOfSlot[(int)SLOTTYPE.GRENADE];
         if (grenadeSlot < 0)
         {
             return false;
@@ -299,9 +317,17 @@ public class InventoryManager : MonoBehaviour {
 		}
 		return false;
 	}
+
+
 	//AMMO BAG SECTION END
-	
-	
+
+    public void ReloadStats()
+    {
+        for (int i = 0; i < myWeapons.Length; i++)
+        {
+            myWeapons[i].RecalculateStats();
+        }
+    }
 	
 	
 	
@@ -335,7 +361,21 @@ public class InventoryManager : MonoBehaviour {
         myArmor[i] = NetworkController.Instance.ArmorSpawn(prefab.name, transform.position, Quaternion.identity, owner.foxView.isChildScene(), owner.foxView.viewID).GetComponent<BaseArmor>();
         myArmor[i].AttachArmorToChar(owner);	
     }
-	
+
+    public void AddStandartMelee()
+    {
+        BaseWeapon[] oldprefabWeapon = myWeapons;
+        myWeapons = new BaseWeapon[oldprefabWeapon.Length + 1];
+
+        for (int i = 0; i < oldprefabWeapon.Length; i++)
+        {
+            myWeapons[i] = oldprefabWeapon[i];
+        }
+        myWeapons[myWeapons.Length - 1] = NetworkController.Instance.WeaponSpawn(stdMelee, transform.position, Quaternion.identity, owner.foxView.isChildScene(), owner.foxView.viewID).GetComponent<BaseWeapon>();
+        indexOfSlot[(int)myWeapons[myWeapons.Length - 1].slotType] = myWeapons.Length - 1;
+        myWeapons[myWeapons.Length - 1].AttachWeaponToChar(owner);
+    }
+
 	public void SetSlot( BaseWeapon prefab){
 		if(prefab==null){
 			return;
@@ -344,17 +384,15 @@ public class InventoryManager : MonoBehaviour {
 		for(int i=0;i<myWeapons.Length;i++){
 			if(myWeapons[i].slotType==prefab.slotType){
 				myWeapons[i]=NetworkController.Instance.WeaponSpawn(prefab.name,transform.position, Quaternion.identity,owner.foxView.isChildScene(),owner.foxView.viewID).GetComponent<BaseWeapon>();
-				if(prefab.slotType==SLOTTYPE.GRENADE){
-                    grenadeSlot = i;
-				}
-				 if (prefab.slotType == SLOTTYPE.MAIN)
+                indexOfSlot[(int)myWeapons[i].slotType] = i;
+				if (prefab.slotType == SLOTTYPE.MAIN)
 				{
 					NetworkController.Instance.LastSpawnWeaponMakeInHand();
 				}
-                 if (!isThereMain() && prefab.slotType == SLOTTYPE.PERSONAL)
-                 {
+                if (!isThereMain() && prefab.slotType == SLOTTYPE.PERSONAL)
+                {
                      NetworkController.Instance.LastSpawnWeaponMakeInHand();
-                 }
+                }
                 myWeapons[myWeapons.Length - 1].AttachWeaponToChar(owner);
 				return;
 			}
@@ -366,9 +404,7 @@ public class InventoryManager : MonoBehaviour {
 			myWeapons[i]= oldprefabWeapon[i];
 		}
 		myWeapons[myWeapons.Length-1] = NetworkController.Instance.WeaponSpawn(prefab.name,transform.position, Quaternion.identity,owner.foxView.isChildScene(),owner.foxView.viewID).GetComponent<BaseWeapon>();
-		if(prefab.slotType==SLOTTYPE.GRENADE){
-					grenadeSlot=myWeapons.Length-1;
-		}
+        indexOfSlot[(int)myWeapons[myWeapons.Length - 1].slotType] = myWeapons.Length - 1;
 		 if (prefab.slotType == SLOTTYPE.MAIN)
 				{
 					NetworkController.Instance.LastSpawnWeaponMakeInHand();
@@ -396,21 +432,33 @@ public class InventoryManager : MonoBehaviour {
 		//picker.info =weaponinfo;
 
 	}
-	
+
+    public bool IsSpecial(int newindex)
+    {
+        return indexOfSlot[(int)SLOTTYPE.GRENADE] == newindex || indexOfSlot[(int)SLOTTYPE.MELEE] == newindex;
+    }
+
 	public void NextWeapon(){
         if(!owner.animator.CanWeaponChange()){
             return;
         }
 		int newIndex = indexWeapon+1;
-		if(newIndex==grenadeSlot){
-			newIndex++;
-		}
+		
+      
 		if(newIndex>=myWeapons.Length){
 			newIndex=0;
 		}
-		if(newIndex==grenadeSlot){
-			newIndex++;
-		}
+        if (IsSpecial(newIndex))
+        {
+            if (myWeapons.Length > specialSize)
+            {
+                indexWeapon=newIndex; 
+                NextWeapon();
+                return;
+            }
+
+
+        }
 		//Debug.Log ("NextWeapon"+newIndex);
         cahcedIndex = newIndex;
         owner.animator.SetWeaponType(myWeapons[cahcedIndex].animType);
@@ -422,15 +470,21 @@ public class InventoryManager : MonoBehaviour {
             return;
         }
 		int newIndex = indexWeapon-1;
-		if(newIndex==grenadeSlot){
-			newIndex--;
-		}
+		
 		if(newIndex<0){
 			newIndex=myWeapons.Length-1;
 		}
-		if(newIndex==grenadeSlot){
-			newIndex--;
-		}
+        if (IsSpecial(newIndex))
+        {
+            if (myWeapons.Length > specialSize)
+            {
+                indexWeapon = newIndex; 
+                PrevWeapon();
+                return;
+            }
+
+
+        }
 		//Debug.Log ("PrevWeapon"+newIndex);
        cahcedIndex = newIndex;
        owner.animator.SetWeaponType(myWeapons[cahcedIndex].animType);
@@ -454,16 +508,19 @@ public class InventoryManager : MonoBehaviour {
 			Debug.Log("Selected weapon doesn't exist in current inventory manager");
 			return;
 		}
-        if (newWeapon == grenadeSlot)
+        int grenadeSlot = indexOfSlot[(int)SLOTTYPE.GRENADE];
+        int meleeSlot = indexOfSlot[(int)SLOTTYPE.MELEE];
+        if (newWeapon == grenadeSlot || newWeapon== meleeSlot)
         {
-            owner.animator.SetWeaponType(myWeapons[grenadeSlot].animType);
+            owner.animator.SetWeaponType(myWeapons[newWeapon].animType);
 
         }
 		BaseWeapon firstWeapon = myWeapons[newWeapon];
-     
-	
-	
-		if(currentWeapon!=null&&currentWeapon.slotType==SLOTTYPE.GRENADE){
+
+
+
+        if (currentWeapon != null && (currentWeapon.slotType == SLOTTYPE.GRENADE || currentWeapon.slotType == SLOTTYPE.MELEE))
+        {
 			
 			currentWeapon.PutAway();
 		}

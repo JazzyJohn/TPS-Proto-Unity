@@ -36,6 +36,8 @@ public class SettingsManager: MonoBehaviour{
 		
 	}
 	public void LoadSetting(){
+       // PlayerPrefs.DeleteAll();
+       
 		XmlDocument xmlDoc = new XmlDocument();
 		xmlDoc.LoadXml(configTable.text);
 		foreach (XmlNode node in xmlDoc.SelectNodes("settings/setting")){

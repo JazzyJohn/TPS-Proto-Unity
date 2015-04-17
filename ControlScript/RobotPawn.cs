@@ -27,8 +27,7 @@ public class RobotPawn : Pawn {
 
        
         cameraController = GetComponent<PlayerCamera>();
-       
-        naturalWeapon = GetComponent<WeaponOfExtremities>();
+    
         mainAi = GetComponent<AIBase>();
 
         isAi = mainAi != null;

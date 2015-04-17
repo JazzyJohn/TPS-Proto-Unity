@@ -7,7 +7,7 @@ public class LotItemGUI : MonoBehaviour
 
     public CharSection weaponSection;
     public ArmorSection armSection;
-
+    public HTHSection hthSection;
     public InventoryGUI Shop;
     public InventorySlot item;
     public UILabel Name;
@@ -177,6 +177,9 @@ public class LotItemGUI : MonoBehaviour
         gunModel = null;
         ItemManager.instance.LoadModel(item);
         Description.text = item.description;
+        weaponSection.widget.alpha = 0.0f;
+        armSection.widget.alpha = 0.0f;
+        hthSection.widget.alpha = 0.0f;
         if (item.type == ShopSlotType.WEAPON)
         {
             
@@ -188,19 +191,22 @@ public class LotItemGUI : MonoBehaviour
             weaponSection.reload.value = weapon.chars.reload;
             weaponSection.speed.value = weapon.chars.speed;
             weaponSection.mode.text = TextGenerator.instance.GetSimpleText(weapon.chars.gunMode);
-            armSection.widget.alpha =0.0f;
+         
           
         } else if(item.type == ShopSlotType.ARMOR) {
             ArmorInventorySlot armor = (ArmorInventorySlot)item;
             armSection.def.value = armor.chars.def/100;
-            weaponSection.widget.alpha = 0.0f;
+          
             armSection.widget.alpha = 1.0f;
         }
-        else
+        else if (item.type == ShopSlotType.HTHWEAPON)
         {
-              weaponSection.widget.alpha = 0.0f;
-              armSection.widget.alpha =0.0f;
+            HTHWeaponSlot weapon = (HTHWeaponSlot)item;
+            hthSection.active.text = weapon.activeBuff;
+            hthSection.passive.text = weapon.passiveBuff;
+            hthSection.widget.alpha = 1.0f;
         }
+       
         loading.alpha = 1.0f;
     }
     public void Buy(int key)
@@ -266,5 +272,15 @@ public class ArmorSection
     public UIWidget widget;
  
     public UIProgressBar def;
+
+}
+[System.Serializable]
+public class HTHSection
+{
+    public UIWidget widget;
+
+    public UILabel passive;
+
+    public UILabel active;
 
 }

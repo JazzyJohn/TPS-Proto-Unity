@@ -247,12 +247,19 @@ public class AnimationManager : MonoBehaviour
 	}
 	private void SetNotMainLayer(float weight){
 		for(int i =1; i<animator.layerCount;i++){
-			animator.SetLayerWeight (i, weight);
-			
+			animator.SetLayerWeight (i, weight);		
 			
 		}
 
 	}
+    public void MainLayerPripity()
+    {
+        SetNotMainLayer(0.0f);
+    }
+    public void MainLayerNormal()
+    {
+        SetNotMainLayer(1.0f);
+    }
 	//toogle aiming state
 	public void ToggleAim(bool aim){
 		animator.SetBool("AIM", aim);
@@ -426,7 +433,17 @@ public class AnimationManager : MonoBehaviour
     {
         Debug.Log("PutGrenadeAway");
         pawn.StopGrenadeThrow();
-        aimPos.AimOn();
+        aimPos.AimOff();
+    }
+    public void PutMeleeAway()
+    {
+        Debug.Log("PutGrenadeAway");
+        pawn.PutMeleeAway();
+        aimPos.AimOff();
+    }
+    public void MeleeStartDamage()
+    {
+        pawn.CurWeapon.StartDamage();
     }
 	/*[Serializable]
 	public class Leg

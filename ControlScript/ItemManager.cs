@@ -72,7 +72,7 @@ public class FromDBAnims{
 }
 public enum ShopSlotType
 {
-    WEAPON, ARMOR, ETC,OFFERS,PREMIUM
+    WEAPON, ARMOR, ETC, OFFERS, PREMIUM, HTHWEAPON
 }
 public enum BuyMode
 {
@@ -267,7 +267,12 @@ public class WeaponInventorySlot : InventorySlot
     public WeaponChar chars;
 
  }
+public class HTHWeaponSlot : WeaponInventorySlot
+{
+    public string passiveBuff;
 
+    public string activeBuff;
+}
 public class ArmorInventorySlot : InventorySlot
 {
     public int armorId;
@@ -596,6 +601,25 @@ public class ItemManager : MonoBehaviour {
                             }
                         }
                         break;
+                    case ShopSlotType.HTHWEAPON:
+                        {
+                            HTHWeaponSlot weaponslot = new HTHWeaponSlot();
+                            slot = weaponslot;
+
+                            weaponslot.weaponId = int.Parse(node.SelectSingleNode("ingame_mysqlid").InnerText);
+                            weaponIndexTable[weaponslot.weaponId] = weaponslot;
+
+
+
+                            weaponslot.gameSlot = (SLOTTYPE)int.Parse(node.SelectSingleNode("ingame_type").InnerText);
+                            if (node.SelectSingleNode("active") != null)
+                            {
+                                weaponslot.activeBuff = node.SelectSingleNode("active").InnerText;
+                                weaponslot.passiveBuff = node.SelectSingleNode("passive").InnerText;
+                                
+                            }
+                        }
+                        break;
                     case ShopSlotType.ARMOR:
                         ArmorInventorySlot armorSlot = new ArmorInventorySlot();
                         slot = armorSlot;
@@ -830,7 +854,7 @@ public class ItemManager : MonoBehaviour {
                     case SLOTTYPE.MAIN:
                     case SLOTTYPE.PERSONAL:
                     case SLOTTYPE.GRENADE:
-                    case SLOTTYPE.ANTITANK:
+                    case SLOTTYPE.MELEE:
                         {
                             WeaponIndex index = new WeaponIndex(node.SelectSingleNode("weaponId").InnerText);
                             index.gameClass = int.Parse(node.SelectSingleNode("gameClass").InnerText);
@@ -942,6 +966,14 @@ public class ItemManager : MonoBehaviour {
 
         return weaponIndexTable[SQLID];
 
+    }
+    public int GetWeaponMaxChargebByID(int SQLID)
+    {
+        if (!weaponIndexTable.ContainsKey(SQLID))
+        {
+            return 0;
+        }
+        return weaponIndexTable[SQLID].maxcharge;
     }
     public ArmorInventorySlot GetArmorSlotbByID(WeaponIndex index)
     {

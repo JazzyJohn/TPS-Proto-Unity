@@ -317,14 +317,14 @@ public class AIState : MonoBehaviour {
 			controlledPawn.StartFire();
 			return;
 		}
-		controlledPawn.RandomKick();
+        controlledPawn.MeleeHit();
 	}
 	protected virtual void StopAttack(){
 		if(controlledPawn.CurWeapon!=null&&!isMelee){
             //Debug.Log("stop shoot");
 			controlledPawn.StopFire();
 		}
-		controlledPawn.StopKick();
+		
 	}
 	protected virtual bool IsInWeaponRange(){
 	   float weaponDistance =controlledPawn.OptimalDistance(isMelee);

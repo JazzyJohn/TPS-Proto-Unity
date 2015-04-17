@@ -147,12 +147,7 @@ public class dog_ThirdPersonController : ThirdPersonController {
 			if (Input.GetButtonDown ("Fire1")) {
 				pawn.StartFire();
 			}
-			if(Input.GetButton("SpawnBot")){
-				((AlphaDogPawn)pawn).Kick(2);
-			}
-			if(Input.GetButton("Jump")){
-				((AlphaDogPawn)pawn).Kick(3	);
-			}
+		
 	}
 
 

@@ -38,6 +38,8 @@ public class BaseDamage{
 	public int shootWeapon = -1;
     [HideInInspector]
     public bool isHeadshoot = false;
+    [HideInInspector]
+    public bool crit = false;
 
     public BaseDamage()
     {
@@ -53,6 +55,7 @@ public class BaseDamage{
 		type = old.type;
 		shootWeapon= old.shootWeapon;
         isHeadshoot = old.isHeadshoot;
+        crit = old.crit;
 	}
 
 }

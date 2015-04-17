@@ -31,14 +31,15 @@ public enum CharacteristicList{
 		RECOIL_ALL,
         RECOIL_DOP,
         RECOIL_MAIN,
-		RECOIL_MACHINEGUN,
-		RECOIL_ROCKET,
+		RECOIL_SHOOTGUN,
+		RECOIL_REVOLVER,
 
         AIM_ALL,
         AIM_DOP,
         AIM_MAIN,
 
 		FIRE_RATE,
+        FIRE_RATE_MAIN,
 		
 		DAMAGE_ALL,
 		DAMAGE_REDUCE_SPLASH,
@@ -46,11 +47,19 @@ public enum CharacteristicList{
 		DAMAGE_REDUCE_ALL,
         DAMAGE_REDUCE_HEAD,
 
+        
         DAMAGE_ADD_DOP,
         DAMAGE_ADD_MAIN,
+        
+        DAMAGE_ADD_DOP_POINT,
+        DAMAGE_ADD_MAIN_POINT,
+
+        VS_ARMOR_DOP,
+        VS_ARMOR_MAIN,
 
         DISTANCE_MAIN,
 
+        MAX_WEAR,
         WEAR,
 		
 		AMMO_AMOUNT,
@@ -59,7 +68,10 @@ public enum CharacteristicList{
 
         HEAD_BLOCK,
 
-        REGEN
+        REGEN,
+    
+        CRIT_CHANCE_ALL,
+        CRIT_CHANCE_MAIN
 		
 		
 }
@@ -82,9 +94,10 @@ public class BaseCharacteristic{
 	protected float timeLastUpdate =-1;
 	protected bool needUpdate = true;
 	protected void AddEffect(BaseEffect newEffect){
-		if(newEffect.timeEnd!=-1&&timeUpdate>newEffect.timeEnd){
+        //Debug.Log(timeUpdate + "  " + newEffect.timeEnd);
+		if(newEffect.timeEnd!=-1&&(timeUpdate>newEffect.timeEnd||timeUpdate<Time.time)){
 			timeUpdate = 	newEffect.timeEnd;
-
+           // Debug.Log(timeUpdate+"  "+Time.time);
 		}
 		effectList.Add(newEffect);
 		needUpdate= true;
@@ -93,16 +106,36 @@ public class BaseCharacteristic{
 		return effectList;
 	}
 	
-	public void UpdateList(){
+	public bool UpdateList(){
 		if(timeUpdate>timeLastUpdate&&timeUpdate<Time.time){
+          //  Debug.Log(timeUpdate + "  " + Time.time);
+            int count = effectList.Count;
 			timeLastUpdate = Time.time;
 			effectList.RemoveAll(delegate(BaseEffect eff) {
-               
-                return eff.timeEnd != -1 && eff.timeEnd < Time.time;
+              //  Debug.Log(eff.timeEnd + "  " + Time.time);
+                return eff.timeEnd != -1 && eff.timeEnd <= Time.time;
 			});
-			needUpdate= true;
+            float minTime = float.MaxValue;
+            foreach (BaseEffect eff in effectList)
+            {
+                if (eff.timeEnd != -1 && eff.timeEnd < minTime)
+                {
+                    minTime = eff.timeEnd;
+                }
+            }
+            if (minTime != float.MaxValue)
+            {
+                timeUpdate = minTime;
+                //Debug.Log(timeUpdate + "  " + Time.time);
+            }
+            needUpdate = true;
+            if (count != effectList.Count)
+            {
+                return true;
+            }
+          
 		}
-		
+        return false;
 	
 	}
 	public void UpdateListByDeath(){
@@ -111,7 +144,7 @@ public class BaseCharacteristic{
 			effectList.RemoveAll(delegate(BaseEffect eff) {
                 if (eff.endByDeath)
                 {
-                    Debug.Log("DELETEBY Death");
+                  ///  Debug.Log("DELETEBY Death");
                 }
                 return eff.endByDeath;
 			});
@@ -295,14 +328,20 @@ public class CharacteristicManager : MonoBehaviour {
 		for(int  i=0; i<startFloatCharacteristic.Length;i++){
 			allCharacteristic[(int)startFloatCharacteristic[i].characteristic] = new FloatCharacteristic(startFloatCharacteristic[i].startValue);
 		}
-	
+      
 	}
 	void Update(){
+        bool askOwner=false;
 		for(int  i=0; i<allCharacteristic.Length;i++){
 			if(allCharacteristic[i]!=null){
-				allCharacteristic[i].UpdateList();
+                askOwner = askOwner||allCharacteristic[i].UpdateList();
 			}
 		}
+        if (askOwner)
+        {
+          
+            GetComponent<Pawn>().ReloadStats();
+        }
 	}
 	public void DeathUpdate(){
 		for(int  i=0; i<allCharacteristic.Length;i++){
@@ -361,7 +400,59 @@ public class CharacteristicManager : MonoBehaviour {
 			return;
 		}
 	}
+    public void AddBaseEffect(int characteristic, BaseEffect value)
+    {
+        if (allCharacteristic[characteristic] == null)
+        {
+            Effect<float> floatEffect = value as Effect<float>;
+            if (floatEffect != null)
+            {
+                FloatCharacteristic Characteristic = new FloatCharacteristic(0);
+                Characteristic.AddEffect(floatEffect);
 
+                allCharacteristic[characteristic] = Characteristic;
+                return;
+            }
+            Effect<int> intEffect = value as Effect<int>;
+            if (intEffect != null)
+            {
+                IntCharacteristic Characteristic = new IntCharacteristic(0);
+                Characteristic.AddEffect(intEffect);
+                allCharacteristic[characteristic] = Characteristic;
+                return;
+            }
+            Effect<bool> boolEffect = value as Effect<bool>;
+            if (boolEffect != null)
+            {
+                BoolCharacteristic Characteristic = new BoolCharacteristic(false);
+                Characteristic.AddEffect(boolEffect);
+                allCharacteristic[characteristic] = Characteristic;
+                return;
+            }
+        }
+        else
+        {
+            FloatCharacteristic floatCharacteristic = allCharacteristic[characteristic] as FloatCharacteristic;
+            if (floatCharacteristic != null)
+            {
+                floatCharacteristic.AddEffect((Effect<float>)value);
+                return;
+            }
+            IntCharacteristic intCharacteristic = allCharacteristic[characteristic] as IntCharacteristic;
+            if (intCharacteristic != null)
+            {
+                intCharacteristic.AddEffect((Effect<int>)value);
+                return;
+            }
+            BoolCharacteristic boolCharacteristic = allCharacteristic[characteristic] as BoolCharacteristic;
+            if (boolCharacteristic != null)
+            {
+                boolCharacteristic.AddEffect((Effect<bool>)value);
+                return;
+            }
+        }
+    }
+		
 	public void RemoveEffect(int characteristic, object value){
 		FloatCharacteristic floatCharacteristic=allCharacteristic [characteristic]as FloatCharacteristic ;
         if (floatCharacteristic != null)

@@ -208,7 +208,8 @@ namespace nstuff.juggerfall.extension.models
         SPLASH = 2,
         GUN = 4,
         KNOCKOUT  =8,
-        CONTINIUS = 16
+        CONTINIUS = 16,
+        CRIT = 32
     }
 	[Serializable]
     public class BaseDamageModel : SerializableSFSType
@@ -247,7 +248,10 @@ namespace nstuff.juggerfall.extension.models
             {
                 FlagsHelper.Set(ref modifiers, (int)DamageModifiers.CONTINIUS);
             }
-			
+             if (damage.crit)
+             {
+                 FlagsHelper.Set(ref modifiers, (int)DamageModifiers.CRIT);
+             }
 		
 			this.hitPosition= new Vector3Model(damage.hitPosition);
             this.weaponId = damage.shootWeapon;
@@ -264,7 +268,7 @@ namespace nstuff.juggerfall.extension.models
             damageClass.splash = FlagsHelper.IsSet(modifiers, (int)DamageModifiers.SPLASH);
             damageClass.weapon = FlagsHelper.IsSet(modifiers, (int)DamageModifiers.GUN);
             damageClass.isContinius = FlagsHelper.IsSet(modifiers, (int)DamageModifiers.CONTINIUS);
-            
+            damageClass.crit = FlagsHelper.IsSet(modifiers, (int)DamageModifiers.CRIT);
             damageClass.pushDirection = pushDirection.GetVector();
             damageClass.hitPosition = hitPosition.GetVector();
 			damageClass.shootWeapon =weaponId;

@@ -96,10 +96,6 @@ public class Pawn : DamagebleObject
     
     //Nautaral weapons like hand or claws
 
-    public WeaponOfExtremities naturalWeapon;
-
-    public List<HTHHitter> AttackType = new List<HTHHitter>();
-
     public Transform myTransform;
 
     protected Vector3 correctPlayerPos = Vector3.zero; //We lerp towards this
@@ -415,7 +411,8 @@ public class Pawn : DamagebleObject
     private float timeShow = 0.0f;
 
     private float timeMiniMapShow = 0.0f;
-	
+
+    protected Pawn blueprint;
     protected void Awake()
     {
         if (AIM_MASK == 1)
@@ -451,7 +448,7 @@ public class Pawn : DamagebleObject
         yAngle = desiredRotation.eulerAngles.y;
         Invoke("SpawnImmortalityEnd", spawnImortalityDuration);
         timeSpawned = Time.time;
-      
+        blueprint = this.Default();
     }
     public void AfterAwake()
     {
@@ -505,7 +502,7 @@ public class Pawn : DamagebleObject
             isAi = cameraController == null;
             SetCurWeaponFov();
         }
-        naturalWeapon = GetComponent<WeaponOfExtremities>();
+       
         mainAi = GetComponent<AIBase>();
 
         isAi = mainAi != null;
@@ -569,21 +566,22 @@ public class Pawn : DamagebleObject
     {
 //        Debug.Log("speed mod" + GetPercentValue(CharacteristicList.SPEED));
         float speedMod = GetPercentValue(CharacteristicList.SPEED);
-        wallRunSpeed = wallRunSpeed * speedMod;
 
-        groundSprintSpeed = groundSprintSpeed * (speedMod+((float)GetValue(CharacteristicList.SPRINT_SPEED))/100f);
+        wallRunSpeed = blueprint.wallRunSpeed * speedMod;
 
-        flyForwardSpeed = flyForwardSpeed * speedMod;
+        groundSprintSpeed = blueprint.groundSprintSpeed * ((1 + (float)GetValue(CharacteristicList.SPEED) + (float)GetValue(CharacteristicList.SPRINT_SPEED)) / 100f);
 
-        groundRunSpeed = groundRunSpeed * speedMod;
+        flyForwardSpeed = blueprint.flyForwardSpeed * speedMod;
 
-        flySpeed = flySpeed *speedMod;
+        groundRunSpeed = blueprint.groundRunSpeed * speedMod;
 
-        groundWalkSpeed = groundWalkSpeed * speedMod;
+        flySpeed = blueprint.flySpeed * speedMod;
 
-		groundCrouchSpeed = groundCrouchSpeed  * speedMod;
-		
-        jumpHeight = jumpHeight * speedMod;
+        groundWalkSpeed = blueprint.groundWalkSpeed * speedMod;
+
+        groundCrouchSpeed = blueprint.groundCrouchSpeed * speedMod;
+
+        jumpHeight = blueprint.jumpHeight * speedMod;
     }
     public float GetSize()
     {
@@ -617,7 +615,7 @@ public class Pawn : DamagebleObject
     {
         WeaponIndex idPersonal = Choice._Personal[myId],
         idMain = Choice._Main[myId],
-        idExtra = Choice._Extra[myId],
+        idMelee = Choice._Extra[myId],
         idGrenade = Choice._Grenad[myId],
         idArmor = Choice._BodyArmor[myId],
         idHead = Choice._HeadArmor[myId],
@@ -632,9 +630,13 @@ public class Pawn : DamagebleObject
             //Debug.Log(ItemManager.instance.weaponPrefabsListbyId[idMain]);
             ivnMan.SetSlot(ItemManager.instance.GetWeaponprefabByID(idMain));
         }
-        if (!idExtra.IsSameIndex(WeaponIndex.Zero))
+        if (!idMelee.IsSameIndex(WeaponIndex.Zero))
         {
-            ivnMan.SetSlot(ItemManager.instance.GetWeaponprefabByID(idExtra));
+            ivnMan.SetSlot(ItemManager.instance.GetWeaponprefabByID(idMelee));
+        }
+        else
+        {
+            ivnMan.AddStandartMelee();
         }
         if (!idGrenade.IsSameIndex(WeaponIndex.Zero))
         {
@@ -642,7 +644,7 @@ public class Pawn : DamagebleObject
         }
         if (!idArmor.IsSameIndex(WeaponIndex.Zero))
         {
-            ivnMan.SetArmorSlot(ItemManager.instance.GetArmorprefabByID(idExtra));
+            ivnMan.SetArmorSlot(ItemManager.instance.GetArmorprefabByID(idArmor));
         }
         if (!idHead.IsSameIndex(WeaponIndex.Zero))
         {
@@ -653,6 +655,7 @@ public class Pawn : DamagebleObject
         {
             tauntAnimation = ItemManager.instance.animsIndexTable[idTaunt.prefabId].animationId;
         }
+        ReloadStats();
     }
     public void ResolvedDamage(BaseDamage damage)
     {
@@ -670,7 +673,7 @@ public class Pawn : DamagebleObject
 
         if (damage.isHeadshoot)
         {
-            if (GetValue(CharacteristicList.HEAD_BLOCK) == 0&&headBlockTime+headBlockCoolDown<Time.time)
+            if (GetValue(CharacteristicList.HEAD_BLOCK) == 1&&headBlockTime+headBlockCoolDown<Time.time)
             {
                 float headDamage = damage.Damage - damage.Damage / HEAD_SHOOT_MULTIPLIER;
                 damage.Damage -= headDamage;
@@ -1055,7 +1058,7 @@ public class Pawn : DamagebleObject
         health = 0;
         characterState = CharacterState.Dead;
         DamagerEntry last = RetrunLastDamager();
-        StopKick();
+       
         DeadPhysics();
         //Debug.Log(last);
         if (last == null)
@@ -1525,12 +1528,12 @@ public class Pawn : DamagebleObject
             {
                 if (regenTime + regenCoolDown < Time.time)
                 {
-                    int regen = GetValue(CharacteristicList.REGEN);
+                    float regen = charMan.GetFloatChar(CharacteristicList.REGEN);
                     if (regen != 0)
                     {
                        
                         
-                            health += (float)(regen * maxHealth) * Time.deltaTime;
+                            health += (float)(regen) * Time.deltaTime;
                        
                     }
                 }
@@ -2385,49 +2388,37 @@ public class Pawn : DamagebleObject
 
     //Natural weapon
 
-    public void Kick(int i)
+    public void MeleeHit()
     {
-
-
-        //		Debug.Log ("ATtack");
-        //animator.SetSome("Any",true);
-        //((DogAnimationManager) animator).AnyDo();
-        if (naturalWeapon.StartKick(AttackType[i]) && foxView.isMine)
-        {
-            foxView.StartKick(i);
-        }
-    }
-
-    public void RandomKick()
-    {
-        if (AttackType.Count == 0)
+        if (CurWeapon.IsMelee())
         {
             return;
         }
-        int i = (int)(UnityEngine.Random.value * AttackType.Count);
-
-
-
-        //animator.SetSome("Any",true);
-        //((DogAnimationManager) animator).AnyDo();
-        if (naturalWeapon.StartKick(AttackType[i]) && foxView.isMine)
+        if (animator.CanWeaponChange())
         {
-            foxView.StartKick(i);
+            return;
         }
-
+        if (CanMeleeHit())
+        {
+            UnEquipWeapon();
+            ivnMan.TakeMelee();
+            StartFire();
+        } 
     }
-
-    public void StopKick()
+    public void PutMeleeAway()
     {
-        if (naturalWeapon != null)
+        if (CurWeapon.slotType == SLOTTYPE.MELEE)
         {
-            naturalWeapon.StopKick();
-        }
-        if (foxView.isMine)
-        {
-            foxView.StopKick();
+
+            ivnMan.PutMeleeAway();
         }
     }
+
+    public bool CanMeleeHit()
+    {
+        return characterState != CharacterState.Jumping&&CurWeapon.slotType!=SLOTTYPE.GRENADE;
+    }
+ 
     public void KickFinish()
     {
         if (mainAi != null)
@@ -2443,10 +2434,6 @@ public class Pawn : DamagebleObject
         if (CurWeapon != null && !isMelee)
         {
             return CurWeapon.weaponRange / 2;
-        }
-        if (naturalWeapon != null)
-        {
-            return naturalWeapon.WeaponDistance;
         }
         return 0.0f;
 
@@ -2911,10 +2898,10 @@ public class Pawn : DamagebleObject
                 CapsuleCollider capsule = ((CapsuleCollider)myCollider);
                 minAngle = Mathf.Atan(capsule.radius / capsule.height * 2)  ;
             }
-            if (!isAi)
+            /*if (!isAi)
             {
                 Debug.Log(Mathf.Cos(minAngle));
-            }
+            }*/
           
             /*
              *   float normalRadius;
@@ -3637,7 +3624,7 @@ public class Pawn : DamagebleObject
             _knockOut = true;
             canMove = false;
             animator.KnockOut();
-            StopKick();
+            StopFire();
             if (foxView.isMine)
             {
                 foxView.KnockOut();
@@ -3688,6 +3675,19 @@ public class Pawn : DamagebleObject
         charMan.AddEffect(characteristic, value);
 
     }
+    public void AddBaseBuff(int characteristic, BaseEffect value)
+    {
+        switch ((CharacteristicList)characteristic)
+        {
+            case CharacteristicList.MAXHEALTH:
+                health += ((Effect<float>)value).value;
+                break;
+        }
+
+
+        charMan. AddBaseEffect(characteristic, value);
+
+    }
     public void RemoveBuff(int characteristic, object value)
     {
         switch ((CharacteristicList)characteristic)
@@ -3722,6 +3722,13 @@ public class Pawn : DamagebleObject
         }
 
     }
+    public void ReloadStats()
+    {
+        ivnMan.ReloadStats();
+        SpeedInit();
+    }
+
+   
     //END OF BUFF SECTION
 
 

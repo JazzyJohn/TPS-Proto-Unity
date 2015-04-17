@@ -13,7 +13,7 @@ public enum PremiumSkillType
 
 }
 
-public class PremiumSkill
+public class PremiumSkill : BasePassiveSkill
 {
    
     
@@ -30,7 +30,7 @@ public class PremiumSkill
     public int id;
 
     public DateTime timeEnd;
-    public bool Open()
+    public override bool Open()
     {
         return timeEnd > DateTime.Now;
     }
@@ -41,6 +41,8 @@ public class PremiumSkill
 public class PremiumManager : MonoBehaviour {
 
     public const int PRICE_COUNT = 3;
+
+    public int resetSkillPrice = 70;
 
     public static float REGEN_TIME = 10.0f;
 
@@ -67,7 +69,7 @@ public class PremiumManager : MonoBehaviour {
 		
 		XmlNodeList list = xmlDoc.SelectNodes(root +"/premiumskill");
 
-
+        DateTime dtDateTime = new DateTime(1970, 1, 1, 0, 0, 0, 0, System.DateTimeKind.Utc);
         foreach (XmlNode node in list)
         {
             int id = int.Parse(node.SelectSingleNode("id").InnerText);
@@ -79,6 +81,9 @@ public class PremiumManager : MonoBehaviour {
                 skill = new PremiumSkill();
                 skills[id] = skill;
                 skill.id = id;
+                skill.name = node.SelectSingleNode("name").InnerText;
+                skill.iconGUI = node.SelectSingleNode("icon").InnerText;
+                skill.descr = node.SelectSingleNode("descr").InnerText;
                 skill.type = (PremiumSkillType)System.Enum.Parse(typeof(PremiumSkillType), node.SelectSingleNode("type").InnerText);
                 skill.amount = int.Parse(node.SelectSingleNode("gameData").InnerText);
                 skill.maxAmount = bool.Parse(node.SelectSingleNode("maxAmount").InnerText);
@@ -99,7 +104,9 @@ public class PremiumManager : MonoBehaviour {
             {
                 try
                 {
-                    skill.timeEnd = DateTime.Parse(node.SelectSingleNode("timeEnd").InnerText);
+                   
+                    
+                    skill.timeEnd = dtDateTime.AddSeconds(int.Parse(node.SelectSingleNode("timeEnd").InnerText));
 
                 }
                 catch (Exception)
@@ -141,7 +148,7 @@ public class PremiumManager : MonoBehaviour {
 
         if (xmlDoc.SelectSingleNode("result/error").InnerText == "0")
         {
-            GlobalPlayer.instance.gold -= int.Parse(xmlDoc.SelectSingleNode("result/price").InnerText);
+            GlobalPlayer.instance.gold -=skills[itemId].price[price];
             ParseData(xmlDoc, "result");
         }
         else
@@ -258,6 +265,14 @@ public class PremiumManager : MonoBehaviour {
                 target.health = max;
             }
         }
+    }
+    public PremiumSkill GetSkill(int id)
+    {
+        if (skills.ContainsKey(id))
+        {
+            return skills[id];
+        }
+        return null;
     }
 }
 

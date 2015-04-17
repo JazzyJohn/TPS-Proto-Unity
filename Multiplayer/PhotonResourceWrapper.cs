@@ -20,6 +20,23 @@ public static class PhotonResourceWrapper {
 	}
 	
 }
+public static class PhotonResourceWrapperExtensions
+{
 
+    public static T Default<T>(this T prefab) where T : Component
+    {
+        string name = prefab.name.Replace("(Clone)", "");
+        if (PhotonResourceWrapper.allobject.ContainsKey(name))
+        {
+            return PhotonResourceWrapper.allobject[name].GetComponent<T>();
+        }
+        GameObject resourceGameObject = (GameObject)Resources.Load(name, typeof(GameObject));
+        if (resourceGameObject != null)
+        {
+            return resourceGameObject.GetComponent<T>();
+        }
+        return prefab;
+    }
+}
 
 

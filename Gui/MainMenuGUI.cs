@@ -447,6 +447,7 @@ public class MainMenuGUI : MonoBehaviour {
 		_playerInfo.playerName = _playerInfo.Player.PlayerName;
 		_playerInfo.KP = _playerInfo.Player.cash;
 		_playerInfo.GITP = _playerInfo.Player.gold;
+        _playerInfo.SKILLPOINT =PassiveSkillManager.instance.skillPointLeft;
 		_playerInfo.playerLvl = lvl.playerLvl;
 		_playerInfo.playerExp =  LevelingManager.instance.playerExp;
         if (LevelingManager.instance.playerNeededExp.Length > _playerInfo.playerLvl)
@@ -468,6 +469,7 @@ public class MainMenuGUI : MonoBehaviour {
 		_PlayerComponent.ExpBar.value = _playerInfo.playerProcent /100f;
 		_PlayerComponent.KP.text = _playerInfo.KP.ToString();
 		_PlayerComponent.GITP.text = _playerInfo.GITP.ToString();
+        _PlayerComponent.SKILLPOINT.text = _playerInfo.SKILLPOINT.ToString(); 
 	}
 
 	public void ReSize() //Правка позиции компонентов
@@ -784,6 +786,7 @@ public class PlayerComponent
 	public UIProgressBar ExpBar;
 	public UILabel KP;
 	public UILabel GITP;
+    public UILabel SKILLPOINT;
 	public UILabel PremDate;
 	public UIPanel Prem_have;
 	public UIPanel Prem_DoNot_have;
@@ -800,6 +803,7 @@ public class PlayerInfo
 	public int playerExpNeed;
 	public int KP;
 	public int GITP;
+    public int SKILLPOINT;
 	public float playerProcent;
 	public bool Premium_have;
 

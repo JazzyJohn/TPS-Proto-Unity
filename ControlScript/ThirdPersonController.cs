@@ -290,15 +290,12 @@ public class ThirdPersonController : MonoBehaviour
             {
                 pawn.StartKnockOut();
             }
-            if (InputManager.instance.GetButtonDown("LegKick"))
+            if (InputManager.instance.GetButtonDown("MeleeHit"))
             {
-                pawn.Kick(0);
+                pawn.MeleeHit();
             }
 
-            if (InputManager.instance.GetButtonUp("LegKick"))
-            {
-                pawn.StopKick();
-            }
+           
 
             float wheel = Input.GetAxis("Mouse ScrollWheel");
             if (wheel < 0)

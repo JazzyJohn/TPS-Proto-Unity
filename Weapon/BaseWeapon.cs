@@ -5,14 +5,29 @@ using System.Collections.Generic;
 using nstuff.juggerfall.extension.models;
 using Random = UnityEngine.Random;
 
-public enum SLOTTYPE { PERSONAL, MAIN, ANTITANK, GRENADE, HEAD, CHEST };
+public enum SLOTTYPE { PERSONAL, MAIN, MELEE, GRENADE, HEAD, CHEST };
 
+public enum CharacteristicType
+{
+    Bool,
+    Float,
+    Int
+}
+[System.Serializable]
+public class CharacteristicForItems
+{
+    public CharacteristicList name;
+    public EffectType effect;
+    public CharacteristicType type;
+    public float value;
+}
 public class BaseWeapon : DestroyableNetworkObject {
 
+    private const float CRIT_MULTIPLIER = 2.0f;
 	
 	private static LayerMask layer = -123909;
 	
-	public enum DESCRIPTIONTYPE{NONE,MACHINE_GUN,ROCKET_LAUNCHER};
+	public enum DESCRIPTIONTYPE{NONE,SHOOTGUN,REVOLVER};
 	
 	public DESCRIPTIONTYPE descriptionType;
 	
@@ -61,7 +76,10 @@ public class BaseWeapon : DestroyableNetworkObject {
 
     public bool initStats = false;
     //SHOOT LOGIC
-
+    /// <summary>
+    ///critchance
+    /// </summary>
+    public int critChance =0;
     /// <summary>
     /// Define Fireing type like Auto SemiAuto
     /// </summary>
@@ -179,6 +197,8 @@ public class BaseWeapon : DestroyableNetworkObject {
     ///FOV if aiming with this weapon
     /// </summary>
     public float aimFOV;
+
+
 	
 	public bool shouldDrawTrajectory;
 	
@@ -272,7 +292,12 @@ public class BaseWeapon : DestroyableNetworkObject {
     public event EventHandler FireStarted;
     public event EventHandler FireStoped;
 
-   
+    public CharacteristicForItems[] passiveSkill;
+
+    protected bool fullyBroken;
+
+    protected BaseWeapon blueprint;
+
 	void Awake(){
 		foxView = GetComponent<FoxView>();
         if (projectilePrefab != null)
@@ -291,6 +316,8 @@ public class BaseWeapon : DestroyableNetworkObject {
   
 		charge = ItemManager.instance.GetCharge(SQLId);
 		shootCounter = ItemManager.instance.GetShootCounter(SQLId);
+        blueprint = this.Default();
+        Debug.Log(blueprint + "  " +( blueprint == this));
 	}
 
     public Pawn GetOwner()
@@ -374,15 +401,77 @@ public class BaseWeapon : DestroyableNetworkObject {
 
         }
         initStats = true;
+       
+        int maxCharge = ItemManager.instance.GetWeaponMaxChargebByID(SQLId);
+        int minWear = Mathf.RoundToInt((float)(maxCharge * owner.GetValue(CharacteristicList.MAX_WEAR)) / 100.0f);
+        fullyBroken = maxCharge == minWear + charge && maxCharge!=0;
+
+        if (!fullyBroken)
+        {
+
+
+            foreach (CharacteristicForItems oneChar in passiveSkill)
+            {
+                
+                switch (oneChar.type)
+                {
+                    case CharacteristicType.Bool:
+                        {
+
+                            Effect<bool> effect = new Effect<bool>(oneChar.value == 1.0f);
+                            effect.endByDeath = true;
+                            effect.timeEnd = -1;
+                            effect.type = oneChar.effect;
+                            owner.AddBaseBuff((int)oneChar.name, effect);
+                        }
+                        break;
+                    case CharacteristicType.Float:
+                        {
+
+                            Effect<float> effect = new Effect<float>(oneChar.value);
+                            effect.endByDeath = true;
+                            effect.timeEnd = -1;
+                            effect.type = oneChar.effect;
+                            owner.AddBaseBuff((int)oneChar.name, effect);
+                        }
+                        break;
+                    case CharacteristicType.Int:
+                        {
+
+                            Effect<int> effect = new Effect<int>((int)oneChar.value);
+                            effect.endByDeath = true;
+                            effect.timeEnd = -1;
+                            effect.type = oneChar.effect;
+                            owner.AddBaseBuff((int)oneChar.name, effect);
+                        }
+                        break;
+
+                }
+
+            }
+        }
+        RecalculateStats();
+    }
+
+    public void RecalculateStats(){
+        int maxCharge = ItemManager.instance.GetWeaponMaxChargebByID(SQLId);
+        int minWear = Mathf.RoundToInt((float)(maxCharge * owner.GetValue(CharacteristicList.MAX_WEAR)) / 100.0f);
         if (foxView.isMine)
         {
             owner.ivnMan.RewrtieMaxAmmo(maxAmmoAmount, ammoType);
         }
 
-        reloadTime = reloadTime * owner.GetPercentValue(CharacteristicList.RELOAD_SPEED);
-        fireInterval = fireInterval * owner.GetPercentValue(CharacteristicList.FIRE_RATE);
+        reloadTime = blueprint.reloadTime * owner.GetPercentValue(CharacteristicList.RELOAD_SPEED);
+        float firerate =100f+owner.GetValue(CharacteristicList.FIRE_RATE);
+        if (slotType == SLOTTYPE.PERSONAL)
+        {
+             firerate +=owner.GetValue(CharacteristicList.FIRE_RATE_MAIN);
 
-        clipSize = Mathf.RoundToInt(clipSize * owner.GetPercentValue(CharacteristicList.AMMO_AMOUNT));
+        }
+
+        fireInterval = blueprint.fireInterval * firerate / 100f;
+
+        clipSize = Mathf.RoundToInt(blueprint.clipSize * owner.GetPercentValue(CharacteristicList.AMMO_AMOUNT));
 
         float recoilmod = owner.GetValue(CharacteristicList.AIM_ALL);
        /* switch (descriptionType)
@@ -399,11 +488,11 @@ public class BaseWeapon : DestroyableNetworkObject {
         }*/
         if (slotType == SLOTTYPE.PERSONAL)
         {
-            recoilmod += damageAmount.Damage * owner.GetValue(CharacteristicList.AIM_DOP);
+            recoilmod +=  owner.GetValue(CharacteristicList.AIM_DOP);
         }
         if (slotType == SLOTTYPE.MAIN)
         {
-            recoilmod += damageAmount.Damage * owner.GetValue(CharacteristicList.AIM_MAIN);
+            recoilmod += owner.GetValue(CharacteristicList.AIM_MAIN);
         }
         recoilmod = ((float)recoilmod) / 100f + 1f;
      
@@ -417,11 +506,35 @@ public class BaseWeapon : DestroyableNetworkObject {
         {
             damageAdd += owner.GetValue(CharacteristicList.DAMAGE_ADD_MAIN);
         }
-        damageAmount.Damage = damageAmount.Damage * ((float)damageAdd/100f+1);
+        
+        damageAmount.Damage = blueprint.damageAmount.Damage * ((float)damageAdd / 100f + 1);
 
+        damageAdd = 0;
+        if (slotType == SLOTTYPE.PERSONAL)
+        {
+            damageAdd += owner.GetValue(CharacteristicList.DAMAGE_ADD_DOP_POINT);
+        }
+        if (slotType == SLOTTYPE.MAIN)
+        {
+            damageAdd += owner.GetValue(CharacteristicList.DAMAGE_ADD_MAIN_POINT);
+        }
+
+
+        damageAmount.Damage += damageAdd;
+        
+        float  vsarmor = 0;
+        if (slotType == SLOTTYPE.PERSONAL)
+        {
+            vsarmor += owner.GetValue(CharacteristicList.VS_ARMOR_DOP);
+        }
+        if (slotType == SLOTTYPE.MAIN)
+        {
+            vsarmor += owner.GetValue(CharacteristicList.VS_ARMOR_MAIN);
+        }
+
+        damageAmount.vsArmor = blueprint.damageAmount.vsArmor +vsarmor;
         if (SQLId > 0)
         {
-            int minWear = Mathf.RoundToInt(ItemManager.instance.GetWeaponSlotbByID(SQLId).maxcharge * owner.GetValue(CharacteristicList.DAMAGE_ADD_MAIN));
             damageAmount.weapon = true;
           
              float damageMode = ((float)charge - minWear) / DAMAGE_BROKE_PERCEN * DAMAGE_BROKE_COEF / 100;
@@ -442,8 +555,8 @@ public class BaseWeapon : DestroyableNetworkObject {
             }
            
         }
-        aimRandCoef = aimRandCoef * recoilmod;
-        normalRandCoef = normalRandCoef * recoilmod;
+        aimRandCoef = blueprint.aimRandCoef * recoilmod;
+        normalRandCoef = blueprint.normalRandCoef * recoilmod;
         float randPerShootMod = owner.GetValue(CharacteristicList.RECOIL_ALL);
         if (slotType == SLOTTYPE.PERSONAL)
         {
@@ -451,17 +564,30 @@ public class BaseWeapon : DestroyableNetworkObject {
         }
         if (slotType == SLOTTYPE.MAIN)
         {
-            randPerShootMod += damageAmount.Damage * owner.GetValue(CharacteristicList.RECOIL_MAIN);
+            randPerShootMod += owner.GetValue(CharacteristicList.RECOIL_MAIN);
         }
-        randPerShoot = randPerShoot *  ((float)randPerShootMod/100f+1);
+        if (descriptionType == DESCRIPTIONTYPE.REVOLVER)
+        {
+            randPerShootMod += owner.GetValue(CharacteristicList.RECOIL_REVOLVER);
+        }
+        if (descriptionType == DESCRIPTIONTYPE.SHOOTGUN)
+        {
+            randPerShootMod += owner.GetValue(CharacteristicList.RECOIL_SHOOTGUN);
+        }
+        randPerShoot = blueprint.randPerShoot * ((float)randPerShootMod / 100f + 1);
 
         if (slotType == SLOTTYPE.MAIN)
         {
-            weaponRange = weaponRange * owner.GetPercentValue(CharacteristicList.DAMAGE_ADD_MAIN);
-            weaponMinRange = weaponMinRange * owner.GetPercentValue(CharacteristicList.DAMAGE_ADD_MAIN);
+            weaponRange = blueprint.weaponRange * owner.GetPercentValue(CharacteristicList.DAMAGE_ADD_MAIN);
+            weaponMinRange = blueprint.weaponMinRange * owner.GetPercentValue(CharacteristicList.DAMAGE_ADD_MAIN);
+        }
+        critChance =blueprint.critChance + owner.GetValue(CharacteristicList.CRIT_CHANCE_ALL);
+        if (slotType == SLOTTYPE.MAIN)
+        {
+            critChance += owner.GetValue(CharacteristicList.CRIT_CHANCE_MAIN);
         }
 
-        shootPerCharge = Mathf.RoundToInt((float)shootPerCharge * owner.GetPercentValue(CharacteristicList.WEAR));
+        shootPerCharge = Mathf.RoundToInt((float)blueprint.shootPerCharge * owner.GetPercentValue(CharacteristicList.WEAR));
     }
 	
 	public void PawnDeath(){
@@ -1176,7 +1302,7 @@ public class BaseWeapon : DestroyableNetworkObject {
 	protected virtual void HitEffect(RaycastHit hitInfo,float power){
 			DamagebleObject target =(DamagebleObject) hitInfo.collider.GetComponent(typeof(DamagebleObject));
 			if(target!=null){
-				BaseDamage dmg =new BaseDamage(damageAmount);
+				BaseDamage dmg =GetDamage(damageAmount);
 				dmg.Damage += power;
 				target.Damage(dmg ,owner.gameObject);
 			}
@@ -1291,11 +1417,12 @@ public class BaseWeapon : DestroyableNetworkObject {
 		if (foxView.isMine) {
             foxView.PrepareShoot(startPoint, startRotation, power, range, weaponMinRange, viewId, projScript.projId);
 		}
-		
-		
-		projScript.damage =new BaseDamage(damageAmount) ;
+
+
+        projScript.damage = GetDamage(damageAmount, power);
+      
 		projScript.owner = owner.gameObject;
-		projScript.damage.Damage+=power;
+		
 		projScript.range=range;
         projScript.minRange = minRange;
         projScript.Init();
@@ -1437,5 +1564,29 @@ public class BaseWeapon : DestroyableNetworkObject {
 		curTransform.localRotation = weaponRotator;
         owner.animator.SetMuzzle(muzzlePoint);
 	}
+    public virtual bool IsMelee()
+    {
+        return false;
+    }
+    public virtual void StartDamage()
+    {
 
+    }
+    public BaseDamage GetDamage(BaseDamage dmg,float addDamage=0)
+    {
+         BaseDamage lDamage = new BaseDamage(damageAmount);
+        
+         lDamage.Damage += addDamage;
+         if (critChance > 0)
+         {
+             float dice = UnityEngine.Random.Range(0, 100f);
+             if (dice < critChance)
+             {
+                 lDamage.Damage *= CRIT_MULTIPLIER;
+                 lDamage.crit = true;
+             }
+         }
+         return lDamage;
+    }
 }
+

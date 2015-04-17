@@ -247,6 +247,6 @@ public class CharacterControllerM1A1 : MonoBehaviour
             IKWeight = upperWeight;
         }
         ik.SetMotionWeight(IKWeight);
-        animator.SetLayerWeight(1, upperWeight);
+      //  animator.SetLayerWeight(1, upperWeight);
     }
 }

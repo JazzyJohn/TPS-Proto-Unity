@@ -189,7 +189,7 @@ public class AIWalk : AIMovementState
 		
 		_timeLastDecide =Time.time;
 		
-		if(controlledPawn.naturalWeapon!=null){
+		
 			if(controlledPawn.CurWeapon==null){
 				
 				
@@ -215,12 +215,12 @@ public class AIWalk : AIMovementState
 				RangeFight();
 			}
             //Debug.Log("I decide melee" + isMelee);
-			return;
+			
 		
 		
-		}
 		
-		RangeFight();
+		
+	//	RangeFight();
 	}
 	protected void MeleeFight(){
 		isMelee = true;

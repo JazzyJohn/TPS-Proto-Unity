@@ -1915,16 +1915,7 @@ public class NetworkController : MonoBehaviour
     public void HandlePawnKick(ISFSObject dt)
     {
 
-        Pawn pawn = GetView(dt.GetInt("id")).pawn;
-        if (dt.GetBool("state"))
-        {
-            pawn.Kick(dt.GetInt("kick"));
-        }
-        else
-        {
-            pawn.StopKick();
-        }
-
+        
     }
     /// <summary>
     /// handle pawnActiveState  from Server

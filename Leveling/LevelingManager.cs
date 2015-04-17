@@ -157,7 +157,7 @@ public class LevelingManager : MonoBehaviour, LocalPlayerListener,GameListener{
 					classLvl[i]= int.Parse(node.SelectSingleNode("lvl").InnerText);
 					classExp[i++]= int.Parse(node.SelectSingleNode("exp").InnerText);
 		}
-        StartCoroutine(PassiveSkillManager.instance.InitSkillTree(XML));
+        PassiveSkillManager.instance.InitSkillTree(XML);
         if (!isLoaded)
         {
             GlobalPlayer.instance.loadingStage++;

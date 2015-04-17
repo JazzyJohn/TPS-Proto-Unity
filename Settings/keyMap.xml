@@ -57,8 +57,8 @@
 		<default>L</default>
 	</keys>
 	<keys>
-		<name>LegKick</name>
-		<default>V</default>
+		<name>MeleeHit</name>
+		<default>F</default>
 	</keys>
 	<keys>
 		<name>Taunt</name>

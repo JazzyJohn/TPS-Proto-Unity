@@ -11,25 +11,43 @@ public class InputManager{
 	private   Dictionary<String, KeyCode> keyMap  = new Dictionary<String, KeyCode> ();
 	private   float mouseSensitivity = 1.0f;
 	private static string MOUSESENSITIVITY ="mouseSensitivity";
+
+    private static int version = 1;
 	
 	public InputManager(){
-		XmlDocument xmlDoc = new XmlDocument();
-		xmlDoc.LoadXml(SettingsManager.instance.configTable.text);
-		foreach (XmlNode node in xmlDoc.SelectNodes("input/keys")) {
-			string name = node.SelectSingleNode ("name").InnerText;
-			 KeyCode key = KeyCode.None;
-			if( PlayerPrefs.HasKey(name)){
-                key = (KeyCode)System.Enum.Parse(typeof(KeyCode), PlayerPrefs.GetString(name));
-			}else{
-				key = (KeyCode) System.Enum.Parse(typeof(KeyCode),node.SelectSingleNode ("default").InnerText);
-			}
-			SetKey(name,key);
-		}
-		if( PlayerPrefs.HasKey(MOUSESENSITIVITY)){
-				mouseSensitivity =  PlayerPrefs.GetFloat(MOUSESENSITIVITY);
-		}else{
-				mouseSensitivity =  1.0f;
-		}
+        if (PlayerPrefs.HasKey("version") && PlayerPrefs.GetInt("version") == version)
+        {
+            XmlDocument xmlDoc = new XmlDocument();
+            xmlDoc.LoadXml(SettingsManager.instance.configTable.text);
+            foreach (XmlNode node in xmlDoc.SelectNodes("input/keys"))
+            {
+                string name = node.SelectSingleNode("name").InnerText;
+                KeyCode key = KeyCode.None;
+                if (PlayerPrefs.HasKey(name))
+                {
+                    key = (KeyCode)System.Enum.Parse(typeof(KeyCode), PlayerPrefs.GetString(name));
+                }
+                else
+                {
+                    key = (KeyCode)System.Enum.Parse(typeof(KeyCode), node.SelectSingleNode("default").InnerText);
+                }
+                SetKey(name, key);
+            }
+            if (PlayerPrefs.HasKey(MOUSESENSITIVITY))
+            {
+                mouseSensitivity = PlayerPrefs.GetFloat(MOUSESENSITIVITY);
+            }
+            else
+            {
+                mouseSensitivity = 1.0f;
+            }
+        }
+        else
+        {
+            PlayerPrefs.SetInt("version", version);
+            ForceReload();
+
+        }
 	
 	}
 
