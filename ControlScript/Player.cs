@@ -445,6 +445,7 @@ public class Player : MonoBehaviour {
 				if(inBot&&robotPawn!=null){
 					robotPawn.ChangeWeapon (0);
 				}else{
+                    Debug.Log("Weapon");
 					currentPawn.ChangeWeapon (0);
 				}
 			}

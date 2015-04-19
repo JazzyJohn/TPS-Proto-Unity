@@ -28,11 +28,13 @@ public class HTHWeapon : BaseWeapon {
     public override void StartFire()
     {
         owner.animator.StartShootAniamtion("meleehit");
+
+        StartHit();
         
     }
     public override void StartDamage()
     {
-        StartHit();
+        //StartHit();
     }
     public void StartHit()
     {
@@ -45,15 +47,16 @@ public class HTHWeapon : BaseWeapon {
     {
         if (hitting)
         {
-            float distance = (oldEdgePostion - edge.position).magnitude;
+            float distance = Mathf.Max((oldEdgePostion - edge.position).magnitude,radius);
             oldEdgePostion = edge.position;
-            Vector3 direction =  edge.position- hilt.position;
-            Ray ray = new Ray(hilt.position, direction.normalized);
-            RaycastHit[] hits = Physics.RaycastAll(ray,   direction.magnitude);
-            Debug.DrawRay(hilt.position, direction.normalized, Color.red, 10.0f);
+            Vector3 direction = edge.position - owner.myTransform.position;
+            Ray ray = new Ray(owner.myTransform.position, direction.normalized);
+            RaycastHit[] hits = Physics.SphereCastAll(ray, distance,  direction.magnitude+0.3f);
+           // Debug.DrawRay(owner.myTransform.position, direction.normalized * (direction.magnitude + 0.3f), Color.red, 10.0f);
             foreach (RaycastHit hit in hits)
             {
-                if(hit.transform.root==owner.myTransform){
+               // Debug.Log(hit.transform.root);
+                if(hit.transform.root==owner.myTransform.root){
                     continue;
                 }
                 DamagebleObject obj = hit.collider.GetComponent<DamagebleObject>();
@@ -66,13 +69,74 @@ public class HTHWeapon : BaseWeapon {
                     obj.Damage(lDamage, owner.gameObject);
                     hitting = false;
                     AfterHitAction();
+                    return;
                 }
             }
+            Collider[]colliders =  Physics.OverlapSphere(edge.position, distance);
+            foreach (Collider hit in colliders)
+            {
+                // Debug.Log(hit.transform.root);
+                if (hit.transform.root == owner.myTransform.root)
+                {
+                    continue;
+                }
+                DamagebleObject obj = hit.collider.GetComponent<DamagebleObject>();
 
+                if (obj != null)
+                {
+                    BaseDamage lDamage = GetDamage(damageAmount);
+                    lDamage.pushDirection = (hit.transform.position-edge.position);
+                    lDamage.hitPosition = hit.transform.position;
+                    obj.Damage(lDamage, owner.gameObject);
+                    hitting = false;
+                    AfterHitAction();
+                    return;
+                }
+            }
+        
         }
     }
+    void SpawnEffect(Vector3 position)
+    {
+        if (projectilePrefab.CountPooled() == 0 && projectilePrefab.CountPooled() == 0)
+        {
+            projectilePrefab.CreatePool(10);
 
-    
+        }
+        if (projectilePrefab.CountPooled() == 0 && projectilePrefab.CountPooled() == 0)
+        {
+            return;
+        }
+        projectilePrefab.Spawn(position);
+    }
+    /*     void OnTriggerStay(Collider other)
+     {
+           Debug.Log(other);
+           if (hitting)
+           {
+          
+           
+             
+                   if (other.transform.root == owner.myTransform.root)
+                   {
+                       return;
+                   }
+                   DamagebleObject obj = other.collider.GetComponent<DamagebleObject>();
+
+                   if (obj != null)
+                   {
+                       BaseDamage lDamage = GetDamage(damageAmount);
+                       lDamage.pushDirection = other.transform.position - hilt.position;
+                       lDamage.hitPosition = other.transform.position;
+                       obj.Damage(lDamage, owner.gameObject);
+                       hitting = false;
+                       AfterHitAction();
+                   }
+          
+
+           }
+       }
+       */
     public override void PutAway()
     {
         hitting = false;

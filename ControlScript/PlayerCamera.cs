@@ -65,4 +65,8 @@ public class PlayerCamera : MonoBehaviour {
     {
        
     }
+    public virtual void SwitchShoulder()
+    {
+        
+    }
 }

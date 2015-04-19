@@ -297,8 +297,12 @@ public class AnimationManager : MonoBehaviour
         {
             return false;
         }
-        inWeaponChange = true;
+      
         return true;
+    }
+    public void WeaponChange()
+    {
+        inWeaponChange = true;
     }
     public void ReloadStop(bool needIk )
     {

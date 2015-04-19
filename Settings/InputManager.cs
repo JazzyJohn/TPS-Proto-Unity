@@ -12,7 +12,7 @@ public class InputManager{
 	private   float mouseSensitivity = 1.0f;
 	private static string MOUSESENSITIVITY ="mouseSensitivity";
 
-    private static int version = 1;
+    private static int version = 2;
 	
 	public InputManager(){
         if (PlayerPrefs.HasKey("version") && PlayerPrefs.GetInt("version") == version)

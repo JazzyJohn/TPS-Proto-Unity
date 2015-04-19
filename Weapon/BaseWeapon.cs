@@ -171,6 +171,14 @@ public class BaseWeapon : DestroyableNetworkObject {
     ///  How Much Crosshair goes up after shoot;
     /// </summary>
     public float aimDisplacment;
+    /// <summary>
+    ///  How Much Crosshair goes up after shoot;
+    /// </summary>
+    public float aimDisplacmentAiming;
+    /// <summary>
+    ///  How Much Crosshair goes up after shoot;
+    /// </summary>
+    public float aimDisplacmentCooled;
 	/// <summary>
     ///  Rand to Shoot direction summary from some effects;
     /// </summary>
@@ -274,6 +282,8 @@ public class BaseWeapon : DestroyableNetworkObject {
 
     private bool pumpAfterReload;
 
+    public GameObject[] effectInHand;
+
 	//звуки
 	protected soundControl sControl;//глобальный обьект контроллера звука
 	private AudioSource aSource;//источник звука. добавляется в редакторе
@@ -303,10 +313,14 @@ public class BaseWeapon : DestroyableNetworkObject {
         if (projectilePrefab != null)
         {
             projectileClass = projectilePrefab.GetComponent<BaseProjectile>();
-            if (projectileClass.CountPooled() == 0&&projectileClass.CountSpawned() == 0)
+            if (projectileClass != null)
             {
-                projectileClass.CreatePool(300);
+                if (projectileClass.CountPooled() == 0 && projectileClass.CountSpawned() == 0)
+                {
+                    projectileClass.CreatePool(300);
+                }
             }
+          
         }
 		if(shouldDrawTrajectory){
 			drawer = GetComponentInChildren<TrajectoryDrawer>();
@@ -1207,6 +1221,17 @@ public class BaseWeapon : DestroyableNetworkObject {
 		}
 		
     }
+    public float GetAimDisplacment(bool isAiming)
+    {
+        if (isAiming)
+        {
+            return aimDisplacmentAiming;
+        }
+        else
+        {
+            return aimDisplacment;
+        }
+    }
 	
 	public virtual void HitWithProjectile(){
 		if(foxView.isMine&&!owner.isAi){
@@ -1545,6 +1570,10 @@ public class BaseWeapon : DestroyableNetworkObject {
 		if(foxView.isMine){
 			foxView.PutAway();
 		}
+        foreach (GameObject obj in effectInHand)
+        {
+            obj.SetActive(false);
+        }
 	}
 	public void TakeInHand(){
 		enabled = true;
@@ -1563,6 +1592,10 @@ public class BaseWeapon : DestroyableNetworkObject {
 		//Debug.Log (name + weaponRotator);
 		curTransform.localRotation = weaponRotator;
         owner.animator.SetMuzzle(muzzlePoint);
+        foreach (GameObject obj in effectInHand)
+        {
+            obj.SetActive(true);
+        }
 	}
     public virtual bool IsMelee()
     {

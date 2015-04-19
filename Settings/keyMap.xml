@@ -18,15 +18,15 @@
 	</keys>
 	<keys>
 		<name>Weapon1</name>
-		<default>1</default>
+		<default>Alpha1</default>
 	</keys>
 	<keys>
 		<name>Weapon2</name>
-		<default>2</default>
+		<default>Alpha2</default>
 	</keys>
 	<keys>
 		<name>Weapon3</name>
-		<default>3</default>
+		<default>Alpha3</default>
 	</keys>
 	<keys>
 		<name>Suicide</name>
@@ -61,7 +61,7 @@
 		<default>F</default>
 	</keys>
 	<keys>
-		<name>Taunt</name>
+		<name>SwitchShoulder</name>
 		<default>Q</default>
 	</keys>
 	<keys>

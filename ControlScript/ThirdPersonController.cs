@@ -295,7 +295,10 @@ public class ThirdPersonController : MonoBehaviour
                 pawn.MeleeHit();
             }
 
-           
+            if (InputManager.instance.GetButtonDown("SwitchShoulder"))
+            {
+                pawn.SwitchShoulder();
+            }
 
             float wheel = Input.GetAxis("Mouse ScrollWheel");
             if (wheel < 0)

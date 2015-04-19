@@ -27,7 +27,14 @@ public class ThirdPersonCamera : PlayerCamera
 	
 	public float lockCameraTimeout= 0.2f;
 
+    protected int xCoef = 1;
 
+    private float curXCoef = 1;
+
+    private float coefLerpTime;
+
+    private int oldXCoef =1;
+    
 
     protected Vector3 targetOffset = Vector3.zero;
     protected Vector3 neededOffset = Vector3.zero;
@@ -144,7 +151,9 @@ public class ThirdPersonCamera : PlayerCamera
        
             timeLerp += Time.deltaTime * lerpSpeed;
             targetOffset = Vector3.Lerp(startedOffset, neededOffset, timeLerp);
-       
+            coefLerpTime += Time.deltaTime * lerpSpeed;
+            curXCoef = Mathf.Lerp(oldXCoef, xCoef, coefLerpTime);
+            ///Debug.Log(curXCoef + " " + xCoef + " " + oldXCoef);
         
         Vector3 lTargetOffset = targetOffset;
 		float lXOffset;
@@ -168,7 +177,7 @@ public class ThirdPersonCamera : PlayerCamera
 
         Vector3 targetHead = _pawn.GetHead().position;
         targetHead.x =_pawn.myTransform.position.x;
-        targetHead += _pawn.GetDesireRotation() * Vector3.right * lXOffset;
+        targetHead += _pawn.GetDesireRotation() * Vector3.right * lXOffset * curXCoef;
         Vector3 lOffset = _pawn.GetDesireRotation() * lTargetOffset;
         Vector3 headAxis = (targetHead + lOffset.y * Vector3.up);
        // Debug.DrawLine(targetHead, targetHead + lOffset, Color.red);
@@ -366,4 +375,11 @@ public class ThirdPersonCamera : PlayerCamera
         }
     }
 
+ 
+    public override void SwitchShoulder()
+    {
+        coefLerpTime = 0;
+        oldXCoef = xCoef;
+        xCoef *= -1;
+    }
 }

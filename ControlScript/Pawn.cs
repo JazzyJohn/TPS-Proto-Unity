@@ -317,13 +317,13 @@ public class Pawn : DamagebleObject
 
     public float aimModCoef = -10.0f;
 
-    public float aimDisplacment = 0.0f;
-	
-	public float aimCrouchPercentMultiplier =0.1f;
+  	public float aimCrouchPercentMultiplier =0.1f;
 	
 	public float aimJumpPercentMultiplier=0.1f;
 
     public float aimIdlePercentMultiplier = 0.25f;
+
+    private float aimDisplacment;
 
     public bool isLookingAt = true;
 
@@ -1892,10 +1892,16 @@ public class Pawn : DamagebleObject
     public void AfterShoot()
     {
 
-        xAngle -= (CurWeapon.aimDisplacment-aimDisplacment);
-        xAngle = Mathf.Clamp(xAngle, cameraController.MinYAngle, cameraController.MaxYAngle);
+        xAngle -= CurWeapon.GetAimDisplacment(isAiming);
+       
         
-        aimDisplacment = CurWeapon.aimDisplacment;
+        if (aimDisplacment == 0)
+        {
+            xAngle -= CurWeapon.aimDisplacmentCooled;
+            aimDisplacment = CurWeapon.aimDisplacmentCooled;
+        }
+        xAngle = Mathf.Clamp(xAngle, cameraController.MinYAngle, cameraController.MaxYAngle);
+      
     }
     public void DisplacmentCoolDown()
     {
@@ -1905,10 +1911,10 @@ public class Pawn : DamagebleObject
             aimDisplacment -= CurWeapon.aimDisplacmentCooling * Time.deltaTime;
             if (aimDisplacment < 0)
             {
-                aimDisplacment = 0.0f;  
+                aimDisplacment = 0.0f;
             }
+
         }
-        
     }
     //Setting new weapon if not null try to attach it
     public void setWeapon(BaseWeapon newWeapon)
@@ -1963,6 +1969,10 @@ public class Pawn : DamagebleObject
         ivnMan.ChangeWeapon(weaponIndex);
     }
 
+    public void SwitchShoulder()
+    {
+        cameraController.SwitchShoulder();
+    }
     public bool isAimimngAtEnemy()
     {
         if (enemy == null)
@@ -2026,6 +2036,7 @@ public class Pawn : DamagebleObject
     public static float fromOldRotationMod =5.0f;
     public virtual void UpdateRotation(float xDeltaAngle,float yDeltaAngle)
     {
+
         if (xDeltaAngle > 0)
         {
             aimDisplacment = 0;
@@ -2394,8 +2405,10 @@ public class Pawn : DamagebleObject
         {
             return;
         }
-        if (animator.CanWeaponChange())
+        if (!animator.CanWeaponChange())
         {
+            Debug.Log("canChange");
+
             return;
         }
         if (CanMeleeHit())
@@ -2942,12 +2955,14 @@ public class Pawn : DamagebleObject
             StartJetPack();
 			StopGrenadeThrow();
             characterState = CharacterState.Sprinting;
+            animator.MainLayerPripity();
         }
 
     }
     public void StopSprint()
     {
         jetPackEnable = false;
+        animator.MainLayerNormal();
     }
     public void StartJetPack()
     {
@@ -3680,7 +3695,7 @@ public class Pawn : DamagebleObject
         switch ((CharacteristicList)characteristic)
         {
             case CharacteristicList.MAXHEALTH:
-                health += ((Effect<float>)value).value;
+                health += ((Effect<int>)value).value;
                 break;
         }
 

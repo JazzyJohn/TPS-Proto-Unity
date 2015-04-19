@@ -147,6 +147,7 @@ public class InventoryManager : MonoBehaviour {
 		if (owner.foxView.isMine) {
 			beforeGrenade =indexWeapon;
 
+           
             _ChangeWeapon(indexOfSlot[(int)SLOTTYPE.GRENADE]);
 		}
 	}
@@ -164,6 +165,7 @@ public class InventoryManager : MonoBehaviour {
             if (indexOfSlot[(int)SLOTTYPE.MELEE]!=indexWeapon)
              beforeMelee = indexWeapon;
 
+
             _ChangeWeapon(indexOfSlot[(int)SLOTTYPE.MELEE]);
         }
     }
@@ -172,7 +174,8 @@ public class InventoryManager : MonoBehaviour {
         if (owner.foxView.isMine)
         {
            // Debug.Log("beforeMelee"+beforeMelee);
-            _ChangeWeapon(beforeMelee);
+            currentWeapon.PutAway();
+            owner.animator.SetWeaponType(myWeapons[beforeMelee].animType);
         }
     }
 	//Destroy weapon and make pawn empty handed
@@ -448,6 +451,7 @@ public class InventoryManager : MonoBehaviour {
 		if(newIndex>=myWeapons.Length){
 			newIndex=0;
 		}
+       
         if (IsSpecial(newIndex))
         {
             if (myWeapons.Length > specialSize)
@@ -459,7 +463,7 @@ public class InventoryManager : MonoBehaviour {
 
 
         }
-		//Debug.Log ("NextWeapon"+newIndex);
+        owner.animator.WeaponChange();
         cahcedIndex = newIndex;
         owner.animator.SetWeaponType(myWeapons[cahcedIndex].animType);
 		//_ChangeWeapon(newIndex);
@@ -474,6 +478,7 @@ public class InventoryManager : MonoBehaviour {
 		if(newIndex<0){
 			newIndex=myWeapons.Length-1;
 		}
+       
         if (IsSpecial(newIndex))
         {
             if (myWeapons.Length > specialSize)
@@ -485,7 +490,8 @@ public class InventoryManager : MonoBehaviour {
 
 
         }
-		//Debug.Log ("PrevWeapon"+newIndex);
+		//
+        owner.animator.WeaponChange();
        cahcedIndex = newIndex;
        owner.animator.SetWeaponType(myWeapons[cahcedIndex].animType);
 		//_ChangeWeapon(newIndex);
@@ -498,8 +504,14 @@ public class InventoryManager : MonoBehaviour {
 	//Change weapon in hand
 	public void ChangeWeapon(int newWeapon){
 		if (indexWeapon != newWeapon) {
-           // cahcedIndex = newWeapon;
-			_ChangeWeapon(newWeapon);	
+            if (!owner.animator.CanWeaponChange())
+            {
+                return;
+            }
+            owner.animator.WeaponChange();
+            cahcedIndex = newWeapon;
+            owner.animator.SetWeaponType(myWeapons[cahcedIndex].animType);
+			//_ChangeWeapon(newWeapon);	
 		}
 	}
 

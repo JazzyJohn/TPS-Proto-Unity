@@ -18,15 +18,18 @@ public class RepairGUI : MonoBehaviour {
     public InventorySlot item;
 	
 	public void ShowRepair(InventorySlot item){
+     //   Debug.Log(item.maxcharge);
         if (item.maxcharge == 0)
         {
             return;
         }
+
+       // Debug.Log(item.maxcharge);
         this.item = item;
 		repairWindow.alpha = 1.0f;
         unbreakPrice.text = item.prices[1].parts[0].amount.ToString();
         repairScroll.value = (float)(item.maxcharge-item.charge) / (float)item.maxcharge;
-
+     ///   Debug.Log(item.maxcharge);
         repairLabel.text = "0";
         amount = 0;
 		
