@@ -163,7 +163,7 @@ public class InventoryManager : MonoBehaviour {
         if (owner.foxView.isMine)
         {
             if (indexOfSlot[(int)SLOTTYPE.MELEE]!=indexWeapon)
-             beforeMelee = indexWeapon;
+                beforeMelee = indexWeapon;
 
 
             _ChangeWeapon(indexOfSlot[(int)SLOTTYPE.MELEE]);

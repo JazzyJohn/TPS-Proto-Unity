@@ -225,7 +225,7 @@ public class HUDText : MonoBehaviour
 
 	void Start()
 	{
-		gameCamera = GameObject.Find("Main Camera").camera;
+        gameCamera = Camera.mainCamera;
 		gameCamera.gameObject.GetComponent<PlayerMainGui>().P1Hud = this;
 	}
 

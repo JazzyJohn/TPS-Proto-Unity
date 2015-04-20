@@ -22,8 +22,9 @@ public enum CharacterState
     DeActivate = 8,
     Activate = 9,
     Dead = 10,
-	
-	Crouching = 11,
+
+    Crouching = 11,
+    Mount,
 }
 public enum WallState
 {
@@ -413,6 +414,9 @@ public class Pawn : DamagebleObject
     private float timeMiniMapShow = 0.0f;
 
     protected Pawn blueprint;
+
+    private RobotPawn transport;
+
     protected void Awake()
     {
         if (AIM_MASK == 1)
@@ -545,7 +549,7 @@ public class Pawn : DamagebleObject
 
     }
     //INIT PLAYER PAWN TO TAKE CHARACTERISTICK
-    public void Init()
+    public virtual void Init()
     {
         charMan.AddList(player.GetCharacteristick());
         if (foxView.isMine && guiComponent!=null)
@@ -918,6 +922,10 @@ public class Pawn : DamagebleObject
         if (isDead)
         {
             return;
+        }
+        if (transport != null)
+        {
+            transport.KillIt(killer);
         }
         Player killerPlayer = null;
         try
@@ -1617,7 +1625,7 @@ public class Pawn : DamagebleObject
             
                 eurler.z = 0;
                 eurler.x = 0;
-                if (characterState == CharacterState.WallRunning || characterState == CharacterState.PullingUp)
+                if (characterState == CharacterState.WallRunning || characterState == CharacterState.PullingUp || characterState == CharacterState.Mount)
                 {
                    
                 }
@@ -1681,7 +1689,7 @@ public class Pawn : DamagebleObject
     }
     public virtual bool shouldRotate()
     {
-        return true;
+        return true ;
     }
     public void SendNetUpdate()
     {
@@ -1807,16 +1815,21 @@ public class Pawn : DamagebleObject
         {
 
             CurWeapon.PutAway();
+            player.WeaponChanged();
         }
     }
 
     public virtual void StartFire()
     {
+        ActualFire();
+    }
+    private void ActualFire()
+    {
         if (CurWeapon != null)
         {
             CurWeapon.StartFire();
         }
-		isSpawnImortality= false;
+        isSpawnImortality = false;
     }
     public virtual void StopFire()
     {
@@ -1863,7 +1876,7 @@ public class Pawn : DamagebleObject
 		
 	}
 	public virtual bool CanUseGrenade(){
-        return characterState != CharacterState.Sprinting && characterState != CharacterState.Jumping && ivnMan.HasGrenade();
+        return characterState != CharacterState.Sprinting && characterState != CharacterState.Jumping && ivnMan.HasGrenade()&&CurWeapon.slotType!=SLOTTYPE.MELEE;
 	}
 	public virtual void ThrowGrenade(){
 		if(CurWeapon.slotType==SLOTTYPE.GRENADE){
@@ -1873,20 +1886,22 @@ public class Pawn : DamagebleObject
 	}
     public bool CanChange()
     {
-        return characterState != CharacterState.Sprinting;
+        return characterState != CharacterState.Sprinting && CurWeapon.slotType != SLOTTYPE.MELEE && CurWeapon.slotType != SLOTTYPE.GRENADE;
     }
-    public void PrevWeapon()
+    public virtual void PrevWeapon()
     {
         if (CanChange())
         {
             ivnMan.PrevWeapon();
+            player.WeaponChanged();
         }
     }
-    public void NextWeapon()
+    public virtual void NextWeapon()
     {
         if (CanChange())
         {
             ivnMan.NextWeapon();
+            player.WeaponChanged();
         }
     }
     public void AfterShoot()
@@ -1966,10 +1981,14 @@ public class Pawn : DamagebleObject
 
     public void ChangeWeapon(int weaponIndex)
     {
-        ivnMan.ChangeWeapon(weaponIndex);
+        if (CanChange())
+        {
+            ivnMan.ChangeWeapon(weaponIndex);
+        }
+       
     }
 
-    public void SwitchShoulder()
+    public virtual void SwitchShoulder()
     {
         cameraController.SwitchShoulder();
     }
@@ -2032,7 +2051,7 @@ public class Pawn : DamagebleObject
     }
     protected Quaternion desiredRotation;
     float xAngle = 0;
-    float yAngle = 0;
+    protected float yAngle = 0;
     public static float fromOldRotationMod =5.0f;
     public virtual void UpdateRotation(float xDeltaAngle,float yDeltaAngle)
     {
@@ -2061,7 +2080,10 @@ public class Pawn : DamagebleObject
         desiredRotation = Quaternion.Euler(xAngle, yAngle,0.0f);
 
     }
-
+    public void ResetDesireRotation(Pawn passenger)
+    {
+        desiredRotation = passenger.desiredRotation;
+    }
     public virtual Quaternion GetDesireRotation()
     {
         return desiredRotation;
@@ -2098,8 +2120,8 @@ public class Pawn : DamagebleObject
             }
             else
             {
-               
-                if (cameraController.enabled == false)
+
+                if (cameraController!=null&&cameraController.enabled == false)
                 {
                     aimRotation = myTransform.position + myTransform.forward * 50;
 
@@ -2116,7 +2138,7 @@ public class Pawn : DamagebleObject
 				Transform localTarget=null;
                 foreach (RaycastHit hitInfo in Physics.RaycastAll(centerRay, aimRange,AIM_MASK))
                 {
-                    if (hitInfo.collider == myCollider || hitInfo.transform.IsChildOf(myTransform) || hitInfo.collider.isTrigger)
+                    if (hitInfo.collider == myCollider || hitInfo.transform.root.IsChildOf(myTransform) || hitInfo.collider.isTrigger)
                     {
                         continue;
                     }
@@ -2347,7 +2369,7 @@ public class Pawn : DamagebleObject
         }
 		 ResetMiniMapShowTimer();
     }
-    public void Reload()
+    public virtual void Reload()
     {
 	
         if (CurWeapon != null&&characterState != CharacterState.Sprinting)
@@ -2415,7 +2437,7 @@ public class Pawn : DamagebleObject
         {
             UnEquipWeapon();
             ivnMan.TakeMelee();
-            StartFire();
+            ActualFire();
         } 
     }
     public void PutMeleeAway()
@@ -3514,38 +3536,28 @@ public class Pawn : DamagebleObject
         {
             _rb.isKinematic = false;
             _rb.detectCollisions = true;
-            cameraController.enabled = true;
-            cameraController.Reset();
+            
             GetComponent<ThirdPersonController>().enabled = true;
 
         }
-        isActive = true;
-        for (int i = 0; i < myTransform.childCount; i++)
+       
+       /* for (int i = 0; i < myTransform.childCount; i++)
         {
             myTransform.GetChild(i).gameObject.SetActive(true);
-        }
+        }*/
         if (foxView.isMine)
         {
             foxView.Activate();
         }
-      
+        transport = null;
+        myTransform.parent = null;
+        
     }
 
     public void RemoteActivate()
     {
         //Debug.Log ("RPCActivate");
-        if (cameraController != null)
-        {
-            cameraController.enabled = true;
-
-            GetComponent<ThirdPersonController>().enabled = true;
-
-        }
-        isActive = true;
-        for (int i = 0; i < myTransform.childCount; i++)
-        {
-            myTransform.GetChild(i).gameObject.SetActive(true);
-        }
+        Activate();
     }
     public void DeActivate()
     {
@@ -3554,36 +3566,31 @@ public class Pawn : DamagebleObject
             _rb.isKinematic = true;
 
             _rb.detectCollisions = false;
-            cameraController.enabled = false;
+           
 
             GetComponent<ThirdPersonController>().enabled = false;
         }
-        isActive = false;
-        for (int i = 0; i < myTransform.childCount; i++)
+      
+        /*for (int i = 0; i < myTransform.childCount; i++)
         {
             myTransform.GetChild(i).gameObject.SetActive(false);
-        }
+        }*/
         if (foxView.isMine)
         {
             foxView.DeActivate();
         }
-
+        transport = player.GetRobot();
+       
+        myTransform.parent = transport.back;
+        myTransform.localPosition = Vector3.zero;
+        myTransform.localRotation = Quaternion.identity;
+        characterState = CharacterState.Mount;
     }
 
     public void RemoteDeActivate()
     {
         //Debug.Log ("RPCDeActivate");
-        if (cameraController != null)
-        {
-            cameraController.enabled = false;
-
-            GetComponent<ThirdPersonController>().enabled = false;
-        }
-        isActive = false;
-        for (int i = 0; i < myTransform.childCount; i++)
-        {
-            myTransform.GetChild(i).gameObject.SetActive(false);
-        }
+        DeActivate();
 
     }
 

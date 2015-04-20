@@ -1443,7 +1443,7 @@ public class BaseWeapon : DestroyableNetworkObject {
             foxView.PrepareShoot(startPoint, startRotation, power, range, weaponMinRange, viewId, projScript.projId);
 		}
 
-
+        projScript.fromGun = true;
         projScript.damage = GetDamage(damageAmount, power);
       
 		projScript.owner = owner.gameObject;
@@ -1474,6 +1474,7 @@ public class BaseWeapon : DestroyableNetworkObject {
 			if (rifleParticleController != null) {
 				rifleParticleController.CreateShootFlame ();
 			}
+         
             proj.projId = projId;
 			proj.damage.Damage+=power;
 			proj.range=range;
@@ -1504,7 +1505,7 @@ public class BaseWeapon : DestroyableNetworkObject {
 		GameObject proj=projectilePrefab.Spawn(startPoint,startRotation);
 		BaseProjectile projScript = proj.GetComponent<BaseProjectile>();
         projScript.lateTime = timeShoot;
-
+        projScript.fromGun = true;
         projScript.damage =new BaseDamage(damageAmount) ;
 		projScript.owner = owner.gameObject;
 		return projScript;

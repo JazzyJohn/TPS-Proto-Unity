@@ -176,7 +176,9 @@ public class LevelingManager : MonoBehaviour, LocalPlayerListener,GameListener{
             return false ;
         }
 		
+
 		int exp = expDictionary[cause].amount;
+        myPlayer.AddRating(exp);
         exp = Mathf.RoundToInt(exp * PremiumManager.GetMultiplierExp(cause, myPlayer.team));
         if (exp == 0)
         {

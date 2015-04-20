@@ -9,73 +9,84 @@ public class RobotPawn : Pawn {
 	public bool isPilotIn = false;
 	public bool isMutual;
 	public bool isEmpty =true;
+    private Pawn passenger;
 
-
+    public Transform back;
     public override void StartPawn()
     {
-        Debug.Log("Start PAwn");
-      
-        _canWallRun = canWallRun;
-        //проигрываем звук респавна
-        sControl.playClip(spawnSound);
-        isActive = true;
-        if (effectController != null && effectController.IsSpawn() != null)
-        {
-          //  emitter.Emit();//запускаем эмиттер
-            isSpawn = true;//отключаем движения и повреждения
-        }
-
-       
-        cameraController = GetComponent<PlayerCamera>();
-    
-        mainAi = GetComponent<AIBase>();
-
-        isAi = mainAi != null;
-        if (isAi)
-        {
-            if (foxView.isMine)
-            {
-                mainAi.StartAI();
-
-              
-
-            }
-        }
-        GetSize();
-
-        correctPlayerPos = transform.position;
-
-        ivnMan.Init();
-        centerOffset = capsule.bounds.center - myTransform.position;
-        headOffset = centerOffset;
-        headOffset.y = capsule.bounds.max.y - myTransform.position.y;
-
-        distToGround = capsule.height / 2 - capsule.center.y;
-
-        health = charMan.GetIntChar(CharacteristicList.MAXHEALTH);
-       
-
-        if (isAi)
-        {
-            ivnMan.Init();
-            AfterSpawnAction();
-        }
-        //Debug.Log (distToGround);
+        base.StartPawn();
        
     }
 
+    public override void StartFire()
+    {
+        passenger.StartFire();
+    }
+    public override void StopFire()
+    {
+        passenger.StopFire();
+    }
+    public override void NextWeapon(){
+        passenger.NextWeapon();
+    }
+    public override void PrevWeapon()
+    {
+        passenger.PrevWeapon();
+    }
+
+    public override void StartPumping()
+    {
+        passenger.StartPumping();
+    }
+    public override void StopPumping()
+    {
+        passenger.StopPumping();
+    }
+
+    public override void StopGrenadeThrow()
+    {
+        passenger.StopGrenadeThrow();
+    }
+
+    public override void StartGrenadeThrow()
+    {
+        passenger.StartGrenadeThrow();
+
+
+    }
+    public override void Reload()
+    {
+        passenger.Reload();
+    }
+    public override void ThrowGrenade()
+    {
+        passenger.ThrowGrenade();
+    }
+    public override void Init()
+    {
+        charMan.AddList(player.GetCharacteristick());
+        
+
+    }
+  
     public void AnotherEnter()
     {
         Destroy(GetComponent<ThirdPersonController>());
-        Destroy(GetComponent<PlayerCamera>());
+ 
         Destroy(GetComponent<ShowOnGuiComponent>());
         GetComponent<Rigidbody>().isKinematic = true;
     }
-    public void MySelfEnter()
+    public void MySelfEnter(Pawn passenger)
     {
+        this.passenger = passenger;
+        passenger.AddBuff((int)CharacteristicList.MAXHEALTH, (int)health);
+        ResetDesireRotation(passenger);
         Destroy(GetComponent<ShowOnGuiComponent>());    
     }
-
+    public override void SwitchShoulder()
+    {
+        passenger.SwitchShoulder();
+    }
 	protected void Awake(){
 		base.Awake();
 		if(isMutual){
@@ -93,25 +104,51 @@ public class RobotPawn : Pawn {
 	}
 	//Player get in robot
 	public new void  Activate(){
-		((RobotAnimationManager)animator).Activation();
+		
 		_rb.constraints = RigidbodyConstraints.FreezeRotation;
+        _rb.useGravity = false;
 		isPilotIn = true;
         foxView.InPilotChange(isPilotIn);
 		isActive = false;
 		characterState=CharacterState.Activate;
-        GetComponent<PlayerCamera>().enabled = true;
-        GetComponent<PlayerCamera>().Reset();
+    
 		StartCoroutine(WaitBeforeActive(ActivationTime));
 		
 	}
 	public override void Damage(BaseDamage damage,GameObject killer){
-		float reduce =  charMan.GetFloatChar(CharacteristicList.JUGGER_DAMAGE_REDUCE);
-		if(reduce!=0){
-				damage.Damage-= damage.Damage*reduce;
-		}
+        if (passenger != null)
+        {
+            passenger.Damage(damage, killer);
+        }
+        else
+        {
+            base.Damage(damage, killer);
+        }
 
-		base.Damage(damage, killer);
+		
 	}
+
+    public override void UpdateRotation(float xDeltaAngle, float yDeltaAngle)
+    {
+
+
+        yAngle += yDeltaAngle * fromOldRotationMod;
+        if (yAngle > 360)
+        {
+            yAngle -= 360;
+        }
+        if (yAngle < -360)
+        {
+            yAngle += 360;
+        }
+
+
+
+
+        desiredRotation = Quaternion.Euler(0, yAngle, 0.0f);
+        passenger.UpdateRotation(xDeltaAngle, yDeltaAngle); 
+    }
+
 	public IEnumerator WaitBeforeActive(float waitTime) {
 
         if (isPilotIn)
@@ -119,8 +156,7 @@ public class RobotPawn : Pawn {
 
 			yield return new WaitForSeconds(waitTime);
 			GetComponent<ThirdPersonController>().enabled = true;
-			ivnMan.GenerateWeaponStart();
-			_rb.isKinematic = false;
+		    _rb.isKinematic = false;
 			isActive = true;
 			_rb.detectCollisions = true;
 			for (int i =0; i<myTransform.childCount; i++) {
@@ -137,13 +173,13 @@ public class RobotPawn : Pawn {
         foxView.InPilotChange(isPilotIn);
 		((RobotAnimationManager)animator).DeActivation();
 		GetComponent<ThirdPersonController>().enabled = false;
-        GetComponent<PlayerCamera>().enabled = false;
-		ivnMan.TakeWeaponAway();
+      
 		StopMachine ();
 		_rb.constraints = RigidbodyConstraints.FreezeAll;
 		_rb.velocity = Vector3.zero;
 		//Debug.Log ("ROBOT");
 	}
+   
 
 	public void OnDestoy(){
 		if(isMutual){
@@ -187,7 +223,9 @@ public class RobotPawn : Pawn {
         return isPilotIn;
     }
 	public override void ChangeDefaultWeapon(int myId){
+        ivnMan.AddStandartMelee();
 
+        ivnMan.GenerateWeaponStart();
 	}
     public override void NetUpdate(PawnModel pawn)
     {
@@ -204,6 +242,7 @@ public class RobotPawn : Pawn {
         lastNetUpdate = Time.time;
         replicatedVelocity = replicatedVelocity / (oldTime - lastNetUpdate);
         RestartLocalVisibilite();
+        isActive = pawn.active;
        
     }
 

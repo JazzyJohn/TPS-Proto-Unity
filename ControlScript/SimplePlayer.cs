@@ -14,6 +14,17 @@ public class SimplePlayer : Player {
 		}
 			
 	}
+    public override String GetNewBot()
+    {
+        if (team == 1)
+        {
+            return PlayerManager.instance.avaibleBots[0];
+        }
+        else
+        {
+            return PlayerManager.instance.avaibleBots[1];
+        }
+    }
     public override void PawnKill(Pawn deadPawn, Player victim, Vector3 position, KillInfo killinfo)
     {
         if (!playerView.isMine)

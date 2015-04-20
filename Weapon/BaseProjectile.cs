@@ -76,6 +76,8 @@ public class BaseProjectile : MonoBehaviour
     public GameObject owner;
 	
 	public BaseWeapon shoota;
+
+    public bool fromGun= true;
 	[HideInInspector]
     public Transform target;
     public Vector3 targetOffset; 
@@ -205,7 +207,10 @@ public class BaseProjectile : MonoBehaviour
     }
    public void Init(){
         shouldInit = false;
-        shoota = owner.GetComponent<Pawn>().CurWeapon;
+        if (fromGun)
+        {
+            shoota = owner.GetComponent<Pawn>().CurWeapon;
+        }
 //        Debug.Log(owner.GetComponent<Pawn>().CurWeapon);
 		switch (attraction)
         {
@@ -424,14 +429,17 @@ public class BaseProjectile : MonoBehaviour
     {
 
         obj.Damage(inDamage, owner);
-		shoota.HitWithProjectile();
+        if (fromGun)
+        {
+            shoota.HitWithProjectile();
+        }
         //Debug.Log ("HADISH INTO SOME PLAYER! " + hit.transform.gameObject.name);
         //Destroy (gameObject, 0.1f);
     }
 	
     public void onBulletHit(RaycastHit hit)
     {
-        if (owner == hit.transform.root.gameObject || used)
+        if (owner.transform.root == hit.transform.root || used)
         {
             return;
         }

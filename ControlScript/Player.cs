@@ -10,6 +10,9 @@ public enum PawnType{PAWN,BOT};
 //BIT MASK 
 public enum GameClassEnum{ENGINEER,ASSAULT,SCOUT,MEDIC,ANY,ROBOTHEAVY,ROBOTMEDIUM,ROBOTLIGHT,ANYROBOT};
 
+
+
+
 public class Player : MonoBehaviour {
     private static Player _localPlayer;
 	public static Player localPlayer {
@@ -32,7 +35,12 @@ public class Player : MonoBehaviour {
 
         
     }
+    public ActivateReward selectedReward;
 
+    public ActivateReward[] rewards;
+
+    public int rewardRating;
+	
 	public LayerMask robotLayer =1 ;
 
 	public List<string> friendsInfo = new List<string>();
@@ -72,12 +80,14 @@ public class Player : MonoBehaviour {
 	public string UID;
 
 	public Texture2D vkAvavtar;
-	
+
+  
 	 // Declare your serializable data.
 	[System.Serializable]
 	public class PlayerScore
 		{
 		public int Kill =0;
+        public int rating = 0;
 		public int Death=0;
 		public int Assist=0;
 		public int RobotKill=0;
@@ -85,6 +95,7 @@ public class Player : MonoBehaviour {
         public int WaveCnt=0;
 		
 		public void Reset(){
+            rating = 0;
 			Assist = 0;
 			AIKill = 0;
 			Death = 0;
@@ -253,6 +264,12 @@ public class Player : MonoBehaviour {
          
           
         }
+         List<Player>  players = PlayerManager.instance.FindAllPlayer();
+         foreach (Player player in players)
+         {
+             player.Score.Reset();
+         }
+       
 	}
 	public void Respawn(Pawn newPawn){
        
@@ -261,6 +278,20 @@ public class Player : MonoBehaviour {
 	public virtual Pawn GetNewPawn(){
 			return PlayerManager.instance.SpawmPlayer(PlayerManager.instance.pawnName[selected],team,GetBuffs());
 	}
+    public virtual String GetNewBot()
+    {
+        return PlayerManager.instance.avaibleBots[Choice._Robot];
+    }
+    public virtual void SpawnBot(Vector3 position, Quaternion rotation){
+        robotPawn = (RobotPawn)PlayerManager.instance.SpawmBot(GetNewBot(), position, rotation, new int[0]);
+        robotPawn.AfterAwake();
+        AfterSpawnSetting(robotPawn, new int[0]);
+        robotPawn.ChangeDefaultWeapon(Choice._Player);
+  
+        currentPawn.SpeedInit();
+      
+        NetworkController.Instance.EndPawnSpawnRequest();
+    }
 	void OnDestroy(){
 		if (playerView.isMine)
         {
@@ -303,11 +334,7 @@ public class Player : MonoBehaviour {
                 PlayerMainGui.instance.ActivateStim(activeSteampacks);
                 activeSteampacks.Clear();
                 currentPawn.ChangeDefaultWeapon(Choice._Player);
-                if (GameRule.instance.CanUseRobot)
-                {
-                    prefabBot = PlayerManager.instance.avaibleBots[selectedBot];
-                    prefabGhostBot = PlayerManager.instance.ghostsBots[selectedBot];
-                }
+               
                 currentPawn.SpeedInit();
                 NetworkController.Instance.EndPawnSpawnRequest();
 			}
@@ -316,76 +343,11 @@ public class Player : MonoBehaviour {
 		}else{
 			Ray centerofScreen =Camera.main.ViewportPointToRay(new Vector3(0.5f, 0.5f, 0f));
 			RaycastHit hitinfo;			
-			if(CanUseJugger()&&robotPawn==null){
-				robotTimer+=Time.deltaTime;
-				
-				if(robotTimer>robotTime&&canSpamBot){
-                    if (!robotAnnonce)
-                    {
-                        robotAnnonce = true;
-                        PlayerMainGui.instance.Annonce(AnnonceType.JUGGERREADY);
-                    }
-					if(InputManager.instance.GetButton("SpawnBot")){
-						
-						if(Physics.Raycast(centerofScreen, out hitinfo,50.0f,robotLayer)){
-							if(ghostBot==null){
-								GameObject ghostGameObj = Instantiate(prefabGhostBot,hitinfo.point,currentPawn.transform.rotation) as GameObject;
-								ghostBot =ghostGameObj.GetComponent<GhostObject>();
-							}
-							ghostBot.myTransform.position = hitinfo.point;
-							ghostBot.myTransform.rotation= Quaternion.LookRotation(-currentPawn.transform.forward);
-							
-							if(Physics.SphereCast(hitinfo.point+Vector3.up*ghostBot.size,ghostBot.size,Vector3.up,out hitinfo,100.0f)){
-								//Debug.Log (hitinfo.collider);
-								if(canSpawnBot){
-									ghostBot.MakeBad();
-									//Debug.Log (ghostBot.myRenderer.sharedMaterial.color);
-								}
-								canSpawnBot=false;
-							}else{
-								if(!canSpawnBot){
-									
-									ghostBot.MakeNormal();
-									//Debug.Log (ghostBot.myRenderer.sharedMaterial.color);
-								}
-								canSpawnBot=true;
-							}
-						}
-						
-					}
-                    if (InputManager.instance.GetButtonUp("SpawnBot"))
-                    {
-						if(ghostBot!=null&&canSpawnBot){
-							Vector3 spamPoint =ghostBot.transform.position;
-							spamPoint.y+= 30;
-							robotPawn =(RobotPawn)PlayerManager.instance.SpawmBot(prefabBot,spamPoint,ghostBot.transform.rotation,activeSteampacks.ToArray());
-							robotPawn.ChangeDefaultWeapon(selectedBot);
-							//Debug.Log("robot spawn"+robotPawn);
-                            AfterSpawnSetting(robotPawn, activeSteampacks.ToArray());
-
-						
-							canSpawnBot=false;							
-						}
-						//Debug.Log("destory chost");
-						Destroy(ghostBot.gameObject);	
-					}
-
-				}
-			}
+			
 				
 				if(inBot){
 					useTarget= null;
-                    if (InputManager.instance.GetButtonDown("Use"))
-                    {
-						if(!robotPawn.isMutual){
-							ExitBot();
-                        }
-                        else
-                        {
-                            DestroyBot();
-                        }
-					}
-					
+                  					
 				}else {
 					
 						if(!inBot&&robotPawn!=null){
@@ -407,10 +369,13 @@ public class Player : MonoBehaviour {
 
 							}
 						
-							RobotPawn robot = currentPawn.curLookTarget.GetComponent<RobotPawn>();
-                            if (!inBot && robot != null && robot.isEmpty && robot.isMutual && (currentPawn.myTransform.position - robot.myTransform.position).sqrMagnitude < SQUERED_RADIUS_OF_ACTION * 2.0)
+							RobotPawn robot = currentPawn.curLookTarget.root.GetComponent<RobotPawn>();
+                            if (!inBot && robot != null && ((robot.isEmpty && robot.isMutual) || robotPawn==robot) && (currentPawn.myTransform.position - robot.myTransform.position).sqrMagnitude < SQUERED_RADIUS_OF_ACTION * 2.0)
                             {
-								EnterBot(robot);
+                                if (robot.isMutual)
+                                    EnterBot(robot);
+                                else
+                                    EnterBot();
 							
 							}
 						}
@@ -458,15 +423,8 @@ public class Player : MonoBehaviour {
 					currentPawn.ChangeWeapon (1);
 				}
 			}
-             if (InputManager.instance.GetButtonDown("Weapon3"))
-             {
-				
-				if(inBot&&robotPawn!=null){
-					robotPawn.ChangeWeapon (2);
-				}else{
-					currentPawn.ChangeWeapon (2);
-				}
-			}
+
+          
 			  if (InputManager.instance.GetButtonDown("Mark"))
              {
 				
@@ -492,6 +450,34 @@ public class Player : MonoBehaviour {
                     // StatisticHandler.SendPlayerKillbyNPC(UID, PlayerName);
                  }
 			}
+            for (int i = 0; i < rewards.Length; i++)
+            {
+                if (InputManager.instance.GetButtonDown("Reward" + (i + 1)) && rewards[i].State()!=RewardState.NO_ACTIVE)
+                {
+
+                    if (selectedReward == rewards[i])
+                    {
+                        selectedReward.Activate(currentPawn);
+                        if (i == rewards.Length-1)
+                        {
+                            ResetRewards();
+                        }
+                    }
+                    else
+                    {
+                        if (selectedReward != null)
+                        {
+                            selectedReward.Deselect(currentPawn);
+                        }
+                        selectedReward = rewards[i];
+                        selectedReward.Select(currentPawn);
+
+                    }
+                }
+            }
+
+
+
     }
     public void DeathUpdate()
     {
@@ -505,23 +491,43 @@ public class Player : MonoBehaviour {
 		ItemManager.instance.SendChargeData();
     }
 	public void RobotDead(Player Killer){
-		robotTimer=0;
-        robotAnnonce = false;
-		if (inBot) {
-				inBot = false;
-           
-				currentPawn.Activate ();
-				currentPawn.rigidbody.MovePosition (robotPawn.playerExitPositon.position);
-				currentPawn.myTransform.rotation = robotPawn.playerExitPositon.rotation;
-				currentPawn.transform.parent = null;
-		}
+		
 	
 	}
 	public bool CanUseJugger(){
         return GameRule.instance.CanUseRobot;
     }
-	
-	
+
+    public void AddRating(int rating)
+    {
+        Score.rating += rating;
+        rewardRating += rating;
+        CheckReward();
+    }
+
+    public void CheckReward()
+    {
+        foreach (ActivateReward reward in rewards)
+        {
+            reward.TryOpen(Score.rating);
+        }
+    }
+    public void WeaponChanged()
+    {
+        if (selectedReward != null)
+        {
+            selectedReward.Deselect(currentPawn);
+            selectedReward = null;
+        }
+    }
+    public void ResetRewards()
+    {
+        rewardRating = 0;
+        foreach (ActivateReward reward in rewards)
+        {
+            reward.Reset();
+        }
+    }
 	public void PawnDead(Player Killer,Pawn killerPawn,KillInfo killinfo ){
 
 
@@ -737,7 +743,8 @@ public class Player : MonoBehaviour {
         }
 		inBot=true;
 		currentPawn.DeActivate();
-		currentPawn.transform.parent = robotPawn.transform;
+        robotPawn.MySelfEnter(currentPawn);
+
 		robotPawn.Activate ();
 	}
 	public void EnterBot(RobotPawn robot){
@@ -750,9 +757,9 @@ public class Player : MonoBehaviour {
 	public void EnterBotSuccess(RobotPawn robot){
 		inBot=true;
 		robotPawn=robot;
-        robotPawn.MySelfEnter();
+        robotPawn.MySelfEnter(currentPawn);
 		currentPawn.DeActivate();
-		currentPawn.transform.parent = robotPawn.transform;
+		
 		EventHolder.instance.FireEvent(typeof(LocalPlayerListener), "EventJuggerTake", this);
 		robotPawn.Activate ();
 	}
@@ -760,8 +767,7 @@ public class Player : MonoBehaviour {
 		//robotTimer=robotTime;
 		inBot= false;
 		currentPawn.myTransform.parent = null;
-		currentPawn.rigidbody.MovePosition (robotPawn.playerExitPositon.position);
-		currentPawn.myTransform.rotation = robotPawn.playerExitPositon.rotation;
+	
 		currentPawn.Activate ();
 		robotPawn.DeActivate();
 		
@@ -770,8 +776,6 @@ public class Player : MonoBehaviour {
     {
         inBot = false;
         currentPawn.myTransform.parent = null;
-        currentPawn.rigidbody.MovePosition(robotPawn.playerExitPositon.position);
-        currentPawn.myTransform.rotation = robotPawn.playerExitPositon.rotation;
         currentPawn.Activate();
         robotPawn.RequestKillMe();
     }
@@ -783,13 +787,9 @@ public class Player : MonoBehaviour {
 	public PlayerMainGui.PlayerStats GetPlayerStats(){
 		stats.robotTime = GetRobotTimer();
 		Pawn curPawn = null;
-		if (inBot) {
-			curPawn = robotPawn;
-		} else {
+		
+	    curPawn= currentPawn;
 
-			curPawn= currentPawn;
-
-		}
 		if (curPawn != null) {
 			stats.health = curPawn.health;
 			SkillBehaviour skill = currentPawn.GetMainSkill();
@@ -806,7 +806,13 @@ public class Player : MonoBehaviour {
                 stats.pumpCoef = curPawn.CurWeapon.PumpCoef();
 				
 			}
-            stats.jetPackCharge = curPawn.GetJetPackCharges() / curPawn.GetMaxJetPack() ;
+            stats.rewards = new RewardState[rewards.Length];
+            for (int i = 0; i < rewards.Length; i++)
+            {
+                stats.rewards[i] = rewards[i].State();
+            }
+            stats.rating = (float)rewardRating / (float)rewards[rewards.Length - 1].cost;
+                stats.jetPackCharge = curPawn.GetJetPackCharges() / curPawn.GetMaxJetPack();
 		}
 
 		
@@ -842,7 +848,8 @@ public class Player : MonoBehaviour {
 	public Pawn GetCurrentPawn(){
 		return currentPawn;
 	}
-	public Pawn GetRobot(){
+    public RobotPawn GetRobot()
+    {
 		return robotPawn;
 	}
 

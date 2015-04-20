@@ -1216,8 +1216,18 @@ public class NetworkController : MonoBehaviour
 
 
     }
+    public void MakePawnNotActive()
+    {
+        PawnModel pawn =(PawnModel) pawnSpawnData.GetClass("pawn");
+        pawn.active = false;
+        pawnSpawnData.PutClass("pawn", pawn);
+    }
     public void EndPawnSpawnRequest()
     {
+        if (isSingle)
+        {
+            return;
+        }
         if (pawnSpawnData != null)
         {
             SFSArray sendWeapon = new SFSArray();

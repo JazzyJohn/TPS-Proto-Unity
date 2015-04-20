@@ -140,6 +140,8 @@ public class SimplePawn : Pawn
                     JumpEnd(nextState);
                 }
                 break;
+            case CharacterState.Mount:
+                break;
             default:
                 characterState = nextState;
                 break;

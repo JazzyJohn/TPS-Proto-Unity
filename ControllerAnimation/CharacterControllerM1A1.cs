@@ -25,7 +25,7 @@ public class CharacterControllerM1A1 : MonoBehaviour
 
     private Animator animator;
 
-    [HideInInspector] public Pawn character;
+    public Pawn character;
     private Rigidbody characterRigidbody;
 
     private float IsRU;

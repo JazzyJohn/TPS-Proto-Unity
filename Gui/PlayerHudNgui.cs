@@ -134,7 +134,9 @@ public class PlayerHudNgui : MonoBehaviour {
 	
 	public Transform goldPrefab;
 
+    public ActivateRewardIcon[] rewardsIcon;
 
+    public UIProgressBar rating;
 
    
 	
@@ -244,8 +246,11 @@ public class PlayerHudNgui : MonoBehaviour {
                      if (BlueTeamScore) BlueTeamScore.text = gamestats.score[1].ToString();
                     break;
             }
-           
-
+            for (int i = 0; i < Stats.rewards.Length;i++ )
+            {
+                rewardsIcon[i].Show(Stats.rewards[i]);
+            }
+            rating.value = Stats.rating;
             crosshair.UpdateCrosshair(Stats);
         }
        
@@ -409,5 +414,11 @@ public class PlayerHudNgui : MonoBehaviour {
         {
             Destroy(child.gameObject);
         }
+    }
+
+    public  void PlayAnonce(AudioClip sound)
+    {
+        annoncePlayer.clip = sound;
+        annoncePlayer.Play();
     }
 }

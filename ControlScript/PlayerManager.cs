@@ -11,7 +11,7 @@ public class PlayerManager : MonoBehaviour {
 	
 	public List<Player> cachedPlayers;
 
-	public RobotPawn[] avaibleBots;
+    public String[] avaibleBots;
 
 	public GameObject[] ghostsBots;
 
@@ -74,11 +74,11 @@ public class PlayerManager : MonoBehaviour {
     }
 	
 
-    public Pawn SpawmBot(Pawn newPalyerClass, Vector3 position,Quaternion rotation ,int[] stims) {
+    public Pawn SpawmBot(String newPalyerClass, Vector3 position,Quaternion rotation ,int[] stims) {
 		Pawn localPlayer;
 
 
-        localPlayer = NetworkController.Instance.BeginPawnSpawnRequest(newPalyerClass.name, position, rotation, false, stims, false).GetComponent<Pawn>();
+        localPlayer = NetworkController.Instance.BeginPawnSpawnRequest(newPalyerClass, position, rotation, false, stims, false).GetComponent<Pawn>();
 		
 		return localPlayer;
     }

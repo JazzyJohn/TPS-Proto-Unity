@@ -96,7 +96,8 @@ public class PlayerMainGui : MonoBehaviour {
 		public float jetPackCharge= 0;
         public float pumpCoef = 0;
 		public SkillBehaviour skill;
-		
+        public RewardState[] rewards;
+        public float rating;
 	       
 	}
 	public class LevelStats{
@@ -876,6 +877,11 @@ public class PlayerMainGui : MonoBehaviour {
 	public void StopKillCam(){
 		ChageState(GUIState.Respawn);
 	}
+
+    public void PlayAnonce(AudioClip sound)
+    {
+        hud.PlayAnonce(sound);
+    }
 }
 
 public static class GUIHelper{

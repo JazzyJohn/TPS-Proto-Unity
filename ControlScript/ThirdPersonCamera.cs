@@ -274,8 +274,8 @@ public class ThirdPersonCamera : PlayerCamera
             }
         }
 
-        Vector3 velocity = Vector3.zero;
-        if (timeLerpPos <= 1.0f)
+
+        if (timeLerpPos <= 1.0f && startedPos.magnitude!=0)
         {
             timeLerpPos += Time.deltaTime * lerpSpeed;
             neededPos = resultcameraPos + GetShaker();
@@ -283,6 +283,7 @@ public class ThirdPersonCamera : PlayerCamera
         }
         else
         {
+            startedPos = cameraTransform.position;
             cameraTransform.position = resultcameraPos + GetShaker();
         }
      

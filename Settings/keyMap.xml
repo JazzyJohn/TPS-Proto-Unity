@@ -24,10 +24,7 @@
 		<name>Weapon2</name>
 		<default>Alpha2</default>
 	</keys>
-	<keys>
-		<name>Weapon3</name>
-		<default>Alpha3</default>
-	</keys>
+	
 	<keys>
 		<name>Suicide</name>
 		<default>K</default>
@@ -98,4 +95,16 @@
     <name>Mark</name>
     <default>F</default>
   </keys>
+<keys>
+		<name>Reward1</name>
+		<default>Alpha3</default>
+	</keys>
+	<keys>
+		<name>Reward2</name>
+		<default>Alpha4</default>
+	</keys>
+	<keys>
+		<name>Reward3</name>
+		<default>Alpha5</default>
+	</keys>
 </input>

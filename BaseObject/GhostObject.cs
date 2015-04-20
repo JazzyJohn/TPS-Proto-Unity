@@ -4,6 +4,8 @@ using System.Collections;
 public class GhostObject : MonoBehaviour {
 	
 	public Transform myTransform;
+
+    public LayerMask blockLayer;
 	
 	public Color normalColor;
 	 
@@ -19,13 +21,13 @@ public class GhostObject : MonoBehaviour {
 	}
 	public void MakeBad(){
 		foreach (Renderer lRendered in myRenderers) {
-			lRendered.material.SetColor("_TintColor",	badColor);
+			lRendered.material.SetColor("_MainColor",	badColor);
 		}
 
 	}
 	public void MakeNormal(){
 		foreach (Renderer lRendered in myRenderers) {
-			lRendered.material.SetColor("_TintColor",	normalColor);
+            lRendered.material.SetColor("_MainColor", normalColor);
 		}
 		
 	}
