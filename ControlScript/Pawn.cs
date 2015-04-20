@@ -879,7 +879,7 @@ public class Pawn : DamagebleObject
 		return 	!isSpawnImortality;
 	}
 
-    public void Heal(float damage, GameObject Healler)
+    public virtual void Heal(float damage, GameObject Healler)
     {
         if (isDead)
         {
@@ -1202,6 +1202,11 @@ public class Pawn : DamagebleObject
             }
             if (allPawn[i] == this)
             {
+                continue;
+            }
+            if (allPawn[i] == transport)
+            {
+                allPawn[i].LocalPlayerSeeMe(0, team, false);
                 continue;
             }
             Vector3 distance = (allPawn[i].myTransform.position - myTransform.position);
@@ -2341,7 +2346,7 @@ public class Pawn : DamagebleObject
         return ivnMan.GetArmor();
     }
 
-    public void AddAmmo(float p)
+    public virtual void AddAmmo(float p)
     {
         ivnMan.AddAmmoAll(p);
     }

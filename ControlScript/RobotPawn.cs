@@ -68,7 +68,15 @@ public class RobotPawn : Pawn {
         
 
     }
-  
+    public override void AddAmmo(float p)
+    {
+        passenger.AddAmmo(p);
+    }
+    public override void Heal(float damage, GameObject Healler)
+    {
+        passenger.Heal(damage, Healler);
+    }
+
     public void AnotherEnter()
     {
         Destroy(GetComponent<ThirdPersonController>());
