@@ -12,7 +12,7 @@ public class DispenserAmmo : Building
         Pawn pawn = other.GetComponent<Pawn>();
         if (pawn!=null&&pawn.foxView.isMine&&!pawn.isAi)
         {
-            Debug.Log("Other" + pawn);
+            
             pawn.AddAmmo(ammoRate * Time.fixedDeltaTime);
         }
     }

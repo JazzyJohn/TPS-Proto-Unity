@@ -6,7 +6,7 @@ using System.Collections.Generic;
 public static class MinimapManager{
 
 	public static List<MinimapObject> allMinimapObject = new List<MinimapObject>();
-	
+
 	public enum MODE{
 		NONE,
 		TEAMMATE,
@@ -44,14 +44,14 @@ public static class MinimapManager{
 		else
 		{
 			foreach(MinimapObject obj in allMinimapObject)
-			{					
+			{
 				obj.ThisIndex = 0;
 				obj.Item.type = obj.ThisIndex;
 			}
 		}
 	}
 
-	public static UIMiniMapOnGUI MiniMap; 
+	public static UIMiniMapOnGUI MiniMap;
 
 	public static List<string> IndexItem = new List<string>();
 
@@ -70,11 +70,11 @@ public class MinimapObject : MonoBehaviour {
 	Player player;
 
 	public TYPE type;
-	
+
 	public Pawn pawn;
 
 	public NJGMapItem Item;
-	
+
 	public int team;
 
 	Transform myTransform;
@@ -94,13 +94,16 @@ public class MinimapObject : MonoBehaviour {
 		switch(type){
 		case TYPE.PAWN:
 			pawn= GetComponent<Pawn>();
-			break;	
+			break;
 		}
 	}
 
 	public void Start()
 	{
-		if(!Transform.FindObjectOfType<UIMiniMapOnGUI>())
+		if (!Item)
+			Item = gameObject.AddComponent<NJGMapItem>();
+
+		if (!Transform.FindObjectOfType<UIMiniMapOnGUI>())
 		{
 			this.enabled = false;
 			Item.enabled = false;
@@ -108,9 +111,7 @@ public class MinimapObject : MonoBehaviour {
 		}
 		else if(!MinimapManager.MiniMap)
 			MinimapManager.MiniMap = Transform.FindObjectOfType<UIMiniMapOnGUI>();
-		
-		if(!Item)
-			Item = gameObject.AddComponent<NJGMapItem>();
+
 
 		Item.type = 0;
 
@@ -134,7 +135,7 @@ public class MinimapObject : MonoBehaviour {
 				ThisIndex = MinimapManager.IndexItem.IndexOf("Player");
 				Item.type = ThisIndex;
 
-			
+
 
 				MinimapManager.SetStatus(true);
 			}
@@ -150,7 +151,7 @@ public class MinimapObject : MonoBehaviour {
 		}
 	}
 
-	
+
 	void OnDestroy()
 	{
 		if(main)
@@ -165,25 +166,25 @@ public class MinimapObject : MonoBehaviour {
 	public void OnRemove(){
 		MinimapManager.allMinimapObject.Remove(this);
 	}
-	
+
 	public bool SeeMe(int team){
 		switch(type){
 			case TYPE.PAWN:
 				switch(MinimapManager.mode){
 					case MinimapManager.MODE.NONE:
 						return false;
-					
+
 					break;
 					case MinimapManager.MODE.TEAMMATE:
 						return pawn.team==team||pawn.OnMinimapShow();
-					
+
 					break;
 					default:
 						return true;
 					break;
-				
+
 				}
-			break;	
+			break;
 			case TYPE.TARGET:
 				return this.team ==team;
 			break;
@@ -195,28 +196,28 @@ public class MinimapObject : MonoBehaviour {
 			break;
 		}
 	}
-	
-		
+
+
 	public String AddInfo(){
 		switch(type){
 			case TYPE.PAWN:
 				switch(MinimapManager.mode){
 					case MinimapManager.MODE.ALLANDHP:
 						return pawn.health.ToString("0");
-					
+
 					break;
-					
+
 					default:
 						return "";
 					break;
-				
+
 				}
-			break;	
+			break;
 			default:
 			return "";
 			break;
 		}
-		
+
 	}
 
 	void GetStatus()
@@ -232,7 +233,7 @@ public class MinimapObject : MonoBehaviour {
 			case MinimapManager.MODE.TEAMMATE:
                 if (MinimapManager.MainPawn.team == team)
 					ThisIndex = MinimapManager.IndexItem.IndexOf("Frend");
-                 
+
                 else
 					ThisIndex = MinimapManager.IndexItem.IndexOf("Enemy");
 				break;
@@ -268,15 +269,15 @@ public class MinimapObject : MonoBehaviour {
 		if(!SeeMe(MinimapManager.MainPawn.team)){
 			ThisIndex = 0;
 			Item.newColorGet(ThisIndex);
-			GetNewStatus = true;			
+			GetNewStatus = true;
 		}else{
 			switch(type)
 			{
 			case TYPE.PAWN:
 				MainPawnSpawn = MinimapManager.MainPlayerSpawn;
 
-				
-				
+
+
 				if(GetNewStatus)
 				{
 					GetNewStatus = false;
@@ -296,8 +297,8 @@ public class MinimapObject : MonoBehaviour {
 				}
 				break;
 			}
-		
+
 		}
-		
+
 	}
 }

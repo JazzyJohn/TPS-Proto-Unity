@@ -7,37 +7,37 @@ public class PlayerManager : MonoBehaviour {
 
 	public String[] pawnName;
 
-	public List<Pawn> cachedPawns;
-	
-	public List<Player> cachedPlayers;
+	public List<Pawn> cachedPawns = new List<Pawn>();
 
     public String[] avaibleBots;
+	public List<Player> cachedPlayers = new List<Player>();
+
 
 	public GameObject[] ghostsBots;
 
 	private int curTeam =1;
 
 	public int MaxTeam = 2;
-	
+
 	public Player LocalPlayer;
 
 	public bool frendlyFire =false;
 
 	public string version = "0.0.8";
-	
+
 	  public float updateDelay = 0.1f;
 
     public float updateTimer = 0.0f;
-	
+
 	public int maxPawnSend = 5;
-	
+
 	public float radius = 2.0f;
 
-	
+
 	public InventoryManager.AmmoBag[] AllTypeInGame;
     // s_Instance is used to cache the instance found in the scene so we don't have to look it up every time.
     private static PlayerManager s_Instance = null;
- 
+
     // This defines a static instance property that attempts to find the manager object in the scene and
     // returns it to the caller.
     public static PlayerManager instance {
@@ -47,32 +47,37 @@ public class PlayerManager : MonoBehaviour {
                 //  FindObjectOfType(...) returns the first AManager object in the scene.
                 s_Instance =  FindObjectOfType(typeof (PlayerManager)) as PlayerManager;
             }
- 
-            
- 
-            return s_Instance;
+			if (s_Instance == null)	//by ssrazor
+			{
+				var go = new GameObject();
+				go.name = "~PlayerManager";
+				s_Instance = go.AddComponent<PlayerManager>();
+			}
+
+			return s_Instance;
         }
     }
     public void Awake(){
-        version = FindObjectOfType<ServerHolder>().version;
+		var serverHolder = FindObjectOfType<ServerHolder>();
+		if (serverHolder != null)
+			version = serverHolder.version;
     }
     // Ensure that the instance is destroyed when the game is stopped in the editor.
     void OnApplicationQuit() {
         s_Instance = null;
     }
- 
+
     // Add the rest of the code here...
     public virtual  Pawn SpawmPlayer(String newPalyerClass,int team,int[] stims) {
 		Pawn localPlayer;
 		Transform targetPos = GetSpamPosition (team);
 
-	
-		
+
+
         localPlayer = (Pawn)NetworkController.Instance.BeginPawnSpawnRequest(newPalyerClass, targetPos.position, targetPos.rotation, false, stims,false).GetComponent<Pawn>();
         localPlayer.AfterAwake();
 		return localPlayer;
     }
-	
 
     public Pawn SpawmBot(String newPalyerClass, Vector3 position,Quaternion rotation ,int[] stims) {
 		Pawn localPlayer;
@@ -91,9 +96,9 @@ public class PlayerManager : MonoBehaviour {
         {
             if (disspamPoints[i].team == 0 || team == disspamPoints[i].team)
             {
-			
+
 				listDist.Add(disspamPoints[i]);
-				
+
             }
         }
         if (listDist.Count > 0)
@@ -107,7 +112,7 @@ public class PlayerManager : MonoBehaviour {
 			{
                 Collider[] hitColliders = Physics.OverlapSphere(spamPoints[i].transform.position, radius);
 				bool move = false;
-				
+
 				foreach(Collider col in hitColliders){
 					if(col.transform.root.GetComponent<Pawn>()!=null){
 						move= true;
@@ -162,7 +167,7 @@ public class PlayerManager : MonoBehaviour {
         foreach(Player player in cachedPlayers){
             Destroy(player.gameObject);
         }
-      
+
     }
 	public  void Update(){
 		updateTimer += Time.deltaTime;
@@ -172,24 +177,24 @@ public class PlayerManager : MonoBehaviour {
             PawnUpdate();
         }
 	}
-	
+
 	 public void PawnUpdate(){
-		
+
 		ISFSObject data = new SFSObject();
 		ISFSArray pawnsArr = new SFSArray();
-		
+
 		foreach(Pawn pawn in cachedPawns){
 			if(pawn.NeedUpdate()){
 				pawnsArr.AddClass(pawn.GetSerilizedData());
-			
+
 			}
-			
+
 			if(pawnsArr.Size()>=maxPawnSend){
 				data.PutSFSArray("pawns",pawnsArr);
 				NetworkController.Instance.PawnUpdateRequest(data);
 				data = new SFSObject();
 				pawnsArr = new SFSArray();
-			
+
 			}
 		}
 		if(pawnsArr.Size()==0){
@@ -199,6 +204,6 @@ public class PlayerManager : MonoBehaviour {
 		NetworkController.Instance.PawnUpdateRequest(data);
 	}
 }
-	
+
 
 

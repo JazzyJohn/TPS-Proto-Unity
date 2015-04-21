@@ -69,9 +69,10 @@ public class Pawn : DamagebleObject
 
     public const float ASSIT_FORGET_TIME = 30.0f;
 
-    private LayerMask groundLayers = 1;
     protected LayerMask wallRunLayers = 1;
+
     private LayerMask climbLayers = 1 << 9; // Layer 9
+
     public LayerMask seenlist = 1;
 
     public static LayerMask AIM_MASK = 1;
@@ -244,9 +245,11 @@ public class Pawn : DamagebleObject
 
     protected Collider myCollider;
 
+    public float groundCheckDistance;
+
     private bool _isGrounded;
 
-    public float distanceToGround; // Проверка дистанции до земли (+)
+    private float distanceToGround; // Проверка дистанции до земли (+)
 
     public bool isGrounded
     {
@@ -338,11 +341,17 @@ public class Pawn : DamagebleObject
     };
 
     protected CharacteristicManager charMan;
+
     public SkillManager skillManager;
+
     public BasePawnStatistic statistic = new BasePawnStatistic();
+
     private float headBlockTime = -10.0f;
+
     public float headBlockCoolDown  = 10.0f;
+
     private float regenTime = -10.0f;
+
     private float regenCoolDown = 10.0f;
 
 
@@ -423,6 +432,7 @@ public class Pawn : DamagebleObject
         {
             AIM_MASK =1 | LayerMask.GetMask("Damagable", "PlayerDamage", "Default");
         }
+         
         myTransform = transform;
         ivnMan = GetComponent<InventoryManager>();
         _rb = GetComponent<Rigidbody>();
@@ -1560,7 +1570,7 @@ public class Pawn : DamagebleObject
             if (jetPackEnable == false)
             {
                 float maxCharge = charMan.GetFloatChar(CharacteristicList.JETPACKCHARGE);
-                if (canJump && jetPackCharge < maxCharge)
+                if (jetPackCharge < maxCharge)
                 {
 
                     jetPackCharge += Time.deltaTime;
@@ -2669,7 +2679,7 @@ public class Pawn : DamagebleObject
         }
         return 0.0f;
     }
-    public void Movement(Vector3 movement, CharacterState state)
+    public virtual void Movement(Vector3 movement, CharacterState state)
     {
         //Debug.Log (state);
         //Debug.Log (state);
@@ -2697,7 +2707,7 @@ public class Pawn : DamagebleObject
     }
     public bool IsSprinting()
     {
-        return characterState == CharacterState.Sprinting;
+        return characterState == CharacterState.Sprinting||(transport!=null&&transport.IsSprinting());
 
     }
     public bool IsCrouch()
@@ -2909,7 +2919,7 @@ public class Pawn : DamagebleObject
 
 
     //TODO ADD STEP CHECK WITH RAYS
-    void OnCollisionStay(Collision collisionInfo)
+  /*  void OnCollisionStay(Collision collisionInfo)
     {
         if (lastJumpTime + 0.1f > Time.time)
         {
@@ -2923,9 +2933,7 @@ public class Pawn : DamagebleObject
 
         foreach (ContactPoint contact in collisionInfo.contacts)
         {
-            /*if(contact.otherCollider.CompareTag("decoration")){
-                continue;
-            }*/
+         
             Vector3 Direction = contact.point - myTransform.position - ((CapsuleCollider)myCollider).center;
             //Debug.Log (this.ToString()+collisionInfo.collider+Vector3.Dot(Direction.normalized ,Vector3.down) );
             float minAngle = 0.75f;
@@ -2936,28 +2944,8 @@ public class Pawn : DamagebleObject
             else
             {
                 CapsuleCollider capsule = ((CapsuleCollider)myCollider);
-                minAngle = Mathf.Atan(capsule.radius / capsule.height * 2)  ;
+                minAngle = Mathf.Atan(capsule.radius / capsule.height * 2);
             }
-            /*if (!isAi)
-            {
-                Debug.Log(Mathf.Cos(minAngle));
-            }*/
-          
-            /*
-             *   float normalRadius;
-             *   
-            if (((CapsuleCollider)myCollider).direction == 2)
-            {
-                minAngle = 0.2f;
-                normalRadius =((CapsuleCollider)myCollider).radius;
-            }else{
-                 normalRadius =((CapsuleCollider)myCollider).height/2;
-            }
-            float radiusPoint = Mathf.Sin(Vector3.Angle(Direction.normalized, Vector3.down)) * Direction.magnitude;
-            Debug.Log(radiusPoint);
-             *
-             * */
-            //Debug.Log(Vector3.Dot(Direction.normalized, Vector3.down));
             if (Vector3.Dot(Direction.normalized, Vector3.down) > Mathf.Cos(minAngle))
             {
                 isGrounded = true;
@@ -2968,25 +2956,26 @@ public class Pawn : DamagebleObject
            // Debug.DrawLine(myTransform.position + ((CapsuleCollider)myCollider).center, contact.point, Color.white);
 
         }
+        
 
 
+    }*/
 
-    }
 
-
-    public void StartSprint()
+    public virtual void StartSprint(CharacterState state = CharacterState.Sprinting)
     {
 
         if (jetPackCharge >= 1.0f)
         {
             StartJetPack();
 			StopGrenadeThrow();
-            characterState = CharacterState.Sprinting;
+            characterState = state;
             animator.MainLayerPripity();
         }
 
     }
-    public void StopSprint()
+   
+    public virtual void StopSprint()
     {
         jetPackEnable = false;
         animator.MainLayerNormal();
@@ -3032,6 +3021,7 @@ public class Pawn : DamagebleObject
         {
             KillIt(null);
         }
+        CheckGrounded();
 //        Debug.Log(characterState +" " +isGrounded);
         Vector3 velocity = _rb.velocity;
         /* if(nextMovement.y==0){
@@ -3067,7 +3057,7 @@ public class Pawn : DamagebleObject
                     if (_rb.isKinematic) _rb.isKinematic = false;
 
                     //Debug.Log (this+ " " +velocityChange);
-                    //rigidbody.AddForce(velocityChange, ForceMode.VelocityChange);
+                    rigidbody.AddForce(velocityChange, ForceMode.VelocityChange);
 
                     if (nextState == CharacterState.Sprinting)
                     {
@@ -3123,7 +3113,7 @@ public class Pawn : DamagebleObject
                     }
                     if (isGrounded)
                     {
-                        //rigidbody.AddForce(velocityChange, ForceMode.VelocityChange);
+                        rigidbody.AddForce(velocityChange, ForceMode.VelocityChange);
 
                         if (nextState == CharacterState.DoubleJump)
                         {
@@ -3302,10 +3292,46 @@ public class Pawn : DamagebleObject
         }
         //Debug.Log(_rb.isKinematic);
         */
-        isGrounded = false;
+       // isGrounded = false;
 
     }
 
+    public void CheckGrounded()
+    {
+        if (lastJumpTime + 0.1f > Time.time)
+        {
+            isGrounded = false;
+        }
+        if (characterState == CharacterState.WallRunning)
+        {
+            isGrounded = true;
+        }
+        RaycastHit hitInfo;
+        if (Physics.SphereCast(GetCheckStartPoint(), capsule.radius, Vector3.down, out hitInfo, GetCheckDistance(), floorLayer))
+		{
+			isGrounded = true;
+			floorNormal = hitInfo.normal;
+           // Debug.Log(hitInfo.collider);
+           // Debug.DrawLine(hitInfo.point, GetCheckStartPoint());
+		}
+		else
+		{
+			isGrounded = false;
+            floorNormal = Vector3.up;
+		}
+
+      //  Debug.Log(isGrounded);
+    }
+    float GetCheckDistance()
+    {
+        return (capsule.height / 2f) + groundCheckDistance - capsule.radius;
+    }
+
+    Vector3 GetCheckStartPoint()
+    {
+        Vector3 startPoint = myTransform.position + capsule.center;
+        return startPoint;
+    }
     public virtual void JumpEnd(CharacterState nextState)
     {
         if (nextState == CharacterState.Jumping)
@@ -3535,7 +3561,7 @@ public class Pawn : DamagebleObject
 
 
 
-    public void Activate()
+    public virtual void Activate()
     {
         if (cameraController != null)
         {

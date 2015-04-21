@@ -41,7 +41,7 @@ public class AirStrike : ActivateReward
         ghostGo = (GameObject)Instantiate(ghostGo, GetPosition(), pawn.myTransform.rotation);
         ghostObj = ghostGo.transform;
         ghostClass = ghostGo.GetComponent<GhostObject>();
-
+        base.Select(pawn);
 
     }
 
@@ -52,33 +52,48 @@ public class AirStrike : ActivateReward
             RaycastHit hitinfo;
             if (Physics.SphereCast(ghostObj.position + Vector3.up * ghostClass.size, ghostClass.size, Vector3.up, out hitinfo, 100.0f, ghostClass.blockLayer))
             {
-                ghostClass.MakeNormal();
+                ghostClass.MakeBad();
                 canSpawn = false;
             }
             else
             {
-                ghostClass.MakeBad();
+                ghostClass.MakeNormal();
                 canSpawn = true;
             }
         }
 
     }
-    public  Vector3 GetPosition(){
-        	Ray centerofScreen =Camera.main.ViewportPointToRay(new Vector3(0.5f, 0.5f, 0f));
-			RaycastHit hitinfo;
-            if (Physics.Raycast(centerofScreen, out hitinfo, maxDistance, robotLayer))
-            {
-                return hitinfo.point;
-            }
-            else
-            {
-                return centerofScreen.origin + centerofScreen.direction * maxDistance;
-            }
+    public Vector3 GetPosition()
+    {
+        Ray centerofScreen = Camera.main.ViewportPointToRay(new Vector3(0.5f, 0.5f, 1f));
+        //  Debug.Log(Camera.main.transform.position);
+        RaycastHit hitinfo;
+        Vector3 point;
+        if (Physics.Raycast(centerofScreen, out hitinfo, maxDistance, robotLayer))
+        {
+            // Debug.Log(hitinfo.point);
+            point = hitinfo.point;
+        }
+        else
+        {
+            //Debug.Log(centerofScreen.GetPoint(maxDistance));
+            point = centerofScreen.GetPoint(maxDistance); //+ centerofScreen.direction * maxDistance;
+        }
+        if (Physics.Raycast(point, Vector3.down, out hitinfo, 10.0f, robotLayer))
+        {
+            return hitinfo.point;
+        }
+        else
+        {
+            return point;
+        }
+
     }
 
-    public virtual void Deselect(Pawn pawn)
+    public override void Deselect(Pawn pawn)
     {
         Destroy(ghostObj.gameObject);
+        base.Deselect(pawn);
     }
 
     public override void Activate(Pawn pawn)
@@ -90,7 +105,7 @@ public class AirStrike : ActivateReward
         base.Activate(pawn);
         Building building = NetworkController.Instance.SimplePrefabSpawn(prefabs[pawn.team - 1],  GetPosition(), pawn.myTransform.rotation, new SFSObject(), false, NetworkController.PREFABTYPE.PLAYERBUILDING).GetComponent<Building>();
         building.SetOwner(pawn.player);
-       
+        Destroy(ghostObj.gameObject);
     }
 
 }

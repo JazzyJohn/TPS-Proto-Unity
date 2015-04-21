@@ -41,7 +41,9 @@ public class CharacterControllerM1A1 : MonoBehaviour
 
     private Transform camTransform;
 
-    [HideInInspector] public IKcontroller ik;
+    public IKcontroller ik;
+
+    public bool noRootMotion= false;
 
     //private Quaternion lookRotation;
 
@@ -61,6 +63,10 @@ public class CharacterControllerM1A1 : MonoBehaviour
     private void OnAnimatorMove()
     {
         if (!character.foxView.isMine)
+        {
+            return;
+        }
+        if (noRootMotion)
         {
             return;
         }

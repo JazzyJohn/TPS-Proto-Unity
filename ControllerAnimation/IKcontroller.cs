@@ -25,7 +25,10 @@ public class IKcontroller : MonoBehaviour {
 	
 	public Vector3 aimPosition{
 		get{return aim.solver.GetIKPosition();}
-		set{aim.solver.IKPosition = value;}
+		set{
+            if(aim!=null)
+                aim.solver.IKPosition = value;
+        }
 	}
 	public void SetWeight(float weight){
        
@@ -54,8 +57,8 @@ public class IKcontroller : MonoBehaviour {
         {
             targetWeight =actionWeight;
         }
-		
-        aim.solver.IKPositionWeight = targetWeight; 
+        if (aim!=null)
+            aim.solver.IKPositionWeight = targetWeight; 
 		
 	}
     public void AddAction(UpdateFinished finished)
@@ -117,7 +120,8 @@ public class IKcontroller : MonoBehaviour {
 
      public void SetMuzzle(Transform point)
     {
-        aim.solver.transform = point;
+        if (aim != null)
+            aim.solver.transform = point;
        
     }
 }

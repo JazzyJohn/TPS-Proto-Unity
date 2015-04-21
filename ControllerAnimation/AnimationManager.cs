@@ -441,7 +441,7 @@ public class AnimationManager : MonoBehaviour
     }
     public void PutMeleeAway()
     {
-        Debug.Log("PutGrenadeAway");
+        Debug.Log("PutMeleeAway");
         pawn.PutMeleeAway();
         aimPos.AimOff();
     }

@@ -734,9 +734,7 @@ public class NetworkController : MonoBehaviour
                 case "playerLeave":
                     HandlePlayerLeave(dt);
                     break;
-                case "pawnInPilotChange":
-                    HandlePawnInPilotChange(dt);
-                    break;
+               
                 case "updateSimpleDestroyableObject":
                     HandleUpdateSimpleDestroyableObject(dt);
                     break;
@@ -1439,6 +1437,10 @@ public class NetworkController : MonoBehaviour
     {
 
         GameObject go = InstantiateNetPrefab(prefab, vector3, quaternion, data, true);
+        if (isSingle)
+        {
+            return go;
+        }
         SimpleNetModel model = new SimpleNetModel();
         model.id = go.GetComponent<FoxView>().viewID;
         model.type = prefab;
@@ -2311,17 +2313,7 @@ public class NetworkController : MonoBehaviour
     }
 
 
-    /// <summary>
-    /// handle pawnInPilotChange  from Server
-    /// </summary>	
-
-    public void HandlePawnInPilotChange(ISFSObject dt)
-    {
-
-        RobotPawn pawn = GetView(dt.GetInt("id")).pawn as RobotPawn;
-        pawn.isPilotIn = dt.GetBool("isPilotIn");
-
-    }
+   
     /// <summary>
     /// handle updateSimpleDestroyableObject from Server
     /// </summary>	

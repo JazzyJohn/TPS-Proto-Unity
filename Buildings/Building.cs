@@ -20,7 +20,10 @@ public class Building : DamagebleObject {
     {
         team = p.team;
         player = p;
-        onGui.team = team;
+        if (onGui != null)
+        {
+            onGui.team = team;
+        }
     }
 
     public override void KillIt(GameObject killer)

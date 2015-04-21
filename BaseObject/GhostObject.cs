@@ -21,13 +21,13 @@ public class GhostObject : MonoBehaviour {
 	}
 	public void MakeBad(){
 		foreach (Renderer lRendered in myRenderers) {
-			lRendered.material.SetColor("_MainColor",	badColor);
+            lRendered.material.SetColor("_Color", badColor);
 		}
 
 	}
 	public void MakeNormal(){
 		foreach (Renderer lRendered in myRenderers) {
-            lRendered.material.SetColor("_MainColor", normalColor);
+            lRendered.material.SetColor("_Color", normalColor);
 		}
 		
 	}

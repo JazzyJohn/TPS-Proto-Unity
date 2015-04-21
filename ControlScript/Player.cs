@@ -458,6 +458,7 @@ public class Player : MonoBehaviour {
                     if (selectedReward == rewards[i])
                     {
                         selectedReward.Activate(currentPawn);
+                        selectedReward = null;
                         if (i == rewards.Length-1)
                         {
                             ResetRewards();
@@ -502,6 +503,7 @@ public class Player : MonoBehaviour {
     {
         Score.rating += rating;
         rewardRating += rating;
+        Debug.Log("ADD REWARD " + rating);
         CheckReward();
     }
 
@@ -743,7 +745,7 @@ public class Player : MonoBehaviour {
         }
 		inBot=true;
 		currentPawn.DeActivate();
-        robotPawn.MySelfEnter(currentPawn);
+       
 
 		robotPawn.Activate ();
 	}

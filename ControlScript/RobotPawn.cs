@@ -6,18 +6,23 @@ using nstuff.juggerfall.extension.models;
 public class RobotPawn : Pawn {
 	public float ActivationTime=2.0f;
 	public Transform playerExitPositon;
-	public bool isPilotIn = false;
+	
 	public bool isMutual;
 	public bool isEmpty =true;
     private Pawn passenger;
 
     public Transform back;
+
+    private Transform cameraTransform;
     public override void StartPawn()
     {
         base.StartPawn();
        
     }
-
+    public override bool CanSprint()
+    {
+        return base.CanSprint() && passenger.CanSprint();
+    }
     public override void StartFire()
     {
         passenger.StartFire();
@@ -76,6 +81,17 @@ public class RobotPawn : Pawn {
     {
         passenger.Heal(damage, Healler);
     }
+    public override void StartSprint(CharacterState state = CharacterState.Sprinting)
+    {
+
+        base.StartSprint();
+        passenger.StartSprint(CharacterState.Mount);
+    }
+    public override void StopSprint()
+    {
+        base.StopSprint();
+        passenger.StopSprint();
+    }
 
     public void AnotherEnter()
     {
@@ -97,6 +113,8 @@ public class RobotPawn : Pawn {
     }
 	protected void Awake(){
 		base.Awake();
+        cameraTransform = Camera.main.transform;
+
 		if(isMutual){
             try
             {
@@ -110,18 +128,51 @@ public class RobotPawn : Pawn {
 		
 		}
 	}
+    protected override bool ShouldRotateTorso()
+    {
+        return characterState == CharacterState.Idle || characterState == CharacterState.DoubleJump || characterState == CharacterState.Walking || characterState == CharacterState.Running;
+    }
+    public override void Movement(Vector3 movement, CharacterState state)
+    {
+        //Debug.Log (state);
+        //Debug.Log (state);
+        if (isSpawn)
+        {//если только респавнились, то не шевелимся
+            return;
+        }
+        Vector3 right =Vector3.Project(movement, cameraTransform.right);
+        movement = movement - right;
+        Debug.Log(IsGrounded());
+       
+        base.Movement(movement, state);
+        float yAngle = Vector3.Dot(right, cameraTransform.right) * Time.deltaTime;
+        UpdateRotation(0, yAngle);
+        Vector3 eurler;
+
+        eurler.y = yAngle* fromOldRotationMod;
+    
+
+
+        eurler.z = 0;
+        eurler.x = 0;
+        myTransform.rotation *= Quaternion.Euler(eurler);
+
+    }
 	//Player get in robot
-	public new void  Activate(){
-		
+	public override void  Activate(){
+        MySelfEnter(player.GetCurrentPawn());
 		_rb.constraints = RigidbodyConstraints.FreezeRotation;
         _rb.useGravity = false;
-		isPilotIn = true;
-        foxView.InPilotChange(isPilotIn);
+	
+      
 		isActive = false;
 		characterState=CharacterState.Activate;
-    
+       
 		StartCoroutine(WaitBeforeActive(ActivationTime));
-		
+        if (foxView.isMine)
+        {
+            foxView.Activate();
+        }
 	}
 	public override void Damage(BaseDamage damage,GameObject killer){
         if (passenger != null)
@@ -159,9 +210,7 @@ public class RobotPawn : Pawn {
 
 	public IEnumerator WaitBeforeActive(float waitTime) {
 
-        if (isPilotIn)
-        {
-
+       
 			yield return new WaitForSeconds(waitTime);
 			GetComponent<ThirdPersonController>().enabled = true;
 		    _rb.isKinematic = false;
@@ -170,21 +219,12 @@ public class RobotPawn : Pawn {
 			for (int i =0; i<myTransform.childCount; i++) {
 				myTransform.GetChild(i).gameObject.SetActive(true);
 			}
-            foxView.Activate();
-		}
+       
 		//base.Activate();
 	}
 	//Player have left robot
 	public new void  DeActivate(){
-		characterState=CharacterState.DeActivate;
-		isPilotIn = false;
-        foxView.InPilotChange(isPilotIn);
-		((RobotAnimationManager)animator).DeActivation();
-		GetComponent<ThirdPersonController>().enabled = false;
-      
-		StopMachine ();
-		_rb.constraints = RigidbodyConstraints.FreezeAll;
-		_rb.velocity = Vector3.zero;
+		
 		//Debug.Log ("ROBOT");
 	}
    
@@ -209,49 +249,15 @@ public class RobotPawn : Pawn {
 	}
 	protected override void UpdateAnimator(){
 		//Debug.Log (isGrounded);
-		if (animator != null && animator.gameObject.activeSelf) {
-			if(!foxView.isMine){
-
-				RobotAnimationManager roboanim =(RobotAnimationManager)animator;
-				if(!roboanim.isActive()&&isPilotIn){
-					roboanim.Activation();
-				}
-				if(roboanim.isActive()&&!isPilotIn){
-					roboanim.DeActivation();
-				}
-			}
-					
-			//animator.SetLookAtPosition (getAimRotation());
-		
-		}
+	
 		base.UpdateAnimator();
 	}
-    public override bool shouldRotate()
-    {
-        return isPilotIn;
-    }
+  
 	public override void ChangeDefaultWeapon(int myId){
         ivnMan.AddStandartMelee();
 
         ivnMan.GenerateWeaponStart();
 	}
-    public override void NetUpdate(PawnModel pawn)
-    {
-        nextState = (CharacterState)pawn.characterState;
-        Vector3 oldPos = correctPlayerPos;
-        correctPlayerPos = pawn.position.MakeVector(correctPlayerPos);
-        correctPlayerRot = pawn.rotation.MakeQuaternion(correctPlayerRot);
-        aimRotation = pawn.aimRotation.MakeVector(aimRotation);
-        ToggleAim(pawn.isAiming);
-        team = pawn.team;
-        health = pawn.health;
-        replicatedVelocity = correctPlayerPos - oldPos;
-        float oldTime = lastNetUpdate;
-        lastNetUpdate = Time.time;
-        replicatedVelocity = replicatedVelocity / (oldTime - lastNetUpdate);
-        RestartLocalVisibilite();
-        isActive = pawn.active;
-       
-    }
+
 
 }

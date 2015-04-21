@@ -148,6 +148,34 @@ public class MapLoader : MonoBehaviour {
                                
 
                             }
+                             UnityEngine.Object[]  buildings = pawnBundle.LoadAll(typeof(Building));
+                             for (int i = 0; i < buildings.Length; i++)
+                            {
+
+
+                                GameObject prefab = ((MonoBehaviour)buildings[i]).gameObject;
+                                //   Debug.Log(prefab.name);
+                                if (!PhotonResourceWrapper.allobject.ContainsKey(prefab.name))
+                                {
+                                    PhotonResourceWrapper.allobject[prefab.name] = prefab;
+                                }
+                               
+
+                            }
+                               UnityEngine.Object[]  ghosts = pawnBundle.LoadAll(typeof(GhostObject));
+                               for (int i = 0; i < ghosts.Length; i++)
+                            {
+
+
+                                GameObject prefab = ((MonoBehaviour)ghosts[i]).gameObject;
+                                //   Debug.Log(prefab.name);
+                                if (!PhotonResourceWrapper.allobject.ContainsKey(prefab.name))
+                                {
+                                    PhotonResourceWrapper.allobject[prefab.name] = prefab;
+                                }
+                               
+
+                            }
                             Debug.Log("MyBundle" + pawnBundle);
                             inProgress = false;
 

@@ -21,23 +21,29 @@ public class SettingsManager: MonoBehaviour{
                 //  FindObjectOfType(...) returns the first AManager object in the scene.
                 s_Instance = FindObjectOfType(typeof (SettingsManager)) as SettingsManager;
             }
+			if (s_Instance == null) //by ssrazor
+			{
+				var go = new GameObject();
+				go.name = "~SettingsManager";
+				s_Instance = go.AddComponent<SettingsManager>();
+			}
 
 
             return s_Instance;
         }
     }
-	
+
 	public TextAsset configTable;
 	void Awake(){
 		LoadSetting();
 	}
 	public int GetSetting(string name){
         return PlayerPrefs.GetInt(name);
-		
+
 	}
 	public void LoadSetting(){
-       // PlayerPrefs.DeleteAll();
-       
+       PlayerPrefs.DeleteAll();
+
 		XmlDocument xmlDoc = new XmlDocument();
 		xmlDoc.LoadXml(configTable.text);
 		foreach (XmlNode node in xmlDoc.SelectNodes("settings/setting")){
@@ -46,17 +52,17 @@ public class SettingsManager: MonoBehaviour{
 				SettingLogic(name,PlayerPrefs.GetInt(name));
 			}else{
 				SettingLogic(name, int.Parse(node.SelectSingleNode ("default").InnerText));
-			}		
+			}
 		}
-	
+
 	}
 	public void SetSetting(string name, int value){
 
         PlayerPrefs.SetInt(name, value);
 		SettingLogic(name,value);
 	}
-	
-	
+
+
 
 	public const string FULLSCREEN = "fullscreen";
 	public const string MUSICVOLUME = "musicvolume";
@@ -65,19 +71,19 @@ public class SettingsManager: MonoBehaviour{
 		if(name ==FULLSCREEN){
             Resolution[] resolutions = Screen.resolutions;
 			if(value==1){
-				Screen.SetResolution(800, 600, false);	
-				GlobalPlayer.ResizeCall();				
+				Screen.SetResolution(800, 600, false);
+				GlobalPlayer.ResizeCall();
 			}else{
 				Screen.SetResolution(resolutions[resolutions.Length-1].width, resolutions[resolutions.Length-1].height, true);
 				GlobalPlayer.ResizeCall();
 			}
 		}
 		if(name==SOUNDVOLUME){
-		
+
 		   AudioListener.volume =((float) value)/100.0f;
 		}
 		if(name==MUSICVOLUME){
-		
+
 		  MusicHolder.SetVolume(((float) value)/100.0f);
 		}
 	}
@@ -112,20 +118,20 @@ public class SettingsManager: MonoBehaviour{
             if (fps < LowFps)
             {
                 QualitySettings.DecreaseLevel();
-                PlayerPrefs.SetFloat("GraphicQuality", QualitySettings.GetQualityLevel()); 
+                PlayerPrefs.SetFloat("GraphicQuality", QualitySettings.GetQualityLevel());
             }
 
             if (fps > HighFps)
             {
                 QualitySettings.IncreaseLevel();
-                PlayerPrefs.SetFloat("GraphicQuality", QualitySettings.GetQualityLevel()); 
+                PlayerPrefs.SetFloat("GraphicQuality", QualitySettings.GetQualityLevel());
             }
         }*/
 
 
     }
-	
-	
-	
+
+
+
 
 }

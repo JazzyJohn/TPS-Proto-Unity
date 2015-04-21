@@ -25,6 +25,7 @@ public class SimplePawn : Pawn
         {
             KillIt(null);
         }
+        CheckGrounded();
         Vector3 velocity = _rb.velocity;
         /* if(nextMovement.y==0){
              nextMovement.y = velocity.y;
@@ -46,7 +47,7 @@ public class SimplePawn : Pawn
         {
             velocityChange = (nextMovement - velocity);
         }
-
+        //Debug.Log(characterState);
         switch (characterState)
         {
             case CharacterState.Idle:
@@ -147,7 +148,7 @@ public class SimplePawn : Pawn
                 break;
         }
 
-        isGrounded = false;
+       
     }
 
     public override void StartFire()

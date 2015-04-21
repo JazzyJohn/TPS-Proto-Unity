@@ -16,9 +16,11 @@ public class ShootingBuilding : Building
 
     public BaseDamage damage;
 
+    public float effAimRandCoef;
     void Awake()
     {
         Invoke("DestroyBuilding", lifeTime);
+        base.Awake();
     }
 
     private void DestroyBuilding(){
@@ -33,15 +35,22 @@ public class ShootingBuilding : Building
         if (time > fireInterval)
         {
             time = 0;
+            Quaternion startRotation = muzzle.rotation;
 
-            GameObject proj = projectile.Spawn(muzzle.position, muzzle.rotation);
+          
+
+            if (effAimRandCoef > 0)
+            {
+                startRotation = Quaternion.Euler(startRotation.eulerAngles + new Vector3(Random.Range(-1 * effAimRandCoef, 1 * effAimRandCoef), Random.Range(-1 * effAimRandCoef, 1 * effAimRandCoef), Random.Range(-1 * effAimRandCoef, 1 * effAimRandCoef)));
+            }
+            GameObject proj = projectile.Spawn(muzzle.position, startRotation);
             BaseProjectile projScript = proj.GetComponent<BaseProjectile>();
             projScript.replication = false;
           
             projScript.fromGun = false;
             projScript.damage = new BaseDamage(damage);
 
-            projScript.owner = player.GetActivePawn().gameObject;
+            projScript.owner = player.GetCurrentPawn().gameObject;
 
             projScript.range = 10000f;
             projScript.minRange = 10000f;

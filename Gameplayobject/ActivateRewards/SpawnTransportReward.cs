@@ -52,12 +52,12 @@ public class SpawnTransportReward : ActivateReward {
             RaycastHit hitinfo;
             if (Physics.SphereCast(ghostObj.position + Vector3.up * ghostClass.size, ghostClass.size, Vector3.up, out hitinfo, 100.0f, ghostClass.blockLayer))
             {
-                ghostClass.MakeNormal();
+                ghostClass.MakeBad();
                 canSpawn = false;
             }
             else
             {
-                ghostClass.MakeBad();
+                ghostClass.MakeNormal();
                 canSpawn = true;
             }
         }
@@ -68,19 +68,29 @@ public class SpawnTransportReward : ActivateReward {
         Ray centerofScreen = Camera.main.ViewportPointToRay(new Vector3(0.5f, 0.5f, 1f));
       //  Debug.Log(Camera.main.transform.position);
         RaycastHit hitinfo;
+        Vector3 point;
         if (Physics.Raycast(centerofScreen, out hitinfo, maxDistance, robotLayer))
         {
            // Debug.Log(hitinfo.point);
-            return hitinfo.point;
+            point= hitinfo.point;
         }
         else
         {
             //Debug.Log(centerofScreen.GetPoint(maxDistance));
-            return centerofScreen.GetPoint(maxDistance); //+ centerofScreen.direction * maxDistance;
+            point= centerofScreen.GetPoint(maxDistance); //+ centerofScreen.direction * maxDistance;
         }
+        if (Physics.Raycast(point,Vector3.down, out hitinfo, 10.0f, robotLayer))
+        {
+            return hitinfo.point;
+        }
+        else
+        {
+            return point;
+        }
+
     }
 
-    public virtual void Deselect(Pawn pawn)
+    public override void Deselect(Pawn pawn)
     {
         Destroy(ghostObj.gameObject);
         base.Deselect(pawn);
