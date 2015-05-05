@@ -92,8 +92,14 @@ public class EventHolder : MonoBehaviour
 			foreach(HolderBase holder  in list){
 		
 				if(holder.isValid(type)){
-
-					holder. FireEvent(theMethod,values);
+                    try {
+                        holder.FireEvent(theMethod, values);
+                    }
+                    catch (Exception e)
+                    {
+                        Debug.Log(e);
+                    }
+					
 				}
 			}
 		}

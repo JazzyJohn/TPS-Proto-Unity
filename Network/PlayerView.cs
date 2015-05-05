@@ -5,6 +5,7 @@ using System;
 using System.Reflection;
 using Sfs2X.Entities.Data;
 using nstuff.juggerfall.extension.models;
+using Sfs2X.Entities;
  
 
 public class PlayerView : MonoBehaviour {
@@ -69,7 +70,7 @@ public class PlayerView : MonoBehaviour {
 
     public void NetUpdate(PlayerModel player)
     {
-        Debug.Log("NET UPDATE " + player.uid + " name " + player.name + "team" + player.team + " player.kill" + player.kill);
+//        Debug.Log("NET UPDATE " + player.uid + " name " + player.name + "team" + player.team + " player.kill" + player.kill);
         observed.UID = player.uid;
         observed.team =  player.team;
         observed.PlayerName = player.name;
@@ -78,5 +79,27 @@ public class PlayerView : MonoBehaviour {
         observed.Score.Assist = player.assist;
         observed.Score.Death = player.death;
         observed.Score.RobotKill = player.robotKill;
+        User user = NetworkController.Instance.GetUserById(ownerId);
+        if (user.GetVariable("lvl") != null)
+        {
+            observed.Score.Lvl = user.GetVariable("lvl").GetIntValue();
+            observed.Score.rating = player.rating;
+        }
+    }
+
+    public void SendStats()
+    {
+        if (NetworkController.Instance.isSingle)
+        {
+            return;
+        }
+        PlayerModel player = new PlayerModel();
+      
+        player.rating    = observed.Score.rating ;
+        player.kill = observed.Score.Kill;
+        player.aikill = observed.Score.AIKill;
+        player.assist = observed.Score.Assist;
+        player.death= observed.Score.Death;
+        NetworkController.Instance.SetStats(player);
     }
 }

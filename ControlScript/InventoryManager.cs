@@ -145,7 +145,10 @@ public class InventoryManager : MonoBehaviour {
 	
 	public void TakeGrenade(){
 		if (owner.foxView.isMine) {
-			beforeGrenade =indexWeapon;
+            if (indexOfSlot[(int)SLOTTYPE.GRENADE] != indexWeapon)
+                beforeGrenade = indexWeapon;
+
+		
 
            
             _ChangeWeapon(indexOfSlot[(int)SLOTTYPE.GRENADE]);
@@ -154,8 +157,9 @@ public class InventoryManager : MonoBehaviour {
   
 	public void PutGrenadeAway(){
 		if (owner.foxView.isMine) {
-	
-			_ChangeWeapon(beforeGrenade);
+            currentWeapon.PutAway();
+            owner.SetWeaponType(myWeapons[beforeGrenade].animType);
+			
 		}
 	}
     public void TakeMelee()
@@ -175,7 +179,7 @@ public class InventoryManager : MonoBehaviour {
         {
            // Debug.Log("beforeMelee"+beforeMelee);
             currentWeapon.PutAway();
-            owner.animator.SetWeaponType(myWeapons[beforeMelee].animType);
+            owner.SetWeaponType(myWeapons[beforeMelee].animType);
         }
     }
 	//Destroy weapon and make pawn empty handed
@@ -321,6 +325,28 @@ public class InventoryManager : MonoBehaviour {
 		return false;
 	}
 
+    public BaseWeapon GetCurWeapon(){
+        int grenadeSlot = indexOfSlot[(int)SLOTTYPE.GRENADE];
+        if (indexWeapon == grenadeSlot)
+        {
+            return myWeapons[beforeGrenade];
+        }
+        else
+        {
+            return myWeapons[indexWeapon];
+        }
+    }
+    public BaseWeapon GetGrenade()
+    {
+        int grenadeSlot = indexOfSlot[(int)SLOTTYPE.GRENADE];
+        if (grenadeSlot <0)
+        {
+            return null;
+        }
+       
+        return myWeapons[grenadeSlot];
+       
+    }
 
 	//AMMO BAG SECTION END
 
@@ -465,7 +491,7 @@ public class InventoryManager : MonoBehaviour {
         }
         owner.animator.WeaponChange();
         cahcedIndex = newIndex;
-        owner.animator.SetWeaponType(myWeapons[cahcedIndex].animType);
+        owner.SetWeaponType(myWeapons[cahcedIndex].animType);
 		//_ChangeWeapon(newIndex);
 	}
 	public void PrevWeapon(){
@@ -493,7 +519,7 @@ public class InventoryManager : MonoBehaviour {
 		//
         owner.animator.WeaponChange();
        cahcedIndex = newIndex;
-       owner.animator.SetWeaponType(myWeapons[cahcedIndex].animType);
+       owner.SetWeaponType(myWeapons[cahcedIndex].animType);
 		//_ChangeWeapon(newIndex);
 	}
 
@@ -503,6 +529,12 @@ public class InventoryManager : MonoBehaviour {
     }
 	//Change weapon in hand
 	public void ChangeWeapon(int newWeapon){
+        newWeapon = indexOfSlot[newWeapon];
+        if (newWeapon == -1)
+        {
+            return;
+        }
+
 		if (indexWeapon != newWeapon) {
             if (!owner.animator.CanWeaponChange())
             {
@@ -510,7 +542,7 @@ public class InventoryManager : MonoBehaviour {
             }
             owner.animator.WeaponChange();
             cahcedIndex = newWeapon;
-            owner.animator.SetWeaponType(myWeapons[cahcedIndex].animType);
+            owner.SetWeaponType(myWeapons[cahcedIndex].animType);
 			//_ChangeWeapon(newWeapon);	
 		}
 	}
@@ -524,7 +556,7 @@ public class InventoryManager : MonoBehaviour {
         int meleeSlot = indexOfSlot[(int)SLOTTYPE.MELEE];
         if (newWeapon == grenadeSlot || newWeapon== meleeSlot)
         {
-            owner.animator.SetWeaponType(myWeapons[newWeapon].animType);
+            owner.SetWeaponType(myWeapons[newWeapon].animType);
 
         }
 		BaseWeapon firstWeapon = myWeapons[newWeapon];

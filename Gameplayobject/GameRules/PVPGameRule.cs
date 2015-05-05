@@ -96,6 +96,8 @@ public class PVPGameRule : GameRule {
                 teamKill[i] = (int)pvpmodel.teamKill[i];
                 teamScore[i] = (int)pvpmodel.teamScore[i];
             }
+            Debug.Log(timer);
+            timer = pvpmodel.time;
           
             if (!isGameEnded && pvpmodel.isGameEnded)
             {

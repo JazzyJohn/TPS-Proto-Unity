@@ -27,7 +27,10 @@ namespace nstuff.juggerfall.extension.models
 	    public int team;
 
         public int userId;
-		
+
+        public int rating;
+       
+
 		public PlayerModel()
         {
 
@@ -293,6 +296,8 @@ namespace nstuff.juggerfall.extension.models
         public ArrayList teamScore;
 
         public ArrayList teamKill;
+
+        public float time;
     }
 	 [Serializable]
     public class PVPHuntGameRuleModel : GameRuleModel
@@ -311,7 +316,7 @@ namespace nstuff.juggerfall.extension.models
 
         public ArrayList teamScore;
 
-       
+        public float time;
     }
 	 [Serializable]
     public class RunnerGameRuleModel : GameRuleModel

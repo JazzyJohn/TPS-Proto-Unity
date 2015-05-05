@@ -10,7 +10,7 @@
 	</keys>
 	<keys>
 		<name>Use</name>
-		<default>Mouse2</default>
+		<default>E</default>
 	</keys>
 	<keys>
 		<name>Fire2</name>
@@ -55,7 +55,7 @@
 	</keys>
 	<keys>
 		<name>MeleeHit</name>
-		<default>E</default>
+		<default>F</default>
 	</keys>
 	<keys>
 		<name>SwitchShoulder</name>

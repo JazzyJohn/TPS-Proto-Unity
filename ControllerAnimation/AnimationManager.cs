@@ -7,7 +7,7 @@ public enum AnimType {TAUNT};
 public enum AnimDirection {Front,Back};
 
 public delegate void UpdateFinished();
-public class AnimationManager : MonoBehaviour
+public class AnimationManager : MonoBehaviour, IAnimationManager
 {
     private float
         directionAxisZ,
@@ -26,9 +26,9 @@ public class AnimationManager : MonoBehaviour
         animator = GetComponent<Animator>();
 		if (aimPos == null) {
 			aimPos = gameObject.GetComponentInChildren<IKcontroller> ();
-            aimPos.AddAction(FinisedIKUpdate);
+            //aimPos.AddAction(FinisedIKUpdate); //empty method. fixed by ssrazor
 		}
-     
+
         pawn =transform.root.GetComponent<Pawn>();
         if (animator == null)
             Debug.LogError("Animator not find!", this);
@@ -37,14 +37,46 @@ public class AnimationManager : MonoBehaviour
         raggdollRoot = gameObject.GetComponentInChildren<RaggdollRoot>();
     }
 
+	public void SetAnimatorBool(string boolName, bool boolValue)
+	{
+		animator.SetBool(boolName, boolValue);
+	}
 
-    public void FinisedIKUpdate()
+	public void AimEvalToWeight(float weight)
+	{
+		aimPos.EvalToWeight(1);
+	}
+	public void AimSetWeight(float weight)
+	{
+		aimPos.SetWeight(0);
+	}
+	public void AimOff()
+	{
+		aimPos.AimOff();
+	}
+	public void AimOn()
+	{
+		aimPos.AimOn();
+	}
+
+	public bool IsActive()
+	{
+		return gameObject.activeSelf;
+	}
+
+	public bool InTransition()
+	{
+		return animator.IsInTransition(0);
+    }
+
+	public void FinisedIKUpdate()
     {
 		if(pawn!=null&&pawn.CurWeapon!=null){
 			pawn.CurWeapon.UpdateCahedPosition();
-			
+
 		}
     }
+
    /* /// <summary>
     /// Задает или возвращает значение воспроизведения скорости анимации
     /// </summary>
@@ -77,7 +109,7 @@ public class AnimationManager : MonoBehaviour
     }
     /// <summary>
     /// Служит для определения выбора одно из вариантов позы смерти.
-    /// Принимает числа больше ноля. Каждое число соотсветсвует позе. 
+    /// Принимает числа больше ноля. Каждое число соотсветсвует позе.
     /// </summary>
     /// <param name="poseDeath"></param>
   /*  public void ApllyDeath(int poseDeath)
@@ -89,7 +121,7 @@ public class AnimationManager : MonoBehaviour
     /// <summary>*/
     /// Служит для определения выбора одно из вариантов перелазанья.
     /// Может быть вызвано только при движении. Принимает числа больше ноля.
-    /// Каждое число соотсветсвует позе. 
+    /// Каждое число соотсветсвует позе.
     /// </summary>
     /// <param name="climbLedgePose"></param>
  /*   public void ApllyClimbLedge(int climbLedgePose)
@@ -103,7 +135,7 @@ public class AnimationManager : MonoBehaviour
     /// </summary>
     /// <param name="jump"></param>
     public virtual void ApllyJump(bool jump)
-    {	
+    {
 		//if (animator.layerCount >= 3) {
 						//AnimatorStateInfo state = animator.GetCurrentAnimatorStateInfo ();
 		switch(jump)
@@ -121,19 +153,19 @@ public class AnimationManager : MonoBehaviour
 			break;
 		}
 			//	}
-				
+
     }
 	public virtual void DoubleJump(){
 		animator.SetBool ("StandUp", false);
 		animator.SetBool ("Jump", true);
 		animator.SetBool ("Grounded", false);
-	
+
 	}
 	/*public bool GetJump(){
 		return animator.GetBool("Jump");
 	} */
-	
-	
+
+
     /// <summary>
     /// Reset all animation to default
     /// </summary>
@@ -155,9 +187,9 @@ public class AnimationManager : MonoBehaviour
 			animator.SetBool ("StandUp", false);
 		}
 		animator.SetBool("WallRunL", leftW);
-		
+
 		animator.SetBool("WallRunR", rightW);
-		
+
 		animator.SetBool("WallRunUp", frontW);
 	}
 	//for Sprint Additional animation like jetpack in subclass
@@ -166,7 +198,7 @@ public class AnimationManager : MonoBehaviour
 	}
 	//for freefall no DoubleJump Additional animation like jetpack in subclass
 	public virtual void FreeFall(){
-		
+
 	}
 	//Pulling weapon up near wall;
 	public void WeaponDown(bool value){
@@ -191,22 +223,22 @@ public class AnimationManager : MonoBehaviour
 		animator.SetTrigger(name.ToString());	 //Заменил с була на тригер
 	}
 	public void StopAttackAnim(string name){
-		animator.SetBool(name, false);	
-		
+		animator.SetBool(name, false);
+
 	}
 	/// <summary>
     /// IS we under IK controll
     /// </summary>
 	/*public bool IsIk(){
         return aimPos != null && aimPos.IsIk();
-	
+
 	}*/
     /// <summary>
     /// Turn on and of IK of aiming
     /// </summary>
     public void ToggleAimPos(bool state){
        // Debug.Log(state);
-		
+
        if (aimPos != null) {
 
             if (state)
@@ -231,24 +263,24 @@ public class AnimationManager : MonoBehaviour
 //        Debug.Log("ikON");
 		ToggleAimPos(true);
 	}
-	
+
 	public void StartPullingUp(){
 
 
 
-        ToggleAimPos(false);	
-		animator.SetBool("PullUp", true);	
+        ToggleAimPos(false);
+		animator.SetBool("PullUp", true);
 		SetNotMainLayer (0.0f);
 	}
 	public void FinishPullingUp(){
-        ToggleAimPos(true);	
-		animator.SetBool("PullUp", false);	
+        ToggleAimPos(true);
+		animator.SetBool("PullUp", false);
 		SetNotMainLayer (1.0f);
 	}
 	private void SetNotMainLayer(float weight){
 		for(int i =1; i<animator.layerCount;i++){
-			animator.SetLayerWeight (i, weight);		
-			
+			animator.SetLayerWeight (i, weight);
+
 		}
 
 	}
@@ -283,11 +315,11 @@ public class AnimationManager : MonoBehaviour
 			return;
 		}
         //Debug.Log(State);
-            
+
 		animator.SetInteger ("GunType",State);
 	}
 	public void ReloadStart(){
-	
+
 		animator.SetBool ("Reload",true);
 		IKOff ();
 	}
@@ -297,7 +329,7 @@ public class AnimationManager : MonoBehaviour
         {
             return false;
         }
-      
+
         return true;
     }
     public void WeaponChange()
@@ -330,13 +362,13 @@ public class AnimationManager : MonoBehaviour
 			case AnimDirection.Back:
                 animator.SetTrigger("Back_death");
 				break;
-              
-		
+
+
 		}
 	}
 	public void EquipWeaponNow()
 	{
-        inWeaponChange = false;
+       
 	    pawn.ChangeWeapon();
 	}
 	public void UnEquipWeaponNow()
@@ -354,7 +386,7 @@ public class AnimationManager : MonoBehaviour
 	public void StopTaunt(){
 		SetNotMainLayer (1.0f);
 		transform.parent.SendMessage ("StopTaunt", SendMessageOptions.DontRequireReceiver);
-		
+
 	}
 	//I'm not sure in necessity of this function maybe we should change logic of some script to get rid of it . JazzyJohn.
 	public void SetSome(string some, bool value){
@@ -427,27 +459,41 @@ public class AnimationManager : MonoBehaviour
 
     void Update()
     {
-        if (!aimPos.ActiveAim()&& pawn != null && pawn.CurWeapon != null)
+        if (aimPos != null && !aimPos.ActiveAim() && pawn != null && pawn.CurWeapon != null)
         {
             pawn.CurWeapon.UpdateCahedPosition();
 
         }
     }
+    public void ThrowGrenadeNow()
+    {
+        pawn.CurWeapon.StartDamage();
+    }
     public void PutGrenadeAway()
     {
-        Debug.Log("PutGrenadeAway");
+       // Debug.Log("PutGrenadeAway");
+        inWeaponChange = true;  
         pawn.StopGrenadeThrow();
-        aimPos.AimOff();
+        IKOff();
     }
     public void PutMeleeAway()
     {
-        Debug.Log("PutMeleeAway");
+        //Debug.Log("PutMeleeAway");
+        inWeaponChange = true;
         pawn.PutMeleeAway();
-        aimPos.AimOff();
+        IKOff();
     }
     public void MeleeStartDamage()
     {
         pawn.CurWeapon.StartDamage();
+    }
+    public void SetMount(bool state)
+    {
+        animator.SetBool("Mount", state);
+    }
+    public void WeaponChangeEnd()
+    {
+        inWeaponChange = false ;
     }
 	/*[Serializable]
 	public class Leg
@@ -459,7 +505,7 @@ public class AnimationManager : MonoBehaviour
 		[HideInInspector]
 		public float BonesLenght;
 		public void LegStep(){
-		
+
 			LegBone LegBoneFirst = LegBones[0];
 			LegBone LegBoneEnd = LegBones[LegBones.Length - 1];
 			Vector3 RayPoint = new Vector3(LegBoneEnd.Bone.position.x, LegBoneFirst.Bone.position.y, LegBoneEnd.Bone.position.z);

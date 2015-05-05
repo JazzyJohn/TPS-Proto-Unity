@@ -70,9 +70,7 @@ public class Pawn : DamagebleObject
     public const float ASSIT_FORGET_TIME = 30.0f;
 
     protected LayerMask wallRunLayers = 1;
-
     private LayerMask climbLayers = 1 << 9; // Layer 9
-
     public LayerMask seenlist = 1;
 
     public static LayerMask AIM_MASK = 1;
@@ -81,9 +79,9 @@ public class Pawn : DamagebleObject
     //If this spawn pre defained by game designer we don't want to start in on start but on AIDirector start so set this to false;
 
     public bool isSpawned = true;
-	
+
 	public bool isSpawnImortality = false;
-	
+
 	public float spawnImortalityDuration= 3.0f;
     //Weapon that in hand
     public BaseWeapon CurWeapon;
@@ -91,11 +89,11 @@ public class Pawn : DamagebleObject
     public List<BaseArmor> armors = new List<BaseArmor>();
 
     public Transform weaponSlot;
-	
+
 	public Transform[] putAwaySlots;
 
     public Transform head;
-    
+
     //Nautaral weapons like hand or claws
 
     public Transform myTransform;
@@ -118,10 +116,10 @@ public class Pawn : DamagebleObject
 
     public static float aimRange = 1000.0f;
 
-    //rotation for moment when rotation of camera and pawn can be different e.t.c wall run	
+    //rotation for moment when rotation of camera and pawn can be different e.t.c wall run
     protected Vector3 forwardRotation;
 
-    public AnimationManager animator;
+    public IAnimationManager animator;
 
     private CharacterState _characterState;
 
@@ -212,7 +210,7 @@ public class Pawn : DamagebleObject
     public float groundSprintSpeed;
 
     public float groundRunSpeed;
-	
+
 	public float groundCrouchSpeed;
 
     public float flySpeed;
@@ -271,30 +269,7 @@ public class Pawn : DamagebleObject
 
             _isGrounded = value;
 
-            RaycastHit hitGround; // Луч (+)
 
-            switch (characterState) // Если прыжок проверить растояние (+)
-            {
-                case CharacterState.Jumping:
-                case CharacterState.DoubleJump:
-                    if (Physics.Raycast(transform.position, -Vector3.up, out hitGround))
-                    {
-                        distanceToGround = hitGround.distance;
-                        if (distanceToGround < 0.35 + GetComponent<CapsuleCollider>().height / 2)
-                        {
-                            animator.animator.SetBool("DistanceJump", false);
-                        }
-                        else
-                        {
-                            animator.animator.SetBool("DistanceJump", true);
-                        }
-                    }
-                    else
-                    {
-                        animator.animator.SetBool("DistanceJump", true);
-                    }
-                    break;
-            }
         }
 
 
@@ -316,13 +291,13 @@ public class Pawn : DamagebleObject
     public InventoryManager ivnMan;
 
     public bool isAiming = false;
-	
+
 	public bool isFps= false;
 
     public float aimModCoef = -10.0f;
 
   	public float aimCrouchPercentMultiplier =0.1f;
-	
+
 	public float aimJumpPercentMultiplier=0.1f;
 
     public float aimIdlePercentMultiplier = 0.25f;
@@ -358,7 +333,7 @@ public class Pawn : DamagebleObject
     //effects
 
 	public PawnEffectController effectController;
-	
+
 
 
     //звуки
@@ -432,14 +407,14 @@ public class Pawn : DamagebleObject
         {
             AIM_MASK =1 | LayerMask.GetMask("Damagable", "PlayerDamage", "Default");
         }
-         
+        _rb = HelperGameObject.GetComponentInChildren<Rigidbody>(this);
+        capsule = HelperGameObject.GetComponentInChildren<CapsuleCollider>(this);
+        myCollider = capsule;
+        animator = HelperGameObject.GetComponentOrInterfaceInChildren<IAnimationManager>(this);
+
         myTransform = transform;
         ivnMan = GetComponent<InventoryManager>();
-        _rb = GetComponent<Rigidbody>();
-        capsule = GetComponent<CapsuleCollider>();
-        myCollider = collider;
         foxView = GetComponent<FoxView>();
-		animator = transform.GetComponentInChildren<AnimationManager>();
         PlayerManager.instance.addPawn(this);
         aSource = GetComponent<AudioSource>();
         if (!isSpawned)
@@ -470,7 +445,7 @@ public class Pawn : DamagebleObject
         {
             ivnMan.Init();
         }
-     
+
     }
 	public void SpawnImmortalityEnd(){
 		isSpawnImortality= false;
@@ -479,7 +454,10 @@ public class Pawn : DamagebleObject
     // Use this for initialization
     protected void Start()
     {
-        if (isSpawned || !foxView.isMine)
+		// required components from self or childs. by ssrazor
+
+
+		if (isSpawned || !foxView.isMine)
         {
             StartPawn();
         }
@@ -496,7 +474,7 @@ public class Pawn : DamagebleObject
         isActive = true;
         if (effectController!=null&&effectController.IsSpawn())
         {
-        
+
             isSpawn = true;//отключаем движения и повреждения
         }
 
@@ -506,17 +484,17 @@ public class Pawn : DamagebleObject
             Destroy(GetComponent<ThirdPersonController>());
             Destroy(GetComponent<PlayerCamera>());
 
-            GetComponent<Rigidbody>().isKinematic = true;
+            _rb.isKinematic = true;
             //ivnMan.Init ();
         }
         else
         {
-           
+
             cameraController = GetComponent<PlayerCamera>();
             isAi = cameraController == null;
             SetCurWeaponFov();
         }
-       
+
         mainAi = GetComponent<AIBase>();
 
         isAi = mainAi != null;
@@ -533,7 +511,7 @@ public class Pawn : DamagebleObject
 
         correctPlayerPos = transform.position;
 
-    
+
         centerOffset = capsule.bounds.center - myTransform.position;
         headOffset = centerOffset;
         headOffset.y = capsule.bounds.max.y - myTransform.position.y- headOddsetFloat;
@@ -569,7 +547,7 @@ public class Pawn : DamagebleObject
 
     }
 	public void AddExternalCharacteristic(List<CharacteristicToAdd> effects){
-		charMan.AddList(effects);		
+		charMan.AddList(effects);
 	}
     public int GetMaxHealth()
     {
@@ -583,7 +561,7 @@ public class Pawn : DamagebleObject
 
         wallRunSpeed = blueprint.wallRunSpeed * speedMod;
 
-        groundSprintSpeed = blueprint.groundSprintSpeed * ((1 + (float)GetValue(CharacteristicList.SPEED) + (float)GetValue(CharacteristicList.SPRINT_SPEED)) / 100f);
+        groundSprintSpeed = blueprint.groundSprintSpeed * ((100f + (float)GetValue(CharacteristicList.SPEED) + (float)GetValue(CharacteristicList.SPRINT_SPEED)) / 100f);
 
         flyForwardSpeed = blueprint.flyForwardSpeed * speedMod;
 
@@ -634,7 +612,7 @@ public class Pawn : DamagebleObject
         idArmor = Choice._BodyArmor[myId],
         idHead = Choice._HeadArmor[myId],
         idTaunt = Choice._Taunt[myId];
-      
+
         if (!idPersonal.IsSameIndex(WeaponIndex.Zero))
         {
             ivnMan.SetSlot(ItemManager.instance.GetWeaponprefabByID(idPersonal));
@@ -678,7 +656,7 @@ public class Pawn : DamagebleObject
         {
             damage.Damage = damage.Damage * HEAD_SHOOT_MULTIPLIER;
             allPrecent += GetValue(CharacteristicList.DAMAGE_REDUCE_HEAD);
-            
+
         }
         foreach (BaseArmor armor in armors)
         {
@@ -710,13 +688,23 @@ public class Pawn : DamagebleObject
 
     public override void Damage(BaseDamage damage, GameObject killer)
     {
+
+        Pawn killerPawn = killer.GetComponent<Pawn>();
+        if (!foxView.isMine)
+        {
+            if (killerPawn != null)
+            {
+                foxView.LowerHPRequest(damage, killerPawn.foxView.viewID);
+            }
+
+        }
         if (isSpawn || killer == null || !isActive)
         {//если только респавнились, то повреждений не получаем
             return;
         }
 
-      
-        
+
+
         //вопли при попадании
         //выбираются случайно из массива. Звучат не прерываясь при следующем вызове
         if (lastPainSound + 1.0f < Time.time && painSoundsArray.Length > 0)
@@ -727,14 +715,13 @@ public class Pawn : DamagebleObject
         }
 
 
-        Pawn killerPawn = killer.GetComponent<Pawn>();
         if (killerPawn != null && killerPawn.team != 0 && killerPawn.team == team && !PlayerManager.instance.frendlyFire && killerPawn != this)
         {
 
             return;
         }
-       
-       
+
+
         if (foxView.isMine)
         {
 
@@ -760,7 +747,7 @@ public class Pawn : DamagebleObject
                     entry = new DamagerEntry(killerPawn);
                     damagers.Add(entry);
                 }
-               
+
                 entry.forgetTime = Time.time + ASSIT_FORGET_TIME;
                 entry.amount += damage.Damage;
                 entry.lastHitDirection = damage.pushDirection;
@@ -786,16 +773,16 @@ public class Pawn : DamagebleObject
         else
         {
             lastHitDirection = damage.pushDirection;
-           
+
         }
-        	if (damage.sendMessage)
-			{
-				AddEffect(damage.hitPosition,damage.pushDirection ,damage.type);
-			}
+        if (damage.sendMessage)
+		{
+			AddEffect(damage.hitPosition,damage.pushDirection ,damage.type);
+		}
         if (killerPawn == null && foxView.isMine)
         {
             ResolvedDamage(damage);
-		
+
 			if(CanBeDamaged()){
 				StatisticManager.instance.AddDamage(Mathf.RoundToInt(damage.Damage));
 				base.Damage(damage, killer);
@@ -807,18 +794,18 @@ public class Pawn : DamagebleObject
             if (foxView.isMine)
             {
                 ResolvedDamage(damage);
-   			   
+
 				if(CanBeDamaged()){
 					base.Damage(damage, killer);
 				}
             }
             else
             {
-               
-                foxView.LowerHPRequest(damage, killerPawn.foxView.viewID);
+
+
                 ResolvedDamage(damage);
             }
-          
+
         }
         if (killerPawn != null)
         {
@@ -834,14 +821,39 @@ public class Pawn : DamagebleObject
             AddEffect(damage.hitPosition, damage.pushDirection, damage.type);
         }
         //Debug.Log ("DAMAGE");
-       
+
     }
-    //For network purpose 
+    //For network purpose
     public void LowerHealth(BaseDamageModel damageModel, GameObject killer)
     {
+
+
+
+        Pawn killerPawn = killer.GetComponent<Pawn>();
+        if (isSpawn || killer == null || !isActive)
+        {//если только респавнились, то повреждений не получаем
+            return;
+        }
+
+
+
+        //вопли при попадании
+        //выбираются случайно из массива. Звучат не прерываясь при следующем вызове
+        if (lastPainSound + 1.0f < Time.time && painSoundsArray.Length > 0)
+        {
+            lastPainSound = Time.time;
+            sControl.playClipsRandom(painSoundsArray);
+
+        }
+
+
+        if (killerPawn != null && killerPawn.team != 0 && killerPawn.team == team && !PlayerManager.instance.frendlyFire && killerPawn != this)
+        {
+
+            return;
+        }
         BaseDamage damage = damageModel.GetDamage();
         ResolvedDamage(damage);
-        Pawn killerPawn = killer.GetComponent<Pawn>();
         if (killerPawn != null)
         {
 
@@ -874,7 +886,7 @@ public class Pawn : DamagebleObject
         {
             eventHandler.Damage(killer, damage.Damage);
         }
-		
+
         //Debug.Log ("DAMAGE");
 		if (damage.sendMessage)
 		{
@@ -946,8 +958,9 @@ public class Pawn : DamagebleObject
 
             //StartCoroutine (CoroutineRequestKillMe ());
             Pawn killerPawn = null;
-       
+
             int killerID = -1;
+            string KillerName="";
             if (killer != null)
             {
                 killerPawn = killer.GetComponent<Pawn>();
@@ -969,15 +982,17 @@ public class Pawn : DamagebleObject
                             {
                                 killerPlayer.PawnKill(this, player, myTransform.position, killInfo);
                             }
-							
+
                         }
                     }
+                    KillerName = killerPawn.publicName;
                 }
 
+
             }
-		
-			
-            foxView.PawnDiedByKill(killerID);
+
+
+            foxView.PawnDiedByKill(killerID, KillerName);
 
             if (player != null)
             {
@@ -1036,15 +1051,15 @@ public class Pawn : DamagebleObject
             mainAi.Death();
         }
         ivnMan.PawnDeath();
-		
+
         ActualKillMe();
 		//AssistLogic
         if (killerPlayer != Player.localPlayer)
         {
             DamagerEntry entry = damagers.Find(delegate(DamagerEntry searchentry) {
 //                Debug.Log("PLAYER ASSIST" + searchentry.pawn.player + " " + (searchentry.pawn.player == Player.localPlayer));
-                return searchentry.pawn.player == Player.localPlayer; 
-            
+                return searchentry.pawn.player == Player.localPlayer;
+
             });
   //          Debug.Log("PLAYER ASSIST" +entry);
             if (entry != null)
@@ -1062,7 +1077,7 @@ public class Pawn : DamagebleObject
         if (!foxView.isMine && player!=null)
         {
             player.Score.Death++;
-           
+
         }
         if (foxView.isMine)
         {
@@ -1076,7 +1091,7 @@ public class Pawn : DamagebleObject
         health = 0;
         characterState = CharacterState.Dead;
         DamagerEntry last = RetrunLastDamager();
-       
+
         DeadPhysics();
         //Debug.Log(last);
         if (last == null)
@@ -1106,8 +1121,8 @@ public class Pawn : DamagebleObject
             GetComponent<ThirdPersonController>().enabled = false;
         }
 
-    
-       
+
+
     }
 
     public IEnumerator AfterAnimKill()
@@ -1116,7 +1131,7 @@ public class Pawn : DamagebleObject
         Destroy(gameObject);
     }
     //EFFECCT SECTION
-    void AddEffect(Vector3 position,Vector3 direction,DamageType type)
+    protected void AddEffect(Vector3 position,Vector3 direction,DamageType type)
     {
         if (player != null && player.isMine)
         {
@@ -1130,17 +1145,17 @@ public class Pawn : DamagebleObject
         {
             effectController.DamageEffect(type,position,direction);
         }
-		
+
     }
 
 
     //END OF EFFECT SECTIOn
-	
+
 	//MiniMAp and seen section
-	
-	
-	
-	
+
+
+
+
 
 	protected void UpdateMarkedLogic(){
 		if(timeMarked>0){
@@ -1157,11 +1172,11 @@ public class Pawn : DamagebleObject
 			timeMiniMapShow -= Time.deltaTime;
 		}
 	}
-	
+
 	protected void ResetShowTimer(){
 		timeShow = Player.localPlayer.GetShowTime(player);
 	}
-	
+
 	public void InitMark(){
 		foxView.SendMark();
 		MarkMe();
@@ -1181,7 +1196,7 @@ public class Pawn : DamagebleObject
 			return state;
 		}
 		return isMarked||timeShow>0;
-	
+
 	}
 	public bool OnMinimapShow(){
 		if(characterState == CharacterState.Sprinting){
@@ -1275,13 +1290,13 @@ public class Pawn : DamagebleObject
         {
             guiComponent.LocalPlayerSeeMe(distance, team, IsSeeMe(state));
         }
-		
-		
+
+
     }
     protected virtual void UpdateAnimator()
     {
         float strafe = 0;
-        //Debug.Log (strafe);	
+        //Debug.Log (strafe);
         float speed = 0;
         if (isDead)
         {
@@ -1289,7 +1304,7 @@ public class Pawn : DamagebleObject
         }
 
         //Debug.Log (speed);
-        if (animator != null && animator.gameObject.activeSelf)
+        if (animator != null && animator.IsActive())
         {
             if (foxView.isMine)
             {
@@ -1298,7 +1313,7 @@ public class Pawn : DamagebleObject
                 strafe = CalculateStarfe();
                 //Debug.Log(characterState);
                 speed = CalculateSpeed();
-                //Debug.Log(speed);	
+                //Debug.Log(speed);
                 switch (characterState)
                 {
                     case CharacterState.Jumping:
@@ -1355,18 +1370,18 @@ public class Pawn : DamagebleObject
                     Vector3 laimRotation;
                     if (isAi)
                     {
-                        laimRotation = aimRotation; 
+                        laimRotation = aimRotation;
                     }
                     else
                     {
                         laimRotation = myTransform.position + desiredRotation * Vector3.forward * aimRange;
                     }
-                 
+
                     /*if(animator.isWeaponAimable()){
                         Quaternion diference = Quaternion.FromToRotation(CurWeapon.muzzlePoint.forward,myTransform.forward);
 
                         Vector3 direction= laimRotation-myTransform.position;
-				
+
                         laimRotation =(diference *direction.normalized)*direction.magnitude +myTransform.position;
                     }*/
 
@@ -1379,7 +1394,7 @@ public class Pawn : DamagebleObject
             else
             {
                 strafe = CalculateRepStarfe();
-                //Debug.Log (strafe);	
+                //Debug.Log (strafe);
                 speed = CalculateRepSpeed();
 
                 switch (nextState)
@@ -1454,7 +1469,7 @@ public class Pawn : DamagebleObject
                        /*
                         if (characterState != CharacterState.Dead)
                         {
-                           
+
                             DeadPhysics();
                             float angle = Vector3.Dot(lastHitDirection, myTransform.forward);
                             // If last hit direction equals negative forward it's hit in face
@@ -1478,7 +1493,7 @@ public class Pawn : DamagebleObject
                         Quaternion diference = Quaternion.FromToRotation(CurWeapon.muzzlePoint.forward,myTransform.forward);
 
                         Vector3 direction= laimRotation-myTransform.position;
-				
+
                         laimRotation =(diference *direction.normalized)*direction.magnitude +myTransform.position;
                     }*/
 
@@ -1487,7 +1502,7 @@ public class Pawn : DamagebleObject
 
                 }
             }
-         
+
         }
 
     }
@@ -1528,7 +1543,7 @@ public class Pawn : DamagebleObject
         ProgressEdit();
         if (!isActive && !foxView.isMine)
         {
-            //replicate position to get rid off teleportation after bot is dead			
+            //replicate position to get rid off teleportation after bot is dead
             ReplicatePosition();
             return;
         }
@@ -1554,10 +1569,10 @@ public class Pawn : DamagebleObject
                     float regen = charMan.GetFloatChar(CharacteristicList.REGEN);
                     if (regen != 0)
                     {
-                       
-                        
+
+
                             health += (float)(regen) * Time.deltaTime;
-                       
+
                     }
                 }
                 if (player == Player.localPlayer)
@@ -1635,14 +1650,14 @@ public class Pawn : DamagebleObject
                 {
                     eurler = desiredRotation.eulerAngles;
                 }
-               
 
-            
+
+
                 eurler.z = 0;
                 eurler.x = 0;
                 if (characterState == CharacterState.WallRunning || characterState == CharacterState.PullingUp || characterState == CharacterState.Mount)
                 {
-                   
+
                 }
                 else
                 {
@@ -1730,7 +1745,7 @@ public class Pawn : DamagebleObject
             {
                 singleDPS key = activeDPS[i];
                 key.lastTime += Time.deltaTime;
-				
+
                 //Debug.Log(key.lastTime);
                 if (key.noOnwer)
                 {
@@ -1757,7 +1772,7 @@ public class Pawn : DamagebleObject
                 // Debug.Log(ldamage.Damage);
 
                 Damage(ldamage, key.killer);
-            
+
                     Pawn killerPawn = key.killer.GetComponent<Pawn>();
                     if (killerPawn != null && killerPawn.team != 0 && killerPawn.team == team && !PlayerManager.instance.frendlyFire && killerPawn != this)
                     {
@@ -1779,7 +1794,7 @@ public class Pawn : DamagebleObject
             }
         }
     }
-    //Net replication of position 
+    //Net replication of position
     public void ReplicatePosition()
     {
         if (Time.time - lastNetUpdate > 2.0f)
@@ -1811,7 +1826,7 @@ public class Pawn : DamagebleObject
         }
 
     }
-  
+
     //Weapon Section
     public void ChangeWeapon()
     {
@@ -1822,7 +1837,7 @@ public class Pawn : DamagebleObject
 
             ivnMan.ChangeWeapon();
         }
-		
+
     }
     public void UnEquipWeapon()
     {
@@ -1833,7 +1848,14 @@ public class Pawn : DamagebleObject
             player.WeaponChanged();
         }
     }
-
+    public void SetWeaponType(int animType)
+    {
+        animator.SetWeaponType(animType);
+        if (foxView.isMine)
+        {
+            foxView.WeaponType(animType);
+        }
+    }
     public virtual void StartFire()
     {
         ActualFire();
@@ -1874,21 +1896,21 @@ public class Pawn : DamagebleObject
             CurWeapon.StopPumping();
         }
     }
-	
+
 	public virtual void StopGrenadeThrow(){
 		if(CurWeapon.slotType==SLOTTYPE.GRENADE){
 
             ivnMan.PutGrenadeAway();
 		}
 	}
-	
+
 	public virtual void StartGrenadeThrow(){
 		if(CanUseGrenade()){
             UnEquipWeapon();
             ivnMan.TakeGrenade();
-        } 
-   
-		
+        }
+
+
 	}
 	public virtual bool CanUseGrenade(){
         return characterState != CharacterState.Sprinting && characterState != CharacterState.Jumping && ivnMan.HasGrenade()&&CurWeapon.slotType!=SLOTTYPE.MELEE;
@@ -1896,7 +1918,7 @@ public class Pawn : DamagebleObject
 	public virtual void ThrowGrenade(){
 		if(CurWeapon.slotType==SLOTTYPE.GRENADE){
             CurWeapon.StartFire();
-           
+
 		}
 	}
     public bool CanChange()
@@ -1923,15 +1945,15 @@ public class Pawn : DamagebleObject
     {
 
         xAngle -= CurWeapon.GetAimDisplacment(isAiming);
-       
-        
+
+
         if (aimDisplacment == 0)
         {
             xAngle -= CurWeapon.aimDisplacmentCooled;
             aimDisplacment = CurWeapon.aimDisplacmentCooled;
         }
         xAngle = Mathf.Clamp(xAngle, cameraController.MinYAngle, cameraController.MaxYAngle);
-      
+
     }
     public void DisplacmentCoolDown()
     {
@@ -1953,7 +1975,7 @@ public class Pawn : DamagebleObject
         {
             ToggleAim(false);
         }
-        CurWeapon = newWeapon;	
+        CurWeapon = newWeapon;
         //Debug.Log (newWeapon);
         if (CurWeapon != null)
         {
@@ -1963,7 +1985,7 @@ public class Pawn : DamagebleObject
                 animator.SetWeaponType(CurWeapon.animType);
 			}
             weaponOffset = CurWeapon.MuzzleOffset();
-           
+
             SetCurWeaponFov();
 
             weaponRenderer = CurWeapon.GetComponentInChildren<Renderer>();
@@ -1975,7 +1997,7 @@ public class Pawn : DamagebleObject
         armors.Add(armor);
     }
 	public void ForcedWeaponAttach(BaseWeapon newWeapon){
-	
+
 	     newWeapon.AttachWeapon(weaponSlot, Vector3.zero, Quaternion.Euler(weaponRotatorOffset), this);
 	}
     public void SetCurWeaponFov()
@@ -2000,7 +2022,7 @@ public class Pawn : DamagebleObject
         {
             ivnMan.ChangeWeapon(weaponIndex);
         }
-       
+
     }
 
     public virtual void SwitchShoulder()
@@ -2030,7 +2052,7 @@ public class Pawn : DamagebleObject
     }
     public Vector3 getAimpointForWeapon(float speed)
     {
-        
+
         if (foxView.isMine)
         {
             if (isAi)
@@ -2077,8 +2099,8 @@ public class Pawn : DamagebleObject
         }
           xAngle += xDeltaAngle * fromOldRotationMod;
           xAngle = Mathf.Clamp(xAngle, cameraController.MinYAngle, cameraController.MaxYAngle);
-        
-       
+
+
             yAngle += yDeltaAngle * fromOldRotationMod;
         if (yAngle > 360)
         {
@@ -2090,14 +2112,15 @@ public class Pawn : DamagebleObject
         }
 
 
-        
-      
+
+
         desiredRotation = Quaternion.Euler(xAngle, yAngle,0.0f);
 
     }
     public void ResetDesireRotation(Pawn passenger)
     {
         desiredRotation = passenger.desiredRotation;
+        yAngle = desiredRotation.eulerAngles.y;
     }
     public virtual Quaternion GetDesireRotation()
     {
@@ -2173,8 +2196,8 @@ public class Pawn : DamagebleObject
                     wasHit = true;
                     targetpoint = hitInfo.point;
                     localTarget = hitInfo.transform;
-					
-					
+
+
                     //Debug.Log (curLookTarget);
 
 
@@ -2211,7 +2234,7 @@ public class Pawn : DamagebleObject
 
         }
     }
-	
+
 	public void SwitchLookTarget(Transform oldTarget,Transform newTarget){
 		if(oldTarget==newTarget){
 			return;
@@ -2229,13 +2252,13 @@ public class Pawn : DamagebleObject
 			if(tPawn!=null){
 				tPawn.ShowName();
 				if(player!=null&&tPawn!=null){
-				
+
 					if(tPawn.team==team){
 						player.CrosshairType(CrosshairColor.ALLY);
 					}else{
 						player.CrosshairType(CrosshairColor.ENEMY);
 					}
-				
+
 				}
 			}else{
 				if(player!=null){
@@ -2247,7 +2270,7 @@ public class Pawn : DamagebleObject
 				player.CrosshairType(CrosshairColor.NEUTRAL);
 			}
 		}
-		
+
 	}
 	void HideName(){
 		guiComponent.HideName();
@@ -2261,11 +2284,20 @@ public class Pawn : DamagebleObject
         weaponDirection = (spot - (weaponSlot.position + myTransform.forward * weaponOffset)).normalized;
         return Vector3.Dot(charDirection, weaponDirection) < 0;
     }
-    void OnDrawGizmos()
+    void OnDrawGizmosSelected()
     {
-        //Gizmos.color = Color.yellow;
-        //Gizmos.DrawSphere(aimRotation, 1);
-    }
+		if (capsule == null)
+			return;
+
+		var dist = GetCheckDistance();
+		var pos1 = GetCheckStartPoint();
+		var pos2 = new Vector3(pos1.x, pos1.y - dist, pos1.z);
+		if (isGrounded)
+			Gizmos.color = Color.blue;
+		else
+			Gizmos.color = Color.red;
+		Gizmos.DrawLine(pos1, pos2);
+	}
     public Vector3 getCachedAimRotation()
     {
         return aimRotation;
@@ -2280,18 +2312,18 @@ public class Pawn : DamagebleObject
         }
         return 0.0f;
     }
-	
 
-	
+
+
 	public float AimingCoefMultiplier(){
 		float mult= 1.0f;
 		   switch (characterState)
         {
-           
+
 			case CharacterState.Crouching:
 				mult-=aimCrouchPercentMultiplier;
             break;
-          
+
             case CharacterState.Jumping:
 				mult+=aimJumpPercentMultiplier;
 			break;
@@ -2300,8 +2332,8 @@ public class Pawn : DamagebleObject
                 break;*/
 		}
 		return mult;
-		
-	
+
+
 	}
 
 
@@ -2311,7 +2343,7 @@ public class Pawn : DamagebleObject
         {
             return;
         }
-	
+
         if (CurWeapon!=null)
         {
             if (CurWeapon.ToggleAim(value) && value)
@@ -2319,7 +2351,7 @@ public class Pawn : DamagebleObject
                 return;
             }
         }
-		
+
         isAiming = value;
         animator.ToggleAim(value);
         if (cameraController != null)
@@ -2332,7 +2364,7 @@ public class Pawn : DamagebleObject
             {
                 cameraController.ToggleAim(value,false);
             }
-            
+
         }
 		isFps= false;
         if (foxView.isMine && CurWeapon != null&&CurWeapon.isAimingFPS)
@@ -2350,6 +2382,18 @@ public class Pawn : DamagebleObject
     {
         return ivnMan.GetAmmo(CurWeapon.ammoType);
 
+    }
+    public BaseWeapon GetGun()
+    {
+        return ivnMan.GetCurWeapon();
+    }
+    public BaseWeapon GetGrenade()
+    {
+        return ivnMan.GetGrenade();
+    }
+    public int GetGrenadeInBag()
+    {
+        return ivnMan.GetAmmo(AMMOTYPE.GRENADE);
     }
     public BaseArmor GetArmor()
     {
@@ -2386,7 +2430,7 @@ public class Pawn : DamagebleObject
     }
     public virtual void Reload()
     {
-	
+
         if (CurWeapon != null&&characterState != CharacterState.Sprinting)
         {
             CurWeapon.ReloadStart();
@@ -2417,7 +2461,7 @@ public class Pawn : DamagebleObject
     }
 
 
-    //We must tell our gun it's time to spit some projectiles cause of animation 
+    //We must tell our gun it's time to spit some projectiles cause of animation
     public void WeaponShoot()
     {
         AnimationRelatedWeapon myWeapon = CurWeapon as AnimationRelatedWeapon;
@@ -2444,7 +2488,7 @@ public class Pawn : DamagebleObject
         }
         if (!animator.CanWeaponChange())
         {
-            Debug.Log("canChange");
+           // Debug.Log("canChange");
 
             return;
         }
@@ -2453,7 +2497,7 @@ public class Pawn : DamagebleObject
             UnEquipWeapon();
             ivnMan.TakeMelee();
             ActualFire();
-        } 
+        }
     }
     public void PutMeleeAway()
     {
@@ -2468,7 +2512,7 @@ public class Pawn : DamagebleObject
     {
         return characterState != CharacterState.Jumping&&CurWeapon.slotType!=SLOTTYPE.GRENADE;
     }
- 
+
     public void KickFinish()
     {
         if (mainAi != null)
@@ -2570,7 +2614,7 @@ public class Pawn : DamagebleObject
     }
 
 	public override  void clearDps(GameObject killer){
-		
+
         foreach (singleDPS key in activeDPS)
         {
             if (killer == key.killer)
@@ -2579,7 +2623,7 @@ public class Pawn : DamagebleObject
                 return;
             }
         }
-		
+
 	}
     public override void addDPS(BaseDamage damage, GameObject killer, float fireInterval = 1.0f)
     {
@@ -2773,7 +2817,7 @@ public class Pawn : DamagebleObject
 
         Vector3 tangVect = Vector3.zero, normal = Vector3.zero;
 
-        if (!animator.animator.IsInTransition(0) && !_rb.isKinematic)
+        if (!animator.InTransition() && !_rb.isKinematic)
         {
             if (leftW)
             {
@@ -2933,7 +2977,7 @@ public class Pawn : DamagebleObject
 
         foreach (ContactPoint contact in collisionInfo.contacts)
         {
-         
+
             Vector3 Direction = contact.point - myTransform.position - ((CapsuleCollider)myCollider).center;
             //Debug.Log (this.ToString()+collisionInfo.collider+Vector3.Dot(Direction.normalized ,Vector3.down) );
             float minAngle = 0.75f;
@@ -2944,7 +2988,7 @@ public class Pawn : DamagebleObject
             else
             {
                 CapsuleCollider capsule = ((CapsuleCollider)myCollider);
-                minAngle = Mathf.Atan(capsule.radius / capsule.height * 2);
+                minAngle = Mathf.Atan(capsule.radius / capsule.height * 2)  ;
             }
             if (Vector3.Dot(Direction.normalized, Vector3.down) > Mathf.Cos(minAngle))
             {
@@ -2956,7 +3000,7 @@ public class Pawn : DamagebleObject
            // Debug.DrawLine(myTransform.position + ((CapsuleCollider)myCollider).center, contact.point, Color.white);
 
         }
-        
+
 
 
     }*/
@@ -2974,7 +3018,7 @@ public class Pawn : DamagebleObject
         }
 
     }
-   
+
     public virtual void StopSprint()
     {
         jetPackEnable = false;
@@ -2988,7 +3032,7 @@ public class Pawn : DamagebleObject
 
     public float CalculateJumpVerticalSpeed(float targetJumpHeight)
     {
-        // From the jump height and gravity we deduce the upwards speed 
+        // From the jump height and gravity we deduce the upwards speed
         // for the character to reach at the apex.
         return Mathf.Sqrt(2 * targetJumpHeight * gravity);
     }
@@ -3007,7 +3051,7 @@ public class Pawn : DamagebleObject
         if (!_rb.isKinematic)
         {
 
-            _rb.AddForce(new Vector3(0, -gravity * rigidbody.mass, 0) + pushingForce);
+            _rb.AddForce(new Vector3(0, -gravity * _rb.mass, 0) + pushingForce);
         }
         if (!canMove)
         {
@@ -3027,7 +3071,7 @@ public class Pawn : DamagebleObject
         /* if(nextMovement.y==0){
              nextMovement.y = velocity.y;
          }*/
-        // nextMovement = nextMovement;// -Vector3.up * gravity + pushingForce / rigidbody.mass;
+        // nextMovement = nextMovement;// -Vector3.up * gravity + pushingForce / _rb.mass;
         Vector3 velocityChange;
         if (isAi)
         {
@@ -3057,7 +3101,7 @@ public class Pawn : DamagebleObject
                     if (_rb.isKinematic) _rb.isKinematic = false;
 
                     //Debug.Log (this+ " " +velocityChange);
-                    rigidbody.AddForce(velocityChange, ForceMode.VelocityChange);
+                    _rb.AddForce(velocityChange, ForceMode.VelocityChange);
 
                     if (nextState == CharacterState.Sprinting)
                     {
@@ -3071,7 +3115,7 @@ public class Pawn : DamagebleObject
                     }
                     if (nextState == CharacterState.Jumping)
                     {
-                        rigidbody.AddForce(velocityChange, ForceMode.VelocityChange);
+                        _rb.AddForce(velocityChange, ForceMode.VelocityChange);
 
                         Jump();
 
@@ -3113,7 +3157,7 @@ public class Pawn : DamagebleObject
                     }
                     if (isGrounded)
                     {
-                        rigidbody.AddForce(velocityChange, ForceMode.VelocityChange);
+                        _rb.AddForce(velocityChange, ForceMode.VelocityChange);
 
                         if (nextState == CharacterState.DoubleJump)
                         {
@@ -3171,7 +3215,7 @@ public class Pawn : DamagebleObject
                 velocityChange = nextMovement.normalized * flyForwardSpeed + Vector3.up * flySpeed - velocity;
                 animator.ApllyJump(true);
                 animator.WallAnimation(false, false, false);
-                //rigidbody.AddForce(velocityChange, ForceMode.VelocityChange);
+                //_rb.AddForce(velocityChange, ForceMode.VelocityChange);
                 if (!jetPackEnable)
                 {
                     if (isGrounded)
@@ -3254,7 +3298,7 @@ public class Pawn : DamagebleObject
         } else {
             //Debug.Log ("Air"+characterState);
             v = nextMovement.normalized.magnitude;
-			
+
             switch(nextState)
             {
             case CharacterState.DoubleJump:
@@ -3268,12 +3312,12 @@ public class Pawn : DamagebleObject
 
                 if(!WallRun (nextMovement,nextState)){
                     if(characterState==CharacterState.Idle
-                       ||characterState==CharacterState.Walking 
-                       ||characterState==CharacterState.Running 
+                       ||characterState==CharacterState.Walking
+                       ||characterState==CharacterState.Running
                        ||characterState==CharacterState.Sprinting){
                         characterState=CharacterState.Jumping;
                     }
-                    animator.ApllyJump(true);						
+                    animator.ApllyJump(true);
                     animator.WallAnimation(false,false,false);
                     if(characterState!=CharacterState.DoubleJump){
                         animator.FreeFall();
@@ -3288,7 +3332,7 @@ public class Pawn : DamagebleObject
                 }
                 break;
             }
-			
+
         }
         //Debug.Log(_rb.isKinematic);
         */
@@ -3300,7 +3344,7 @@ public class Pawn : DamagebleObject
     {
         if (lastJumpTime + 0.1f > Time.time)
         {
-            isGrounded = false;
+        isGrounded = false;
         }
         if (characterState == CharacterState.WallRunning)
         {
@@ -3312,7 +3356,7 @@ public class Pawn : DamagebleObject
 			isGrounded = true;
 			floorNormal = hitInfo.normal;
            // Debug.Log(hitInfo.collider);
-           // Debug.DrawLine(hitInfo.point, GetCheckStartPoint());
+
 		}
 		else
 		{
@@ -3320,11 +3364,10 @@ public class Pawn : DamagebleObject
             floorNormal = Vector3.up;
 		}
 
-      //  Debug.Log(isGrounded);
     }
-    float GetCheckDistance()
+	float GetCheckDistance()
     {
-        return (capsule.height / 2f) + groundCheckDistance - capsule.radius;
+		return (capsule.height / 2f) + groundCheckDistance + 0.05f;// - capsule.radius;
     }
 
     Vector3 GetCheckStartPoint()
@@ -3354,7 +3397,7 @@ public class Pawn : DamagebleObject
         {
             return!(nextState==CharacterState.Jumping||nextState==CharacterState.DoubleJump);
         }
-     
+
     }
     protected virtual void Jump()
     {
@@ -3502,10 +3545,10 @@ public class Pawn : DamagebleObject
     {
         if (jetPackCharge >= 1.0f)
         {
-          
+
             StartJetPack();
             animator.DoubleJump();
-           
+
             if (player != null)
             {
                 EventHolder.instance.FireEvent(typeof(LocalPlayerListener), "EventPawnDoubleJump", player);
@@ -3567,11 +3610,11 @@ public class Pawn : DamagebleObject
         {
             _rb.isKinematic = false;
             _rb.detectCollisions = true;
-            
+
             GetComponent<ThirdPersonController>().enabled = true;
 
         }
-       
+
        /* for (int i = 0; i < myTransform.childCount; i++)
         {
             myTransform.GetChild(i).gameObject.SetActive(true);
@@ -3582,7 +3625,7 @@ public class Pawn : DamagebleObject
         }
         transport = null;
         myTransform.parent = null;
-        
+
     }
 
     public void RemoteActivate()
@@ -3597,11 +3640,11 @@ public class Pawn : DamagebleObject
             _rb.isKinematic = true;
 
             _rb.detectCollisions = false;
-           
+
 
             GetComponent<ThirdPersonController>().enabled = false;
         }
-      
+
         /*for (int i = 0; i < myTransform.childCount; i++)
         {
             myTransform.GetChild(i).gameObject.SetActive(false);
@@ -3611,13 +3654,17 @@ public class Pawn : DamagebleObject
             foxView.DeActivate();
         }
         transport = player.GetRobot();
-       
+        characterState = CharacterState.Mount;
+        animator.SetMount(true);
+
+    }
+    public void Mount()
+    {
         myTransform.parent = transport.back;
         myTransform.localPosition = Vector3.zero;
         myTransform.localRotation = Quaternion.identity;
-        characterState = CharacterState.Mount;
-    }
 
+    }
     public void RemoteDeActivate()
     {
         //Debug.Log ("RPCDeActivate");
@@ -3638,7 +3685,7 @@ public class Pawn : DamagebleObject
     //end seen hear work
 
 
-    //VISUAL EFFECT SECTION 
+    //VISUAL EFFECT SECTION
 
     public void PlayTaunt()
     {
@@ -3696,25 +3743,25 @@ public class Pawn : DamagebleObject
         canMove = true;
     }
 
-		
+
 	public void HideRenders(){
 		Renderer[] renderers = GetComponentsInChildren<Renderer>();
         foreach (Renderer renderer in renderers) {
             renderer.enabled = false;
         }
-	
+
 	}
 	public void ShowRenders(){
 		Renderer[] renderers = GetComponentsInChildren<Renderer>();
         foreach (Renderer renderer in renderers) {
             renderer.enabled = true;
         }
-	
+
 	}
     //END OF VISULA EFFECT
 
 
-    //BUFF SECTION 
+    //BUFF SECTION
     public void AddBuff(int characteristic, object value)
     {
         switch ((CharacteristicList)characteristic)
@@ -3781,7 +3828,7 @@ public class Pawn : DamagebleObject
         SpeedInit();
     }
 
-   
+
     //END OF BUFF SECTION
 
 
@@ -3795,7 +3842,7 @@ public class Pawn : DamagebleObject
 
             RestartLocalVisibilite();
         }
-        rigidbody.isKinematic = false;
+        _rb.isKinematic = false;
     }
 
     public void RemoteSetAI(int group, int homeindex)
@@ -3836,13 +3883,13 @@ public class Pawn : DamagebleObject
 
         correctPlayerPos = pawn.position.MakeVector(correctPlayerPos);
         correctPlayerRot = pawn.rotation.MakeQuaternion(correctPlayerRot);
-//        Debug.Log("SPAWN IN"+correctPlayerPos); 
+//        Debug.Log("SPAWN IN"+correctPlayerPos);
         aimRotation = pawn.aimRotation.MakeVector(aimRotation);
         ToggleAim(pawn.isAiming);
         team = pawn.team;
         health = pawn.health;
         replicatedVelocity = correctPlayerPos - oldPos;
-        
+
         float oldTime = lastNetUpdate;
         lastNetUpdate = Time.time;
         replicatedVelocity = pawn.velocity.GetVector();
@@ -3861,13 +3908,20 @@ public class Pawn : DamagebleObject
         }
     }
 	public void InfoAboutDeath(ISFSObject data){
-		
+
 		data.PutInt("weaponId",killInfo.weaponId);
-        data.PutBool("headShot", killInfo.isHeadShoot);
+        if (killInfo.isHeadShoot)
+        {
+            data.PutBool("headShot", killInfo.isHeadShoot);
+        }
+        if (killInfo.isMelee)
+        {
+            data.PutBool("isMelee", killInfo.isMelee);
+        }
 	}
 
 
-    //For machine we turn off render but leave logic and movement 
+    //For machine we turn off render but leave logic and movement
     public void RestartLocalVisibilite()
     {
         if (!isLocalVisible)
@@ -3879,7 +3933,7 @@ public class Pawn : DamagebleObject
             isLocalVisible = true;
         }
     }
-    //For machine we turn on render 
+    //For machine we turn on render
     public void StopLocalVisibilite()
     {
         isLocalVisible = false;
@@ -3950,8 +4004,8 @@ public class Pawn : DamagebleObject
     public void gameEnded()
     {
         StopFire();
-       
+
         Destroy(gameObject);
-       
+
     }
 }

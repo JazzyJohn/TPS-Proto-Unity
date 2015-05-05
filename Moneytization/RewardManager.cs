@@ -51,6 +51,7 @@ public static class ParamLibrary{
 	public static string PARAM_AMMO_HIT= "AmmoHit";
 	
 	public static string PARAM_TASK_RESET= "taskReset";
+    public static string PARAM_MELEE_KILL="MeleeKill";
 }
 
 public class  RewardManager : MonoBehaviour, LocalPlayerListener,GameListener{ 
@@ -150,9 +151,10 @@ public class  RewardManager : MonoBehaviour, LocalPlayerListener,GameListener{
 	
         if(rewardMoneyDictionary.ContainsKey(reason)){
 			MoneyReward reward = rewardMoneyDictionary[reason];
-
-            upCash += Mathf.RoundToInt(reward.cash * PremiumManager.GetMultiplierMoney(reason, myPlayer.team));
-            upGold += Mathf.RoundToInt(reward.gold * PremiumManager.GetMultiplierMoney(reason, myPlayer.team));
+            int cahsReward =Mathf.RoundToInt(reward.cash * PremiumManager.GetMultiplierMoney(reason, myPlayer.team));
+            int goldReward = Mathf.RoundToInt(reward.gold * PremiumManager.GetMultiplierMoney(reason, myPlayer.team));
+            upCash += cahsReward;
+            upGold += goldReward;
             if (reward.cash != 0 || reward.gold != 0)
             {
                reward.Increment();
@@ -161,12 +163,12 @@ public class  RewardManager : MonoBehaviour, LocalPlayerListener,GameListener{
             {
                 if (reward.cash > 0)
                 {
-                    String rewardStr = TextGenerator.instance.GetMoneyText(reason, Mathf.RoundToInt(reward.cash * PremiumManager.GetMultiplierMoney(reason, myPlayer.team)));
+                    String rewardStr = TextGenerator.instance.GetMoneyText(reason, Mathf.RoundToInt(cahsReward));
                     PlayerMainGui.instance.AddMessage(rewardStr, PlayerMainGui.MessageType.MONEY_REWARD);
                 }
                 if (reward.gold > 0)
                 {
-                    String rewardStr = TextGenerator.instance.GetMoneyText(reason, Mathf.RoundToInt(reward.gold * PremiumManager.GetMultiplierMoney(reason, myPlayer.team)));
+                    String rewardStr = TextGenerator.instance.GetMoneyText(reason, Mathf.RoundToInt(goldReward));
                     PlayerMainGui.instance.AddMessage(rewardStr, PlayerMainGui.MessageType.GOLD_REWARD);
                 }
             }

@@ -85,6 +85,10 @@ public class PremiumManager : MonoBehaviour {
                 skill.iconGUI = node.SelectSingleNode("icon").InnerText;
                 skill.descr = node.SelectSingleNode("descr").InnerText;
                 skill.type = (PremiumSkillType)System.Enum.Parse(typeof(PremiumSkillType), node.SelectSingleNode("type").InnerText);
+                if (skill.type == PremiumSkillType.HP_BOOST)
+                {
+                    regen = skill;
+                }
                 skill.amount = int.Parse(node.SelectSingleNode("gameData").InnerText);
                 skill.maxAmount = bool.Parse(node.SelectSingleNode("maxAmount").InnerText);
                 foreach (XmlNode trigger in node.SelectNodes("eventTriggers"))
@@ -104,9 +108,9 @@ public class PremiumManager : MonoBehaviour {
             {
                 try
                 {
-                   
-                    
-                    skill.timeEnd = dtDateTime.AddSeconds(int.Parse(node.SelectSingleNode("timeEnd").InnerText));
+
+
+                    skill.timeEnd = dtDateTime.AddSeconds(int.Parse(node.SelectSingleNode("timeEnd").InnerText)).ToLocalTime();
 
                 }
                 catch (Exception)
@@ -150,6 +154,7 @@ public class PremiumManager : MonoBehaviour {
         {
             GlobalPlayer.instance.gold -=skills[itemId].price[price];
             ParseData(xmlDoc, "result");
+            FindObjectOfType<SkillSelectGUI>().Reset();
         }
         else
         {

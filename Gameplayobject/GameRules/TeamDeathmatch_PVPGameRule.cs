@@ -12,6 +12,8 @@ public class TeamDeathmatch_PVPGameRule : PVPGameRule {
 
             teamScore[i] = (int)pvpmodel.teamScore[i];
         }
+                                                                    
+        timer = pvpmodel.time;
         if (!isGameEnded && pvpmodel.isGameEnded)
         {
             isGameEnded = true;

@@ -7,8 +7,8 @@ public class StatisticMessage : MonoBehaviour {
 	public UILabel Kill;
 	public UILabel Dead;
 	public UILabel HelpKill;
-	public UILabel Ping;
-
+	public UILabel Lvl;
+    public UILabel Rating;
 	public string UID;
 	public Player I_am;
 
@@ -16,32 +16,29 @@ public class StatisticMessage : MonoBehaviour {
 
     void Awake()
     {
-		Name = transform.FindChild ("Name").GetComponent<UILabel> ();
-		Kill = transform.FindChild ("Kill").GetComponent<UILabel> ();
-		Dead = transform.FindChild ("Dead").GetComponent<UILabel> ();
-		HelpKill = transform.FindChild ("HelpKill").GetComponent<UILabel> ();
-		Ping = transform.FindChild ("Ping").GetComponent<UILabel> ();
+	
 	}
 
     public void Hide(bool Bool)
     {
 
         //Debug.Log ("Dead" + Deads);
-        Name.enabled = !Bool;
-        Kill.enabled = !Bool;
-        Dead.enabled = !Bool;
-        HelpKill.enabled = !Bool;
-        Ping.enabled = !Bool;
+        gameObject.SetActive(!Bool);
     }
 
-	public void SetStartInfo(string NamePlayer, int Kills, int Deads, int HelpKills, Player MyPlayer)
+	public void SetStartInfo( Player MyPlayer)
 	{
 
 		//Debug.Log ("Dead" + Deads);
-		Name.text = NamePlayer;
-		Kill.text = Kills.ToString();
-		Dead.text = Deads.ToString();
-		HelpKill.text = HelpKills.ToString();
+        Name.text = MyPlayer.PlayerName;
+        Kill.text = (MyPlayer.Score.Kill + MyPlayer.Score.AIKill + MyPlayer.Score.RobotKill).ToString();
+        Dead.text = MyPlayer.Score.Death.ToString();
+        HelpKill.text = MyPlayer.Score.Assist.ToString();
+        Lvl.text = MyPlayer.Score.Lvl.ToString();
+        if (Rating != null)
+        {
+            Rating.text = MyPlayer.Score.rating.ToString();
+        }
 		I_am = MyPlayer;
 	}
 

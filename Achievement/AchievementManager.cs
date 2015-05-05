@@ -62,7 +62,15 @@ public class Achievement{
             max += entry.Value.needed;
 
         }
-        return cnt.ToString("0") +"/"+max.ToString("0");
+        if (isDone)
+        {
+            return max.ToString("0") + "/" + max.ToString("0");
+        }
+        else
+        {
+            return cnt.ToString("0") + "/" + max.ToString("0");
+        }
+       
     }
     public float GetFloatProgress()
     {
@@ -194,7 +202,8 @@ public class AchievementManager : MonoBehaviour, LocalPlayerListener, GameListen
 		}
 		//loots of counting arrays, dictionary, logic don't want to drop fps by this)
 		 myThread = new Thread(new ThreadStart(this.AchivmentLoop));
-		 myThread.Start ();		
+		 myThread.Start ();
+         reloaded = true;
 	}
 
 	//Achivment Hondler
@@ -322,6 +331,8 @@ public class AchievementManager : MonoBehaviour, LocalPlayerListener, GameListen
 		
 		if(xmlDoc.SelectSingleNode("result/error").InnerText=="0"){
 			daylyFinished =bool.Parse(xmlDoc.SelectSingleNode("result/daylyfinish").InnerText);
+
+            GlobalPlayer.instance.parseProfileSImple(xmlDoc);
 		}else{
 		
 		}
@@ -422,6 +433,12 @@ public class AchievementManager : MonoBehaviour, LocalPlayerListener, GameListen
     private int time =-10;
 
     private const int TIME_DELAY = 10;
+
+    private bool reloaded = false;
+  
+    private float cachedTimer=0;
+
+    private int taskFinished = 0;
 	void Update(){
         if (GameRule.instance != null)
         {
@@ -444,7 +461,11 @@ public class AchievementManager : MonoBehaviour, LocalPlayerListener, GameListen
             {
                 GA.API.Design.NewEvent("Achievement:Open:" + finished.engName);
             }
-          
+
+            if (finished.type == AchievementType.TASK)
+            {
+                taskFinished++; 
+            }
 			syncAchivment.Add(finished.achievementId);
 		}
 
@@ -460,8 +481,15 @@ public class AchievementManager : MonoBehaviour, LocalPlayerListener, GameListen
             needupdate = false;
 			SyncAchievement (syncAchivment,GetTask());		
 		}
-		//Debug.Log (onFinishedAchivment.Count);
+
+
+        //Debug.Log (onFinishedAchivment.Count);
 	}
+    public int GetDoneInMatch()
+    {
+        return taskFinished;
+    }
+
 	public List<Achievement> GetAchivment (){
 	
 		return finishedAchivment;
@@ -480,6 +508,7 @@ public class AchievementManager : MonoBehaviour, LocalPlayerListener, GameListen
         }
         return list;
     }
+  
 	public Achievement[] GetTask()
     {
         Achievement[] list = new Achievement[3];
@@ -492,6 +521,16 @@ public class AchievementManager : MonoBehaviour, LocalPlayerListener, GameListen
             }
         }
         return list;
+    }
+
+    public bool ReloadHudTask()
+    {
+        if (reloaded)
+        {
+            reloaded = false;
+            return true;
+        }
+        return false;
     }
 
 	private static AchievementManager s_Instance = null;
@@ -749,7 +788,9 @@ public class AchievementManager : MonoBehaviour, LocalPlayerListener, GameListen
 		incomeQueue.Enqueue(mess);
 	}
 
-    public void EventStart() { }
+    public void EventStart() {
+        taskFinished = 0;
+    }
     public void EventTeamWin(int teamNumber) {
         if (teamNumber == myPlayer.team)
         {
@@ -759,8 +800,11 @@ public class AchievementManager : MonoBehaviour, LocalPlayerListener, GameListen
         
 			incomeQueue.Enqueue(mess);
             killCnt = 0;
+          
         }
     }
-    public void EventRestart() { }
+    public void EventRestart() {
+        taskFinished = 0;
+    }
     
 }

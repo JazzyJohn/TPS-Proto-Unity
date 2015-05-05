@@ -29,29 +29,30 @@ public class HTHWeapon : BaseWeapon {
     {
         owner.animator.StartShootAniamtion("meleehit");
 
-        StartHit();
-        
+        Invoke("StartHit", 0.2f);
+
     }
     public override void StartDamage()
     {
+        
         //StartHit();
     }
     public void StartHit()
     {
-        Debug.Log("StartHit");
+     
         oldEdgePostion = edge.position;
         hitting = true;
     }
 
     void Update()
     {
-        if (hitting)
+        if (hitting&&!owner.isDead)
         {
             float distance = Mathf.Max((oldEdgePostion - edge.position).magnitude,radius);
             oldEdgePostion = edge.position;
             Vector3 direction = edge.position - owner.myTransform.position;
             Ray ray = new Ray(owner.myTransform.position, direction.normalized);
-            RaycastHit[] hits = Physics.SphereCastAll(ray, distance,  direction.magnitude+0.3f);
+            RaycastHit[] hits = Physics.SphereCastAll(ray, distance,  direction.magnitude);
            // Debug.DrawRay(owner.myTransform.position, direction.normalized * (direction.magnitude + 0.3f), Color.red, 10.0f);
             foreach (RaycastHit hit in hits)
             {
@@ -68,7 +69,7 @@ public class HTHWeapon : BaseWeapon {
                     lDamage.hitPosition = hit.point;
                     obj.Damage(lDamage, owner.gameObject);
                     hitting = false;
-                    AfterHitAction();
+                    AfterHitAction(obj);
                     return;
                 }
             }
@@ -87,13 +88,14 @@ public class HTHWeapon : BaseWeapon {
                     BaseDamage lDamage = GetDamage(damageAmount);
                     lDamage.pushDirection = (hit.transform.position-edge.position);
                     lDamage.hitPosition = hit.transform.position;
+                    lDamage.isMelee = true;
                     obj.Damage(lDamage, owner.gameObject);
                     hitting = false;
-                    AfterHitAction();
+                    AfterHitAction(obj);
                     return;
                 }
             }
-        
+
         }
     }
     void SpawnEffect(Vector3 position)
@@ -114,9 +116,9 @@ public class HTHWeapon : BaseWeapon {
            Debug.Log(other);
            if (hitting)
            {
-          
-           
-             
+
+
+
                    if (other.transform.root == owner.myTransform.root)
                    {
                        return;
@@ -132,7 +134,7 @@ public class HTHWeapon : BaseWeapon {
                        hitting = false;
                        AfterHitAction();
                    }
-          
+
 
            }
        }
@@ -143,9 +145,15 @@ public class HTHWeapon : BaseWeapon {
         owner.animator.MainLayerNormal();
         base.PutAway();
     }
-    
-    public  void  AfterHitAction(){
-        if (!fullyBroken)
+
+    public  void  AfterHitAction(DamagebleObject obj){
+        bool mustBonus = false;
+        Pawn pawn = obj.transform.root.GetComponent<Pawn>();
+        if (pawn != null&& pawn.team!=owner.team&&!pawn.isDead)
+        {
+            mustBonus = true;
+        }
+        if (!fullyBroken && mustBonus)
         {
 
             foreach (ActiveBuff buff in buffs)
@@ -221,7 +229,7 @@ public class HTHWeapon : BaseWeapon {
     public override void TakeInHand(Transform weaponSlot, Vector3 Offset, Quaternion weaponRotator)
     {
         base.TakeInHand(weaponSlot, Offset, weaponRotator);
-        owner.animator.aimPos.AimOff();
+        owner.animator.IKOff();
         owner.animator.MainLayerPripity();
 
     }

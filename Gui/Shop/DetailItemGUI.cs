@@ -1,5 +1,6 @@
 using UnityEngine;
 using System.Collections;
+using System;
 
 public class DetailItemGUI : MonoBehaviour
 {
@@ -44,6 +45,7 @@ public class DetailItemGUI : MonoBehaviour
             loading.alpha = 0.0f;
            
         }
+     
     }
 	//LoL SetSetOfItemToSetOfSets
 	public void SetToSet(){

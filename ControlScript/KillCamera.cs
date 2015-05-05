@@ -220,13 +220,7 @@ public class KillCamera : ThirdPersonCamera
     }
 	void Update(){
 			
-		if(killpalyer!=null){
-			Pawn pawn  =killpalyer.GetActivePawn();
-			if(pawn!=_pawn){
-				Init(pawn);
-			}
-			
-		}
+		
 		/*if(_pawn==null){
 			FinishKillCam();
 			return;
@@ -251,16 +245,21 @@ public class KillCamera : ThirdPersonCamera
 		
 		_pawn  =Killer.GetActivePawn();
 
-        Debug.Log("KILLER PAWWN"+_pawn);
+//        Debug.Log("KILLER PAWWN"+_pawn);
 		killpalyer = Killer;
-		return Init (_pawn);
+        return _Init(_pawn);
 		
 	}
-	public bool Init(Pawn Killer){
+    public bool Init(Pawn Killer)
+    {
+        killpalyer = null;
+        return _Init(Killer);
+    }
+	bool _Init(Pawn Killer){
 
       
             _pawn  =Killer;
-            Debug.Log("KILLER PAWWN" + _pawn);
+//            Debug.Log("KILLER PAWWN" + _pawn);
             killpawn = Killer;
 		    killCamTimer = 0.0f;
             if (Player.localPlayer != null)

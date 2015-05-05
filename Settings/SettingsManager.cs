@@ -42,7 +42,7 @@ public class SettingsManager: MonoBehaviour{
 
 	}
 	public void LoadSetting(){
-       PlayerPrefs.DeleteAll();
+       //PlayerPrefs.DeleteAll();
 
 		XmlDocument xmlDoc = new XmlDocument();
 		xmlDoc.LoadXml(configTable.text);

@@ -94,6 +94,10 @@ public class StatisticManager : MonoBehaviour, LocalPlayerListener,GameListener{
             {
                 UpData(ParamLibrary.PARAM_GRENADE_KILL);
 			}
+            if (killinfo.isMelee)
+            {
+                UpData(ParamLibrary.PARAM_MELEE_KILL);
+            }
 		}
 	}
     public void EventPawnKillAI(Player target, KillInfo killinfo)

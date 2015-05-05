@@ -32,6 +32,10 @@ public class SimplePlayer : Player {
             return;
 
         }
+        if (victim == this)
+        {
+            return;
+        }
           String victimName;
         AnnonceAddType addtype = AnnonceAddType.NONE;
         if (killinfo.isHeadShoot)
@@ -43,7 +47,7 @@ public class SimplePlayer : Player {
             //TODO: move text to config
 
             EventHolder.instance.FireEvent(typeof(LocalPlayerListener), "EventPawnKillPlayer", this, killinfo);
-
+            PlayerMainGui.instance.KillerAnnonce(PlayerName, victim.PlayerName, killinfo.weaponId);
 
             if (isPlayerFriend(victim.UID))
             {
@@ -59,6 +63,7 @@ public class SimplePlayer : Player {
         }
         else
         {
+            PlayerMainGui.instance.KillerAnnonce(PlayerName, deadPawn.publicName, killinfo.weaponId);
             //TODO: move text to config
             victimName= deadPawn.publicName;
             Score.AIKill++;

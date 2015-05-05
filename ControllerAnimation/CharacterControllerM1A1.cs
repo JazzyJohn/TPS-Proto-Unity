@@ -243,14 +243,14 @@ public class CharacterControllerM1A1 : MonoBehaviour
                 return;
             }
 
-            IKWeight = Mathf.Lerp(IKWeight, 0f, Time.deltaTime * IKSetSpeed);
-            upperWeight = IKWeight;
+            IKWeight = 0f;
+          
             
         }
         else
         {
-            upperWeight = Mathf.Lerp(upperWeight, 1f, Time.deltaTime * IKSetSpeed);
-            IKWeight = upperWeight;
+            IKWeight = 1;
+           
         }
         ik.SetMotionWeight(IKWeight);
       //  animator.SetLayerWeight(1, upperWeight);

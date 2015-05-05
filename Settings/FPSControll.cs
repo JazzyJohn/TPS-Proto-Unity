@@ -82,7 +82,7 @@ public class FPSControll : MonoBehaviour{
 		float[] levelmult  =new float[]{5.0f, 30.0f, 80.0f, 130.0f, 200.0f, 320.0f};
 		int level = 0;
 		while ((level < QualitySettings.names.Length-1) && fillrate > fillneed * levelmult[level+1]) ++level;
-		QualitySettings.SetQualityLevel(level);
+		QualitySettings.SetQualityLevel(level,false);
 		currQuality = QualitySettings.GetQualityLevel();
 		currentQuality=""+currQuality+" ("+QualitySettings.names[currQuality]+")";
 		if(verbose)Debug.Log("Quality on start: "+currentQuality);

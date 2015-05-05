@@ -5,12 +5,12 @@ using System.Collections.Generic;
 public class AlphaDogPawn : Pawn {
 
 
-	
+
 
 
 
 	// Update is called once per frame
-	void FixedUpdate () 
+	void FixedUpdate ()
 	{
 		base.FixedUpdate();
 
@@ -19,15 +19,15 @@ public class AlphaDogPawn : Pawn {
 	protected override void UpdateAnimator()
 	{
 		float strafe = 0;
-		//Debug.Log (strafe);	
+		//Debug.Log (strafe);
 		float speed =0 ;
 		//
 
-		if (animator != null && animator.gameObject.activeSelf) {
+		if (animator != null && animator.IsActive()) {
             if (foxView.isMine)
             {
-				
-				
+
+
 				strafe = CalculateStarfe();
 				//Debug.Log(characterState);
 				speed =CalculateSpeed();
@@ -44,19 +44,19 @@ public class AlphaDogPawn : Pawn {
 				case CharacterState.Sprinting:
 					animator.Sprint();
 					sControl.playFullClip (stepSound);
-					animator.ApllyMotion (2.0f, speed, strafe);	
+					animator.ApllyMotion (2.0f, speed, strafe);
 					break;
 				case CharacterState.Walking:
 					sControl.playFullClip (stepSound);
-					animator.ApllyMotion (1.0f, speed, strafe);	
-					break;					
+					animator.ApllyMotion (1.0f, speed, strafe);
+					break;
 				}
 				//
 			}else{
 				strafe = CalculateRepStarfe();
-				//Debug.Log (strafe);	
+				//Debug.Log (strafe);
 				speed =	CalculateRepSpeed();
-				
+
 				switch(nextState)
 				{
 				case CharacterState.Idle:
@@ -75,7 +75,7 @@ public class AlphaDogPawn : Pawn {
 				case CharacterState.Walking:
 					sControl.playFullClip (stepSound);
 					animator.ApllyMotion (1.0f, speed, strafe);
-					break;					
+					break;
 				}
 				characterState = nextState;
 			}
@@ -85,18 +85,18 @@ public class AlphaDogPawn : Pawn {
 					Quaternion diference = Quaternion.FromToRotation(CurWeapon.muzzlePoint.forward,myTransform.forward);
 
 					Vector3 direction= laimRotation-myTransform.position;
-				
+
 					laimRotation =(diference *direction.normalized)*direction.magnitude +myTransform.position;
 				}*/
-				
+
 				animator.SetLookAtPosition (laimRotation);
 				//animator.animator.SetLookAtWeight (1, 0.5f, 0.7f, 0.0f, 0.5f);
-				
+
 			}
 		}
 	}
 
-	
-	
-	
+
+
+
 }

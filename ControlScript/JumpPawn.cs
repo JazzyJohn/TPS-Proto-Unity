@@ -4,7 +4,7 @@ using System.Collections;
 using System.Collections.Generic;
 
 
-class JumpPawn :Pawn 
+class JumpPawn :Pawn
 {
     Vector3 acceleration=Vector3.zero;
 
@@ -37,7 +37,7 @@ class JumpPawn :Pawn
 
     public override void FixedUpdate()
     {
-      
+
 
         if (!isActive)
         {
@@ -71,7 +71,7 @@ class JumpPawn :Pawn
          }*/
         // nextMovement = nextMovement;// -Vector3.up * gravity + pushingForce / rigidbody.mass;
 
-      
+
 
         switch (characterState)
         {
@@ -92,7 +92,7 @@ class JumpPawn :Pawn
                         newvelocity = JumpAssist.GetMeFlat(velocity).magnitude * myTransform.forward * nextMovement.normalized.magnitude;
                     }
                     characterState = nextState;
-                  
+
                     if (nextState == CharacterState.Jumping)
                     {
                         newvelocity =  Jump();
@@ -106,7 +106,7 @@ class JumpPawn :Pawn
                 }
 
                 break;
-          
+
             case CharacterState.Jumping:
                 if (characterState != CharacterState.DoubleJump)
                 {
@@ -191,12 +191,12 @@ class JumpPawn :Pawn
                     animator.ApllyJump(true);
                     animator.WallAnimation(false, false, false);
                     animator.FreeFall();
-                  
+
                 }
                 PullUp();
                 newvelocity = GetWallRunVelocity();
 
-            
+
                 if (characterState != CharacterState.WallRunning)
                 {
                     if (player != null)
@@ -206,12 +206,12 @@ class JumpPawn :Pawn
                     }
 
                 }
-                
+
                 break;
             case CharacterState.PullingUp:
                 newvelocity =Vector3.zero;
                 PullUp();
-              
+
                 break;
             default:
                 characterState = nextState;
@@ -237,7 +237,7 @@ class JumpPawn :Pawn
         } else {
             //Debug.Log ("Air"+characterState);
             v = nextMovement.normalized.magnitude;
-			
+
             switch(nextState)
             {
             case CharacterState.DoubleJump:
@@ -251,12 +251,12 @@ class JumpPawn :Pawn
 
                 if(!WallRun (nextMovement,nextState)){
                     if(characterState==CharacterState.Idle
-                       ||characterState==CharacterState.Walking 
-                       ||characterState==CharacterState.Running 
+                       ||characterState==CharacterState.Walking
+                       ||characterState==CharacterState.Running
                        ||characterState==CharacterState.Sprinting){
                         characterState=CharacterState.Jumping;
                     }
-                    animator.ApllyJump(true);						
+                    animator.ApllyJump(true);
                     animator.WallAnimation(false,false,false);
                     if(characterState!=CharacterState.DoubleJump){
                         animator.FreeFall();
@@ -271,12 +271,12 @@ class JumpPawn :Pawn
                 }
                 break;
             }
-			
+
         }
         //Debug.Log(_rb.isKinematic);
         */
         isGrounded = CheckGrounded();
-     
+
         velocity = newvelocity;
        // myTransform.position += velocity;
        Debug.Log(characterState +"  " +wallState);
@@ -358,7 +358,7 @@ class JumpPawn :Pawn
              myTransform.forward, Color.black,10.0f);*/
 
         }
-    
+
 
    /* Debug.DrawLine(myTransform.position,
                         myTransform.position + (-myTransform.right).normalized * (capsule.radius + 0.2f));
@@ -366,18 +366,18 @@ class JumpPawn :Pawn
         Debug.DrawLine(myTransform.position,
                         myTransform.position + (myTransform.right).normalized * (capsule.radius + 0.2f));*/
 
-      
-       
+
+
 
         Vector3 tangVect = Vector3.zero, normal = Vector3.zero;
-       
-        if (!animator.animator.IsInTransition(0) && !_rb.isKinematic)
+
+        if (!animator.InTransition() && !_rb.isKinematic)
         {
 
-           
+
             if (leftW)
             {
-               
+
                 normal = leftH.normal;
                 tangVect = Vector3.Cross(leftH.normal, Vector3.up);
                 myTransform.rotation = Quaternion.LookRotation(tangVect);
@@ -397,13 +397,13 @@ class JumpPawn :Pawn
                 {
                    // _rb.velocity = myTransform.up * movement.y + WallJumpDirection(leftH.normal) * movement.y;
                       StartCoroutine(FromWallJump( WallJumpDirection(leftH.normal) ));
-                   
+
                 }
             }
 
             else if (rightW)
             {
-            
+
                 normal = rightH.normal;
                 tangVect = -Vector3.Cross(rightH.normal, Vector3.up);
                 myTransform.rotation = Quaternion.LookRotation(tangVect);
@@ -422,27 +422,27 @@ class JumpPawn :Pawn
                 {
                   //  _rb.velocity = myTransform.up * movement.y + WallJumpDirection(rightH.normal) * movement.y;
                          StartCoroutine(FromWallJump( WallJumpDirection(rightH.normal)));
-                
-                   
+
+
                 }
             }
 
             else if (frontW)
             {
-                
+
                 normal = frontH.normal;
 
                 Vector3 forwardonWall = Vector3.Cross( myTransform.right,normal);
 
-             
+
 
                 tangVect = frontH.normal * -1;
 
-            
+
 
                 myTransform.rotation = Quaternion.LookRotation(forwardonWall, normal);
-             
-                wallRunVelocity = myTransform.forward * velocity.magnitude; 
+
+                wallRunVelocity = myTransform.forward * velocity.magnitude;
                 if (!(characterState == CharacterState.WallRunning))
                 {
                     StartJetPack();
@@ -456,14 +456,14 @@ class JumpPawn :Pawn
                 {
                    /// _rb.velocity = (myTransform.up + WallJumpDirection(myTransform.forward * -1)).normalized * movement.y;
                      StartCoroutine(FromWallJump((myTransform.up + WallJumpDirection(myTransform.forward * -1)).normalized));
-                    
+
                 }
             }
             else
             {
                 if (characterState == CharacterState.WallRunning)
                 {
-                 
+
                     characterState = CharacterState.Jumping;
                     lastTimeOnWall = Time.time;
                     jetPackEnable = false;
@@ -473,8 +473,8 @@ class JumpPawn :Pawn
             }
             float angle = Mathf.Abs(Vector3.Dot(normal, Vector3.up));
 
-          
-         
+
+
             //Debug.Log(forwardRotation);
             // Debug.DrawRay(myTransform.position,forwardRotation,Color.green);
             //animator.WallAnimation(leftW,rightW,frontW);
@@ -504,11 +504,11 @@ class JumpPawn :Pawn
         lastJumpTime = Time.time;
         //photonView.RPC("JumpChange",PhotonTargets.OthersBuffered,true);
         return _Jump((Vector3.up + myTransform.forward).normalized);
-       
+
     }
 
     public Vector3 _Jump(Vector3 direction){
-  
+
 
         if (Time.time - timeGrounded < timeForImpulseJump)
         {
@@ -527,9 +527,9 @@ class JumpPawn :Pawn
             {
                 return resultSpeed;
             }
-         
+
         }
-       
+
     }
     protected IEnumerator FromWallJump(Vector3 direction)
     {
@@ -544,7 +544,7 @@ class JumpPawn :Pawn
     }
 
 
-   
+
     public virtual void JumpEnd(CharacterState nextState)
     {
         if (nextState == CharacterState.Jumping)

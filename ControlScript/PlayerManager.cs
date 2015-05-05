@@ -33,6 +33,8 @@ public class PlayerManager : MonoBehaviour {
 
 	public float radius = 2.0f;
 
+    public float sortTimer = 0;
+   
 
 	public InventoryManager.AmmoBag[] AllTypeInGame;
     // s_Instance is used to cache the instance found in the scene so we don't have to look it up every time.
@@ -169,12 +171,29 @@ public class PlayerManager : MonoBehaviour {
         }
 
     }
+    public void Resort()
+    {
+        cachedPlayers.Sort(delegate(Player x, Player y)
+        {
+            if (x.Score.rating == y.Score.rating)
+            {
+                return 0;
+            }
+            return -1 * x.Score.rating.CompareTo(y.Score.rating);
+
+        });
+    }
 	public  void Update(){
 		updateTimer += Time.deltaTime;
         if (updateTimer > updateDelay)
         {
             updateTimer = 0.0f;
             PawnUpdate();
+        }
+        sortTimer += Time.deltaTime;
+        if (sortTimer > 1.0f)
+        {
+            Resort();
         }
 	}
 

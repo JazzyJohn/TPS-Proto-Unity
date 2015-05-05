@@ -4,10 +4,12 @@ using System;
 using System.Collections;
 using System.Collections.Generic;
 
-public enum DamageType{
-	SIMPLE,
-	FIRE,
-	ACID
+public enum DamageType
+{
+    SIMPLE,
+    FIRE,
+    ACID,
+    MELEE
 
 }
 
@@ -40,7 +42,10 @@ public class BaseDamage{
     public bool isHeadshoot = false;
     [HideInInspector]
     public bool crit = false;
+    [HideInInspector]
+    public bool isMelee = false;
 
+    
     public BaseDamage()
     {
     }
@@ -697,7 +702,7 @@ public class BaseProjectile : MonoBehaviour
         boomed = true;
         sControl.stopSound();//останавливаем звук реактивного двигателя
         sControl.playClip(exploseSound);//звук взрыва
-        Debug.Log("DOOOM");
+//        Debug.Log("DOOOM");
         Collider[] hitColliders = Physics.OverlapSphere(Position, splashRadius);
         List<Transform> alredyHit = new List<Transform>();
         
@@ -718,7 +723,7 @@ public class BaseProjectile : MonoBehaviour
            
                 DamagebleObject obj = hitColliders[i].GetComponent<DamagebleObject>();
 
-                if (obj != null && obj != shootTarget && !alredyHit.Contains(obj.transform.root))
+                if (obj != null && (shootTarget ==null|| obj.transform.root != shootTarget.transform.root) && !alredyHit.Contains(obj.transform.root))
                 {
                     alredyHit.Add(obj.transform.root);
                     BaseDamage lDamage = new BaseDamage(damage);

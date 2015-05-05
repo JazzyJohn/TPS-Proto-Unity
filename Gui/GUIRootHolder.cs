@@ -8,7 +8,7 @@ public class GUIRootHolder : MonoBehaviour {
         DontDestroyOnLoad(gameObject);
         if (FindObjectsOfType<GUIRootHolder>().Length > 1)
         {
-            Destroy(gameObject);
+            DestroyImmediate(gameObject);
         }
 	}
 	

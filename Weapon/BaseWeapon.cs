@@ -331,7 +331,7 @@ public class BaseWeapon : DestroyableNetworkObject {
 		charge = ItemManager.instance.GetCharge(SQLId);
 		shootCounter = ItemManager.instance.GetShootCounter(SQLId);
         blueprint = this.Default();
-        Debug.Log(blueprint + "  " +( blueprint == this));
+///        Debug.Log(blueprint + "  " +( blueprint == this));
 	}
 
     public Pawn GetOwner()
@@ -414,6 +414,10 @@ public class BaseWeapon : DestroyableNetworkObject {
             return;
 
         }
+        if (foxView.isMine)
+        {
+            owner.ivnMan.RewrtieMaxAmmo(maxAmmoAmount, ammoType);
+        }
         initStats = true;
        
         int maxCharge = ItemManager.instance.GetWeaponMaxChargebByID(SQLId);
@@ -470,10 +474,7 @@ public class BaseWeapon : DestroyableNetworkObject {
     public void RecalculateStats(){
         int maxCharge = ItemManager.instance.GetWeaponMaxChargebByID(SQLId);
         int minWear = Mathf.RoundToInt((float)(maxCharge * owner.GetValue(CharacteristicList.MAX_WEAR)) / 100.0f);
-        if (foxView.isMine)
-        {
-            owner.ivnMan.RewrtieMaxAmmo(maxAmmoAmount, ammoType);
-        }
+    
 
         reloadTime = blueprint.reloadTime * owner.GetPercentValue(CharacteristicList.RELOAD_SPEED);
         float firerate =100f+owner.GetValue(CharacteristicList.FIRE_RATE);
@@ -613,7 +614,7 @@ public class BaseWeapon : DestroyableNetworkObject {
 	}
 	public void RemoteAttachWeapon(Pawn newowner,bool state){
 		if(state){
-            Debug.Log(name + " EQUIP");
+//            Debug.Log(name + " EQUIP");
             newowner.setWeapon(this); 
 		}else{
             AttachWeaponToChar(newowner);
@@ -680,6 +681,10 @@ public class BaseWeapon : DestroyableNetworkObject {
             {
                 _randShootCoef -= randCoolingEffectNotFire * deltaTime;
             }
+        }
+        if (_randShootCoef < 0)
+        {
+            _randShootCoef = 0;
         }
 		//AimFix ();
 		if(ReplicationContinue()){

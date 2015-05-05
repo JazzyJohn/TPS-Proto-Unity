@@ -64,6 +64,8 @@ public class Operation : BaseSocEvent
 
     public string counterEvent;
 
+    public string counterEventNormal;
+
     public int toSendCounter;
 
     public int myCounter;
@@ -281,10 +283,21 @@ public class TournamentManager : MonoBehaviour, LocalPlayerListener, GameListene
         oper.start = DateTime.Parse(node.SelectSingleNode("start").InnerText);
         oper.end = DateTime.Parse(node.SelectSingleNode("end").InnerText);
         oper.name = node.SelectSingleNode("name").InnerText;
+
         oper.desctiption = node.SelectSingleNode("desctiption").InnerText;
         oper.counterEvent = node.SelectSingleNode("counterEvent").InnerText;
+        oper.counterEventNormal = TextGenerator.instance.GetSimpleText("Operation_" + oper.counterEvent);
         oper.myCounter = int.Parse(node.SelectSingleNode("myCounter").InnerText);
         oper.myPlace = int.Parse(node.SelectSingleNode("myPlace").InnerText);
+    }
+
+    public String GetOperationSpriteName()
+    {
+        if (currentOperation == null)
+        {
+            return "";
+        }
+        return TextGenerator.instance.GetSimpleText(currentOperation.counterEvent + "_sprite");
     }
 	
 	public SocUser GetUser(string uid){

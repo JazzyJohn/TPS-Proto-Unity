@@ -208,6 +208,13 @@ public class FoxView : MonoBehaviour {
         }
 		NetworkController.Instance.PawnTauntRequest(viewID, name);
 	}
+    public void WeaponType(int type){
+        if (NetworkController.Instance.isSingle)
+        {
+            return;
+        }
+        NetworkController.Instance.PawnWeaponAnimRequest(viewID, type);
+	}
 	public void KnockOut(){
         if (NetworkController.Instance.isSingle)
         {
@@ -320,7 +327,7 @@ public class FoxView : MonoBehaviour {
         NetworkController.Instance.InvokeProjectileCallRequest(data);
     }
 
-    public void PawnDiedByKill(int userId)
+    public void PawnDiedByKill(int userId,string killerName)
     {
         if (NetworkController.Instance.isSingle)
         {
@@ -329,6 +336,10 @@ public class FoxView : MonoBehaviour {
 		ISFSObject data = new SFSObject();
         data.PutInt("viewId", viewID);
         data.PutInt("player", userId);
+        if (userId < 0)
+        {
+            data.PutUtfString("killerName", killerName);
+        }
 		pawn.InfoAboutDeath(data);
         NetworkController.Instance.PawnDiedByKillRequest(data);
     }

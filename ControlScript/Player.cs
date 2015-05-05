@@ -79,6 +79,8 @@ public class Player : MonoBehaviour {
 
 	public string UID;
 
+    public float timeSend = 0;
+
 	public Texture2D vkAvavtar;
 
   
@@ -93,7 +95,7 @@ public class Player : MonoBehaviour {
 		public int RobotKill=0;
         public int AIKill = 0;
         public int WaveCnt=0;
-		
+        public int Lvl = 1;
 		public void Reset(){
             rating = 0;
 			Assist = 0;
@@ -245,7 +247,10 @@ public class Player : MonoBehaviour {
         
 
 	}
-	
+    void OnLevelWasLoaded(int level)
+    {
+        Score.Reset();
+    }
    
 	public void GameEnd(){
         if (GameRule.instance.Winner() == team)
@@ -264,11 +269,7 @@ public class Player : MonoBehaviour {
          
           
         }
-         List<Player>  players = PlayerManager.instance.FindAllPlayer();
-         foreach (Player player in players)
-         {
-             player.Score.Reset();
-         }
+        
        
 	}
 	public void Respawn(Pawn newPawn){
@@ -388,6 +389,14 @@ public class Player : MonoBehaviour {
 				}
             ButtonControll();
 		}
+        if (playerView.isMine)
+        {
+            timeSend += Time.deltaTime;
+            if(timeSend>1.0f){
+                timeSend = 0.0f;
+                playerView.SendStats();
+            }
+        }
 	
 	}
 
@@ -503,7 +512,7 @@ public class Player : MonoBehaviour {
     {
         Score.rating += rating;
         rewardRating += rating;
-        Debug.Log("ADD REWARD " + rating);
+//        Debug.Log("ADD REWARD " + rating);
         CheckReward();
     }
 
@@ -537,11 +546,12 @@ public class Player : MonoBehaviour {
         isDead = true;
 	
 		if (Killer != null) {
-         
-		
+
+            PlayerMainGui.instance.KillerAnnonce(Killer.PlayerName, PlayerName, killinfo.weaponId);
 			PVPGameRule.instance.Kill (Killer.team);
             EventHolder.instance.FireEvent(typeof(LocalPlayerListener), "EventPawnDeadByPlayer", this, killinfo);
 		} else {
+            PlayerMainGui.instance.KillerAnnonce(killerPawn.publicName, PlayerName, killinfo.weaponId);
             PVPGameRule.instance.PlayerDeath();
 			EventHolder.instance.FireEvent(typeof(LocalPlayerListener),"EventPawnDeadByAI",this);
 		}
@@ -613,7 +623,7 @@ public class Player : MonoBehaviour {
         }
 		if (victim != null) {
             //TODO: move text to config
-
+            PlayerMainGui.instance.KillerAnnonce(PlayerName, victim.PlayerName, killinfo.weaponId);
             EventHolder.instance.FireEvent(typeof(LocalPlayerListener), "EventPawnKillPlayer", this, killinfo);
           
 
@@ -666,6 +676,7 @@ public class Player : MonoBehaviour {
             PlayerMainGui.instance.Annonce(AnnonceType.AIKILL,addtype, deadPawn.publicName);
             EventHolder.instance.FireEvent(typeof(LocalPlayerListener), "EventPawnKillAI", this, killinfo);
            // StatisticHandler.SendPlayerKillNPC(UID, PlayerName);
+            PlayerMainGui.instance.KillerAnnonce(PlayerName, deadPawn.publicName, killinfo.weaponId);
 		}
 
 
@@ -801,22 +812,31 @@ public class Player : MonoBehaviour {
 		
 			if(curPawn.CurWeapon!=null){
 			
-				stats.gun  = curPawn.CurWeapon;
+				stats.gun  = curPawn.GetGun();
+                stats.grenade = curPawn.GetGrenade();
                 stats.armor = curPawn.GetArmor();
 				stats.ammoInBag = curPawn.GetAmmoInBag ();
-				stats.reloadTime = curPawn.CurWeapon.ReloadTimer();
-                stats.pumpCoef = curPawn.CurWeapon.PumpCoef();
+                if (stats.grenade != null)
+                    stats.grenadeAmount = curPawn.GetGrenadeInBag() + (int)stats.grenade.curAmmo;
+                else
+                    stats.grenadeAmount = 0;
+                stats.reloadTime = stats.gun.ReloadTimer();
+                stats.pumpCoef = stats.gun.PumpCoef();
 				
 			}
-            stats.rewards = new RewardState[rewards.Length];
-            for (int i = 0; i < rewards.Length; i++)
-            {
-                stats.rewards[i] = rewards[i].State();
-            }
-            stats.rating = (float)rewardRating / (float)rewards[rewards.Length - 1].cost;
-                stats.jetPackCharge = curPawn.GetJetPackCharges() / curPawn.GetMaxJetPack();
+          
+            stats.jetPackCharge = curPawn.GetJetPackCharges() / curPawn.GetMaxJetPack();
 		}
+        stats.rewards = new RewardState[rewards.Length];
+        for (int i = 0; i < rewards.Length; i++)
+        {
+            stats.rewards[i] = rewards[i].State();
+        }
 
+        if (rewards.Length != 0)
+        {
+            stats.rating = (float)rewardRating / (float)rewards[rewards.Length - 1].cost;
+        }
 		
 		return stats;
 
@@ -867,6 +887,27 @@ public class Player : MonoBehaviour {
 		pawn.player = this;
         pawn.team = this.team;
 	}
+    public void CleanSpawned(Pawn pawn)
+    {
+          PawnType type =PawnType.PAWN;
+        //Debug.Log (viewid);
+		
+		if((pawn as RobotPawn)!=null){
+		  type =PawnType.BOT;
+		}
+        switch (type)
+        {
+            case PawnType.PAWN:
+                if (currentPawn!=null)
+                    Destroy(currentPawn.gameObject);
+                break;
+            case PawnType.BOT:
+                if (robotPawn != null)
+                    Destroy(robotPawn.gameObject);
+                break;
+        }
+
+    }
     public void AfterSpawnSetting(Pawn pawn, int[] buffs)
     {
 

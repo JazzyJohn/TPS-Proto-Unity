@@ -90,6 +90,8 @@ public class PlayerMainGui : MonoBehaviour {
 		public float health=0;
         public float maxHealth = 200;
 		public BaseWeapon gun;
+        public BaseWeapon grenade;
+        public int grenadeAmount;
         public BaseArmor armor;
 		public float ammoInBag=0;
 		public float reloadTime=0;
@@ -110,6 +112,7 @@ public class PlayerMainGui : MonoBehaviour {
 		public float gameTime;
 		public int[] score;
 		public int maxScore;
+        public bool showProgress = false;
 	}
 	public enum GUIState{
 		Normal,
@@ -157,6 +160,11 @@ public class PlayerMainGui : MonoBehaviour {
 	
 
 	}
+    public void SetHud(PlayerHudNgui hud)
+    {
+        Debug.Log(hud);
+        this.hud = hud;
+    }
     void OnEnabled()
     {
         Debug.Log("OLOLO");
@@ -167,23 +175,14 @@ public class PlayerMainGui : MonoBehaviour {
 		foreach (ChatHolder holder in chats) {
 			holder.SetPlayer(newPlayer);	
 		}
-      
-            Statistic[] statistics  =Transform.FindObjectsOfType<Statistic>(); //Статистика (+)
-            foreach(Statistic tempStat in statistics){
-                GameFinished  tempFinished = tempStat as GameFinished;
-                if (tempFinished == null)
-                {
-                    stat = tempStat;
-                    stat.SetLocalPlayer(newPlayer);
-                }else{
-                    finished = tempFinished;
-                    finished.SetLocalPlayer(newPlayer);
-                }
-            }
-          
-        
-      
-		hud = Transform.FindObjectOfType<PlayerHudNgui> ();
+
+        stat = Transform.FindObjectOfType<Statistic>(); //Статистика (+)
+        stat.SetLocalPlayer(newPlayer);
+        finished = Transform.FindObjectOfType<GameFinished>(); //Статистика (+)
+
+
+      //  Debug.Log("SetLocalPlayer");
+		
 		hud.SetLocalPlayer(LocalPlayer);
 		respawnMenu = Transform.FindObjectOfType<SelectPlayerGUI>();
 		//pausegui = Transform.FindObjectOfType<MainMenuGUI>();
@@ -500,7 +499,7 @@ public class PlayerMainGui : MonoBehaviour {
 		}*/
 	}
 	void LabelSection(){
-		float screenX = Screen.width, screenY = Screen.height;
+		/*float screenX = Screen.width, screenY = Screen.height;
 		//LABEL SECTION
 		GUI.skin = guiSkin;
 
@@ -511,13 +510,18 @@ public class PlayerMainGui : MonoBehaviour {
 		Vector3 pivotPoint = new Vector2(screenX  - VersionSize/2, VersionSize/2);
 		GUIUtility.RotateAroundPivot(45.0f, pivotPoint);
 		versionrect = new Rect (screenX  - VersionSize,VersionSize/2.5f, VersionSize*10, VersionSize);
-		GUI.Label(versionrect , "Version:" +PlayerManager.instance.version + " Date: "+ System.DateTime.Now.ToShortDateString());
-		
 	
+		*/
+       
 	}
     public void Annonce(AnnonceType type) {
         hud.Annonce(type, AnnonceAddType.NONE, "");
     
+    }
+    public void KillerAnnonce(string killer, string victim, int weapon)
+    {
+        hud.KillHistory(killer, victim, weapon);
+
     }
     public void Annonce(AnnonceType type, AnnonceAddType sprite)
     {
@@ -886,6 +890,17 @@ public class PlayerMainGui : MonoBehaviour {
 
 public static class GUIHelper{
     public static Queue<string> messages = new Queue<string>();
+    private static Queue<ShopEvent> events = new Queue<ShopEvent>();
+    public static ShopEvent shopEvent{get{
+        if(events.Count>0){
+            return events.Dequeue();
+        }
+        return null;
+    }
+        set{
+            events.Enqueue(value);
+    }}
+
 	public static void SendMessage(string text){
 			MainMenuGUI menu =UnityEngine.Object.FindObjectOfType<MainMenuGUI>();
 			if (menu != null)

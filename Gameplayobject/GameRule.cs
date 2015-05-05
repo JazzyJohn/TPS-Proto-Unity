@@ -6,6 +6,8 @@ using System;
 using System.Collections.Generic;
 
 public class GameRule : MonoBehaviour {
+    static public float RESTART_TIME = 10.0f;
+
 	static public bool IsLvlChanging=false;
 
     protected int[] teamScore;
@@ -70,20 +72,24 @@ public class GameRule : MonoBehaviour {
         }
 	// Update is called once per frame
 	protected void Update () {
+       
         timer += Time.deltaTime;
         if (isGameEnded)
         {
             restartTimer += Time.deltaTime;
         }
         #if UNITY_EDITOR
-                if (Input.GetKeyDown(KeyCode.L))
+                if (Input.GetKeyDown(KeyCode.Alpha0))
                 {
                     GameEnded();
                 }
         #endif
   
 	}
-
+    public float GetTime()
+    {
+        return timer;
+    }
     public virtual void GameEnded()
     {
         //PhotonNetwork.automaticallySyncScene = true;
@@ -100,6 +106,7 @@ public class GameRule : MonoBehaviour {
         {
             pawn.gameEnded();
         }
+      
 
     }
 

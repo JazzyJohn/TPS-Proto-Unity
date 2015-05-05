@@ -5,6 +5,8 @@ using nstuff.juggerfall.extension.models;
 
 public class RobotPawn : Pawn {
 	public float ActivationTime=2.0f;
+    public float rotateSpeeed = 1.0f;
+
 	public Transform playerExitPositon;
 	
 	public bool isMutual;
@@ -130,7 +132,7 @@ public class RobotPawn : Pawn {
 	}
     protected override bool ShouldRotateTorso()
     {
-        return characterState == CharacterState.Idle || characterState == CharacterState.DoubleJump || characterState == CharacterState.Walking || characterState == CharacterState.Running;
+        return characterState == CharacterState.Jumping ||characterState == CharacterState.Idle || characterState == CharacterState.DoubleJump || characterState == CharacterState.Walking || characterState == CharacterState.Running;
     }
     public override void Movement(Vector3 movement, CharacterState state)
     {
@@ -140,12 +142,14 @@ public class RobotPawn : Pawn {
         {//если только респавнились, то не шевелимся
             return;
         }
-        Vector3 right =Vector3.Project(movement, cameraTransform.right);
-        movement = movement - right;
-        Debug.Log(IsGrounded());
-       
-        base.Movement(movement, state);
-        float yAngle = Vector3.Dot(right, cameraTransform.right) * Time.deltaTime;
+      
+        Vector3 local = Quaternion.Inverse(cameraTransform.rotation) * movement;
+        float yAngle = local.x * Time.deltaTime * rotateSpeeed ;
+        local.x = 0;
+      
+
+        base.Movement(myTransform.rotation*local, state);
+     
         UpdateRotation(0, yAngle);
         Vector3 eurler;
 
@@ -155,6 +159,17 @@ public class RobotPawn : Pawn {
 
         eurler.z = 0;
         eurler.x = 0;
+
+        if (eurler.y > 360)
+        {
+
+            eurler.y -= 360;
+        }
+        if (eurler.y < -360)
+        {
+
+            eurler.y += 360;
+        }
         myTransform.rotation *= Quaternion.Euler(eurler);
 
     }
@@ -163,6 +178,7 @@ public class RobotPawn : Pawn {
         MySelfEnter(player.GetCurrentPawn());
 		_rb.constraints = RigidbodyConstraints.FreezeRotation;
         _rb.useGravity = false;
+      
 	
       
 		isActive = false;
@@ -175,6 +191,12 @@ public class RobotPawn : Pawn {
         }
 	}
 	public override void Damage(BaseDamage damage,GameObject killer){
+        if (damage.isMelee)
+        {
+            AddEffect(damage.hitPosition, damage.pushDirection, DamageType.MELEE);
+            return;
+        }
+
         if (passenger != null)
         {
             passenger.Damage(damage, killer);
@@ -219,6 +241,7 @@ public class RobotPawn : Pawn {
 			for (int i =0; i<myTransform.childCount; i++) {
 				myTransform.GetChild(i).gameObject.SetActive(true);
 			}
+           passenger.Mount();
        
 		//base.Activate();
 	}

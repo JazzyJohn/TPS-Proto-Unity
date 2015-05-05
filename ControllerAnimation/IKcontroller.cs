@@ -69,8 +69,12 @@ public class IKcontroller : MonoBehaviour {
     {
         if (aim != null)
         {
-            return aim.enabled;
+            if (aim.enabled)
+            {
+                return aim.solver.IKPositionWeight == 1.0f;
+            }
         }
+       
         return false;
     }
     public void AimOff()

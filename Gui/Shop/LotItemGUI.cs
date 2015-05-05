@@ -1,5 +1,39 @@
 ﻿using UnityEngine;
 using System.Collections;
+using System;
+
+[System.Serializable]
+public class PriceForLot
+{
+    public UILabel actualPrice;
+
+    public UILabel oldPrice;
+
+    public UIWidget oldPriceWid;
+
+    public int text
+    {
+        set{
+            actualPrice.text = value.ToString();
+        }
+    }
+
+    public int discount
+    {
+        set
+        {
+            if (value ==0)
+            {
+                oldPriceWid.alpha = 0;
+            }
+            else
+            {
+                oldPriceWid.alpha = 1;
+                oldPrice.text = "[s]"+value.ToString()+"[s]";
+            }
+        }
+    }
+}
 
 public class LotItemGUI : MonoBehaviour
 {
@@ -22,8 +56,8 @@ public class LotItemGUI : MonoBehaviour
 
 
 	public UIWidget forGold;
-	
-	public UILabel[] goldPrices;
+
+    public PriceForLot[] goldPrices;
 	
 	public UIWidget forKP;
 
@@ -38,8 +72,8 @@ public class LotItemGUI : MonoBehaviour
     public UIWidget repairKP;
 
     public UIWidget useItem;
-	
-	public UILabel[] kpPrices;
+
+    public PriceForLot[] kpPrices;
 	
 	
     [HideInInspector]
@@ -72,12 +106,22 @@ public class LotItemGUI : MonoBehaviour
             loading.alpha = 0.0f;
            
         }
+        if (item != null && item.prices[0].discount && item.prices[0].discoutnEnd < DateTime.Now)
+        {
+
+            for (int i = 0; i < item.prices.Length; i++)
+            {
+                item.prices[i].CloseDiscount();
+            }
+            SetItem(item);
+        }
     }
 
     public void SetItem(InventorySlot _item)
     {
         item = _item;
-        Debug.Log(item.buyMode);
+        
+//        Debug.Log(item.buyMode);
 
       
 
@@ -127,7 +171,9 @@ public class LotItemGUI : MonoBehaviour
                 
                 for (int i = 0; i < item.prices.Length; i++)
                 {
-                    kpPrices[i].text = item.prices[i].parts[0].amount.ToString();
+                    item.prices[i].CheckDiscount();
+                    kpPrices[i].text = item.prices[i].GetPrice();
+                    kpPrices[i].discount = item.prices[i].GetOldPrice();
                 }
            
 
@@ -147,7 +193,9 @@ public class LotItemGUI : MonoBehaviour
                 forKP.alpha = 0.0f;
                 for (int i = 0; i < item.prices.Length; i++)
                 {
-                    goldPrices[i].text = item.prices[i].parts[0].amount.ToString();
+                    item.prices[i].CheckDiscount();
+                    goldPrices[i].text = item.prices[i].GetPrice();
+                    goldPrices[i].discount = item.prices[i].GetOldPrice();
                 }
             }
         }
@@ -216,14 +264,14 @@ public class LotItemGUI : MonoBehaviour
             string text;
             if (item.prices[key].type == BuyPrice.KP_PRICE)
             {
-                text = TextGenerator.instance.GetMoneyText("buyKPprice", item.prices[key].parts[0].amount);
+                text = TextGenerator.instance.GetMoneyText("buyKPprice", item.prices[key].GetText());
             }
             else if (item.prices[key].type == BuyPrice.GOLD_PRICE_UNBREAKE)
             {
-                text = TextGenerator.instance.GetMoneyText("buyUnbreakeprice", item.prices[key].parts[0].amount);
+                text = TextGenerator.instance.GetMoneyText("buyUnbreakeprice", item.prices[key].GetText());
             }
             else {
-                text = TextGenerator.instance.GetMoneyText("buyGoldPrice", item.prices[key].parts[0].amount);
+                text = TextGenerator.instance.GetMoneyText("buyGoldPrice", item.prices[key].GetText());
 			}
 
             Shop.askWindow.Show(text);
@@ -233,13 +281,13 @@ public class LotItemGUI : MonoBehaviour
         Shop.SetItemForChoiseSet(item);
     }
 	public void FinishBuy(){
-		int amount = item.prices[priceKey].parts[0].amount;
+        int amount = item.prices[priceKey].GetPrice();
 		if(item.prices[0].type==BuyPrice.KP_PRICE){
 			GA.API.Business.NewEvent("Shop:BUYItem:" + item.engName, "GASH", amount);
 		}else{
 		  GA.API.Business.NewEvent("Shop:BUYItem:" + item.engName, "GOLD", amount);
 		}
-        StartCoroutine( ItemManager.instance.BuyItem(item.prices[priceKey].id,this));
+        StartCoroutine( ItemManager.instance.BuyItem(item.prices[priceKey].id,Shop));
     }
 
     public void Repair()

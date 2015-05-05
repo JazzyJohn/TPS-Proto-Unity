@@ -7,31 +7,40 @@ using Random = UnityEngine.Random;
 
 
 public class BaseGrenade : BaseWeapon {
-	
+
 	public Quaternion addAngle;
 
     public Vector3 eluer;
-	
+
 	public override void StartFire(){
-		Fire();
-		Reload();
+		
         owner.animator.StartShootAniamtion("shooting");
-		if(curAmmo<=0){
-			Renderer[] renderers = GetComponentsInChildren<Renderer>();
-			foreach (Renderer renderer in renderers) {
-				renderer.enabled = false;
-			}
-            if(drawer!=null){
+		
+	}
+    public override void StartDamage()
+    {
+        Fire();
+        Reload();
+        if (curAmmo <= 0)
+        {
+            Renderer[] renderers = GetComponentsInChildren<Renderer>();
+            foreach (Renderer renderer in renderers)
+            {
+                renderer.enabled = false;
+            }
+            if (drawer != null)
+            {
                 drawer.GetComponent<Renderer>().enabled = false;
             }
-		}
-	}
+        }
+        //StartHit();
+    }
 	public override void ReloadStart(){
 		return;
-	
+
 	}
 	public override void Reload(){
-		curAmmo =owner.GetComponent<InventoryManager>().GiveAmmo(ammoType,1);	
+		curAmmo =owner.GetComponent<InventoryManager>().GiveAmmo(ammoType,1);
 		if(curAmmo>0){
 			Renderer[] renderers = GetComponentsInChildren<Renderer>();
 			foreach (Renderer renderer in renderers) {
@@ -50,7 +59,7 @@ public class BaseGrenade : BaseWeapon {
 
 //        Debug.Log(Quaternion.Euler(eluer));
         if (projectileClass != null)
-        {   
+        {
 
             return Quaternion.LookRotation(owner.getAimpointForWeapon(projectileClass.startImpulse) - muzzleCached)*addAngle;
         }
@@ -58,20 +67,20 @@ public class BaseGrenade : BaseWeapon {
         {
             return Quaternion.LookRotation(owner.getAimpointForWeapon() - muzzleCached)*addAngle;
         }
-		
+
 
 	}
     public override void TakeInHand(Transform weaponSlot, Vector3 Offset, Quaternion weaponRotator)
     {
         base.TakeInHand(weaponSlot, Offset, weaponRotator);
-        owner.animator.aimPos.AimOff();
+        owner.animator.IKOff();
 
     }
 
     public override void PutAway()
     {
         base.PutAway();
-        owner.animator.aimPos.AimOn();
+     
     }
 
     void Update()
@@ -79,13 +88,13 @@ public class BaseGrenade : BaseWeapon {
         UpdateWeapon(Time.deltaTime);
         if (foxView.isMine)
         {
-            
+
             if (shouldDrawTrajectory && drawer != null && drawer.gameObject.activeSelf)
             {
                 drawer.Draw(muzzleCached + muzzleOffset, getAimRotation(), GetRandomeDirectionCoef());
             }
         }
-        
+
 
     }
 }

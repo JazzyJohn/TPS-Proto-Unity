@@ -138,7 +138,7 @@ public class AISwarm:MonoBehaviour
 		}
     }
     public virtual void Activate() {
-        Debug.Log("Activate");
+//        Debug.Log("Activate");
         isActive = true;
 		
     }

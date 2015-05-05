@@ -94,6 +94,61 @@ public class Price{
 	public string id;
 	
 	public PricePart[] parts ;
+
+    public bool discount;
+
+    public float discountAmount;
+
+    public DateTime discoutnEnd;
+
+    public void CheckDiscount()
+    {
+        if (discount&&discoutnEnd < DateTime.Now)
+        {
+            discount = false;
+        }
+    }
+    public void CloseDiscount()
+    {
+       
+            discount = false;
+       
+    }
+    public  string GetText()
+    {
+        if (discount)
+        {
+            return (parts[0].amount * discountAmount).ToString("0");
+        }
+        else
+        {
+            return parts[0].amount.ToString();
+        }
+    }
+
+    public int GetPrice()
+    {
+        if (discount)
+        {
+            return (int) (parts[0].amount * discountAmount);
+        }
+        else
+        {
+            return parts[0].amount;
+        }
+    }
+
+    public int GetOldPrice()
+    {
+        if (discount)
+        {
+            return parts[0].amount;
+        }
+        else
+        {
+            return 0;
+        }
+    }
 }
 
 public class SimpleSlot{
@@ -171,6 +226,8 @@ public class SmallShopData{
 }
 public class InventorySlot  : SimpleSlot{
 
+    public bool isEvented;
+
 	public int charge;
 
     private int chacheCharge;
@@ -242,6 +299,11 @@ public class InventorySlot  : SimpleSlot{
     public int GetChargePercent()
     {
         return Mathf.RoundToInt((((float)maxcharge - (float)charge) / (float)maxcharge) * 100.0f);
+    }
+
+    public bool IsEvented()
+    {
+        return isEvented;
     }
 }
 
@@ -384,6 +446,7 @@ public class ItemManager : MonoBehaviour {
            //     weapon.gameSlot = weaponPrefabsListbyId[weapon.weaponId].slotType;
 			//		Debug.Log(weapon.name + " " + weapon.gameType);
                 weaponPrefabsListbyId[weapon.weaponId].HUDIcon = weapon.texture;
+                weaponPrefabsListbyId[weapon.weaponId].weaponName = weapon.name;
 			}
 		}
 
@@ -534,10 +597,10 @@ public class ItemManager : MonoBehaviour {
 	}
 	//parse XML string to normal Achivment Pattern
 	protected IEnumerator ParseList(string XML,string startTag = "items"){
-	Debug.Log (XML);
+	    Debug.Log (XML);
 	  	XmlDocument xmlDoc = new XmlDocument();
 		xmlDoc.LoadXml(XML);
-
+        DateTime dtDateTime = new DateTime(1970, 1, 1, 0, 0, 0, 0, System.DateTimeKind.Utc);
 		int i = 0;
 
         foreach (XmlNode node in xmlDoc.SelectNodes(startTag+"/inventory/item"))
@@ -550,6 +613,7 @@ public class ItemManager : MonoBehaviour {
                 slot.buyMode = (BuyMode)Enum.Parse(typeof(BuyMode), node.SelectSingleNode("buytype").InnerText);
              
                 slot.charge = int.Parse(node.SelectSingleNode("charge").InnerText);
+                slot.isEvented = bool.Parse(node.SelectSingleNode("isEvented").InnerText);
              //   Debug.Log("repari" + slot.charge);
                 if (node.SelectSingleNode("time_end").InnerText != "")
                 {
@@ -567,6 +631,39 @@ public class ItemManager : MonoBehaviour {
                         Debug.LogError("date format  exeption");
                     }
 
+                }
+
+
+                XmlNodeList prices = node.SelectNodes("price");
+                if (prices.Count > 0)
+                {
+                    slot.prices = new Price[prices.Count];
+                    for (int j = 0; j < prices.Count; j++)
+                    {
+                        XmlNode onePrice = prices[j];
+                        Price price = new Price();
+                        XmlNodeList amounts = onePrice.SelectNodes("amount");
+                        XmlNodeList types = onePrice.SelectNodes("type");
+
+                        XmlNode discount = onePrice.SelectSingleNode("discount");
+                        if (discount != null)
+                        {
+                            price.discount = true;
+                            price.discountAmount = float.Parse(discount.InnerText);
+                            price.discoutnEnd = dtDateTime.AddSeconds(int.Parse(onePrice.SelectSingleNode("discountEnd").InnerText)).ToLocalTime();
+                        }
+                        price.parts = new PricePart[amounts.Count];
+                        price.type = (BuyPrice)Enum.Parse(typeof(BuyPrice), types[0].InnerText);
+                        price.id = onePrice.SelectSingleNode("id").InnerText;
+                        for (int k = 0; k < amounts.Count; k++)
+                        {
+                            price.parts[k] = new PricePart();
+                            price.parts[k].amount = int.Parse(amounts[k].InnerText);
+                            price.parts[k].type = (BuyPrice)Enum.Parse(typeof(BuyPrice), types[k].InnerText);
+                        }
+                        // Debug.Log(slot.name + " " + price.type);
+                        slot.prices[j] = price;
+                    }
                 }
 				if(shop!=null){
 					shop.TryUpdate(slot);
@@ -640,7 +737,7 @@ public class ItemManager : MonoBehaviour {
                         break;
                 }
 
-
+                slot.isEvented = bool.Parse(node.SelectSingleNode("isEvented").InnerText);
                 slot.gameClass = (GameClassEnum)Enum.Parse(typeof(GameClassEnum), node.SelectSingleNode("class").InnerText);
                 slot.type = type;
                 slot.buyMode = (BuyMode)Enum.Parse(typeof(BuyMode), node.SelectSingleNode("buytype").InnerText);
@@ -683,6 +780,14 @@ public class ItemManager : MonoBehaviour {
                     XmlNodeList amounts = onePrice.SelectNodes("amount");
                     XmlNodeList types = onePrice.SelectNodes("type");
 
+                    XmlNode discount = onePrice.SelectSingleNode("discount");
+                    if (discount != null)
+                    {
+                        price.discount = true;
+                        price.discountAmount = float.Parse(discount.InnerText);
+                        price.discoutnEnd = dtDateTime.AddSeconds(int.Parse(onePrice.SelectSingleNode("discountEnd").InnerText)).ToLocalTime();
+
+                    }
                     price.parts = new PricePart[amounts.Count];
                     price.type = (BuyPrice)Enum.Parse(typeof(BuyPrice), types[0].InnerText);
                     price.id = onePrice.SelectSingleNode("id").InnerText;
@@ -963,7 +1068,9 @@ public class ItemManager : MonoBehaviour {
     }
     public WeaponInventorySlot GetWeaponSlotbByID(int SQLID)
     {
-
+        if (!weaponIndexTable.ContainsKey(SQLID)){
+            return null;
+        }
         return weaponIndexTable[SQLID];
 
     }
@@ -1489,7 +1596,8 @@ public class ItemManager : MonoBehaviour {
 		}
 	}
 	*/
-	public IEnumerator BuyItem(string itemId,LotItemGUI gui){
+    public IEnumerator BuyItem(string itemId, InventoryGUI Shop)
+    {
 		if(buyBlock){
 			yield break;		
 		}
@@ -1525,9 +1633,9 @@ public class ItemManager : MonoBehaviour {
             {
                 yield return numenator.Current;
             }
-            if (gui != null)
+            if (Shop != null)
             {
-                gui.Shop.UpdateLot();
+                Shop.UpdateLot();
             }
             buyBlock = false;
             ///yield return new WaitForSeconds(10.0f);
@@ -1537,11 +1645,11 @@ public class ItemManager : MonoBehaviour {
         {
             GUIHelper.ConnectionStop();
             buyBlock = false;
-            if (gui != null)
+            if (Shop != null)
             {
                 if (xmlDoc.SelectSingleNode("result/error").InnerText == "2")
                 {
-                    gui.Shop.MainMenu.MoneyError();
+                    Shop.MainMenu.MoneyError();
                 }
                 //gui.SetError(xmlDoc.SelectSingleNode("result/errortext").InnerText);
             }

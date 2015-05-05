@@ -194,6 +194,7 @@ public class LevelingManager : MonoBehaviour, LocalPlayerListener,GameListener{
 			if(playerExp>=playerNeededExp[playerLvl]){
 				sendByLvl= true;
 				playerLvl++;
+                NetworkController.Instance.SetNetworkLvl(playerLvl);
                 GUIHelper.Notify(TextGenerator.instance.GetSimpleText("LevelUp"),TextGenerator.instance.GetExpText("LvlOpen",playerLvl));
 			}
 		}
@@ -273,7 +274,71 @@ public class LevelingManager : MonoBehaviour, LocalPlayerListener,GameListener{
 		StatisticHandler.SendTCP(StatisticHandler.SAVE_LVL,form);
 
 	}
-	
+    public bool HasNext()
+    {
+        return playerLvl < playerNeededExp.Length;
+    }
+
+    int startLvl = 0;
+    int startExp = 0;
+    public LVLAnimation animation;
+    public void MadeAnimationData()
+    {
+        animation = new LVLAnimation();
+        for (int i = startLvl; i <= playerLvl; i++)
+        {
+            LVLAnimationKey key = new LVLAnimationKey();
+            if (i == startLvl)
+            {
+                    key.startExp = startExp;
+            }
+            else
+            {
+                if(i==0){
+                    key.startExp=0;
+                }else{
+                    key.startExp = playerNeededExp[i - 1];
+                }
+
+               
+            }
+            if (i == playerLvl)
+            {
+                key.finishedxExp = playerExp;
+            }
+            else
+            {
+                  
+                  if (i >= playerNeededExp.Length)
+                {
+                    key.finishedxExp = playerNeededExp[i - 1];
+                }
+                else
+                {
+                    key.finishedxExp = playerNeededExp[i];
+                }     
+            }
+            float Min = 0;
+            if (i != 0)
+            {
+                Min = playerNeededExp[i-1];
+            }
+            float Max = playerNeededExp[playerNeededExp.Length-1];
+            if (i < playerNeededExp.Length)
+            {
+                Max = playerNeededExp[i]; 
+            }
+            key.startExpProcent = (key.startExp - Min) / (Max - Min);
+            key.finishedxExpProcent = (key.finishedxExp - Min) / (Max - Min);
+            animation.keys.Add(key);
+        }
+        startLvl = playerLvl;
+        startExp = playerExp;
+    }
+    public LVLAnimation GetAnimationData()
+    {
+        return animation;
+    }
 	//Event Section
 	private Player myPlayer;
 	private int playerStrike;
@@ -282,7 +347,9 @@ public class LevelingManager : MonoBehaviour, LocalPlayerListener,GameListener{
         //Debug.Log("PLAYER SPAWM"+   target);
 		if (target.isMine) {
 			myPlayer = target;
-			
+            startLvl = playerLvl;
+            startExp=playerExp;
+
 		}
 	}
     public void EventPawnKillPlayer(Player target, KillInfo killinfo)
@@ -344,7 +411,7 @@ public class LevelingManager : MonoBehaviour, LocalPlayerListener,GameListener{
 		if ((myPlayer.team	!= teamNumber&&!UpExp(ParamLibrary.PARAM_LOSE))||(myPlayer.team == teamNumber&&!UpExp(ParamLibrary.PARAM_WIN))) {
 			SyncLvl();
 		}
-		
+        MadeAnimationData();
 	}
 	public void EventKilledByFriend(Player target,Player friend){
 		if (target == myPlayer) {

@@ -3,6 +3,7 @@ using System.Collections;
 using System.Collections.Generic;
 
 public class MainMenuGUI : MonoBehaviour {
+    public static int EVENT_KEY = 2;
 
 	int numMessage=0;
 	int numMessageOld;
@@ -53,6 +54,10 @@ public class MainMenuGUI : MonoBehaviour {
 
     public AskWindow askWindow;
 
+    public EventNotifyWindow eventWindow;
+
+    public HUDHolder HUDholder;
+
     public InventoryGUI shop;
     public void LoadingFinish()
     {
@@ -87,8 +92,35 @@ public class MainMenuGUI : MonoBehaviour {
             //Debug.Log("PULLSIZE" + GUIHelper.messages.Dequeue());
             SimpleMessage(GUIHelper.messages.Dequeue());
         }
+        ShopEvent evnt =GUIHelper.shopEvent;
+        if (evnt != null)
+        {
+            ShowEvent(evnt);
+          
+        }
+    }
+    public void TryShowEvent()
+    {
+        if (allWWidget.alpha != 1.0f)
+        {
+            return;
+        }
+        ShopEvent evnt = GUIHelper.shopEvent;
+        if (evnt != null)
+        {
+            ShowEvent(evnt);
+
+        }
     }
 
+    public void NotifyClose(){
+        ShopEvent evnt = GUIHelper.shopEvent;
+        if (evnt != null)
+        {
+            ShowEvent(evnt);
+
+        }
+    }
     public static MainMenuGUI instance;
 	void Awake(){
 	
@@ -711,8 +743,8 @@ public class MainMenuGUI : MonoBehaviour {
 		Screen.lockCursor = false;
         NetworkController.Instance.LeaveRoomReuqest();
         ItemManager.instance.LeaveRoom();
-        Destroy(FindObjectOfType<HUDHolder>().gameObject);
-        Application.LoadLevel(0);
+        Destroy(HUDholder.gameObject);
+        Application.LoadLevel("Empty");
         gameObject.SetActive(true);
 		inGame= true;
 		foreach(UIRect panel in HideInGamePanels){
@@ -725,7 +757,7 @@ public class MainMenuGUI : MonoBehaviour {
 	}
     void OnLevelWasLoaded(int level)
     {
-        if(level==0){
+        if(level==0||level==1){
             FindObjectOfType<MusicHolder>().SetStage( MUSIC_STAGE.MAIN_MENU_LOOP);
             gameObject.SetActive(true);
             inGame = false;
@@ -739,6 +771,59 @@ public class MainMenuGUI : MonoBehaviour {
             }
         }
     }
+    public void ShowEvent(ShopEvent evt)
+    {
+      
+            InventorySlot item = ItemManager.instance.GetItem(evt.item);
+                   
+        switch (evt.type)
+        {
+            case ShopEventType.CAN_TAKE_HOLLIDAY:
+              
+                eventWindow.action = delegate()
+                {
+                    shop.SetItemForChoiseSet(item);
+                };
+                eventWindow.Show(evt.text, item, TextGenerator.instance.GetSimpleText("take_item"));
+                break;
+            case ShopEventType.CAN_TAKE:
+                if (!item.IsEvented())
+                {
+                    return;
+                }
+                eventWindow.action = delegate()
+                {
+                    shop.SetItemForChoiseSet(item);
+                };
+                eventWindow.Show(evt.text, item, TextGenerator.instance.GetSimpleText("take_item"));
+                break;
+            case ShopEventType.DISCOUNT:
+                if (item.isAvailable())
+                {
+                    return;
+                }
+                int amount = item.prices[EVENT_KEY].GetPrice();
+                eventWindow.action = delegate()
+                {
+                  
+                    if (item.prices[0].type == BuyPrice.KP_PRICE)
+                    {
+                        GA.API.Business.NewEvent("Shop:BUYItem:" + item.engName, "GASH", amount);
+                    }
+                    else
+                    {
+                        GA.API.Business.NewEvent("Shop:BUYItem:" + item.engName, "GOLD", amount);
+                    }
+                    StartCoroutine(ItemManager.instance.BuyItem(item.prices[EVENT_KEY].id, shop));
+                };
+               // string text = item.prices[EVENT_KEY].GetText();
+                eventWindow.Show(evt.text, item, TextGenerator.instance.GetMoneyText("simple_buy_item", amount));
+                break;
+        }
+
+    }
+
+    
 }
 
 

@@ -1,6 +1,7 @@
 ﻿using UnityEngine;
 using System.Collections;
 using System.Collections.Generic;
+using System;
 
 
 public class TeamSlot{
@@ -27,6 +28,10 @@ public class Statistic : MonoBehaviour {
 	public GameObject TeamBlue;
 	public GameObject ShablonBluePlayer;
 
+    public UILabel redTeamLabel;
+    public UILabel blueTeamLabel;
+
+
 	public GameObject PlayerBox;
 
 	public UISprite PlayerPreviev;
@@ -40,6 +45,16 @@ public class Statistic : MonoBehaviour {
 	public ClassStat[] ClassStats;
 
     public AchievementUI[] achievements;
+    public UILabel operDescr;
+    public UILabel operProgress;
+    public UILabel operPlace;
+
+
+    public UILabel modeLabel;
+
+    public UILabel mapLabel;
+
+    public UILabel timerLabel;
 
     public string achievementOpenSprite;
 
@@ -72,7 +87,7 @@ public class Statistic : MonoBehaviour {
                 RedTeamlPlayer[i].message.Hide(true);
             }
         }
-        avatar.mainTexture = GlobalPlayer.instance.avatar;
+//        avatar.mainTexture = GlobalPlayer.instance.avatar;
 	}
 
 
@@ -122,41 +137,20 @@ public class Statistic : MonoBehaviour {
 
 	public void LocalPlayerStat(string NamePlayer, int Class)
 	{
-		PlayerName.text = NamePlayer;
-
-		if(PlayerPreviev!=null){
-			switch((GameClassEnum)Class)
-			{
-			case GameClassEnum.ENGINEER:
-				PlayerPreviev.spriteName="engineer";
-				break;
-			case GameClassEnum.MEDIC:
-				PlayerPreviev.spriteName="medic";
-				break;
-			case GameClassEnum.ASSAULT:
-				PlayerPreviev.spriteName="storm";
-				break;
-			case GameClassEnum.SCOUT:
-				PlayerPreviev.spriteName="sniper";
-				break;
-			}
-		}
-		PlayerMainGui.LevelStats stats = LevelingManager.instance.GetPlayerStats ();
-
-		Lvl.text = "Lvl "+LevelingManager.instance.playerLvl;
-		ExpLabel.text = LevelingManager.instance.playerExp.ToString();
-        if (LevelingManager.instance.playerLvl < LevelingManager.instance.playerNeededExp.Length)
+        if (operDescr != null)
         {
-            ExpNeedLabel.text = LevelingManager.instance.playerNeededExp[LevelingManager.instance.playerLvl].ToString();
+            operDescr.text = TournamentManager.instance.currentOperation.counterEventNormal;
+            operProgress.text = TournamentManager.instance.currentOperation.myCounter.ToString();
+            operPlace.text = TournamentManager.instance.currentOperation.myPlace.ToString();
+            
         }
-        else
-        {
-            ExpNeedLabel.text = LevelingManager.instance.playerExp.ToString();
-        }
-		if (LevelingManager.instance.playerNeededExp[LevelingManager.instance.playerLvl] != 0)
-			Exp.value = stats.playerProcent/100f;
-
-		ClassExpPlayer(stats); //Внесение базовой инфы по классам (+)
+        modeLabel.text = TextGenerator.instance.GetSimpleText(ServerHolder.mode);
+        mapLabel.text = TextGenerator.instance.GetSimpleText(ServerHolder.currentMap);
+           PlayerMainGui.GameStats gamestats = GameRule.instance.GetStats();
+        redTeamLabel.text = gamestats.score[0].ToString();
+        blueTeamLabel.text = gamestats.score[1].ToString();
+        TimeSpan span = new TimeSpan((long)(GameRule.instance.GetTime() * TimeSpan.TicksPerSecond));
+        timerLabel.text = string.Format("{0:D2} : {1:D2}", span.Minutes, span.Seconds);
 	}
 
 	public void RefreshExpAndLvl()
@@ -285,7 +279,7 @@ public class Statistic : MonoBehaviour {
                     else
                         namer = "NoName";
 
-                    RedTeamlPlayer[countRed].message.SetStartInfo(namer, Gamer.Score.Kill + Gamer.Score.AIKill, Gamer.Score.Death, Gamer.Score.Assist, Gamer);
+                    RedTeamlPlayer[countRed].message.SetStartInfo(Gamer);
                     RedTeamlPlayer[countRed].message.Hide(false);
                     countRed++;
                     break;
@@ -298,7 +292,7 @@ public class Statistic : MonoBehaviour {
                     else
                         nameb = "NoName";
 
-                    BlueTeamlPlayer[countBlue].message.SetStartInfo(nameb, Gamer.Score.Kill + Gamer.Score.AIKill, Gamer.Score.Death, Gamer.Score.Assist, Gamer);
+                    BlueTeamlPlayer[countBlue].message.SetStartInfo(  Gamer);
                     BlueTeamlPlayer[countBlue].message.Hide(false);
                     countBlue++;
                     break;
@@ -331,11 +325,9 @@ public class Statistic : MonoBehaviour {
             }
             Achievement ach  = list[i];
             
-            if (ach.isDone)
-            {
-                ui.finished.spriteName = achievementOpenSprite;
-                ui.progress.alpha=0.0f;
-            }
+          
+       
+            
             ui.name.text = ach.description;
             ui.progress.text = ach.GetProgress();
         }

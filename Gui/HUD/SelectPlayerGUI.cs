@@ -30,11 +30,7 @@ public class SelectPlayerGUI : MonoBehaviour {
 	private int W; //Ширина
 	private int H; //Высота
 
-	public enum _PlayerC{None, Ennginer, Medic, Sniper, Soldier};
-	public _PlayerC PlayerC;
-
-	public enum _PlayerR{None, Red, Green, Next};
-	public _PlayerR PlayerR;
+	
 
 	public GameObject Play;
 
@@ -44,25 +40,22 @@ public class SelectPlayerGUI : MonoBehaviour {
 
 	public UIPanel ThisPanel;
 
+    public UIPanel InBattle;
+
     public Player LocalPlayer;
 
     public GAMEMODE mode;
 
-    public UIToggle[] team;
 
-    public int slotAmount =4;
-    
-    public List<GUIItem>[] listOfItems = new List<GUIItem>[4];
+
+ 
 
     public Color[] colorByType;
 	// Use this for initialization
-	void Start () 
-	{
-	
-		PlayerC = _PlayerC.None;
-		
-		PlayerR = _PlayerR.None;
-	}
+    void Start()
+    {
+
+    }
 
     public void ReDrawAll() {
         
@@ -100,21 +93,29 @@ public class SelectPlayerGUI : MonoBehaviour {
         SelectPlayer(1);
         SelectRobot();
       //  Debug.Log(player.team);
-		if(player.team==0){
-			Choice._Team = -1;
-		}else{
-			Choice._Team =player.team;
-		}
+		Choice._Team = -1;
+		
         Debug.Log(Choice._Team );
     }
     public void Activate()
     {
         if (ThisPanel.alpha==0.0f)
         {
-            ThisPanel.alpha = 1.0f;
-            if(Choice._Player!=-1&&MenuElements.ClassModels.Count<Choice._Player&& MenuElements.ClassModels[Choice._Player] != null){
-                MenuElements.ClassModels[Choice._Player].SetActive(true);
+            if (Choice._Team == -1)
+            {
+                ThisPanel.alpha = 1.0f;
+                InBattle.alpha = 0.0f;
+                if (Choice._Player != -1 && MenuElements.ClassModels.Count < Choice._Player && MenuElements.ClassModels[Choice._Player] != null)
+                {
+                    MenuElements.ClassModels[Choice._Player].SetActive(true);
+                }
             }
+            else
+            {
+                ThisPanel.alpha = 0.0f;
+                InBattle.alpha = 1.0f;
+            }
+           
         }
     }
     public void DeActivate()
@@ -125,6 +126,14 @@ public class SelectPlayerGUI : MonoBehaviour {
            
         
         }
+
+        if (InBattle.alpha == 1.0f)
+        {
+            InBattle.alpha = 0.0f;
+
+
+        }
+       
         HideModel();
     }
 	//Коректировка размеров
@@ -142,21 +151,21 @@ public class SelectPlayerGUI : MonoBehaviour {
 		switch(i)
 		{
 		case 1:
-			PlayerC = _PlayerC.Ennginer;
+			
 			Choice._Player = (int)GameClassEnum.ENGINEER;
 			break;
 		case 2:
-			PlayerC = _PlayerC.Medic;
+			
 			Choice._Player = (int)GameClassEnum.MEDIC;
 			
 			break;
 		case 3:
-			PlayerC = _PlayerC.Sniper;
+			
 			Choice._Player = (int)GameClassEnum.SCOUT;
 			
 			break;
 		case 4:
-			PlayerC = _PlayerC.Soldier;
+			
 			Choice._Player = (int)GameClassEnum.ASSAULT;
 			break;
 		}
@@ -208,10 +217,7 @@ public class SelectPlayerGUI : MonoBehaviour {
             case GAMEMODE.PVE_HOLD:
 
                 Choice._Team = 1;
-                if (team.Length > Choice._Team - 1 && team[Choice._Team - 1] != null)
-                {
-                    team[Choice._Team - 1].value = true;
-                }
+               
                 break;
 
             case GAMEMODE.PVP:
@@ -239,7 +245,7 @@ public class SelectPlayerGUI : MonoBehaviour {
                 if (i == 2 )
                     Choice._Team = 2;
 
-                team[Choice._Team - 1].value = true;
+              //  team[Choice._Team - 1].value = true;
                 break;
 
         
@@ -274,6 +280,8 @@ public class SelectPlayerGUI : MonoBehaviour {
         {
             Choice._Team = i;
         }
+
+		StartGameBut(); //Выбор команды(26.04.2015)
 	}
 
     public void NextWeapon(int TypeW) //Вперёд слайдер оружия
@@ -292,65 +300,8 @@ public class SelectPlayerGUI : MonoBehaviour {
 
         Choice._GUIChoice[Choice._Player][TypeW] += delta;
 
-        if (Choice._GUIChoice[Choice._Player][TypeW] >= listOfItems[TypeW].Count)
-              {
-                  Choice._GUIChoice[Choice._Player][TypeW] = 0;
-              }
-            if (Choice._GUIChoice[Choice._Player][TypeW] < 0)
-              {
-                  Choice._GUIChoice[Choice._Player][TypeW] = listOfItems[TypeW].Count - 1;
-              }
-              ReDrawWeapon(TypeW, Choice._GUIChoice[Choice._Player][TypeW]);       
-        
-        
 	}
-    public void ReDrawWeapon(int TypeW, int choice)
-    {
-        if (listOfItems[TypeW].Count == 0) {
-            return;
-        }
-        if (MenuElements.Weapon.Length == 0||MenuElements.Weapon[TypeW]==null)
-        {
-            return;
-        }
-        GUIItem item =  listOfItems[TypeW][choice];
-        MenuElements.Weapon[TypeW].mainTexture = item.texture;
-
-
-		if(colorByType.Length>(int)item.color){
-			MenuElements.WeaponBack[TypeW].color = colorByType[(int)item.color];
-		}
-
-        if (MenuElements.WeaponTitle.Length > TypeW)
-        {
-            MenuElements.WeaponTitle[TypeW].text = item.name;
-        }
-        if (MenuElements.WeaponText.Length > TypeW)
-        {
-            MenuElements.WeaponText[TypeW].text = item.text;
-        }
-        if (MenuElements.WeaponBars.Length > TypeW)
-        {
-          
-            if (item.chars != null)
-            {
-                MenuElements.WeaponBars[TypeW].widget.alpha = 1.0f;
-                MenuElements.WeaponBars[TypeW].magazine.text = item.chars.magazine.ToString();
-                MenuElements.WeaponBars[TypeW].dmg.value = item.chars.dmg;
-                MenuElements.WeaponBars[TypeW].aim.value = item.chars.aim;
-                MenuElements.WeaponBars[TypeW].reload.value = item.chars.reload;
-                MenuElements.WeaponBars[TypeW].speed.value = item.chars.speed;
-                MenuElements.WeaponBars[TypeW].mode.text = TextGenerator.instance.GetSimpleText(item.chars.gunMode);
-            }
-            else
-            {
-                MenuElements.WeaponBars[TypeW].widget.alpha = 0.0f;
-            }
-        }
-        MenuElements.WeaponSelect[TypeW] = item;
-        Choice.SetChoice(TypeW, Choice._Player, item.index);
-    }
-
+   
 
 	void FixedUpdate()
 	{

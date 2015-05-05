@@ -103,6 +103,7 @@ public class InventoryGUI : MonoBehaviour {
 		selected = GetComponentsInChildren<SelectedItemGUI>();
 		ReloadSelectedItem();
         init = true;
+        MainMenu.TryShowEvent();
 	}
 	
 	void ReloadSelectedItem(){
@@ -253,7 +254,10 @@ public class InventoryGUI : MonoBehaviour {
 	}
     public void UpdateLot()
     {
-        lotItemGUI.SetItem(lotItemGUI.item);
+        if (lotItem.alpha == 1f)
+        {
+            lotItemGUI.SetItem(lotItemGUI.item);
+        }
     }
 
 	public void CloseLot()

@@ -17,7 +17,9 @@ public enum AsyncNotify
     PREMIUM,
     RELOAD_ITEMS,
     HOLIDAY,
-    DAYREWARD
+    DAYREWARD,
+    ITEMDISCOUNT,
+    ITEMTAKE
 }
 public class GlobalPlayer : MonoBehaviour {
 
@@ -102,7 +104,12 @@ public class GlobalPlayer : MonoBehaviour {
 	public bool isLoaded = false;
 	
 	public bool loaded = false;
-	
+
+    public DateTime timeShow = new DateTime(1970, 1, 1, 0, 0, 0, 0, System.DateTimeKind.Utc);
+
+    public DateTime timeUpdate;
+
+    public DateTime timeUpdateLast = new DateTime(1970, 1, 1, 0, 0, 0, 0, System.DateTimeKind.Utc);
 	public void SetFaceBookInit() {
 		if(FB.IsLoggedIn) {
 			UID ="FB"+FB.UserId;
@@ -221,6 +228,12 @@ public class GlobalPlayer : MonoBehaviour {
 			}
 		
 		}
+       // Debug.Log(timeUpdate + " " + DateTime.Now);
+        if (timeUpdateLast < timeUpdate && timeUpdate < DateTime.Now)
+        {
+            ReloadProfile(true);
+            timeUpdateLast = timeUpdate;
+        }
 	}
 	public void FinishedLoad(){
 		LevelingManager.instance.SetNetworkLvl();
@@ -271,19 +284,30 @@ public class GlobalPlayer : MonoBehaviour {
 		foreach (string id in ids)
 			friendsInfo.Add (id);
 	}
-	
+    public void parseProfileSImple(XmlDocument xmlDoc)
+    {
+        if (xmlDoc.SelectSingleNode("result/gold") != null)
+        {
+            gold = int.Parse(xmlDoc.SelectSingleNode("result/gold").InnerText);
+            cash = int.Parse(xmlDoc.SelectSingleNode("result/cash").InnerText);
+            PassiveSkillManager.instance.skillPointLeft = int.Parse(xmlDoc.SelectSingleNode("result/skillpoint").InnerText);
+        }
+    }
 	
 	public void parseProfile(string XML,bool parseFirsttTime = false){
-
-        Debug.Log(XML);
+        DateTime dtDateTime = new DateTime(1970, 1, 1, 0, 0, 0, 0, System.DateTimeKind.Utc);
+//        Debug.Log(XML);
 		XmlDocument xmlDoc = new XmlDocument();
 		xmlDoc.LoadXml(XML);
 		gold = int.Parse (xmlDoc.SelectSingleNode ("player/gold").InnerText);
 		cash = int.Parse (xmlDoc.SelectSingleNode ("player/cash").InnerText);
+        PassiveSkillManager.instance.skillPointLeft = int.Parse(xmlDoc.SelectSingleNode("player/skillpoint").InnerText);
 		stamina = int.Parse (xmlDoc.SelectSingleNode ("player/stamina").InnerText);
 		
 		XmlNodeList list = xmlDoc.SelectNodes("player/notify");
 
+        timeUpdate = dtDateTime.AddSeconds(int.Parse(xmlDoc.SelectSingleNode("player/update").InnerText)).ToLocalTime();
+       
         open_set = int.Parse(xmlDoc.SelectSingleNode("player/open_set").InnerText);
         foreach (XmlNode node in list)
         {
@@ -294,13 +318,51 @@ public class GlobalPlayer : MonoBehaviour {
 				    ItemManager.instance.ReloadItem();			
 				break;
                 case AsyncNotify.RELOAD_ITEMS:
-                    ItemManager.instance.ReloadItem();	
+                    ItemManager.instance.ReloadItem();	     
                 break;
                 case AsyncNotify.HOLIDAY:
-              
-                      GUIHelper.PushMessage(TextGenerator.instance.GetSimpleText("RewardHOLIDAY"));
+                {
+                    string text = node.SelectSingleNode("text").InnerText;
+                    if (node.SelectSingleNode("item") == null)
+                    {
+
+                        GUIHelper.PushMessage(text);
+                    }
+                    else
+                    {
+                        ShopEvent evnt = new ShopEvent(ShopEventType.CAN_TAKE_HOLLIDAY, node.SelectSingleNode("item").InnerText, text);
+                        GUIHelper.shopEvent = evnt;
+                    }
+                }
                 break;
                 case AsyncNotify.DAYREWARD:
+                break;
+                case AsyncNotify.ITEMDISCOUNT:
+                {
+                    DateTime lTimeShow = dtDateTime.AddSeconds(int.Parse(node.SelectSingleNode("start").InnerText));
+                    if (lTimeShow <= timeShow)
+                    {
+                        continue;
+                    }
+                    timeShow = lTimeShow;
+                    string text = node.SelectSingleNode("text").InnerText;
+                    ShopEvent evnt = new ShopEvent(ShopEventType.DISCOUNT, node.SelectSingleNode("item").InnerText, text);
+                    GUIHelper.shopEvent = evnt;
+                }
+                break;
+                case AsyncNotify.ITEMTAKE:
+                {
+
+                    DateTime lTimeShow = dtDateTime.AddSeconds(int.Parse(node.SelectSingleNode("start").InnerText));
+                    if (lTimeShow <= timeShow)
+                    {
+                        continue;
+                    }
+                    timeShow = lTimeShow;
+                    string text = node.SelectSingleNode("text").InnerText;
+                    ShopEvent evnt = new ShopEvent(ShopEventType.CAN_TAKE, node.SelectSingleNode("item").InnerText, text);
+                    GUIHelper.shopEvent = evnt;
+                }
                 break;
 			}
 		}
@@ -317,7 +379,7 @@ public class GlobalPlayer : MonoBehaviour {
         {
             ItemManager.instance.Init(UID);
         }
-       
+    
 	}
 
 
@@ -372,8 +434,9 @@ public class GlobalPlayer : MonoBehaviour {
 		yield return w;
 		//Debug.Log (w.text);
         parseProfile(w.text, ParseFirstTime);
-	}	
-	public IEnumerator  ReloadStats(){
+	}
+    public IEnumerator ReloadStats(bool ParseFirstTime = false)
+    {
 		WWWForm form = new WWWForm ();
 
         form.AddField("uid", UID);
@@ -389,7 +452,7 @@ public class GlobalPlayer : MonoBehaviour {
 		}
 
 		yield return w;
-		parseProfile(w.text);
+        parseProfile(w.text, ParseFirstTime);
         MainMenuGUI menu =FindObjectOfType<MainMenuGUI>();
         if (menu != null)
         {
@@ -416,8 +479,9 @@ public class GlobalPlayer : MonoBehaviour {
 		Application.ExternalCall ("ItemBuy",item);
 	
 	}
-	public void ReloadProfile(){
-		StartCoroutine(ReloadStats());
+    public void ReloadProfile(bool ParseFirstTime = false)
+    {
+        StartCoroutine(ReloadStats(ParseFirstTime));
 	}
 	
 	public void  SetName(string newname)

@@ -556,7 +556,7 @@ public class NetworkController : MonoBehaviour
                     {
                         if (player.userId != _smartFox.MySelf.Id)
                         {
-                            Debug.Log("init player" + player.userId);
+//                            Debug.Log("init player" + player.userId);
                             if (PlayerView.allPlayer.ContainsKey(player.userId))
                             {
                                 PlayerView.allPlayer[player.userId].NetUpdate(player);
@@ -643,8 +643,10 @@ public class NetworkController : MonoBehaviour
                     {
                         ReadMapData(dt);
                     }
+                   
                     if (dt.ContainsKey("gameRule"))
                     {
+
                         GameRule.instance.SetFromModel((GameRuleModel)dt.GetClass("gameRule"));
                     }
                     GameRule.instance.ReadData(dt);
@@ -653,7 +655,7 @@ public class NetworkController : MonoBehaviour
                 case "updatePlayerInfo":
                     {
                         PlayerModel player = (PlayerModel)dt.GetClass("player");
-                        Debug.Log("updatePlayerInfo team" + player.team);
+                    //    Debug.Log("updatePlayerInfo team" + player.team);
                         if (PlayerView.allPlayer.ContainsKey(player.userId))
                         {
                             PlayerView.allPlayer[player.userId].NetUpdate(player);
@@ -685,8 +687,8 @@ public class NetworkController : MonoBehaviour
                 case "pawnUpdate":
                     HandlePawnUpdate(dt);
                     break;
-                case "pawnTaunt":
-                    HandlePawnTaunt(dt);
+                case "pawnAnim":
+                    HandlePawnAnim(dt);
                     break;
                 case "pawnKnockOut":
                     HandlePawnKnockOut(dt);
@@ -962,6 +964,11 @@ public class NetworkController : MonoBehaviour
         }
     }
 
+    public User GetUserById(int uid)
+    {
+        return serverHolder.gameRoom.GetUserById(uid);
+    }
+
     /// <summary>
     ///Prevent player form diconect in main menu
     /// </summary>	
@@ -1052,6 +1059,18 @@ public class NetworkController : MonoBehaviour
         smartFox.Send(request);
 
 
+    }
+    /// <summary>
+    /// setStatus request to server
+    /// </summary>	
+    public void SetStats(PlayerModel model)
+    {
+        
+        ISFSObject data = new SFSObject();
+
+        data.PutClass("stats", model);
+        ExtensionRequest request = new ExtensionRequest("sendStats", data, serverHolder.gameRoom);
+        smartFox.Send(request);
     }
     public ISFSObject pawnSpawnData;
 
@@ -1314,7 +1333,7 @@ public class NetworkController : MonoBehaviour
 
     }
     /// <summary>
-    /// pawnTaunt request to server
+    /// pawnAnim request to server
     /// </summary>	
     public void PawnTauntRequest(int id, string animName)
     {
@@ -1322,7 +1341,19 @@ public class NetworkController : MonoBehaviour
 
         data.PutInt("id", id);
         data.PutUtfString("animName", animName);
-        ExtensionRequest request = new ExtensionRequest("pawnTaunt", data, serverHolder.gameRoom);
+        ExtensionRequest request = new ExtensionRequest("pawnAnim", data, serverHolder.gameRoom);
+        smartFox.Send(request);
+
+    }/// <summary>
+    /// pawnAnim request to server
+    /// </summary>	
+    public void PawnWeaponAnimRequest(int id, int animName)
+    {
+        ISFSObject data = new SFSObject();
+
+        data.PutInt("id", id);
+        data.PutInt("weaponType", animName);
+        ExtensionRequest request = new ExtensionRequest("pawnAnim", data, serverHolder.gameRoom);
         smartFox.Send(request);
 
     }
@@ -1822,7 +1853,7 @@ public class NetworkController : MonoBehaviour
         if (dt.ContainsKey("ownerId"))
         {
             Player player = GetPlayer(dt.GetInt("ownerId"));
-
+            player.CleanSpawned(pawn);
             if (dt.ContainsKey("isAI") && dt.GetBool("isAI"))
             {
                 player.AISpawnSetting(pawn, dt.GetIntArray("stims"));
@@ -1969,14 +2000,16 @@ public class NetworkController : MonoBehaviour
         }
     }
     /// <summary>
-    /// handle pawnTaunt  from Server
+    /// handle pawnAnim  from Server
     /// </summary>	
 
-    public void HandlePawnTaunt(ISFSObject dt)
+    public void HandlePawnAnim(ISFSObject dt)
     {
         Pawn pawn = GetView(dt.GetInt("id")).pawn;
-        pawn.RemotePlayTaunt(dt.GetUtfString("animName"));
-
+        if (dt.ContainsKey("animName"))
+            pawn.RemotePlayTaunt(dt.GetUtfString("animName"));
+        if (dt.ContainsKey("weaponType"))
+            pawn.SetWeaponType(dt.GetInt("weaponType"));
     }
     /// <summary>
     /// handle pawnKnockOut  from Server
@@ -2223,27 +2256,55 @@ public class NetworkController : MonoBehaviour
         Pawn pawn = GetView(dt.GetInt("viewId")).pawn;
 
         int player = dt.GetInt("player");
+        bool headShoot = false;
+        if (dt.ContainsKey("headShot"))
+        {
+            headShoot = dt.GetBool("headShot");
+        }
+        bool isMelee = false;
+        if (dt.ContainsKey("isMelee"))
+        {
+            isMelee = dt.GetBool("isMelee");
+        }
+        String killerName="";
+        if (dt.ContainsKey("killerName"))
+        {
+            killerName = dt.GetUtfString("killerName");
+        }
+        KillInfo info = new KillInfo(dt.GetInt("weaponId"), headShoot, isMelee);
         if (player == _smartFox.MySelf.Id)
         {
-            bool headShoot = false;
-            if (dt.ContainsKey("headShot"))
-            {
-                headShoot = dt.GetBool("headShot");
-            }
-            KillInfo info = new KillInfo(dt.GetInt("weaponId"), headShoot);
+         
             GetPlayer(player).PawnKill(pawn, pawn.player, pawn.myTransform.position, info);
             pawn.PawnKill(GetPlayer(player));
 
         }
         else
         {
+            
             if (player > 0)
             {
+               
+
                 pawn.PawnKill(GetPlayer(player));
+                if (pawn.player != null)
+                {
+                    PlayerMainGui.instance.KillerAnnonce(GetPlayer(player).PlayerName, pawn.player.PlayerName, info.weaponId);
+                }
+                else
+                {
+                    PlayerMainGui.instance.KillerAnnonce(GetPlayer(player).PlayerName, pawn.publicName, info.weaponId);
+                }
             }
             else
             {
                 pawn.PawnKill(null);
+                if (pawn.player != null)
+                {
+                    PlayerMainGui.instance.KillerAnnonce(killerName, pawn.player.PlayerName, info.weaponId);
+                }
+               
+            
             }
 
 

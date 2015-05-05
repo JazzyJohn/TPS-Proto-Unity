@@ -12,7 +12,7 @@ using Sfs2X.Entities.Data;
 using nstuff.juggerfall.extension.models;
 
 
-public enum GAMEMODE { PVP, PVE,RUNNER, PVPJUGGERFIGHT,PVPHUNT,PVE_HOLD,SEQUENCE_POINTGAME};
+public enum GAMEMODE { PVP, PVE, RUNNER, PVPJUGGERFIGHT, PVPHUNT, PVE_HOLD, SEQUENCE_POINTGAME, KING_OF_HILL_POINTGAME };
 
 public class RoomData
 {
@@ -46,6 +46,8 @@ public class ServerHolder : MonoBehaviour
 	public bool connectingToRoom = false;
 
     public string map = "kaspi_map_c_2_test";
+
+    public static string mode ;
 
     public static string currentMap;
 	string playerName;
@@ -262,28 +264,30 @@ public class ServerHolder : MonoBehaviour
     public void RoomNewName(GAMEMODE mode) {
         switch(mode){
             case GAMEMODE.PVE:
-                newRoomName = "Test PVE chamber " + UnityEngine.Random.Range(100, 999);
+                newRoomName = "Test PVE chamber " + GlobalPlayer.instance.UID;
                 break;
             case GAMEMODE.PVP:
-                newRoomName = "Test PVP chamber " + UnityEngine.Random.Range(100, 999);
+                newRoomName = "Test PVP chamber " + GlobalPlayer.instance.UID;
                 break;
             case GAMEMODE.RUNNER:
-                newRoomName = "Runner chamber " + UnityEngine.Random.Range(100, 999);
+                newRoomName = "Runner chamber " + GlobalPlayer.instance.UID;
                 break;
             case GAMEMODE.PVPJUGGERFIGHT:
-                 newRoomName = "Jugger Fight chamber " + UnityEngine.Random.Range(100, 999);
+                newRoomName = "Jugger Fight chamber " + GlobalPlayer.instance.UID;
                 break;
 			case GAMEMODE.PVPHUNT:
-                 newRoomName = "Hunt chamber " + UnityEngine.Random.Range(100, 999);
+                newRoomName = "Hunt chamber " + GlobalPlayer.instance.UID;
                 break;
 			case GAMEMODE.PVE_HOLD:
-				newRoomName = "Hold chamber " + UnityEngine.Random.Range(100, 999);
+                newRoomName = "Hold chamber " + GlobalPlayer.instance.UID;
                 break;
 				
 			case GAMEMODE.SEQUENCE_POINTGAME:
-				newRoomName = "Score point chamber " + UnityEngine.Random.Range(100, 999);
+                newRoomName = "Score point chamber " + GlobalPlayer.instance.UID;
                 break;
-       
+            case GAMEMODE.KING_OF_HILL_POINTGAME:
+                newRoomName = "King of Hill chamber " + GlobalPlayer.instance.UID;
+                break;
         }
     }
 	void Update()
@@ -617,6 +621,14 @@ public class ServerHolder : MonoBehaviour
                 setting.maxTime =0;
                 setting.maxScore= 0;
 			break;
+            case GAMEMODE.KING_OF_HILL_POINTGAME:
+                gameRule = new SFSRoomVariable("ruleClass", "nstuff.juggerfall.extension.gamerule.KingOfHillPointGameRule");
+                setting.teamCount = 2;
+                setting.maxTime =600;
+                setting.maxScore= 300;
+			break;
+
+                
         }
 
         Debug.Log(gameRule.GetStringValue());
@@ -833,6 +845,7 @@ public class ServerHolder : MonoBehaviour
         Camera.main.GetComponent<PlayerMainGui>().enabled = true;
         HUDHolder holder = FindObjectOfType<HUDHolder>();
         Camera.main.GetComponent<PlayerMainGui>().PlayGUI = holder.PlayPanel;
+        Camera.main.GetComponent<PlayerMainGui>().SetHud(holder.GetComponentInChildren<PlayerHudNgui>());
         //        holder.cameraForMark.transform.parent = Camera.main.transform;
         //    holder.cameraForMark.transform.localPosition = Vector3.zero;
         //      holder.cameraForMark.transform.localRotation = Quaternion.identity;
@@ -845,7 +858,7 @@ public class ServerHolder : MonoBehaviour
 
 
             mainMenu.PlayerGUI = Camera.main.GetComponent<PlayerMainGui>();
-
+            mainMenu.HUDholder = holder;
             mainMenu.FinishLvlLoad();
         }
         
@@ -874,6 +887,7 @@ public class ServerHolder : MonoBehaviour
 			}
 		}
         NetworkController.Instance.LoadFinish();
+        mode = GetRuleClass(data.name);
      
       //  NetworkController.Instance.SpawnPlayer( Vector3.zero, Quaternion.identity);
         FPSControll.instance.dontCount = false;
@@ -889,7 +903,7 @@ public class ServerHolder : MonoBehaviour
             menu.transform.localRotation = Quaternion.identity;
             menu.transform.localScale = holder.scale;
             Camera.main.GetComponent<PlayerMainGui>().enabled = true;
-
+            Camera.main.GetComponent<PlayerMainGui>().SetHud(holder.GetComponentInChildren<PlayerHudNgui>());
             NetworkController.Instance.LoadFinish();
 		}
 		connectingToRoom = false;
@@ -911,6 +925,9 @@ public class ServerHolder : MonoBehaviour
     void Awake()
     {
         instance = this;
+
+    }
+    void Start(){
         if (!shouldLoad && NetworkController.Instance.isSingle)
         {
             FinishLoad();
