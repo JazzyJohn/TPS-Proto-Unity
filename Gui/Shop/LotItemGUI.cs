@@ -117,7 +117,7 @@ public class LotItemGUI : MonoBehaviour
         }
     }
 
-    public void SetItem(InventorySlot _item)
+    public void SetItem(InventorySlot _item, bool justInfo= false)
     {
         item = _item;
         
@@ -209,7 +209,12 @@ public class LotItemGUI : MonoBehaviour
             useItem.alpha = 0.0f;
         }
 
-
+        if (justInfo)
+        {
+            useItem.alpha = 0.0f;
+            forGold.alpha = 0.0f;
+            forKP.alpha = 0.0f;
+        }
 		
 
         

@@ -881,6 +881,54 @@ public class ItemManager : MonoBehaviour {
 
 		
 		}
+        foreach (XmlNode node in xmlDoc.SelectNodes(startTag + "/itemKit"))
+        {
+          
+            XmlNodeList items =  node.SelectNodes("item");
+            XmlNodeList skills =  node.SelectNodes("skill");
+            XmlNodeList moneys = node.SelectNodes("money");
+            InvItemGroupSlot.BaseSlot[] slots = new InvItemGroupSlot.BaseSlot[items.Count + skills.Count + moneys.Count];
+            int count =0;
+            for (int j = 0; j < moneys.Count; j++)
+            {
+                XmlNode money = moneys[j];
+                InvItemGroupSlot.MoneySlot.MoneyType type = InvItemGroupSlot.MoneySlot.MoneyType.GP;
+                switch(j){
+                    case 0:
+                        type = InvItemGroupSlot.MoneySlot.MoneyType.KP;
+                        break;
+                    case 1: 
+                        type = InvItemGroupSlot.MoneySlot.MoneyType.GP;
+                        break;
+
+                }
+
+                InvItemGroupSlot.MoneySlot coin = new InvItemGroupSlot.MoneySlot(type, int.Parse(money.InnerText));
+                slots[count] = coin;
+                count++;
+
+               
+            }
+            foreach (XmlNode skill in skills)
+            {
+                int id  = int.Parse(skill.SelectSingleNode ("id").InnerText);
+                int days  = int.Parse(skill.SelectSingleNode ("days").InnerText);
+
+                count++;
+            }
+            foreach (XmlNode item in items)
+            {
+                int id = int.Parse(item.SelectSingleNode("id").InnerText);
+                int days = int.Parse(item.SelectSingleNode("days").InnerText);
+
+                count++;
+            }
+          
+            int price = int.Parse(node.SelectSingleNode("goldPrice").InnerText);
+            string name = node.SelectSingleNode("name").InnerText;
+            int kitId = int.Parse(node.SelectSingleNode("id").InnerText);
+
+        }
         XmlNodeList stims = xmlDoc.SelectNodes(startTag+"/stim");
 		if(stimPackDictionary==null){
 			stimPackDictionary = new StimPack[stims.Count];
@@ -1657,6 +1705,71 @@ public class ItemManager : MonoBehaviour {
         
 		//buyBlock =false;
 	}
+    public IEnumerator BuyItemit(string itemId, InventoryGUI Shop)
+    {
+        if (buyBlock)
+        {
+            yield break;
+        }
+        buyBlock = true;
+        WWWForm form = new WWWForm();
+
+        form.AddField("uid", UID);
+        form.AddField("kit_id", itemId);
+
+        GUIHelper.ShowConnectionStart();
+
+        WWW w = StatisticHandler.GetMeRightWWW(form, StatisticHandler.BUY_ITEM);
+
+        yield return w;
+
+        Debug.Log(w.text);
+        XmlDocument xmlDoc = new XmlDocument();
+        xmlDoc.LoadXml(w.text);
+
+        if (xmlDoc.SelectSingleNode("result/error").InnerText == "0")
+        {
+
+            form = new WWWForm();
+
+            form.AddField("uid", UID);
+
+            IEnumerator numenator = LoadItems(form);
+
+            while (numenator.MoveNext())
+            {
+                yield return numenator.Current;
+            }
+            numenator = GlobalPlayer.instance.ReloadStats();
+            while (numenator.MoveNext())
+            {
+                yield return numenator.Current;
+            }
+
+            if (Shop != null)
+            {
+                Shop.UpdateLot();
+            }
+            buyBlock = false;
+            ///yield return new WaitForSeconds(10.0f);
+            GUIHelper.ConnectionStop();
+        }
+        else
+        {
+            GUIHelper.ConnectionStop();
+            buyBlock = false;
+            if (Shop != null)
+            {
+                if (xmlDoc.SelectSingleNode("result/error").InnerText == "2")
+                {
+                    Shop.MainMenu.MoneyError();
+                }
+                //gui.SetError(xmlDoc.SelectSingleNode("result/errortext").InnerText);
+            }
+        }
+
+        //buyBlock =false;
+    }
 	
 	
     public IEnumerator UseItem(string[] itemId)

@@ -448,6 +448,7 @@ public class GlobalPlayer : MonoBehaviour {
 		WWWForm form = new WWWForm ();
 
         form.AddField("uid", UID);
+        form.AddField("premium", 1); 
 		WWW w = null;
 		if (String.Compare(Application.absoluteURL, 0, "https", 0,5) != 0) {
 			
