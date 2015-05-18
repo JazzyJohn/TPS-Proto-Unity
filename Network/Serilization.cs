@@ -212,7 +212,8 @@ namespace nstuff.juggerfall.extension.models
         GUN = 4,
         KNOCKOUT  =8,
         CONTINIUS = 16,
-        CRIT = 32
+        CRIT = 32,
+        LONGSHOT = 64
     }
 	[Serializable]
     public class BaseDamageModel : SerializableSFSType
@@ -255,6 +256,10 @@ namespace nstuff.juggerfall.extension.models
              {
                  FlagsHelper.Set(ref modifiers, (int)DamageModifiers.CRIT);
              }
+             if (damage.isLongShoot)
+             {
+                 FlagsHelper.Set(ref modifiers, (int)DamageModifiers.LONGSHOT);
+             }
 		
 			this.hitPosition= new Vector3Model(damage.hitPosition);
             this.weaponId = damage.shootWeapon;
@@ -268,6 +273,7 @@ namespace nstuff.juggerfall.extension.models
             damageClass.pushForce = 0;
             damageClass.knockOut = FlagsHelper.IsSet(modifiers, (int)DamageModifiers.KNOCKOUT);
             damageClass.isHeadshoot = FlagsHelper.IsSet(modifiers, (int)DamageModifiers.HEADSHOT);
+            damageClass.isLongShoot = FlagsHelper.IsSet(modifiers, (int)DamageModifiers.LONGSHOT);
             damageClass.splash = FlagsHelper.IsSet(modifiers, (int)DamageModifiers.SPLASH);
             damageClass.weapon = FlagsHelper.IsSet(modifiers, (int)DamageModifiers.GUN);
             damageClass.isContinius = FlagsHelper.IsSet(modifiers, (int)DamageModifiers.CONTINIUS);

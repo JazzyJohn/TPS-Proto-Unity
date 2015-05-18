@@ -157,10 +157,12 @@ public class GameFinished : MonoBehaviour
         
     }
 
-    public void InitAnimation()
-    {
-        timePerKey = (GameRule.RESTART_TIME-2 )/ animation.keys.Count;
-        timeOfKey=0;
+    public void InitAnimation(){
+    
+        if(animation!=null){
+            timePerKey = (GameRule.RESTART_TIME-2 )/ animation.keys.Count;
+            timeOfKey=0;
+        }
     }
     public void UpdateAnimation()
     {
@@ -171,16 +173,18 @@ public class GameFinished : MonoBehaviour
         if(!animation.IsActive()){
             return;
         }
-        animationLvl.text = animation.GetLvl().ToString();
-        timeOfKey+= Time.deltaTime;
-        animationBar.value = animation.GetStartProcent()+ animation.GetDiffernceProcent()*timeOfKey/timePerKey;
-        animationExp.text = (animation.GetStart() + animation.GetDiffernce() * timeOfKey / timePerKey).ToString("0");
-        if (timeOfKey > timePerKey)
+        if (animation != null)
         {
-            timeOfKey = 0.0f;
-            animation.NextStage();
+            animationLvl.text = animation.GetLvl().ToString();
+            timeOfKey += Time.deltaTime;
+            animationBar.value = animation.GetStartProcent() + animation.GetDiffernceProcent() * timeOfKey / timePerKey;
+            animationExp.text = (animation.GetStart() + animation.GetDiffernce() * timeOfKey / timePerKey).ToString("0");
+            if (timeOfKey > timePerKey)
+            {
+                timeOfKey = 0.0f;
+                animation.NextStage();
+            }
         }
-
     }
     void RewardResolve()
     {
@@ -194,7 +198,7 @@ public class GameFinished : MonoBehaviour
         animation = LevelingManager.instance.GetAnimationData();
         InitAnimation();
         List < RewardGUI> rewards = RewardManager.instance.GetAllReward();
-        int totalCash = 0,totalGold = 0;
+        int totalCash = 0, totalGold = 0, totalXP  = LevelingManager.instance.GetTotalXP();
         foreach (RewardGUI reward in rewards)
         {
             if (reward.isCash)
@@ -226,6 +230,10 @@ public class GameFinished : MonoBehaviour
             lvlNext.alpha = 0.0f;
             lvlMax.alpha = 1.0f;
         }
+        GA.API.Design.NewEvent("Game:MatchEnd:End", 1);
+        GA.API.Design.NewEvent("Game:MatchEnd:PlayerReward:XP", totalXP);
+        GA.API.Design.NewEvent("Game:MatchEnd:PlayerReward:Gold", totalGold);
+        GA.API.Design.NewEvent("Game:MatchEnd:PlayerReward:Cash", totalCash);
     }
 
     public void RefreshStatisticPlayers()

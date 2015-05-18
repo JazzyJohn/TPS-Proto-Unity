@@ -41,6 +41,8 @@ public class BaseDamage{
     [HideInInspector]
     public bool isHeadshoot = false;
     [HideInInspector]
+    public bool isLongShoot = false;    
+    [HideInInspector]
     public bool crit = false;
     [HideInInspector]
     public bool isMelee = false;
@@ -68,6 +70,8 @@ public class BaseDamage{
 [RequireComponent(typeof(DelayDestroyedObject))]
 public class BaseProjectile : MonoBehaviour
 {
+
+
 	public bool active;
 	[HideInInspector]
     public int projId;

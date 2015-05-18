@@ -198,7 +198,7 @@ public class TournamentManager : MonoBehaviour, LocalPlayerListener, GameListene
         top.name = TextGenerator.instance.GetSimpleText("topNametoplvls");
         tops.Add(top);
 
-        killersXml = xmlDoc.SelectNodes("player/topcash");
+      /*  killersXml = xmlDoc.SelectNodes("player/topcash");
         top = new Top();
         killers = new Winner[killersXml.Count];
 
@@ -210,7 +210,7 @@ public class TournamentManager : MonoBehaviour, LocalPlayerListener, GameListene
         }
         top.winners = killers;
         top.name = TextGenerator.instance.GetSimpleText("topNametopcash");
-        tops.Add(top);
+        tops.Add(top);*/
 
        /* killersXml = xmlDoc.SelectNodes("player/daylic");
 
@@ -385,6 +385,8 @@ public class TournamentManager : MonoBehaviour, LocalPlayerListener, GameListene
 
     public static string EVENT_HEAD_SHOT = "headshot";
 
+    public static string EVENT_MELEE_HIT = "meleehit";
+
     public Player myPlayer;
 
     public void EventStart()
@@ -458,6 +460,10 @@ public class TournamentManager : MonoBehaviour, LocalPlayerListener, GameListene
                     {
                         currentOperation.Increment();
                     }
+                    if (currentOperation.counterEvent == EVENT_MELEE_HIT && killinfo.isHeadShoot)
+                    {
+                        currentOperation.Increment();
+                    }
                 }
 
             
@@ -476,7 +482,11 @@ public class TournamentManager : MonoBehaviour, LocalPlayerListener, GameListene
                 {
                     currentOperation.Increment();
                 }
-                if (currentOperation.counterEvent == EVENT_HEAD_SHOT&&killinfo.isHeadShoot)
+                if (currentOperation.counterEvent == EVENT_HEAD_SHOT && killinfo.isHeadShoot)
+                {
+                    currentOperation.Increment();
+                }
+                if (currentOperation.counterEvent == EVENT_MELEE_HIT && killinfo.isMelee)
                 {
                     currentOperation.Increment();
                 }

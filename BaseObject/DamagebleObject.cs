@@ -4,15 +4,23 @@ using CodeStage.AntiCheat.ObscuredTypes;
 public struct KillInfo{
 	public int weaponId;
     public bool isHeadShoot;
+    public bool isLongShoot;
     public bool isMelee;
+   
+    public bool isOnMount;
+    public bool killerMount;
 
-    public KillInfo(int weaponId, bool isHeadShoot, bool isMelee)
+    public KillInfo(int weaponId, bool isHeadShoot, bool isMelee, bool isOnMount, bool isLongShoot)
     {
         
         this.weaponId = weaponId;
         this.isHeadShoot = isHeadShoot;
-        this.isMelee = isMelee;
+        this.isMelee = isMelee;      
+        this.isOnMount = isOnMount;
+        this.isLongShoot = isLongShoot;
+        this.killerMount = false;
     }
+
 }
 public class DamagebleObject : DestroyableNetworkObject {
 
@@ -66,6 +74,8 @@ public class DamagebleObject : DestroyableNetworkObject {
 				killInfo.weaponId=damage.shootWeapon;
                 killInfo.isMelee = damage.isMelee;
                 killInfo.isHeadShoot = damage.isHeadshoot;
+                killInfo.isLongShoot = damage.isLongShoot;
+                
 				KillIt(killer);
 
 			}

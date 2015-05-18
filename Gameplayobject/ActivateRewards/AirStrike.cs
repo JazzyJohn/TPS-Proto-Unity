@@ -4,8 +4,15 @@ using Sfs2X.Entities.Data;
 
 public class AirStrike : ActivateReward
 {
+    public SpawnRewardState state ;
+
+    public string blockTag;
+
+    public string teleportTag;
 
     public string[] prefabs;
+
+    public string[] teleportPrefabs;
 
     public string ghost;
 
@@ -49,8 +56,24 @@ public class AirStrike : ActivateReward
         if (ghostObj != null)
         {
             ghostObj.position = GetPosition();
-            RaycastHit hitinfo;
-            if (Physics.SphereCast(ghostObj.position + Vector3.up * ghostClass.size, ghostClass.size, Vector3.up, out hitinfo, 100.0f, ghostClass.blockLayer))
+            state = SpawnRewardState.AIR_DROP;
+            
+            Collider[] colliders = Physics.OverlapSphere(ghostObj.position+ Vector3.up * ghostClass.size, ghostClass.size);
+            
+            foreach (Collider zone in colliders)
+            {
+                if (zone.CompareTag(blockTag))
+                {
+                    state = SpawnRewardState.BLOCK;
+                    break;
+                }
+                if (zone.CompareTag(teleportTag))
+                {
+                    state = SpawnRewardState.TELEPORT;
+                    break;
+                }
+            }
+            if (state == SpawnRewardState.BLOCK)
             {
                 ghostClass.MakeBad();
                 canSpawn = false;
@@ -103,8 +126,15 @@ public class AirStrike : ActivateReward
             return;
         }
         base.Activate(pawn);
-        Building building = NetworkController.Instance.SimplePrefabSpawn(prefabs[pawn.team - 1],  GetPosition(), pawn.myTransform.rotation, new SFSObject(), false, NetworkController.PREFABTYPE.PLAYERBUILDING).GetComponent<Building>();
-        building.SetOwner(pawn.player);
+
+        Building building;
+        if(state ==SpawnRewardState.TELEPORT){
+            building = NetworkController.Instance.SimplePrefabSpawn(teleportPrefabs[pawn.team - 1], GetPosition(), pawn.myTransform.rotation, new SFSObject(), false, NetworkController.PREFABTYPE.PLAYERBUILDING).GetComponent<Building>();
+        }else{
+            building = NetworkController.Instance.SimplePrefabSpawn(prefabs[pawn.team - 1], GetPosition(), pawn.myTransform.rotation, new SFSObject(), false, NetworkController.PREFABTYPE.PLAYERBUILDING).GetComponent<Building>();
+    
+        }
+       building.SetOwner(pawn.player);
         Destroy(ghostObj.gameObject);
     }
 

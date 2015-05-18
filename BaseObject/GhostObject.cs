@@ -13,6 +13,9 @@ public class GhostObject : MonoBehaviour {
 
 	public Renderer[] myRenderers;
 
+    public bool teleport;
+
+
 	public float size;
     void Awake()
     {

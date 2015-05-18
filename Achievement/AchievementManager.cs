@@ -92,6 +92,7 @@ public class AchievementManager : MonoBehaviour, LocalPlayerListener, GameListen
 		public float delta;
         public string mapContext;
         public string gunContext;
+        public bool mount;
         public int teamContext;
         public int weaponType;
 
@@ -105,6 +106,7 @@ public class AchievementManager : MonoBehaviour, LocalPlayerListener, GameListen
 
 	public void Init(string uid){
 		EventHolder.instance.Bind (this);
+        ActionResolver.instance.AddUp(KillAction);
 		DontDestroyOnLoad(transform.gameObject);
 		WWWForm form = new WWWForm ();
 			
@@ -240,17 +242,26 @@ public class AchievementManager : MonoBehaviour, LocalPlayerListener, GameListen
 										  }
 									}
 								}else{
-
-                                    string[] events  = new string[9]{
+                                    string mount = "false";
+                                    if (mess.mount)
+                                    {
+                                        mount = "true";
+                                    }
+                                    string[] events  = new string[14]{
                                             mess.param,
                                             mess.param + "by"+ mess.gunContext,
                                             mess.param + "with"+ mess.weaponType,
                                             mess.param + "on" + mess.mapContext,
                                             mess.param + "team"+mess.teamContext.ToString(),
+                                            mess.param + "mount" +mount,
                                             mess.param + "by"+ mess.gunContext + "on" +  mess.mapContext,
                                             mess.param + "by"+ mess.gunContext + "team" +  mess.teamContext.ToString(),
                                             mess.param + "on"+ mess.gunContext + "team" +  mess.teamContext.ToString(),
                                             mess.param + "by"+ mess.gunContext + "on"+ mess.mapContext + "team" +  mess.teamContext.ToString(),
+                                            mess.param + "by"+ mess.gunContext + "on" +  mess.mapContext+ "mount" +mount,
+                                            mess.param + "by"+ mess.gunContext + "team" +  mess.teamContext.ToString()+ "mount" +mount,
+                                            mess.param + "on"+ mess.gunContext + "team" +  mess.teamContext.ToString()+ "mount" +mount,
+                                            mess.param + "by"+ mess.gunContext + "on"+ mess.mapContext + "team" +  mess.teamContext.ToString()+ "mount" +mount,
                                                 };
                                     foreach (string eventStr in events)
                                     {
@@ -464,7 +475,8 @@ public class AchievementManager : MonoBehaviour, LocalPlayerListener, GameListen
 
             if (finished.type == AchievementType.TASK)
             {
-                taskFinished++; 
+                taskFinished++;
+                StatisticManager.instance.AddTask();
             }
 			syncAchivment.Add(finished.achievementId);
 		}
@@ -571,6 +583,7 @@ public class AchievementManager : MonoBehaviour, LocalPlayerListener, GameListen
    IncomingMessage CreateMessageFromContext(KillInfo killinfo){
        IncomingMessage mess = new IncomingMessage();
        mess.delta = 1.0f;
+
        BaseWeapon weapon = ItemManager.instance.GetWeaponprefabByID(killinfo.weaponId);
 
        if (weapon != null)
@@ -578,7 +591,8 @@ public class AchievementManager : MonoBehaviour, LocalPlayerListener, GameListen
        mess.gunContext = killinfo.weaponId.ToString();
        mess.mapContext = ServerHolder.currentMap;
        mess.teamContext = myPlayer.team;
-       
+       if (killinfo.killerMount)
+           mess.mount = true;
        return mess;
    }
    IncomingMessage CreateMessageFromContext()
@@ -616,42 +630,40 @@ public class AchievementManager : MonoBehaviour, LocalPlayerListener, GameListen
             killCnt = 0;
 		}
 	}
-    public void EventPawnKillPlayer(Player target, KillInfo killinfo)
+
+    public void KillAction(string action,KillInfo killinfo)
     {
-		if (target == myPlayer) {
-            IncomingMessage mess = CreateMessageFromContext(killinfo);
-			mess.param =ParamLibrary.PARAM_KILL;
-         
-            incomeQueue.Enqueue(mess);
+        IncomingMessage mess = CreateMessageFromContext(killinfo);
+        mess.param = action;
+
+        incomeQueue.Enqueue(mess);
+        if (action == ParamLibrary.PARAM_KILL)
+        {
             if (killinfo.isHeadShoot)
             {
                 mess = CreateMessageFromContext(killinfo);
                 mess.param = ParamLibrary.PARAM_HEAD_SHOOT;
-                
+
                 incomeQueue.Enqueue(mess);
             }
-            killCnt++;
-            switch (killCnt)
+            if (killinfo.isLongShoot)
             {
-                case 2:
-                    mess = CreateMessageFromContext(killinfo);
-                    mess.param = ParamLibrary.PARAM_DOUBLE_KILL;
-                   
-			        incomeQueue.Enqueue(mess);
-                    break;
-                case 3:
-                     mess = CreateMessageFromContext(killinfo);
-                    mess.param = ParamLibrary.PARAM_TRIPLE_KILL;
-                    
-			        incomeQueue.Enqueue(mess);
-                    break;
-                case 4:
-                     mess = CreateMessageFromContext(killinfo);
-                    mess.param = ParamLibrary.PARAM_RAMPAGE_KILL;
-                    incomeQueue.Enqueue(mess);
-                    break;
+                mess = CreateMessageFromContext(killinfo);
+                mess.param = ParamLibrary.PARAM_LONG_SHOOT;
+
+                incomeQueue.Enqueue(mess);
             }
-		}
+            if (killinfo.isOnMount)
+            {
+                mess = CreateMessageFromContext(killinfo);
+                mess.param = ParamLibrary.PARAM_KILL_MOUNT;
+
+                incomeQueue.Enqueue(mess);
+            }
+        }
+    }
+    public void EventPawnKillPlayer(Player target, KillInfo killinfo)
+    {
 	}
 
 	//hawk
@@ -678,40 +690,7 @@ public class AchievementManager : MonoBehaviour, LocalPlayerListener, GameListen
 
     public void EventPawnKillAI(Player target, KillInfo killinfo)
     {
-		if (target == myPlayer) {
-            IncomingMessage mess = CreateMessageFromContext(killinfo);
-            mess.param = ParamLibrary.PARAM_KILL;
-
-            incomeQueue.Enqueue(mess);
-            if (killinfo.isHeadShoot)
-            {
-                mess = CreateMessageFromContext(killinfo);
-                mess.param = ParamLibrary.PARAM_HEAD_SHOOT;
-
-                incomeQueue.Enqueue(mess);
-            }
-            killCnt++;
-            switch (killCnt)
-            {
-                case 2:
-                    mess = CreateMessageFromContext(killinfo);
-                    mess.param = ParamLibrary.PARAM_DOUBLE_KILL;
-
-                    incomeQueue.Enqueue(mess);
-                    break;
-                case 3:
-                    mess = CreateMessageFromContext(killinfo);
-                    mess.param = ParamLibrary.PARAM_TRIPLE_KILL;
-
-                    incomeQueue.Enqueue(mess);
-                    break;
-                case 4:
-                    mess = CreateMessageFromContext(killinfo);
-                    mess.param = ParamLibrary.PARAM_RAMPAGE_KILL;
-                    incomeQueue.Enqueue(mess);
-                    break;
-            }
-        }
+		
 	}
 	public void EventPawnGround(Player target){
 
@@ -792,10 +771,18 @@ public class AchievementManager : MonoBehaviour, LocalPlayerListener, GameListen
         taskFinished = 0;
     }
     public void EventTeamWin(int teamNumber) {
+        IncomingMessage mess = CreateMessageFromContext();
+        mess.param = ParamLibrary.PARAM_SCORE;
+        mess.delta = Player.localPlayer.Score.rating;
+        incomeQueue.Enqueue(mess);
+        mess = CreateMessageFromContext();
+        mess.param = ParamLibrary.PARAM_END_GAME;
+
+        incomeQueue.Enqueue(mess);
         if (teamNumber == myPlayer.team)
         {
 
-            IncomingMessage mess = CreateMessageFromContext();
+             mess = CreateMessageFromContext();
             mess.param = ParamLibrary.PARAM_WIN;
         
 			incomeQueue.Enqueue(mess);

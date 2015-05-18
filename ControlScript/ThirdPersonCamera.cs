@@ -113,6 +113,7 @@ public class ThirdPersonCamera : PlayerCamera
 	
 
 	public override void ToggleAim(bool value,bool isFps){
+       
         if (aiming != value)
         {
             timeLerp = 0.0f;
@@ -205,7 +206,7 @@ public class ThirdPersonCamera : PlayerCamera
                 //	Debug.Log(magnitude+ " " +target.distance);
                 continue;
             }
-            if (target.transform != _target)
+            if (target.transform.root != _target.root)
             {
                 //Debug.Log(target.collider);
                 //Vector3 newPostion  = 	target.point-direction.normalized*1.0f;
@@ -230,7 +231,7 @@ public class ThirdPersonCamera : PlayerCamera
                 //Debug.Log(magnitude+ " " +target.distance);
                 continue;
             }
-            if (target.transform != _target)
+            if (target.transform.root != _target.root)
             {
                 //Debug.Log(target.collider);
                 //Vector3 newPostion  = 	target.point-direction.normalized*1.0f;

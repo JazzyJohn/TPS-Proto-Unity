@@ -158,7 +158,10 @@ public class InventoryManager : MonoBehaviour {
 	public void PutGrenadeAway(){
 		if (owner.foxView.isMine) {
             currentWeapon.PutAway();
+            owner.animator.WeaponChange();
+            cahcedIndex = beforeGrenade;
             owner.SetWeaponType(myWeapons[beforeGrenade].animType);
+       
 			
 		}
 	}
@@ -179,6 +182,8 @@ public class InventoryManager : MonoBehaviour {
         {
            // Debug.Log("beforeMelee"+beforeMelee);
             currentWeapon.PutAway();
+            owner.animator.WeaponChange();
+            cahcedIndex = beforeMelee;
             owner.SetWeaponType(myWeapons[beforeMelee].animType);
         }
     }
@@ -554,20 +559,16 @@ public class InventoryManager : MonoBehaviour {
 		}
         int grenadeSlot = indexOfSlot[(int)SLOTTYPE.GRENADE];
         int meleeSlot = indexOfSlot[(int)SLOTTYPE.MELEE];
-        if (newWeapon == grenadeSlot || newWeapon== meleeSlot)
-        {
+     /*  if (newWeapon == grenadeSlot || newWeapon== meleeSlot)
+        {*/
             owner.SetWeaponType(myWeapons[newWeapon].animType);
 
-        }
+        /*}*/
 		BaseWeapon firstWeapon = myWeapons[newWeapon];
 
 
 
-        if (currentWeapon != null && (currentWeapon.slotType == SLOTTYPE.GRENADE || currentWeapon.slotType == SLOTTYPE.MELEE))
-        {
-			
-			currentWeapon.PutAway();
-		}
+      
 
 		//TakeWeaponAway ();
 		indexWeapon=newWeapon;

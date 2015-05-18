@@ -395,7 +395,7 @@ public class NetworkController : MonoBehaviour
     {
         bool success = (bool)evt.Params["success"];
         string error = (string)evt.Params["errorMessage"];
-      /*  IEnumerator enume  =evt.Params.Keys.GetEnumerator();
+      /*   IEnumerator enume  =evt.Params.Keys.GetEnumerator();
          while(enume.MoveNext()){
             Debug.Log(enume.Current.ToString());
         }*/
@@ -554,18 +554,27 @@ public class NetworkController : MonoBehaviour
 
                     foreach (PlayerModel player in dt.GetSFSArray("owners"))
                     {
-                        if (player.userId != _smartFox.MySelf.Id)
-                        {
-//                            Debug.Log("init player" + player.userId);
-                            if (PlayerView.allPlayer.ContainsKey(player.userId))
+                         try{
+                            if (player.userId != _smartFox.MySelf.Id)
                             {
-                                PlayerView.allPlayer[player.userId].NetUpdate(player);
-                            }
-                            else
-                            {
-                                SpawnPlayer(player);
+    //                            Debug.Log("init player" + player.userId);
+                                if (PlayerView.allPlayer.ContainsKey(player.userId))
+                                {
+                                    PlayerView.allPlayer[player.userId].NetUpdate(player);
+                                }
+                                else
+                                {
+                                    SpawnPlayer(player);
+                                }
                             }
                         }
+                         catch (Exception e)
+                         {
+
+                             Debug.LogError("Exception handling playersSpawm in palyer section: " + e.Message + " >>> " + e.StackTrace);
+
+                         }
+
                     }
 
 
@@ -2266,15 +2275,21 @@ public class NetworkController : MonoBehaviour
         {
             isMelee = dt.GetBool("isMelee");
         }
+        bool isLongShoot = false;
+        if (dt.ContainsKey("isLongShoot"))
+        {
+            isLongShoot = dt.GetBool("isLongShoot");
+        }
         String killerName="";
         if (dt.ContainsKey("killerName"))
         {
             killerName = dt.GetUtfString("killerName");
         }
-        KillInfo info = new KillInfo(dt.GetInt("weaponId"), headShoot, isMelee);
+
+        KillInfo info = new KillInfo(dt.GetInt("weaponId"), headShoot, isMelee, pawn.IsMount(), isLongShoot);
         if (player == _smartFox.MySelf.Id)
         {
-         
+            
             GetPlayer(player).PawnKill(pawn, pawn.player, pawn.myTransform.position, info);
             pawn.PawnKill(GetPlayer(player));
 

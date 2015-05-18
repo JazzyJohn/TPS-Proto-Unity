@@ -2,12 +2,13 @@ using UnityEngine;
 using System.Collections;
 using System.Collections.Generic;
 using nstuff.juggerfall.extension.models;
+using System;
 
 public class RobotPawn : Pawn {
 	public float ActivationTime=2.0f;
-    public float rotateSpeeed = 1.0f;
+    public float rotateSpeed = 1.0f;
 
-	public Transform playerExitPositon;
+	public Transform playerEnterPositon;
 	
 	public bool isMutual;
 	public bool isEmpty =true;
@@ -144,7 +145,7 @@ public class RobotPawn : Pawn {
         }
       
         Vector3 local = Quaternion.Inverse(cameraTransform.rotation) * movement;
-        float yAngle = local.x * Time.deltaTime * rotateSpeeed ;
+        float yAngle = local.x * Time.deltaTime * rotateSpeed ;
         local.x = 0;
       
 
@@ -208,7 +209,42 @@ public class RobotPawn : Pawn {
 
 		
 	}
+     public override void KillIt(GameObject killer)
+    {
+      
+        if (isDead)
+        {
+            return;
+        }
+       
+        Player killerPlayer = null;
+        try
+        {
 
+
+            isDead = true;
+
+            //StartCoroutine (CoroutineRequestKillMe ());
+            Pawn killerPawn = null;
+
+            int killerID = -1;
+            string KillerName="";
+       
+
+            foxView.PawnDiedByKill(killerID, KillerName);
+
+        }
+        catch (Exception e)
+        {
+            Debug.Log("ErrorExeption in Pawn KillIt" + e);
+        }
+        finally
+        {
+            PawnKill(killerPlayer);
+        }
+
+
+    }
     public override void UpdateRotation(float xDeltaAngle, float yDeltaAngle)
     {
 

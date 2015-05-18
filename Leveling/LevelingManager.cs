@@ -6,7 +6,7 @@ using System.Collections.Generic;
 using System.Threading;
 using CodeStage.AntiCheat.ObscuredTypes;
 
-public class LevelingManager : MonoBehaviour, LocalPlayerListener,GameListener{
+public class LevelingManager : MonoBehaviour{
 
 
 
@@ -93,9 +93,16 @@ public class LevelingManager : MonoBehaviour, LocalPlayerListener,GameListener{
          }
          return answer;
     }
-
+    ActionResolver resolver;
+    public void UpReward(string arg)
+    {
+        UpExp(arg);
+    }
 	public void Init(string uid){
-		EventHolder.instance.Bind (this);
+        ActionResolver.instance.AddUp(UpReward);
+        ActionResolver.instance.AddSync(SyncLvl);
+        ActionResolver.instance.AddApear(EventAppear);
+    
 		DontDestroyOnLoad(transform.gameObject);
 		WWWForm form = new WWWForm ();
 			
@@ -151,6 +158,8 @@ public class LevelingManager : MonoBehaviour, LocalPlayerListener,GameListener{
 		}
 		//Parse  Data
 		playerLvl = int.Parse(xmlDoc.SelectSingleNode("leveling/player/currentlvl").InnerText);
+        GA.API.Design.NewEvent("Game:LVL:LVL" + playerLvl);
+        GA.API.Design.NewEvent("Game:LVL:LVLNumber" ,playerLvl);
 		playerExp = int.Parse(xmlDoc.SelectSingleNode("leveling/player/currentexp").InnerText);
 		 i =0;
 		foreach (XmlNode node in xmlDoc.SelectNodes("leveling/classes/current")) {
@@ -194,6 +203,8 @@ public class LevelingManager : MonoBehaviour, LocalPlayerListener,GameListener{
 			if(playerExp>=playerNeededExp[playerLvl]){
 				sendByLvl= true;
 				playerLvl++;
+                GA.API.Design.NewEvent("Game:LVL:LVL" + playerLvl);
+                GA.API.Design.NewEvent("Game:LVL:LVLNumber", playerLvl);
                 NetworkController.Instance.SetNetworkLvl(playerLvl);
                 GUIHelper.Notify(TextGenerator.instance.GetSimpleText("LevelUp"),TextGenerator.instance.GetExpText("LvlOpen",playerLvl));
 			}
@@ -338,6 +349,11 @@ public class LevelingManager : MonoBehaviour, LocalPlayerListener,GameListener{
     public LVLAnimation GetAnimationData()
     {
         return animation;
+
+    }
+    public int GetTotalXP()
+    {
+        return playerExp - startExp;
     }
 	//Event Section
 	private Player myPlayer;
@@ -352,103 +368,6 @@ public class LevelingManager : MonoBehaviour, LocalPlayerListener,GameListener{
 
 		}
 	}
-    public void EventPawnKillPlayer(Player target, KillInfo killinfo)
-    {
-		if (target == myPlayer) {
-			playerStrike++;
-			switch(playerStrike){
-				case 1:
-				case 2:
-					UpExp(ParamLibrary.PARAM_KILL,target.selected);
-					break;
-				case 3:
-					UpExp(ParamLibrary.PARAM_TRIPLE_KILL,target.selected);
-					break;
-				case 4:
-					UpExp(ParamLibrary.PARAM_RAMPAGE_KILL,target.selected);
-					break;
-				default:
-					UpExp(ParamLibrary.PARAM_RAMPAGE_GOING_KILL,target.selected);
-                    break;
-					
-			}
-			
-            if (killinfo.isHeadShoot)
-            {
-                UpExp(ParamLibrary.PARAM_HEAD_SHOOT, target.selected);
-            }
-		}
-	}
-    public void EventPawnKillAI(Player target, KillInfo killinfo)
-    {
-	
-
-		if (target == myPlayer) {
-
-			UpExp(ParamLibrary.PARAM_KILL_AI,target.selected);
-            if (killinfo.isHeadShoot)
-            {
-                UpExp(ParamLibrary.PARAM_HEAD_SHOOT_AI, target.selected);
-            }
-		}
-	
-	}
-	public void EventPawnKillAssistPlayer(Player target){
-		if (target == myPlayer) {
-
-			UpExp(ParamLibrary.PARAM_ASSIST, target.selected);	
-		}
-	}
-    public void EventPawnKillAssistAI(Player target){
-		if (target == myPlayer) {
-
-			UpExp(ParamLibrary.PARAM_ASSIST_AI, target.selected);	
-		}
-	}
-	public void EventTeamWin(int teamNumber){
-		//if we not winner so no change in exp, or we a winner but no send were initiate we sync data 
-        
-		if ((myPlayer.team	!= teamNumber&&!UpExp(ParamLibrary.PARAM_LOSE))||(myPlayer.team == teamNumber&&!UpExp(ParamLibrary.PARAM_WIN))) {
-			SyncLvl();
-		}
-        MadeAnimationData();
-	}
-	public void EventKilledByFriend(Player target,Player friend){
-		if (target == myPlayer) {
-			UpExp(ParamLibrary.PARAM_KILL_BY_FRIEND,target.selected);	
-		}
-	}
-    public void EventKilledAFriend(Player target, Player friend, KillInfo killinfo)
-    {
-		if (target == myPlayer) {
-			UpExp(ParamLibrary.PARAM_KILL_FRIEND,target.selected);	
-		}
-	}
-    public void EventPawnDeadByPlayer(Player target, KillInfo killinfo) { 
-		playerStrike=0;
-	}
-	public void EventPawnDeadByAI(Player target){
-		playerStrike=0;
-	}
-	public void EventPawnGround(Player target){	}
-	public void EventPawnDoubleJump(Player target){}
-	public void EventStartWallRun(Player target,Vector3 position){}
-	public void EventStartSprintRun(Player target, Vector3 position){}
-	public void EventEndSprintRun(Player target,Vector3 position){}
-	public void EventEndWallRun(Player target, Vector3 position){}
-	public void EventPawnReload(Player target){}
-	public void EventStart(){}
-	public void EventRestart(){
-			SyncLvl();
-	}
-	public	void EventJuggerTake(Player target){
-	
-	}
-    public void EventJuggerKill(Player target, KillInfo killinfo)
-    {
-	
-	}
-	public void EventRoomFinished(){}
 
 
     public void AddPremiumBoost(int boost)

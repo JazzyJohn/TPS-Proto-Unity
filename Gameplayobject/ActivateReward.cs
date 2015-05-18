@@ -2,12 +2,12 @@
 using System.Collections;
 
 public enum RewardState { NO_ACTIVE,ACTIVE,SELECTED };
-
+public enum SpawnRewardState { BLOCK,TELEPORT,AIR_DROP}
 public class ActivateReward : MonoBehaviour {
 
     public int cost;
 
-    private bool isActive= true;
+    private bool isActive= false;
 
     private bool used;
 

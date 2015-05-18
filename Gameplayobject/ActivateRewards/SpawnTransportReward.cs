@@ -4,7 +4,13 @@ using Sfs2X.Entities.Data;
 
 public class SpawnTransportReward : ActivateReward {
 
-   
+
+    public SpawnRewardState state;
+
+
+    public string blockTag;
+
+    public string teleportTag;
 
     public string[] ghost;
 
@@ -49,8 +55,23 @@ public class SpawnTransportReward : ActivateReward {
         if (ghostObj != null)
         {
             ghostObj.position = GetPosition();
-            RaycastHit hitinfo;
-            if (Physics.SphereCast(ghostObj.position + Vector3.up * ghostClass.size, ghostClass.size, Vector3.up, out hitinfo, 100.0f, ghostClass.blockLayer))
+            Collider[] colliders = Physics.OverlapSphere(ghostObj.position + Vector3.up * ghostClass.size, ghostClass.size);
+            state = SpawnRewardState.AIR_DROP;
+            foreach (Collider zone in colliders)
+            {
+                Debug.Log(zone.tag);
+                if (zone.CompareTag(blockTag))
+                {
+                    state = SpawnRewardState.BLOCK;
+                    break;
+                }
+                if (zone.CompareTag(teleportTag))
+                {
+                    state = SpawnRewardState.TELEPORT;
+                  
+                }
+            }
+            if (state == SpawnRewardState.BLOCK)
             {
                 ghostClass.MakeBad();
                 canSpawn = false;
@@ -103,8 +124,14 @@ public class SpawnTransportReward : ActivateReward {
             return;
         }
         base.Activate(pawn);
-
-        Player.localPlayer.SpawnBot(ghostObj.position+ Vector3.up*10.0f, ghostObj.rotation);
+        if (state == SpawnRewardState.TELEPORT)
+        {
+            Player.localPlayer.SpawnBot(ghostObj.position + Vector3.up * 1.0f, ghostObj.rotation);
+        }
+        else
+        {
+            Player.localPlayer.SpawnBot(ghostObj.position + Vector3.up * 10.0f, ghostObj.rotation);
+        }
         Destroy(ghostObj.gameObject);
 
     }

@@ -105,7 +105,7 @@ public class PointGameRule : GameRule {
     {
         PlayerMainGui.GameStats stats = new PlayerMainGui.GameStats();
         stats.gameTime = gameTime - timer;
-        stats.score = teamScore;
+        stats.score = new int []{maxScore-teamScore[1],maxScore-teamScore[0]};
         stats.maxScore = maxScore;
         stats.showProgress = true;
         return stats;

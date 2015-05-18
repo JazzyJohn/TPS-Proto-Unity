@@ -31,6 +31,10 @@ public class BodyHurt : DamagebleObject {
             switch (Organ)
             {
                 case BodySegment.Head:
+                    if ((killer.transform.position - transform.position).sqrMagnitude > ParamLibrary.LONG_SHOT_SQRT_MAG)
+                    {
+                        damage.isLongShoot = true;
+                    }
                     damage.isHeadshoot = true;
                     break;
                 

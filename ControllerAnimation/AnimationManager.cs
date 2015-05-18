@@ -15,6 +15,7 @@ public class AnimationManager : MonoBehaviour, IAnimationManager
 
     public Animator animator;
 	public IKcontroller aimPos;
+    private bool mount=false;
 	private bool shouldAim= true;
 	public Rigidbody rb;
     protected RaggdollRoot raggdollRoot;
@@ -260,7 +261,7 @@ public class AnimationManager : MonoBehaviour, IAnimationManager
     /// </summary>
     public virtual void IKOn()
     {
-//        Debug.Log("ikON");
+       // Debug.Log("ikON");
 		ToggleAimPos(true);
 	}
 
@@ -279,6 +280,17 @@ public class AnimationManager : MonoBehaviour, IAnimationManager
 	}
 	private void SetNotMainLayer(float weight){
 		for(int i =1; i<animator.layerCount;i++){
+            if (weight != 0)
+            {
+                if (mount && i == 1)
+                {
+                    continue;
+                }
+                if (!mount && i == 3)
+                {
+                    continue;
+                }
+            }
 			animator.SetLayerWeight (i, weight);
 
 		}
@@ -314,9 +326,12 @@ public class AnimationManager : MonoBehaviour, IAnimationManager
 		if (State == 0) {
 			return;
 		}
-        //Debug.Log(State);
-
-		animator.SetInteger ("GunType",State);
+      //  Debug.Log(animator.GetInteger("GunType") );
+        if( animator.GetInteger("GunType")!=State){
+            animator.SetInteger("GunType", State);
+          //  Debug.Log("IKOFFF");
+            IKOff();
+        }
 	}
 	public void ReloadStart(){
 
@@ -490,6 +505,9 @@ public class AnimationManager : MonoBehaviour, IAnimationManager
     public void SetMount(bool state)
     {
         animator.SetBool("Mount", state);
+        mount = true;
+        animator.SetLayerWeight(1, 0.0f);
+        animator.SetLayerWeight(3, 1.0f);
     }
     public void WeaponChangeEnd()
     {

@@ -3,7 +3,8 @@ using System.Collections;
 
 public class PointOnGuiComponent : ShowOnGuiComponent
 {
-    public string[] teamSprites;
+    public string[] aTeamSprites;
+    public string[] bTeamSprites;
 	
 	public Color neutral =Color.grey;
 
@@ -18,6 +19,13 @@ public class PointOnGuiComponent : ShowOnGuiComponent
 
         if (hudentry.Sprite != null)
         {
+            string[] teamSprites;
+            if (Player.localPlayer.team == 1)
+            {
+                teamSprites = aTeamSprites;
+            }else{
+                teamSprites = bTeamSprites;
+            }
             if (teamSprites.Length > team)
             {
                 string sprite = teamSprites[team];

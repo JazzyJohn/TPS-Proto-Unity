@@ -71,8 +71,11 @@ public class PlayerView : MonoBehaviour {
     public void NetUpdate(PlayerModel player)
     {
 //        Debug.Log("NET UPDATE " + player.uid + " name " + player.name + "team" + player.team + " player.kill" + player.kill);
-        observed.UID = player.uid;
-        observed.team =  player.team;
+        if (!isMine)
+        {
+            observed.UID = player.uid;
+            observed.team = player.team;
+        }
         observed.PlayerName = player.name;
         observed.Score.Kill = player.kill;
         observed.Score.AIKill = player.aikill;
@@ -80,6 +83,10 @@ public class PlayerView : MonoBehaviour {
         observed.Score.Death = player.death;
         observed.Score.RobotKill = player.robotKill;
         User user = NetworkController.Instance.GetUserById(ownerId);
+        if (user == null)
+        {
+            Destroy(gameObject);
+        }
         if (user.GetVariable("lvl") != null)
         {
             observed.Score.Lvl = user.GetVariable("lvl").GetIntValue();

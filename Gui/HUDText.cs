@@ -21,6 +21,8 @@ public class HUDText : MonoBehaviour
 	{
 		public TypeMessage Type;
 		public UISprite Sprite;
+        public UISprite ArrowSprite;
+        public Transform ArrowTransform;
 		public float time;			// Timestamp of when this entry was added
 		public float stay = 0f;		// How long the text will appear to stay stationary on the screen
 		public float offset = 0f;	// How far the object has moved based on time
@@ -124,6 +126,11 @@ public class HUDText : MonoBehaviour
         ne.label = ne.PerfabInfo.Label;
         ne.label.keepCrispWhenShrunk = UILabel.Crispness.Never;
         ne.Sprite = ne.PerfabInfo.Sprite;
+        ne.ArrowSprite = ne.PerfabInfo.ArrowSprite;
+        if (ne.ArrowSprite != null)
+        {
+            ne.ArrowTransform = ne.ArrowSprite.transform.parent;
+        }
 		mList.Add(ne);
 		++counter;
 		return ne;
@@ -462,13 +469,14 @@ public class HUDText : MonoBehaviour
                     {
                         ent.Sprite.spriteName = ent.defSpriteName;
                     }
+                  
                     ent.Sprite.enabled = true;
                 }
                 else
                 {
                     if (ent.isShow)
                     {
-                        if (ent.isShow && viewport.x > 0.5)
+                        if (ent.isShow && viewport.x < 0.5)
                         {
                             if (ent.Sprite.spriteName != arrowName[0])
                             {
@@ -483,6 +491,7 @@ public class HUDText : MonoBehaviour
                             }
                         }
                         viewport = NormalizeOffScreen(viewport);
+
                         ent.Sprite.enabled = true;
                     }
                     else
@@ -503,7 +512,8 @@ public class HUDText : MonoBehaviour
              
 				break;
 			case TypeMessage.Perfab:
-				if (ent.isShow && (viewport.z > 0 || ent.OnTarget))
+            
+				if (ent.isShow && (!IsOffscreen(viewport) || ent.OnTarget))
                 {
                     if (ent.Sprite.spriteName != ent.defSpriteName)
                     {
@@ -517,26 +527,29 @@ public class HUDText : MonoBehaviour
                     {
                         ent.PerfabInfo.Foreground.enabled = true;
                     }
+                    if (ent.ArrowSprite != null)
+                    {
+                        ent.ArrowSprite.enabled = false;
+                    }
+                 
                 }
                 else
                 {
+                   
                     if (ent.isShow && ent.withArrow)
                     {
-                        if (ent.isShow && viewport.x < 0.5)
+
+                        if (ent.ArrowSprite != null)
                         {
-                            if (ent.Sprite.spriteName != arrowName[0])
-                            {
-                                ent.Sprite.spriteName = arrowName[0];
-                            }
+                            ent.ArrowSprite.enabled = true;
+                            viewport = NormalizeOffScreen(viewport,ent.ArrowTransform);
                         }
                         else
                         {
-                            if (ent.Sprite.spriteName != arrowName[1])
-                            {
-                                ent.Sprite.spriteName = arrowName[1];
-                            }
+                            viewport = NormalizeOffScreen(viewport);
                         }
-                        viewport = NormalizeOffScreen(viewport);
+                      
+                     
                         ent.Sprite.enabled = true;
                     }
 					else
@@ -547,9 +560,10 @@ public class HUDText : MonoBehaviour
 							if(ent.PerfabInfo.OnProgressBar)
 								ent.PerfabInfo.Foreground.enabled = false;
 						}
+                        if (ent.PerfabInfo.OnLabel)
+                            ent.label.enabled = false;
                     }
-					if (ent.PerfabInfo.OnLabel)
-                    	ent.label.enabled = false;
+					
                 }
                 ent.Perfab.position = uiCamera.ViewportToWorldPoint(viewport);
 				if (!ent.constant)
@@ -588,17 +602,74 @@ public class HUDText : MonoBehaviour
 			
 		}
 	}
-
-    private Vector3 NormalizeOffScreen(Vector3 viewport)
+    private bool IsOffscreen(Vector3 viewport)
     {
-        if (viewport.x < 0.5)
-        {
-            viewport.x = 0.9f;
+        return( viewport.x < 0f || viewport.x > 1f || viewport.y < 0f || viewport.y > 1f|| viewport.z<0);
 
+    }
+    private Vector3 NormalizeOffScreen(Vector3 viewport, Transform transform=null)
+    {
+        if (viewport.z > 0)
+        {
+            if (viewport.x > 0.9)
+            {
+                viewport.x = 0.9f;
+                if (transform != null)
+                    transform.rotation = Quaternion.Euler(new Vector3(0, 0, 90));
+            }
+            if (viewport.x < 0.1)
+            {
+                viewport.x = 0.1f;
+                if (transform != null)
+                    transform.rotation = Quaternion.Euler(new Vector3(0, 0, -90));
+            }
+            if (viewport.y > 0.9)
+            {
+                viewport.y = 0.9f;
+                if (transform != null)
+                    transform.rotation = Quaternion.Euler(new Vector3(0, 0, 180));
+            }
+            if (viewport.y < 0.1)
+            {
+                viewport.y = 0.1f;
+                if (transform != null)
+                    transform.rotation = Quaternion.Euler(new Vector3(0, 0, 0));
+            }
         }
         else
         {
-            viewport.x = 0.1f;
+            if (viewport.y > 0 && viewport.y<1)
+            {
+                if (viewport.x > 0.5)
+                {
+                    viewport.x = 0.1f;
+                    if (transform != null)
+                        transform.rotation = Quaternion.Euler(new Vector3(0, 0, -90));
+                }
+                else
+                {
+                    viewport.x = 0.9f;
+                    if (transform != null)
+                        transform.rotation = Quaternion.Euler(new Vector3(0, 0, 90));
+                }
+
+            }
+            else
+            {
+                viewport.x = Mathf.Clamp(viewport.x, 0.1f, 0.9f);
+                if (viewport.y > 0.5)
+                {
+                    viewport.y = 0.1f;
+                    if (transform != null)
+                        transform.rotation = Quaternion.Euler(new Vector3(0, 0, 0));
+                }
+                else
+                {
+                    viewport.y = 0.9f;
+                    if (transform != null)
+                        transform.rotation = Quaternion.Euler(new Vector3(0, 0, 180));
+                }
+            }
         }
         viewport.z = 10.0f;
         return viewport;

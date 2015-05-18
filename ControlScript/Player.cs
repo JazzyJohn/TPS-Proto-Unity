@@ -447,17 +447,13 @@ public class Player : MonoBehaviour {
 			 }
              if (InputManager.instance.GetButtonDown("Suicide"))
              {
-                 if (!inBot)
-                 {
+               
                      currentPawn.RequestKillMe();
-                     if (robotPawn != null)
-                     {
-                         robotPawn.RequestKillMe();
-                     }
+                   
                      PVPGameRule.instance.PlayerDeath();
                      DeathUpdate();
                     // StatisticHandler.SendPlayerKillbyNPC(UID, PlayerName);
-                 }
+               
 			}
             for (int i = 0; i < rewards.Length; i++)
             {

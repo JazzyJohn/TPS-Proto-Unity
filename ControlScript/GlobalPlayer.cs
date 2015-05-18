@@ -300,6 +300,14 @@ public class GlobalPlayer : MonoBehaviour {
 		XmlDocument xmlDoc = new XmlDocument();
 		xmlDoc.LoadXml(XML);
 		gold = int.Parse (xmlDoc.SelectSingleNode ("player/gold").InnerText);
+        if (xmlDoc.SelectSingleNode("player/new") != null && bool.Parse(xmlDoc.SelectSingleNode("player/gold").InnerText))
+        {
+            GA.API.Design.NewEvent("MetricFlags:NewUser");
+        }
+        else
+        {
+            GA.API.Design.NewEvent("MetricFlags:ReturningUser");
+        }
 		cash = int.Parse (xmlDoc.SelectSingleNode ("player/cash").InnerText);
         PassiveSkillManager.instance.skillPointLeft = int.Parse(xmlDoc.SelectSingleNode("player/skillpoint").InnerText);
 		stamina = int.Parse (xmlDoc.SelectSingleNode ("player/stamina").InnerText);

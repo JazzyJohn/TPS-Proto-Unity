@@ -36,6 +36,11 @@ public class SimplePlayer : Player {
         {
             return;
         }
+
+        if (GetCurrentPawn().IsMount())
+        {
+            killinfo.killerMount = true;
+        }
           String victimName;
         AnnonceAddType addtype = AnnonceAddType.NONE;
         if (killinfo.isHeadShoot)
@@ -71,32 +76,10 @@ public class SimplePlayer : Player {
             EventHolder.instance.FireEvent(typeof(LocalPlayerListener), "EventPawnKillAI", this, killinfo);
          //   StatisticHandler.SendPlayerKillNPC(UID, PlayerName);
         }
-        killInRow++;
-        switch (killInRow)
-        {
-            case 1:
-                PlayerMainGui.instance.Annonce(AnnonceType.KILL, addtype, victimName);
-                break;
-            case 2:
-                PlayerMainGui.instance.Annonce(AnnonceType.DOUBLEKILL, addtype, victimName);
-                break;
-            case 3:
-                PlayerMainGui.instance.Annonce(AnnonceType.TRIPLIKILL, addtype, victimName);
-                break;
-            case 4:
-                PlayerMainGui.instance.Annonce(AnnonceType.ULTRAKILL, addtype, victimName);
-                break;
-            case 5:
-                PlayerMainGui.instance.Annonce(AnnonceType.MEGAKILL, addtype, victimName);
-                break;
-            default:
-                PlayerMainGui.instance.Annonce(AnnonceType.RAMPAGE, addtype, victimName);
-                break;
-
-
-
-        }
-
+   
+   
+       PlayerMainGui.instance.Annonce(ActionResolver.instance.GetLastKill(), addtype, victimName);
+        
     }
 
 

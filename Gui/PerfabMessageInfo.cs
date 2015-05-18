@@ -12,5 +12,6 @@ public class PerfabMessageInfo : MonoBehaviour {
 	public UILabel Label;
 	public UIProgressBar ProgressBar;
 	public UISprite Foreground;
-	
+    public UISprite ArrowSprite;
+    
 }

@@ -5,7 +5,7 @@ using System.Collections;
 using System.Collections.Generic;
 using System.Threading;
 
-public class StatisticManager : MonoBehaviour, LocalPlayerListener,GameListener{ 
+public class StatisticManager : MonoBehaviour{ 
 	
 	private Dictionary<string, int> toSendData = new Dictionary<string, int>();
 	
@@ -16,7 +16,7 @@ public class StatisticManager : MonoBehaviour, LocalPlayerListener,GameListener{
     public string UID ;
 
 	public void Init(string uid){
-		EventHolder.instance.Bind (this);
+        ActionResolver.instance.AddUp(UpDataSimple);
 		DontDestroyOnLoad(transform.gameObject);
         UID = uid;
 	
@@ -49,17 +49,10 @@ public class StatisticManager : MonoBehaviour, LocalPlayerListener,GameListener{
 	
 	}
 	
-	private Player myPlayer;
-	private int playerStrike;
+
 	
-	public void EventAppear(Player target){
-        //Debug.Log("PLAYER SPAWM"+   target);
-		if (target.isMine) {
-			myPlayer = target;
-			
-		}
-	}
-	public void UpData(string key){
+	
+	public void UpDataSimple(string key){
 		UpData(key,1);
 	}	
 	public void UpData(string key, int value){
@@ -68,99 +61,7 @@ public class StatisticManager : MonoBehaviour, LocalPlayerListener,GameListener{
 		}
 		toSendData[key]+=value;
 	}
-    public void EventPawnKillPlayer(Player target, KillInfo killinfo)
-    {
-		if (target == myPlayer) {
-			UpData(ParamLibrary.PARAM_KILL);
-			playerStrike++;
-			switch(playerStrike){
-				
-				case 3:
-					UpData(ParamLibrary.PARAM_TRIPLE_KILL);
-					break;
-				case 4:
-					UpData(ParamLibrary.PARAM_RAMPAGE_KILL);
-					break;
-				
-					
-			}
-			
-            if (killinfo.isHeadShoot)
-            {
-                UpData(ParamLibrary.PARAM_HEAD_SHOOT);
-            }
-            BaseWeapon weapon = ItemManager.instance.GetWeaponprefabByID(killinfo.weaponId);
-            if (weapon!=null&&weapon.slotType == SLOTTYPE.GRENADE)
-            {
-                UpData(ParamLibrary.PARAM_GRENADE_KILL);
-			}
-            if (killinfo.isMelee)
-            {
-                UpData(ParamLibrary.PARAM_MELEE_KILL);
-            }
-		}
-	}
-    public void EventPawnKillAI(Player target, KillInfo killinfo)
-    {
-        UpData(ParamLibrary.PARAM_KILL_AI);
-
-		
-	
-	}
-	public void EventPawnKillAssistPlayer(Player target){
-		if (target == myPlayer) {
-            UpData(ParamLibrary.PARAM_ASSIST);
-		}
-	}
-    public void EventPawnKillAssistAI(Player target){
-		
-	}
-	public void EventTeamWin(int teamNumber){
-		//if we not winner so no change in exp, or we a winner but no send were initiate we sync data 
-        
-		if (myPlayer.team	== teamNumber) {
-			UpData(ParamLibrary.PARAM_WIN);
-		}else{
-			UpData(ParamLibrary.PARAM_LOSE);
-		}
-		
-	}
-	public void EventKilledByFriend(Player target,Player friend){
-	
-	}
-    public void EventKilledAFriend(Player target, Player friend, KillInfo killinfo)
-    {
-		
-	}
-    public void EventPawnDeadByPlayer(Player target, KillInfo killinfo) { 
-		playerStrike=0;
-	}
-	public void EventPawnDeadByAI(Player target){
-		playerStrike=0;
-	}
-	public void EventPawnGround(Player target){	}
-	public void EventPawnDoubleJump(Player target){}
-	public void EventStartWallRun(Player target,Vector3 position){}
-	public void EventStartSprintRun(Player target, Vector3 position){}
-	public void EventEndSprintRun(Player target,Vector3 position){}
-	public void EventEndWallRun(Player target, Vector3 position){}
-	public void EventPawnReload(Player target){
-		if (target == myPlayer) {
-			UpData(ParamLibrary.PARAM_RELOAD);
-		}
-	}
-	public void EventStart(){}
-	public void EventRestart(){
-			
-	}
-	public	void EventJuggerTake(Player target){
-	
-	}
-    public void EventJuggerKill(Player target, KillInfo killinfo)
-    {
-	
-	}
-	public void EventRoomFinished(){}
+   
 
 	public void AddDamageDeliver(int damage){
 		UpData(ParamLibrary.PARAM_DAMAGE_DELIVER,damage);
@@ -174,6 +75,10 @@ public class StatisticManager : MonoBehaviour, LocalPlayerListener,GameListener{
 	public void AmmoHit(int hit){
 		UpData(ParamLibrary.PARAM_AMMO_HIT,hit);
 	}
+    public void AddTask()
+    {
+        UpDataSimple(ParamLibrary.PARAM_TASK_COMPLITE);
+    }
 	private static StatisticManager s_Instance = null;
 	
 	public static StatisticManager instance {

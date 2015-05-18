@@ -19,7 +19,8 @@ public class AskWindow  : MonoBehaviour{
 
     public virtual void Accept()
     {
-        GA.API.Design.NewEvent("GUI:AskWindow:" + action.ToString()+":Yes", 1); 
+      //  Debug.Log(action.Method.Name);
+        GA.API.Design.NewEvent("GUI:AskWindow:" + action.Method.Name+":Yes", 1); 
 		panel.alpha = 0.0f;
 		action();
 		MainMenu.CamMove.RideTo(backPosition);
@@ -28,7 +29,8 @@ public class AskWindow  : MonoBehaviour{
 	
 	
 	public virtual void Decline(){
-        GA.API.Design.NewEvent("GUI:AskWindow:" + action.ToString()+":No", 1); 
+//Debug.Log(action.Method.Name);
+        GA.API.Design.NewEvent("GUI:AskWindow:" + action.Method.Name + ":No", 1); 
 		panel.alpha = 0.0f;
 		MainMenu.CamMove.RideTo(backPosition);
 	}

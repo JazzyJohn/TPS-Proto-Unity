@@ -698,7 +698,7 @@ public class Pawn : DamagebleObject
             }
 
         }
-        if (isSpawn || killer == null || !isActive)
+        if (isSpawn || killer == null || !isActive||isDead)
         {//если только респавнились, то повреждений не получаем
             return;
         }
@@ -751,6 +751,7 @@ public class Pawn : DamagebleObject
                 entry.forgetTime = Time.time + ASSIT_FORGET_TIME;
                 entry.amount += damage.Damage;
                 entry.lastHitDirection = damage.pushDirection;
+               
             }
             if (isAi)
             {
@@ -830,7 +831,7 @@ public class Pawn : DamagebleObject
 
 
         Pawn killerPawn = killer.GetComponent<Pawn>();
-        if (isSpawn || killer == null || !isActive)
+        if (isSpawn || killer == null || !isActive || isDead)
         {//если только респавнились, то повреждений не получаем
             return;
         }
@@ -941,6 +942,7 @@ public class Pawn : DamagebleObject
     }
     public override void KillIt(GameObject killer)
     {
+      
         if (isDead)
         {
             return;
@@ -948,6 +950,7 @@ public class Pawn : DamagebleObject
         if (transport != null)
         {
             transport.KillIt(killer);
+            killInfo.isOnMount = true;
         }
         Player killerPlayer = null;
         try
@@ -3654,6 +3657,9 @@ public class Pawn : DamagebleObject
             foxView.DeActivate();
         }
         transport = player.GetRobot();
+        myTransform.parent = transport.playerEnterPositon;
+        myTransform.localPosition = Vector3.zero;
+        myTransform.localRotation =Quaternion.identity;
         characterState = CharacterState.Mount;
         animator.SetMount(true);
 
@@ -3664,6 +3670,10 @@ public class Pawn : DamagebleObject
         myTransform.localPosition = Vector3.zero;
         myTransform.localRotation = Quaternion.identity;
 
+    }
+    public bool IsMount()
+    {
+        return transport != null;
     }
     public void RemoteDeActivate()
     {
@@ -3913,6 +3923,10 @@ public class Pawn : DamagebleObject
         if (killInfo.isHeadShoot)
         {
             data.PutBool("headShot", killInfo.isHeadShoot);
+        }
+        if (killInfo.isLongShoot)
+        {
+            data.PutBool("isLongShoot", killInfo.isLongShoot);
         }
         if (killInfo.isMelee)
         {
