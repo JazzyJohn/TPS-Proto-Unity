@@ -1,11 +1,13 @@
 ﻿using UnityEngine;
 using System.Collections;
+using System;
 
 public enum ShopEventType
 {
     CAN_TAKE,
     DISCOUNT,
     CAN_TAKE_HOLLIDAY,
+    KITDISCOUNT,
 }
 
 public class ShopEvent
@@ -22,6 +24,8 @@ public class ShopEvent
     public string item;
 
     public string text;
+
+    public DateTime end;
 }
 public class EventNotifyWindow : AskWindow
 {
@@ -36,6 +40,16 @@ public class EventNotifyWindow : AskWindow
     public UILabel itemName;
 
     public UILabel actionLabel;
+
+    public InvItemGroupGUI slot;
+
+    public DateTime end;
+
+    public bool timed;
+
+    public UIWidget timer;
+
+    public UILabel timerLabel;
 
     public override void Accept()
     {
@@ -63,16 +77,46 @@ public class EventNotifyWindow : AskWindow
             loading.alpha = 0.0f;
 
         }
+        if (timed)
+        {
+            timerLabel.text = IndicatorManager.GetLeftTime(end);
+        }
     }
 
+    public bool IsActive()
+    {
+        return panel.alpha >0.0f;
+    }
     public void Show(string text, SimpleSlot item, string action )
     {
 //        Debug.Log(text);
+        timed = false;
+        timer.alpha = 0.0f;
         panel.alpha = 1.0f;
         this.text.text = text;
         this.item = item;
         itemName.text = item.name;
+        itemName.alpha = 1.0f;
         actionLabel.text = action;
         ItemManager.instance.LoadModel(item);
+        loading.alpha = 1.0f;
+        slot.ResetSlot();
+    }
+    public void Show(string text, InvItemGroupSlot item, string action)
+    {
+        panel.alpha = 1.0f;
+        this.text.text = text;
+        loading.alpha = 0.0f;
+        itemName.alpha = 0.0f;
+        slot.SetSlot(item);
+        actionLabel.text = action;
+        ShowEnd(item.discountEnd);
+        
+    }
+    public void ShowEnd(DateTime end)
+    {
+        timed = true;
+        this.end = end;
+        timer.alpha = 1.0f;
     }
 }

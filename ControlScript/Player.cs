@@ -269,7 +269,7 @@ public class Player : MonoBehaviour {
          
           
         }
-        
+        Choice._Team = -1;
        
 	}
 	public void Respawn(Pawn newPawn){
@@ -351,7 +351,7 @@ public class Player : MonoBehaviour {
                   					
 				}else {
 					
-						if(!inBot&&robotPawn!=null){
+						if(robotPawn!=null){
                             //Debug.Log(currentPawn.curLookTarget.gameObject +" "+ (currentPawn.myTransform.position - robotPawn.myTransform.position).sqrMagnitude);
 							if(currentPawn.curLookTarget!=null&&currentPawn.curLookTarget.gameObject==robotPawn.gameObject&&(currentPawn.myTransform.position-robotPawn.myTransform.position).sqrMagnitude<SQUERED_RADIUS_OF_ACTION*2.0f){
 								if(InputManager.instance.GetButtonDown("Use")){
@@ -497,7 +497,7 @@ public class Player : MonoBehaviour {
 		ItemManager.instance.SendChargeData();
     }
 	public void RobotDead(Player Killer){
-		
+		inBot = false;
 	
 	}
 	public bool CanUseJugger(){

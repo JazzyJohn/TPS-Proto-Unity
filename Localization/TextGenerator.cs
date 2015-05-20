@@ -90,6 +90,19 @@ public class TextGenerator : MonoBehaviour{
         }
         return String.Format(result, count);
     }
+    public string GetMoneyText(string cause, string count,string name)
+    {
+        string result;
+        if (moneyTexts.ContainsKey(cause))
+        {
+            result = moneyTexts[cause];
+        }
+        else
+        {
+            return count;
+        }
+        return String.Format(result, count, name);
+    }
     public string GetMoneyText(string cause, int cash, int gold)
     {
         string result;

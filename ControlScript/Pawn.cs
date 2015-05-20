@@ -2495,8 +2495,10 @@ public class Pawn : DamagebleObject
 
             return;
         }
+        Debug.Log("MELEE");
         if (CanMeleeHit())
         {
+            Debug.Log("Inv");
             UnEquipWeapon();
             ivnMan.TakeMelee();
             ActualFire();

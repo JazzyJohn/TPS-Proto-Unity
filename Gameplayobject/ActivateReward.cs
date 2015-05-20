@@ -7,7 +7,7 @@ public class ActivateReward : MonoBehaviour {
 
     public int cost;
 
-    private bool isActive= false;
+    private bool isActive= true;
 
     private bool used;
 

@@ -33,6 +33,7 @@ public class InvItemGUI : MonoBehaviour {
 
     public UIWidget repairFon;
 
+   
     public UISprite repair;
 
     public UIWidget repairBarFon;
@@ -65,8 +66,8 @@ public class InvItemGUI : MonoBehaviour {
         }
         if (item != null && item.buyMode == BuyMode.FOR_GOLD_TIME && item.isAvailable())
         {
-            TimeSpan span = new TimeSpan(item.timeEnd.Ticks - DateTime.UtcNow.Ticks);
-            timerLabel.text = string.Format("{0:D3} : {1:D2} : {2:D2}", span.Hours + span.Days * 24, span.Minutes, span.Seconds);
+          
+            timerLabel.text =  IndicatorManager.GetLeftTime(item.timeEnd);
         }
 	}
     public void SetItem(InventorySlot _item, int set)

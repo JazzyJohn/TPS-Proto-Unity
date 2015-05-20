@@ -1,4 +1,5 @@
 
+using System;
 using UnityEngine;
 
 public class InvItemGroupGUI : MonoBehaviour
@@ -9,6 +10,10 @@ public class InvItemGroupGUI : MonoBehaviour
 	[SerializeField] UIButton buyButton;
 	[SerializeField] UILabel buyButtonPrice;
 
+    [Space(10)]
+    [SerializeField] UILabel discountTime;
+    [SerializeField] UIWidget discount;
+
 	[Space(10)]
 	//отступ между слотами
 	[SerializeField] int offset = 0;
@@ -17,6 +22,7 @@ public class InvItemGroupGUI : MonoBehaviour
 	
 	[Header("Prefabs")]
 	[SerializeField] GameObject itemPrefab;
+	[SerializeField] GameObject skillPrefab;
 	[SerializeField] GameObject moneyPrefab;
 	[SerializeField] GameObject plusPrefab;
 
@@ -24,6 +30,28 @@ public class InvItemGroupGUI : MonoBehaviour
 	private GameObject[] items;
 	
 	public bool HasSlot { get; private set; }
+
+    private InvItemGroupSlot _groupSlot;
+
+    public void Update()
+    {
+        if (HasSlot&& discount != null)
+        {
+            if (discount.alpha == 1.0f)
+            {
+                if (_groupSlot.IsDiscount())
+                {
+                   
+                    discountTime.text = IndicatorManager.GetLeftTime(_groupSlot.discountEnd);
+                }
+                else
+                {
+                    discount.alpha = 0.0f;
+                }
+
+            }
+        }
+    }
 
 	public void SetSlot(InvItemGroupSlot groupSlot)
 	{
@@ -33,15 +61,30 @@ public class InvItemGroupGUI : MonoBehaviour
 		if(groupSlot == null)
 			return;
 
+        _groupSlot = groupSlot;
 		HasSlot = true;
 
 		titleLabel.text = groupSlot.name;
-		buyButtonPrice.text = "" + groupSlot.goldPrice;
-
+        if (buyButtonPrice != null)
+        {
+            buyButtonPrice.text = "" + groupSlot.GetPrice();
+        }
+        if (discount != null)
+        {
+            if (groupSlot.IsDiscount())
+            {
+                discount.alpha = 1.0f;
+            }
+            else
+            {
+                discount.alpha = 0.0f;
+            }
+        }
 		GetComponent<UISprite>().alpha = 1;
 
 		itemPrefab.SetActive(true);
 		moneyPrefab.SetActive(true);
+        skillPrefab.SetActive(true);
 		plusPrefab.SetActive(true);
 		
 		int count = groupSlot.slots.Length;
@@ -60,9 +103,18 @@ public class InvItemGroupGUI : MonoBehaviour
 				items[i] = InstantiateClone(itemPrefab);
 
 				items[i].transform.FindChild("DaysLabel").GetComponent<UILabel>().text = GetDaysText(itemSlot.Days);
-				items[i].GetComponent<UITexture>().mainTexture = itemSlot.iconTexture;
+				items[i].GetComponent<UITexture>().mainTexture = itemSlot.Item.texture;
 
 				NormalizeTextureWidth(items[i].GetComponent<UITexture>());
+			}
+			else if(groupSlot.slots[i] is InvItemGroupSlot.SkillSlot)
+			{
+				var skillSlot = (InvItemGroupSlot.SkillSlot) groupSlot.slots[i];
+				
+				items[i] = InstantiateClone(skillPrefab);
+				
+				items[i].transform.FindChild("DaysLabel").GetComponent<UILabel>().text = GetDaysText(skillSlot.Days);
+				items[i].GetComponent<UISprite>().spriteName = skillSlot.Skill.iconGUI;
 			}
 			else if(groupSlot.slots[i] is InvItemGroupSlot.MoneySlot)
 			{
@@ -107,8 +159,26 @@ public class InvItemGroupGUI : MonoBehaviour
 		itemPrefab.SetActive(false);
 		moneyPrefab.SetActive(false);
 		plusPrefab.SetActive(false);
+        skillPrefab.SetActive(false);
 	}
 
+    public void Buy()
+    {
+        InventoryGUI Shop = FindObjectOfType<InventoryGUI>();
+        Shop.askWindow.action = FinishBuy;
+        string text = TextGenerator.instance.GetMoneyText("buyKit", _groupSlot.GetPrice().ToString(), _groupSlot.name);
+      
+        Shop.askWindow.Show(text);
+    }
+
+    public void FinishBuy()
+    {
+
+        IndicatorManager.instance.Remove(IndicatorManager.KITS, _groupSlot.discountEnd);
+        GA.API.Business.NewEvent("Shop:BUYKIT:" + _groupSlot.id, "GOLD", _groupSlot.GetPrice());
+
+        StartCoroutine(ItemManager.instance.BuyItemKit(_groupSlot.id));
+    }
 	public void ResetSlot()
 	{
 		GetComponent<UISprite>().alpha = 0;
@@ -116,13 +186,8 @@ public class InvItemGroupGUI : MonoBehaviour
 		if(!HasSlot)
 			return;
 
-//#if UNITY_EDITOR
-//		foreach(var p in pluses) DestroyImmediate(p);
-//		foreach(var p in items) DestroyImmediate(p);
-//#elif
 		foreach(var p in pluses) Destroy(p);
 		foreach(var p in items) Destroy(p);
-//#endif
 
 		pluses = null;
 		items = null;
@@ -141,6 +206,10 @@ public class InvItemGroupGUI : MonoBehaviour
 		if(slotData is InvItemGroupSlot.ItemSlot)
 		{
 			return slotGO.GetComponent<UITexture>().width;
+		}
+		else if(slotData is InvItemGroupSlot.SkillSlot)
+		{
+			return slotGO.GetComponent<UISprite>().width;
 		}
 		else if(slotData is InvItemGroupSlot.MoneySlot)
 		{

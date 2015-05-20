@@ -184,8 +184,14 @@ public class RobotPawn : Pawn {
       
 		isActive = false;
 		characterState=CharacterState.Activate;
-       
-		StartCoroutine(WaitBeforeActive(ActivationTime));
+        if (ActivationTime == 0)
+        {
+            _ActualMount();
+        }
+        else
+        {
+            StartCoroutine(WaitBeforeActive(ActivationTime));
+        }
         if (foxView.isMine)
         {
             foxView.Activate();
@@ -232,7 +238,7 @@ public class RobotPawn : Pawn {
        
 
             foxView.PawnDiedByKill(killerID, KillerName);
-
+            player.RobotDead(killerPlayer);
         }
         catch (Exception e)
         {
@@ -270,17 +276,23 @@ public class RobotPawn : Pawn {
 
        
 			yield return new WaitForSeconds(waitTime);
-			GetComponent<ThirdPersonController>().enabled = true;
-		    _rb.isKinematic = false;
-			isActive = true;
-			_rb.detectCollisions = true;
-			for (int i =0; i<myTransform.childCount; i++) {
-				myTransform.GetChild(i).gameObject.SetActive(true);
-			}
-           passenger.Mount();
+            _ActualMount();
        
 		//base.Activate();
 	}
+
+    private void _ActualMount()
+    {
+        GetComponent<ThirdPersonController>().enabled = true;
+        _rb.isKinematic = false;
+        isActive = true;
+        _rb.detectCollisions = true;
+        for (int i = 0; i < myTransform.childCount; i++)
+        {
+            myTransform.GetChild(i).gameObject.SetActive(true);
+        }
+        passenger.Mount();
+    }
 	//Player have left robot
 	public new void  DeActivate(){
 		

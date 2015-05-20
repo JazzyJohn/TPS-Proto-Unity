@@ -12,7 +12,7 @@ public class InventoryGUI : MonoBehaviour {
 	
 	public MainMenuGUI MainMenu;
 
-
+    public InventoryGroupGUI kitsGui;
 	
 	public UIPanel Inventory;
 	
@@ -100,7 +100,13 @@ public class InventoryGUI : MonoBehaviour {
 			
 		
 		}
-		selected = GetComponentsInChildren<SelectedItemGUI>();
+        InvItemGroupSlot[] kits = ItemManager.instance.GetKits();
+        for (int i = 0; i < kits.Length; i++)
+        {
+            Debug.Log(kits[i]);
+            kitsGui.SetSlot( i,kits[i]);
+        }
+            selected = GetComponentsInChildren<SelectedItemGUI>();
 		ReloadSelectedItem();
         init = true;
         MainMenu.TryShowEvent();

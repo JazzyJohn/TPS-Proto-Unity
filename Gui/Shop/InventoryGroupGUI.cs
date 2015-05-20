@@ -5,7 +5,8 @@ using UnityEngine;
 /// 
 ///	slot = new InvItemGroupSlot("Название набора", price, new InvItemGroupSlot.BaseSlot[] {
 ///		new InvItemGroupSlot.MoneySlot(InvItemGroupSlot.MoneySlot.MoneyType.GP, moneyCount),
-///		new InvItemGroupSlot.ItemSlot(texture, days),
+///		new InvItemGroupSlot.ItemSlot(inventorySlot, days),
+/// 	new InvItemGroupSlot.SkillSlot(spriteName, days),
 ///		...
 ///	});
 ///	GetComponent<InventoryGroupGUI>().SetSlot(index, slot);
@@ -27,7 +28,10 @@ public class InventoryGroupGUI : MonoBehaviour
 		var a = GetComponent<UIWidget>().alpha;
 		GetComponent<UIWidget>().alpha = (Mathf.Approximately(a, 1) ? 0f : 1f);
 	}
-
+    public void Hide()
+    {
+        GetComponent<UIWidget>().alpha = 0.0f;
+    }
 	public void SetSlot(int index, InvItemGroupSlot slot)
 	{
 		if(index < 0 || index >= slots.Length)

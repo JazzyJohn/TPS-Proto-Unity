@@ -881,7 +881,10 @@ public class ItemManager : MonoBehaviour {
 
 		
 		}
-        foreach (XmlNode node in xmlDoc.SelectNodes(startTag + "/itemKit"))
+        XmlNodeList kits = xmlDoc.SelectNodes(startTag + "/inventory/itemKit");
+        itemKits = new InvItemGroupSlot[kits.Count];
+        int slotCnt=0;
+        foreach (XmlNode node in kits)
         {
           
             XmlNodeList items =  node.SelectNodes("item");
@@ -913,21 +916,33 @@ public class ItemManager : MonoBehaviour {
             {
                 int id  = int.Parse(skill.SelectSingleNode ("id").InnerText);
                 int days  = int.Parse(skill.SelectSingleNode ("days").InnerText);
-
+                InvItemGroupSlot.SkillSlot skillSlot = new InvItemGroupSlot.SkillSlot(PremiumManager.instance.GetSkill(id), days);
+                slots[count] = skillSlot;
                 count++;
             }
             foreach (XmlNode item in items)
             {
-                int id = int.Parse(item.SelectSingleNode("id").InnerText);
+                string id = item.SelectSingleNode("id").InnerText;
                 int days = int.Parse(item.SelectSingleNode("days").InnerText);
-
+                InvItemGroupSlot.ItemSlot itemSlot = new InvItemGroupSlot.ItemSlot(allShopSlot[id], days);
+                slots[count] = itemSlot;
                 count++;
             }
           
             int price = int.Parse(node.SelectSingleNode("goldPrice").InnerText);
             string name = node.SelectSingleNode("name").InnerText;
-            int kitId = int.Parse(node.SelectSingleNode("id").InnerText);
+            string kitId = node.SelectSingleNode("id").InnerText;
+            float discount = float.Parse(node.SelectSingleNode("discount").InnerText);
+          
 
+            InvItemGroupSlot slot = new InvItemGroupSlot(name, price, slots, kitId, discount);
+            if (discount < 1.0f)
+            {
+                slot.discountEnd = dtDateTime.AddSeconds(int.Parse(node.SelectSingleNode("discountEnd").InnerText)).ToLocalTime();
+            }
+           
+            itemKits[slotCnt] = slot;
+            slotCnt++;
         }
         XmlNodeList stims = xmlDoc.SelectNodes(startTag+"/stim");
 		if(stimPackDictionary==null){
@@ -1454,6 +1469,8 @@ public class ItemManager : MonoBehaviour {
 	
 	public Dictionary<string,InventorySlot> allShopSlot = new Dictionary<string,InventorySlot>();
 
+    private InvItemGroupSlot[] itemKits;
+
     public List<InventorySlot> cachedShopList = new List<InventorySlot>();
 
     public InventoryGUI shop;
@@ -1464,9 +1481,22 @@ public class ItemManager : MonoBehaviour {
         this.shop = shop;
     }
 
+    public InvItemGroupSlot[] GetKits()
+    {
+        return itemKits;
+    }
 
-
-    
+    public InvItemGroupSlot GetKit(string id)
+    {
+        foreach (InvItemGroupSlot slot in itemKits)
+        {
+            if (slot.id == id)
+            {
+                return slot;
+            }
+        }
+        return null;
+    }
     public IEnumerator GenerateMarkedList(GameClassEnum gameClass,ShopSlotType type)
     {
         List<InventorySlot> result = new List<InventorySlot>();
@@ -1705,12 +1735,13 @@ public class ItemManager : MonoBehaviour {
         
 		//buyBlock =false;
 	}
-    public IEnumerator BuyItemit(string itemId, InventoryGUI Shop)
+    public IEnumerator BuyItemKit(string itemId)
     {
         if (buyBlock)
         {
             yield break;
         }
+        InventoryGUI Shop = FindObjectOfType<InventoryGUI>();
         buyBlock = true;
         WWWForm form = new WWWForm();
 
@@ -1719,7 +1750,7 @@ public class ItemManager : MonoBehaviour {
 
         GUIHelper.ShowConnectionStart();
 
-        WWW w = StatisticHandler.GetMeRightWWW(form, StatisticHandler.BUY_ITEM);
+        WWW w = StatisticHandler.GetMeRightWWW(form, StatisticHandler.BUY_ITEM_KIT);
 
         yield return w;
 
@@ -1749,6 +1780,7 @@ public class ItemManager : MonoBehaviour {
             if (Shop != null)
             {
                 Shop.UpdateLot();
+                Shop.kitsGui.Hide();
             }
             buyBlock = false;
             ///yield return new WaitForSeconds(10.0f);

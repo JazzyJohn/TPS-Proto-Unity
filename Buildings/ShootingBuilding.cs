@@ -4,6 +4,7 @@ using System.Collections.Generic;
 
 public class ShootingBuilding : Building
 {
+    private static int SHOOT_BUILDING_ID=-100;
 
     public float lifeTime;
 
@@ -71,7 +72,7 @@ public class ShootingBuilding : Building
                 GameObject proj = projectile.Spawn(muzzle.position, startRotation);
                 BaseProjectile projScript = proj.GetComponent<BaseProjectile>();
                 projScript.replication = false;
-
+                damage.shootWeapon = SHOOT_BUILDING_ID;
                 projScript.fromGun = false;
                 projScript.damage = new BaseDamage(damage);
 

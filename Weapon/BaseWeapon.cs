@@ -24,19 +24,19 @@ public class CharacteristicForItems
 public class BaseWeapon : DestroyableNetworkObject {
 
     private const float CRIT_MULTIPLIER = 2.0f;
-	
+
 	private static LayerMask layer = -123909;
-	
+
 	public enum DESCRIPTIONTYPE{NONE,SHOOTGUN,REVOLVER};
-	
+
 	public DESCRIPTIONTYPE descriptionType;
-	
+
 	public enum AMUNITONTYPE{SIMPLEHIT, PROJECTILE, RAY, HTHWEAPON, AOE};
 
 	public AMUNITONTYPE amunitionType;
 
 	public SLOTTYPE slotType;
-	
+
 	public AMMOTYPE ammoType;
     /// <summary>
     /// maxAmmmo for rewriting
@@ -44,7 +44,7 @@ public class BaseWeapon : DestroyableNetworkObject {
     public int maxAmmoAmount;
 
 	//ROOT OF ALL EVIL SECTION
-	
+
     /// <summary>
     /// Charge that lowers gun efficiency
     /// </summary>
@@ -53,11 +53,11 @@ public class BaseWeapon : DestroyableNetworkObject {
     ///How many shoots up charge
     /// </summary>
     public int shootPerCharge = 30;
-	
+
 	private int shootCounter= 0;
-	
+
 	private int hitCounter=0;
-	
+
 	private int totalShootCount=0;
 
     private static float DAMAGE_BROKE_PERCEN = 10.0f;
@@ -70,8 +70,8 @@ public class BaseWeapon : DestroyableNetworkObject {
 
     private static float AIM_BROKE_COEF = 5f;
 
- 
-    
+
+
 	//END MONEY SECTION
 
     public bool initStats = false;
@@ -90,7 +90,7 @@ public class BaseWeapon : DestroyableNetworkObject {
 	public float fireInterval;
 
     private float lastShootTime;
-    
+
     /// <summary>
     /// For SemiAuto ANd BoltAmmo
     /// </summary>
@@ -117,7 +117,7 @@ public class BaseWeapon : DestroyableNetworkObject {
     public float pumpAmount;
     protected float _pumpAmount;
     /// <summary>
-    ///  Use to Caclulate impact of pumping 
+    ///  Use to Caclulate impact of pumping
     /// </summary>
     public float pumpCoef;
     protected float _pumpCoef;
@@ -132,7 +132,7 @@ public class BaseWeapon : DestroyableNetworkObject {
 	/// <summary>
     ///  One shoot pump do you need pump every shot;
     /// </summary>
-	public bool oneShootPump =false;	
+	public bool oneShootPump =false;
     /// <summary>
     /// After Pump Finish action
     /// </summary>
@@ -195,7 +195,7 @@ public class BaseWeapon : DestroyableNetworkObject {
     /// How cooling move to zero when not firing
     /// </summary>
     public float randCoolingEffectNotFire;
-    
+
 	/// <summary>
     ///MAximum of all random Effect;
     /// </summary>
@@ -207,15 +207,15 @@ public class BaseWeapon : DestroyableNetworkObject {
     public float aimFOV;
 
 
-	
+
 	public bool shouldDrawTrajectory;
-	
+
 	protected TrajectoryDrawer drawer;
 
 	public GameObject projectilePrefab;
 
     public BaseProjectile projectileClass;
-	
+
 	public GameObject pickupPrefabPrefab;
 
 	public Transform muzzlePoint;
@@ -255,7 +255,7 @@ public class BaseWeapon : DestroyableNetworkObject {
     protected bool isPumping = false;
 
 	private float fireTimer =  0.0f;
-	
+
 	private float reloadTimer =  0.0f;
     /// <summary>
     ///  Is reload one clip at time during reload timer
@@ -269,9 +269,9 @@ public class BaseWeapon : DestroyableNetworkObject {
 	public string attackAnim;
 
 	public string weaponName;
-	
+
 	public Texture2D HUDIcon;
-	
+
 	public bool init = false;
 
 	public const float MAXDIFFERENCEINANGLE=0.7f;
@@ -320,14 +320,14 @@ public class BaseWeapon : DestroyableNetworkObject {
                     projectileClass.CreatePool(300);
                 }
             }
-          
+
         }
 		if(shouldDrawTrajectory){
 			drawer = GetComponentInChildren<TrajectoryDrawer>();
 			drawer.Init(projectileClass);
             drawer.gameObject.SetActive(false);
 		}
-  
+
 		charge = ItemManager.instance.GetCharge(SQLId);
 		shootCounter = ItemManager.instance.GetShootCounter(SQLId);
         blueprint = this.Default();
@@ -350,13 +350,13 @@ public class BaseWeapon : DestroyableNetworkObject {
 		if (reloadSound!=null&&reloadSound.length >= reloadTime) {
 			//Debug.LogError("reloadSound clip length is greater than reloadTime value");
 		}
-		
+
 		curTransform = transform;
-	
+
 		rifleParticleController = GetComponentInChildren<RifleParticleController>();
-	
+
 		if (rifleParticleController != null&&foxView.isMine) {
-			rifleParticleController.SetOwner (owner.collider);
+			rifleParticleController.SetOwner (owner.GetCollider() );
 		}
 	}
     public void AttachWeaponToChar(Pawn newowner)
@@ -387,11 +387,11 @@ public class BaseWeapon : DestroyableNetworkObject {
             curAmmo = owner.GetComponent<InventoryManager>().GiveAmmo(ammoType, clipSize - (int)curAmmo);
         }
         InitStats();
-      
+
     }
 	public virtual void AttachWeapon(Transform weaponSlot,Vector3 Offset, Quaternion weaponRotator,Pawn inowner){
 		if (curTransform == null) {
-			curTransform = transform;		
+			curTransform = transform;
 		}
 		if (foxView == null) {
 			foxView = GetComponent<FoxView>();
@@ -399,11 +399,11 @@ public class BaseWeapon : DestroyableNetworkObject {
 		owner = inowner;
 
 		TakeInHand(weaponSlot,Offset,weaponRotator);
-	
-        
+
+
 		//RemoteAttachWeapon(inowner);
         InitStats();
-		
+
 
 
 	}
@@ -419,7 +419,7 @@ public class BaseWeapon : DestroyableNetworkObject {
             owner.ivnMan.RewrtieMaxAmmo(maxAmmoAmount, ammoType);
         }
         initStats = true;
-       
+
         int maxCharge = ItemManager.instance.GetWeaponMaxChargebByID(SQLId);
         int minWear = Mathf.RoundToInt((float)(maxCharge * owner.GetValue(CharacteristicList.MAX_WEAR)) / 100.0f);
         fullyBroken = maxCharge == minWear + charge && maxCharge!=0;
@@ -430,7 +430,7 @@ public class BaseWeapon : DestroyableNetworkObject {
 
             foreach (CharacteristicForItems oneChar in passiveSkill)
             {
-                
+
                 switch (oneChar.type)
                 {
                     case CharacteristicType.Bool:
@@ -474,7 +474,7 @@ public class BaseWeapon : DestroyableNetworkObject {
     public void RecalculateStats(){
         int maxCharge = ItemManager.instance.GetWeaponMaxChargebByID(SQLId);
         int minWear = Mathf.RoundToInt((float)(maxCharge * owner.GetValue(CharacteristicList.MAX_WEAR)) / 100.0f);
-    
+
 
         reloadTime = blueprint.reloadTime * owner.GetPercentValue(CharacteristicList.RELOAD_SPEED);
         float firerate =100f+owner.GetValue(CharacteristicList.FIRE_RATE);
@@ -510,8 +510,8 @@ public class BaseWeapon : DestroyableNetworkObject {
             recoilmod += owner.GetValue(CharacteristicList.AIM_MAIN);
         }
         recoilmod = ((float)recoilmod) / 100f + 1f;
-     
-      
+
+
         float damageAdd = owner.GetValue(CharacteristicList.DAMAGE_ALL);
         if (slotType == SLOTTYPE.PERSONAL)
         {
@@ -521,7 +521,7 @@ public class BaseWeapon : DestroyableNetworkObject {
         {
             damageAdd += owner.GetValue(CharacteristicList.DAMAGE_ADD_MAIN);
         }
-        
+
         damageAmount.Damage = blueprint.damageAmount.Damage * ((float)damageAdd / 100f + 1);
 
         damageAdd = 0;
@@ -536,7 +536,7 @@ public class BaseWeapon : DestroyableNetworkObject {
 
 
         damageAmount.Damage += damageAdd;
-        
+
         float  vsarmor = 0;
         if (slotType == SLOTTYPE.PERSONAL)
         {
@@ -551,7 +551,7 @@ public class BaseWeapon : DestroyableNetworkObject {
         if (SQLId > 0)
         {
             damageAmount.weapon = true;
-          
+
              float damageMode = ((float)charge - minWear) / DAMAGE_BROKE_PERCEN * DAMAGE_BROKE_COEF / 100;
             if (damageMode > 0)
             {
@@ -562,13 +562,13 @@ public class BaseWeapon : DestroyableNetworkObject {
 
                 damageAmount.Damage -= damageAmount.Damage * damageMode;
             }
-          
+
                 float aimMode = ((float)charge - minWear) / AIM_BROKE_PERCEN * AIM_BROKE_COEF / 100;
             if (damageMode > 0)
             {
                 recoilmod += aimMode * recoilmod;
             }
-           
+
         }
         aimRandCoef = blueprint.aimRandCoef * recoilmod;
         normalRandCoef = blueprint.normalRandCoef * recoilmod;
@@ -604,7 +604,7 @@ public class BaseWeapon : DestroyableNetworkObject {
 
         shootPerCharge = Mathf.RoundToInt((float)blueprint.shootPerCharge * owner.GetPercentValue(CharacteristicList.WEAR));
     }
-	
+
 	public void PawnDeath(){
 		if(foxView.isMine&&!owner.isAi){
 			ItemManager.instance.SetShootCount(SQLId,shootCounter);
@@ -615,7 +615,7 @@ public class BaseWeapon : DestroyableNetworkObject {
 	public void RemoteAttachWeapon(Pawn newowner,bool state){
 		if(state){
 //            Debug.Log(name + " EQUIP");
-            newowner.setWeapon(this); 
+            newowner.setWeapon(this);
 		}else{
             AttachWeaponToChar(newowner);
 		}
@@ -664,7 +664,7 @@ public class BaseWeapon : DestroyableNetworkObject {
             muzzleCached = muzzlePoint.position;
             muzzleCachedforward = muzzlePoint.forward;
         }
-      
+
     }
    protected void UpdateWeapon(float deltaTime){
 		if(init&&owner==null) {
@@ -715,8 +715,8 @@ public class BaseWeapon : DestroyableNetworkObject {
                 {
                     Reload();
                 }
-               
-                
+
+
             }
             return;
 		}
@@ -729,7 +729,7 @@ public class BaseWeapon : DestroyableNetworkObject {
 		        if (isShooting) {
                     ShootTick(deltaTime);
 		        }
-              
+
 
                 break;
             default:
@@ -737,7 +737,7 @@ public class BaseWeapon : DestroyableNetworkObject {
                 {
                     if (_pumpAmount >= pumpAmount)
                     {
-						
+
                         if (isShooting)
                         {
                             ShootTick(deltaTime);
@@ -760,9 +760,9 @@ public class BaseWeapon : DestroyableNetworkObject {
                                         if (curAmmo > 0 )
                                         {
                                             curAmmo--;
-                                          
-                                        } 
-                                     
+
+                                        }
+
                                     }
                                     break;
                                 case AFTERPUMPACTION.Damage:
@@ -773,7 +773,7 @@ public class BaseWeapon : DestroyableNetworkObject {
                                     break;
                             }
                         }
-                       
+
 
                     }
                     else
@@ -785,7 +785,7 @@ public class BaseWeapon : DestroyableNetworkObject {
                                 if (curAmmo == 0 && alredyGunedAmmo == 0) {
                                     ReloadStart();
                                 }
-                               
+
                                if (_pumpCoef >= 1.0f)
                                {
                                    _pumpCoef = 0;
@@ -804,7 +804,7 @@ public class BaseWeapon : DestroyableNetworkObject {
 										Pawn target = owner.curLookTarget.GetComponent<Pawn>();
 										if(target!=null&&(isFriendlyGuide||target.team!=owner.team)){
                                             guidanceTarget = owner.curLookTarget;
-										}									
+										}
 									}
 								}
                                 Debug.Log(guidanceTarget);
@@ -814,16 +814,16 @@ public class BaseWeapon : DestroyableNetworkObject {
 								if (curAmmo == 0) {
                                     ReloadStart();
                                 }
-                               
+
 								break;
                          }
-                     
+
                     }
                 }
                 break;
         }
-        
-     
+
+
 	}
 	private void Pumping(){
 		_pumpCoef += Time.deltaTime*pumpCoef;
@@ -832,10 +832,10 @@ public class BaseWeapon : DestroyableNetworkObject {
 
     protected virtual void ShootTick(float deltaTime)
     {
-       
+
         if (fireTimer <= 0)
         {
-           
+
             fireTimer = fireInterval;
             Fire();
         }
@@ -852,7 +852,7 @@ public class BaseWeapon : DestroyableNetworkObject {
     }
 	public virtual void StartFire(){
 		isShooting = true;
-	
+
 	}
     public virtual void StartPumping()
     {
@@ -868,10 +868,10 @@ public class BaseWeapon : DestroyableNetworkObject {
             _pumpAmount = 0.0f;
         }
         pumpAfterReload = false;
-    
+
     }
 	public virtual void StopFire(){
-        
+
         switch (prefiretype)
         {
             case PREFIRETYPE.Normal:
@@ -892,7 +892,7 @@ public class BaseWeapon : DestroyableNetworkObject {
         _waitForRelease = false;
         _amountInShoot = 0;
         alredyGunedAmmo = 0;
-      
+
         if (!isPumping) {
             _pumpCoef = 0.0f;
             _pumpAmount = 0.0f;
@@ -900,7 +900,7 @@ public class BaseWeapon : DestroyableNetworkObject {
         }
 
     }
-	
+
 	public virtual void ReloadStart(){
 		if (isReload) {
 			return;
@@ -948,7 +948,7 @@ public class BaseWeapon : DestroyableNetworkObject {
 			StopFire();
 			return;
 		}
-		
+
 	}
     public void OnDestroy()
     {
@@ -994,7 +994,7 @@ public class BaseWeapon : DestroyableNetworkObject {
                 curAmmo = owner.GetComponent<InventoryManager>().GiveAmmo(ammoType, 1) + oldClip;
                 if (curAmmo == oldClip)
                 {
-                   
+
                     ReloadFinish();
                 }
                 reloaderCounter = 0.0f;
@@ -1019,12 +1019,12 @@ public class BaseWeapon : DestroyableNetworkObject {
 	}
 
     public float ReloadProgress(){
-    
+
         if(reloadTime==0){
             return 0;
         }
         return (reloadTime - reloadTimer) / reloadTime;
-       
+
     }
 	public float ReloadTimer(){
 		if (isReload) {
@@ -1036,16 +1036,16 @@ public class BaseWeapon : DestroyableNetworkObject {
     {
         return _pumpAmount;
     }
-	
+
 	public bool AfterActing(){
 		if(afterPumpAction!=AFTERPUMPACTION.Wait){
 			return _pumpAmount>=pumpAmount&&!isShooting;
 		}
-		
+
 		return false;
-	
+
 	}
-	
+
 	public bool PumpIsActing(){
 		switch (prefiretype)
         {
@@ -1053,22 +1053,22 @@ public class BaseWeapon : DestroyableNetworkObject {
 				return false;
 		    case PREFIRETYPE.ChargedPower:
 			case PREFIRETYPE.ChargedAccuracy:
-			
+
 			case PREFIRETYPE.ChargedRange:
                 return _pumpCoef >= 1.0f;
-                
+
 			case PREFIRETYPE.Salvo:
                 return _pumpAmount / pumpCoef >= 1.0f;
-               
+
 			 case PREFIRETYPE.Spooling:
 				return _pumpAmount>=pumpAmount;
-              
+
              case PREFIRETYPE.Guidance:
                 return _pumpAmount >= pumpAmount;
-               
+
 			default:
                	return false;
-               
+
         }
 	}
 	//temporary function to fix wrong aiming
@@ -1077,11 +1077,11 @@ public class BaseWeapon : DestroyableNetworkObject {
 	}
 	protected void Fire(bool fromReload = false){
 		if (!CanShoot ()) {
-			return;		
+			return;
 		}
-  
+
         LogicShoot();
-        
+
 		if(curAmmo>0){
 			curAmmo--;
 		}else{
@@ -1089,7 +1089,7 @@ public class BaseWeapon : DestroyableNetworkObject {
             {
                 if (clipSize > 0 )
                 {
-                    if (!fromReload) { 
+                    if (!fromReload) {
                         ReloadStart();
                     }
                     return;
@@ -1101,11 +1101,11 @@ public class BaseWeapon : DestroyableNetworkObject {
             }
 		}
 			//играем звук стрельбы
-		
+
 		if (rifleParticleController != null) {
 			rifleParticleController.CreateShootFlame ();
 		}
-		
+
 		owner.shootEffect();
         FiredEffect();
         if (alredyGunedAmmo > 0)
@@ -1116,16 +1116,16 @@ public class BaseWeapon : DestroyableNetworkObject {
                 ActualFire();
             }
             IncreseRandFromShoot(alredyGunedAmmo);
-			
-          
+
+
         }
         else
         {
             ActualFire();
             IncreseRandFromShoot(1);
-			
+
         }
-	
+
 		owner.HasShoot ();
         AfterShootLogic();
 		//photonView.RPC("FireEffect",PhotonTargets.Others);
@@ -1149,7 +1149,7 @@ public class BaseWeapon : DestroyableNetworkObject {
     protected void FiredEffect()
     {
 
-		
+
         if (FireStarted != null&&(!foxView.isMine||!isAimingFPS||!owner.isAiming))
         {
             FireStarted(this, EventArgs.Empty);
@@ -1159,7 +1159,7 @@ public class BaseWeapon : DestroyableNetworkObject {
 
     protected virtual void ActualFire()
     {
-       
+
        // Debug.Log("fire");
 	   if(foxView.isMine){
 			switch (amunitionType)
@@ -1184,7 +1184,7 @@ public class BaseWeapon : DestroyableNetworkObject {
 
 			}
 		}
-		
+
     }
 
     public virtual  void LogicShoot()
@@ -1195,7 +1195,7 @@ public class BaseWeapon : DestroyableNetworkObject {
         {
             case FIRETYPE.SEMIAUTO:
                 if (_amountInShoot >= amountInShoot) {
-                    _waitForRelease = true; 
+                    _waitForRelease = true;
                 }
                 break;
             case FIRETYPE.BOLT:
@@ -1224,7 +1224,7 @@ public class BaseWeapon : DestroyableNetworkObject {
 			}
             owner.AfterShoot();
 		}
-		
+
     }
     public float GetAimDisplacment(bool isAiming)
     {
@@ -1237,17 +1237,17 @@ public class BaseWeapon : DestroyableNetworkObject {
             return aimDisplacment;
         }
     }
-	
+
 	public virtual void HitWithProjectile(){
 		if(foxView.isMine&&!owner.isAi){
 			hitCounter++;
-			
+
 		}
 	}
 	public virtual bool CanShoot (){
         if (_waitForRelease)
         {
-           
+
             return false;
         }
 	  if (muzzlePoint==null)
@@ -1258,7 +1258,7 @@ public class BaseWeapon : DestroyableNetworkObject {
 
 		if (angle < MAXDIFFERENCEINANGLE) {
            /// Debug.Log("angle");
-			//return false;		
+			//return false;
 		}
 
 //		Vector3 aimDir = (owner.getCachedAimRotation() -muzzlePoint.position).normalized;
@@ -1266,7 +1266,7 @@ public class BaseWeapon : DestroyableNetworkObject {
 //		float angle = Vector3.Dot (aimDir, realDir);
 //
 //		if (angle < 0.8) {
-//			return false;		
+//			return false;
 //		}
 
 		return true;
@@ -1279,9 +1279,9 @@ public class BaseWeapon : DestroyableNetworkObject {
 			owner.animator.StopAttackAnim(attackAnim);
 			ChangeWeaponStatus(false);
 			break;
-			
+
 		}
-		
+
 	}
 
 	public virtual void ChangeWeaponStatus(bool status){
@@ -1295,37 +1295,37 @@ public class BaseWeapon : DestroyableNetworkObject {
 	protected virtual void DoSimpleDamage(){
         Vector3 startPoint = muzzleCached + muzzleOffset;
 		Quaternion startRotation = getAimRotation();
-	
+
 		float effAimRandCoef = GetRandomeDirectionCoef();
-		
+
 		if (effAimRandCoef > 0) {
 			startRotation = Quaternion.Euler (startRotation.eulerAngles + new Vector3 (Random.Range (-1 * effAimRandCoef, 1 * effAimRandCoef), Random.Range (-1 * effAimRandCoef, 1 * effAimRandCoef), Random.Range (-1 * effAimRandCoef, 1 * effAimRandCoef)));
 		}
-	
+
 		Vector3 direction = startRotation*Vector3.forward;
 		Ray centerRay=new Ray(startPoint,direction);
 		RaycastHit hitInfo;
 		float power=0;
 		float range = 0;
-		
+
 		switch(prefiretype){
 			case PREFIRETYPE.ChargedPower:
 				power += _pumpCoef;
 			break;
 			case PREFIRETYPE.ChargedRange:
 				range += _pumpCoef;
-			break;		
+			break;
 		}
-     
+
 		if (Physics.Raycast (centerRay, out hitInfo, weaponRange+range)) {
-		
+
 			HitEffect(hitInfo,power);
 			rifleParticleController.CreateLine(startPoint,hitInfo.point);
 		}else{
 			rifleParticleController.CreateRay(startPoint,direction);
 		}
 	}
-	
+
 	/// <summary>
     /// Hit logic for SimpleDamage
     /// </summary>
@@ -1343,7 +1343,7 @@ public class BaseWeapon : DestroyableNetworkObject {
 		Ray centerRay=new Ray(position,direction);
 		RaycastHit hitInfo;
 		if (Physics.Raycast (centerRay, out hitInfo, weaponRange+range)) {
-		
+
 			HitEffect(hitInfo,power);
             rifleParticleController.CreateLine(position, hitInfo.point);
 		}else{
@@ -1355,7 +1355,7 @@ public class BaseWeapon : DestroyableNetworkObject {
     /// </summary>
 	public float GetRandomeDirectionCoef(){
 		float effAimRandCoef =0;
-		
+
 		if (owner.isAiming) {
 			effAimRandCoef+=aimRandCoef;
 		}else{
@@ -1365,13 +1365,13 @@ public class BaseWeapon : DestroyableNetworkObject {
 
         effAimRandCoef += _randShootCoef;
 		effAimRandCoef+= owner.AimingCoef ();
-		
+
 		if(effAimRandCoef>maxRandEffect){
 			effAimRandCoef =maxRandEffect;
 		}
 		if(prefiretype==PREFIRETYPE.ChargedAccuracy){
 			effAimRandCoef-= _pumpCoef;
-			
+
 		}
         if (effAimRandCoef < 0)
         {
@@ -1394,22 +1394,22 @@ public class BaseWeapon : DestroyableNetworkObject {
 
         effAimRandCoef += _randShootCoef;
         effAimRandCoef += owner.AimingCoef();
-		
+
         return effAimRandCoef > maxRandEffect;
-        
+
     }
-	
+
 	protected virtual void GenerateProjectile(){
 		Vector3 startPoint  = muzzleCached+muzzleOffset;
 		Quaternion startRotation = getAimRotation();
 		GameObject proj;
 		float effAimRandCoef = GetRandomeDirectionCoef();
-		
+
 		if (effAimRandCoef > 0) {
 			startRotation = Quaternion.Euler (startRotation.eulerAngles + new Vector3 (Random.Range (-1 * effAimRandCoef, 1 * effAimRandCoef), Random.Range (-1 * effAimRandCoef, 1 * effAimRandCoef), Random.Range (-1 * effAimRandCoef, 1 * effAimRandCoef)));
 		}
        // Debug.DrawLine(transform.position, startPoint, Color.red,10 );
-   
+
 		proj=projectilePrefab.Spawn(startPoint,startRotation);
         //Debug.DrawLine(transform.position,proj.transform.position, Color.blue, 10);
 		BaseProjectile projScript =proj.GetComponent<BaseProjectile>();
@@ -1427,8 +1427,8 @@ public class BaseWeapon : DestroyableNetworkObject {
 			case PREFIRETYPE.Guidance:
 				if(_pumpCoef>=1.0f){
 					Transform target = 	guidanceTarget;
-                    
-					
+
+
 					if(target!=null){
 						projScript.target = target;
 						viewId = target.GetComponent<FoxView>().viewID;
@@ -1441,7 +1441,7 @@ public class BaseWeapon : DestroyableNetworkObject {
 				}
 			break;
 		}
-     
+
         projScript.projId = ProjectileManager.instance.GetNextId();
         projScript.replication = false;
 		if (foxView.isMine) {
@@ -1450,9 +1450,9 @@ public class BaseWeapon : DestroyableNetworkObject {
 
         projScript.fromGun = true;
         projScript.damage = GetDamage(damageAmount, power);
-      
+
 		projScript.owner = owner.gameObject;
-		
+
 		projScript.range=range;
         projScript.minRange = minRange;
         projScript.Init();
@@ -1467,8 +1467,8 @@ public class BaseWeapon : DestroyableNetworkObject {
             case AMUNITONTYPE.PROJECTILE:
 				RemoteGenerate(position, rotation, power, range,minRange, viewId, projId, timeShoot);
                 break;
-      
-          
+
+
 
         }
 	}
@@ -1479,7 +1479,7 @@ public class BaseWeapon : DestroyableNetworkObject {
 			if (rifleParticleController != null) {
 				rifleParticleController.CreateShootFlame ();
 			}
-         
+
             proj.projId = projId;
 			proj.damage.Damage+=power;
 			proj.range=range;
@@ -1488,8 +1488,8 @@ public class BaseWeapon : DestroyableNetworkObject {
 				case PREFIRETYPE.Guidance:
 					if(viewId!=0){
 						Transform target =NetworkController.GetView(viewId).GetComponent<Transform>();
-				
-					
+
+
 						proj.target = target;
                         Pawn targPawn = target.GetComponent<Pawn>();
                         if (targPawn != null)
@@ -1502,7 +1502,7 @@ public class BaseWeapon : DestroyableNetworkObject {
 			}
             proj.Init();
 
-		
+
 	}
     protected BaseProjectile GenerateProjectileRep(Vector3 startPoint, Quaternion startRotation, long timeShoot)
     {
@@ -1515,7 +1515,7 @@ public class BaseWeapon : DestroyableNetworkObject {
 		projScript.owner = owner.gameObject;
 		return projScript;
 	}
-  
+
 	protected virtual Quaternion getAimRotation(){
 		/*Vector3 randVec = Random.onUnitSphere;
 		Vector3 normalDirection  = owner.getAimRotation(weaponRange)-muzzlePoint.position;
@@ -1529,11 +1529,11 @@ public class BaseWeapon : DestroyableNetworkObject {
         {
             return Quaternion.LookRotation(owner.getAimpointForWeapon() - muzzleCached);
         }
-		
+
 
 	}
-	
-	
+
+
 	public float MuzzleOffset(){
         if (muzzlePoint != null)
         {
@@ -1554,10 +1554,10 @@ public class BaseWeapon : DestroyableNetworkObject {
     {
 
     }
-	
+
 	public bool ToggleAim(bool value){
         aimAfterReload = value;
-        
+
 		if(shouldDrawTrajectory&&foxView.isMine){
 			drawer.gameObject.SetActive(value);
 		}
@@ -1614,7 +1614,7 @@ public class BaseWeapon : DestroyableNetworkObject {
     public BaseDamage GetDamage(BaseDamage dmg,float addDamage=0)
     {
          BaseDamage lDamage = new BaseDamage(damageAmount);
-        
+
          lDamage.Damage += addDamage;
          if (critChance > 0)
          {

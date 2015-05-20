@@ -92,16 +92,24 @@ public class MainMenuGUI : MonoBehaviour {
             //Debug.Log("PULLSIZE" + GUIHelper.messages.Dequeue());
             SimpleMessage(GUIHelper.messages.Dequeue());
         }
-        ShopEvent evnt =GUIHelper.shopEvent;
-        if (evnt != null)
+        if (!eventWindow.IsActive())
         {
-            ShowEvent(evnt);
-          
+            ShopEvent evnt = GUIHelper.shopEvent;
+            if (evnt != null)
+            {
+                ShowEvent(evnt);
+
+            }
         }
+       
     }
     public void TryShowEvent()
     {
         if (allWWidget.alpha != 1.0f)
+        {
+            return;
+        }
+        if (eventWindow.IsActive())
         {
             return;
         }
@@ -743,7 +751,10 @@ public class MainMenuGUI : MonoBehaviour {
 		Screen.lockCursor = false;
         NetworkController.Instance.LeaveRoomReuqest();
         ItemManager.instance.LeaveRoom();
-        Destroy(HUDholder.gameObject);
+        if (HUDholder != null)
+        {
+            Destroy(HUDholder.gameObject);
+        }
         Application.LoadLevel("Empty");
         gameObject.SetActive(true);
 		inGame= true;
@@ -769,17 +780,19 @@ public class MainMenuGUI : MonoBehaviour {
             {
                 panel.gameObject.SetActive(false);
             }
+            TryShowEvent();
+            
         }
     }
     public void ShowEvent(ShopEvent evt)
     {
-      
-            InventorySlot item = ItemManager.instance.GetItem(evt.item);
+
+        InventorySlot item;
                    
         switch (evt.type)
         {
             case ShopEventType.CAN_TAKE_HOLLIDAY:
-              
+                item = ItemManager.instance.GetItem(evt.item);
                 eventWindow.action = delegate()
                 {
                     shop.SetItemForChoiseSet(item);
@@ -787,6 +800,7 @@ public class MainMenuGUI : MonoBehaviour {
                 eventWindow.Show(evt.text, item, TextGenerator.instance.GetSimpleText("take_item"));
                 break;
             case ShopEventType.CAN_TAKE:
+                 item = ItemManager.instance.GetItem(evt.item);
                 if (!item.IsEvented())
                 {
                     return;
@@ -796,8 +810,10 @@ public class MainMenuGUI : MonoBehaviour {
                     shop.SetItemForChoiseSet(item);
                 };
                 eventWindow.Show(evt.text, item, TextGenerator.instance.GetSimpleText("take_item"));
+                eventWindow.ShowEnd(evt.end);
                 break;
             case ShopEventType.DISCOUNT:
+                 item = ItemManager.instance.GetItem(evt.item);
                 if (item.isAvailable())
                 {
                     return;
@@ -818,7 +834,21 @@ public class MainMenuGUI : MonoBehaviour {
                 };
                // string text = item.prices[EVENT_KEY].GetText();
                 eventWindow.Show(evt.text, item, TextGenerator.instance.GetMoneyText("simple_buy_item", amount));
+                eventWindow.ShowEnd(evt.end);
                 break;
+            case ShopEventType.KITDISCOUNT:
+                InvItemGroupSlot slot = ItemManager.instance.GetKit(evt.item);
+                int slotPrice = slot.GetPrice();
+                eventWindow.action = delegate()
+                {
+
+                    IndicatorManager.instance.Remove(IndicatorManager.KITS, evt.end);
+                    StartCoroutine(ItemManager.instance.BuyItemKit(slot.id ));
+                };
+               // string text = item.prices[EVENT_KEY].GetText();
+                eventWindow.Show(evt.text, slot, TextGenerator.instance.GetMoneyText("simple_buy_item", slotPrice));
+                break;
+
         }
 
     }

@@ -19,7 +19,8 @@ public enum AsyncNotify
     HOLIDAY,
     DAYREWARD,
     ITEMDISCOUNT,
-    ITEMTAKE
+    ITEMTAKE,
+    KITDISCOUNT
 }
 public class GlobalPlayer : MonoBehaviour {
 
@@ -317,6 +318,7 @@ public class GlobalPlayer : MonoBehaviour {
         timeUpdate = dtDateTime.AddSeconds(int.Parse(xmlDoc.SelectSingleNode("player/update").InnerText)).ToLocalTime();
        
         open_set = int.Parse(xmlDoc.SelectSingleNode("player/open_set").InnerText);
+        DateTime lTimeShow = DateTime.MinValue;
         foreach (XmlNode node in list)
         {
 			AsyncNotify type = (AsyncNotify)Enum.Parse(typeof(AsyncNotify), node.SelectSingleNode("type").InnerText);
@@ -347,33 +349,53 @@ public class GlobalPlayer : MonoBehaviour {
                 break;
                 case AsyncNotify.ITEMDISCOUNT:
                 {
-                    DateTime lTimeShow = dtDateTime.AddSeconds(int.Parse(node.SelectSingleNode("start").InnerText));
+                    lTimeShow = dtDateTime.AddSeconds(int.Parse(node.SelectSingleNode("start").InnerText));
                     if (lTimeShow <= timeShow)
                     {
                         continue;
                     }
-                    timeShow = lTimeShow;
+                   
                     string text = node.SelectSingleNode("text").InnerText;
                     ShopEvent evnt = new ShopEvent(ShopEventType.DISCOUNT, node.SelectSingleNode("item").InnerText, text);
+                    evnt.end = dtDateTime.AddSeconds(int.Parse(node.SelectSingleNode("end").InnerText)).ToLocalTime();
                     GUIHelper.shopEvent = evnt;
                 }
                 break;
                 case AsyncNotify.ITEMTAKE:
                 {
 
-                    DateTime lTimeShow = dtDateTime.AddSeconds(int.Parse(node.SelectSingleNode("start").InnerText));
+                    lTimeShow = dtDateTime.AddSeconds(int.Parse(node.SelectSingleNode("start").InnerText));
                     if (lTimeShow <= timeShow)
                     {
                         continue;
                     }
-                    timeShow = lTimeShow;
+                  
                     string text = node.SelectSingleNode("text").InnerText;
                     ShopEvent evnt = new ShopEvent(ShopEventType.CAN_TAKE, node.SelectSingleNode("item").InnerText, text);
+                    evnt.end = dtDateTime.AddSeconds(int.Parse(node.SelectSingleNode("end").InnerText)).ToLocalTime();
                     GUIHelper.shopEvent = evnt;
                 }
                 break;
+                case AsyncNotify.KITDISCOUNT:
+                {
+                    lTimeShow = dtDateTime.AddSeconds(int.Parse(node.SelectSingleNode("start").InnerText));
+                    if (lTimeShow <= timeShow)
+                    {
+                        continue;
+                    }
+                    
+                    string text = node.SelectSingleNode("text").InnerText;
+                    ShopEvent evnt = new ShopEvent(ShopEventType.KITDISCOUNT, node.SelectSingleNode("item").InnerText, text);
+                    GUIHelper.shopEvent = evnt;
+                    evnt.end = dtDateTime.AddSeconds(int.Parse(node.SelectSingleNode("end").InnerText)).ToLocalTime();
+                    IndicatorManager.instance.Add(IndicatorManager.KITS, false, evnt.end);
+                }
+                break;
 			}
+
+            
 		}
+        timeShow = lTimeShow;
         list = xmlDoc.SelectNodes("player/statistic/entry");
         statisticData.Clear();
         foreach (XmlNode node in list)
@@ -389,7 +411,84 @@ public class GlobalPlayer : MonoBehaviour {
         }
     
 	}
+    public void ParseExteranlPrize(XmlNode node)
+    {
+        DateTime dtDateTime = new DateTime(1970, 1, 1, 0, 0, 0, 0, System.DateTimeKind.Utc);
+        DateTime lTimeShow = DateTime.MinValue;
+        AsyncNotify type = (AsyncNotify)Enum.Parse(typeof(AsyncNotify), node.SelectSingleNode("type").InnerText);
+        switch (type)
+        {
+            case AsyncNotify.PREMIUM:
+                GUIHelper.SendMessage(TextGenerator.instance.GetSimpleText("PremiumStart"));
+                ItemManager.instance.ReloadItem();
+                break;
+            case AsyncNotify.RELOAD_ITEMS:
+                ItemManager.instance.ReloadItem();
+                break;
+            case AsyncNotify.HOLIDAY:
+                {
+                    string text = node.SelectSingleNode("text").InnerText;
+                    if (node.SelectSingleNode("item") == null)
+                    {
 
+                        GUIHelper.PushMessage(text);
+                    }
+                    else
+                    {
+                        ShopEvent evnt = new ShopEvent(ShopEventType.CAN_TAKE_HOLLIDAY, node.SelectSingleNode("item").InnerText, text);
+                        GUIHelper.shopEvent = evnt;
+                    }
+                }
+                break;
+            case AsyncNotify.DAYREWARD:
+                break;
+            case AsyncNotify.ITEMDISCOUNT:
+                {
+                    lTimeShow = dtDateTime.AddSeconds(int.Parse(node.SelectSingleNode("start").InnerText));
+                    if (lTimeShow <= timeShow)
+                    {
+                        return;
+                    }
+
+                    string text = node.SelectSingleNode("text").InnerText;
+                    ShopEvent evnt = new ShopEvent(ShopEventType.DISCOUNT, node.SelectSingleNode("item").InnerText, text);
+                    GUIHelper.shopEvent = evnt;
+                    evnt.end = dtDateTime.AddSeconds(int.Parse(node.SelectSingleNode("end").InnerText)).ToLocalTime();
+                }
+                break;
+            case AsyncNotify.ITEMTAKE:
+                {
+
+                    lTimeShow = dtDateTime.AddSeconds(int.Parse(node.SelectSingleNode("start").InnerText));
+                    if (lTimeShow <= timeShow)
+                    {
+                        return;
+                    }
+
+                    string text = node.SelectSingleNode("text").InnerText;
+                    ShopEvent evnt = new ShopEvent(ShopEventType.CAN_TAKE, node.SelectSingleNode("item").InnerText, text);
+                    GUIHelper.shopEvent = evnt;
+                    evnt.end = dtDateTime.AddSeconds(int.Parse(node.SelectSingleNode("end").InnerText)).ToLocalTime();
+                }
+                break;
+            case AsyncNotify.KITDISCOUNT:
+                {
+                    lTimeShow = dtDateTime.AddSeconds(int.Parse(node.SelectSingleNode("start").InnerText));
+                    if (lTimeShow <= timeShow)
+                    {
+                        return;
+                    }
+
+                    string text = node.SelectSingleNode("text").InnerText;
+                    ShopEvent evnt = new ShopEvent(ShopEventType.KITDISCOUNT, node.SelectSingleNode("item").InnerText, text);
+                    GUIHelper.shopEvent = evnt;
+                    evnt.end = dtDateTime.AddSeconds(int.Parse(node.SelectSingleNode("end").InnerText)).ToLocalTime();
+                    IndicatorManager.instance.Add(IndicatorManager.KITS, false, evnt.end);
+                }
+                break;
+        }
+        timeShow = lTimeShow;
+    }
 
     public int GetStatisticData(string key)
     {

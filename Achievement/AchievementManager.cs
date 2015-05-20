@@ -179,6 +179,13 @@ public class AchievementManager : MonoBehaviour, LocalPlayerListener, GameListen
             achivment.isDone = open;
             achivment.isMultiplie = bool.Parse(node.SelectSingleNode("multiplie").InnerText);
 			achivment.type = (AchievementType)Enum.Parse(typeof(AchievementType), node.SelectSingleNode("type").InnerText);
+            if (achivment.type == AchievementType.TASK)
+            {
+                if (!open)
+                {
+                    IndicatorManager.instance.Add(IndicatorManager.TASK, true);
+                }
+            }
 			//Debug.Log(open);
             ongoingAchivment.Add(achivment);
 			if(open){
@@ -476,6 +483,7 @@ public class AchievementManager : MonoBehaviour, LocalPlayerListener, GameListen
             if (finished.type == AchievementType.TASK)
             {
                 taskFinished++;
+                IndicatorManager.instance.Remove(IndicatorManager.TASK);
                 StatisticManager.instance.AddTask();
             }
 			syncAchivment.Add(finished.achievementId);

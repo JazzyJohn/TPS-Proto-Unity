@@ -269,6 +269,14 @@ public class LevelingManager : MonoBehaviour{
             }
 
         }
+        node = xmlDoc.SelectSingleNode("result/prize");
+        if (node != null)
+        {
+            GlobalPlayer.instance.ParseExteranlPrize(node.SelectSingleNode("notify"));
+            
+            
+            ItemManager.instance.ReloadItem();
+        }
 
 	}
 

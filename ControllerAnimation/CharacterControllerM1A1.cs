@@ -82,9 +82,7 @@ public class CharacterControllerM1A1 : MonoBehaviour
                 velocity.y = characterRigidbody.velocity.y;
                 characterRigidbody.velocity = velocity;
                 break;
-            case CharacterState.Mount:
-                character.myTransform.Translate(animator.deltaPosition);
-                break;
+          
         }
     }
 
