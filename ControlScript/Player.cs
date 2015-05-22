@@ -250,6 +250,12 @@ public class Player : MonoBehaviour {
     void OnLevelWasLoaded(int level)
     {
         Score.Reset();
+        rewardRating = 0;
+        if (selectedReward != null)
+        {
+            selectedReward.Deselect(currentPawn);
+        }
+        selectedReward = null;
     }
    
 	public void GameEnd(){
@@ -476,7 +482,10 @@ public class Player : MonoBehaviour {
                             selectedReward.Deselect(currentPawn);
                         }
                         selectedReward = rewards[i];
-                        selectedReward.Select(currentPawn);
+                        if (!selectedReward.Select(currentPawn))
+                        {
+                            selectedReward = null;
+                        }
 
                     }
                 }

@@ -74,8 +74,11 @@ public class LotItemGUI : MonoBehaviour
     public UIWidget useItem;
 
     public PriceForLot[] kpPrices;
-	
-	
+
+    public UIWidget timer;
+
+    public UILabel timerLabel;
+
     [HideInInspector]
     public int numToItem;
 
@@ -106,14 +109,18 @@ public class LotItemGUI : MonoBehaviour
             loading.alpha = 0.0f;
            
         }
-        if (item != null && item.prices[0].discount && item.prices[0].discoutnEnd < DateTime.Now)
+        if (item != null && item.prices[0].discount)
         {
-
-            for (int i = 0; i < item.prices.Length; i++)
+            if (item.prices[0].discoutnEnd < DateTime.Now)
             {
-                item.prices[i].CloseDiscount();
+                for (int i = 0; i < item.prices.Length; i++)
+                {
+                    item.prices[i].CloseDiscount();
+                }
+                SetItem(item);
+             
             }
-            SetItem(item);
+            timerLabel.text = IndicatorManager.GetLeftTime(item.prices[0].discoutnEnd);
         }
     }
 
@@ -198,6 +205,14 @@ public class LotItemGUI : MonoBehaviour
                     goldPrices[i].discount = item.prices[i].GetOldPrice();
                 }
             }
+        }
+        if (item.prices[0].discount)
+        {
+            timer.alpha = 1.0f;
+        }
+        else
+        {
+            timer.alpha = 0.0f;
         }
         if (item.isAvailable())
         {

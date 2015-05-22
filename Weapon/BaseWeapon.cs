@@ -1404,7 +1404,7 @@ public class BaseWeapon : DestroyableNetworkObject {
 		Quaternion startRotation = getAimRotation();
 		GameObject proj;
 		float effAimRandCoef = GetRandomeDirectionCoef();
-
+       
 		if (effAimRandCoef > 0) {
 			startRotation = Quaternion.Euler (startRotation.eulerAngles + new Vector3 (Random.Range (-1 * effAimRandCoef, 1 * effAimRandCoef), Random.Range (-1 * effAimRandCoef, 1 * effAimRandCoef), Random.Range (-1 * effAimRandCoef, 1 * effAimRandCoef)));
 		}

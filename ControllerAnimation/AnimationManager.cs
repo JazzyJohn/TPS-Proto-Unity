@@ -45,10 +45,14 @@ public class AnimationManager : MonoBehaviour, IAnimationManager
 
 	public void AimEvalToWeight(float weight)
 	{
+        if (!pawn.isAi && (pawn as RobotPawn) == null)
+            Debug.Log(1);
 		aimPos.EvalToWeight(1);
 	}
 	public void AimSetWeight(float weight)
 	{
+        if (!pawn.isAi && (pawn as RobotPawn) == null)
+            Debug.Log(0);
 		aimPos.SetWeight(0);
 	}
 	public void AimOff()
@@ -244,8 +248,10 @@ public class AnimationManager : MonoBehaviour, IAnimationManager
 
             if (state)
             {
+              
                 aimPos.EvalToWeight(1.0f);
             }else{
+               
                 aimPos.SetWeight(0.0f);
             }
         }
@@ -254,6 +260,9 @@ public class AnimationManager : MonoBehaviour, IAnimationManager
     /// Short cut to turn off IK
     /// </summary>
 	public virtual  void IKOff(){
+
+       // if (!pawn.isAi && (pawn as RobotPawn) == null)
+           // Debug.Log("IKOff");
 		ToggleAimPos(false);
 	}
 	/// <summary>
@@ -261,7 +270,8 @@ public class AnimationManager : MonoBehaviour, IAnimationManager
     /// </summary>
     public virtual void IKOn()
     {
-       // Debug.Log("ikON");
+       // if(!pawn.isAi &&( pawn as RobotPawn)==null)
+          //  Debug.Log("ikON");
 		ToggleAimPos(true);
 	}
 
@@ -472,7 +482,7 @@ public class AnimationManager : MonoBehaviour, IAnimationManager
         aimPos.SetMuzzle( point);
     }
 
-    void Update()
+    void LateUpdate()
     {
         if (aimPos != null && !aimPos.ActiveAim() && pawn != null && pawn.CurWeapon != null)
         {

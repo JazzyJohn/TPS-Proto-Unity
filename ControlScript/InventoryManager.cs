@@ -561,7 +561,7 @@ public class InventoryManager : MonoBehaviour {
         int meleeSlot = indexOfSlot[(int)SLOTTYPE.MELEE];
      /*  if (newWeapon == grenadeSlot || newWeapon== meleeSlot)
         {*/
-            owner.SetWeaponType(myWeapons[newWeapon].animType);
+         owner.SetWeaponType(myWeapons[newWeapon].animType);
 
         /*}*/
 		BaseWeapon firstWeapon = myWeapons[newWeapon];

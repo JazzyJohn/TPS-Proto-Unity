@@ -448,8 +448,10 @@ public class BaseProjectile : MonoBehaviour
 	
     public void onBulletHit(RaycastHit hit)
     {
+       
         if (owner.transform.root == hit.transform.root || used)
         {
+          
             return;
         }
      	switch (hit.transform.tag) {
@@ -730,6 +732,7 @@ public class BaseProjectile : MonoBehaviour
                 if (obj != null && (shootTarget ==null|| obj.transform.root != shootTarget.transform.root) && !alredyHit.Contains(obj.transform.root))
                 {
                     alredyHit.Add(obj.transform.root);
+                 
                     BaseDamage lDamage = new BaseDamage(damage);
                     lDamage.pushDirection = mTransform.forward;
                     lDamage.hitPosition = mTransform.position;

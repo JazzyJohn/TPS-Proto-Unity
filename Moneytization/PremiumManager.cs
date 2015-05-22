@@ -235,9 +235,12 @@ public class PremiumManager : MonoBehaviour {
                 && (skill.eventTriggers.Count == 0 || skill.eventTriggers.Contains(cause))
                 && (skill.team==0||skill.team==team))
             {
-                if (skill.maxAmount && maxAmount<skill.amount)
+                if (skill.maxAmount)
                 {
-                    maxAmount = skill.amount;
+                    if (maxAmount < skill.amount)
+                    {
+                        maxAmount = skill.amount;
+                    }
                 }
                 else
                 {

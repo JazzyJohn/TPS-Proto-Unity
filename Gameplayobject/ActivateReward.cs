@@ -13,9 +13,10 @@ public class ActivateReward : MonoBehaviour {
 
     private bool selected;
 
-    public virtual void Select(Pawn pawn)
+    public virtual bool Select(Pawn pawn)
     {
         selected = true;
+        return true;
     }
     public RewardState State()
     {

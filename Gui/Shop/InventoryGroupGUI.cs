@@ -17,7 +17,7 @@ using UnityEngine;
 public class InventoryGroupGUI : MonoBehaviour
 {
 	[SerializeField] InvItemGroupGUI[] slots;
-
+    [SerializeField]  MainMenuGUI mainMenu;
 	void Awake()
 	{
 		ResetSlots();
@@ -25,6 +25,10 @@ public class InventoryGroupGUI : MonoBehaviour
 
 	public void ToggleVisible()
 	{
+        if (mainMenu.inGame)
+        {
+            return;
+        }
 		var a = GetComponent<UIWidget>().alpha;
 		GetComponent<UIWidget>().alpha = (Mathf.Approximately(a, 1) ? 0f : 1f);
 	}

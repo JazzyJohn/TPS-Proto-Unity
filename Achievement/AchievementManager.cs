@@ -331,7 +331,10 @@ public class AchievementManager : MonoBehaviour, LocalPlayerListener, GameListen
 
         foreach (Achievement task in tasks)
         {
-            form.AddField("daylicProggress[" + task.order + "]", task.GetFloatProgress().ToString("0.0"));
+            if (task != null)
+            {
+                form.AddField("daylicProggress[" + task.order + "]", task.GetFloatProgress().ToString("0.0"));
+            }
 
         }
 		
@@ -343,7 +346,7 @@ public class AchievementManager : MonoBehaviour, LocalPlayerListener, GameListen
 	IEnumerator SendAchive(WWWForm form){
         WWW w = StatisticHandler.GetMeRightWWW(form, StatisticHandler.SAVE_ACHIVE);
 		yield return w;
-        Debug.Log(w.text);
+//        Debug.Log(w.text);
 		XmlDocument xmlDoc = new XmlDocument();
 		xmlDoc.LoadXml(w.text);
 		

@@ -412,7 +412,8 @@ public class MainMenuGUI : MonoBehaviour {
 	{
 		//_PanelsNgui.SliderPanel.alpha= 1.0f;
 		_RoomsNgui.Loading.alpha = 1f;
-        shop.CloseLot();
+      
+        shop.LoadStart();
 	}
 	
 	public void StartBut() //Создать комнату

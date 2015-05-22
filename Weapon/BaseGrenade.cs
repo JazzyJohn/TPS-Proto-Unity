@@ -58,9 +58,11 @@ public class BaseGrenade : BaseWeapon {
 		normalDirection =normalDirection + randVec.normalized * normalDirection.magnitude * aimRandCoef / 100;*/
 
 //        Debug.Log(Quaternion.Euler(eluer));
+       
+     
         if (projectileClass != null)
         {
-
+           
             return Quaternion.LookRotation(owner.getAimpointForWeapon(projectileClass.startImpulse) - muzzleCached)*addAngle;
         }
         else
@@ -70,6 +72,13 @@ public class BaseGrenade : BaseWeapon {
 
 
 	}
+    void OnDrawGizmos()
+    {
+        if (!owner.isAi)
+        {
+            Gizmos.DrawSphere(muzzleCached, 1);
+        }
+    }
     public override void TakeInHand(Transform weaponSlot, Vector3 Offset, Quaternion weaponRotator)
     {
         base.TakeInHand(weaponSlot, Offset, weaponRotator);

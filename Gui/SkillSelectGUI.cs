@@ -121,11 +121,11 @@ public class SkillSelectGUI : MonoBehaviour {
 
 
         PremiumSkill pSkill = _skill as PremiumSkill;
-        if (pSkill != null)
+        if (pSkill != null && pSkill.Open())
         {
 
-            TimeSpan span = new TimeSpan(pSkill.timeEnd.Ticks - DateTime.UtcNow.Ticks);
-            elementNGUI.premActiveLabel.text = string.Format(baseFormat, span.Hours + span.Days * 24, span.Minutes, span.Seconds);
+
+            elementNGUI.premActiveLabel.text = IndicatorManager.GetLeftTime(pSkill.timeEnd);
         }
     }
     public void ShowSkill(BasePassiveSkill skill)

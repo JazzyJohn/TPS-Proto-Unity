@@ -164,7 +164,10 @@ public class InventoryGUI : MonoBehaviour {
         }
 	}
 
-   
+    public void LoadStart() {
+        CloseLot();
+        kitsGui.Hide();
+    }
 		
 	public void CloseRepair(){
 		repairGui.Close();

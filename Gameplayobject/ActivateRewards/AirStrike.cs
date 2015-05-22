@@ -26,12 +26,12 @@ public class AirStrike : ActivateReward
 
     public bool canSpawn;
 
-    public override void Select(Pawn pawn)
+    public override bool Select(Pawn pawn)
     {
 
         if (ghostObj != null)
         {
-            return;
+            return false;
         }
         GameObject  ghostGo;
         GameObject resourceGameObject = null;
@@ -48,7 +48,7 @@ public class AirStrike : ActivateReward
         ghostGo = (GameObject)Instantiate(ghostGo, GetPosition(), pawn.myTransform.rotation);
         ghostObj = ghostGo.transform;
         ghostClass = ghostGo.GetComponent<GhostObject>();
-        base.Select(pawn);
+        return base.Select(pawn);
 
     }
 
@@ -115,7 +115,10 @@ public class AirStrike : ActivateReward
 
     public override void Deselect(Pawn pawn)
     {
-        Destroy(ghostObj.gameObject);
+        if (ghostObj != null)
+        {
+            Destroy(ghostObj.gameObject);
+        }
         base.Deselect(pawn);
     }
 

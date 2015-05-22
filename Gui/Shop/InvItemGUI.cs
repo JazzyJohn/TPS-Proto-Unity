@@ -44,7 +44,7 @@ public class InvItemGUI : MonoBehaviour {
 
     public UILabel timerLabel;
 
-    
+    public UIWidget discount;
 
 	// Use this for initialization
 	void Start () {
@@ -68,6 +68,15 @@ public class InvItemGUI : MonoBehaviour {
         {
           
             timerLabel.text =  IndicatorManager.GetLeftTime(item.timeEnd);
+        }
+        if (item != null&&item.prices[0].discount)
+        {
+            if (discount.alpha< 1.0f)
+            {
+                discount.alpha = 1.0f;
+
+            }
+            item.prices[0].CheckDiscount();
         }
 	}
     public void SetItem(InventorySlot _item, int set)
@@ -148,6 +157,10 @@ public class InvItemGUI : MonoBehaviour {
         else
         {
             timerFon.alpha = 0.0f;
+        }
+        if (!item.prices[0].discount)
+        {
+            discount.alpha = 0.0f;
         }
         if (item.isAvailable())
         {

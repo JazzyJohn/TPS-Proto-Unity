@@ -121,6 +121,7 @@ public sealed class ObjectPool : MonoBehaviour
 					trans.parent = parent;
 					trans.localPosition = position;
 					trans.localRotation = rotation;
+                    
 					obj.SetActive(true);
 					instance.spawnedObjects.Add(obj, prefab);
 					return obj;

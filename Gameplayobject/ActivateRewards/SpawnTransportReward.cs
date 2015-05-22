@@ -24,12 +24,16 @@ public class SpawnTransportReward : ActivateReward {
 
     public bool canSpawn;
 
-    public override void Select(Pawn pawn)
+    public override bool Select(Pawn pawn)
     {
 
         if (ghostObj != null)
         {
-            return;
+            return false;
+        }
+        if (pawn.IsMount())
+        {
+            return false;
         }
         GameObject ghostGoBlue;
         GameObject resourceGameObject = null;
@@ -47,7 +51,7 @@ public class SpawnTransportReward : ActivateReward {
         ghostObj = ghostGo.transform;
         ghostClass = ghostGo.GetComponent<GhostObject>();
 
-        base.Select(pawn);
+        return base.Select(pawn);
     }
 
     public void Update()
@@ -59,7 +63,7 @@ public class SpawnTransportReward : ActivateReward {
             state = SpawnRewardState.AIR_DROP;
             foreach (Collider zone in colliders)
             {
-                Debug.Log(zone.tag);
+               // Debug.Log(zone.tag);
                 if (zone.CompareTag(blockTag))
                 {
                     state = SpawnRewardState.BLOCK;
@@ -113,7 +117,10 @@ public class SpawnTransportReward : ActivateReward {
 
     public override void Deselect(Pawn pawn)
     {
-        Destroy(ghostObj.gameObject);
+        if (ghostObj != null)
+        {
+            Destroy(ghostObj.gameObject);
+        }
         base.Deselect(pawn);
     }
 

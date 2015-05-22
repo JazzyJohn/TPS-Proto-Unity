@@ -647,6 +647,7 @@ public class Pawn : DamagebleObject
         {
             tauntAnimation = ItemManager.instance.animsIndexTable[idTaunt.prefabId].animationId;
         }
+       
         ReloadStats();
     }
     public void ResolvedDamage(BaseDamage damage)
@@ -692,7 +693,7 @@ public class Pawn : DamagebleObject
         Pawn killerPawn = killer.GetComponent<Pawn>();
         if (!foxView.isMine)
         {
-            if (killerPawn != null)
+            if (killerPawn != null && killerPawn.foxView.isMine)
             {
                 foxView.LowerHPRequest(damage, killerPawn.foxView.viewID);
             }
@@ -1926,7 +1927,7 @@ public class Pawn : DamagebleObject
 	}
     public bool CanChange()
     {
-        return characterState != CharacterState.Sprinting && CurWeapon.slotType != SLOTTYPE.MELEE && CurWeapon.slotType != SLOTTYPE.GRENADE;
+        return characterState != CharacterState.Sprinting && CurWeapon.slotType != SLOTTYPE.MELEE;
     }
     public virtual void PrevWeapon()
     {
@@ -2165,7 +2166,7 @@ public class Pawn : DamagebleObject
                 if (cameraController!=null&&cameraController.enabled == false)
                 {
                     aimRotation = myTransform.position + myTransform.forward * 50;
-
+                    return;
                 }
                 Camera maincam = Camera.main;
                 Ray centerRay = maincam.ViewportPointToRay(new Vector3(.5f, 0.5f, 1f));
@@ -2179,7 +2180,7 @@ public class Pawn : DamagebleObject
 				Transform localTarget=null;
                 foreach (RaycastHit hitInfo in Physics.RaycastAll(centerRay, aimRange,AIM_MASK))
                 {
-                    if (hitInfo.collider == myCollider || hitInfo.transform.root.IsChildOf(myTransform) || hitInfo.collider.isTrigger)
+                    if (hitInfo.collider == myCollider || hitInfo.transform.root ==myTransform.root || hitInfo.collider.isTrigger)
                     {
                         continue;
                     }
@@ -2287,6 +2288,7 @@ public class Pawn : DamagebleObject
         weaponDirection = (spot - (weaponSlot.position + myTransform.forward * weaponOffset)).normalized;
         return Vector3.Dot(charDirection, weaponDirection) < 0;
     }
+  
     void OnDrawGizmosSelected()
     {
 		if (capsule == null)
@@ -2495,10 +2497,10 @@ public class Pawn : DamagebleObject
 
             return;
         }
-        Debug.Log("MELEE");
+    
         if (CanMeleeHit())
         {
-            Debug.Log("Inv");
+           
             UnEquipWeapon();
             ivnMan.TakeMelee();
             ActualFire();

@@ -33,7 +33,7 @@ public class IKcontroller : MonoBehaviour {
 	public void SetWeight(float weight){
        
 			
-          // Debug.Log("WEIGHT" + weight);
+//           Debug.Log("WEIGHT" + weight);
             actionWeight = weight;
            
 	}
@@ -45,7 +45,7 @@ public class IKcontroller : MonoBehaviour {
     }
 	public void EvalToWeight(float weight){
 		//aim.solver.IKPositionWeight = weight;
-         //Debug.Log("WEIGHT" + weight);
+       //  Debug.Log("WEIGHT" + weight);
         actionWeight = weight;
 	}
 	void Update(){
@@ -57,6 +57,7 @@ public class IKcontroller : MonoBehaviour {
         {
             targetWeight =actionWeight;
         }
+     
         if (aim!=null)
             aim.solver.IKPositionWeight = targetWeight; 
 		
