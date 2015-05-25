@@ -27,7 +27,10 @@ public enum AnnonceType
     HATE,
     GREATE_WARRIOR,
     DEATH_BRINGER,
-    LEGEND
+    LEGEND,
+    HEAL,
+    AIR_STRIKE,
+    BEAR
 
 }
 

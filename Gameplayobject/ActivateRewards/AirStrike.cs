@@ -122,13 +122,13 @@ public class AirStrike : ActivateReward
         base.Deselect(pawn);
     }
 
-    public override void Activate(Pawn pawn)
+    public override int Activate(Pawn pawn)
     {
         if (!canSpawn)
         {
-            return;
+            return 0;
         }
-        base.Activate(pawn);
+        GA.API.Design.NewEvent("Game:Reward:Activate:AirStrike");
 
         Building building;
         if(state ==SpawnRewardState.TELEPORT){
@@ -137,8 +137,9 @@ public class AirStrike : ActivateReward
             building = NetworkController.Instance.SimplePrefabSpawn(prefabs[pawn.team - 1], GetPosition(), pawn.myTransform.rotation, new SFSObject(), false, NetworkController.PREFABTYPE.PLAYERBUILDING).GetComponent<Building>();
     
         }
-       building.SetOwner(pawn.player);
+        building.SetOwner(pawn.player);
         Destroy(ghostObj.gameObject);
+        return base.Activate(pawn);
     }
 
 }

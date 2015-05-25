@@ -468,12 +468,11 @@ public class Player : MonoBehaviour {
 
                     if (selectedReward == rewards[i])
                     {
-                        selectedReward.Activate(currentPawn);
+                        int score = selectedReward.Activate(currentPawn);
+                        rewardRating -= score;
+                        CheckReward();
                         selectedReward = null;
-                        if (i == rewards.Length-1)
-                        {
-                            ResetRewards();
-                        }
+                      
                     }
                     else
                     {

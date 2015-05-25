@@ -34,6 +34,10 @@ public class StatisticHandler : MonoBehaviour {
 	
 	public static string BUY_ITEM = "buyItem";
 
+    public static string BUY_LOTTERY_PLAY = "buyLotteryPlay";
+
+    public static string SEND_LOTTERY_RESULT = "loteryResult";
+
     public static string BUY_ITEM_KIT = "buyKit";
 
     public static string RESET_SKILL = "resetSkills";

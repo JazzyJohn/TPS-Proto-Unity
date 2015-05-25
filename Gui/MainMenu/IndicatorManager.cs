@@ -9,6 +9,7 @@ public class IndicatorManager: MonoBehaviour  {
  private static IndicatorManager s_Instance = null;
  public static string KITS = "kits";
  public static string TASK = "task";
+ public static string LOTTERY = "lottery";
   public static IndicatorManager instance {
 		get {
 			if (s_Instance == null) {
@@ -33,8 +34,49 @@ public class IndicatorManager: MonoBehaviour  {
 
         public bool infinite;
     }
+    interface Indicator
+    {
+        int GetCount();
 
-    class Indicator
+        void CheckBad();
+
+        void Add(bool infinite, DateTime time);
+
+        void Remove();
+
+        void Set(int count);
+        void Remove (DateTime time);
+    }
+    class CounterIndicator : Indicator
+    {
+
+        private int counter;
+        public int GetCount()
+        {
+            return counter;
+        }
+        public void CheckBad()
+        {
+        }
+
+        public void Add(bool infinite, DateTime time)
+        {
+            
+        }
+        public void Remove()
+        {
+           
+        }
+        public void Remove(DateTime time)
+        {
+          
+        }
+        public void Set(int count)
+        {
+            counter = count;
+        }
+    }
+    class ListIndicator : Indicator
     {
         List<Counter> list = new List<Counter>();
 
@@ -68,6 +110,10 @@ public class IndicatorManager: MonoBehaviour  {
             {
                 return !v.infinite && v.end == time;
             });
+        }
+        public void Set(int count)
+        {
+
         }
     }
     Dictionary<string, Indicator> dictionary = new Dictionary<string, Indicator>();
@@ -105,11 +151,26 @@ public class IndicatorManager: MonoBehaviour  {
         }
         else
         {
-            indicator = new Indicator();
+            indicator = new ListIndicator();
             dictionary[name] = indicator;
         }
         indicator.Add( infinite, time);
     }
+    public void Set( string name,int count)
+    {
+        Indicator indicator;
+        if (dictionary.ContainsKey(name))
+        {
+            indicator = dictionary[name];
+        }
+        else
+        {
+            indicator = new CounterIndicator();
+            dictionary[name] = indicator;
+        }
+        indicator.Set(count);
+    }
+
     public void Remove(string name)
     {
       

@@ -4,9 +4,11 @@ using System.Collections;
 public class InstantHealReward : ActivateReward
 {
 
-    public override void Activate(Pawn pawn)
+    public override int Activate(Pawn pawn)
     {
-        base.Activate(pawn);
-        pawn.Heal(10000f, pawn.gameObject);        
+     
+        pawn.Heal(10000f, pawn.gameObject);
+        GA.API.Design.NewEvent("Game:Reward:Activate:HealSkill" );
+        return base.Activate(pawn);
     }
 }

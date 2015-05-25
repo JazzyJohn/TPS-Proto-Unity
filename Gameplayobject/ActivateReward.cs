@@ -7,11 +7,14 @@ public class ActivateReward : MonoBehaviour {
 
     public int cost;
 
-    private bool isActive= true;
-
-    private bool used;
+    private bool isActive= true;   
 
     private bool selected;
+
+    public AnnonceType type;
+
+    public string annonceText;
+  
 
     public virtual bool Select(Pawn pawn)
     {
@@ -41,22 +44,30 @@ public class ActivateReward : MonoBehaviour {
         selected = false;
     }
 
-    public virtual void Activate(Pawn pawn)
+    public virtual int Activate(Pawn pawn)
     {
-        used = true;
+       
         selected = false;
-        isActive = false;
+        return cost;
     }
 
     public virtual void TryOpen(int rating)
     {
-        if (rating > cost && !used)
+        if (rating > cost )
         {
+            if (!isActive)
+            {
+                PlayerMainGui.instance.Annonce(type, AnnonceAddType.NONE, annonceText);
+            }
             isActive = true;
+        }
+        else
+        {
+            isActive = false;
         }
     }
     public virtual void Reset()
     {
-        used = false;
+       
     }
 }

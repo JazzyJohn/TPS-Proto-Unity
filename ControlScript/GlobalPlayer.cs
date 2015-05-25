@@ -409,6 +409,7 @@ public class GlobalPlayer : MonoBehaviour {
         {
             ItemManager.instance.Init(UID);
         }
+        LotteryManager.Instance.Parse(xmlDoc, "player");
     
 	}
     public void ParseExteranlPrize(XmlNode node)

@@ -124,13 +124,13 @@ public class SpawnTransportReward : ActivateReward {
         base.Deselect(pawn);
     }
 
-    public override void Activate(Pawn pawn)
+    public override int Activate(Pawn pawn)
     {
         if (!canSpawn)
         {
-            return;
+            return 0;
         }
-        base.Activate(pawn);
+        GA.API.Design.NewEvent("Game:Reward:Activate:SpawmBear");
         if (state == SpawnRewardState.TELEPORT)
         {
             Player.localPlayer.SpawnBot(ghostObj.position + Vector3.up * 1.0f, ghostObj.rotation);
@@ -140,6 +140,7 @@ public class SpawnTransportReward : ActivateReward {
             Player.localPlayer.SpawnBot(ghostObj.position + Vector3.up * 10.0f, ghostObj.rotation);
         }
         Destroy(ghostObj.gameObject);
+        return base.Activate(pawn);
 
     }
 
